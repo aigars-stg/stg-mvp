@@ -71,7 +71,17 @@ export async function GET(request: NextRequest) {
 
     // Also search in alternate names (slower, client-side filtering)
     // Only do this if we have room for more results
-    let alternateMatches: any[] = [];
+    type GameResult = {
+      id: number;
+      name: string;
+      yearpublished: number | null;
+      thumbnail: string | null;
+      bayesaverage: number | null;
+      is_expansion: boolean | null;
+      alternate_names: string[] | null;
+    };
+
+    let alternateMatches: GameResult[] = [];
     if ((nameMatches?.length || 0) < limit) {
       const { data: allGamesWithAlternates } = await supabase
         .from('games')
@@ -80,7 +90,7 @@ export async function GET(request: NextRequest) {
         .limit(500); // Fetch more to filter client-side
 
       if (allGamesWithAlternates) {
-        alternateMatches = allGamesWithAlternates.filter((game) => {
+        alternateMatches = allGamesWithAlternates.filter((game: GameResult) => {
           if (!game.alternate_names) return false;
           const alternateNames = Array.isArray(game.alternate_names)
             ? game.alternate_names
@@ -93,19 +103,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Combine results, removing duplicates
-    const nameMatchIds = new Set(nameMatches?.map(g => g.id) || []);
-    const uniqueAlternateMatches = alternateMatches.filter(g => !nameMatchIds.has(g.id));
+    const nameMatchIds = new Set(nameMatches?.map((g: GameResult) => g.id) || []);
+    const uniqueAlternateMatches = alternateMatches.filter((g: GameResult) => !nameMatchIds.has(g.id));
     const games = [...(nameMatches || []), ...uniqueAlternateMatches];
-
-    const error = null;
-
-    if (error) {
-      console.error('❌ [Search API] Database error:', error);
-      return NextResponse.json(
-        { error: 'Search failed', details: error.message },
-        { status: 500 }
-      );
-    }
 
     // Sort by: 1) relevance, 2) base games before expansions, 3) rating
     const sortedGames = (games || [])
