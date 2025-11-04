@@ -1,0 +1,34 @@
+{
+  "name": "second-turn-games",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Nordic-minimalist board game marketplace for the Baltic region",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @second-turn/marketplace --filter design-system-site dev",
+    "dev:ds": "pnpm --filter @second-turn/design-system dev",
+    "dev:site": "pnpm --filter design-system-site dev",
+    "dev:marketplace": "pnpm --filter @second-turn/marketplace dev",
+    "dev:all": "pnpm --parallel --filter @second-turn/marketplace --filter design-system-site dev",
+    "build": "pnpm --recursive build",
+    "build:ds": "pnpm --filter @second-turn/design-system build",
+    "build:site": "pnpm --filter design-system-site build",
+    "build:marketplace": "pnpm --filter @second-turn/marketplace build",
+    "lint": "pnpm --recursive lint",
+    "type-check": "pnpm --recursive type-check"
+  },
+  "keywords": [
+    "board-games",
+    "marketplace",
+    "circular-economy",
+    "nordic-design",
+    "design-system"
+  ],
+  "author": "Second Turn Games",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.75.1"
+  },
+  "devDependencies": {
+    "csv-parser": "^3.2.0"
+  }
+}

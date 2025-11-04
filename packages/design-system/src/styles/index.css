@@ -1,0 +1,59 @@
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles following Nordic minimalism */
+@layer base {
+  /* Set Inter as default font */
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Ensure focus states are visible for accessibility */
+  *:focus-visible {
+    outline: none;
+  }
+}
+
+/* Component layer for reusable patterns */
+@layer components {
+  /* Focus ring utility for consistent focus states */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-frost-ice/30;
+  }
+
+  /* Subtle hover lift for interactive cards */
+  .hover-lift {
+    @apply transition-all duration-normal hover:shadow-md hover:-translate-y-0.5;
+  }
+}
+
+/* Utility layer for custom utilities */
+@layer utilities {
+  /* Text truncation utilities */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}

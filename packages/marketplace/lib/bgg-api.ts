@@ -1,0 +1,673 @@
+// BGG API integration with caching and type classification
+import { XMLParser } from 'fast-xml-parser';
+import type { BGGGame, BGGVersion, BGGGameMetadata, BGGInboundLink } from './bgg-types';
+import { isExpansion, classifyGame } from './bgg-classifier';
+import {
+  BGGError,
+  createRateLimitError,
+  createNetworkError,
+  createAPIUnavailableError,
+  createParseError,
+  createTimeoutError,
+  parseFetchError,
+} from './bgg-errors';
+import { createBGGHeaders } from './bgg-config';
+
+// Re-export types for convenience
+export type { BGGGame, BGGVersion, BGGGameMetadata, BGGInboundLink };
+
+// Re-export utilities from bgg-utils for backward compatibility
+export {
+  getLanguageFlag,
+  getLanguageInfo,
+  getLanguageCode,
+  formatLanguage,
+  debounce,
+  CONDITION_TEMPLATES,
+  decodeHTMLEntities,
+  decodeHTMLEntitiesArray,
+} from './bgg-utils';
+
+// Import HTML entity decoder for processing BGG data
+import { decodeHTMLEntities, decodeHTMLEntitiesArray } from './bgg-utils';
+
+// Simple in-memory cache (replace with Redis/database later)
+const searchCache = new Map<string, { data: BGGGame[]; timestamp: number }>();
+const gameDetailsCache = new Map<number, { data: BGGGame; timestamp: number }>();
+const versionCache = new Map<number, { data: BGGVersion[]; timestamp: number }>();
+const metadataCache = new Map<number, { data: BGGGameMetadata; timestamp: number }>();
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+// Parse XML helper
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: '@_',
+});
+
+
+// Check if cache is valid
+function isCacheValid(timestamp: number): boolean {
+  return Date.now() - timestamp < CACHE_DURATION;
+}
+
+/**
+ * Check if cached data exists (even if expired)
+ */
+function getStaleCache<T>(
+  cache: Map<any, { data: T; timestamp: number }>,
+  key: any
+): { data: T; age: number } | null {
+  const cached = cache.get(key);
+  if (!cached) return null;
+
+  const ageInMs = Date.now() - cached.timestamp;
+  const ageInHours = Math.floor(ageInMs / (1000 * 60 * 60));
+
+  return {
+    data: cached.data,
+    age: ageInHours,
+  };
+}
+
+/**
+ * Log when using stale cache as fallback
+ */
+function logStaleCacheFallback(
+  resourceType: string,
+  key: string,
+  ageInHours: number,
+  error: BGGError
+) {
+  console.warn(
+    `⚠️  [BGG Fallback] Using ${ageInHours}h old cached ${resourceType} for "${key}" ` +
+      `(Reason: ${error.code})`
+  );
+}
+
+/**
+ * Fetches comprehensive game metadata including inbound/outbound links
+ * This is critical for accurate type classification (expansion vs base game)
+ */
+export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata | null> {
+  // Check fresh cache
+  const cached = metadataCache.get(gameId);
+  if (cached && isCacheValid(cached.timestamp)) {
+    return cached.data;
+  }
+
+  try {
+    console.log(`📡 [BGG API] Fetching metadata for game ${gameId}`);
+
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+    const response = await fetch(
+      `https://boardgamegeek.com/xmlapi2/thing?id=${gameId}&stats=1`,
+      {
+        signal: controller.signal,
+        headers: createBGGHeaders(),
+      }
+    );
+
+    clearTimeout(timeoutId);
+
+    // Check response status
+    if (response.status === 429) {
+      throw createRateLimitError(`game ${gameId}`, 5);
+    }
+
+    if (response.status >= 500) {
+      throw createAPIUnavailableError(response.status, `game ${gameId}`);
+    }
+
+    if (response.status === 404) {
+      return null; // Game not found is not an error, just return null
+    }
+
+    if (!response.ok) {
+      throw createAPIUnavailableError(response.status, `game ${gameId}`);
+    }
+
+    const xml = await response.text();
+    const parsed = parser.parse(xml);
+
+    const item = parsed.items?.item;
+    if (!item) {
+      return null;
+    }
+
+    // Parse alternate names (all non-primary names)
+    // Decode HTML entities like &#039; (apostrophe) that BGG often includes
+    const names = item.name ? (Array.isArray(item.name) ? item.name : [item.name]) : [];
+    const alternateNames = names
+      .filter((n: any) => n['@_type'] !== 'primary')
+      .map((n: any) => decodeHTMLEntities(n['@_value']))
+      .filter((name: string) => name && name.length > 0);
+
+    // Parse links (critical for type classification)
+    const links = item.link ? (Array.isArray(item.link) ? item.link : [item.link]) : [];
+
+    // Extract inbound links (games that this game expands/integrates with)
+    const inboundLinks: BGGInboundLink[] = links
+      .filter((l: any) => l['@_inbound'] === 'true')
+      .map((l: any) => ({
+        id: l['@_id'],
+        type: l['@_type'],
+        value: l['@_value'],
+        inbound: true,
+      }));
+
+    // Extract outbound links (games that expand/integrate with this game)
+    const outboundLinks: BGGInboundLink[] = links
+      .filter((l: any) => !l['@_inbound'] || l['@_inbound'] === 'false')
+      .map((l: any) => ({
+        id: l['@_id'],
+        type: l['@_type'],
+        value: l['@_value'],
+        inbound: false,
+      }));
+
+    // Parse designers (decode HTML entities in names)
+    const designerLinks = links.filter((l: any) => l['@_type'] === 'boardgamedesigner');
+    const designers = designerLinks.map((l: any) => decodeHTMLEntities(l['@_value']));
+
+    // Parse player count
+    const minPlayers = item.minplayers?.['@_value'];
+    const maxPlayers = item.maxplayers?.['@_value'];
+    const playerCount = minPlayers && maxPlayers ? `${minPlayers}-${maxPlayers}` : undefined;
+
+    // Parse minimum age
+    const minAge = item.minage?.['@_value'] ? parseInt(item.minage['@_value']) : undefined;
+
+    // Parse playing time
+    const playingTime = item.playingtime?.['@_value'];
+
+    // Parse ratings (both simple average and Bayesian average)
+    const rating = item.statistics?.ratings?.average?.['@_value'];
+    const bayesaverage = item.statistics?.ratings?.bayesaverage?.['@_value'];
+
+    const metadata: BGGGameMetadata = {
+      id: parseInt(item['@_id']),
+      name: decodeHTMLEntities(names.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'] || 'Unknown'),
+      type: item['@_type'] || 'boardgame',
+      yearPublished: item.yearpublished ? parseInt(item.yearpublished['@_value']) : undefined,
+      thumbnail: item.thumbnail,
+      image: item.image,
+      alternateNames: alternateNames.length > 0 ? alternateNames : undefined,
+      designers,
+      playerCount,
+      minAge,
+      playingTime,
+      description: item.description,
+      rating: rating ? parseFloat(rating) : undefined,
+      bayesaverage: bayesaverage ? parseFloat(bayesaverage) : undefined,
+      inboundLinks,
+      outboundLinks,
+    };
+
+    // Cache result
+    metadataCache.set(gameId, { data: metadata, timestamp: Date.now() });
+
+    return metadata;
+  } catch (error: any) {
+    // Convert to structured error
+    let bggError: BGGError;
+
+    if (error instanceof BGGError) {
+      bggError = error;
+    } else if (error.name === 'AbortError') {
+      bggError = createTimeoutError(`game ${gameId}`);
+    } else if (error.message?.includes('parse') || error.message?.includes('XML')) {
+      bggError = createParseError(`game ${gameId}`, error);
+    } else {
+      bggError = parseFetchError(error, `game ${gameId}`);
+    }
+
+    console.error(`❌ [BGG API] Metadata error for game ${gameId}:`, bggError.getTechnicalDetails());
+
+    // Try stale cache fallback
+    if (bggError.canUseStaleCacheFallback()) {
+      const stale = getStaleCache(metadataCache, gameId);
+
+      if (stale) {
+        logStaleCacheFallback('game metadata', String(gameId), stale.age, bggError);
+        return stale.data;
+      }
+    }
+
+    // No fallback - return null (let caller handle gracefully)
+    return null;
+  }
+}
+
+/**
+ * Internal function to perform BGG search with exact match parameter
+ */
+async function performBGGSearch(query: string, exact: boolean = false): Promise<any[]> {
+  const exactParam = exact ? '&exact=1' : '';
+  const response = await fetch(
+    `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame${exactParam}`,
+    {
+      headers: createBGGHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`BGG API error: ${response.status}`);
+  }
+
+  const xml = await response.text();
+  const parsed = parser.parse(xml);
+
+  if (!parsed.items) {
+    return [];
+  }
+
+  const items = parsed.items?.item || [];
+  return Array.isArray(items) ? items : [items];
+}
+
+/**
+ * Smart search strategy: exact-then-fuzzy
+ *
+ * For queries ≥4 characters:
+ * 1. Try exact match first (e.g., "Terra Mystica" finds exact game)
+ * 2. If we get ≥3 results, return those (high confidence)
+ * 3. Otherwise, fall back to fuzzy search for better coverage
+ *
+ * For short queries (<4 chars):
+ * - Use fuzzy search only (exact match too restrictive)
+ *
+ * This fixes the "Terra" problem where fuzzy search returns 100+ irrelevant results
+ */
+export async function searchGames(query: string): Promise<BGGGame[]> {
+  if (!query || query.trim().length < 2) {
+    return [];
+  }
+
+  // Check cache
+  const cacheKey = query.toLowerCase().trim();
+  const cached = searchCache.get(cacheKey);
+  if (cached && isCacheValid(cached.timestamp)) {
+    return cached.data;
+  }
+
+  try {
+    let searchResults: any[] = [];
+
+    // Smart strategy: Exact-then-fuzzy for queries ≥4 chars
+    if (query.length >= 4) {
+      // Try exact match first
+      const exactResults = await performBGGSearch(query, true);
+
+      if (exactResults.length >= 3) {
+        // Good exact matches found, use those
+        searchResults = exactResults;
+        console.log(`[BGG Search] Exact match strategy for "${query}": ${exactResults.length} results`);
+      } else {
+        // Not enough exact matches, fall back to fuzzy
+        const fuzzyResults = await performBGGSearch(query, false);
+        // Combine: exact results first, then fuzzy results
+        const exactIds = new Set(exactResults.map((r: any) => r['@_id']));
+        const additionalFuzzy = fuzzyResults.filter((r: any) => !exactIds.has(r['@_id']));
+        searchResults = [...exactResults, ...additionalFuzzy];
+        console.log(`[BGG Search] Exact+Fuzzy strategy for "${query}": ${exactResults.length} exact + ${additionalFuzzy.length} fuzzy`);
+      }
+    } else {
+      // Short query: fuzzy search only
+      searchResults = await performBGGSearch(query, false);
+      console.log(`[BGG Search] Fuzzy-only strategy for "${query}": ${searchResults.length} results`);
+    }
+
+    // Parse search results
+    const parsedResults = searchResults
+      .filter((item: any) => item['@_id'])
+      .map((item: any) => {
+        const nameData = item.name;
+        const name = Array.isArray(nameData)
+          ? nameData.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || nameData[0]?.['@_value']
+          : nameData?.['@_value'];
+
+        return {
+          id: parseInt(item['@_id']),
+          name: name || 'Unknown',
+          yearPublished: item.yearpublished ? parseInt(item.yearpublished['@_value']) : undefined,
+        };
+      });
+
+    // CRITICAL: Fetch metadata for top results to classify type
+    // This prevents expansions from appearing in base game searches
+    const topResults = parsedResults.slice(0, 20); // Limit to reduce API calls
+
+    const enrichedResults = await Promise.all(
+      topResults.map(async (result) => {
+        const metadata = await fetchGameMetadata(result.id);
+        if (!metadata) {
+          // If metadata fetch fails, include the game (safer than excluding)
+          return {
+            ...result,
+            isExpansion: false,
+          };
+        }
+
+        // Use classifier to determine if expansion
+        const classification = classifyGame(metadata);
+        const isExp = classification.type === 'expansion' || classification.type === 'standalone-expansion';
+
+        console.log(`[BGG Classifier] ${metadata.name} (ID: ${metadata.id}) → ${classification.type} (${classification.reason})`);
+
+        return {
+          id: result.id,
+          name: result.name || metadata.name,
+          yearPublished: result.yearPublished || metadata.yearPublished,
+          thumbnail: metadata.thumbnail,
+          image: metadata.image,
+          designers: metadata.designers,
+          playerCount: metadata.playerCount,
+          minAge: metadata.minAge,
+          playingTime: metadata.playingTime,
+          description: metadata.description,
+          rating: metadata.rating,
+          isExpansion: isExp,
+        };
+      })
+    );
+
+    // Filter to base games only
+    const baseGames = enrichedResults.filter((game) => !game.isExpansion);
+
+    console.log(`[BGG Search] Final results for "${query}": ${baseGames.length} base games (filtered ${enrichedResults.length - baseGames.length} expansions)`);
+
+    // Cache results
+    searchCache.set(cacheKey, { data: baseGames, timestamp: Date.now() });
+
+    return baseGames;
+  } catch (error: any) {
+    // Convert to structured error
+    let bggError: BGGError;
+
+    if (error instanceof BGGError) {
+      bggError = error;
+    } else if (error.message?.includes('BGG API error')) {
+      // Parse status code from error message
+      const statusMatch = error.message.match(/error: (\d+)/);
+      const statusCode = statusMatch ? parseInt(statusMatch[1]) : 500;
+
+      if (statusCode === 429) {
+        bggError = createRateLimitError(query, 5);
+      } else if (statusCode >= 500) {
+        bggError = createAPIUnavailableError(statusCode, query);
+      } else {
+        bggError = parseFetchError(error, query);
+      }
+    } else {
+      bggError = parseFetchError(error, query);
+    }
+
+    // Log the error
+    console.error('❌ [BGG Search] Error:', bggError.getTechnicalDetails());
+
+    // Try stale cache fallback
+    if (bggError.canUseStaleCacheFallback()) {
+      const stale = getStaleCache(searchCache, cacheKey);
+
+      if (stale) {
+        logStaleCacheFallback('search results', query, stale.age, bggError);
+
+        // Return stale data with metadata flag
+        const staleResults = stale.data;
+        return staleResults.map((r) => ({
+          ...r,
+          _isStaleCache: true,
+          _cacheAge: stale.age,
+        }));
+      }
+    }
+
+    // No fallback available - throw error to UI
+    throw bggError;
+  }
+}
+
+export async function getGameDetails(gameId: number): Promise<BGGGame | null> {
+  // Check cache
+  const cached = gameDetailsCache.get(gameId);
+  if (cached && isCacheValid(cached.timestamp)) {
+    return cached.data;
+  }
+
+  try {
+    const response = await fetch(
+      `https://boardgamegeek.com/xmlapi2/thing?id=${gameId}&stats=1`,
+      {
+        headers: createBGGHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`BGG API error: ${response.status}`);
+    }
+
+    const xml = await response.text();
+    const parsed = parser.parse(xml);
+
+    const item = parsed.items?.item;
+    if (!item) {
+      return null;
+    }
+
+    // Parse name (handle both array and single object)
+    const names = item.name ? (Array.isArray(item.name) ? item.name : [item.name]) : [];
+
+    // Parse designers
+    const links = item.link ? (Array.isArray(item.link) ? item.link : [item.link]) : [];
+    const designerLinks = links.filter((l: any) => l['@_type'] === 'boardgamedesigner');
+    const designers = designerLinks.map((l: any) => l['@_value']);
+
+    // Parse player count
+    const minPlayers = item.minplayers?.['@_value'];
+    const maxPlayers = item.maxplayers?.['@_value'];
+    const playerCount = minPlayers && maxPlayers ? `${minPlayers}-${maxPlayers}` : undefined;
+
+    // Parse minimum age
+    const minAge = item.minage?.['@_value'] ? parseInt(item.minage['@_value']) : undefined;
+
+    // Parse playing time
+    const playingTime = item.playingtime?.['@_value'];
+
+    const game: BGGGame = {
+      id: parseInt(item['@_id']),
+      name: names.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'] || 'Unknown',
+      yearPublished: item.yearpublished ? parseInt(item.yearpublished['@_value']) : undefined,
+      thumbnail: item.thumbnail,
+      image: item.image,
+      designers,
+      playerCount,
+      minAge,
+      playingTime,
+      description: item.description,
+    };
+
+    // Cache result
+    gameDetailsCache.set(gameId, { data: game, timestamp: Date.now() });
+
+    return game;
+  } catch (error) {
+    console.error('BGG game details error:', error);
+    return null;
+  }
+}
+
+export async function getGameVersions(gameId: number): Promise<BGGVersion[]> {
+  // Check cache
+  const cached = versionCache.get(gameId);
+  if (cached && isCacheValid(cached.timestamp)) {
+    return cached.data;
+  }
+
+  try {
+    const response = await fetch(
+      `https://boardgamegeek.com/xmlapi2/thing?id=${gameId}&versions=1`,
+      {
+        headers: createBGGHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`BGG API error: ${response.status}`);
+    }
+
+    const xml = await response.text();
+    const parsed = parser.parse(xml);
+
+    const item = parsed.items?.item;
+    if (!item || !item.versions) {
+      return [];
+    }
+
+    // Parse versions
+    const versionsData = item.versions?.item || [];
+    const versionsArray = Array.isArray(versionsData) ? versionsData : [versionsData];
+
+    const versions: BGGVersion[] = versionsArray
+      .filter((version: any) => version['@_id'])
+      .map((version: any) => {
+        // Extract links
+        const versionLinks = version.link ? (Array.isArray(version.link) ? version.link : [version.link]) : [];
+
+        // Extract ALL publishers (decode HTML entities)
+        const publisherLinks = versionLinks.filter((l: any) => l['@_type'] === 'boardgamepublisher');
+        const publishers = publisherLinks.map((l: any) => decodeHTMLEntities(l['@_value']));
+
+        // Extract ALL languages (for multilingual versions, decode HTML entities)
+        const languageLinks = versionLinks.filter((l: any) => l['@_type'] === 'language');
+        const languages = languageLinks.map((l: any) => decodeHTMLEntities(l['@_value']));
+        const languageIds = languageLinks.map((l: any) => parseInt(l['@_id']));
+
+        // Parse name (decode HTML entities)
+        const nameData = version.name;
+        const rawName = Array.isArray(nameData)
+          ? nameData.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || nameData[0]?.['@_value']
+          : nameData?.['@_value'];
+        const name = decodeHTMLEntities(rawName);
+
+        return {
+          id: parseInt(version['@_id']),
+          name: name || 'Unknown Version',
+          publisher: publishers[0], // Primary publisher for backward compatibility
+          publishers: publishers.length > 0 ? publishers : undefined,
+          language: languages[0], // Primary language for backward compatibility
+          languages: languages.length > 0 ? languages : undefined,
+          languageId: languageIds[0],
+          languageIds: languageIds.length > 0 ? languageIds : undefined,
+          yearPublished: version.yearpublished ? parseInt(version.yearpublished['@_value']) : undefined,
+          productCode: version.productcode?.['@_value'],
+          thumbnail: version.thumbnail,
+          image: version.image,
+        };
+      });
+
+    // Cache results
+    versionCache.set(gameId, { data: versions, timestamp: Date.now() });
+
+    return versions;
+  } catch (error) {
+    console.error('BGG versions error:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch game data with automatic fallback detection
+ * Returns game data along with a flag indicating if manual input should be used
+ *
+ * Triggers fallback mode when:
+ * - BGG API is completely unavailable
+ * - No cover image is available
+ * - No version data is available
+ */
+export async function fetchGameWithFallback(gameId: number): Promise<{
+  metadata: BGGGameMetadata | null;
+  versions: BGGVersion[];
+  fallbackMode: boolean;
+  reason?: string;
+}> {
+  console.log(`📡 [BGG Fallback Detection] Checking game ${gameId}...`);
+
+  try {
+    // Fetch metadata and versions in parallel
+    const [metadata, versions] = await Promise.all([
+      fetchGameMetadata(gameId),
+      getGameVersions(gameId),
+    ]);
+
+    // Check if we should fallback to manual input
+    let fallbackMode = false;
+    let reason: string | undefined;
+
+    // Case 1: Metadata fetch completely failed
+    if (!metadata) {
+      fallbackMode = true;
+      reason = 'BGG metadata unavailable';
+      console.warn(`⚠️  [BGG Fallback] No metadata available for game ${gameId}`);
+    }
+    // Case 2: No cover image
+    else if (!metadata.image && !metadata.thumbnail) {
+      fallbackMode = true;
+      reason = 'Missing cover image';
+      console.warn(`⚠️  [BGG Fallback] No cover image for game ${gameId}: ${metadata.name}`);
+    }
+    // Case 3: No version data
+    else if (!versions || versions.length === 0) {
+      fallbackMode = true;
+      reason = 'No version data available';
+      console.warn(`⚠️  [BGG Fallback] No versions for game ${gameId}: ${metadata.name}`);
+    }
+
+    // Apply image fallback: use game's image/thumbnail for versions without their own
+    let processedVersions = versions || [];
+    if (!fallbackMode && metadata && processedVersions.length > 0) {
+      let fallbackCount = 0;
+      processedVersions = processedVersions.map(version => {
+        if (!version.thumbnail && !version.image) {
+          fallbackCount++;
+          return {
+            ...version,
+            thumbnail: metadata.thumbnail,
+            image: metadata.image,
+          };
+        }
+        return version;
+      });
+
+      if (fallbackCount > 0) {
+        console.log(`🔄 [BGG Fallback] Using game images for ${fallbackCount} version(s) without images`);
+      }
+    }
+
+    if (fallbackMode) {
+      console.log(`🔄 [BGG Fallback] Entering manual input mode for game ${gameId}: ${reason}`);
+    } else {
+      console.log(`✅ [BGG Fallback] Full BGG data available for game ${gameId}`);
+    }
+
+    return {
+      metadata,
+      versions: processedVersions,
+      fallbackMode,
+      reason,
+    };
+  } catch (error: any) {
+    console.error(`❌ [BGG Fallback] Error fetching game ${gameId}:`, error);
+
+    // Complete API failure - definitely fallback
+    return {
+      metadata: null,
+      versions: [],
+      fallbackMode: true,
+      reason: 'BGG API error',
+    };
+  }
+}
+

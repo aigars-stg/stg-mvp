@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm --version)",
+      "Bash(pnpm install)",
+      "Bash(pnpm create:*)",
+      "Bash(pnpm build)",
+      "Bash(pnpm build:ds:*)",
+      "Bash(pnpm dev:site:*)",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(pnpm dev)",
+      "Bash(dir:*)",
+      "Bash(pnpm list:*)",
+      "Bash(pnpm add:*)",
+      "Bash(npx tsx:*)",
+      "Bash(test -f \"packages/marketplace/lib/supabase/client.ts\")",
+      "Bash(test:*)",
+      "Bash(/dev/null)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npm install:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

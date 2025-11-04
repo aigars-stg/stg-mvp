@@ -1,0 +1,271 @@
+// Mock BoardGameGeek game database for autocomplete
+export interface BGGGame {
+  id: string;
+  title: string;
+  year: number;
+  designer: string;
+  imageUrl: string;
+  playerCount: string;
+  playingTime: string;
+  ageRecommendation: string;
+  complexity: number;
+  bggRating: number;
+  description: string;
+  components: string[];
+}
+
+export const bggGames: BGGGame[] = [
+  {
+    id: 'bgg-1',
+    title: 'Settlers of Catan',
+    year: 1995,
+    designer: 'Klaus Teuber',
+    imageUrl: '/images/catan.jpg',
+    playerCount: '3-4',
+    playingTime: '60-120',
+    ageRecommendation: '10+',
+    complexity: 2.3,
+    bggRating: 7.2,
+    description: 'Trade, build, and settle the island of Catan in this modern classic.',
+    components: [
+      '19 terrain hexes',
+      '6 sea frame pieces',
+      '9 harbor pieces',
+      '18 number tokens',
+      '95 resource cards (19 each: lumber, brick, wool, grain, ore)',
+      '25 development cards',
+      '4 building cost cards',
+      '2 special cards (Longest Road, Largest Army)',
+      '16 cities (4 per color)',
+      '20 settlements (5 per color)',
+      '60 roads (15 per color)',
+      '2 dice',
+      '1 robber',
+      'Rulebook',
+    ],
+  },
+  {
+    id: 'bgg-2',
+    title: 'Wingspan',
+    year: 2019,
+    designer: 'Elizabeth Hargrave',
+    imageUrl: '/images/wingspan.jpg',
+    playerCount: '1-5',
+    playingTime: '40-70',
+    ageRecommendation: '10+',
+    complexity: 2.4,
+    bggRating: 8.0,
+    description: 'Attract a beautiful and diverse collection of birds to your wildlife preserve.',
+    components: [
+      '170 bird cards',
+      '26 bonus cards',
+      '16 automa cards',
+      '103 food tokens',
+      '75 egg miniatures',
+      '5 player mats',
+      '5 dice (custom)',
+      '1 birdfeeder dice tower',
+      '1 scorepad',
+      '40 wooden action cubes',
+      '8 wooden player markers',
+      'Rulebook',
+      'Appendix',
+    ],
+  },
+  {
+    id: 'bgg-3',
+    title: 'Ticket to Ride',
+    year: 2004,
+    designer: 'Alan R. Moon',
+    imageUrl: '/images/ticket-to-ride.jpg',
+    playerCount: '2-5',
+    playingTime: '30-60',
+    ageRecommendation: '8+',
+    complexity: 1.9,
+    bggRating: 7.4,
+    description: 'Collect cards and claim railway routes across North America.',
+    components: [
+      '1 game board (USA map)',
+      '240 colored train cars (48 per color)',
+      '110 train cards',
+      '30 destination ticket cards',
+      '5 wooden scoring markers',
+      '1 longest route bonus card',
+      'Rulebook',
+    ],
+  },
+  {
+    id: 'bgg-4',
+    title: 'Pandemic',
+    year: 2008,
+    designer: 'Matt Leacock',
+    imageUrl: '/images/pandemic.jpg',
+    playerCount: '2-4',
+    playingTime: '45',
+    ageRecommendation: '8+',
+    complexity: 2.4,
+    bggRating: 7.6,
+    description: 'Work together to save humanity from four deadly diseases.',
+    components: [
+      '1 game board (world map)',
+      '7 role cards',
+      '7 pawns',
+      '59 player cards',
+      '48 infection cards',
+      '4 cure markers',
+      '96 disease cubes (24 per color)',
+      '6 research stations',
+      '1 infection rate marker',
+      '1 outbreaks marker',
+      'Rulebook',
+    ],
+  },
+  {
+    id: 'bgg-5',
+    title: 'Azul',
+    year: 2017,
+    designer: 'Michael Kiesling',
+    imageUrl: '/images/azul.jpg',
+    playerCount: '2-4',
+    playingTime: '30-45',
+    ageRecommendation: '8+',
+    complexity: 1.8,
+    bggRating: 7.8,
+    description: 'Draft colorful tiles to decorate the walls of the Royal Palace of Evora.',
+    components: [
+      '100 resin tiles (20 each in 5 colors)',
+      '9 factory displays',
+      '4 player boards',
+      '1 scoring track',
+      '4 scoring markers',
+      '1 starting player marker',
+      '1 linen bag',
+      'Rulebook',
+    ],
+  },
+  {
+    id: 'bgg-6',
+    title: '7 Wonders',
+    year: 2010,
+    designer: 'Antoine Bauza',
+    imageUrl: '/images/7wonders.jpg',
+    playerCount: '2-7',
+    playingTime: '30',
+    ageRecommendation: '10+',
+    complexity: 2.3,
+    bggRating: 7.7,
+    description: 'Lead one of the seven great cities of the ancient world.',
+    components: [
+      '7 wonder boards',
+      '7 wonder cards',
+      '49 age I cards',
+      '49 age II cards',
+      '50 age III cards',
+      '46 conflict tokens',
+      '60 coin tokens',
+      '1 score booklet',
+      'Rulebook',
+    ],
+  },
+  {
+    id: 'bgg-7',
+    title: 'Splendor',
+    year: 2014,
+    designer: 'Marc André',
+    imageUrl: '/images/splendor.jpg',
+    playerCount: '2-4',
+    playingTime: '30',
+    ageRecommendation: '10+',
+    complexity: 1.8,
+    bggRating: 7.4,
+    description: 'Collect gems and build a jewelry empire in Renaissance Europe.',
+    components: [
+      '40 gem tokens (7 each of 5 colors + 5 gold)',
+      '90 development cards (40 level 1, 30 level 2, 20 level 3)',
+      '10 noble tiles',
+      'Rulebook',
+    ],
+  },
+  {
+    id: 'bgg-8',
+    title: 'Carcassonne',
+    year: 2000,
+    designer: 'Klaus-Jürgen Wrede',
+    imageUrl: '/images/carcassonne.jpg',
+    playerCount: '2-5',
+    playingTime: '30-45',
+    ageRecommendation: '7+',
+    complexity: 1.9,
+    bggRating: 7.4,
+    description: 'Build the medieval landscape of France tile by tile.',
+    components: [
+      '72 land tiles',
+      '40 followers (8 per color: 7 normal, 1 abbot)',
+      '1 scoreboard',
+      '5 score markers',
+      'Rulebook',
+    ],
+  },
+  {
+    id: 'bgg-9',
+    title: 'Codenames',
+    year: 2015,
+    designer: 'Vlaada Chvátil',
+    imageUrl: '/images/codenames.jpg',
+    playerCount: '2-8',
+    playingTime: '15',
+    ageRecommendation: '14+',
+    complexity: 1.3,
+    bggRating: 7.6,
+    description: 'Two teams compete to identify their secret agents using one-word clues.',
+    components: [
+      '200 codename cards (double-sided)',
+      '40 key cards',
+      '1 timer',
+      '8 red agent cards',
+      '8 blue agent cards',
+      '1 double agent card',
+      '7 innocent bystander cards',
+      '1 assassin card',
+      'Rulebook',
+    ],
+  },
+  {
+    id: 'bgg-10',
+    title: 'Dominion',
+    year: 2008,
+    designer: 'Donald X. Vaccarino',
+    imageUrl: '/images/dominion.jpg',
+    playerCount: '2-4',
+    playingTime: '30',
+    ageRecommendation: '13+',
+    complexity: 2.3,
+    bggRating: 7.6,
+    description: 'Build the most powerful deck of kingdom cards in this deck-building game.',
+    components: [
+      '130 basic treasure cards (60 copper, 40 silver, 30 gold)',
+      '48 basic victory cards (24 estates, 12 duchies, 12 provinces)',
+      '30 curse cards',
+      '32 randomizer cards',
+      '252 kingdom cards (25 different types)',
+      '1 trash card',
+      '7 blank cards',
+      'Rulebook',
+    ],
+  },
+];
+
+export function searchBGGGames(query: string): BGGGame[] {
+  const lowerQuery = query.toLowerCase();
+  return bggGames
+    .filter(
+      (game) =>
+        game.title.toLowerCase().includes(lowerQuery) ||
+        game.designer.toLowerCase().includes(lowerQuery)
+    )
+    .slice(0, 5); // Return max 5 results for autocomplete
+}
+
+export function getBGGGameById(id: string): BGGGame | undefined {
+  return bggGames.find((game) => game.id === id);
+}

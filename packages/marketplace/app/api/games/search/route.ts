@@ -1,0 +1,161 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase/client';
+
+function calculateRelevance(
+  gameName: string,
+  query: string,
+  alternateNames: string[] | null,
+  matchedInAlternate: boolean
+): number {
+  const lowerName = gameName.toLowerCase();
+  const lowerQuery = query.toLowerCase();
+
+  // Base scores for primary name matches
+  let score = 0;
+
+  // Exact match (highest priority)
+  if (lowerName === lowerQuery) score = 1000;
+  // Starts with query (very high priority)
+  else if (lowerName.startsWith(lowerQuery)) score = 900;
+  // Word starts with query (high priority)
+  else if (lowerName.split(/[:\s-]/).some((word) => word.startsWith(lowerQuery))) score = 800;
+  // Contains query as substring (medium priority)
+  else score = 500;
+
+  // If matched in alternate name but not in primary, reduce score slightly
+  // This ensures primary name matches rank higher than alternate name matches
+  if (matchedInAlternate && !lowerName.includes(lowerQuery)) {
+    score = score * 0.9; // 10% reduction for alternate name matches
+  }
+
+  return score;
+}
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const query = searchParams.get('q');
+  const limit = parseInt(searchParams.get('limit') || '20');
+
+  if (!query || query.trim().length < 2) {
+    return NextResponse.json({
+      games: [],
+      count: 0,
+      message: 'Query must be at least 2 characters',
+    });
+  }
+
+  try {
+    const startTime = Date.now();
+    console.log(`🔍 [Search API] Searching for: "${query}"`);
+
+    // Fetch matching games (base games AND expansions)
+    // Search in both name and alternate_names (JSONB array)
+    // Fetch 3x the requested limit to ensure we get exact matches after sorting
+    // This balances performance with getting all relevant exact matches
+    const fetchLimit = Math.min(limit * 3, 300); // Cap at 300 to prevent timeouts
+
+    // Search in primary name first (fast index-based search)
+    const { data: nameMatches, error: nameError } = await supabase
+      .from('games')
+      .select('id, name, yearpublished, thumbnail, bayesaverage, is_expansion, alternate_names')
+      .ilike('name', `%${query}%`)
+      .limit(fetchLimit);
+
+    if (nameError) {
+      console.error('❌ [Search API] Database error:', nameError);
+      return NextResponse.json(
+        { error: 'Search failed', details: nameError.message },
+        { status: 500 }
+      );
+    }
+
+    // Also search in alternate names (slower, client-side filtering)
+    // Only do this if we have room for more results
+    let alternateMatches: any[] = [];
+    if ((nameMatches?.length || 0) < limit) {
+      const { data: allGamesWithAlternates } = await supabase
+        .from('games')
+        .select('id, name, yearpublished, thumbnail, bayesaverage, is_expansion, alternate_names')
+        .not('alternate_names', 'is', null)
+        .limit(500); // Fetch more to filter client-side
+
+      if (allGamesWithAlternates) {
+        alternateMatches = allGamesWithAlternates.filter((game) => {
+          if (!game.alternate_names) return false;
+          const alternateNames = Array.isArray(game.alternate_names)
+            ? game.alternate_names
+            : [];
+          return alternateNames.some((altName: string) =>
+            altName.toLowerCase().includes(query.toLowerCase())
+          );
+        });
+      }
+    }
+
+    // Combine results, removing duplicates
+    const nameMatchIds = new Set(nameMatches?.map(g => g.id) || []);
+    const uniqueAlternateMatches = alternateMatches.filter(g => !nameMatchIds.has(g.id));
+    const games = [...(nameMatches || []), ...uniqueAlternateMatches];
+
+    const error = null;
+
+    if (error) {
+      console.error('❌ [Search API] Database error:', error);
+      return NextResponse.json(
+        { error: 'Search failed', details: error.message },
+        { status: 500 }
+      );
+    }
+
+    // Sort by: 1) relevance, 2) base games before expansions, 3) rating
+    const sortedGames = (games || [])
+      .map((game) => {
+        // Check if match was in alternate names
+        const alternateNames = Array.isArray(game.alternate_names) ? game.alternate_names : [];
+        const matchedInAlternate = alternateNames.some((altName: string) =>
+          altName.toLowerCase().includes(query.toLowerCase())
+        ) && !game.name.toLowerCase().includes(query.toLowerCase());
+
+        return {
+          ...game,
+          _relevanceScore: calculateRelevance(game.name, query, alternateNames, matchedInAlternate),
+        };
+      })
+      .sort((a, b) => {
+        // Primary sort: relevance score (descending)
+        if (b._relevanceScore !== a._relevanceScore) {
+          return b._relevanceScore - a._relevanceScore;
+        }
+
+        // Secondary sort: base games before expansions
+        if (a.is_expansion !== b.is_expansion) {
+          return a.is_expansion ? 1 : -1; // false (base) comes before true (expansion)
+        }
+
+        // Tertiary sort: Bayesian average (descending), nulls last
+        const aRating = a.bayesaverage ?? -1;
+        const bRating = b.bayesaverage ?? -1;
+        return bRating - aRating;
+      })
+      .slice(0, limit)
+      .map(({ _relevanceScore, alternate_names, ...game }) => game); // Remove helper fields and alternate_names from response
+
+    const duration = Date.now() - startTime;
+    console.log(
+      `✅ [Search API] Found ${sortedGames.length} results in ${duration}ms (searched name + alternate names, sorted by relevance + rating)`
+    );
+
+    return NextResponse.json({
+      games: sortedGames,
+      count: sortedGames.length,
+      query,
+      durationMs: duration,
+    });
+  } catch (error: any) {
+    console.error('❌ [Search API] Unexpected error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', details: error.message },
+      { status: 500 }
+    );
+  }
+}
