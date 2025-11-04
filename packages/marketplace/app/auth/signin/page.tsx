@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
@@ -15,11 +15,19 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
   const [error, setError] = useState('');
+  const [redirectTo, setRedirectTo] = useState('/');
 
   const { signIn, signInWithOAuth } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirectTo') || '/';
+
+  // Get redirect parameter from URL on mount (avoiding useSearchParams for SSG compatibility)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirectTo');
+    if (redirect) {
+      setRedirectTo(redirect);
+    }
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

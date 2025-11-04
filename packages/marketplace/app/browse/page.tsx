@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Input, Select, Checkbox, Button, Badge } from '@second-turn/design-system';
 import {
   Package, ChevronDown, Star, Sparkles, CircleCheck, Wrench, X,
@@ -23,7 +23,6 @@ import {
 export default function BrowsePage() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   // Data state
   const [listings, setListings] = useState<ListingWithSeller[]>([]);
@@ -62,8 +61,9 @@ export default function BrowsePage() {
   const [saveSearchError, setSaveSearchError] = useState('');
   const [showSavedSearchesMenu, setShowSavedSearchesMenu] = useState(false);
 
-  // Initialize filters from URL params on mount
+  // Initialize filters from URL params on mount (avoiding useSearchParams for SSG compatibility)
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
     const query = searchParams.get('q');
     const conditions = searchParams.get('conditions');
     const languages = searchParams.get('languages');
@@ -85,7 +85,7 @@ export default function BrowsePage() {
     if (sort) setSortBy(sort);
 
     setFiltersInitialized(true);
-  }, [searchParams]);
+  }, []);
 
   // Update URL when filters change (but only after initialization)
   useEffect(() => {
