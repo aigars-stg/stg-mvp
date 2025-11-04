@@ -186,7 +186,7 @@ export default function MyListingsPage() {
                   </div>
                 </div>
 
-                <ListingCard listing={listing} />
+                <ListingCard listing={listing as any} />
               </div>
             ))}
           </div>
