@@ -259,7 +259,7 @@ export async function GET(request: NextRequest) {
       if (games) {
         const gamesMap = new Map(games.map((g: any) => [g.id, g]));
         listings.forEach((listing: any) => {
-          const game = gamesMap.get(listing.bgg_game_id);
+          const game: any = gamesMap.get(listing.bgg_game_id);
 
           if (game) {
             // Check if listing has a version-specific image
