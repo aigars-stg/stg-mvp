@@ -11,8 +11,13 @@
  * The BGG API token is server-side only and not exposed to the browser.
  */
 export function createBGGHeaders(): HeadersInit {
+  // Use environment variable for domain, fallback to secondturn.games
+  const domain = process.env.NEXT_PUBLIC_VERCEL_URL
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+    : 'https://secondturn.games';
+
   const headers: HeadersInit = {
-    'User-Agent': 'SecondTurnGames/1.0 (https://secondturn.games; aigars@secondturn.games)',
+    'User-Agent': `SecondTurnGames/1.0 (${domain}; aigars@secondturn.games)`,
   };
 
   // Add Authorization header if token is available (server-side only)
