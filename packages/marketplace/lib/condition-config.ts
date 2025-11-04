@@ -6,7 +6,7 @@ export const conditionConfig = {
   },
   veryGood: {
     label: 'Very Good',
-    variant: 'info' as const,
+    variant: 'default' as const,
     description: 'Minimal wear. All components present and in great shape.',
   },
   good: {

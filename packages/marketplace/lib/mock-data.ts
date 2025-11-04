@@ -492,7 +492,7 @@ export const conditionConfig = {
   },
   veryGood: {
     label: 'Very Good',
-    variant: 'info' as const,
+    variant: 'default' as const,
     description: 'Minimal wear. All components present and in great shape.',
   },
   good: {
@@ -507,7 +507,7 @@ export const conditionConfig = {
   },
   forParts: {
     label: 'For Parts',
-    variant: 'danger' as const,
+    variant: 'error' as const,
     description: 'Incomplete or damaged. Sold as-is for parts/crafts.',
   },
 };

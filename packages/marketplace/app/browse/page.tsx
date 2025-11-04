@@ -573,7 +573,7 @@ export default function BrowsePage() {
       filtered = filtered.filter((listing) => {
         if (!listing.game?.player_count) return false;
         return Array.from(selectedPlayerCounts).some(count =>
-          playerCountMatches(listing.game.player_count, count)
+          playerCountMatches(listing.game.player_count || null, count)
         );
       });
     }
@@ -590,7 +590,7 @@ export default function BrowsePage() {
       filtered = filtered.filter((listing) => {
         if (!listing.game?.playing_time) return false;
         return Array.from(selectedPlayingTimes).some(time =>
-          playingTimeMatches(listing.game.playing_time, time)
+          playingTimeMatches(listing.game.playing_time || null, time)
         );
       });
     }

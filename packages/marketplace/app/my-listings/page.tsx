@@ -145,7 +145,7 @@ export default function MyListingsPage() {
 
         {/* Empty State */}
         {!loading && filteredListings.length === 0 && (
-          <Card padding="xl" className="text-center">
+          <Card padding="lg" className="text-center">
             <Package className="w-16 h-16 text-text-muted mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-polar-night mb-2">
               {activeTab === 'all'
