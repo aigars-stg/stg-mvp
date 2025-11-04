@@ -101,7 +101,7 @@ export function LanguageVersionSelector({
     versions.forEach((version: any) => {
       // Add all languages from multilingual versions
       if (version.languages && version.languages.length > 0) {
-        version.languages.forEach((lang) => languages.add(lang));
+        version.languages.forEach((lang: string) => languages.add(lang));
       } else if (version.language) {
         // Fallback to single language for backward compatibility
         languages.add(version.language);

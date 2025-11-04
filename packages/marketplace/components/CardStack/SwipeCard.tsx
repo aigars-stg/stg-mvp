@@ -7,10 +7,11 @@ import type { SwipeCardProps } from './types';
 import { getLanguageFlag } from '@/lib/bgg-utils';
 
 const conditionConfig = {
-  likeNew: { label: '📦 Like New', variant: 'info' as const },
+  likeNew: { label: '📦 Like New', variant: 'default' as const },
   veryGood: { label: '✨ Very Good', variant: 'success' as const },
   good: { label: '🎲 Good', variant: 'warning' as const },
   acceptable: { label: '🔧 Acceptable', variant: 'default' as const },
+  forParts: { label: '🔩 For Parts', variant: 'error' as const },
 };
 
 // Card rotation and scale values for each position in stack

@@ -48,7 +48,7 @@ const CONDITION_LABELS = {
 };
 
 const CONDITION_VARIANTS = {
-  likeNew: 'info' as const,
+  likeNew: 'default' as const,
   veryGood: 'success' as const,
   good: 'warning' as const,
   acceptable: 'default' as const,
@@ -74,7 +74,7 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
           <h3 className="text-base sm:text-lg font-semibold text-polar-night">
             Listing Preview
           </h3>
-          <Badge variant="info" size="sm">
+          <Badge variant="default" size="sm">
             How buyers will see it
           </Badge>
         </div>
@@ -285,7 +285,7 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
                   />
                   {photo.isMain && (
                     <div className="absolute inset-0 bg-frost-ice/20 rounded flex items-center justify-center">
-                      <Badge variant="info" size="sm">Main</Badge>
+                      <Badge variant="default" size="sm">Main</Badge>
                     </div>
                   )}
                 </div>
@@ -356,7 +356,7 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
             <div className="pt-0.5">
               <Checkbox
                 checked={formData.termsAccepted}
-                onChange={(checked) => onTermsChange?.(checked)}
+                onChange={(e) => onTermsChange?.(e.target.checked)}
               />
             </div>
             <div className="flex-1 text-sm text-polar-night">

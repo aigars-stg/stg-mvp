@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@second-turn/design-system';
 import { Upload, X, User } from 'lucide-react';
-import { supabaseService } from '@/lib/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 interface AvatarUploadProps {
@@ -51,7 +51,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
       const fileName = `${user.id}/avatar.${fileExt}`;
 
       // Upload to Supabase storage
-      const { error: uploadError } = await supabaseService()
+      const { error: uploadError } = await supabase
         .storage
         .from('listing-photos')
         .upload(fileName, file, {
@@ -64,7 +64,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
       }
 
       // Get public URL
-      const { data } = supabaseService()
+      const { data } = supabase
         .storage
         .from('listing-photos')
         .getPublicUrl(fileName);
@@ -101,7 +101,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
     try {
       // Delete from storage
       const fileName = `${user.id}/avatar`;
-      await supabaseService()
+      await supabase
         .storage
         .from('listing-photos')
         .remove([fileName]);

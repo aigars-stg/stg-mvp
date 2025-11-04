@@ -7,7 +7,7 @@ import { Card } from '@second-turn/design-system';
 export function ListingCardSkeleton() {
   return (
     <Card
-      variant="default"
+      variant="standard"
       padding="none"
       className="overflow-hidden h-full flex flex-col animate-pulse"
     >

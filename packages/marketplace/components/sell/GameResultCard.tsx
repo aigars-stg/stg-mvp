@@ -34,7 +34,7 @@ export function GameResultCard({
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLButtonElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const hasAttemptedLoad = useRef(false);
 

@@ -160,7 +160,6 @@ export function getFilterReason(metadata: BGGGameMetadata): string | null {
     expansion: 'This is an expansion and requires the base game to play',
     'standalone-expansion': 'This is a standalone expansion',
     compilation: 'This is a compilation of multiple games',
-    base: '', // Never reached
   };
 
   return reasons[classification.type];

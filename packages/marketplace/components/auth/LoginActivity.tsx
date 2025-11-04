@@ -33,6 +33,8 @@ export function LoginActivity() {
     if (!user) return;
 
     async function fetchActivities() {
+      if (!user) return;
+
       try {
         const { data, error: fetchError } = await (supabase as any)
           .from('login_activity')

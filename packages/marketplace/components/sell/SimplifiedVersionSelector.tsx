@@ -51,7 +51,7 @@ export function SimplifiedVersionSelector({
             <Select
               label="Language"
               value={language}
-              onChange={(e) => onChange('language', e.target.value)}
+              onChange={(value) => onChange('language', value)}
               options={LANGUAGE_OPTIONS}
             />
           </div>

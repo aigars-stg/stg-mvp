@@ -565,10 +565,10 @@ export default function NewListingPage() {
                       <div key={component}>
                         <Checkbox
                           checked={formData.completeness[component] || false}
-                          onChange={(checked) =>
+                          onChange={(e) =>
                             setFormData((prev) => ({
                               ...prev,
-                              completeness: { ...prev.completeness, [component]: checked },
+                              completeness: { ...prev.completeness, [component]: e.target.checked },
                             }))
                           }
                           label={component}
@@ -604,60 +604,60 @@ export default function NewListingPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Checkbox
                   checked={formData.features.originalBox}
-                  onChange={(checked) =>
+                  onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      features: { ...prev.features, originalBox: checked },
+                      features: { ...prev.features, originalBox: e.target.checked },
                     }))
                   }
                   label="Original box included"
                 />
                 <Checkbox
                   checked={formData.features.rulebookIncluded}
-                  onChange={(checked) =>
+                  onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      features: { ...prev.features, rulebookIncluded: checked },
+                      features: { ...prev.features, rulebookIncluded: e.target.checked },
                     }))
                   }
                   label="Rulebook included"
                 />
                 <Checkbox
                   checked={formData.features.cardsSleeved}
-                  onChange={(checked) =>
+                  onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      features: { ...prev.features, cardsSleeved: checked },
+                      features: { ...prev.features, cardsSleeved: e.target.checked },
                     }))
                   }
                   label="Cards are sleeved"
                 />
                 <Checkbox
                   checked={formData.features.includesExpansion}
-                  onChange={(checked) =>
+                  onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      features: { ...prev.features, includesExpansion: checked },
+                      features: { ...prev.features, includesExpansion: e.target.checked },
                     }))
                   }
                   label="Includes expansion(s)"
                 />
                 <Checkbox
                   checked={formData.features.customInsert}
-                  onChange={(checked) =>
+                  onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      features: { ...prev.features, customInsert: checked },
+                      features: { ...prev.features, customInsert: e.target.checked },
                     }))
                   }
                   label="Custom insert/organizer"
                 />
                 <Checkbox
                   checked={formData.features.smokeFree}
-                  onChange={(checked) =>
+                  onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      features: { ...prev.features, smokeFree: checked },
+                      features: { ...prev.features, smokeFree: e.target.checked },
                     }))
                   }
                   label="Smoke-free home"
@@ -709,7 +709,7 @@ export default function NewListingPage() {
                       className="w-full aspect-square object-cover rounded-lg"
                     />
                     {photo.isMain && (
-                      <Badge variant="info" size="sm" className="absolute top-2 left-2">
+                      <Badge variant="default" size="sm" className="absolute top-2 left-2">
                         Main Photo
                       </Badge>
                     )}
@@ -794,30 +794,30 @@ export default function NewListingPage() {
               <div className="space-y-3">
                 <Checkbox
                   checked={formData.shippingOptions.standard}
-                  onChange={(checked) =>
+                  onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      shippingOptions: { ...prev.shippingOptions, standard: checked },
+                      shippingOptions: { ...prev.shippingOptions, standard: e.target.checked },
                     }))
                   }
                   label="Standard shipping - €5 (2-4 business days)"
                 />
                 <Checkbox
                   checked={formData.shippingOptions.express}
-                  onChange={(checked) =>
+                  onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      shippingOptions: { ...prev.shippingOptions, express: checked },
+                      shippingOptions: { ...prev.shippingOptions, express: e.target.checked },
                     }))
                   }
                   label="Express shipping - €12 (1-2 business days)"
                 />
                 <Checkbox
                   checked={formData.shippingOptions.localPickup}
-                  onChange={(checked) =>
+                  onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      shippingOptions: { ...prev.shippingOptions, localPickup: checked },
+                      shippingOptions: { ...prev.shippingOptions, localPickup: e.target.checked },
                     }))
                   }
                   label="Local pickup - Free (meet at public location)"
@@ -829,8 +829,8 @@ export default function NewListingPage() {
                   <Select
                     label="Your City"
                     value={formData.pickupCity}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, pickupCity: e.target.value }))
+                    onChange={(value) =>
+                      setFormData((prev) => ({ ...prev, pickupCity: value }))
                     }
                     options={[
                       { value: '', label: 'Select your city' },
@@ -970,8 +970,8 @@ export default function NewListingPage() {
           <Card className="bg-frost-ice/5 border-frost-ice/20 mb-6">
             <Checkbox
               checked={formData.termsAccepted}
-              onChange={(checked) =>
-                setFormData((prev) => ({ ...prev, termsAccepted: checked }))
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, termsAccepted: e.target.checked }))
               }
               label="I accurately described this game's condition including any wear or missing components, and I agree to ship within 2 business days or respond within 1 day to arrange local pickup"
               required

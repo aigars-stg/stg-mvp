@@ -8,10 +8,11 @@ interface GameCardProps {
 }
 
 const conditionConfig = {
-  likeNew: { label: '📦 Like New', variant: 'info' as const },
+  likeNew: { label: '📦 Like New', variant: 'default' as const },
   veryGood: { label: '✨ Very Good', variant: 'success' as const },
   good: { label: '🎲 Good', variant: 'warning' as const },
   acceptable: { label: '🔧 Acceptable', variant: 'default' as const },
+  forParts: { label: '🔩 For Parts', variant: 'error' as const },
 };
 
 export function GameCard({ game }: GameCardProps) {
