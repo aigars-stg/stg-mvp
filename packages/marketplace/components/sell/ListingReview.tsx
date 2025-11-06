@@ -55,7 +55,7 @@ const CONDITION_VARIANTS = {
 };
 
 export function ListingReview({ formData, onEdit, onPublish, isPublishing = false, onTermsChange }: ListingReviewProps) {
-  const mainPhoto = formData.photos.find(p => p.isMain) || formData.photos[0];
+  const mainPhoto = formData.photos[0];
 
   return (
     <div className="space-y-6">
@@ -283,11 +283,6 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
                     alt={`Photo ${index + 1}`}
                     className="w-full h-full object-cover rounded"
                   />
-                  {photo.isMain && (
-                    <div className="absolute inset-0 bg-frost-ice/20 rounded flex items-center justify-center">
-                      <Badge variant="default" size="sm">Main</Badge>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
