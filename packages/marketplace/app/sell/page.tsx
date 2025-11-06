@@ -76,7 +76,6 @@ function createPreviewListing(
     language: formData.selectedVersion?.languages?.join(', ') || formData.selectedVersion?.language || null,
     edition_year: formData.selectedVersion?.yearPublished || null,
     photo_urls: userPhotoUrls, // User photos only
-    main_photo_url: userPhotoUrls[0] || null, // First user photo as fallback
     condition: formData.condition || 'good',
     condition_notes: formData.conditionNotes || null,
     all_components_present: formData.allComponentsPresent,
@@ -273,8 +272,9 @@ export default function SellPage() {
     const gameComplete = !!formData.selectedGame && !!formData.selectedVersion &&
       (!needsAlternateName || !!formData.selectedGameDisplayName);
 
-    const photosComplete = formData.photos.length >= 1;
     const conditionComplete = !!formData.condition;
+    // Photos required only for Acceptable condition
+    const photosComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1;
     const pricingComplete = !!formData.price && parseFloat(formData.price) > 0 &&
       Object.values(formData.shippingOptions).some((v) => v);
 
@@ -282,9 +282,9 @@ export default function SellPage() {
     setExpandedSections((prev) => ({
       ...prev,
       game: true, // Always keep game section visible
-      photos: gameComplete || prev.photos,
-      condition: (gameComplete && photosComplete) || prev.condition,
-      pricing: (gameComplete && photosComplete && conditionComplete) || prev.pricing,
+      condition: gameComplete || prev.condition,
+      photos: (gameComplete && conditionComplete) || prev.photos,
+      pricing: (gameComplete && conditionComplete && photosComplete) || prev.pricing,
     }));
   }, [
     formData.selectedGame,
@@ -331,8 +331,9 @@ export default function SellPage() {
     return true;
   })();
 
-  const isPhotosSectionComplete = formData.photos.length >= 1;
   const isConditionSectionComplete = !!formData.condition;
+  // Photos required only for Acceptable condition
+  const isPhotosSectionComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1;
   const isPricingSectionComplete =
     !!formData.price &&
     parseFloat(formData.price) > 0 &&
@@ -341,8 +342,8 @@ export default function SellPage() {
   const canPublish = (): boolean => {
     return (
       isGameSectionComplete &&
-      isPhotosSectionComplete &&
       isConditionSectionComplete &&
+      isPhotosSectionComplete &&
       isPricingSectionComplete &&
       formData.termsAccepted
     );
@@ -353,12 +354,12 @@ export default function SellPage() {
       alert('Please select a game and version');
       return false;
     }
-    if (!isPhotosSectionComplete) {
-      alert('Please upload at least 1 photo');
-      return false;
-    }
     if (!isConditionSectionComplete) {
       alert('Please select the condition of your game');
+      return false;
+    }
+    if (!isPhotosSectionComplete) {
+      alert('Please upload at least 1 photo for Acceptable condition items');
       return false;
     }
     if (!isPricingSectionComplete) {
@@ -395,24 +396,30 @@ export default function SellPage() {
     try {
       console.log('📤 [Sell Page] Starting listing publication...');
 
-      // Step 1: Upload photos
-      console.log(`📸 [Sell Page] Uploading ${formData.photos.length} photos...`);
-      const photoFormData = new FormData();
-      formData.photos.forEach((photoFile) => {
-        photoFormData.append('photos', photoFile.file);
-      });
+      // Step 1: Upload photos (if any)
+      let photoUrls: string[] = [];
+      if (formData.photos.length > 0) {
+        console.log(`📸 [Sell Page] Uploading ${formData.photos.length} photos...`);
+        const photoFormData = new FormData();
+        formData.photos.forEach((photoFile) => {
+          photoFormData.append('photos', photoFile.file);
+        });
 
-      const uploadResponse = await fetch('/api/upload/photos', {
-        method: 'POST',
-        body: photoFormData,
-      });
+        const uploadResponse = await fetch('/api/upload/photos', {
+          method: 'POST',
+          body: photoFormData,
+        });
 
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload photos');
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload photos');
+        }
+
+        const uploadData = await uploadResponse.json();
+        photoUrls = uploadData.urls;
+        console.log(`✅ [Sell Page] Uploaded ${photoUrls.length} photos`);
+      } else {
+        console.log('📸 [Sell Page] No photos to upload');
       }
-
-      const { urls: photoUrls } = await uploadResponse.json();
-      console.log(`✅ [Sell Page] Uploaded ${photoUrls.length} photos`);
 
       // Step 2: Create listing
       console.log('📝 [Sell Page] Creating listing...');
@@ -638,24 +645,7 @@ export default function SellPage() {
           </div>
         </CollapsibleSection>
 
-        {/* Section 2: Photos */}
-        <CollapsibleSection
-          title="Upload Photos"
-          icon={<Camera className="w-6 h-6 text-frost-ice" />}
-          isComplete={isPhotosSectionComplete}
-          isExpanded={expandedSections.photos}
-          onToggle={() => toggleSection('photos')}
-          required
-          subtitle={isPhotosSectionComplete ? undefined : "Add 1-8 photos showing the game's condition"}
-        >
-          <PhotoUpload
-            photos={formData.photos}
-            onPhotosChange={(photos) => setFormData((prev) => ({ ...prev, photos }))}
-            maxPhotos={8}
-          />
-        </CollapsibleSection>
-
-        {/* Section 3: Condition */}
+        {/* Section 2: Condition */}
         <CollapsibleSection
           title="Condition & Details"
           icon={<ClipboardCheck className="w-6 h-6 text-frost-ice" />}
@@ -671,6 +661,27 @@ export default function SellPage() {
             allComponentsPresent={formData.allComponentsPresent}
             missingComponents={formData.missingComponents}
             onChange={(field, value) => setFormData((prev) => ({ ...prev, [field]: value }))}
+          />
+        </CollapsibleSection>
+
+        {/* Section 3: Photos */}
+        <CollapsibleSection
+          title="Upload Photos"
+          icon={<Camera className="w-6 h-6 text-frost-ice" />}
+          isExpanded={expandedSections.photos}
+          onToggle={() => toggleSection('photos')}
+          required={formData.condition === 'acceptable'}
+          subtitle={
+            formData.condition === 'acceptable'
+              ? 'At least 1 photo required to show condition'
+              : 'Add up to 8 photos (optional but recommended)'
+          }
+        >
+          <PhotoUpload
+            photos={formData.photos}
+            onPhotosChange={(photos) => setFormData((prev) => ({ ...prev, photos }))}
+            maxPhotos={8}
+            condition={formData.condition}
           />
         </CollapsibleSection>
 

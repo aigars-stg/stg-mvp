@@ -59,10 +59,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Version is required' }, { status: 400 });
     }
 
-    if (!photoUrls || photoUrls.length === 0) {
-      return NextResponse.json({ error: 'At least one photo is required' }, { status: 400 });
-    }
-
     if (!condition) {
       return NextResponse.json({ error: 'Condition is required' }, { status: 400 });
     }
@@ -94,8 +90,7 @@ export async function POST(request: NextRequest) {
       edition_year: selectedVersion.yearPublished || null,
 
       // Photos
-      photo_urls: photoUrls,
-      main_photo_url: photoUrls[0], // First photo is main
+      photo_urls: photoUrls || [],
 
       // Condition
       condition,

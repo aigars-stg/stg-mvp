@@ -23,7 +23,6 @@ export interface Listing {
 
   // Photos
   photo_urls: string[];
-  main_photo_url: string | null;
 
   // Condition
   condition: ListingCondition;

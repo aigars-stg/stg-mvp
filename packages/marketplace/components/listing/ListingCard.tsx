@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Card, Badge, Button } from '@second-turn/design-system';
 import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock } from 'lucide-react';
@@ -84,7 +84,7 @@ export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
     }
   };
 
-  const displayImage = allImages[currentImageIndex] || listing.main_photo_url;
+  const displayImage = allImages[currentImageIndex];
 
   return (
     <Link href={`/listing/${listing.id}`} className="h-full">
@@ -163,7 +163,7 @@ export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
         {/* Content Section */}
         <div className="p-4 flex flex-col flex-grow">
           {/* Middle Content */}
-          <div className="space-y-3">
+          <div className="space-y-3 pb-1">
             {/* Game Name with Year */}
             <h3 className="font-bold text-lg text-polar-night line-clamp-2 min-h-[2.5rem]">
               {listing.game_name}
@@ -248,9 +248,17 @@ export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
             {/* Seller Info */}
             {showSeller && listing.seller && (
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-frost-ice/20 flex items-center justify-center text-xs font-semibold text-frost-ice">
-                  {listing.seller.full_name.charAt(0).toUpperCase()}
-                </div>
+                {listing.seller.avatar_url ? (
+                  <img
+                    src={listing.seller.avatar_url}
+                    alt={listing.seller.full_name}
+                    className="w-6 h-6 rounded-full object-cover border border-border-subtle"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-frost-ice/20 flex items-center justify-center text-xs font-semibold text-frost-ice">
+                    {listing.seller.full_name.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <span className="text-sm text-text-secondary line-clamp-1">
                   {listing.seller.full_name}
                 </span>

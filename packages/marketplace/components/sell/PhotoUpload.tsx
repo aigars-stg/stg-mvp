@@ -2,24 +2,24 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { Card } from '@second-turn/design-system';
-import { Camera, X, Star } from 'lucide-react';
+import { Camera, X } from 'lucide-react';
 
 export interface PhotoFile {
   file: File;
   preview: string;
-  isMain: boolean;
 }
 
 interface PhotoUploadProps {
   photos: PhotoFile[];
   onPhotosChange: (photos: PhotoFile[]) => void;
   maxPhotos?: number;
+  condition?: 'likeNew' | 'veryGood' | 'good' | 'acceptable' | null;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
 
-export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8 }: PhotoUploadProps) {
+export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8, condition = null }: PhotoUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -59,7 +59,6 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8 }: PhotoUplo
         newPhotos.push({
           file,
           preview: URL.createObjectURL(file),
-          isMain: photos.length === 0 && newPhotos.length === 0, // First photo is main
         });
       }
     });
@@ -106,21 +105,8 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8 }: PhotoUplo
 
     newPhotos.splice(index, 1);
 
-    // If removed photo was main and there are still photos, make first one main
-    if (removedPhoto.isMain && newPhotos.length > 0) {
-      newPhotos[0].isMain = true;
-    }
-
     onPhotosChange(newPhotos);
     setUploadError(null);
-  };
-
-  const setMainPhoto = (index: number) => {
-    const newPhotos = photos.map((photo, i) => ({
-      ...photo,
-      isMain: i === index,
-    }));
-    onPhotosChange(newPhotos);
   };
 
   // Drag-to-reorder handlers
@@ -162,7 +148,9 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8 }: PhotoUplo
           <div className="space-y-3 text-sm">
             <p className="text-frost-ice font-medium flex items-center gap-2">
               <Camera className="w-4 h-4" />
-              Honest photos build buyer trust
+              {condition === 'acceptable'
+                ? 'Photos are required for Acceptable condition items'
+                : 'Photos help build buyer trust (optional)'}
             </p>
             <div>
               <ul className="list-disc list-inside space-y-1 text-text-secondary ml-2">
@@ -277,14 +265,6 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8 }: PhotoUplo
                   className="w-full h-full object-cover rounded-lg pointer-events-none"
                 />
 
-                {/* Main Photo Badge */}
-                {photo.isMain && (
-                  <div className="absolute top-2 left-2 bg-frost-ice text-snow-white px-2 py-1 rounded-md shadow-lg flex items-center gap-1.5 text-xs font-semibold">
-                    <Star className="w-3 h-3 fill-current" />
-                    Main
-                  </div>
-                )}
-
                 {/* Remove Button */}
                 <button
                   onClick={() => removePhoto(index)}
@@ -302,24 +282,6 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8 }: PhotoUplo
                 >
                   <X className="w-4 h-4" />
                 </button>
-
-                {/* Set as Main Button */}
-                {!photo.isMain && (
-                  <button
-                    onClick={() => setMainPhoto(index)}
-                    className="
-                      absolute bottom-2 left-2 right-2
-                      px-2 py-1.5 sm:py-1
-                      bg-polar-night/80 text-snow-white
-                      text-xs rounded
-                      sm:opacity-0 sm:group-hover:opacity-100
-                      transition-opacity
-                      hover:bg-polar-night
-                    "
-                  >
-                    Set as main
-                  </button>
-                )}
               </div>
             ))}
           </div>

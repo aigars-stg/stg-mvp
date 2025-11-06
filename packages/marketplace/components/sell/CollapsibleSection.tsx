@@ -6,7 +6,7 @@ import { Card } from '@second-turn/design-system';
 interface CollapsibleSectionProps {
   title: string;
   icon: ReactNode;
-  isComplete: boolean;
+  isComplete?: boolean; // Optional - if not provided, won't show Complete badge
   isExpanded: boolean;
   onToggle: () => void;
   children: ReactNode;
@@ -26,7 +26,7 @@ export function CollapsibleSection({
 }: CollapsibleSectionProps) {
   // Auto-expand when section becomes incomplete (user needs to complete it)
   useEffect(() => {
-    if (!isComplete && !isExpanded) {
+    if (isComplete !== undefined && !isComplete && !isExpanded) {
       // Section is incomplete but collapsed - could auto-expand here if needed
     }
   }, [isComplete, isExpanded]);
@@ -56,7 +56,7 @@ export function CollapsibleSection({
                 </span>
               )}
             </div>
-            {subtitle && !isComplete && (
+            {subtitle && (isComplete === undefined || !isComplete) && (
               <p className="text-sm text-text-secondary mt-0.5">{subtitle}</p>
             )}
           </div>

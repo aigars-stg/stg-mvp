@@ -39,7 +39,6 @@ export function ListingPreviewCard({
   const isComplete =
     !!selectedGame &&
     !!selectedVersion &&
-    photos.length >= 1 &&
     !!condition &&
     !!price &&
     parseFloat(price) > 0 &&
@@ -140,9 +139,8 @@ export function ListingPreviewCard({
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-text-muted text-sm">
-              <AlertCircle className="w-4 h-4" />
-              <span>No photos uploaded yet</span>
+            <div className="text-text-muted text-sm">
+              <span>No photos</span>
             </div>
           )}
 
