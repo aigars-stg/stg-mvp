@@ -20,6 +20,9 @@ export default function SignInPage() {
   const { signIn, signInWithOAuth } = useAuth();
   const router = useRouter();
 
+  // Check if site is in "coming soon" mode
+  const isComingSoon = process.env.NEXT_PUBLIC_COMING_SOON === 'true';
+
   // Get redirect parameter from URL on mount (avoiding useSearchParams for SSG compatibility)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -215,15 +218,17 @@ export default function SignInPage() {
           </form>
         </Card>
 
-        {/* Sign Up Link */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-text-secondary">
-            Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-frost-ice hover:underline font-medium">
-              Create account
-            </Link>
-          </p>
-        </div>
+        {/* Sign Up Link - Hide in coming soon mode */}
+        {!isComingSoon && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-text-secondary">
+              Don't have an account?{' '}
+              <Link href="/auth/signup" className="text-frost-ice hover:underline font-medium">
+                Create account
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

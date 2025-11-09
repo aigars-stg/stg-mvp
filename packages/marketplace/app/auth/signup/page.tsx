@@ -15,6 +15,44 @@ import { CountrySelector } from '@/components/auth/CountrySelector';
 import type { CountryCode } from '@/lib/country-utils';
 
 export default function SignUpPage() {
+  // Check if site is in "coming soon" mode
+  const isComingSoon = process.env.NEXT_PUBLIC_COMING_SOON === 'true';
+
+  // If in coming soon mode, show a message instead
+  if (isComingSoon) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center px-4">
+        <Card padding="lg" className="max-w-md w-full text-center">
+          <div className="mb-6">
+            <div className="w-16 h-16 rounded-full bg-frost-ice/10 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-frost-ice" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-polar-night mb-2">
+              We're Launching Soon!
+            </h2>
+            <p className="text-text-secondary mb-6">
+              Sign up will be available when we officially launch. In the meantime, you can explore what's coming to the Baltic board game community.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <Link href="/">
+              <Button variant="primary" fullWidth>
+                Explore Preview
+              </Button>
+            </Link>
+            <Link href="/auth/signin">
+              <Button variant="secondary" fullWidth>
+                Sign In (If You Have an Account)
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

@@ -2,7 +2,11 @@ import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 import Image from 'next/image';
 
-export function HeroSection() {
+interface HeroSectionProps {
+  isComingSoon?: boolean;
+}
+
+export function HeroSection({ isComingSoon = false }: HeroSectionProps) {
   // Check if hero image exists
   const hasHeroImage = true; 
 
@@ -49,16 +53,29 @@ export function HeroSection() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Link href="/browse">
-              <Button size="lg" variant="primary" className="w-full sm:w-auto min-w-[200px]">
-                Find Your Next Game
-              </Button>
-            </Link>
-            <Link href="/sell">
-              <Button size="lg" variant="secondary" className="w-full sm:w-auto min-w-[200px]">
-                List Your Game (Free)
-              </Button>
-            </Link>
+            {isComingSoon ? (
+              <>
+                <Button size="lg" variant="primary" className="w-full sm:w-auto min-w-[200px]" disabled>
+                  Coming Soon
+                </Button>
+                <Button size="lg" variant="secondary" className="w-full sm:w-auto min-w-[200px]" disabled>
+                  Coming Soon
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/browse">
+                  <Button size="lg" variant="primary" className="w-full sm:w-auto min-w-[200px]">
+                    Find Your Next Game
+                  </Button>
+                </Link>
+                <Link href="/sell">
+                  <Button size="lg" variant="secondary" className="w-full sm:w-auto min-w-[200px]">
+                    List Your Game (Free)
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
