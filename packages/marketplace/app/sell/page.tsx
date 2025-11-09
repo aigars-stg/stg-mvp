@@ -102,6 +102,7 @@ function createPreviewListing(
       full_name: profile?.full_name || 'Your Name', // From user_profiles table
       email: profile?.email || user?.email || 'you@example.com', // From user_profiles table
       avatar_url: profile?.avatar_url || null, // From user_profiles table
+      country: profile?.country || null, // From user_profiles table
     },
   };
 }

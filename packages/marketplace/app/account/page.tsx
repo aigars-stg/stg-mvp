@@ -10,6 +10,8 @@ import { AvatarUpload } from '@/components/auth/AvatarUpload';
 import { EmailChange } from '@/components/auth/EmailChange';
 import { AccountDeletion } from '@/components/auth/AccountDeletion';
 import { LoginActivity } from '@/components/auth/LoginActivity';
+import { CountrySelector } from '@/components/auth/CountrySelector';
+import { getCountryFlag, getCountryName, type CountryCode } from '@/lib/country-utils';
 
 export default function AccountPage() {
   const { user, profile, updateProfile, refreshProfile, signOut } = useAuth();
@@ -17,6 +19,7 @@ export default function AccountPage() {
 
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
+  const [country, setCountry] = useState<CountryCode | ''>(profile?.country as CountryCode || '');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -27,6 +30,7 @@ export default function AccountPage() {
     if (profile) {
       setFullName(profile.full_name);
       setPhone(profile.phone || '');
+      setCountry(profile.country as CountryCode || '');
     }
   });
 
@@ -46,6 +50,7 @@ export default function AccountPage() {
       const { error: updateError } = await updateProfile({
         full_name: fullName.trim(),
         phone: phone.trim() || null,
+        country: country || null,
       });
 
       if (updateError) {
@@ -100,12 +105,12 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg py-8 px-4">
+    <div className="min-h-screen bg-bg py-4 sm:py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-polar-night mb-2">Account Settings</h1>
-          <p className="text-text-secondary">
+        <div className="mb-4 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">Account Settings</h1>
+          <p className="text-sm sm:text-base text-text-secondary">
             Manage your profile and account preferences
           </p>
         </div>
@@ -114,9 +119,9 @@ export default function AccountPage() {
         <EmailVerificationBanner dismissible />
 
         {/* Profile Information Card */}
-        <Card padding="lg" className="mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-polar-night">Profile Information</h2>
+        <Card padding="lg" className="mb-6 sm:p-6 p-4">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Profile Information</h2>
             {!isEditing && (
               <Button
                 variant="secondary"
@@ -143,99 +148,135 @@ export default function AccountPage() {
             </div>
           )}
 
-          {/* Avatar Upload Section */}
-          <div className="mb-8 pb-6 border-b border-border">
-            <AvatarUpload
-              currentAvatarUrl={profile.avatar_url}
-              onUploadComplete={handleAvatarUpload}
-            />
-          </div>
+          {!isEditing ? (
+            /* VIEW MODE - Compact Profile Card */
+            <div className="flex items-start gap-3 sm:gap-4">
+              {/* Avatar */}
+              <div className="flex-shrink-0">
+                {profile.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="Profile"
+                    className="w-20 h-20 rounded-xl object-cover border-2 border-border"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-xl bg-frost-ice/10 flex items-center justify-center border-2 border-border">
+                    <User className="w-10 h-10 text-text-muted" />
+                  </div>
+                )}
+              </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Full Name */}
-            <div>
-              <label className="block text-sm font-medium text-polar-night mb-2">
-                Full Name *
-              </label>
-              {isEditing ? (
+              {/* Profile Info */}
+              <div className="flex-1 min-w-0 space-y-2">
+                {/* Name */}
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-polar-night truncate">
+                    {profile.full_name}
+                    {profile.country && getCountryFlag(profile.country) && (
+                      <span
+                        className={`${getCountryFlag(profile.country)} ml-2`}
+                        role="img"
+                        aria-label={`Country: ${getCountryName(profile.country)}`}
+                        title={getCountryName(profile.country)}
+                      />
+                    )}
+                  </h3>
+                </div>
+
+                {/* Email */}
+                <div className="text-sm text-text-secondary break-words">
+                  {profile.email}
+                </div>
+
+                {/* Phone - only show if exists */}
+                {profile.phone && (
+                  <div className="text-sm text-text-secondary">
+                    {profile.phone}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* EDIT MODE - Compact Form */
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Avatar Upload */}
+              <div>
+                <AvatarUpload
+                  currentAvatarUrl={profile.avatar_url}
+                  onUploadComplete={handleAvatarUpload}
+                />
+              </div>
+
+              {/* Full Name */}
+              <div>
+                <label className="block text-sm font-medium text-polar-night mb-2">
+                  Full Name *
+                </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-text-muted" />
+                    <User className="h-4 w-4 text-frost-ice" />
                   </div>
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border-2 border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-snow-white"
+                    className="w-full pl-10 pr-4 py-2.5 border-2 border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-snow-white"
                     placeholder="John Doe"
                     required
                     disabled={loading}
                   />
                 </div>
-              ) : (
-                <div className="flex items-center gap-3 p-3 bg-bg-elevated rounded-lg">
-                  <User className="h-5 w-5 text-text-muted" />
-                  <span className="text-polar-night">{profile.full_name}</span>
-                </div>
-              )}
-            </div>
+              </div>
 
-            {/* Email */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-polar-night">
-                  Email
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-medium text-polar-night mb-2">
+                  Phone Number (Optional)
                 </label>
-                {!isEditing && <EmailChange currentEmail={profile.email} />}
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-bg-elevated rounded-lg">
-                <Mail className="h-5 w-5 text-text-muted" />
-                <span className="text-polar-night">{profile.email}</span>
-                {user.email_confirmed_at && (
-                  <span className="ml-auto text-xs text-aurora-green flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Verified
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium text-polar-night mb-2">
-                Phone Number (Optional)
-              </label>
-              {isEditing ? (
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-text-muted" />
+                    <Phone className="h-4 w-4 text-frost-ice" />
                   </div>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border-2 border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-snow-white"
+                    className="w-full pl-10 pr-4 py-2.5 border-2 border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-snow-white"
                     placeholder="+371 12345678"
                     disabled={loading}
                   />
                 </div>
-              ) : (
-                <div className="flex items-center gap-3 p-3 bg-bg-elevated rounded-lg">
-                  <Phone className="h-5 w-5 text-text-muted" />
-                  <span className="text-polar-night">
-                    {profile.phone || 'Not provided'}
-                  </span>
-                </div>
-              )}
-            </div>
+              </div>
 
-            {/* Action Buttons */}
-            {isEditing && (
-              <div className="flex gap-3 pt-4">
+              {/* Country */}
+              <div>
+                <label className="block text-sm font-medium text-polar-night mb-2">
+                  Country *
+                </label>
+                <CountrySelector
+                  value={country}
+                  onChange={setCountry}
+                  disabled={loading}
+                  required
+                />
+              </div>
+
+              {/* Email Change */}
+              <div>
+                <label className="block text-sm font-medium text-polar-night mb-2">
+                  Change Email
+                </label>
+                <EmailChange currentEmail={profile.email} />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button
                   type="submit"
                   variant="primary"
                   disabled={loading}
+                  fullWidth
+                  className="sm:w-auto"
                 >
                   {loading ? 'Saving...' : 'Save Changes'}
                 </Button>
@@ -246,21 +287,24 @@ export default function AccountPage() {
                     setIsEditing(false);
                     setFullName(profile.full_name);
                     setPhone(profile.phone || '');
+                    setCountry(profile.country as CountryCode || '');
                     setError('');
                     setSuccess('');
                   }}
                   disabled={loading}
+                  fullWidth
+                  className="sm:w-auto"
                 >
                   Cancel
                 </Button>
               </div>
-            )}
-          </form>
+            </form>
+          )}
         </Card>
 
         {/* Account Actions Card */}
-        <Card padding="lg" className="mb-6">
-          <h2 className="text-xl font-semibold text-polar-night mb-4">Account Actions</h2>
+        <Card padding="lg" className="mb-6 sm:p-6 p-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night mb-4">Account Actions</h2>
 
           <div className="space-y-3">
             <Button
@@ -287,13 +331,13 @@ export default function AccountPage() {
         </div>
 
         {/* Danger Zone - Account Deletion */}
-        <Card padding="lg">
-          <h2 className="text-xl font-semibold text-polar-night mb-4">Danger Zone</h2>
+        <Card padding="lg" className="sm:p-6 p-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night mb-4">Danger Zone</h2>
           <AccountDeletion />
         </Card>
 
         {/* Account Info */}
-        <div className="mt-6 p-4 bg-bg-elevated rounded-lg">
+        <div className="mt-6 p-3 sm:p-4 bg-bg-elevated rounded-lg">
           <p className="text-xs text-text-secondary">
             <strong>Account ID:</strong> {user.id}
           </p>

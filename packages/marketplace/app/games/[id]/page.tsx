@@ -5,7 +5,8 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button, Card, Badge, Checkbox, Modal } from '@second-turn/design-system';
-import { mockGames, conditionConfig } from '../../../lib/mock-data';
+import { mockGames } from '../../../lib/mock-data';
+import { conditionConfig } from '../../../lib/condition-config';
 import { getLanguageFlag } from '../../../lib/bgg-api';
 
 interface GameDetailPageProps {

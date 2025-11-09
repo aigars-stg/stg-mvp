@@ -93,16 +93,9 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
-        {/* Logo */}
+        {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/">
-            <img
-              src="/images/logo_nav.svg"
-              alt="Second Turn Games"
-              className="h-12 mx-auto"
-            />
-          </Link>
-          <h1 className="text-2xl font-bold text-polar-night mt-6 mb-2">
+          <h1 className="text-2xl font-bold text-polar-night mb-2">
             Reset your password
           </h1>
           <p className="text-text-secondary">

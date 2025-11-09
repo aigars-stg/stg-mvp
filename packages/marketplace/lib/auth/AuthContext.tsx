@@ -38,38 +38,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize auth state
   useEffect(() => {
     let mounted = true;
+    let subscription: any = null;
 
     async function initAuth() {
       try {
-        // Get and validate user (secure - prevents cookie forgery)
-        const { data: { user } } = await (supabase as any).auth.getUser();
-
-        if (mounted) {
-          if (user) {
-            setUser(user);
-            const userProfile = await fetchProfile(user.id);
-            setProfile(userProfile);
-          }
-          setLoading(false);
-        }
-
-        // Listen for auth changes
+        // Set up auth state listener FIRST before checking initial state
+        // This ensures we don't miss any auth events during initialization
         const {
-          data: { subscription },
+          data: { subscription: sub },
         } = (supabase as any).auth.onAuthStateChange(
           async (event: string, session: any) => {
             console.log('🔐 Auth state changed:', event);
 
-            if (mounted) {
-              if (session?.user) {
-                setUser(session.user);
-                const userProfile = await fetchProfile(session.user.id);
-                setProfile(userProfile);
-              } else {
-                setUser(null);
-                setProfile(null);
-              }
-              setLoading(false);
+            if (!mounted) return;
+
+            if (session?.user) {
+              setUser(session.user);
+              const userProfile = await fetchProfile(session.user.id);
+              setProfile(userProfile);
+            } else {
+              setUser(null);
+              setProfile(null);
             }
 
             // Handle specific events
@@ -82,9 +71,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         );
 
-        return () => {
-          subscription.unsubscribe();
-        };
+        subscription = sub;
+
+        // Now check for existing session (faster than getUser())
+        const { data: { session } } = await (supabase as any).auth.getSession();
+
+        if (!mounted) return;
+
+        if (session?.user) {
+          setUser(session.user);
+          const userProfile = await fetchProfile(session.user.id);
+          setProfile(userProfile);
+        }
+
+        setLoading(false);
       } catch (error) {
         console.error('Error initializing auth:', error);
         if (mounted) {
@@ -97,6 +97,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       mounted = false;
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, [fetchProfile, router]);
 
@@ -132,7 +135,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (
     email: string,
     password: string,
-    fullName: string
+    fullName: string,
+    country: string
   ) => {
     try {
       // Create auth user
@@ -143,6 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           emailRedirectTo: `${window.location.origin}/auth/confirm`,
           data: {
             full_name: fullName,
+            country: country,
           },
         },
       });
@@ -185,12 +190,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await (supabase as any).auth.signOut();
       if (error) throw error;
 
-      setUser(null);
-      setProfile(null);
-
-      // Force router refresh to clear any cached data
-      router.push('/');
-      router.refresh();
+      // Don't manually update state or navigate here
+      // The auth listener will handle the SIGNED_OUT event
+      // and update state/navigation automatically
+      // This prevents race conditions between manual updates and listener updates
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;

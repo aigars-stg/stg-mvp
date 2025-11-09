@@ -25,13 +25,18 @@ function getSupabaseClient() {
 /**
  * Client-side Supabase client with proper cookie handling
  * Use this in React components and client-side code
+ *
+ * We eagerly initialize on the client-side to prevent timing issues
+ * with auth operations. On the server, we use a Proxy for lazy initialization.
  */
-export const supabase = new Proxy({} as ReturnType<typeof createBrowserClient>, {
-  get: (target, prop) => {
-    const client = getSupabaseClient();
-    return (client as any)[prop];
-  }
-});
+export const supabase = typeof window !== 'undefined'
+  ? getSupabaseClient()
+  : new Proxy({} as ReturnType<typeof createBrowserClient>, {
+      get: (target, prop) => {
+        const client = getSupabaseClient();
+        return (client as any)[prop];
+      }
+    });
 
 /**
  * Server-side client with service role (for imports and admin operations)

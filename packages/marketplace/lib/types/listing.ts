@@ -61,6 +61,7 @@ export interface ListingWithSeller extends Listing {
     full_name: string;
     email: string;
     avatar_url: string | null;
+    country: string | null;
   };
 }
 

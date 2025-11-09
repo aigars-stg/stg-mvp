@@ -6,6 +6,7 @@ import { Card, Badge, Button } from '@second-turn/design-system';
 import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock } from 'lucide-react';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
+import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 
 interface ListingCardProps {
   listing: ListingWithSeller;
@@ -252,15 +253,23 @@ export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
                   <img
                     src={listing.seller.avatar_url}
                     alt={listing.seller.full_name}
-                    className="w-6 h-6 rounded-full object-cover border border-border-subtle"
+                    className="w-6 h-6 rounded-sm object-cover border border-border-subtle"
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-frost-ice/20 flex items-center justify-center text-xs font-semibold text-frost-ice">
+                  <div className="w-6 h-6 rounded-sm bg-frost-ice/20 flex items-center justify-center text-xs font-semibold text-frost-ice">
                     {listing.seller.full_name.charAt(0).toUpperCase()}
                   </div>
                 )}
                 <span className="text-sm text-text-secondary line-clamp-1">
                   {listing.seller.full_name}
+                  {listing.seller.country && getCountryFlag(listing.seller.country) && (
+                    <span
+                      className={`${getCountryFlag(listing.seller.country)} ml-1`}
+                      role="img"
+                      aria-label={`Country: ${getCountryName(listing.seller.country)}`}
+                      title={getCountryName(listing.seller.country)}
+                    />
+                  )}
                 </span>
               </div>
             )}

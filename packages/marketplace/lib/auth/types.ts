@@ -6,6 +6,7 @@ export interface UserProfile {
   email: string;
   phone: string | null;
   avatar_url: string | null;
+  country: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -15,7 +16,7 @@ export interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, country: string) => Promise<{ error: Error | null }>;
   signInWithOAuth: (provider: 'google' | 'github') => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<{ error: Error | null }>;

@@ -1,18 +1,20 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button, Card, Badge } from '@second-turn/design-system';
-import { Package, MapPin, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Share2, ExternalLink, ZoomIn, ZoomOut } from 'lucide-react';
+import { Package, MapPin, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Share2, ExternalLink, MessageCircle } from 'lucide-react';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import Link from 'next/link';
 import { ImageLightbox } from '@/components/listing/ImageLightbox';
-import { ListingCard } from '@/components/listing/ListingCard';
+import { getCountryFlag, getCountryName } from '@/lib/country-utils';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 export default function ListingDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const listingId = params.id as string;
 
   const [listing, setListing] = useState<ListingWithSeller | null>(null);
@@ -22,6 +24,7 @@ export default function ListingDetailPage() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [contactingSellerLoading, setContactingSellerLoading] = useState(false);
   const minSwipeDistance = 50;
 
   useEffect(() => {
@@ -54,6 +57,46 @@ export default function ListingDetailPage() {
       fetchListing();
     }
   }, [listingId]);
+
+  const handleContactSeller = async () => {
+    if (!user) {
+      router.push(`/auth/signin?redirect=/listing/${listingId}`);
+      return;
+    }
+
+    if (!listing) return;
+
+    // Don't allow contacting yourself
+    if (listing.seller_id === user.id) {
+      return;
+    }
+
+    try {
+      setContactingSellerLoading(true);
+
+      const response = await fetch('/api/messages/initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listing_id: listing.id,
+          seller_id: listing.seller_id,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to initiate conversation');
+      }
+
+      const data = await response.json();
+      router.push(`/messages/${data.conversation_id}`);
+    } catch (error) {
+      console.error('Failed to contact seller:', error);
+      alert('Failed to start conversation. Please try again.');
+    } finally {
+      setContactingSellerLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -464,23 +507,72 @@ export default function ListingDetailPage() {
             <Card padding="md">
               <h3 className="font-semibold text-polar-night mb-3">Seller</h3>
 
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-frost-ice/20 flex items-center justify-center text-lg font-semibold text-frost-ice">
-                  {listing.seller.full_name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <div className="font-medium text-polar-night">
-                    {listing.seller.full_name}
+              {listing.seller ? (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    {listing.seller.avatar_url ? (
+                      <img
+                        src={listing.seller.avatar_url}
+                        alt={listing.seller.full_name}
+                        className="w-12 h-12 rounded-lg object-cover border-2 border-border"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-frost-ice/20 flex items-center justify-center text-lg font-semibold text-frost-ice">
+                        {listing.seller.full_name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-medium text-polar-night">
+                        {listing.seller.full_name}
+                        {listing.seller.country && getCountryFlag(listing.seller.country) && (
+                          <span
+                            className={`${getCountryFlag(listing.seller.country)} ml-2`}
+                            role="img"
+                            aria-label={`Country: ${getCountryName(listing.seller.country)}`}
+                            title={getCountryName(listing.seller.country)}
+                          />
+                        )}
+                      </div>
+                      <div className="text-sm text-text-secondary">
+                        Member since {new Date(listing.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm text-text-secondary">
-                    Member since {new Date(listing.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
-                  </div>
-                </div>
-              </div>
 
-              <Button variant="secondary" size="md" fullWidth>
-                Contact Seller
-              </Button>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    fullWidth
+                    onClick={handleContactSeller}
+                    disabled={contactingSellerLoading || Boolean(user && listing.seller_id === user.id)}
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    {contactingSellerLoading ? 'Starting conversation...' : user && listing.seller_id === user.id ? 'Your Listing' : 'Contact Seller'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-lg bg-text-muted/20 flex items-center justify-center text-lg font-semibold text-text-muted">
+                      ?
+                    </div>
+                    <div>
+                      <div className="font-medium text-text-muted">
+                        Deleted User
+                      </div>
+                      <div className="text-sm text-text-secondary">
+                        Account no longer active
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-aurora-red/10 rounded-lg border border-aurora-red/20">
+                    <p className="text-xs text-aurora-red">
+                      This listing is no longer available for purchase.
+                    </p>
+                  </div>
+                </>
+              )}
             </Card>
           </div>
         </div>

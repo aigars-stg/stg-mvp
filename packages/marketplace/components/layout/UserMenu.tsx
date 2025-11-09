@@ -4,13 +4,46 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { User, LogOut, Package } from 'lucide-react';
+import { User, LogOut, Package, MessageCircle } from 'lucide-react';
 import { getInitials } from '@/lib/auth/utils';
+import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 
 export function UserMenu() {
   const { user, profile, signOut, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [signOutError, setSignOutError] = useState<string>('');
+  const [unreadCount, setUnreadCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Fetch unread message count
+  useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch('/api/messages');
+        if (response.ok) {
+          const data = await response.json();
+          const total = data.conversations?.reduce(
+            (sum: number, conv: any) => sum + (conv.unread_count || 0),
+            0
+          ) || 0;
+          setUnreadCount(total);
+        }
+      } catch (error) {
+        console.error('Failed to fetch unread count:', error);
+      }
+    };
+
+    fetchUnreadCount();
+
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -28,17 +61,20 @@ export function UserMenu() {
 
   const handleSignOut = async () => {
     try {
+      setSignOutError('');
       await signOut();
       setIsOpen(false);
       // AuthContext handles the redirect to '/'
     } catch (error) {
       console.error('Failed to sign out:', error);
+      setSignOutError('Failed to sign out. Please try again.');
+      // Keep menu open so user can see the error
     }
   };
 
   if (loading) {
     return (
-      <div className="w-8 h-8 rounded-full bg-bg-secondary animate-pulse" />
+      <div className="w-8 h-8 rounded-md bg-bg-secondary animate-pulse" />
     );
   }
 
@@ -68,15 +104,24 @@ export function UserMenu() {
           <img
             src={profile.avatar_url}
             alt={displayName}
-            className="w-8 h-8 rounded-full object-cover border border-border"
+            className="w-8 h-8 rounded-md object-cover border border-border"
+            key={profile.avatar_url}
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-frost-ice text-snow-white flex items-center justify-center text-sm font-semibold">
+          <div className="w-8 h-8 rounded-md bg-frost-ice text-snow-white flex items-center justify-center text-sm font-semibold">
             {initials}
           </div>
         )}
         <span className="hidden sm:inline text-sm font-medium text-text">
           {displayName}
+          {profile?.country && getCountryFlag(profile.country) && (
+            <span
+              className={`${getCountryFlag(profile.country)} ml-1.5`}
+              role="img"
+              aria-label={`Country: ${getCountryName(profile.country)}`}
+              title={getCountryName(profile.country)}
+            />
+          )}
         </span>
         <svg
           className={`w-4 h-4 text-text-muted transition-transform ${
@@ -121,6 +166,21 @@ export function UserMenu() {
               <Package className="w-4 h-4 text-frost-ice" />
               My Listings
             </Link>
+            <Link
+              href="/messages"
+              className="flex items-center justify-between px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <div className="flex items-center gap-3">
+                <MessageCircle className="w-4 h-4 text-frost-ice" />
+                Messages
+              </div>
+              {unreadCount > 0 && (
+                <span className="bg-frost-ice text-snow-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </Link>
           </div>
 
           {/* Sign Out */}
@@ -133,6 +193,13 @@ export function UserMenu() {
               Sign Out
             </button>
           </div>
+
+          {/* Error Message */}
+          {signOutError && (
+            <div className="px-4 py-2 text-xs text-aurora-red bg-aurora-red/10 border-t border-border-subtle">
+              {signOutError}
+            </div>
+          )}
         </div>
       )}
     </div>

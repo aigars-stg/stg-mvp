@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as xml2js from 'xml2js';
+import { XMLParser } from 'fast-xml-parser';
 import { createServiceClient } from '@/lib/supabase/client';
 import { createBGGHeaders } from '@/lib/bgg-config';
 
@@ -36,11 +36,11 @@ async function fetchBGGImages(gameId: number, isExpansion: boolean): Promise<{ t
     }
 
     const xmlData = await response.text();
-    const parser = new xml2js.Parser();
-    const result = await parser.parseStringPromise(xmlData);
+    const parser = new XMLParser({ ignoreAttributes: false });
+    const result = parser.parse(xmlData);
 
-    const thumbnail = result?.items?.item?.[0]?.thumbnail?.[0];
-    const image = result?.items?.item?.[0]?.image?.[0];
+    const thumbnail = result?.items?.item?.thumbnail;
+    const image = result?.items?.item?.image;
 
     if (thumbnail || image) {
       console.log(`✅ Found images for game ${gameId} (thumbnail: ${!!thumbnail}, image: ${!!image})`);

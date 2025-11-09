@@ -204,7 +204,8 @@ export async function GET(request: NextRequest) {
           id,
           full_name,
           email,
-          avatar_url
+          avatar_url,
+          country
         )
       `, { count: 'exact' })
       .order('created_at', { ascending: false })

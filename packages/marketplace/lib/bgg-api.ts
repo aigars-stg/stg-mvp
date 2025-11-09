@@ -20,8 +20,6 @@ export type { BGGGame, BGGVersion, BGGGameMetadata, BGGInboundLink };
 export {
   getLanguageFlag,
   getLanguageInfo,
-  getLanguageCode,
-  formatLanguage,
   debounce,
   CONDITION_TEMPLATES,
   decodeHTMLEntities,

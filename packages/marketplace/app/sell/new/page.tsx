@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Input, Select, Checkbox, Card, Badge, Modal } from '@second-turn/design-system';
 import { searchBGGGames, getBGGGameById, type BGGGame } from '../../../lib/bgg-games';
-import { conditionConfig } from '../../../lib/mock-data';
+import { conditionConfig } from '../../../lib/condition-config';
 import { mockGames } from '../../../lib/mock-data';
 
 const STEPS = [

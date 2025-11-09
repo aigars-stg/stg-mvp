@@ -38,24 +38,6 @@ export function getLanguageFlag(languageName: string): string {
 }
 
 /**
- * Get language code (e.g., 'en', 'de') for a language name
- */
-export function getLanguageCode(languageName: string): string {
-  const entry = Object.values(LANGUAGE_MAP).find(l =>
-    l.name.toLowerCase() === languageName.toLowerCase()
-  );
-  return entry?.code || 'unknown';
-}
-
-/**
- * Format language name with emoji flag prefix
- */
-export function formatLanguage(languageName: string): string {
-  const flag = getLanguageFlag(languageName);
-  return `${flag} ${languageName}`;
-}
-
-/**
  * Decode HTML entities from BGG data
  * BGG often returns data with HTML entities like &#039; (apostrophe), &amp; (ampersand), etc.
  * This function decodes them to their proper characters.

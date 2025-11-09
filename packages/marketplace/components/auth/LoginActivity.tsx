@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
-import { Monitor, Smartphone, Tablet, MapPin, Calendar, AlertCircle, LogOut } from 'lucide-react';
+import { Monitor, Smartphone, Tablet, MapPin, Calendar, AlertCircle, LogOut, ChevronDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
 
@@ -24,36 +24,52 @@ export function LoginActivity() {
   const [activities, setActivities] = useState<LoginRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
   const [showSignOutAll, setShowSignOutAll] = useState(false);
   const [signOutPassword, setSignOutPassword] = useState('');
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [signOutError, setSignOutError] = useState('');
 
   useEffect(() => {
-    if (!user) return;
+    console.log('LoginActivity: user state:', user ? 'present' : 'null');
+    if (!user) {
+      console.log('LoginActivity: No user, skipping fetch');
+      return;
+    }
 
     async function fetchActivities() {
       if (!user) return;
 
+      console.log('LoginActivity: Fetching activities for user:', user.id);
       try {
-        const { data, error: fetchError } = await (supabase as any)
+        // Add timeout to prevent hanging
+        const fetchPromise = (supabase as any)
           .from('login_activity')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(10);
 
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Fetch timeout')), 10000)
+        );
+
+        const { data, error: fetchError } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
         if (fetchError) {
-          setError('Failed to load login activity');
-          console.error('Error fetching login activity:', fetchError);
+          setError('Login activity unavailable');
+          console.log('LoginActivity: Unable to load login history');
           setLoading(false);
           return;
         }
 
+        console.log('✅ LoginActivity: Fetched', data?.length || 0, 'activities');
         setActivities(data || []);
         setLoading(false);
-      } catch (err) {
-        setError('Failed to load login activity');
+      } catch (err: any) {
+        // Silently fail - login activity is optional
+        console.log('LoginActivity: Unable to load login history');
+        setError('Login activity unavailable');
         setLoading(false);
       }
     }
@@ -126,50 +142,98 @@ export function LoginActivity() {
 
   if (loading) {
     return (
-      <Card padding="lg">
-        <h2 className="text-xl font-semibold text-polar-night mb-4">Login Activity</h2>
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-frost-ice"></div>
-        </div>
+      <Card padding="lg" className="sm:p-6 p-4">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
+        >
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login Activity</h2>
+          <ChevronDown
+            className={`w-5 h-5 text-text-secondary transition-transform ${
+              isExpanded ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+        {isExpanded && (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-frost-ice"></div>
+          </div>
+        )}
       </Card>
     );
   }
 
   if (error) {
     return (
-      <Card padding="lg">
-        <h2 className="text-xl font-semibold text-polar-night mb-4">Login Activity</h2>
-        <div className="p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-aurora-red">{error}</p>
-        </div>
+      <Card padding="lg" className="sm:p-6 p-4">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
+        >
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login Activity</h2>
+          <ChevronDown
+            className={`w-5 h-5 text-text-secondary transition-transform ${
+              isExpanded ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+        {isExpanded && (
+          <div className="p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-aurora-red">{error}</p>
+          </div>
+        )}
       </Card>
     );
   }
 
   if (activities.length === 0) {
     return (
-      <Card padding="lg">
-        <h2 className="text-xl font-semibold text-polar-night mb-4">Login Activity</h2>
-        <p className="text-sm text-text-secondary text-center py-8">
-          No login activity recorded yet.
-        </p>
+      <Card padding="lg" className="sm:p-6 p-4">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
+        >
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login Activity</h2>
+          <ChevronDown
+            className={`w-5 h-5 text-text-secondary transition-transform ${
+              isExpanded ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+        {isExpanded && (
+          <p className="text-sm text-text-secondary text-center py-8">
+            No login activity recorded yet.
+          </p>
+        )}
       </Card>
     );
   }
 
   return (
-    <Card padding="lg">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-polar-night">Login Activity</h2>
-        <span className="text-xs text-text-secondary">Last 10 sign-ins</span>
-      </div>
+    <Card padding="lg" className="sm:p-6 p-4">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
+      >
+        <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login Activity</h2>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-text-secondary">Last 10 sign-ins</span>
+          <ChevronDown
+            className={`w-5 h-5 text-text-secondary transition-transform ${
+              isExpanded ? 'rotate-180' : ''
+            }`}
+          />
+        </div>
+      </button>
 
-      <div className="space-y-3">
+      {isExpanded && (
+        <>
+          <div className="space-y-2 sm:space-y-3">
         {activities.map((activity, index) => (
           <div
             key={activity.id}
-            className={`p-4 rounded-lg border ${
+            className={`p-3 sm:p-4 rounded-lg border ${
               index === 0
                 ? 'border-frost-ice/30 bg-frost-ice/5'
                 : 'border-border bg-bg-elevated'
@@ -296,6 +360,8 @@ export function LoginActivity() {
           )}
         </div>
       </div>
+        </>
+      )}
     </Card>
   );
 }

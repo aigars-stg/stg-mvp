@@ -40,10 +40,24 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
       analytics: true,
       prefix: '@upstash/ratelimit/email-resend',
     }),
+
+    messageCreate: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(30, '1 m'), // 30 messages per minute
+      analytics: true,
+      prefix: '@upstash/ratelimit/message-create',
+    }),
+
+    conversationCreate: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '1 h'), // 5 new conversations per hour
+      analytics: true,
+      prefix: '@upstash/ratelimit/conversation-create',
+    }),
   };
 }
 
-export type RateLimitAction = 'signIn' | 'signUp' | 'passwordReset' | 'emailResend';
+export type RateLimitAction = 'signIn' | 'signUp' | 'passwordReset' | 'emailResend' | 'messageCreate' | 'conversationCreate';
 
 export interface RateLimitResult {
   success: boolean;

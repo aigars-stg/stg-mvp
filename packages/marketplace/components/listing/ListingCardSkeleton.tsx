@@ -50,7 +50,7 @@ export function ListingCardSkeleton() {
         {/* Seller Info Skeleton */}
         <div className="pt-3 border-t border-border-subtle space-y-3">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-polar-night/10" />
+            <div className="w-6 h-6 rounded-sm bg-polar-night/10" />
             <div className="h-4 bg-polar-night/10 rounded w-24" />
           </div>
 

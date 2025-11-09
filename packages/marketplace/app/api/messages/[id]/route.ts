@@ -1,0 +1,343 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { checkRateLimit } from '@/lib/ratelimit';
+import type { Message, SendMessageRequest, Conversation } from '@/lib/types/message';
+import { MESSAGE_CONSTRAINTS } from '@/lib/types/message';
+
+/**
+ * GET /api/messages/[id]
+ * Get all messages in a conversation and conversation details
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const conversationId = params.id;
+
+    // Create Supabase client
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            cookieStore.set(name, value, options);
+          },
+          remove(name: string, options: any) {
+            cookieStore.delete(name);
+          },
+        },
+      }
+    );
+
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: 'Not authenticated' },
+        { status: 401 }
+      );
+    }
+
+    // Get conversation and verify user is a participant
+    const { data: conversation, error: conversationError } = await supabase
+      .from('conversations')
+      .select(`
+        id,
+        listing_id,
+        buyer_id,
+        seller_id,
+        last_message_at,
+        buyer_archived_at,
+        seller_archived_at,
+        created_at,
+        updated_at
+      `)
+      .eq('id', conversationId)
+      .single();
+
+    if (conversationError || !conversation) {
+      return NextResponse.json(
+        { error: 'Conversation not found' },
+        { status: 404 }
+      );
+    }
+
+    // Verify user is a participant
+    if (conversation.buyer_id !== user.id && conversation.seller_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Not authorized to view this conversation' },
+        { status: 403 }
+      );
+    }
+
+    // Get listing details
+    const { data: listing } = await supabase
+      .from('listings')
+      .select('id, title, price, status, photo_urls, game_name, game_id')
+      .eq('id', conversation.listing_id)
+      .single();
+
+    // Get other user's profile
+    const otherUserId = conversation.buyer_id === user.id
+      ? conversation.seller_id
+      : conversation.buyer_id;
+
+    const { data: otherProfile } = await supabase
+      .from('user_profiles')
+      .select('id, full_name, avatar_url')
+      .eq('id', otherUserId)
+      .single();
+
+    // Get current user's profile
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('id, full_name, avatar_url')
+      .eq('id', user.id)
+      .single();
+
+    // Get messages
+    const { data: messages, error: messagesError } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: true });
+
+    if (messagesError) {
+      console.error('Error fetching messages:', messagesError);
+      return NextResponse.json(
+        { error: 'Failed to fetch messages' },
+        { status: 500 }
+      );
+    }
+
+    // Attach sender profiles to messages
+    const messagesWithProfiles: Message[] = (messages || []).map(msg => ({
+      ...msg,
+      sender: msg.sender_id === user.id
+        ? {
+            id: userProfile?.id || user.id,
+            full_name: userProfile?.full_name || null,
+            avatar_url: userProfile?.avatar_url || null,
+          }
+        : {
+            id: otherProfile?.id || otherUserId,
+            full_name: otherProfile?.full_name || null,
+            avatar_url: otherProfile?.avatar_url || null,
+          },
+    }));
+
+    // Build full conversation response
+    const conversationData: Conversation = {
+      ...conversation,
+      listing: listing ? {
+        id: listing.id,
+        title: listing.title,
+        price: listing.price,
+        status: listing.status,
+        photos: listing.photo_urls || [],
+        game_id: listing.game_id,
+        game_name: listing.game_name,
+      } : undefined,
+      buyer_profile: conversation.buyer_id === user.id
+        ? {
+            id: userProfile?.id || user.id,
+            full_name: userProfile?.full_name || null,
+            avatar_url: userProfile?.avatar_url || null,
+          }
+        : {
+            id: otherProfile?.id || otherUserId,
+            full_name: otherProfile?.full_name || null,
+            avatar_url: otherProfile?.avatar_url || null,
+          },
+      seller_profile: conversation.seller_id === user.id
+        ? {
+            id: userProfile?.id || user.id,
+            full_name: userProfile?.full_name || null,
+            avatar_url: userProfile?.avatar_url || null,
+          }
+        : {
+            id: otherProfile?.id || otherUserId,
+            full_name: otherProfile?.full_name || null,
+            avatar_url: otherProfile?.avatar_url || null,
+          },
+    };
+
+    return NextResponse.json(
+      {
+        conversation: conversationData,
+        messages: messagesWithProfiles,
+      },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error('Get messages error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * POST /api/messages/[id]
+ * Send a new message in a conversation
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const conversationId = params.id;
+    const body: SendMessageRequest = await request.json();
+    const { content } = body;
+
+    // Validate content
+    if (!content || !content.trim()) {
+      return NextResponse.json(
+        { error: 'Message content is required' },
+        { status: 400 }
+      );
+    }
+
+    if (content.length > MESSAGE_CONSTRAINTS.MAX_LENGTH) {
+      return NextResponse.json(
+        { error: `Message cannot exceed ${MESSAGE_CONSTRAINTS.MAX_LENGTH} characters` },
+        { status: 400 }
+      );
+    }
+
+    // Create Supabase client
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            cookieStore.set(name, value, options);
+          },
+          remove(name: string, options: any) {
+            cookieStore.delete(name);
+          },
+        },
+      }
+    );
+
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: 'Not authenticated' },
+        { status: 401 }
+      );
+    }
+
+    // Check rate limit
+    const rateLimitResult = await checkRateLimit('messageCreate', user.id);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: rateLimitResult.error,
+          limit: rateLimitResult.limit,
+          remaining: rateLimitResult.remaining,
+          reset: rateLimitResult.reset,
+        },
+        { status: 429 }
+      );
+    }
+
+    // Verify conversation exists and user is a participant
+    const { data: conversation, error: conversationError } = await supabase
+      .from('conversations')
+      .select('id, buyer_id, seller_id, buyer_archived_at, seller_archived_at')
+      .eq('id', conversationId)
+      .single();
+
+    if (conversationError || !conversation) {
+      return NextResponse.json(
+        { error: 'Conversation not found' },
+        { status: 404 }
+      );
+    }
+
+    // Verify user is a participant
+    if (conversation.buyer_id !== user.id && conversation.seller_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Not authorized to send messages in this conversation' },
+        { status: 403 }
+      );
+    }
+
+    // Unarchive conversation if archived
+    if (conversation.buyer_id === user.id && conversation.buyer_archived_at) {
+      await supabase
+        .from('conversations')
+        .update({ buyer_archived_at: null })
+        .eq('id', conversationId);
+    } else if (conversation.seller_id === user.id && conversation.seller_archived_at) {
+      await supabase
+        .from('conversations')
+        .update({ seller_archived_at: null })
+        .eq('id', conversationId);
+    }
+
+    // Insert message
+    const { data: newMessage, error: messageError } = await supabase
+      .from('messages')
+      .insert({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        content: content.trim(),
+      })
+      .select('*')
+      .single();
+
+    if (messageError) {
+      console.error('Error creating message:', messageError);
+      return NextResponse.json(
+        { error: 'Failed to send message' },
+        { status: 500 }
+      );
+    }
+
+    // Get sender profile
+    const { data: senderProfile } = await supabase
+      .from('user_profiles')
+      .select('id, full_name, avatar_url')
+      .eq('id', user.id)
+      .single();
+
+    const messageWithProfile: Message = {
+      ...newMessage,
+      sender: {
+        id: senderProfile?.id || user.id,
+        full_name: senderProfile?.full_name || null,
+        avatar_url: senderProfile?.avatar_url || null,
+      },
+    };
+
+    return NextResponse.json(
+      { message: messageWithProfile },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    console.error('Send message error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

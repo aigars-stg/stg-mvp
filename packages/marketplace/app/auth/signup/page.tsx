@@ -11,12 +11,15 @@ import { mapAuthError } from '@/lib/auth/errors';
 import { AUTH_ERRORS } from '@/lib/auth/constants';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 import { Turnstile } from '@marsidev/react-turnstile';
+import { CountrySelector } from '@/components/auth/CountrySelector';
+import type { CountryCode } from '@/lib/country-utils';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [country, setCountry] = useState<CountryCode | ''>('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,6 +41,11 @@ export default function SignUpPage() {
     // Validation
     if (!fullName.trim()) {
       setError('Please enter your full name');
+      return;
+    }
+
+    if (!country) {
+      setError('Please select your country');
       return;
     }
 
@@ -82,7 +90,7 @@ export default function SignUpPage() {
         }
       }
 
-      const { error: signUpError } = await signUp(email, password, fullName);
+      const { error: signUpError } = await signUp(email, password, fullName, country);
 
       if (signUpError) {
         setError(mapAuthError(signUpError));
@@ -156,16 +164,9 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
-        {/* Logo */}
+        {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/">
-            <img
-              src="/images/logo_nav.svg"
-              alt="Second Turn Games"
-              className="h-12 mx-auto"
-            />
-          </Link>
-          <h1 className="text-2xl font-bold text-polar-night mt-6 mb-2">
+          <h1 className="text-2xl font-bold text-polar-night mb-2">
             Create your account
           </h1>
           <p className="text-text-secondary">
@@ -245,6 +246,22 @@ export default function SignUpPage() {
                   disabled={loading}
                 />
               </div>
+            </div>
+
+            {/* Country */}
+            <div>
+              <label className="block text-sm font-medium text-polar-night mb-2">
+                Country *
+              </label>
+              <p className="text-xs text-text-secondary mb-3">
+                Select your country for local pickup options
+              </p>
+              <CountrySelector
+                value={country}
+                onChange={setCountry}
+                disabled={loading}
+                required
+              />
             </div>
 
             {/* Email */}

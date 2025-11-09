@@ -78,6 +78,9 @@ export async function DELETE(request: NextRequest) {
     const recoveryDeadline = new Date();
     recoveryDeadline.setDate(recoveryDeadline.getDate() + 14);
 
+    // Define anonymized email pattern (used for both user_profiles and auth.users)
+    const anonymizedEmail = `deleted-${user.id}@internal.local`;
+
     // Step 1: Soft delete user profile and anonymize PII
     const { error: softDeleteError } = await supabase
       .from('user_profiles')
@@ -86,6 +89,7 @@ export async function DELETE(request: NextRequest) {
         deletion_reason: 'user_request',
         recovery_deadline: recoveryDeadline.toISOString(),
         original_email: user.email, // Store for recovery
+        email: anonymizedEmail, // Anonymize email immediately
         full_name: 'Deleted User',
         phone: null,
         avatar_url: null,
@@ -100,7 +104,22 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Step 2: Delete avatar from storage immediately (PII anonymization)
+    // Step 2: Mark all user's listings as 'removed' (hide from public, retain for disputes)
+    const { error: listingsError } = await supabase
+      .from('listings')
+      .update({ status: 'removed' })
+      .eq('seller_id', user.id)
+      .in('status', ['draft', 'active', 'sold']); // Don't update already removed ones
+
+    if (listingsError) {
+      console.error('Error marking listings as removed:', listingsError);
+      return NextResponse.json(
+        { error: 'Failed to hide listings from public view' },
+        { status: 500 }
+      );
+    }
+
+    // Step 3: Delete avatar from storage immediately (PII anonymization)
     try {
       const { data: files } = await supabase
         .storage
@@ -119,7 +138,7 @@ export async function DELETE(request: NextRequest) {
       // Continue even if avatar deletion fails
     }
 
-    // Step 3: Use service role to sign out all devices (revoke refresh tokens)
+    // Step 4: Use service role to sign out all devices (revoke refresh tokens)
     const supabaseAdmin = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -140,32 +159,41 @@ export async function DELETE(request: NextRequest) {
 
     await supabaseAdmin.auth.admin.signOut(user.id, 'global');
 
-    // Step 4: Anonymize email in auth.users to make it reusable immediately
-    // Pattern: deleted-{user_id}@internal.local
-    const anonymizedEmail = `deleted-${user.id}@internal.local`;
-
+    // Step 5: Anonymize email and clear PII in auth.users
     const { error: emailUpdateError } = await supabaseAdmin.auth.admin.updateUserById(
       user.id,
-      { email: anonymizedEmail }
+      {
+        email: anonymizedEmail,
+        user_metadata: {}, // Clear any PII from metadata (name, phone, avatar from OAuth/signup)
+      }
     );
 
     if (emailUpdateError) {
-      console.error('Error anonymizing email:', emailUpdateError);
-      // Don't fail the whole deletion if email update fails
-      // User can still sign in during grace period with original email stored in profile
+      console.error('Error anonymizing auth.users:', emailUpdateError);
+      // Don't fail the whole deletion if auth update fails
+      // Profile email is already anonymized in user_profiles
+      // Original email stored in user_profiles.original_email for recovery
     }
 
-    // Step 5: Sign out current session
+    // Step 6: Sign out current session
     await supabase.auth.signOut();
 
-    // Note: We DO NOT delete:
-    // - auth.users record (retained for 90 days, email anonymized)
-    // - user_profiles record (soft deleted, retained for 90 days)
-    // - listings and transaction history (retained for dispute resolution)
-    // - listing photos (retained for dispute resolution)
+    // Note: PII ANONYMIZATION AND DATA RETENTION
+    // Immediately anonymized/cleared:
+    // - user_profiles: email, full_name, phone, avatar_url
+    // - auth.users: email, user_metadata (OAuth/signup data)
+    // - Storage: avatar photos deleted
+    //
+    // Retained for 90-day compliance period:
+    // - auth.users record (email anonymized)
+    // - user_profiles record (soft deleted, all PII anonymized)
+    // - user_profiles.original_email (for 14-day recovery only)
+    // - listings (marked as 'removed', hidden from public)
+    // - transaction history (for dispute resolution)
+    // - listing photos (for dispute resolution)
     //
     // User CAN recover account within 14 days via recovery endpoint
-    // After 14 days: recovery not possible, but data retained for GDPR
+    // After 14 days: recovery not possible, but data retained for GDPR Article 17.3.e
     // After 90 days: scheduled cleanup job permanently deletes everything
     //
     // Email is immediately reusable for new account signups

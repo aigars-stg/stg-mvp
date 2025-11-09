@@ -19,4 +19,9 @@ export const conditionConfig = {
     variant: 'warning' as const,
     description: 'Significant wear but playable. May have minor damage.',
   },
+  forParts: {
+    label: 'For Parts',
+    variant: 'error' as const,
+    description: 'Incomplete or damaged. Sold as-is for parts/crafts.',
+  },
 };

@@ -45,8 +45,11 @@ export function AccountDeletion() {
         return;
       }
 
-      // Redirect to homepage
+      // Account deleted successfully on server
+      // The API has already signed out the user on the server side
+      // Redirect to homepage and force refresh to clear client-side session
       router.push('/?deleted=true');
+      router.refresh(); // Force refresh to clear auth state
     } catch (err: any) {
       setError(err.message || 'Failed to delete account');
       setLoading(false);
@@ -81,54 +84,56 @@ export function AccountDeletion() {
 
   return (
     <div className="p-6 border-2 border-aurora-red rounded-lg bg-aurora-red/5">
-      <div className="flex items-start gap-3 mb-6">
-        <AlertTriangle className="w-6 h-6 text-aurora-red flex-shrink-0" />
-        <div>
-          <h3 className="text-lg font-bold text-polar-night mb-2">
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle className="w-5 h-5 text-aurora-red flex-shrink-0" />
+          <h3 className="text-lg font-bold text-polar-night">
             Are you absolutely sure?
           </h3>
-          <p className="text-sm text-text-secondary mb-3">
-            When you delete your account, the following happens immediately:
+        </div>
+
+        <p className="text-sm text-text-secondary mb-3">
+          When you delete your account, the following happens immediately:
+        </p>
+        <ul className="text-sm text-text-secondary space-y-1 list-disc list-inside mb-4">
+          <li>Your profile will be hidden from public view</li>
+          <li>All your listings will be removed from public view</li>
+          <li>You'll be signed out from all devices</li>
+          <li>Your personal information (name, email, phone) will be anonymized</li>
+          <li>Your email address becomes available for reuse immediately</li>
+        </ul>
+
+        <div className="p-3 bg-frost-ice/10 rounded border border-frost-ice/30 mb-4">
+          <p className="text-xs font-medium text-polar-night mb-2">
+            <strong>Account Recovery (14-Day Grace Period):</strong>
           </p>
-          <ul className="text-sm text-text-secondary space-y-1 list-disc list-inside mb-4">
-            <li>Your profile will be hidden from public view</li>
-            <li>You'll be signed out from all devices</li>
-            <li>Your personal information (name, email, phone) will be anonymized</li>
-            <li>Your email address becomes available for reuse immediately</li>
-          </ul>
-
-          <div className="p-3 bg-frost-ice/10 rounded border border-frost-ice/30 mb-4">
-            <p className="text-xs font-medium text-polar-night mb-2">
-              <strong>Account Recovery (14-Day Grace Period):</strong>
-            </p>
-            <p className="text-xs text-text-secondary">
-              You can recover your account within <strong>14 days</strong> of deletion. After 14 days,
-              recovery is no longer possible, but your data will be retained for an additional 76 days
-              for legal compliance. Visit <strong>/account/recover</strong> to restore your account.
-            </p>
-          </div>
-
-          <div className="p-3 bg-snow-white rounded border border-border mb-4">
-            <p className="text-xs font-medium text-polar-night mb-2">
-              <strong>Data Retention (GDPR Compliance):</strong>
-            </p>
-            <p className="text-xs text-text-secondary mb-2">
-              For legal compliance and dispute resolution, we retain the following data for <strong>90 days</strong>:
-            </p>
-            <ul className="text-xs text-text-secondary space-y-1 list-disc list-inside ml-2">
-              <li>Transaction and purchase history</li>
-              <li>Listing information (anonymized)</li>
-              <li>Communication records related to sales/purchases</li>
-            </ul>
-            <p className="text-xs text-text-secondary mt-2">
-              After 90 days, all data will be permanently deleted from our systems.
-            </p>
-          </div>
-
-          <p className="text-sm font-semibold text-aurora-red">
-            After the 14-day grace period, this action cannot be undone.
+          <p className="text-xs text-text-secondary">
+            You can recover your account within <strong>14 days</strong> of deletion. After 14 days,
+            recovery is no longer possible, but your data will be retained for an additional 76 days
+            for legal compliance. Visit <strong>/account/recover</strong> to restore your account.
           </p>
         </div>
+
+        <div className="p-3 bg-snow-white rounded border border-border mb-4">
+          <p className="text-xs font-medium text-polar-night mb-2">
+            <strong>Data Retention (GDPR Compliance):</strong>
+          </p>
+          <p className="text-xs text-text-secondary mb-2">
+            For legal compliance and dispute resolution, we retain the following data for <strong>90 days</strong>:
+          </p>
+          <ul className="text-xs text-text-secondary space-y-1 list-disc list-inside ml-2">
+            <li>Transaction and purchase history</li>
+            <li>Listing information (hidden from public, kept for disputes)</li>
+            <li>Communication records related to sales/purchases</li>
+          </ul>
+          <p className="text-xs text-text-secondary mt-2">
+            After 90 days, all data will be permanently deleted from our systems.
+          </p>
+        </div>
+
+        <p className="text-sm font-semibold text-aurora-red">
+          After the 14-day grace period, this action cannot be undone.
+        </p>
       </div>
 
       {error && (
