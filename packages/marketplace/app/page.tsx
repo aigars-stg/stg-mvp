@@ -86,8 +86,8 @@ export default async function HomePage() {
         <FeaturedGames />
       </Suspense>
 
-      {/* How It Works */}
-      <HowItWorks />
+      {/* How It Works - Hide in coming soon mode */}
+      {!isComingSoon && <HowItWorks />}
 
       {/* Final CTA */}
       <FinalCTA isComingSoon={isComingSoon} />
