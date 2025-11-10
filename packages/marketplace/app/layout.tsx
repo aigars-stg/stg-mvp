@@ -8,6 +8,8 @@ import { Button } from '@second-turn/design-system';
 import { useState } from 'react';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 import { UserMenu } from '@/components/layout/UserMenu';
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -151,6 +153,8 @@ export default function RootLayout({
           </div>
         </footer>
         </AuthProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
