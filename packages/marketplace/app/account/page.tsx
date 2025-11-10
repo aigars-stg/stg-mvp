@@ -94,12 +94,58 @@ export default function AccountPage() {
     }
   };
 
-  if (!user || !profile) {
+  // Show loading only while auth is initializing
+  if (!user) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center">
         <div className="text-center">
           <p className="text-text-secondary">Loading...</p>
         </div>
+      </div>
+    );
+  }
+
+  // If user exists but profile doesn't, show error with retry
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center p-4">
+        <Card padding="lg" className="max-w-md w-full">
+          <div className="text-center space-y-4">
+            <AlertCircle className="w-12 h-12 text-aurora-red mx-auto" />
+            <h2 className="text-xl font-semibold text-polar-night">Profile Loading Error</h2>
+            <p className="text-text-secondary">
+              We couldn't load your profile. This might be due to a network issue or a problem with your account data.
+            </p>
+            <div className="text-sm text-text-muted bg-bg-secondary p-3 rounded border border-border">
+              <p className="font-mono">User ID: {user.id.substring(0, 8)}...</p>
+              <p className="font-mono">Email: {user.email}</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <Button
+                onClick={() => window.location.reload()}
+                variant="primary"
+                fullWidth
+                className="sm:w-auto"
+              >
+                Retry
+              </Button>
+              <Button
+                onClick={handleSignOut}
+                variant="secondary"
+                fullWidth
+                className="sm:w-auto"
+              >
+                Sign Out
+              </Button>
+            </div>
+            <p className="text-xs text-text-muted pt-2">
+              If this problem persists, please contact{' '}
+              <a href="mailto:info@secondturn.games" className="text-frost-ice hover:underline">
+                info@secondturn.games
+              </a>
+            </p>
+          </div>
+        </Card>
       </div>
     );
   }

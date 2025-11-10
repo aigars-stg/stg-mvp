@@ -14,6 +14,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Create missing profile (in case trigger didn't fire during signup)
+  const createMissingProfile = useCallback(async (userId: string) => {
+    try {
+      const { data: { user } } = await (supabase as any).auth.getUser();
+
+      if (!user) {
+        console.error('❌ [Auth] Cannot create profile - no user found');
+        return null;
+      }
+
+      console.log('🔧 [Auth] Creating missing profile for user:', user.id);
+
+      const { data, error } = await (supabase as any)
+        .from('user_profiles')
+        .insert({
+          id: userId,
+          full_name: user.user_metadata?.full_name || 'User',
+          email: user.email!,
+          phone: user.user_metadata?.phone || null,
+          country: user.user_metadata?.country || null,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ [Auth] Failed to create profile:', error);
+        return null;
+      }
+
+      console.log('✅ [Auth] Profile created successfully');
+      return data as UserProfile;
+    } catch (error) {
+      console.error('❌ [Auth] Profile creation failed:', error);
+      return null;
+    }
+  }, []);
+
   // Fetch user profile from database
   const fetchProfile = useCallback(async (userId: string) => {
     try {
@@ -24,16 +61,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('❌ [Auth] Profile fetch error:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          userId: userId
+        });
+
+        // If profile doesn't exist (PGRST116), try to create it
+        if (error.code === 'PGRST116') {
+          console.warn('⚠️ [Auth] Profile not found, attempting to create...');
+          return await createMissingProfile(userId);
+        }
+
         return null;
       }
 
+      console.log('✅ [Auth] Profile loaded successfully:', data.id);
       return data as UserProfile;
-    } catch (error) {
-      console.error('Error fetching profile:', error);
+    } catch (error: any) {
+      console.error('❌ [Auth] Profile fetch exception:', error);
       return null;
     }
-  }, []);
+  }, [createMissingProfile]);
 
   // Initialize auth state
   useEffect(() => {
