@@ -16,8 +16,8 @@ export default defineConfig({
       generateBundle(_, bundle) {
         for (const chunk of Object.values(bundle)) {
           if (chunk.type === 'chunk') {
-            // Add 'use client' to Modal and Select components
-            if (chunk.fileName.includes('Modal') || chunk.fileName.includes('Select')) {
+            // Add 'use client' to client-side components
+            if (chunk.fileName.includes('Modal') || chunk.fileName.includes('Select') || chunk.fileName.includes('SlidePanel')) {
               if (!chunk.code.startsWith("'use client'")) {
                 chunk.code = `'use client';\n${chunk.code}`;
               }

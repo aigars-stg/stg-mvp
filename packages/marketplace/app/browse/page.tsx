@@ -1431,6 +1431,24 @@ export default function BrowsePage() {
           )}
         </div>
 
+        {/* BGG Attribution - Above Grid */}
+        {!loading && !error && filteredListings.length > 0 && (
+          <div className="flex justify-end mb-4">
+            <a
+              href="https://boardgamegeek.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block"
+            >
+              <img
+                src="/images/powered-by-bgg-rgb.svg"
+                alt="Powered by BoardGameGeek"
+                className="h-6 opacity-60 hover:opacity-100 transition-opacity"
+              />
+            </a>
+          </div>
+        )}
+
         {/* Loading State - Skeleton Cards */}
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">

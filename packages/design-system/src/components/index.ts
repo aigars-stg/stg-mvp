@@ -6,3 +6,4 @@ export * from './Input';
 export * from './Select';
 export * from './Checkbox';
 export * from './Modal';
+export * from './SlidePanel';

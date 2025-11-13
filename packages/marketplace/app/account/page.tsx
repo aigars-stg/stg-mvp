@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Button, Card } from '@second-turn/design-system';
-import { User, Mail, Phone, CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, Mail, Phone, CheckCircle2, AlertCircle, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { AvatarUpload } from '@/components/auth/AvatarUpload';
@@ -78,6 +78,43 @@ export default function AccountPage() {
     } catch (error) {
       console.error('Failed to sign out:', error);
       setError('Failed to sign out. Please try again.');
+    }
+  };
+
+  const handleDownloadData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+
+      // Call the export API
+      const response = await fetch('/api/auth/export-data');
+
+      if (!response.ok) {
+        throw new Error('Failed to export data');
+      }
+
+      // Get the JSON blob
+      const blob = await response.blob();
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `second-turn-games-data-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      setSuccess('Your data has been downloaded successfully');
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to download data:', error);
+      setError('Failed to download your data. Please try again.');
+      setLoading(false);
     }
   };
 
@@ -375,6 +412,36 @@ export default function AccountPage() {
         <div className="mb-6">
           <LoginActivity />
         </div>
+
+        {/* Privacy & Data Management */}
+        <Card padding="lg" className="mb-6 sm:p-6 p-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night mb-4">Privacy & Data</h2>
+          <div className="space-y-4">
+            <div className="p-4 bg-frost-ice/5 rounded-lg border border-frost-ice/20">
+              <div className="flex items-start gap-3">
+                <Download className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-polar-night mb-1">Download Your Data</h3>
+                  <p className="text-sm text-text-secondary mb-3">
+                    Export all your personal data in JSON format. This includes your profile, listings, messages, and login activity.
+                  </p>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleDownloadData}
+                    disabled={loading}
+                  >
+                    {loading ? 'Preparing Download...' : 'Download My Data'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-text-secondary">
+              This feature complies with GDPR Article 20 (Right to Data Portability). Learn more in our{' '}
+              <a href="/privacy#your-rights" className="text-frost-ice hover:underline">Privacy Policy</a>.
+            </p>
+          </div>
+        </Card>
 
         {/* Danger Zone - Account Deletion */}
         <Card padding="lg" className="sm:p-6 p-4">

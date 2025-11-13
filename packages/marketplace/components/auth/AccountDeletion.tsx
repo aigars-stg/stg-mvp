@@ -59,25 +59,25 @@ export function AccountDeletion() {
   if (!showConfirm) {
     return (
       <div className="p-4 border-2 border-aurora-red/30 rounded-lg bg-aurora-red/5">
-        <div className="flex items-start gap-3 mb-4">
+        <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
-          <div>
-            <h3 className="text-sm font-semibold text-polar-night mb-1">
+          <div className="flex-1">
+            <h3 className="font-semibold text-polar-night mb-1">
               Delete Account
             </h3>
-            <p className="text-xs text-text-secondary">
+            <p className="text-sm text-text-secondary mb-3">
               Permanently delete your account and all associated data. This action cannot be undone.
             </p>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => setShowConfirm(true)}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Account
+            </Button>
           </div>
         </div>
-        <Button
-          variant="danger"
-          size="sm"
-          onClick={() => setShowConfirm(true)}
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          Delete Account
-        </Button>
       </div>
     );
   }

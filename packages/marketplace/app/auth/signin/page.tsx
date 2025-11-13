@@ -207,6 +207,16 @@ export default function SignInPage() {
               </div>
             </div>
 
+            {/* Privacy Notice */}
+            <div className="p-3 bg-frost-ice/5 rounded-lg border border-frost-ice/20">
+              <p className="text-xs text-text-secondary text-center">
+                We log IP addresses and device information for security and fraud prevention.{' '}
+                <Link href="/privacy#security" className="text-frost-ice hover:underline">
+                  Learn more
+                </Link>
+              </p>
+            </div>
+
             {/* Submit Button */}
             <Button
               type="submit"

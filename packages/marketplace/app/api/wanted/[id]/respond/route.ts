@@ -1,0 +1,303 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { checkRateLimit } from '@/lib/ratelimit';
+
+/**
+ * POST /api/wanted/[id]/respond
+ * Seller responds to a wanted listing with "I have this"
+ * Creates a response record and initiates a conversation
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id: wantedListingId } = params;
+    const body = await request.json();
+    const {
+      offered_price,
+      offered_condition,
+      response_notes,
+      photo_urls, // Optional photos from seller
+    } = body;
+
+    console.log(`📝 [Respond to Wanted Listing] Seller responding to wanted listing ${wantedListingId}`);
+
+    // Validation
+    if (!offered_price || parseFloat(offered_price) <= 0) {
+      return NextResponse.json(
+        { error: 'Offered price is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!offered_condition) {
+      return NextResponse.json(
+        { error: 'Offered condition is required' },
+        { status: 400 }
+      );
+    }
+
+    const validConditions = ['likeNew', 'veryGood', 'good', 'acceptable'];
+    if (!validConditions.includes(offered_condition)) {
+      return NextResponse.json(
+        { error: 'Invalid condition value' },
+        { status: 400 }
+      );
+    }
+
+    // Create Supabase client
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
+    );
+
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'You must be signed in to respond to a wanted listing' },
+        { status: 401 }
+      );
+    }
+
+    const sellerId = user.id;
+
+    // Fetch wanted listing
+    const { data: wantedListing, error: fetchError } = await (supabase as any)
+      .from('wanted_listings')
+      .select('*')
+      .eq('id', wantedListingId)
+      .single();
+
+    if (fetchError || !wantedListing) {
+      console.error('❌ [Respond to Wanted Listing] Fetch error:', fetchError);
+      return NextResponse.json(
+        { error: 'Wanted listing not found' },
+        { status: 404 }
+      );
+    }
+
+    // Validate listing is active
+    if (wantedListing.status !== 'active') {
+      return NextResponse.json(
+        { error: `Cannot respond to a ${wantedListing.status} wanted listing` },
+        { status: 400 }
+      );
+    }
+
+    // Prevent buyer from responding to their own wanted listing
+    if (wantedListing.buyer_id === sellerId) {
+      return NextResponse.json(
+        { error: 'Cannot respond to your own wanted listing' },
+        { status: 400 }
+      );
+    }
+
+    // Check if at max responses (10)
+    if (wantedListing.response_count >= 10) {
+      return NextResponse.json(
+        { error: 'This wanted listing has reached the maximum number of responses (10)' },
+        { status: 400 }
+      );
+    }
+
+    // Validate offered condition is acceptable
+    if (!wantedListing.acceptable_conditions.includes(offered_condition)) {
+      return NextResponse.json(
+        { error: `Offered condition '${offered_condition}' is not acceptable for this wanted listing. Acceptable conditions: ${wantedListing.acceptable_conditions.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // Check if seller already responded
+    const { data: existingResponse } = await (supabase as any)
+      .from('wanted_listing_responses')
+      .select('id')
+      .eq('wanted_listing_id', wantedListingId)
+      .eq('seller_id', sellerId)
+      .maybeSingle();
+
+    if (existingResponse) {
+      return NextResponse.json(
+        { error: 'You have already responded to this wanted listing' },
+        { status: 400 }
+      );
+    }
+
+    // Check if users have blocked each other
+    const { data: blockCheck } = await (supabase as any)
+      .from('blocked_users')
+      .select('blocker_id')
+      .or(`and(blocker_id.eq.${sellerId},blocked_id.eq.${wantedListing.buyer_id}),and(blocker_id.eq.${wantedListing.buyer_id},blocked_id.eq.${sellerId})`)
+      .limit(1)
+      .maybeSingle();
+
+    if (blockCheck) {
+      return NextResponse.json(
+        { error: 'Cannot respond to this wanted listing' },
+        { status: 403 }
+      );
+    }
+
+    // Check if conversation already exists between these two users
+    // Note: For wanted listings, the SELLER is the "buyer" in the conversation (initiator)
+    // and the ISO poster is the "seller" (recipient)
+    // We check by buyer/seller IDs only since listing_id is null for wanted listings
+    const { data: existingConversation } = await (supabase as any)
+      .from('conversations')
+      .select('id')
+      .is('listing_id', null) // Only wanted listing conversations
+      .eq('buyer_id', sellerId) // Seller initiates
+      .eq('seller_id', wantedListing.buyer_id) // ISO poster receives
+      .maybeSingle();
+
+    let conversationId: string;
+
+    if (existingConversation) {
+      // Use existing conversation
+      conversationId = existingConversation.id;
+
+      // Unarchive if it was archived
+      await (supabase as any)
+        .from('conversations')
+        .update({
+          buyer_archived_at: null, // Seller's archive status
+          seller_archived_at: null, // Buyer's archive status
+        })
+        .eq('id', conversationId);
+    } else {
+      // Rate limit conversation creation
+      const rateLimitResult = await checkRateLimit('conversationCreate', sellerId);
+      if (!rateLimitResult.success) {
+        return NextResponse.json(
+          {
+            error: rateLimitResult.error,
+            limit: rateLimitResult.limit,
+            remaining: rateLimitResult.remaining,
+            reset: rateLimitResult.reset,
+          },
+          { status: 429 }
+        );
+      }
+
+      // Create new conversation
+      // For wanted listings: seller = buyer (initiator), ISO poster = seller (recipient)
+      // listing_id is null for wanted listings (tracked via wanted_listing_responses instead)
+      const { data: newConversation, error: createError } = await (supabase as any)
+        .from('conversations')
+        .insert({
+          listing_id: null, // NULL for wanted listings
+          buyer_id: sellerId, // Seller initiates
+          seller_id: wantedListing.buyer_id, // ISO poster receives
+        })
+        .select('id')
+        .single();
+
+      if (createError) {
+        console.error('❌ [Respond to Wanted Listing] Error creating conversation:', createError);
+        return NextResponse.json(
+          { error: 'Failed to create conversation', details: createError.message },
+          { status: 500 }
+        );
+      }
+
+      conversationId = newConversation.id;
+    }
+
+    // Determine if this is a quick response (within 2 hours)
+    const createdAt = new Date(wantedListing.created_at);
+    const now = new Date();
+    const hoursDiff = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
+    const isQuickResponse = hoursDiff <= 2;
+
+    // Create response record
+    const { data: response, error: responseError } = await (supabase as any)
+      .from('wanted_listing_responses')
+      .insert({
+        wanted_listing_id: wantedListingId,
+        seller_id: sellerId,
+        conversation_id: conversationId,
+        offered_price: parseFloat(offered_price),
+        offered_condition,
+        response_notes: response_notes || null,
+        is_quick_response: isQuickResponse,
+      })
+      .select()
+      .single();
+
+    if (responseError) {
+      console.error('❌ [Respond to Wanted Listing] Error creating response:', responseError);
+      return NextResponse.json(
+        { error: 'Failed to create response', details: responseError.message },
+        { status: 500 }
+      );
+    }
+
+    // Create initial message with offer details
+    const conditionLabels: Record<string, string> = {
+      likeNew: 'Like New',
+      veryGood: 'Very Good',
+      good: 'Good',
+      acceptable: 'Acceptable',
+    };
+
+    let messageContent = `Hi! I have ${wantedListing.game_name} available.\n\n`;
+    messageContent += `**My Offer:**\n`;
+    messageContent += `• Condition: ${conditionLabels[offered_condition]}\n`;
+    messageContent += `• Price: €${offered_price}\n`;
+
+    if (photo_urls && photo_urls.length > 0) {
+      messageContent += `• Photos: ${photo_urls.length} photo(s) attached\n`;
+    }
+
+    if (response_notes) {
+      messageContent += `\n${response_notes}\n`;
+    }
+
+    messageContent += `\nLet me know if you're interested!`;
+
+    // Send initial message
+    const { error: messageError } = await (supabase as any)
+      .from('messages')
+      .insert({
+        conversation_id: conversationId,
+        sender_id: sellerId,
+        content: messageContent,
+      });
+
+    if (messageError) {
+      console.error('❌ [Respond to Wanted Listing] Error sending initial message:', messageError);
+      // Don't fail the whole request if message fails
+    }
+
+    console.log(`✅ [Respond to Wanted Listing] Successfully created response ${response.id} and conversation ${conversationId}`);
+
+    if (isQuickResponse) {
+      console.log(`⚡ [Respond to Wanted Listing] Quick response badge earned!`);
+    }
+
+    return NextResponse.json({
+      response,
+      conversation_id: conversationId,
+      is_quick_response: isQuickResponse,
+      message: 'Response created successfully',
+    });
+  } catch (error: any) {
+    console.error('❌ [Respond to Wanted Listing] Unexpected error:', error);
+    return NextResponse.json(
+      { error: 'Failed to respond to wanted listing', details: error.message },
+      { status: 500 }
+    );
+  }
+}

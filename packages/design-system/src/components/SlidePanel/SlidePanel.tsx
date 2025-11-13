@@ -3,84 +3,69 @@
 import React, { useEffect, useRef } from 'react';
 import { clsx } from 'clsx';
 
-export interface ModalProps {
+export interface SlidePanelProps {
   /**
-   * Whether the modal is open.
+   * Whether the panel is open.
    */
   open: boolean;
 
   /**
-   * Callback when modal should close (clicking backdrop or pressing Escape).
+   * Callback when panel should close (clicking backdrop or pressing Escape).
    */
   onClose: () => void;
 
   /**
-   * Modal title displayed in the header.
+   * Panel title displayed in the header.
    */
   title?: string;
 
   /**
-   * Modal content.
+   * Panel content.
    */
   children: React.ReactNode;
 
   /**
-   * Optional footer content (typically action buttons).
+   * Panel size variant.
    */
-  footer?: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg';
 
   /**
-   * Modal size variant.
-   */
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-
-  /**
-   * Additional className for the modal container.
+   * Additional className for the panel container.
    */
   className?: string;
 }
 
 /**
- * Modal component - for dialogs, confirmations, and overlays.
+ * SlidePanel component - slides in from the right on desktop, bottom on mobile.
  *
- * Design principles:
- * - 16px border radius for elevated overlays
- * - 300ms animation (slow timing for overlays)
- * - Polar night backdrop at 60% opacity
- * - Focus trap - keyboard navigation stays within modal
- * - Escape key closes modal
+ * Perfect for forms and detailed views with lots of content.
+ *
+ * - Slides from right on desktop (md+)
+ * - Slides from bottom on mobile
+ * - Full height, naturally scrollable
+ * - 300ms animation (slow timing)
  *
  * @example
  * ```tsx
- * <Modal
+ * <SlidePanel
  *   open={isOpen}
  *   onClose={() => setIsOpen(false)}
- *   title="Purchase Confirmation"
- *   footer={
- *     <>
- *       <Button variant="secondary" onClick={() => setIsOpen(false)}>
- *         Cancel
- *       </Button>
- *       <Button variant="primary" onClick={handlePurchase}>
- *         Confirm Purchase
- *       </Button>
- *     </>
- *   }
+ *   title="Offer Details"
+ *   size="md"
  * >
- *   <p>Are you sure you want to purchase Catan for €25.00?</p>
- * </Modal>
+ *   <form>...</form>
+ * </SlidePanel>
  * ```
  */
-export const Modal: React.FC<ModalProps> = ({
+export const SlidePanel: React.FC<SlidePanelProps> = ({
   open,
   onClose,
   title,
   children,
-  footer,
   size = 'md',
   className,
 }) => {
-  const modalRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
   // Store previously focused element and restore on close
@@ -104,7 +89,7 @@ export const Modal: React.FC<ModalProps> = ({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [open, onClose]);
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll when panel is open
   useEffect(() => {
     if (open) {
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -121,12 +106,12 @@ export const Modal: React.FC<ModalProps> = ({
     };
   }, [open]);
 
-  // Trap focus within modal
+  // Trap focus within panel
   useEffect(() => {
-    if (!open || !modalRef.current) return;
+    if (!open || !panelRef.current) return;
 
-    const modal = modalRef.current;
-    const focusableElements = modal.querySelectorAll<HTMLElement>(
+    const panel = panelRef.current;
+    const focusableElements = panel.querySelectorAll<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
 
@@ -149,27 +134,26 @@ export const Modal: React.FC<ModalProps> = ({
       }
     };
 
-    modal.addEventListener('keydown', handleTab);
+    panel.addEventListener('keydown', handleTab);
     firstElement?.focus();
 
-    return () => modal.removeEventListener('keydown', handleTab);
+    return () => panel.removeEventListener('keydown', handleTab);
   }, [open]);
 
   if (!open) return null;
 
   const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
+    sm: 'md:max-w-md',
+    md: 'md:max-w-lg',
+    lg: 'md:max-w-2xl',
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto"
+      className="fixed inset-0 z-50"
       role="dialog"
       aria-modal="true"
-      aria-labelledby={title ? 'modal-title' : undefined}
+      aria-labelledby={title ? 'panel-title' : undefined}
     >
       {/* Backdrop */}
       <div
@@ -178,32 +162,34 @@ export const Modal: React.FC<ModalProps> = ({
         aria-hidden="true"
       />
 
-      {/* Centering wrapper */}
-      <div className="flex min-h-screen items-start justify-center p-4 py-8">
-        {/* Modal container */}
-        <div
-          ref={modalRef}
-          className={clsx(
-            'relative bg-bg-elevated rounded-xl shadow-xl w-full',
-            'transition-all duration-slow',
-            'animate-in fade-in zoom-in-95',
-            sizeClasses[size],
-            className
-          )}
-        >
+      {/* Panel - slides from right on desktop, bottom on mobile */}
+      <div
+        ref={panelRef}
+        className={clsx(
+          'fixed bg-bg-elevated shadow-xl w-full h-full overflow-y-auto',
+          // Mobile: slide from bottom
+          'bottom-0 left-0 right-0 max-h-[90vh] rounded-t-xl',
+          'animate-in slide-in-from-bottom duration-slow',
+          // Desktop: slide from right, full height
+          'md:top-0 md:right-0 md:bottom-0 md:left-auto md:max-h-none md:rounded-none md:rounded-l-xl',
+          'md:animate-in md:slide-in-from-right',
+          sizeClasses[size],
+          className
+        )}
+      >
         {/* Header */}
-        {title && (
-          <div className="flex items-center justify-between p-6 border-b border-border-subtle">
+        <div className="sticky top-0 z-10 bg-bg-elevated border-b border-border-subtle">
+          <div className="flex items-center justify-between p-4 md:p-6">
             <h2
-              id="modal-title"
-              className="text-2xl font-semibold text-polar-night"
+              id="panel-title"
+              className="text-xl md:text-2xl font-semibold text-polar-night"
             >
               {title}
             </h2>
             <button
               onClick={onClose}
               className="text-text-muted hover:text-text transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-frost-ice/30 rounded p-1"
-              aria-label="Close modal"
+              aria-label="Close panel"
             >
               <svg
                 className="w-6 h-6"
@@ -220,23 +206,13 @@ export const Modal: React.FC<ModalProps> = ({
               </svg>
             </button>
           </div>
-        )}
-
-        {/* Content */}
-        <div className="overflow-y-auto max-h-[60vh] p-6">
-          {children}
         </div>
 
-        {/* Footer */}
-        {footer && (
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-border-subtle flex-shrink-0">
-            {footer}
-          </div>
-        )}
-        </div>
+        {/* Content - naturally scrollable */}
+        <div className="p-4 md:p-6">{children}</div>
       </div>
     </div>
   );
 };
 
-Modal.displayName = 'Modal';
+SlidePanel.displayName = 'SlidePanel';

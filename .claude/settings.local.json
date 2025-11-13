@@ -20,7 +20,15 @@
       "Bash(test:*)",
       "Bash(/dev/null)",
       "Bash(npx tsc --noEmit)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(if exist .nextcache rmdir /s /q .nextcache)",
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(node test-bgg-api.mjs:*)",
+      "Bash(rm:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

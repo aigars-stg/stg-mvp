@@ -351,61 +351,12 @@ export default function ListingDetailPage() {
           <div className="space-y-6">
             {/* Title and Price */}
             <div>
-              <h1 className="text-3xl font-bold text-polar-night mb-2">
+              <h1 className="text-3xl font-bold text-polar-night mb-4">
                 {listing.game_name}
                 {listing.edition_year && (
                   <span className="text-text-muted font-normal"> ({listing.edition_year})</span>
                 )}
               </h1>
-
-              {/* Game Metadata */}
-              {(listing.game?.player_count || listing.game?.min_age || listing.game?.playing_time || listing.game?.is_expansion || listing.bgg_game_id) && (
-                <div className="flex flex-wrap gap-4 text-sm text-text-secondary mb-4 items-center">
-                  {listing.game?.player_count && (
-                    <span className="flex items-center gap-1.5">
-                      <Users className="w-4 h-4" />
-                      {listing.game.player_count}
-                    </span>
-                  )}
-                  {listing.game?.min_age && (
-                    <span className="flex items-center gap-1.5">
-                      <Baby className="w-4 h-4" />
-                      {listing.game.min_age}+
-                    </span>
-                  )}
-                  {listing.game?.playing_time && (
-                    <span className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4" />
-                      {listing.game.playing_time}
-                    </span>
-                  )}
-                  {listing.game?.is_expansion && (
-                    <Badge variant="warning" size="sm">
-                      Expansion
-                    </Badge>
-                  )}
-                  {listing.bgg_game_id && (
-                    <a
-                      href={`https://boardgamegeek.com/boardgame/${listing.bgg_game_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-frost-ice hover:text-aurora-blue transition-colors"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      <span>BGG</span>
-                    </a>
-                  )}
-                </div>
-              )}
-
-              {/* Version/Publisher Info */}
-              {(listing.language || listing.publisher) && (
-                <p className="text-sm text-text-secondary">
-                  {listing.language?.replace(/, /g, ' / ')}
-                  {listing.language && listing.publisher && ' • '}
-                  {listing.publisher?.replace(/, /g, ' / ')}
-                </p>
-              )}
 
               <div className="flex items-center gap-4">
                 <span className="text-4xl font-bold text-polar-night">
@@ -416,6 +367,76 @@ export default function ListingDetailPage() {
                 </Badge>
               </div>
             </div>
+
+            {/* Game Information (BGG Data) */}
+            {(listing.game?.player_count || listing.game?.min_age || listing.game?.playing_time || listing.game?.is_expansion || listing.bgg_game_id || listing.language || listing.publisher) && (
+              <Card padding="md">
+                <div className="space-y-3">
+                  {/* Metadata Icons */}
+                  <div className="flex flex-wrap gap-4 text-sm text-text-secondary items-center">
+                    {listing.game?.player_count && (
+                      <span className="flex items-center gap-1.5">
+                        <Users className="w-4 h-4" />
+                        {listing.game.player_count}
+                      </span>
+                    )}
+                    {listing.game?.min_age && (
+                      <span className="flex items-center gap-1.5">
+                        <Baby className="w-4 h-4" />
+                        {listing.game.min_age}+
+                      </span>
+                    )}
+                    {listing.game?.playing_time && (
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="w-4 h-4" />
+                        {listing.game.playing_time}
+                      </span>
+                    )}
+                    {listing.game?.is_expansion && (
+                      <Badge variant="warning" size="sm">
+                        Expansion
+                      </Badge>
+                    )}
+                    {listing.bgg_game_id && (
+                      <a
+                        href={`https://boardgamegeek.com/boardgame/${listing.bgg_game_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-frost-ice hover:text-aurora-blue transition-colors font-medium"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        <span>View on BGG</span>
+                      </a>
+                    )}
+                  </div>
+
+                  {/* Version/Publisher Info */}
+                  {(listing.language || listing.publisher) && (
+                    <p className="text-sm text-text-secondary pt-2 border-t border-border-subtle">
+                      {listing.language?.replace(/, /g, ' / ')}
+                      {listing.language && listing.publisher && ' • '}
+                      {listing.publisher?.replace(/, /g, ' / ')}
+                    </p>
+                  )}
+
+                  {/* Powered by BGG */}
+                  <div className="pt-2 border-t border-border-subtle">
+                    <a
+                      href="https://boardgamegeek.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block"
+                    >
+                      <img
+                        src="/images/powered-by-bgg-rgb.svg"
+                        alt="Powered by BoardGameGeek"
+                        className="h-6 opacity-60 hover:opacity-100 transition-opacity"
+                      />
+                    </a>
+                  </div>
+                </div>
+              </Card>
+            )}
 
             {/* Condition Details */}
             <Card padding="md">

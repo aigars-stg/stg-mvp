@@ -8,8 +8,8 @@ import { Button } from '@second-turn/design-system';
 import { useState } from 'react';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 import { UserMenu } from '@/components/layout/UserMenu';
-import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
+import { ConditionalAnalytics } from '@/components/ConditionalAnalytics';
+import { CookieConsent } from '@/components/CookieConsent';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -50,9 +50,9 @@ export default function RootLayout({
               <Link href="/sell" className="text-text-secondary hover:text-text transition-colors">
                 Sell a Game
               </Link>
-              <a href="http://localhost:3003" target="_blank" rel="noopener noreferrer" className="text-frost-ice hover:text-frost-sky transition-colors text-sm">
-                Design System ↗
-              </a>
+              <Link href="/wanted/new" className="text-text-secondary hover:text-text transition-colors">
+                Post Wanted Game
+              </Link>
               <UserMenu />
             </nav>
 
@@ -90,14 +90,13 @@ export default function RootLayout({
                 >
                   Sell a Game
                 </Link>
-                <a
-                  href="http://localhost:3003"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block py-3 text-frost-ice hover:text-frost-sky transition-colors text-base"
+                <Link
+                  href="/wanted/new"
+                  className="block py-3 text-text-secondary hover:text-text transition-colors text-base"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  Design System ↗
-                </a>
+                  Post Wanted Game
+                </Link>
                 <div className="pt-3">
                   <UserMenu />
                 </div>
@@ -114,7 +113,7 @@ export default function RootLayout({
         {/* Footer */}
         <footer className="bg-bg-elevated border-t border-border-subtle mt-12 sm:mt-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
               <div>
                 <h3 className="font-semibold text-polar-night mb-3 sm:mb-4">Second Turn Games</h3>
                 <p className="text-sm text-text-secondary">
@@ -126,35 +125,39 @@ export default function RootLayout({
                 <ul className="space-y-2 text-sm text-text-secondary">
                   <li><Link href="/browse" className="hover:text-text">Browse Games</Link></li>
                   <li><Link href="/sell" className="hover:text-text">Sell a Game</Link></li>
-                  <li><Link href="/" className="hover:text-text">How It Works</Link></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-medium text-polar-night mb-2 sm:mb-3">Support</h4>
-                <ul className="space-y-2 text-sm text-text-secondary">
-                  <li><Link href="/" className="hover:text-text">Buyer Protection</Link></li>
-                  <li><Link href="/" className="hover:text-text">Seller Guide</Link></li>
-                  <li><Link href="/" className="hover:text-text">Shipping Info</Link></li>
+                  <li><Link href="/wanted/new" className="hover:text-text">Post Wanted Game</Link></li>
                 </ul>
               </div>
               <div>
                 <h4 className="font-medium text-polar-night mb-2 sm:mb-3">Company</h4>
                 <ul className="space-y-2 text-sm text-text-secondary">
-                  <li><Link href="/" className="hover:text-text">About Us</Link></li>
-                  <li><Link href="/" className="hover:text-text">Contact</Link></li>
-                  <li><Link href="/" className="hover:text-text">Terms of Service</Link></li>
-                  <li><a href="http://localhost:3003" target="_blank" rel="noopener noreferrer" className="hover:text-text text-frost-ice">Design System →</a></li>
+                  <li><Link href="/privacy" className="hover:text-text">Privacy Policy</Link></li>
+                  <li><Link href="/terms" className="hover:text-text">Terms of Service</Link></li>
                 </ul>
               </div>
             </div>
-            <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border-subtle text-center text-xs sm:text-sm text-text-secondary">
-              <p>© 2024 Second Turn Games. Built in the Baltics with Nordic minimalism.</p>
+            <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border-subtle text-center text-xs sm:text-sm text-text-secondary space-y-4">
+              <p>© 2025 Second Turn Games. Built in the Baltics with Nordic minimalism.</p>
+              <div className="flex justify-center">
+                <a
+                  href="https://boardgamegeek.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block"
+                >
+                  <img
+                    src="/images/powered-by-bgg-rgb.svg"
+                    alt="Powered by BoardGameGeek"
+                    className="h-5 opacity-60 hover:opacity-100 transition-opacity"
+                  />
+                </a>
+              </div>
             </div>
           </div>
         </footer>
         </AuthProvider>
-        <Analytics />
-        <SpeedInsights />
+        <ConditionalAnalytics />
+        <CookieConsent />
       </body>
     </html>
   );

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { randomUUID } from 'crypto';
 import { cookies } from 'next/headers';
+import sharp from 'sharp';
 
 const BUCKET_NAME = 'listing-photos';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -81,12 +82,27 @@ export async function POST(request: NextRequest) {
 
       // Convert File to ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      const originalBuffer = Buffer.from(arrayBuffer);
 
-      // Upload to Supabase Storage
-      const { data, error } = await (supabase as any).storage
+      // Strip EXIF metadata for privacy (removes GPS location, camera info, timestamps)
+      // Auto-rotate based on EXIF orientation, then remove all metadata
+      let processedBuffer: Buffer;
+      try {
+        processedBuffer = await sharp(originalBuffer)
+          .rotate() // Auto-rotate based on EXIF orientation tag
+          .withMetadata({ exif: {} }) // Remove all EXIF metadata
+          .toBuffer();
+        console.log(`🔒 [Photo Upload] Stripped EXIF metadata from ${file.name}`);
+      } catch (sharpError) {
+        console.error(`⚠️ [Photo Upload] Failed to process image with sharp:`, sharpError);
+        // Fallback: use original buffer if sharp processing fails
+        processedBuffer = originalBuffer;
+      }
+
+      // Upload to Supabase Storage (with EXIF-stripped buffer)
+      const { error } = await (supabase as any).storage
         .from(BUCKET_NAME)
-        .upload(filePath, buffer, {
+        .upload(filePath, processedBuffer, {
           contentType: file.type,
           cacheControl: '3600',
           upsert: false,

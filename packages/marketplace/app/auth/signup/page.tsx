@@ -417,17 +417,27 @@ export default function SignUpPage() {
               {loading ? 'Creating account...' : 'Create Account'}
             </Button>
 
-            {/* Terms */}
-            <p className="text-xs text-text-secondary text-center">
-              By creating an account, you agree to our{' '}
-              <Link href="/terms" className="text-frost-ice hover:underline">
-                Terms of Service
-              </Link>{' '}
-              and{' '}
-              <Link href="/privacy" className="text-frost-ice hover:underline">
-                Privacy Policy
-              </Link>
-            </p>
+            {/* Privacy Notice */}
+            <div className="space-y-3">
+              <p className="text-xs text-text-secondary text-center">
+                By creating an account, you agree to our{' '}
+                <Link href="/terms" className="text-frost-ice hover:underline">
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" className="text-frost-ice hover:underline">
+                  Privacy Policy
+                </Link>
+              </p>
+              <div className="p-3 bg-frost-ice/5 rounded-lg border border-frost-ice/20">
+                <p className="text-xs text-text-secondary text-center">
+                  We log IP addresses and device information for security and fraud prevention.{' '}
+                  <Link href="/privacy#security" className="text-frost-ice hover:underline">
+                    Learn more
+                  </Link>
+                </p>
+              </div>
+            </div>
           </form>
         </Card>
 

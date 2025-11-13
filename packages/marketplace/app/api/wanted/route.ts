@@ -1,0 +1,294 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+
+/**
+ * POST /api/wanted
+ * Creates a new wanted listing (ISO)
+ */
+export async function POST(request: NextRequest) {
+  try {
+    console.log('📝 [Create Wanted Listing] Starting wanted listing creation...');
+
+    // Create Supabase client with cookies for auth
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
+    );
+
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error('❌ [Create Wanted Listing] Unauthorized:', authError);
+      return NextResponse.json(
+        { error: 'You must be signed in to create a wanted listing' },
+        { status: 401 }
+      );
+    }
+
+    console.log(`📝 [Create Wanted Listing] User authenticated: ${user.id}`);
+
+    const body = await request.json();
+    const {
+      selectedGame,
+      minPrice,
+      maxPrice,
+      acceptableConditions,
+      preferredLanguage,
+      locationPreferences,
+      notes,
+    } = body;
+
+    // Validation
+    if (!selectedGame || !selectedGame.id) {
+      return NextResponse.json({ error: 'Game is required' }, { status: 400 });
+    }
+
+    if (!maxPrice || parseFloat(maxPrice) <= 0) {
+      return NextResponse.json({ error: 'Maximum price is required' }, { status: 400 });
+    }
+
+    if (minPrice && parseFloat(minPrice) >= parseFloat(maxPrice)) {
+      return NextResponse.json(
+        { error: 'Minimum price must be less than maximum price' },
+        { status: 400 }
+      );
+    }
+
+    if (!acceptableConditions || acceptableConditions.length === 0) {
+      return NextResponse.json(
+        { error: 'At least one acceptable condition is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate conditions array
+    const validConditions = ['likeNew', 'veryGood', 'good', 'acceptable'];
+    const invalidConditions = acceptableConditions.filter(
+      (c: string) => !validConditions.includes(c)
+    );
+    if (invalidConditions.length > 0) {
+      return NextResponse.json(
+        { error: `Invalid conditions: ${invalidConditions.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // Buyer ID comes from authenticated session
+    const buyerId = user.id;
+
+    // Prepare wanted listing data
+    const wantedListingData = {
+      // Game reference
+      bgg_game_id: selectedGame.id,
+      game_name: selectedGame.name,
+      game_year: selectedGame.yearPublished || null,
+
+      // Budget
+      min_price: minPrice ? parseFloat(minPrice) : null,
+      max_price: parseFloat(maxPrice),
+      currency: 'EUR',
+
+      // Preferences
+      acceptable_conditions: acceptableConditions,
+      preferred_language: preferredLanguage || null,
+      location_preferences: locationPreferences || null,
+      notes: notes || null,
+
+      // Metadata
+      buyer_id: buyerId,
+      status: 'active',
+      // expires_at defaults to NOW() + 30 days (set in DB)
+    };
+
+    console.log('📝 [Create Wanted Listing] Inserting wanted listing:', {
+      game: selectedGame.name,
+      budget: `€${wantedListingData.min_price || 0}-${wantedListingData.max_price}`,
+      conditions: acceptableConditions.length,
+    });
+
+    // Insert wanted listing into database
+    const { data: wantedListing, error: insertError } = await (supabase as any)
+      .from('wanted_listings')
+      .insert(wantedListingData)
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('❌ [Create Wanted Listing] Insert error:', insertError);
+      return NextResponse.json(
+        {
+          error: 'Failed to create wanted listing',
+          details: insertError.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    console.log(`✅ [Create Wanted Listing] Successfully created wanted listing ${wantedListing.id}`);
+
+    return NextResponse.json({
+      wantedListing,
+      message: 'Wanted listing created successfully',
+    });
+  } catch (error: any) {
+    console.error('❌ [Create Wanted Listing] Unexpected error:', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to create wanted listing',
+        details: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * GET /api/wanted
+ *
+ * Fetches wanted listings with optional filtering and pagination:
+ * - ?gameId=123 - Get wanted listings for a specific game
+ * - ?buyerId=xyz - Get wanted listings by a specific buyer
+ * - ?status=active - Filter by status (default: active for public browse)
+ * - ?page=1 - Page number (default: 1)
+ * - ?limit=20 - Items per page (default: 20)
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const gameId = searchParams.get('gameId');
+    const buyerId = searchParams.get('buyerId');
+    const status = searchParams.get('status');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+
+    // Calculate offset for pagination
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    console.log(`📋 [Get Wanted Listings] Fetching wanted listings - gameId: ${gameId}, buyerId: ${buyerId}, status: ${status}, page: ${page}, limit: ${limit}`);
+
+    // Create Supabase client
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
+    );
+
+    // Build query with buyer profile join
+    let query = (supabase as any)
+      .from('wanted_listings')
+      .select(`
+        *,
+        buyer:user_profiles!wanted_listings_buyer_id_fkey (
+          id,
+          full_name,
+          email,
+          avatar_url,
+          country
+        )
+      `, { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    // Apply filters
+    if (gameId) {
+      query = query.eq('bgg_game_id', parseInt(gameId));
+    }
+
+    if (buyerId) {
+      // When filtering by buyer, show all their wanted listings
+      query = query.eq('buyer_id', buyerId);
+    } else if (!status) {
+      // For public browse, only show active wanted listings by default
+      query = query.eq('status', 'active');
+    }
+
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    const { data: wantedListings, error, count } = await query;
+
+    if (error) {
+      console.error('❌ [Get Wanted Listings] Query error:', JSON.stringify(error, null, 2));
+      return NextResponse.json(
+        { error: 'Failed to fetch wanted listings', details: error.message },
+        { status: 500 }
+      );
+    }
+
+    // Fetch game images and metadata for all wanted listings
+    if (wantedListings && wantedListings.length > 0) {
+      const gameIds = [...new Set(wantedListings.map((wl: any) => wl.bgg_game_id))];
+      const { data: games } = await (supabase as any)
+        .from('games')
+        .select('id, thumbnail, image, player_count, min_age, playing_time, is_expansion')
+        .in('id', gameIds);
+
+      if (games) {
+        const gamesMap = new Map(games.map((g: any) => [g.id, g]));
+        wantedListings.forEach((wantedListing: any) => {
+          const game: any = gamesMap.get(wantedListing.bgg_game_id);
+
+          if (game) {
+            wantedListing.game = {
+              thumbnail: game.thumbnail,
+              image: game.image,
+              player_count: game.player_count,
+              min_age: game.min_age,
+              playing_time: game.playing_time,
+              is_expansion: game.is_expansion
+            };
+          } else {
+            wantedListing.game = {
+              thumbnail: null,
+              image: null,
+              player_count: null,
+              min_age: null,
+              playing_time: null,
+              is_expansion: null
+            };
+          }
+        });
+      }
+    }
+
+    const total = count || 0;
+    const hasMore = (from + (wantedListings?.length || 0)) < total;
+
+    console.log(`✅ [Get Wanted Listings] Successfully fetched ${wantedListings?.length || 0} wanted listings (page ${page}, total: ${total}, hasMore: ${hasMore})`);
+
+    return NextResponse.json({
+      wantedListings: wantedListings || [],
+      pagination: {
+        page,
+        limit,
+        total,
+        hasMore,
+      },
+    });
+  } catch (error: any) {
+    console.error('❌ [Get Wanted Listings] Unexpected error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch wanted listings', details: error.message },
+      { status: 500 }
+    );
+  }
+}
