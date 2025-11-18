@@ -28,27 +28,39 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
     const fetchCounts = async () => {
       try {
         // Fetch listings count
-        const listingsRes = await fetch('/api/listings/my-listings');
+        const listingsRes = await fetch(`/api/listings?sellerId=${user.id}`);
         if (listingsRes.ok) {
           const data = await listingsRes.json();
-          setListingsCount(data.listings?.length || 0);
+          const count = data.listings?.length || 0;
+          console.log('[ProfileBottomSheet] My Listings count:', count);
+          setListingsCount(count);
+        } else {
+          console.error('[ProfileBottomSheet] Failed to fetch my listings:', listingsRes.status);
         }
 
         // Fetch saved listings count
         const savedRes = await fetch('/api/saved-listings');
         if (savedRes.ok) {
           const data = await savedRes.json();
-          setSavedCount(data.savedListings?.length || 0);
+          const count = data.savedListings?.length || 0;
+          console.log('[ProfileBottomSheet] Saved Listings count:', count);
+          setSavedCount(count);
+        } else {
+          console.error('[ProfileBottomSheet] Failed to fetch saved listings:', savedRes.status);
         }
 
-        // Fetch wanted listings count
-        const wantedRes = await fetch('/api/wanted/my-wanted');
+        // Fetch wanted games count
+        const wantedRes = await fetch('/api/wanted/my-listings');
         if (wantedRes.ok) {
           const data = await wantedRes.json();
-          setWantedCount(data.wantedListings?.length || 0);
+          const count = data.wantedListings?.length || 0;
+          console.log('[ProfileBottomSheet] Wanted Games count:', count);
+          setWantedCount(count);
+        } else {
+          console.error('[ProfileBottomSheet] Failed to fetch wanted games:', wantedRes.status);
         }
       } catch (error) {
-        console.error('Failed to fetch counts:', error);
+        console.error('[ProfileBottomSheet] Failed to fetch counts:', error);
       }
     };
 
@@ -203,7 +215,7 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                 >
                   <div className="flex items-center gap-3">
                     <Search className="w-5 h-5 text-aurora-orange" />
-                    <span className="text-polar-night font-medium">Wanted Posts</span>
+                    <span className="text-polar-night font-medium">Wanted Games</span>
                   </div>
                   {wantedCount > 0 && (
                     <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">

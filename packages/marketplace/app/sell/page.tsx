@@ -97,6 +97,8 @@ function createPreviewListing(
     status: 'active',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    sold_at: null,
+    removed_at: null,
     game: {
       thumbnail: formData.selectedVersion?.thumbnail || formData.selectedGame?.thumbnail || null,
       // Priority: 1) Version image, 2) Base game image, 3) User photos (in photo_urls)

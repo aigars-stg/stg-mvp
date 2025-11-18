@@ -268,7 +268,7 @@ export default function MyListingsPage() {
               Manage your selling and buying activity
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="hidden sm:flex sm:flex-row gap-2 sm:gap-3">
             <Link href="/wanted/new" className="w-full sm:w-auto">
               <Button variant="secondary" size="lg" fullWidth className="sm:w-auto">
                 <Search className="w-5 h-5 mr-2" />

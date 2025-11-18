@@ -3,17 +3,45 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button, Card, Badge } from '@second-turn/design-system';
-import { Package, MapPin, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Share2, ExternalLink, MessageCircle, Edit, RotateCcw, Trash2, Calendar } from 'lucide-react';
+import { Package, MapPin, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Share2, ExternalLink, MessageCircle, Calendar, RotateCcw } from 'lucide-react';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import Link from 'next/link';
 import { ImageLightbox } from '@/components/listing/ImageLightbox';
+import { ListingActionsMenu } from '@/components/listing/ListingActionsMenu';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { StatusChangeModal } from '@/components/listing/StatusChangeModal';
 import { DeleteConfirmationModal } from '@/components/listing/DeleteConfirmationModal';
 import { NotificationModal } from '@/components/common/NotificationModal';
 import { useIsListingSaved } from '@/lib/hooks/useSavedListings';
+
+// Helper functions for status display
+const getStatusBadgeVariant = (status: string): 'success' | 'warning' | 'default' => {
+  switch (status) {
+    case 'active':
+      return 'success';
+    case 'draft':
+      return 'warning';
+    default:
+      return 'default';
+  }
+};
+
+const formatStatusLabel = (status: string): string => {
+  switch (status) {
+    case 'active':
+      return 'Active';
+    case 'sold':
+      return 'Sold';
+    case 'removed':
+      return 'Removed';
+    case 'draft':
+      return 'Draft';
+    default:
+      return status.charAt(0).toUpperCase() + status.slice(1);
+  }
+};
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -634,64 +662,53 @@ export default function ListingDetailPage() {
 
             {/* Seller Controls or Buy Now Button */}
             {isSeller ? (
-              <>
-                {/* Edit Button */}
-                <Link href={`/sell?edit=${listing.id}`}>
-                  <Button variant="primary" size="lg" fullWidth>
-                    <Edit className="w-5 h-5 mr-2" />
-                    Edit Listing
-                  </Button>
-                </Link>
+              <Card padding="md">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-polar-night">Your Listing</h3>
+                  <ListingActionsMenu
+                    listingId={listing.id}
+                    status={listing.status}
+                    onStatusChange={handleStatusChangeRequest}
+                    onDelete={() => setDeleteModal(true)}
+                    onLinkCopied={() => setShowClipboardSuccess(true)}
+                  />
+                </div>
 
-                {/* Quick Actions */}
-                <div className="grid grid-cols-2 gap-3">
-                  {listing.status === 'active' && (
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      fullWidth
-                      onClick={() => handleStatusChangeRequest('sold')}
-                    >
-                      <Package className="w-5 h-5 mr-2" />
-                      Mark as Sold
-                    </Button>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-secondary">Status</span>
+                    <Badge variant={getStatusBadgeVariant(listing.status)}>
+                      {formatStatusLabel(listing.status)}
+                    </Badge>
+                  </div>
+
+                  {listing.status === 'sold' && listing.sold_at && (
+                    <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
+                      <span className="text-text-secondary">Sold on</span>
+                      <span className="text-polar-night">
+                        {new Date(listing.sold_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </div>
                   )}
-                  {listing.status !== 'active' && listing.status !== 'removed' && (
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      fullWidth
-                      onClick={() => handleStatusChangeRequest('active')}
-                    >
-                      <RotateCcw className="w-5 h-5 mr-2" />
-                      Reactivate
-                    </Button>
-                  )}
-                  {listing.status === 'removed' && (
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      fullWidth
-                      onClick={() => setDeleteModal(true)}
-                      className="bg-aurora-red/10 hover:bg-aurora-red/20 text-aurora-red"
-                    >
-                      <Trash2 className="w-5 h-5 mr-2" />
-                      Delete
-                    </Button>
-                  )}
-                  {listing.status !== 'removed' && (
-                    <Button
-                      variant="ghost"
-                      size="lg"
-                      fullWidth
-                      onClick={() => handleStatusChangeRequest('removed')}
-                    >
-                      <Trash2 className="w-5 h-5 mr-2" />
-                      Remove
-                    </Button>
+
+                  {listing.status === 'removed' && listing.removed_at && (
+                    <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
+                      <span className="text-text-secondary">Removed on</span>
+                      <span className="text-polar-night">
+                        {new Date(listing.removed_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </div>
                   )}
                 </div>
-              </>
+              </Card>
             ) : (
               <>
                 {/* Buy Now Button for buyers */}

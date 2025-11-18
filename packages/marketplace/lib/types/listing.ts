@@ -45,6 +45,8 @@ export interface Listing {
   status: ListingStatus;
   created_at: string;
   updated_at: string;
+  sold_at: string | null;
+  removed_at: string | null;
 }
 
 // Listing with seller profile and game images populated

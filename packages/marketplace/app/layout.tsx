@@ -34,17 +34,10 @@ export default function RootLayout({
         <header className="bg-bg-elevated border-b border-border-subtle sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center">
-              {/* Mobile Logo */}
-              <img
-                src="/images/logo_nav_mobile.svg"
-                alt="Second Turn Games"
-                className="h-8 w-auto md:hidden"
-              />
-              {/* Desktop Logo */}
               <img
                 src="/images/logo_nav.svg"
                 alt="Second Turn Games"
-                className="h-10 w-auto hidden md:block"
+                className="h-8 sm:h-10 w-auto"
               />
             </Link>
 

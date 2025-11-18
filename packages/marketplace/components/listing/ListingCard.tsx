@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Card, Badge, Button } from '@second-turn/design-system';
-import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Edit, Heart } from 'lucide-react';
+import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart } from 'lucide-react';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
@@ -335,15 +335,8 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
               </div>
             )}
 
-            {/* Action Button - Edit for own listings, Buy Now for others */}
-            {isOwnListing ? (
-              <Link href={`/sell?edit=${listing.id}`} className="block" onClick={(e) => e.stopPropagation()}>
-                <Button variant="primary" fullWidth>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Listing
-                </Button>
-              </Link>
-            ) : (
+            {/* Action Button - Only show Buy Now for others' listings */}
+            {!isOwnListing && (
               <Button variant="accent" fullWidth>
                 Buy Now
               </Button>
