@@ -33,6 +33,7 @@ export interface Listing {
   // Pricing
   price: number;
   currency: string;
+  previous_price: number | null; // For showing "Price Reduced" indicators
 
   // Shipping
   shipping_local_pickup: boolean;
@@ -63,6 +64,22 @@ export interface ListingWithSeller extends Listing {
     avatar_url: string | null;
     country: string | null;
   };
+}
+
+// Saved listing
+export interface SavedListing {
+  id: string;
+  user_id: string;
+  listing_id: string;
+  saved_at: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Saved listing with full listing details
+export interface SavedListingWithDetails extends SavedListing {
+  listing: ListingWithSeller;
 }
 
 // Helper functions

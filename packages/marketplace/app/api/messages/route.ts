@@ -3,6 +3,9 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { ConversationListItem } from '@/lib/types/message';
 
+// Force dynamic rendering for this route (uses cookies)
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/messages
  * List all conversations for the authenticated user

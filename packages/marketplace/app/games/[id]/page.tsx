@@ -8,6 +8,7 @@ import { Button, Card, Badge, Checkbox, Modal } from '@second-turn/design-system
 import { mockGames } from '../../../lib/mock-data';
 import { conditionConfig } from '../../../lib/condition-config';
 import { getLanguageFlag } from '../../../lib/bgg-api';
+import { NotificationModal } from '@/components/common/NotificationModal';
 
 interface GameDetailPageProps {
   params: {
@@ -26,6 +27,8 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
+  const [showContactInfoModal, setShowContactInfoModal] = useState(false);
+  const [contactEmail, setContactEmail] = useState('');
   const images = game.images || [game.imageUrl];
   const conditionInfo = conditionConfig[game.condition];
 
@@ -62,9 +65,9 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
 
       {/* Mobile: Stack everything vertically */}
       {/* Desktop: Two-column layout (60% visual, 40% info) */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 mb-8 sm:mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 sm:gap-8 mb-8 sm:mb-12">
         {/* LEFT COLUMN: Images (60% = 3/5 on desktop) */}
-        <div className="lg:col-span-3">
+        <div className="md:col-span-3">
           {/* Main Image */}
           <Card className="mb-3 sm:mb-4 overflow-hidden cursor-pointer" onClick={openLightbox}>
             <div className="relative aspect-square bg-bg-elevated">
@@ -198,7 +201,7 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
         </div>
 
         {/* RIGHT COLUMN: Info & Actions (40% = 2/5 on desktop) */}
-        <div className="lg:col-span-2">
+        <div className="md:col-span-2">
           <Card>
             {/* Title & Designer */}
             <h1 className="text-2xl sm:text-3xl font-bold text-text mb-2">{game.title}</h1>
@@ -541,7 +544,8 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
               variant="primary"
               fullWidth
               onClick={() => {
-                alert('Messaging system coming soon! Contact: ' + game.seller.username + '@email.com');
+                setContactEmail(game.seller.username + '@email.com');
+                setShowContactInfoModal(true);
                 setPurchaseModalOpen(false);
               }}
             >
@@ -561,6 +565,14 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
           </p>
         </div>
       </Modal>
+
+      {/* Contact Info Modal */}
+      <NotificationModal
+        isOpen={showContactInfoModal}
+        onClose={() => setShowContactInfoModal(false)}
+        type="info"
+        message={`Messaging system coming soon! Contact: ${contactEmail}`}
+      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Modal } from '@second-turn/design-system';
 import type { BGGGame } from '@/lib/bgg-api';
 import type { VersionSelection } from '@/lib/bgg-types';
@@ -13,11 +13,15 @@ import { PhotoUpload, type PhotoFile } from '@/components/sell/PhotoUpload';
 import { PricingShippingSimple } from '@/components/sell/PricingShippingSimple';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ListingCard } from '@/components/listing/ListingCard';
-import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, Package, AlertCircle } from 'lucide-react';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import type { ListingWithSeller } from '@/lib/types/listing';
+import { NotificationModal } from '@/components/common/NotificationModal';
+
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
 
 interface ListingFormData {
   selectedGame: BGGGame | null;
@@ -59,10 +63,13 @@ const INITIAL_FORM_DATA: ListingFormData = {
 function createPreviewListing(
   formData: ListingFormData,
   user: any,
-  profile: any
+  profile: any,
+  existingPhotoUrls: string[] = []
 ): ListingWithSeller {
-  // Convert user photos to blob URLs
-  const userPhotoUrls = formData.photos.map(photo => URL.createObjectURL(photo.file));
+  // Convert new photos to blob URLs
+  const newPhotoUrls = formData.photos.map(photo => URL.createObjectURL(photo.file));
+  // Combine existing photos with new photos
+  const allPhotoUrls = [...existingPhotoUrls, ...newPhotoUrls];
 
   return {
     id: 'preview',
@@ -75,13 +82,14 @@ function createPreviewListing(
     publisher: formData.selectedVersion?.publishers?.join(', ') || formData.selectedVersion?.publisher || null,
     language: formData.selectedVersion?.languages?.join(', ') || formData.selectedVersion?.language || null,
     edition_year: formData.selectedVersion?.yearPublished || null,
-    photo_urls: userPhotoUrls, // User photos only
+    photo_urls: allPhotoUrls, // Existing + new photos
     condition: formData.condition || 'good',
     condition_notes: formData.conditionNotes || null,
     all_components_present: formData.allComponentsPresent,
     missing_components: formData.missingComponents || null,
     price: parseFloat(formData.price) || 0,
     currency: 'EUR',
+    previous_price: null, // Preview listings don't have price history
     shipping_local_pickup: formData.shippingOptions.localPickup,
     shipping_parcel_locker: formData.shippingOptions.parcelLocker,
     shipping_notes: formData.shippingNotes || null,
@@ -107,8 +115,9 @@ function createPreviewListing(
   };
 }
 
-export default function SellPage() {
+function SellPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, profile } = useAuth();
   const [formData, setFormData] = useState<ListingFormData>(INITIAL_FORM_DATA);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -121,6 +130,13 @@ export default function SellPage() {
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [publishedListingId, setPublishedListingId] = useState<string | null>(null);
 
+  // Edit mode state
+  const editListingId = searchParams.get('edit');
+  const isEditMode = !!editListingId;
+  const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>([]);
+  const [isLoadingListing, setIsLoadingListing] = useState(false);
+  const [loadError, setLoadError] = useState('');
+
   // Section expansion states
   const [expandedSections, setExpandedSections] = useState({
     game: true,      // Always start with game section open
@@ -128,6 +144,17 @@ export default function SellPage() {
     condition: false,
     pricing: false,
   });
+
+  // Modal states
+  const [validationModal, setValidationModal] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({ isOpen: false, message: '' });
+  const [errorModal, setErrorModal] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({ isOpen: false, message: '' });
+  const [draftSavedModal, setDraftSavedModal] = useState(false);
 
   // Fetch game details with fallback detection when game is selected
   const handleGameSelect = useCallback(async (game: BGGGame | null) => {
@@ -211,6 +238,87 @@ export default function SellPage() {
     setFormData((prev) => ({ ...prev, selectedGameDisplayName: null }));
   }, []);
 
+  // Fetch listing data for edit mode
+  useEffect(() => {
+    async function fetchListingForEdit() {
+      if (!isEditMode || !editListingId || !user) return;
+
+      try {
+        setIsLoadingListing(true);
+        setLoadError('');
+
+        const response = await fetch(`/api/listings/${editListingId}`);
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setLoadError('Listing not found');
+          } else {
+            setLoadError('Failed to load listing');
+          }
+          return;
+        }
+
+        const data = await response.json();
+        const listing = data.listing;
+
+        // Check if user owns this listing
+        if (listing.seller_id !== user.id) {
+          setLoadError('You do not have permission to edit this listing');
+          return;
+        }
+
+        // Pre-populate form with listing data
+        setFormData({
+          selectedGame: {
+            id: listing.bgg_game_id,
+            name: listing.game_name,
+            yearPublished: listing.game_year || listing.edition_year,
+            thumbnail: listing.game?.thumbnail || null,
+            image: listing.game?.image || null,
+            playerCount: listing.game?.player_count || null,
+            minAge: listing.game?.min_age || null,
+            playingTime: listing.game?.playing_time || null,
+            alternateNames: undefined, // Not needed in edit mode
+          },
+          selectedGameDisplayName: listing.game_name,
+          selectedVersion: {
+            id: 0,
+            isManual: true,
+            name: listing.version_name || '',
+            publishers: listing.publisher ? listing.publisher.split(', ') : [],
+            publisher: listing.publisher || '',
+            languages: listing.language ? listing.language.split(', ') : [],
+            language: listing.language || '',
+            yearPublished: listing.edition_year || null,
+            thumbnail: listing.game?.thumbnail || null,
+            image: listing.game?.image || null,
+          },
+          photos: [], // New photos to upload
+          condition: listing.condition,
+          conditionNotes: listing.condition_notes || '',
+          allComponentsPresent: listing.all_components_present,
+          missingComponents: listing.missing_components || '',
+          price: listing.price.toString(),
+          shippingOptions: {
+            localPickup: listing.shipping_local_pickup,
+            parcelLocker: listing.shipping_parcel_locker,
+          },
+          shippingNotes: listing.shipping_notes || '',
+          termsAccepted: true, // Already accepted when originally published
+        });
+
+        setExistingPhotoUrls(listing.photo_urls || []);
+      } catch (err) {
+        console.error('Error fetching listing:', err);
+        setLoadError('Failed to load listing');
+      } finally {
+        setIsLoadingListing(false);
+      }
+    }
+
+    fetchListingForEdit();
+  }, [isEditMode, editListingId, user]);
+
   // Check for saved draft on mount
   useEffect(() => {
     const draft = localStorage.getItem('listing-draft');
@@ -230,7 +338,10 @@ export default function SellPage() {
         setShowDraftBanner(false);
       } catch (error) {
         console.error('Error loading draft:', error);
-        alert('Failed to load draft. Please start fresh.');
+        setErrorModal({
+          isOpen: true,
+          message: 'Failed to load draft. Please start fresh.',
+        });
       }
     }
   };
@@ -352,30 +463,48 @@ export default function SellPage() {
 
   const validateForPublish = (): boolean => {
     if (!isGameSectionComplete) {
-      alert('Please select a game and version');
+      setValidationModal({
+        isOpen: true,
+        message: 'Please select a game and version',
+      });
       return false;
     }
     if (!isConditionSectionComplete) {
-      alert('Please select the condition of your game');
+      setValidationModal({
+        isOpen: true,
+        message: 'Please select the condition of your game',
+      });
       return false;
     }
     if (!isPhotosSectionComplete) {
-      alert('Please upload at least 1 photo for Acceptable condition items');
+      setValidationModal({
+        isOpen: true,
+        message: 'Please upload at least 1 photo for Acceptable condition items',
+      });
       return false;
     }
     if (!isPricingSectionComplete) {
       if (!formData.price || parseFloat(formData.price) <= 0) {
-        alert('Please enter a valid price');
+        setValidationModal({
+          isOpen: true,
+          message: 'Please enter a valid price',
+        });
         return false;
       }
       const hasShipping = Object.values(formData.shippingOptions).some((v) => v);
       if (!hasShipping) {
-        alert('Please select at least one shipping option');
+        setValidationModal({
+          isOpen: true,
+          message: 'Please select at least one shipping option',
+        });
         return false;
       }
     }
     if (!formData.termsAccepted) {
-      alert('Please accept the terms and conditions');
+      setValidationModal({
+        isOpen: true,
+        message: 'Please accept the terms and conditions',
+      });
       return false;
     }
     return true;
@@ -386,21 +515,24 @@ export default function SellPage() {
       return;
     }
 
-    // Check email verification
-    if (!user?.email_confirmed_at) {
-      alert('Please verify your email address before creating a listing. Check your inbox for the verification link.');
+    // Check email verification (only for new listings)
+    if (!isEditMode && !user?.email_confirmed_at) {
+      setValidationModal({
+        isOpen: true,
+        message: 'Please verify your email address before creating a listing. Check your inbox for the verification link.',
+      });
       return;
     }
 
     setIsPublishing(true);
 
     try {
-      console.log('📤 [Sell Page] Starting listing publication...');
+      console.log(`📤 [Sell Page] ${isEditMode ? 'Updating' : 'Creating'} listing...`);
 
-      // Step 1: Upload photos (if any)
-      let photoUrls: string[] = [];
+      // Step 1: Upload new photos (if any)
+      let newPhotoUrls: string[] = [];
       if (formData.photos.length > 0) {
-        console.log(`📸 [Sell Page] Uploading ${formData.photos.length} photos...`);
+        console.log(`📸 [Sell Page] Uploading ${formData.photos.length} new photos...`);
         const photoFormData = new FormData();
         formData.photos.forEach((photoFile) => {
           photoFormData.append('photos', photoFile.file);
@@ -416,59 +548,95 @@ export default function SellPage() {
         }
 
         const uploadData = await uploadResponse.json();
-        photoUrls = uploadData.urls;
-        console.log(`✅ [Sell Page] Uploaded ${photoUrls.length} photos`);
+        newPhotoUrls = uploadData.urls;
+        console.log(`✅ [Sell Page] Uploaded ${newPhotoUrls.length} photos`);
+      }
+
+      // Combine existing and new photo URLs
+      const allPhotoUrls = [...existingPhotoUrls, ...newPhotoUrls];
+
+      if (isEditMode) {
+        // Edit mode: Update existing listing
+        console.log('📝 [Sell Page] Updating listing...');
+
+        const updates = {
+          photo_urls: allPhotoUrls,
+          condition: formData.condition,
+          condition_notes: formData.conditionNotes || null,
+          all_components_present: formData.allComponentsPresent,
+          missing_components: formData.missingComponents || null,
+          price: parseFloat(formData.price),
+          shipping_local_pickup: formData.shippingOptions.localPickup,
+          shipping_parcel_locker: formData.shippingOptions.parcelLocker,
+          shipping_notes: formData.shippingNotes || null,
+        };
+
+        const response = await fetch(`/api/listings/${editListingId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to update listing');
+        }
+
+        console.log(`✅ [Sell Page] Updated listing ${editListingId}`);
+
+        // Redirect to listing detail page
+        router.push(`/listing/${editListingId}`);
       } else {
-        console.log('📸 [Sell Page] No photos to upload');
+        // Create mode: Create new listing
+        console.log('📝 [Sell Page] Creating listing...');
+
+        const listingData = {
+          selectedGame: {
+            ...formData.selectedGame,
+            name: formData.selectedGameDisplayName || formData.selectedGame?.name
+          },
+          selectedVersion: formData.selectedVersion,
+          photoUrls: allPhotoUrls,
+          condition: formData.condition,
+          conditionNotes: formData.conditionNotes,
+          allComponentsPresent: formData.allComponentsPresent,
+          missingComponents: formData.missingComponents,
+          price: formData.price,
+          shippingLocalPickup: formData.shippingOptions.localPickup,
+          shippingParcelLocker: formData.shippingOptions.parcelLocker,
+          shippingNotes: formData.shippingNotes,
+        };
+
+        const listingResponse = await fetch('/api/listings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(listingData),
+        });
+
+        if (!listingResponse.ok) {
+          const errorData = await listingResponse.json();
+          throw new Error(errorData.details || 'Failed to create listing');
+        }
+
+        const { listing } = await listingResponse.json();
+        console.log(`✅ [Sell Page] Created listing ${listing.id}`);
+
+        // Clear draft
+        localStorage.removeItem('listing-draft');
+        setHasDraft(false);
+
+        // Show success modal
+        setPublishedListingId(listing.id);
+        setShowSuccessModal(true);
       }
-
-      // Step 2: Create listing
-      console.log('📝 [Sell Page] Creating listing...');
-
-      // Seller ID will be extracted from auth session on the server
-      const listingData = {
-        selectedGame: {
-          ...formData.selectedGame,
-          name: formData.selectedGameDisplayName || formData.selectedGame?.name // Use chosen display name
-        },
-        selectedVersion: formData.selectedVersion,
-        photoUrls,
-        condition: formData.condition,
-        conditionNotes: formData.conditionNotes,
-        allComponentsPresent: formData.allComponentsPresent,
-        missingComponents: formData.missingComponents,
-        price: formData.price,
-        shippingLocalPickup: formData.shippingOptions.localPickup,
-        shippingParcelLocker: formData.shippingOptions.parcelLocker,
-        shippingNotes: formData.shippingNotes,
-      };
-
-      const listingResponse = await fetch('/api/listings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(listingData),
-      });
-
-      if (!listingResponse.ok) {
-        const errorData = await listingResponse.json();
-        throw new Error(errorData.details || 'Failed to create listing');
-      }
-
-      const { listing } = await listingResponse.json();
-      console.log(`✅ [Sell Page] Created listing ${listing.id}`);
-
-      // Clear draft
-      localStorage.removeItem('listing-draft');
-      setHasDraft(false);
-
-      // Show success modal
-      setPublishedListingId(listing.id);
-      setShowSuccessModal(true);
     } catch (error: any) {
-      console.error('❌ [Sell Page] Error publishing listing:', error);
-      alert(`Failed to publish listing: ${error.message || 'Please try again.'}`);
+      console.error(`❌ [Sell Page] Error ${isEditMode ? 'updating' : 'publishing'} listing:`, error);
+      setErrorModal({
+        isOpen: true,
+        message: `Failed to ${isEditMode ? 'update' : 'publish'} listing: ${error.message || 'Please try again.'}`,
+      });
     } finally {
       setIsPublishing(false);
     }
@@ -477,33 +645,69 @@ export default function SellPage() {
   const handleSaveDraft = () => {
     localStorage.setItem('listing-draft', JSON.stringify({ formData }));
     setHasDraft(true);
-    alert('Draft saved! You can continue later from where you left off.');
+    setDraftSavedModal(true);
   };
+
+  // Show loading state for edit mode
+  if (isEditMode && isLoadingListing) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-frost-ice border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-text-secondary">Loading listing...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state for edit mode
+  if (isEditMode && loadError) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center px-4">
+        <Card padding="lg" className="max-w-md w-full text-center">
+          <AlertCircle className="w-12 h-12 text-aurora-red mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-polar-night mb-2">
+            {loadError}
+          </h2>
+          <p className="text-text-secondary mb-6">
+            {loadError === 'You do not have permission to edit this listing'
+              ? 'You can only edit your own listings.'
+              : 'This listing may have been removed or doesn\'t exist.'}
+          </p>
+          <Button variant="primary" onClick={() => router.push('/my-listings')}>
+            Go to My Listings
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Header with BGG Attribution */}
       <div className="mb-8 flex items-center justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-text">
-          Sell a Game
+          {isEditMode ? 'Edit Listing' : 'Sell a Game'}
         </h1>
-        <a
-          href="https://boardgamegeek.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="opacity-70 hover:opacity-100 transition-opacity flex-shrink-0"
-          title="Game data provided by BoardGameGeek"
-        >
-          <img
-            src="/images/powered-by-bgg-rgb.svg"
-            alt="Powered by BoardGameGeek"
-            className="h-6 sm:h-10 w-auto"
-          />
-        </a>
+        {!isEditMode && (
+          <a
+            href="https://boardgamegeek.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-70 hover:opacity-100 transition-opacity flex-shrink-0"
+            title="Game data provided by BoardGameGeek"
+          >
+            <img
+              src="/images/powered-by-bgg-rgb.svg"
+              alt="Powered by BoardGameGeek"
+              className="h-6 sm:h-10 w-auto"
+            />
+          </a>
+        )}
       </div>
 
-      {/* Email Verification Banner */}
-      <EmailVerificationBanner />
+      {/* Email Verification Banner (only in create mode) */}
+      {!isEditMode && <EmailVerificationBanner />}
 
       {/* Draft Banner */}
       {showDraftBanner && hasDraft && (
@@ -547,104 +751,147 @@ export default function SellPage() {
       <div className="lg:grid lg:grid-cols-12 lg:gap-8">
         {/* Left Column: Form Sections (7 cols on desktop) */}
         <div className="lg:col-span-7 space-y-4">
-        {/* Section 1: Game Selection */}
-        <CollapsibleSection
-          title="Find Your Game"
-          icon={<Dices className="w-6 h-6 text-frost-ice" />}
-          isComplete={isGameSectionComplete}
-          isExpanded={expandedSections.game}
-          onToggle={() => toggleSection('game')}
-          required
-          subtitle={
-            formData.selectedGame
-              ? formData.selectedGameDisplayName || formData.selectedGame.name
-              : "Start typing to search thousands of board games"
-          }
-        >
-          <div className="space-y-6">
-            <GameSearch
-              selectedGame={formData.selectedGame}
-              selectedVersion={formData.selectedVersion}
-              onSelect={handleGameSelect}
-              onChangeVersion={handleChangeVersion}
-              hideChangeVersionButton={true}
-            />
-
-            {/* Only show version selector when game is selected but version is not */}
-            {formData.selectedGame && !formData.selectedVersion && (
-              <>
-                {isLoadingGameDetails ? (
-                  <div className="text-center py-8">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-frost-ice" />
-                    <p className="mt-4 text-text-secondary">Loading game details...</p>
-                  </div>
-                ) : (
-                  <LanguageVersionSelector
-                    game={formData.selectedGame}
-                    selectedVersion={formData.selectedVersion}
-                    onSelect={handleVersionSelect}
-                    fallbackMode={fallbackMode}
-                    fallbackReason={fallbackReason}
-                  />
-                )}
-              </>
-            )}
-
-            {/* Show game name selector AFTER version is selected (smart logic based on language) */}
-            {formData.selectedGame && formData.selectedVersion && !isLoadingGameDetails && (
-              <GameNameSelector
-                primaryName={formData.selectedGame.name}
-                alternateNames={formData.selectedGame.alternateNames || null}
-                selectedName={formData.selectedGameDisplayName || ''}
+        {/* Section 1: Game Selection (or locked game info in edit mode) */}
+        {isEditMode ? (
+          // Locked read-only game info in edit mode
+          <Card padding="lg" className="bg-bg-secondary">
+            <div className="flex items-start gap-4">
+              {formData.selectedGame?.image && (
+                <img
+                  src={formData.selectedGame.image}
+                  alt={formData.selectedGameDisplayName || formData.selectedGame.name}
+                  className="w-24 h-24 rounded-lg object-cover border-2 border-border"
+                />
+              )}
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-polar-night mb-1">
+                  {formData.selectedGameDisplayName || formData.selectedGame?.name}
+                  {formData.selectedVersion?.yearPublished && (
+                    <span className="text-text-muted font-normal"> ({formData.selectedVersion.yearPublished})</span>
+                  )}
+                </h2>
+                <div className="space-y-1 text-sm text-text-secondary">
+                  {formData.selectedVersion?.name && (
+                    <p><strong>Edition:</strong> {formData.selectedVersion.name}</p>
+                  )}
+                  {formData.selectedVersion?.language && (
+                    <p><strong>Language:</strong> {formData.selectedVersion.language}</p>
+                  )}
+                  {formData.selectedVersion?.publisher && (
+                    <p><strong>Publisher:</strong> {formData.selectedVersion.publisher}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-frost-ice/10 rounded-lg border border-frost-ice/20">
+              <p className="text-xs text-frost-ice flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>
+                  Game and edition details cannot be changed. If you need to change the game, please delete this listing and create a new one.
+                </span>
+              </p>
+            </div>
+          </Card>
+        ) : (
+          // Normal game selection in create mode
+          <CollapsibleSection
+            title="Find Your Game"
+            icon={<Dices className="w-6 h-6 text-frost-ice" />}
+            isComplete={isGameSectionComplete}
+            isExpanded={expandedSections.game}
+            onToggle={() => toggleSection('game')}
+            required
+            subtitle={
+              formData.selectedGame
+                ? formData.selectedGameDisplayName || formData.selectedGame.name
+                : "Start typing to search thousands of board games"
+            }
+          >
+            <div className="space-y-6">
+              <GameSearch
+                selectedGame={formData.selectedGame}
                 selectedVersion={formData.selectedVersion}
-                onChange={(name) => setFormData(prev => ({ ...prev, selectedGameDisplayName: name }))}
-                onAutoComplete={() => {
-                  // Auto-completed, can mark section as complete
-                  console.log('[GameNameSelector] Auto-completed with primary name');
-                }}
-                onChangeName={handleChangeName}
-                hideChangeNameButton={true}
+                onSelect={handleGameSelect}
+                onChangeVersion={handleChangeVersion}
+                hideChangeVersionButton={true}
               />
-            )}
 
-            {/* Change Version and Change Name buttons */}
-            {formData.selectedGame && formData.selectedVersion && !isLoadingGameDetails && (() => {
-              // Determine if name selector was shown (same logic as GameNameSelector)
-              const hasAlternateNames = formData.selectedGame.alternateNames && formData.selectedGame.alternateNames.length > 0;
+              {/* Only show version selector when game is selected but version is not */}
+              {formData.selectedGame && !formData.selectedVersion && (
+                <>
+                  {isLoadingGameDetails ? (
+                    <div className="text-center py-8">
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-frost-ice" />
+                      <p className="mt-4 text-text-secondary">Loading game details...</p>
+                    </div>
+                  ) : (
+                    <LanguageVersionSelector
+                      game={formData.selectedGame}
+                      selectedVersion={formData.selectedVersion}
+                      onSelect={handleVersionSelect}
+                      fallbackMode={fallbackMode}
+                      fallbackReason={fallbackReason}
+                    />
+                  )}
+                </>
+              )}
 
-              // Check if ANY language is English (not just the first one)
-              let hasEnglish = false;
-              if (formData.selectedVersion.languages && formData.selectedVersion.languages.length > 0) {
-                hasEnglish = formData.selectedVersion.languages.includes('English');
-              } else if (formData.selectedVersion.language) {
-                hasEnglish = formData.selectedVersion.language === 'English';
-              }
+              {/* Show game name selector AFTER version is selected (smart logic based on language) */}
+              {formData.selectedGame && formData.selectedVersion && !isLoadingGameDetails && (
+                <GameNameSelector
+                  primaryName={formData.selectedGame.name}
+                  alternateNames={formData.selectedGame.alternateNames || null}
+                  selectedName={formData.selectedGameDisplayName || ''}
+                  selectedVersion={formData.selectedVersion}
+                  onChange={(name) => setFormData(prev => ({ ...prev, selectedGameDisplayName: name }))}
+                  onAutoComplete={() => {
+                    // Auto-completed, can mark section as complete
+                    console.log('[GameNameSelector] Auto-completed with primary name');
+                  }}
+                  onChangeName={handleChangeName}
+                  hideChangeNameButton={true}
+                />
+              )}
 
-              const showChangeName = hasAlternateNames && !hasEnglish && formData.selectedGameDisplayName;
+              {/* Change Version and Change Name buttons */}
+              {formData.selectedGame && formData.selectedVersion && !isLoadingGameDetails && (() => {
+                // Determine if name selector was shown (same logic as GameNameSelector)
+                const hasAlternateNames = formData.selectedGame.alternateNames && formData.selectedGame.alternateNames.length > 0;
 
-              return (
-                <div className={`grid grid-cols-1 ${showChangeName ? 'md:grid-cols-2' : ''} gap-3`}>
-                  <button
-                    onClick={handleChangeVersion}
-                    className="px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                    Change Version
-                  </button>
-                  {showChangeName && (
+                // Check if ANY language is English (not just the first one)
+                let hasEnglish = false;
+                if (formData.selectedVersion.languages && formData.selectedVersion.languages.length > 0) {
+                  hasEnglish = formData.selectedVersion.languages.includes('English');
+                } else if (formData.selectedVersion.language) {
+                  hasEnglish = formData.selectedVersion.language === 'English';
+                }
+
+                const showChangeName = hasAlternateNames && !hasEnglish && formData.selectedGameDisplayName;
+
+                return (
+                  <div className={`grid grid-cols-1 ${showChangeName ? 'md:grid-cols-2' : ''} gap-3`}>
                     <button
-                      onClick={handleChangeName}
+                      onClick={handleChangeVersion}
                       className="px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
                     >
                       <RefreshCw className="w-4 h-4" />
-                      Change Name
+                      Change Version
                     </button>
-                  )}
-                </div>
-              );
-            })()}
-          </div>
-        </CollapsibleSection>
+                    {showChangeName && (
+                      <button
+                        onClick={handleChangeName}
+                        className="px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        Change Name
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </CollapsibleSection>
+        )}
 
         {/* Section 2: Condition */}
         <CollapsibleSection
@@ -681,6 +928,8 @@ export default function SellPage() {
           <PhotoUpload
             photos={formData.photos}
             onPhotosChange={(photos) => setFormData((prev) => ({ ...prev, photos }))}
+            existingPhotoUrls={existingPhotoUrls}
+            onExistingPhotosChange={setExistingPhotoUrls}
             maxPhotos={8}
             condition={formData.condition}
           />
@@ -737,7 +986,9 @@ export default function SellPage() {
               size="lg"
               fullWidth
             >
-              {isPublishing ? 'Publishing...' : 'Publish Listing'}
+              {isPublishing
+                ? (isEditMode ? 'Saving...' : 'Publishing...')
+                : (isEditMode ? 'Save Changes' : 'Publish Listing')}
             </Button>
 
             <Button
@@ -749,33 +1000,40 @@ export default function SellPage() {
               Preview
             </Button>
 
-            <Button
-              variant="ghost"
-              onClick={handleSaveDraft}
-              size="lg"
-              fullWidth
-            >
-              Save Draft
-            </Button>
+            {!isEditMode && (
+              <Button
+                variant="ghost"
+                onClick={handleSaveDraft}
+                size="lg"
+                fullWidth
+              >
+                Save Draft
+              </Button>
+            )}
           </div>
 
           {/* Desktop: Regular button row */}
           <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-4">
-            <Button
-              variant="ghost"
-              onClick={handleSaveDraft}
-              size="lg"
-            >
-              Save Draft
-            </Button>
+            {!isEditMode && (
+              <Button
+                variant="ghost"
+                onClick={handleSaveDraft}
+                size="lg"
+              >
+                Save Draft
+              </Button>
+            )}
 
             <Button
               variant="primary"
               onClick={handlePublish}
               disabled={!canPublish() || isPublishing}
               size="lg"
+              className={isEditMode ? 'ml-auto' : ''}
             >
-              {isPublishing ? 'Publishing...' : 'Publish Listing'}
+              {isPublishing
+                ? (isEditMode ? 'Saving...' : 'Publishing...')
+                : (isEditMode ? 'Save Changes' : 'Publish Listing')}
             </Button>
           </div>
         </div>
@@ -792,8 +1050,9 @@ export default function SellPage() {
                 <span className="text-sm font-semibold text-polar-night">Live Preview</span>
               </div>
               <ListingCard
-                listing={createPreviewListing(formData, user, profile)}
+                listing={createPreviewListing(formData, user, profile, existingPhotoUrls)}
                 showSeller={true}
+                isOwnListing={true}
               />
             </div>
           </div>
@@ -866,11 +1125,51 @@ export default function SellPage() {
       >
         <div className="max-h-[70vh] overflow-y-auto pb-4">
           <ListingCard
-            listing={createPreviewListing(formData, user, profile)}
+            listing={createPreviewListing(formData, user, profile, existingPhotoUrls)}
             showSeller={true}
+            isOwnListing={true}
           />
         </div>
       </Modal>
+
+      {/* Validation Modal */}
+      <NotificationModal
+        isOpen={validationModal.isOpen}
+        onClose={() => setValidationModal({ isOpen: false, message: '' })}
+        type="warning"
+        message={validationModal.message}
+      />
+
+      {/* Error Modal */}
+      <NotificationModal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        type="error"
+        message={errorModal.message}
+      />
+
+      {/* Draft Saved Modal */}
+      <NotificationModal
+        isOpen={draftSavedModal}
+        onClose={() => setDraftSavedModal(false)}
+        type="success"
+        message="Draft saved! You can continue later from where you left off."
+      />
     </div>
+  );
+}
+
+export default function SellPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-frost-ice border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-text-secondary">Loading...</p>
+        </div>
+      </div>
+    }>
+      <SellPageContent />
+    </Suspense>
   );
 }

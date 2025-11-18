@@ -4,10 +4,9 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Link from 'next/link';
-import { Button } from '@second-turn/design-system';
-import { useState } from 'react';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 import { UserMenu } from '@/components/layout/UserMenu';
+import { BottomNav } from '@/components/layout/BottomNav';
 import { ConditionalAnalytics } from '@/components/ConditionalAnalytics';
 import { CookieConsent } from '@/components/CookieConsent';
 
@@ -18,10 +17,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+        <meta name="theme-color" content="#D08770" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Second Turn" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body className={inter.className}>
         <AuthProvider>
         {/* Header */}
@@ -45,7 +51,7 @@ export default function RootLayout({
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-6">
               <Link href="/browse" className="text-text-secondary hover:text-text transition-colors">
-                Browse Games
+                Browse
               </Link>
               <Link href="/sell" className="text-text-secondary hover:text-text transition-colors">
                 Sell a Game
@@ -55,63 +61,16 @@ export default function RootLayout({
               </Link>
               <UserMenu />
             </nav>
-
-            {/* Mobile Navigation Button */}
-            <button
-              className="md:hidden p-2 text-text hover:text-frost-ice transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
           </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden border-t border-border-subtle bg-bg-elevated">
-              <nav className="px-4 py-4 space-y-3">
-                <Link
-                  href="/browse"
-                  className="block py-3 text-text-secondary hover:text-text transition-colors text-base"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Browse Games
-                </Link>
-                <Link
-                  href="/sell"
-                  className="block py-3 text-text-secondary hover:text-text transition-colors text-base"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Sell a Game
-                </Link>
-                <Link
-                  href="/wanted/new"
-                  className="block py-3 text-text-secondary hover:text-text transition-colors text-base"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Post Wanted Game
-                </Link>
-                <div className="pt-3">
-                  <UserMenu />
-                </div>
-              </nav>
-            </div>
-          )}
         </header>
 
         {/* Main Content */}
-        <main className="min-h-screen bg-bg">
+        <main className="min-h-screen bg-bg pb-20 lg:pb-0">
           {children}
         </main>
 
         {/* Footer */}
-        <footer className="bg-bg-elevated border-t border-border-subtle mt-12 sm:mt-24">
+        <footer className="bg-bg-elevated border-t border-border-subtle mt-12 sm:mt-24 pb-20 lg:pb-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
               <div>
@@ -123,7 +82,7 @@ export default function RootLayout({
               <div>
                 <h4 className="font-medium text-polar-night mb-2 sm:mb-3">Marketplace</h4>
                 <ul className="space-y-2 text-sm text-text-secondary">
-                  <li><Link href="/browse" className="hover:text-text">Browse Games</Link></li>
+                  <li><Link href="/browse" className="hover:text-text">Browse Marketplace</Link></li>
                   <li><Link href="/sell" className="hover:text-text">Sell a Game</Link></li>
                   <li><Link href="/wanted/new" className="hover:text-text">Post Wanted Game</Link></li>
                 </ul>
@@ -155,6 +114,9 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+
+        {/* Mobile Bottom Navigation */}
+        <BottomNav />
         </AuthProvider>
         <ConditionalAnalytics />
         <CookieConsent />

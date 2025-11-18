@@ -3,13 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button, Card, Badge } from '@second-turn/design-system';
-import { Package, MapPin, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Share2, ExternalLink, MessageCircle } from 'lucide-react';
+import { Package, MapPin, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Share2, ExternalLink, MessageCircle, Edit, RotateCcw, Trash2, Calendar } from 'lucide-react';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import Link from 'next/link';
 import { ImageLightbox } from '@/components/listing/ImageLightbox';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { StatusChangeModal } from '@/components/listing/StatusChangeModal';
+import { DeleteConfirmationModal } from '@/components/listing/DeleteConfirmationModal';
+import { NotificationModal } from '@/components/common/NotificationModal';
+import { useIsListingSaved } from '@/lib/hooks/useSavedListings';
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -26,6 +30,30 @@ export default function ListingDetailPage() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [contactingSellerLoading, setContactingSellerLoading] = useState(false);
   const minSwipeDistance = 50;
+
+  // Modal state for seller actions
+  const [statusChangeModal, setStatusChangeModal] = useState<{
+    isOpen: boolean;
+    newStatus: 'draft' | 'active' | 'sold' | 'removed' | null;
+  }>({ isOpen: false, newStatus: null });
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Error modal state
+  const [errorModal, setErrorModal] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({ isOpen: false, message: '' });
+
+  // Clipboard success modal state
+  const [showClipboardSuccess, setShowClipboardSuccess] = useState(false);
+
+  // Saved listing state
+  const { isSaved, isLoading: isSaveLoading, toggleSave } = useIsListingSaved(listingId);
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  // Check if current user is the seller
+  const isSeller = user && listing && listing.seller_id === user.id;
 
   useEffect(() => {
     async function fetchListing() {
@@ -92,9 +120,100 @@ export default function ListingDetailPage() {
       router.push(`/messages/${data.conversation_id}`);
     } catch (error) {
       console.error('Failed to contact seller:', error);
-      alert('Failed to start conversation. Please try again.');
+      setErrorModal({
+        isOpen: true,
+        message: 'Failed to start conversation. Please try again.',
+      });
     } finally {
       setContactingSellerLoading(false);
+    }
+  };
+
+  const handleSaveToggle = async () => {
+    if (!user) {
+      router.push(`/auth/signin?redirect=/listing/${listingId}`);
+      return;
+    }
+
+    try {
+      setSaveLoading(true);
+      await toggleSave();
+    } catch (error) {
+      console.error('Failed to toggle save:', error);
+      setErrorModal({
+        isOpen: true,
+        message: 'Failed to save listing. Please try again.',
+      });
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const handleStatusChangeRequest = (newStatus: 'draft' | 'active' | 'sold' | 'removed') => {
+    setStatusChangeModal({ isOpen: true, newStatus });
+  };
+
+  const handleStatusChange = async () => {
+    if (!listing || !statusChangeModal.newStatus) return;
+
+    try {
+      setActionLoading(true);
+      const response = await fetch(`/api/listings/${listing.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: statusChangeModal.newStatus }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update status');
+      }
+
+      // Update local state
+      setListing({ ...listing, status: statusChangeModal.newStatus });
+      setStatusChangeModal({ isOpen: false, newStatus: null });
+
+      // If removed, redirect to my-listings
+      if (statusChangeModal.newStatus === 'removed') {
+        router.push('/my-listings');
+      }
+    } catch (err: any) {
+      console.error('Error updating status:', err);
+      setErrorModal({
+        isOpen: true,
+        message: err.message || 'Failed to update listing status',
+      });
+      setStatusChangeModal({ isOpen: false, newStatus: null });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!listing) return;
+
+    try {
+      setActionLoading(true);
+      const response = await fetch(`/api/listings/${listing.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete listing');
+      }
+
+      // Redirect to my-listings after deletion
+      router.push('/my-listings');
+    } catch (err: any) {
+      console.error('Error deleting listing:', err);
+      setErrorModal({
+        isOpen: true,
+        message: err.message || 'Failed to delete listing',
+      });
+      setDeleteModal(false);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -160,7 +279,7 @@ export default function ListingDetailPage() {
           <ChevronLeft className="w-4 h-4 mr-1.5" />
           Back
         </Button>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Left Column - Photo Gallery */}
           <div>
             {(() => {
@@ -172,7 +291,7 @@ export default function ListingDetailPage() {
               if (allImages.length === 0) {
                 return (
                   <Card padding="none" className="overflow-hidden">
-                    <div className="relative bg-polar-night/5 flex items-center justify-center min-h-[500px]">
+                    <div className="relative bg-polar-night/5 flex items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[500px]">
                       <Package className="w-24 h-24 text-text-muted" />
                     </div>
                   </Card>
@@ -236,7 +355,7 @@ export default function ListingDetailPage() {
                     <div className="flex-1">
                       <Card padding="none" className="overflow-hidden">
                         <div
-                          className="relative bg-polar-night/5 flex items-center justify-center group cursor-pointer min-h-[500px]"
+                          className="relative bg-polar-night/5 flex items-center justify-center group cursor-pointer min-h-[300px] sm:min-h-[400px] lg:min-h-[500px]"
                           onTouchStart={allImages.length > 1 ? onTouchStart : undefined}
                           onTouchMove={allImages.length > 1 ? onTouchMove : undefined}
                           onTouchEnd={allImages.length > 1 ? onTouchEnd : undefined}
@@ -268,7 +387,7 @@ export default function ListingDetailPage() {
                                   e.stopPropagation();
                                   setCurrentImageIndex((currentImageIndex - 1 + allImages.length) % allImages.length);
                                 }}
-                                className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-snow-white/90 hover:bg-snow-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-snow-white/90 hover:bg-snow-white flex items-center justify-center shadow-md sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                                 aria-label="Previous image"
                               >
                                 <ChevronLeft className="w-6 h-6 text-polar-night" />
@@ -278,7 +397,7 @@ export default function ListingDetailPage() {
                                   e.stopPropagation();
                                   setCurrentImageIndex((currentImageIndex + 1) % allImages.length);
                                 }}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-snow-white/90 hover:bg-snow-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-snow-white/90 hover:bg-snow-white flex items-center justify-center shadow-md sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                                 aria-label="Next image"
                               >
                                 <ChevronRight className="w-6 h-6 text-polar-night" />
@@ -351,20 +470,33 @@ export default function ListingDetailPage() {
           <div className="space-y-6">
             {/* Title and Price */}
             <div>
-              <h1 className="text-3xl font-bold text-polar-night mb-4">
+              <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-4">
                 {listing.game_name}
                 {listing.edition_year && (
                   <span className="text-text-muted font-normal"> ({listing.edition_year})</span>
                 )}
               </h1>
 
-              <div className="flex items-center gap-4">
-                <span className="text-4xl font-bold text-polar-night">
-                  €{listing.price.toFixed(2)}
-                </span>
-                <Badge variant={getConditionVariant()} size="lg">
-                  {conditionLabel}
-                </Badge>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+                  <span className="text-3xl sm:text-4xl font-bold text-polar-night">
+                    €{listing.price.toFixed(2)}
+                  </span>
+                  {listing.previous_price && listing.previous_price > listing.price && (
+                    <span className="text-xl sm:text-2xl text-text-muted line-through">
+                      €{listing.previous_price.toFixed(2)}
+                    </span>
+                  )}
+                  <Badge variant={getConditionVariant()} size="lg">
+                    {conditionLabel}
+                  </Badge>
+                </div>
+                {/* Savings indicator */}
+                {listing.previous_price && listing.previous_price > listing.price && (
+                  <div className="text-base font-medium text-aurora-green">
+                    Save €{(listing.previous_price - listing.price).toFixed(2)} ({Math.round((1 - listing.price / listing.previous_price) * 100)}% off)
+                  </div>
+                )}
               </div>
             </div>
 
@@ -500,29 +632,99 @@ export default function ListingDetailPage() {
               </div>
             </Card>
 
-            {/* Buy Now Button */}
-            <Button variant="accent" size="lg" fullWidth>
-              Buy Now
-            </Button>
+            {/* Seller Controls or Buy Now Button */}
+            {isSeller ? (
+              <>
+                {/* Edit Button */}
+                <Link href={`/sell?edit=${listing.id}`}>
+                  <Button variant="primary" size="lg" fullWidth>
+                    <Edit className="w-5 h-5 mr-2" />
+                    Edit Listing
+                  </Button>
+                </Link>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="secondary" size="lg" fullWidth>
-                <Heart className="w-5 h-5 mr-2" />
-                Save
-              </Button>
-              <Button
-                variant="ghost"
-                size="lg"
-                fullWidth
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert('Link copied to clipboard!');
-                }}
-              >
-                <Share2 className="w-5 h-5 mr-2" />
-                Share
-              </Button>
-            </div>
+                {/* Quick Actions */}
+                <div className="grid grid-cols-2 gap-3">
+                  {listing.status === 'active' && (
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      fullWidth
+                      onClick={() => handleStatusChangeRequest('sold')}
+                    >
+                      <Package className="w-5 h-5 mr-2" />
+                      Mark as Sold
+                    </Button>
+                  )}
+                  {listing.status !== 'active' && listing.status !== 'removed' && (
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      fullWidth
+                      onClick={() => handleStatusChangeRequest('active')}
+                    >
+                      <RotateCcw className="w-5 h-5 mr-2" />
+                      Reactivate
+                    </Button>
+                  )}
+                  {listing.status === 'removed' && (
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      fullWidth
+                      onClick={() => setDeleteModal(true)}
+                      className="bg-aurora-red/10 hover:bg-aurora-red/20 text-aurora-red"
+                    >
+                      <Trash2 className="w-5 h-5 mr-2" />
+                      Delete
+                    </Button>
+                  )}
+                  {listing.status !== 'removed' && (
+                    <Button
+                      variant="ghost"
+                      size="lg"
+                      fullWidth
+                      onClick={() => handleStatusChangeRequest('removed')}
+                    >
+                      <Trash2 className="w-5 h-5 mr-2" />
+                      Remove
+                    </Button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Buy Now Button for buyers */}
+                <Button variant="accent" size="lg" fullWidth>
+                  Buy Now
+                </Button>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant={isSaved ? "accent" : "secondary"}
+                    size="lg"
+                    fullWidth
+                    onClick={handleSaveToggle}
+                    disabled={saveLoading || isSaveLoading}
+                  >
+                    <Heart className={`w-5 h-5 mr-2 ${isSaved ? 'fill-current' : ''}`} />
+                    {saveLoading ? 'Saving...' : isSaved ? 'Saved' : 'Save'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    fullWidth
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      setShowClipboardSuccess(true);
+                    }}
+                  >
+                    <Share2 className="w-5 h-5 mr-2" />
+                    Share
+                  </Button>
+                </div>
+              </>
+            )}
 
             {/* Seller Info */}
             <Card padding="md">
@@ -595,9 +797,105 @@ export default function ListingDetailPage() {
                 </>
               )}
             </Card>
+
+            {/* Listing Information */}
+            <Card padding="md">
+              <h3 className="font-semibold text-polar-night mb-3">Listing Information</h3>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                  <span>
+                    Posted {new Date(listing.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+
+                {/* Only show updated date if it's different from created date */}
+                {(() => {
+                  const createdDate = new Date(listing.created_at).toDateString();
+                  const updatedDate = new Date(listing.updated_at).toDateString();
+
+                  if (createdDate !== updatedDate) {
+                    return (
+                      <div className="flex items-center gap-2 text-text-secondary">
+                        <RotateCcw className="w-4 h-4 flex-shrink-0" />
+                        <span>
+                          Last updated {new Date(listing.updated_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+            </Card>
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      {listing && statusChangeModal.newStatus && (
+        <StatusChangeModal
+          isOpen={statusChangeModal.isOpen}
+          onClose={() => setStatusChangeModal({ isOpen: false, newStatus: null })}
+          onConfirm={handleStatusChange}
+          currentStatus={listing.status}
+          newStatus={statusChangeModal.newStatus}
+          gameName={listing.game_name}
+          isLoading={actionLoading}
+        />
+      )}
+
+      {listing && (
+        <DeleteConfirmationModal
+          isOpen={deleteModal}
+          onClose={() => setDeleteModal(false)}
+          onConfirm={handleDelete}
+          gameName={listing.game_name}
+          isLoading={actionLoading}
+        />
+      )}
+
+      {/* Error Modal */}
+      <NotificationModal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        type="error"
+        message={errorModal.message}
+      />
+
+      {/* Clipboard Success Modal */}
+      <NotificationModal
+        isOpen={showClipboardSuccess}
+        onClose={() => setShowClipboardSuccess(false)}
+        type="success"
+        message="Link copied to clipboard!"
+      />
+
+      {/* Image Lightbox */}
+      {listing && isLightboxOpen && (() => {
+        const allImages = [
+          ...(listing.game?.image ? [listing.game.image] : []),
+          ...listing.photo_urls,
+        ].filter(Boolean);
+
+        return (
+          <ImageLightbox
+            isOpen={isLightboxOpen}
+            images={allImages}
+            initialIndex={currentImageIndex}
+            onClose={() => setIsLightboxOpen(false)}
+          />
+        );
+      })()}
     </div>
   );
 }

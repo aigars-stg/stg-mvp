@@ -6,6 +6,8 @@ import { Button, Input, Select, Checkbox, Card, Badge, Modal } from '@second-tur
 import { searchBGGGames, getBGGGameById, type BGGGame } from '../../../lib/bgg-games';
 import { conditionConfig } from '../../../lib/condition-config';
 import { mockGames } from '../../../lib/mock-data';
+import { NotificationModal } from '@/components/common/NotificationModal';
+import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 
 const STEPS = [
   { id: 1, name: 'Game Selection', shortName: 'Game', mobileShort: 'Game' },
@@ -74,6 +76,11 @@ export default function NewListingPage() {
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
 
+  // Modal states
+  const [showLoadDraftConfirm, setShowLoadDraftConfirm] = useState(false);
+  const [showDraftSavedModal, setShowDraftSavedModal] = useState(false);
+  const [savedDraftData, setSavedDraftData] = useState<any>(null);
+
   const [formData, setFormData] = useState<ListingFormData>({
     selectedGame: null,
     manualEntry: {
@@ -117,17 +124,30 @@ export default function NewListingPage() {
       try {
         const parsed = JSON.parse(savedDraft);
         // Ask user if they want to restore
-        if (confirm('You have a saved draft. Would you like to continue where you left off?')) {
-          setFormData(parsed.formData);
-          setCurrentStep(parsed.currentStep);
-        } else {
-          localStorage.removeItem('listing-draft');
-        }
+        setSavedDraftData(parsed);
+        setShowLoadDraftConfirm(true);
       } catch (e) {
         console.error('Failed to parse saved draft:', e);
       }
     }
   }, []);
+
+  // Handler to load draft
+  const handleLoadDraft = () => {
+    if (savedDraftData) {
+      setFormData(savedDraftData.formData);
+      setCurrentStep(savedDraftData.currentStep);
+    }
+    setShowLoadDraftConfirm(false);
+    setSavedDraftData(null);
+  };
+
+  // Handler to dismiss draft
+  const handleDismissDraft = () => {
+    localStorage.removeItem('listing-draft');
+    setShowLoadDraftConfirm(false);
+    setSavedDraftData(null);
+  };
 
   // Search BGG games
   useEffect(() => {
@@ -196,7 +216,7 @@ export default function NewListingPage() {
 
   const saveDraft = () => {
     localStorage.setItem('listing-draft', JSON.stringify({ formData, currentStep }));
-    alert('Draft saved! You can return later to continue.');
+    setShowDraftSavedModal(true);
   };
 
   const canContinue = () => {
@@ -1068,6 +1088,25 @@ export default function NewListingPage() {
           </div>
         </div>
       </Modal>
+
+      {/* Load Draft Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showLoadDraftConfirm}
+        onClose={handleDismissDraft}
+        onConfirm={handleLoadDraft}
+        title="Restore Draft"
+        message="You have a saved draft. Would you like to continue where you left off?"
+        confirmText="Continue"
+        cancelText="Start Fresh"
+      />
+
+      {/* Draft Saved Modal */}
+      <NotificationModal
+        isOpen={showDraftSavedModal}
+        onClose={() => setShowDraftSavedModal(false)}
+        type="success"
+        message="Draft saved! You can return later to continue."
+      />
     </div>
   );
 }

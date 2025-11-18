@@ -3,18 +3,24 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Card, Badge, Button } from '@second-turn/design-system';
-import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock } from 'lucide-react';
+import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Edit, Heart } from 'lucide-react';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
+import { useIsListingSaved } from '@/lib/hooks/useSavedListings';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 interface ListingCardProps {
   listing: ListingWithSeller;
   showSeller?: boolean;
+  isOwnListing?: boolean; // Whether this listing belongs to the current user
 }
 
-export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
+export function ListingCard({ listing, showSeller = false, isOwnListing = false }: ListingCardProps) {
   const conditionLabel = getConditionLabel(listing.condition);
+  const router = useRouter();
+  const { user } = useAuth();
 
   // Collect all available images (BGG main image + user photos only)
   const allImages = [
@@ -29,6 +35,10 @@ export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
 
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
+
+  // Save listing functionality
+  const { isSaved, toggleSave } = useIsListingSaved(listing.id);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   // Get condition badge variant
   const getConditionVariant = (): 'likeNew' | 'veryGood' | 'good' | 'acceptable' => {
@@ -85,6 +95,25 @@ export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
     }
   };
 
+  const handleSaveToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      router.push(`/auth/signin?redirect=/listing/${listing.id}`);
+      return;
+    }
+
+    try {
+      setSaveLoading(true);
+      await toggleSave();
+    } catch (error) {
+      console.error('Failed to toggle save:', error);
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   const displayImage = allImages[currentImageIndex];
 
   return (
@@ -96,7 +125,7 @@ export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
       >
         {/* Image Section */}
         <div
-          className="relative h-64 bg-polar-night/5 flex items-center justify-center group overflow-hidden"
+          className="relative h-48 sm:h-56 lg:h-64 bg-polar-night/5 flex items-center justify-center group overflow-hidden"
           onTouchStart={hasMultipleImages ? onTouchStart : undefined}
           onTouchMove={hasMultipleImages ? onTouchMove : undefined}
           onTouchEnd={hasMultipleImages ? onTouchEnd : undefined}
@@ -111,19 +140,37 @@ export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
             <Package className="w-16 h-16 text-text-muted" />
           )}
 
+          {/* Save Button - only show for non-own listings */}
+          {!isOwnListing && (
+            <button
+              onClick={handleSaveToggle}
+              disabled={saveLoading}
+              className="absolute top-3 left-3 w-9 h-9 rounded-full bg-snow-white/90 hover:bg-snow-white flex items-center justify-center transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+              aria-label={isSaved ? "Remove from saved" : "Save listing"}
+            >
+              <Heart
+                className={`w-5 h-5 transition-all ${
+                  isSaved
+                    ? 'fill-aurora-red text-aurora-red'
+                    : 'text-text-secondary'
+                }`}
+              />
+            </button>
+          )}
+
           {/* Navigation Arrows - show on hover if multiple images */}
           {hasMultipleImages && (
             <>
               <button
                 onClick={handlePrevImage}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-polar-night/60 hover:bg-polar-night/80 backdrop-blur-sm flex items-center justify-center text-snow-white opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-polar-night/60 hover:bg-polar-night/80 backdrop-blur-sm flex items-center justify-center text-snow-white sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                 aria-label="Previous image"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={handleNextImage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-polar-night/60 hover:bg-polar-night/80 backdrop-blur-sm flex items-center justify-center text-snow-white opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-polar-night/60 hover:bg-polar-night/80 backdrop-blur-sm flex items-center justify-center text-snow-white sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                 aria-label="Next image"
               >
                 <ChevronRight className="w-5 h-5" />
@@ -212,13 +259,27 @@ export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
             )}
 
             {/* Price & Condition */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="text-2xl font-bold text-polar-night">
-                €{listing.price.toFixed(2)}
+            <div className="space-y-1">
+              {/* Price with previous price strikethrough */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="text-2xl font-bold text-polar-night">
+                  €{listing.price.toFixed(2)}
+                </div>
+                {listing.previous_price && listing.previous_price > listing.price && (
+                  <span className="text-base text-text-muted line-through">
+                    €{listing.previous_price.toFixed(2)}
+                  </span>
+                )}
+                <Badge variant={getConditionVariant()}>
+                  {conditionLabel}
+                </Badge>
               </div>
-              <Badge variant={getConditionVariant()}>
-                {conditionLabel}
-              </Badge>
+              {/* Savings indicator */}
+              {listing.previous_price && listing.previous_price > listing.price && (
+                <div className="text-sm font-medium text-aurora-green">
+                  Save €{(listing.previous_price - listing.price).toFixed(2)} ({Math.round((1 - listing.price / listing.previous_price) * 100)}% off)
+                </div>
+              )}
             </div>
 
             {/* Components Warning */}
@@ -274,10 +335,19 @@ export function ListingCard({ listing, showSeller = false }: ListingCardProps) {
               </div>
             )}
 
-            {/* Buy Now Button */}
-            <Button variant="accent" fullWidth>
-              Buy Now
-            </Button>
+            {/* Action Button - Edit for own listings, Buy Now for others */}
+            {isOwnListing ? (
+              <Link href={`/sell?edit=${listing.id}`} className="block" onClick={(e) => e.stopPropagation()}>
+                <Button variant="primary" fullWidth>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Listing
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="accent" fullWidth>
+                Buy Now
+              </Button>
+            )}
           </div>
         </div>
       </Card>

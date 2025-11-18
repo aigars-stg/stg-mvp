@@ -18,6 +18,7 @@ import { getConditionLabel } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { OfferModal } from '@/components/wanted/OfferModal';
+import { NotificationModal } from '@/components/common/NotificationModal';
 import Link from 'next/link';
 
 export default function WantedListingDetailPage() {
@@ -36,6 +37,7 @@ export default function WantedListingDetailPage() {
 
   // Modal state
   const [offerModalOpen, setOfferModalOpen] = useState(openModalParam === 'true');
+  const [showCopySuccessModal, setShowCopySuccessModal] = useState(false);
 
   // Fetch wanted listing
   useEffect(() => {
@@ -158,11 +160,11 @@ export default function WantedListingDetailPage() {
             Back
           </Button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             {/* Left Column - Game Image */}
             <div>
               <Card padding="none" className="overflow-hidden">
-                <div className="relative bg-polar-night/5 flex items-center justify-center min-h-[500px]">
+                <div className="relative bg-polar-night/5 flex items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[500px]">
                   {wantedListing.game?.image ? (
                     <img
                       src={wantedListing.game.image}
@@ -402,7 +404,7 @@ export default function WantedListingDetailPage() {
                     fullWidth
                     onClick={() => {
                       navigator.clipboard.writeText(window.location.href);
-                      alert('Link copied to clipboard!');
+                      setShowCopySuccessModal(true);
                     }}
                   >
                     <Share2 className="w-5 h-5 mr-2" />
@@ -496,6 +498,14 @@ export default function WantedListingDetailPage() {
           onSubmit={handleOfferSubmit}
         />
       )}
+
+      {/* Copy Success Modal */}
+      <NotificationModal
+        isOpen={showCopySuccessModal}
+        onClose={() => setShowCopySuccessModal(false)}
+        type="success"
+        message="Link copied to clipboard!"
+      />
     </>
   );
 }

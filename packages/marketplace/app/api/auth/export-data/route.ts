@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+// Force dynamic rendering for this route (uses cookies)
+export const dynamic = 'force-dynamic';
+
 /**
  * Data Export API
  * GDPR Article 20: Right to Data Portability

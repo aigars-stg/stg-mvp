@@ -14,17 +14,28 @@ interface PhotoUploadProps {
   onPhotosChange: (photos: PhotoFile[]) => void;
   maxPhotos?: number;
   condition?: 'likeNew' | 'veryGood' | 'good' | 'acceptable' | null;
+  existingPhotoUrls?: string[]; // For edit mode
+  onExistingPhotosChange?: (urls: string[]) => void; // For edit mode
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
 
-export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8, condition = null }: PhotoUploadProps) {
+export function PhotoUpload({
+  photos,
+  onPhotosChange,
+  maxPhotos = 8,
+  condition = null,
+  existingPhotoUrls = [],
+  onExistingPhotosChange
+}: PhotoUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const totalPhotoCount = existingPhotoUrls.length + photos.length;
 
   const validateFile = useCallback((file: File): string | null => {
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -109,6 +120,15 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8, condition =
     setUploadError(null);
   };
 
+  const removeExistingPhoto = (index: number) => {
+    if (onExistingPhotosChange) {
+      const newUrls = [...existingPhotoUrls];
+      newUrls.splice(index, 1);
+      onExistingPhotosChange(newUrls);
+      setUploadError(null);
+    }
+  };
+
   // Drag-to-reorder handlers
   const handlePhotoDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
@@ -138,7 +158,7 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8, condition =
     fileInputRef.current?.click();
   };
 
-  const hasPhotos = photos.length > 0;
+  const hasPhotos = totalPhotoCount > 0;
 
   return (
     <div className="space-y-6">
@@ -192,7 +212,7 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8, condition =
                 ? 'border-frost-ice bg-frost-ice/10'
                 : 'border-border hover:border-frost-ice hover:bg-frost-ice/5'
             }
-            ${photos.length >= maxPhotos ? 'opacity-50 cursor-not-allowed' : ''}
+            ${totalPhotoCount >= maxPhotos ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         >
           {/* Large icon - only show when no photos */}
@@ -207,10 +227,12 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8, condition =
             <div className="flex items-center gap-2 text-sm">
               <Camera className="w-5 h-5 text-frost-ice flex-shrink-0" />
               <span className="font-medium text-polar-night">
-                {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+                {totalPhotoCount} {totalPhotoCount === 1 ? 'photo' : 'photos'}
               </span>
-              {photos.length < maxPhotos && (
-                <span className="text-text-secondary text-xs">(up to {maxPhotos})</span>
+              {totalPhotoCount < maxPhotos && (
+                <span className="text-text-secondary text-xs">
+                  • Click to add more (up to {maxPhotos})
+                </span>
               )}
             </div>
           ) : (
@@ -222,7 +244,7 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8, condition =
               <div className="text-sm text-text-secondary space-y-1">
                 <p>JPEG, PNG, WebP, or AVIF</p>
                 <p>Max 5MB per image</p>
-                <p>{photos.length}/{maxPhotos} uploaded</p>
+                <p>{totalPhotoCount}/{maxPhotos} uploaded</p>
               </div>
             </>
           )}
@@ -236,13 +258,47 @@ export function PhotoUpload({ photos, onPhotosChange, maxPhotos = 8, condition =
       </div>
 
       {/* Photo Grid */}
-      {photos.length > 0 && (
+      {hasPhotos && (
         <div>
           <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-4">
-            Your Photos ({photos.length}/{maxPhotos})
+            Your Photos ({totalPhotoCount}/{maxPhotos})
           </h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+            {/* Existing Photos */}
+            {existingPhotoUrls.map((url, index) => (
+              <div
+                key={`existing-${index}`}
+                className="relative group aspect-square"
+              >
+                {/* Photo Preview */}
+                <img
+                  src={url}
+                  alt={`Photo ${index + 1}`}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+
+                {/* Remove Button */}
+                <button
+                  onClick={() => removeExistingPhoto(index)}
+                  className="
+                    absolute top-2 right-2
+                    w-8 h-8 sm:w-7 sm:h-7
+                    bg-polar-night/80 text-snow-white
+                    rounded-full
+                    sm:opacity-0 sm:group-hover:opacity-100
+                    transition-opacity
+                    flex items-center justify-center
+                    hover:bg-polar-night
+                  "
+                  aria-label="Remove photo"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+
+            {/* New Photos */}
             {photos.map((photo, index) => (
               <div
                 key={index}

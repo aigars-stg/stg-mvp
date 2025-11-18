@@ -7,43 +7,14 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { User, LogOut, Package, MessageCircle } from 'lucide-react';
 import { getInitials } from '@/lib/auth/utils';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
+import { useUnreadMessages } from '@/lib/hooks/useUnreadMessages';
 
 export function UserMenu() {
   const { user, profile, signOut, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [signOutError, setSignOutError] = useState<string>('');
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { unreadCount } = useUnreadMessages();
   const menuRef = useRef<HTMLDivElement>(null);
-
-  // Fetch unread message count
-  useEffect(() => {
-    if (!user) {
-      setUnreadCount(0);
-      return;
-    }
-
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch('/api/messages');
-        if (response.ok) {
-          const data = await response.json();
-          const total = data.conversations?.reduce(
-            (sum: number, conv: any) => sum + (conv.unread_count || 0),
-            0
-          ) || 0;
-          setUnreadCount(total);
-        }
-      } catch (error) {
-        console.error('Failed to fetch unread count:', error);
-      }
-    };
-
-    fetchUnreadCount();
-
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

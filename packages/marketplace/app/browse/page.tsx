@@ -5,11 +5,13 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Input, Select, Checkbox, Button, Badge } from '@second-turn/design-system';
 import {
   Package, ChevronDown, Star, Sparkles, CircleCheck, Wrench, X,
-  Users, Baby, Clock, Bookmark, Trash2
+  Users, Baby, Clock, Bookmark, Trash2, MapPin, AlertCircle
 } from 'lucide-react';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
+import { WantedListingCard } from '@/components/wanted/WantedListingCard';
 import type { ListingWithSeller } from '@/lib/types/listing';
+import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import {
   getSavedSearches,
   saveSearch,
@@ -19,13 +21,24 @@ import {
   type SavedSearch,
   type SavedSearchFilters,
 } from '@/lib/saved-searches';
+import { useAuth } from '@/lib/auth/AuthContext';
+import { NotificationModal } from '@/components/common/NotificationModal';
+import { ConfirmationModal } from '@/components/common/ConfirmationModal';
+import { cn } from '@/lib/utils';
+
+type ListingType = 'sell' | 'wanted';
 
 export default function BrowsePage() {
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  // Listing type state
+  const [listingType, setListingType] = useState<ListingType>('sell');
 
   // Data state
   const [listings, setListings] = useState<ListingWithSeller[]>([]);
+  const [wantedListings, setWantedListings] = useState<WantedListingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
@@ -48,6 +61,13 @@ export default function BrowsePage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  // Wanted-specific filter states
+  const [acceptableConditions, setAcceptableConditions] = useState<Set<string>>(new Set());
+  const [budgetMin, setBudgetMin] = useState('');
+  const [budgetMax, setBudgetMax] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+  const [showExpiringOnly, setShowExpiringOnly] = useState(false);
+
   // Track if filters have been initialized from URL
   const [filtersInitialized, setFiltersInitialized] = useState(false);
 
@@ -61,9 +81,15 @@ export default function BrowsePage() {
   const [saveSearchError, setSaveSearchError] = useState('');
   const [showSavedSearchesMenu, setShowSavedSearchesMenu] = useState(false);
 
+  // Modal states
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [searchToDelete, setSearchToDelete] = useState<string | null>(null);
+
   // Initialize filters from URL params on mount (avoiding useSearchParams for SSG compatibility)
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
+    const type = searchParams.get('type');
     const query = searchParams.get('q');
     const conditions = searchParams.get('conditions');
     const languages = searchParams.get('languages');
@@ -74,6 +100,17 @@ export default function BrowsePage() {
     const maxPrice = searchParams.get('maxPrice');
     const sort = searchParams.get('sort');
 
+    // Wanted-specific params
+    const acceptableConds = searchParams.get('acceptableConditions');
+    const budMin = searchParams.get('budgetMin');
+    const budMax = searchParams.get('budgetMax');
+    const location = searchParams.get('location');
+    const expiring = searchParams.get('expiring');
+
+    // Set listing type
+    if (type === 'wanted') setListingType('wanted');
+
+    // General filters
     if (query) setSearchQuery(query);
     if (conditions) setSelectedConditions(new Set(conditions.split(',')));
     if (languages) setSelectedLanguages(new Set(languages.split(',')));
@@ -84,6 +121,13 @@ export default function BrowsePage() {
     if (maxPrice) setPriceMax(maxPrice);
     if (sort) setSortBy(sort);
 
+    // Wanted filters
+    if (acceptableConds) setAcceptableConditions(new Set(acceptableConds.split(',')));
+    if (budMin) setBudgetMin(budMin);
+    if (budMax) setBudgetMax(budMax);
+    if (location) setLocationFilter(location);
+    if (expiring === 'true') setShowExpiringOnly(true);
+
     setFiltersInitialized(true);
   }, []);
 
@@ -93,19 +137,37 @@ export default function BrowsePage() {
 
     const params = new URLSearchParams();
 
+    // Listing type
+    if (listingType !== 'sell') params.set('type', listingType);
+
+    // General filters
     if (searchQuery) params.set('q', searchQuery);
-    if (selectedConditions.size > 0) params.set('conditions', Array.from(selectedConditions).join(','));
-    if (selectedLanguages.size > 0) params.set('languages', Array.from(selectedLanguages).join(','));
-    if (selectedPlayerCounts.size > 0) params.set('players', Array.from(selectedPlayerCounts).join(','));
-    if (selectedMinAges.size > 0) params.set('ages', Array.from(selectedMinAges).join(','));
-    if (selectedPlayingTimes.size > 0) params.set('times', Array.from(selectedPlayingTimes).join(','));
-    if (priceMin) params.set('minPrice', priceMin);
-    if (priceMax) params.set('maxPrice', priceMax);
     if (sortBy !== 'recent') params.set('sort', sortBy);
+
+    // Sell-specific filters
+    if (listingType === 'sell') {
+      if (selectedConditions.size > 0) params.set('conditions', Array.from(selectedConditions).join(','));
+      if (selectedLanguages.size > 0) params.set('languages', Array.from(selectedLanguages).join(','));
+      if (selectedPlayerCounts.size > 0) params.set('players', Array.from(selectedPlayerCounts).join(','));
+      if (selectedMinAges.size > 0) params.set('ages', Array.from(selectedMinAges).join(','));
+      if (selectedPlayingTimes.size > 0) params.set('times', Array.from(selectedPlayingTimes).join(','));
+      if (priceMin) params.set('minPrice', priceMin);
+      if (priceMax) params.set('maxPrice', priceMax);
+    }
+
+    // Wanted-specific filters
+    if (listingType === 'wanted') {
+      if (acceptableConditions.size > 0) params.set('acceptableConditions', Array.from(acceptableConditions).join(','));
+      if (budgetMin) params.set('budgetMin', budgetMin);
+      if (budgetMax) params.set('budgetMax', budgetMax);
+      if (locationFilter) params.set('location', locationFilter);
+      if (showExpiringOnly) params.set('expiring', 'true');
+    }
 
     const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
     router.replace(newUrl, { scroll: false });
   }, [
+    listingType,
     searchQuery,
     selectedConditions,
     selectedLanguages,
@@ -114,6 +176,11 @@ export default function BrowsePage() {
     selectedPlayingTimes,
     priceMin,
     priceMax,
+    acceptableConditions,
+    budgetMin,
+    budgetMax,
+    locationFilter,
+    showExpiringOnly,
     sortBy,
     filtersInitialized,
     pathname,
@@ -159,10 +226,37 @@ export default function BrowsePage() {
     }
   };
 
+  // Fetch wanted listings
+  const fetchWantedListings = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const response = await fetch('/api/wanted?status=active');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch wanted listings');
+      }
+
+      const data = await response.json();
+      setWantedListings(data.wantedListings || []);
+      setError('');
+    } catch (err: any) {
+      console.error('Error fetching wanted listings:', err);
+      setError(err.message || 'Failed to load wanted listings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Initial fetch on mount
   useEffect(() => {
-    fetchListings(1, false);
-  }, []);
+    if (listingType === 'sell') {
+      fetchListings(1, false);
+    } else {
+      fetchWantedListings();
+    }
+  }, [listingType]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -266,7 +360,7 @@ export default function BrowsePage() {
         setSavedSearches(getSavedSearches());
         setShowSaveDialog(false);
         setSaveSearchName('');
-        alert('Search saved successfully!');
+        setShowSuccessModal(true);
       }
     } catch (error: any) {
       setSaveSearchError(error.message || 'Failed to save search');
@@ -294,9 +388,17 @@ export default function BrowsePage() {
   // Handle delete saved search
   const handleDeleteSavedSearch = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Are you sure you want to delete this saved search?')) {
-      deleteSavedSearch(id);
+    setSearchToDelete(id);
+    setShowDeleteConfirmModal(true);
+  };
+
+  // Confirm delete saved search
+  const confirmDeleteSavedSearch = () => {
+    if (searchToDelete) {
+      deleteSavedSearch(searchToDelete);
       setSavedSearches(getSavedSearches());
+      setShowDeleteConfirmModal(false);
+      setSearchToDelete(null);
     }
   };
 
@@ -486,6 +588,7 @@ export default function BrowsePage() {
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery('');
+    // Clear sell filters
     setSelectedConditions(new Set());
     setSelectedLanguages(new Set());
     setSelectedPlayerCounts(new Set());
@@ -493,6 +596,12 @@ export default function BrowsePage() {
     setSelectedPlayingTimes(new Set());
     setPriceMin('');
     setPriceMax('');
+    // Clear wanted filters
+    setAcceptableConditions(new Set());
+    setBudgetMin('');
+    setBudgetMax('');
+    setLocationFilter('');
+    setShowExpiringOnly(false);
   };
 
   // Remove individual filters
@@ -535,14 +644,38 @@ export default function BrowsePage() {
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (searchQuery) count++;
-    if (selectedConditions.size > 0) count++;
-    if (selectedLanguages.size > 0) count++;
-    if (selectedPlayerCounts.size > 0) count++;
-    if (selectedMinAges.size > 0) count++;
-    if (selectedPlayingTimes.size > 0) count++;
-    if (priceMin || priceMax) count++;
+
+    if (listingType === 'sell') {
+      if (selectedConditions.size > 0) count++;
+      if (selectedLanguages.size > 0) count++;
+      if (selectedPlayerCounts.size > 0) count++;
+      if (selectedMinAges.size > 0) count++;
+      if (selectedPlayingTimes.size > 0) count++;
+      if (priceMin || priceMax) count++;
+    } else {
+      if (acceptableConditions.size > 0) count++;
+      if (budgetMin || budgetMax) count++;
+      if (locationFilter) count++;
+      if (showExpiringOnly) count++;
+    }
+
     return count;
-  }, [searchQuery, selectedConditions, selectedLanguages, selectedPlayerCounts, selectedMinAges, selectedPlayingTimes, priceMin, priceMax]);
+  }, [
+    listingType,
+    searchQuery,
+    selectedConditions,
+    selectedLanguages,
+    selectedPlayerCounts,
+    selectedMinAges,
+    selectedPlayingTimes,
+    priceMin,
+    priceMax,
+    acceptableConditions,
+    budgetMin,
+    budgetMax,
+    locationFilter,
+    showExpiringOnly
+  ]);
 
   // Filter listings
   const filteredListings = useMemo(() => {
@@ -642,14 +775,138 @@ export default function BrowsePage() {
     return labels[time] || time;
   };
 
+  // Handle "I Have This" click for wanted listings
+  const handleIHaveThis = (wantedListingId: string) => {
+    if (!user) {
+      router.push(`/auth/signin?redirect=/wanted/${wantedListingId}`);
+      return;
+    }
+    router.push(`/wanted/${wantedListingId}?openModal=true`);
+  };
+
+  // Filter wanted listings
+  const filteredWantedListings = useMemo(() => {
+    let filtered = [...wantedListings];
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((listing) =>
+        listing.game_name.toLowerCase().includes(query)
+      );
+    }
+
+    // Acceptable conditions filter
+    if (acceptableConditions.size > 0) {
+      filtered = filtered.filter((listing) =>
+        listing.acceptable_conditions?.some(cond => acceptableConditions.has(cond))
+      );
+    }
+
+    // Budget filter
+    if (budgetMin) {
+      filtered = filtered.filter((listing) =>
+        (listing.max_price || 0) >= parseFloat(budgetMin)
+      );
+    }
+    if (budgetMax) {
+      filtered = filtered.filter((listing) =>
+        (listing.max_price || 0) <= parseFloat(budgetMax)
+      );
+    }
+
+    // Location filter
+    if (locationFilter) {
+      const query = locationFilter.toLowerCase();
+      filtered = filtered.filter((listing) =>
+        listing.location_preferences?.toLowerCase().includes(query)
+      );
+    }
+
+    // Expiring soon filter (< 7 days)
+    if (showExpiringOnly) {
+      const sevenDaysFromNow = new Date();
+      sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+      filtered = filtered.filter((listing) => {
+        if (!listing.expires_at) return false;
+        return new Date(listing.expires_at) < sevenDaysFromNow;
+      });
+    }
+
+    // Sorting
+    switch (sortBy) {
+      case 'expiring':
+        filtered.sort((a, b) =>
+          new Date(a.expires_at || 0).getTime() - new Date(b.expires_at || 0).getTime()
+        );
+        break;
+      case 'budget-high':
+        filtered.sort((a, b) => (b.max_price || 0) - (a.max_price || 0));
+        break;
+      case 'budget-low':
+        filtered.sort((a, b) => (a.max_price || 0) - (b.max_price || 0));
+        break;
+      case 'popular':
+        filtered.sort((a, b) => (b.response_count || 0) - (a.response_count || 0));
+        break;
+      case 'recent':
+      default:
+        // Already in recent order from API
+        break;
+    }
+
+    return filtered;
+  }, [wantedListings, searchQuery, acceptableConditions, budgetMin, budgetMax, locationFilter, showExpiringOnly, sortBy]);
+
   return (
     <div>
       {/* Hero Section */}
-      <div className="bg-frost-ice/5 border-b border-frost-ice/20">
+      <div className={cn(
+        "border-b transition-colors",
+        listingType === 'sell' ? "bg-frost-ice/5 border-frost-ice/20" : "bg-aurora-orange/5 border-aurora-orange/20"
+      )}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-           <p className="text-base sm:text-lg text-text-secondary mb-6 sm:mb-8 max-w-2xl">
-            Browse quality pre-loved board games from trusted sellers across the Baltics.
+          <h1 className="text-3xl sm:text-4xl font-bold text-polar-night mb-3">
+            Browse Marketplace
+          </h1>
+          <p className="text-base sm:text-lg text-text-secondary mb-6 sm:mb-8 max-w-2xl">
+            {listingType === 'sell'
+              ? 'Browse quality pre-loved board games from trusted sellers across the Baltics.'
+              : 'Browse buyer requests and respond with "I Have This" to start a conversation.'
+            }
           </p>
+
+          {/* Tab Toggle */}
+          <div className="mb-6 sm:mb-8">
+            <div className="inline-flex rounded-lg border-2 border-border p-1 bg-snow-white shadow-sm">
+              <button
+                onClick={() => setListingType('sell')}
+                className={cn(
+                  "px-6 py-2.5 rounded-md font-medium transition-all text-sm sm:text-base min-w-[140px]",
+                  listingType === 'sell'
+                    ? "bg-frost-ice text-snow-white shadow-sm"
+                    : "text-text-secondary hover:text-text"
+                )}
+                aria-pressed={listingType === 'sell'}
+                aria-label="Show games for sale"
+              >
+                For Sale
+              </button>
+              <button
+                onClick={() => setListingType('wanted')}
+                className={cn(
+                  "px-6 py-2.5 rounded-md font-medium transition-all text-sm sm:text-base min-w-[140px]",
+                  listingType === 'wanted'
+                    ? "bg-aurora-orange text-snow-white shadow-sm"
+                    : "text-text-secondary hover:text-text"
+                )}
+                aria-pressed={listingType === 'wanted'}
+                aria-label="Show wanted listings"
+              >
+                Wanted / ISO
+              </button>
+            </div>
+          </div>
 
           {/* Search Bar */}
           <div className="max-w-2xl">
@@ -804,18 +1061,30 @@ export default function BrowsePage() {
               )}
 
               <div className="text-sm text-text-secondary">
-                <span className="font-medium text-polar-night">{filteredListings.length}</span> listings
+                <span className="font-medium text-polar-night">
+                  {listingType === 'sell' ? filteredListings.length : filteredWantedListings.length}
+                </span> {listingType === 'sell' ? 'listings' : 'wanted listings'}
               </div>
             </div>
 
             {/* Right: Sort */}
             <div className="w-full sm:w-auto">
               <Select
-                options={[
-                  { value: 'recent', label: 'Recently listed' },
-                  { value: 'price-low', label: 'Price: Low to High' },
-                  { value: 'price-high', label: 'Price: High to Low' },
-                ]}
+                options={
+                  listingType === 'sell'
+                    ? [
+                        { value: 'recent', label: 'Recently listed' },
+                        { value: 'price-low', label: 'Price: Low to High' },
+                        { value: 'price-high', label: 'Price: High to Low' },
+                      ]
+                    : [
+                        { value: 'recent', label: 'Recently posted' },
+                        { value: 'expiring', label: 'Expiring Soon' },
+                        { value: 'budget-high', label: 'Budget: High to Low' },
+                        { value: 'budget-low', label: 'Budget: Low to High' },
+                        { value: 'popular', label: 'Most Responses' },
+                      ]
+                }
                 value={sortBy}
                 onChange={setSortBy}
                 selectSize="sm"
@@ -827,6 +1096,8 @@ export default function BrowsePage() {
           {filtersOpen && (
             <div className="hidden lg:block border-2 border-border rounded-lg p-4 sm:p-6 bg-bg-elevated animate-in slide-in-from-top-2 duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {listingType === 'sell' ? (
+                  <>
                 {/* Player Count Filter */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -1043,6 +1314,141 @@ export default function BrowsePage() {
                     €{availableOptions.priceRange.min} - €{availableOptions.priceRange.max}
                   </p>
                 </div>
+              </>
+                ) : (
+                  <>
+                {/* Wanted-Specific Filters */}
+
+                {/* Acceptable Conditions Filter */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4 text-aurora-orange" />
+                      <h3 className="text-sm font-medium text-polar-night">Acceptable Conditions</h3>
+                    </div>
+                    {acceptableConditions.size > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setAcceptableConditions(new Set())}
+                        className="h-auto py-0 px-2 text-xs"
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {['likeNew', 'veryGood', 'good', 'acceptable'].map((condition) => {
+                      const { icon: Icon, label } = getConditionInfo(condition);
+                      return (
+                        <label
+                          key={condition}
+                          className="flex items-center gap-2 cursor-pointer group"
+                        >
+                          <Checkbox
+                            checked={acceptableConditions.has(condition)}
+                            onChange={() => {
+                              const newSet = new Set(acceptableConditions);
+                              if (newSet.has(condition)) {
+                                newSet.delete(condition);
+                              } else {
+                                newSet.add(condition);
+                              }
+                              setAcceptableConditions(newSet);
+                            }}
+                          />
+                          <Icon className="w-4 h-4 text-text-muted" />
+                          <span className="text-sm group-hover:text-polar-night transition-colors">
+                            {label}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Budget Range */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-polar-night">Budget (EUR)</h3>
+                    {(budgetMin || budgetMax) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setBudgetMin('');
+                          setBudgetMax('');
+                        }}
+                        className="h-auto py-0 px-2 text-xs"
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Min"
+                      type="number"
+                      value={budgetMin}
+                      onChange={(e) => setBudgetMin(e.target.value)}
+                      inputSize="sm"
+                    />
+                    <Input
+                      placeholder="Max"
+                      type="number"
+                      value={budgetMax}
+                      onChange={(e) => setBudgetMax(e.target.value)}
+                      inputSize="sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Location Filter */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-aurora-orange" />
+                      <h3 className="text-sm font-medium text-polar-night">Location</h3>
+                    </div>
+                    {locationFilter && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setLocationFilter('')}
+                        className="h-auto py-0 px-2 text-xs"
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                  <Input
+                    placeholder="Search location..."
+                    value={locationFilter}
+                    onChange={(e) => setLocationFilter(e.target.value)}
+                    inputSize="sm"
+                  />
+                </div>
+
+                {/* Expiring Soon Toggle */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-aurora-orange" />
+                      <h3 className="text-sm font-medium text-polar-night">Expiring Soon</h3>
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <Checkbox
+                      checked={showExpiringOnly}
+                      onChange={() => setShowExpiringOnly(!showExpiringOnly)}
+                    />
+                    <span className="text-sm group-hover:text-polar-night transition-colors">
+                      Show only listings expiring within 7 days
+                    </span>
+                  </label>
+                </div>
+              </>
+                )}
               </div>
 
               {/* Clear All Button */}
@@ -1299,7 +1705,7 @@ export default function BrowsePage() {
                 </div>
 
                 {/* Footer - Action Buttons */}
-                <div className="border-t border-border-subtle p-4 bg-bg-elevated">
+                <div className="border-t border-border-subtle p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-bg-elevated">
                   <div className="flex gap-3">
                     <Button
                       variant="ghost"
@@ -1473,24 +1879,39 @@ export default function BrowsePage() {
         )}
 
         {/* Listings Grid - Full Width, Responsive */}
-        {!loading && !error && filteredListings.length > 0 && (
+        {!loading && !error && (listingType === 'sell' ? filteredListings.length > 0 : filteredWantedListings.length > 0) && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {filteredListings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} showSeller={true} />
-              ))}
+              {listingType === 'sell'
+                ? filteredListings.map((listing) => (
+                    <ListingCard
+                      key={listing.id}
+                      listing={listing}
+                      showSeller={true}
+                      isOwnListing={user?.id === listing.seller_id}
+                    />
+                  ))
+                : filteredWantedListings.map((wantedListing) => (
+                    <WantedListingCard
+                      key={wantedListing.id}
+                      wantedListing={wantedListing}
+                      onIHaveThis={handleIHaveThis}
+                      showBuyer={true}
+                    />
+                  ))
+              }
             </div>
 
-            {/* Loading More Indicator */}
-            {loadingMore && (
+            {/* Loading More Indicator - Only for sell listings */}
+            {listingType === 'sell' && loadingMore && (
               <div className="text-center py-8">
                 <div className="w-8 h-8 border-4 border-frost-ice border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                 <p className="text-sm text-text-secondary">Loading more listings...</p>
               </div>
             )}
 
-            {/* No More Results */}
-            {!hasMore && !loadingMore && filteredListings.length > 0 && (
+            {/* No More Results - Only for sell listings */}
+            {listingType === 'sell' && !hasMore && !loadingMore && filteredListings.length > 0 && (
               <div className="text-center py-8 border-t border-border-subtle">
                 <p className="text-sm text-text-secondary">
                   You've reached the end! Showing all {totalCount} listings.
@@ -1501,18 +1922,21 @@ export default function BrowsePage() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && filteredListings.length === 0 && (
+        {!loading && !error && (listingType === 'sell' ? filteredListings.length === 0 : filteredWantedListings.length === 0) && (
           <div className="text-center py-16">
             <div className="flex justify-center mb-4">
               <Package className="w-16 h-16 text-text-muted" />
             </div>
             <h3 className="text-xl font-semibold text-polar-night mb-2">
-              No listings found
+              {listingType === 'sell' ? 'No listings found' : 'No wanted listings yet'}
             </h3>
             <p className="text-text-secondary mb-6">
               {activeFiltersCount > 0
                 ? 'Try adjusting your filters or search query'
-                : 'Be the first to list a game!'}
+                : listingType === 'sell'
+                  ? 'Be the first to list a game!'
+                  : 'Be the first to post what you\'re looking for!'
+              }
             </p>
             {activeFiltersCount > 0 && (
               <Button variant="primary" onClick={clearFilters}>
@@ -1579,6 +2003,29 @@ export default function BrowsePage() {
           </div>
         )}
       </div>
+
+      {/* Success Modal */}
+      <NotificationModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        type="success"
+        message="Search saved successfully!"
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteConfirmModal}
+        onClose={() => {
+          setShowDeleteConfirmModal(false);
+          setSearchToDelete(null);
+        }}
+        onConfirm={confirmDeleteSavedSearch}
+        title="Delete Saved Search"
+        message="Are you sure you want to delete this saved search?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        icon={<Trash2 className="w-12 h-12 text-aurora-red" />}
+      />
     </div>
   );
 }

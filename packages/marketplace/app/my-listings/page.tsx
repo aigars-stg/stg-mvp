@@ -3,14 +3,19 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Button, Card } from '@second-turn/design-system';
-import { Package, Clock, CheckCircle, XCircle, Plus, Search } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, Plus, Search, Heart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
+import { ListingActionsMenu } from '@/components/listing/ListingActionsMenu';
+import { StatusChangeModal } from '@/components/listing/StatusChangeModal';
+import { DeleteConfirmationModal } from '@/components/listing/DeleteConfirmationModal';
+import { NotificationModal } from '@/components/common/NotificationModal';
 import type { Listing, ListingStatus } from '@/lib/types/listing';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { getStatusLabel } from '@/lib/types/listing';
+import { useSavedListings } from '@/lib/hooks/useSavedListings';
 
 const STATUS_LABELS = {
   draft: 'Draft',
@@ -37,11 +42,14 @@ export default function MyListingsPage() {
   const { user } = useAuth();
   const router = useRouter();
 
-  // Top-level tab: selling vs wanted (check URL param)
-  const [mainTab, setMainTab] = useState<'selling' | 'wanted'>(() => {
+  // Top-level tab: selling vs wanted vs saved (check URL param)
+  const [mainTab, setMainTab] = useState<'selling' | 'wanted' | 'saved'>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      return params.get('tab') === 'wanted' ? 'wanted' : 'selling';
+      const tab = params.get('tab');
+      if (tab === 'wanted') return 'wanted';
+      if (tab === 'saved') return 'saved';
+      return 'selling';
     }
     return 'selling';
   });
@@ -57,6 +65,23 @@ export default function MyListingsPage() {
   const [wantedLoading, setWantedLoading] = useState(true);
   const [wantedError, setWantedError] = useState('');
   const [wantedActiveTab, setWantedActiveTab] = useState<'all' | 'active' | 'fulfilled' | 'expired' | 'cancelled'>('all');
+
+  // Saved listings
+  const { savedListings, isLoading: savedLoading, error: savedError } = useSavedListings();
+
+  // Modal state for listing actions
+  const [statusChangeModal, setStatusChangeModal] = useState<{
+    isOpen: boolean;
+    listing: Listing | null;
+    newStatus: ListingStatus | null;
+  }>({ isOpen: false, listing: null, newStatus: null });
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    listing: Listing | null;
+  }>({ isOpen: false, listing: null });
+  const [actionLoading, setActionLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showClipboardSuccess, setShowClipboardSuccess] = useState(false);
 
   // Fetch regular listings
   useEffect(() => {
@@ -114,6 +139,88 @@ export default function MyListingsPage() {
     fetchWantedListings();
   }, [user]);
 
+  // Handler functions for listing actions
+  const handleStatusChangeRequest = (listing: Listing, newStatus: ListingStatus) => {
+    setStatusChangeModal({
+      isOpen: true,
+      listing,
+      newStatus,
+    });
+  };
+
+  const handleStatusChange = async () => {
+    if (!statusChangeModal.listing || !statusChangeModal.newStatus) return;
+
+    try {
+      setActionLoading(true);
+      const response = await fetch(`/api/listings/${statusChangeModal.listing.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: statusChangeModal.newStatus }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update status');
+      }
+
+      // Update local state with optimistic update
+      setListings((prev) =>
+        prev.map((l) =>
+          l.id === statusChangeModal.listing?.id
+            ? { ...l, status: statusChangeModal.newStatus! }
+            : l
+        )
+      );
+
+      setSuccessMessage(`Listing ${statusChangeModal.newStatus === 'sold' ? 'marked as sold' : statusChangeModal.newStatus === 'removed' ? 'removed' : statusChangeModal.newStatus === 'active' ? 'reactivated' : 'updated'} successfully`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+
+      setStatusChangeModal({ isOpen: false, listing: null, newStatus: null });
+    } catch (err: any) {
+      console.error('Error updating status:', err);
+      setError(err.message || 'Failed to update listing status');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteRequest = (listing: Listing) => {
+    setDeleteModal({
+      isOpen: true,
+      listing,
+    });
+  };
+
+  const handleDelete = async () => {
+    if (!deleteModal.listing) return;
+
+    try {
+      setActionLoading(true);
+      const response = await fetch(`/api/listings/${deleteModal.listing.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete listing');
+      }
+
+      // Remove from local state
+      setListings((prev) => prev.filter((l) => l.id !== deleteModal.listing?.id));
+
+      setSuccessMessage('Listing permanently deleted');
+      setTimeout(() => setSuccessMessage(''), 3000);
+
+      setDeleteModal({ isOpen: false, listing: null });
+    } catch (err: any) {
+      console.error('Error deleting listing:', err);
+      setError(err.message || 'Failed to delete listing');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // Filter regular listings
   const filteredListings = activeTab === 'all'
     ? listings
@@ -154,22 +261,22 @@ export default function MyListingsPage() {
     <div className="min-h-screen bg-bg py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-polar-night mb-2">My Listings</h1>
-            <p className="text-text-secondary">
+            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">My Listings</h1>
+            <p className="text-sm sm:text-base text-text-secondary">
               Manage your selling and buying activity
             </p>
           </div>
-          <div className="flex gap-3">
-            <Link href="/wanted/new">
-              <Button variant="secondary" size="lg">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <Link href="/wanted/new" className="w-full sm:w-auto">
+              <Button variant="secondary" size="lg" fullWidth className="sm:w-auto">
                 <Search className="w-5 h-5 mr-2" />
                 Looking For
               </Button>
             </Link>
-            <Link href="/sell">
-              <Button variant="primary" size="lg">
+            <Link href="/sell" className="w-full sm:w-auto">
+              <Button variant="primary" size="lg" fullWidth className="sm:w-auto">
                 <Plus className="w-5 h-5 mr-2" />
                 Sell a Game
               </Button>
@@ -178,10 +285,10 @@ export default function MyListingsPage() {
         </div>
 
         {/* Main Tabs */}
-        <div className="mb-6 flex gap-3">
+        <div className="mb-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button
             onClick={() => setMainTab('selling')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all shadow-sm ${
+            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${
               mainTab === 'selling'
                 ? 'bg-frost-ice text-snow-white shadow-md'
                 : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
@@ -192,7 +299,7 @@ export default function MyListingsPage() {
           </button>
           <button
             onClick={() => setMainTab('wanted')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all shadow-sm ${
+            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${
               mainTab === 'wanted'
                 ? 'bg-aurora-orange text-snow-white shadow-md'
                 : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
@@ -200,6 +307,17 @@ export default function MyListingsPage() {
           >
             <Search className="w-5 h-5 inline mr-2" />
             Looking For ({wantedListings.length})
+          </button>
+          <button
+            onClick={() => setMainTab('saved')}
+            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${
+              mainTab === 'saved'
+                ? 'bg-aurora-red text-snow-white shadow-md'
+                : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
+            }`}
+          >
+            <Heart className="w-5 h-5 inline mr-2" />
+            Saved ({savedListings.length})
           </button>
         </div>
 
@@ -258,6 +376,13 @@ export default function MyListingsPage() {
         {/* SELLING TAB CONTENT */}
         {mainTab === 'selling' && (
           <>
+            {/* Success Message */}
+            {successMessage && (
+              <Card padding="md" className="mb-6 bg-aurora-green/10 border border-aurora-green/20">
+                <p className="text-sm text-aurora-green">{successMessage}</p>
+              </Card>
+            )}
+
             {/* Error Message */}
             {error && (
               <Card padding="md" className="mb-6 bg-aurora-red/10 border border-aurora-red/20">
@@ -303,7 +428,7 @@ export default function MyListingsPage() {
                 {filteredListings.map((listing) => (
                   <div key={listing.id} className="relative">
                     {/* Status Badge Overlay */}
-                    <div className="absolute top-3 right-3 z-10">
+                    <div className="absolute top-3 left-3 z-10">
                       <div className={`px-3 py-1 rounded-full bg-snow-white shadow-md flex items-center gap-1.5 ${STATUS_COLORS[listing.status]}`}>
                         {(() => {
                           const StatusIcon = STATUS_ICONS[listing.status];
@@ -315,7 +440,18 @@ export default function MyListingsPage() {
                       </div>
                     </div>
 
-                    <ListingCard listing={listing as any} />
+                    {/* Actions Menu Overlay */}
+                    <div className="absolute top-3 right-3 z-10">
+                      <ListingActionsMenu
+                        listingId={listing.id}
+                        status={listing.status}
+                        onStatusChange={(newStatus) => handleStatusChangeRequest(listing, newStatus)}
+                        onDelete={() => handleDeleteRequest(listing)}
+                        onLinkCopied={() => setShowClipboardSuccess(true)}
+                      />
+                    </div>
+
+                    <ListingCard listing={listing as any} isOwnListing={true} />
                   </div>
                 ))}
               </div>
@@ -379,7 +515,90 @@ export default function MyListingsPage() {
             )}
           </>
         )}
+
+        {/* SAVED TAB CONTENT */}
+        {mainTab === 'saved' && (
+          <>
+            {/* Error Message */}
+            {savedError && (
+              <Card padding="md" className="mb-6 bg-aurora-red/10 border border-aurora-red/20">
+                <p className="text-sm text-aurora-red">{savedError}</p>
+              </Card>
+            )}
+
+            {/* Loading State */}
+            {savedLoading && (
+              <div className="text-center py-12">
+                <p className="text-text-secondary">Loading your saved listings...</p>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!savedLoading && savedListings.length === 0 && (
+              <Card padding="lg" className="text-center">
+                <Heart className="w-16 h-16 text-text-muted mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-polar-night mb-2">
+                  No saved listings yet
+                </h3>
+                <p className="text-text-secondary mb-6">
+                  Start saving listings you're interested in by clicking the heart icon on any listing card or detail page.
+                </p>
+                <Link href="/browse">
+                  <Button variant="primary">
+                    <Search className="w-5 h-5 mr-2" />
+                    Browse Listings
+                  </Button>
+                </Link>
+              </Card>
+            )}
+
+            {/* Saved Listings Grid */}
+            {!savedLoading && savedListings.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {savedListings.map((savedListing) => (
+                  <ListingCard
+                    key={savedListing.id}
+                    listing={savedListing.listing}
+                    showSeller={true}
+                    isOwnListing={false}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
+
+      {/* Modals */}
+      {statusChangeModal.listing && (
+        <StatusChangeModal
+          isOpen={statusChangeModal.isOpen}
+          onClose={() => setStatusChangeModal({ isOpen: false, listing: null, newStatus: null })}
+          onConfirm={handleStatusChange}
+          currentStatus={statusChangeModal.listing.status}
+          newStatus={statusChangeModal.newStatus!}
+          gameName={statusChangeModal.listing.game_name}
+          isLoading={actionLoading}
+        />
+      )}
+
+      {deleteModal.listing && (
+        <DeleteConfirmationModal
+          isOpen={deleteModal.isOpen}
+          onClose={() => setDeleteModal({ isOpen: false, listing: null })}
+          onConfirm={handleDelete}
+          gameName={deleteModal.listing.game_name}
+          isLoading={actionLoading}
+        />
+      )}
+
+      {/* Clipboard Success Modal */}
+      <NotificationModal
+        isOpen={showClipboardSuccess}
+        onClose={() => setShowClipboardSuccess(false)}
+        type="success"
+        message="Link copied to clipboard!"
+      />
     </div>
   );
 }
