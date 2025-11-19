@@ -11,10 +11,14 @@ import { WantedListingCard } from '@/components/wanted/WantedListingCard';
 import { ListingActionsMenu } from '@/components/listing/ListingActionsMenu';
 import { StatusChangeModal } from '@/components/listing/StatusChangeModal';
 import { DeleteConfirmationModal } from '@/components/listing/DeleteConfirmationModal';
+import { WantedListingActionsMenu } from '@/components/wanted/WantedListingActionsMenu';
+import { WantedStatusChangeModal } from '@/components/wanted/WantedStatusChangeModal';
+import { WantedDeleteConfirmationModal } from '@/components/wanted/WantedDeleteConfirmationModal';
 import { NotificationModal } from '@/components/common/NotificationModal';
 import type { Listing, ListingStatus } from '@/lib/types/listing';
-import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
+import type { WantedListingWithDetails, WantedListingStatus } from '@/lib/types/wanted-listing';
 import { getStatusLabel } from '@/lib/types/listing';
+import { getWantedStatusLabel } from '@/lib/types/wanted-listing';
 import { useSavedListings } from '@/lib/hooks/useSavedListings';
 
 const STATUS_LABELS = {
@@ -36,6 +40,20 @@ const STATUS_COLORS = {
   active: 'text-aurora-green',
   sold: 'text-frost-ice',
   removed: 'text-text-muted',
+};
+
+const WANTED_STATUS_ICONS = {
+  active: CheckCircle,
+  expired: Clock,
+  fulfilled: CheckCircle,
+  cancelled: XCircle,
+};
+
+const WANTED_STATUS_COLORS = {
+  active: 'text-aurora-green',
+  expired: 'text-text-secondary',
+  fulfilled: 'text-frost-ice',
+  cancelled: 'text-text-muted',
 };
 
 export default function MyListingsPage() {
@@ -82,6 +100,19 @@ export default function MyListingsPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [showClipboardSuccess, setShowClipboardSuccess] = useState(false);
+
+  // Modal state for wanted listing actions
+  const [wantedStatusChangeModal, setWantedStatusChangeModal] = useState<{
+    isOpen: boolean;
+    listing: WantedListingWithDetails | null;
+    newStatus: WantedListingStatus | null;
+  }>({ isOpen: false, listing: null, newStatus: null });
+  const [wantedDeleteModal, setWantedDeleteModal] = useState<{
+    isOpen: boolean;
+    listing: WantedListingWithDetails | null;
+  }>({ isOpen: false, listing: null });
+  const [wantedActionLoading, setWantedActionLoading] = useState(false);
+  const [wantedSuccessMessage, setWantedSuccessMessage] = useState('');
 
   // Fetch regular listings
   useEffect(() => {
@@ -218,6 +249,121 @@ export default function MyListingsPage() {
       setError(err.message || 'Failed to delete listing');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  // Handler functions for wanted listing actions
+  const handleWantedStatusChangeRequest = (listing: WantedListingWithDetails, newStatus: WantedListingStatus) => {
+    setWantedStatusChangeModal({
+      isOpen: true,
+      listing,
+      newStatus,
+    });
+  };
+
+  const handleWantedStatusChange = async () => {
+    if (!wantedStatusChangeModal.listing || !wantedStatusChangeModal.newStatus) return;
+
+    try {
+      setWantedActionLoading(true);
+      const response = await fetch(`/api/wanted/${wantedStatusChangeModal.listing.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: wantedStatusChangeModal.newStatus }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update status');
+      }
+
+      // Update local state with optimistic update
+      setWantedListings((prev) =>
+        prev.map((l) =>
+          l.id === wantedStatusChangeModal.listing?.id
+            ? { ...l, status: wantedStatusChangeModal.newStatus! }
+            : l
+        )
+      );
+
+      setWantedSuccessMessage(`Wanted listing ${wantedStatusChangeModal.newStatus === 'fulfilled' ? 'marked as fulfilled' : wantedStatusChangeModal.newStatus === 'cancelled' ? 'cancelled' : wantedStatusChangeModal.newStatus === 'active' ? 'reactivated' : 'updated'} successfully`);
+      setTimeout(() => setWantedSuccessMessage(''), 3000);
+
+      setWantedStatusChangeModal({ isOpen: false, listing: null, newStatus: null });
+    } catch (err: any) {
+      console.error('Error updating wanted listing status:', err);
+      setWantedError(err.message || 'Failed to update wanted listing status');
+    } finally {
+      setWantedActionLoading(false);
+    }
+  };
+
+  const handleWantedExtend = async (listing: WantedListingWithDetails) => {
+    try {
+      setWantedActionLoading(true);
+      const response = await fetch(`/api/wanted/${listing.id}/extend`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to extend wanted listing');
+      }
+
+      const data = await response.json();
+
+      // Update local state with new expiration date
+      setWantedListings((prev) =>
+        prev.map((l) =>
+          l.id === listing.id
+            ? { ...l, expires_at: data.newExpiresAt || data.wantedListing.expires_at, status: 'active' }
+            : l
+        )
+      );
+
+      setWantedSuccessMessage('Wanted listing extended by 30 days');
+      setTimeout(() => setWantedSuccessMessage(''), 3000);
+    } catch (err: any) {
+      console.error('Error extending wanted listing:', err);
+      setWantedError(err.message || 'Failed to extend wanted listing');
+    } finally {
+      setWantedActionLoading(false);
+    }
+  };
+
+  const handleWantedDeleteRequest = (listing: WantedListingWithDetails) => {
+    setWantedDeleteModal({
+      isOpen: true,
+      listing,
+    });
+  };
+
+  const handleWantedDelete = async () => {
+    if (!wantedDeleteModal.listing) return;
+
+    try {
+      setWantedActionLoading(true);
+      const response = await fetch(`/api/wanted/${wantedDeleteModal.listing.id}?hard=true`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete wanted listing');
+      }
+
+      // Remove from local state
+      setWantedListings((prev) => prev.filter((l) => l.id !== wantedDeleteModal.listing?.id));
+
+      setWantedSuccessMessage('Wanted listing permanently deleted');
+      setTimeout(() => setWantedSuccessMessage(''), 3000);
+
+      setWantedDeleteModal({ isOpen: false, listing: null });
+    } catch (err: any) {
+      console.error('Error deleting wanted listing:', err);
+      setWantedError(err.message || 'Failed to delete wanted listing');
+    } finally {
+      setWantedActionLoading(false);
     }
   };
 
@@ -501,15 +647,48 @@ export default function MyListingsPage() {
               </Card>
             )}
 
+            {/* Success Message */}
+            {wantedSuccessMessage && (
+              <Card padding="md" className="mb-6 bg-aurora-green/10 border border-aurora-green/20">
+                <p className="text-sm text-aurora-green">{wantedSuccessMessage}</p>
+              </Card>
+            )}
+
             {/* Wanted Listings Grid */}
             {!wantedLoading && filteredWantedListings.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {filteredWantedListings.map((listing) => (
-                  <WantedListingCard
-                    key={listing.id}
-                    wantedListing={listing}
-                    showBuyer={false}
-                  />
+                  <div key={listing.id} className="relative">
+                    {/* Status Badge Overlay */}
+                    <div className="absolute top-3 left-3 z-10">
+                      <div className={`px-3 py-1 rounded-full bg-snow-white shadow-md flex items-center gap-1.5 ${WANTED_STATUS_COLORS[listing.status]}`}>
+                        {(() => {
+                          const StatusIcon = WANTED_STATUS_ICONS[listing.status];
+                          return <StatusIcon className="w-4 h-4" />;
+                        })()}
+                        <span className="text-xs font-medium">
+                          {getWantedStatusLabel(listing.status)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Actions Menu Overlay */}
+                    <div className="absolute top-3 right-3 z-10">
+                      <WantedListingActionsMenu
+                        listingId={listing.id}
+                        status={listing.status}
+                        onStatusChange={(newStatus) => handleWantedStatusChangeRequest(listing, newStatus)}
+                        onExtend={() => handleWantedExtend(listing)}
+                        onDelete={() => handleWantedDeleteRequest(listing)}
+                        onLinkCopied={() => setShowClipboardSuccess(true)}
+                      />
+                    </div>
+
+                    <WantedListingCard
+                      wantedListing={listing}
+                      showBuyer={false}
+                    />
+                  </div>
                 ))}
               </div>
             )}
@@ -589,6 +768,29 @@ export default function MyListingsPage() {
           onConfirm={handleDelete}
           gameName={deleteModal.listing.game_name}
           isLoading={actionLoading}
+        />
+      )}
+
+      {/* Wanted Listing Modals */}
+      {wantedStatusChangeModal.listing && (
+        <WantedStatusChangeModal
+          isOpen={wantedStatusChangeModal.isOpen}
+          onClose={() => setWantedStatusChangeModal({ isOpen: false, listing: null, newStatus: null })}
+          onConfirm={handleWantedStatusChange}
+          currentStatus={wantedStatusChangeModal.listing.status}
+          newStatus={wantedStatusChangeModal.newStatus!}
+          gameName={wantedStatusChangeModal.listing.game_name}
+          isLoading={wantedActionLoading}
+        />
+      )}
+
+      {wantedDeleteModal.listing && (
+        <WantedDeleteConfirmationModal
+          isOpen={wantedDeleteModal.isOpen}
+          onClose={() => setWantedDeleteModal({ isOpen: false, listing: null })}
+          onConfirm={handleWantedDelete}
+          gameName={wantedDeleteModal.listing.game_name}
+          isLoading={wantedActionLoading}
         />
       )}
 

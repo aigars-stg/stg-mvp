@@ -165,9 +165,9 @@ export default function WantedListingDetailPage() {
             <div>
               <Card padding="none" className="overflow-hidden">
                 <div className="relative bg-polar-night/5 flex items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[500px]">
-                  {wantedListing.game?.image ? (
+                  {(wantedListing.version_image || wantedListing.game?.image) ? (
                     <img
-                      src={wantedListing.game.image}
+                      src={wantedListing.version_image || wantedListing.game?.image || ''}
                       alt={wantedListing.game_name}
                       className="max-w-full max-h-full object-contain p-8"
                     />
@@ -205,15 +205,15 @@ export default function WantedListingDetailPage() {
             <div className="space-y-6">
               {/* Title and Budget */}
               <div>
-                <h1 className="text-3xl font-bold text-polar-night mb-4">
+                <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-4">
                   {wantedListing.game_name}
-                  {wantedListing.game_year && (
-                    <span className="text-text-muted font-normal"> ({wantedListing.game_year})</span>
+                  {wantedListing.edition_year && (
+                    <span className="text-text-muted font-normal"> ({wantedListing.edition_year})</span>
                   )}
                 </h1>
 
-                <div className="flex items-center gap-4">
-                  <span className="text-4xl font-bold text-aurora-orange">
+                <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+                  <span className="text-3xl sm:text-4xl font-bold text-aurora-orange">
                     {budgetDisplay}
                   </span>
                   <Badge className={getWantedStatusBadgeColor(wantedListing.status)} size="lg">
@@ -223,7 +223,7 @@ export default function WantedListingDetailPage() {
               </div>
 
               {/* Game Information (BGG Data) */}
-              {(wantedListing.game?.player_count || wantedListing.game?.min_age || wantedListing.game?.playing_time || wantedListing.game?.is_expansion || wantedListing.bgg_game_id) && (
+              {(wantedListing.game?.player_count || wantedListing.game?.min_age || wantedListing.game?.playing_time || wantedListing.game?.is_expansion || wantedListing.bgg_game_id || wantedListing.language || wantedListing.publisher) && (
                 <Card padding="md">
                   <div className="space-y-3">
                     {/* Metadata Icons */}
@@ -256,13 +256,22 @@ export default function WantedListingDetailPage() {
                           href={`https://boardgamegeek.com/boardgame/${wantedListing.bgg_game_id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-aurora-orange hover:text-aurora-orange/80 transition-colors font-medium"
+                          className="flex items-center gap-1.5 text-frost-ice hover:text-aurora-blue transition-colors font-medium"
                         >
                           <ExternalLink className="w-4 h-4" />
                           <span>View on BGG</span>
                         </a>
                       )}
                     </div>
+
+                    {/* Version/Publisher Info */}
+                    {(wantedListing.language || wantedListing.publisher) && (
+                      <p className="text-sm text-text-secondary pt-2 border-t border-border-subtle">
+                        {wantedListing.language?.replace(/ \| /g, ' / ')}
+                        {wantedListing.language && wantedListing.publisher && ' • '}
+                        {wantedListing.publisher?.replace(/ \| /g, ' / ')}
+                      </p>
+                    )}
 
                     {/* Powered by BGG */}
                     <div className="pt-2 border-t border-border-subtle">
@@ -296,7 +305,7 @@ export default function WantedListingDetailPage() {
               </Card>
 
               {/* Location & Details */}
-              {(wantedListing.location_preferences || wantedListing.preferred_language || wantedListing.notes) && (
+              {(wantedListing.location_preferences || wantedListing.notes) && (
                 <Card padding="md">
                   <h3 className="font-semibold text-polar-night mb-3">Preferences & Details</h3>
 
@@ -311,18 +320,8 @@ export default function WantedListingDetailPage() {
                       </div>
                     )}
 
-                    {wantedListing.preferred_language && (
-                      <div className="flex items-start gap-3">
-                        <Package className="w-5 h-5 text-aurora-orange" />
-                        <div>
-                          <p className="text-xs text-text-secondary mb-0.5">Preferred Language</p>
-                          <p className="text-polar-night">{wantedListing.preferred_language}</p>
-                        </div>
-                      </div>
-                    )}
-
                     {wantedListing.notes && (
-                      <div className="pt-3 border-t border-border-subtle">
+                      <div className={wantedListing.location_preferences ? 'pt-3 border-t border-border-subtle' : ''}>
                         <p className="text-xs text-text-secondary mb-1">Additional Details</p>
                         <p className="text-polar-night leading-relaxed whitespace-pre-wrap">
                           {wantedListing.notes}

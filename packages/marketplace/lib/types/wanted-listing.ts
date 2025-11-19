@@ -14,6 +14,16 @@ export interface WantedListing {
   game_name: string;
   game_year: number | null;
 
+  // Version/Edition Information
+  version_source: string;
+  bgg_version_id: number | null;
+  version_name: string | null;
+  publisher: string | null;
+  language: string | null;
+  edition_year: number | null;
+  version_thumbnail: string | null;
+  version_image: string | null;
+
   // Budget Information
   min_price: number | null;
   max_price: number;
@@ -21,7 +31,7 @@ export interface WantedListing {
 
   // Preferences
   acceptable_conditions: ListingCondition[];
-  preferred_language: string | null;
+  preferred_language: string | null; // Deprecated: use language field instead
   location_preferences: string | null;
   notes: string | null;
 
@@ -97,6 +107,12 @@ export interface WantedListingCard {
   bgg_game_id: number;
   game_name: string;
   game_year: number | null;
+  version_name: string | null;
+  publisher: string | null;
+  language: string | null;
+  edition_year: number | null;
+  version_thumbnail: string | null;
+  version_image: string | null;
   min_price: number | null;
   max_price: number;
   currency: string;

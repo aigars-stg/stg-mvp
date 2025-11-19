@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       selectedGame,
+      selectedVersion,
       minPrice,
       maxPrice,
       acceptableConditions,
@@ -51,6 +52,10 @@ export async function POST(request: NextRequest) {
     // Validation
     if (!selectedGame || !selectedGame.id) {
       return NextResponse.json({ error: 'Game is required' }, { status: 400 });
+    }
+
+    if (!selectedVersion) {
+      return NextResponse.json({ error: 'Game version/edition is required' }, { status: 400 });
     }
 
     if (!maxPrice || parseFloat(maxPrice) <= 0) {
@@ -92,6 +97,16 @@ export async function POST(request: NextRequest) {
       bgg_game_id: selectedGame.id,
       game_name: selectedGame.name,
       game_year: selectedGame.yearPublished || null,
+
+      // Version/Edition information
+      version_source: 'bgg',
+      bgg_version_id: selectedVersion.id || null,
+      version_name: selectedVersion.name || null,
+      publisher: selectedVersion.publishers?.join(' | ') || selectedVersion.publisher || null,
+      language: selectedVersion.languages?.join(' | ') || selectedVersion.language || null,
+      edition_year: selectedVersion.yearPublished || null,
+      version_thumbnail: selectedVersion.thumbnail || null,
+      version_image: selectedVersion.image || null,
 
       // Budget
       min_price: minPrice ? parseFloat(minPrice) : null,

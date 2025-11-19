@@ -62,9 +62,9 @@ export function WantedListingCard({
       >
         {/* Image Section */}
         <div className="relative h-64 bg-polar-night/5 flex items-center justify-center overflow-hidden">
-          {wantedListing.game?.image ? (
+          {(wantedListing.version_image || wantedListing.game?.image) ? (
             <img
-              src={wantedListing.game.image}
+              src={wantedListing.version_image || wantedListing.game?.image || ''}
               alt={wantedListing.game_name}
               className="max-w-full max-h-full object-contain p-4"
             />
@@ -109,8 +109,8 @@ export function WantedListingCard({
             {/* Game Name with Year */}
             <h3 className="font-bold text-lg text-polar-night line-clamp-2 min-h-[2.5rem]">
               {wantedListing.game_name}
-              {wantedListing.game_year && (
-                <span className="text-text-muted font-normal"> ({wantedListing.game_year})</span>
+              {wantedListing.edition_year && (
+                <span className="text-text-muted font-normal"> ({wantedListing.edition_year})</span>
               )}
             </h3>
 
@@ -141,6 +141,15 @@ export function WantedListingCard({
                   </Badge>
                 )}
               </div>
+            )}
+
+            {/* Version/Publisher Info */}
+            {(wantedListing.language || wantedListing.publisher) && (
+              <p className="text-sm text-text-secondary line-clamp-2">
+                {wantedListing.language?.replace(/ \| /g, ' / ')}
+                {wantedListing.language && wantedListing.publisher && ' • '}
+                {wantedListing.publisher?.replace(/ \| /g, ' / ')}
+              </p>
             )}
 
             {/* Budget Range */}

@@ -4,10 +4,11 @@ import { Package, MapPin } from 'lucide-react';
 import { Card, Badge } from '@second-turn/design-system';
 import type { ListingCondition } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
-import type { BGGGame } from '@/lib/bgg-types';
+import type { BGGGame, VersionSelection } from '@/lib/bgg-types';
 
 interface WantedListingPreviewProps {
   selectedGame: BGGGame | null;
+  selectedVersion: VersionSelection | null;
   maxPrice: string;
   minimumCondition: ListingCondition | null;
   location: string;
@@ -23,12 +24,13 @@ function getAcceptableConditions(minimum: ListingCondition): ListingCondition[] 
 
 export function WantedListingPreview({
   selectedGame,
+  selectedVersion,
   maxPrice,
   minimumCondition,
   location,
   notes,
 }: WantedListingPreviewProps) {
-  const isComplete = selectedGame && maxPrice && parseFloat(maxPrice) > 0 && minimumCondition;
+  const isComplete = selectedGame && selectedVersion && maxPrice && parseFloat(maxPrice) > 0 && minimumCondition;
 
   return (
     <div className="space-y-4">
@@ -66,6 +68,21 @@ export function WantedListingPreview({
                 <p className="text-sm text-text-secondary">
                   ({selectedGame.yearPublished})
                 </p>
+              )}
+
+              {/* Version/Edition Information */}
+              {selectedVersion && (
+                <div className="mt-2 space-y-1 text-xs text-text-secondary">
+                  {selectedVersion.language && (
+                    <p><strong>Language:</strong> {selectedVersion.language}</p>
+                  )}
+                  {selectedVersion.publisher && (
+                    <p><strong>Publisher:</strong> {selectedVersion.publisher}</p>
+                  )}
+                  {selectedVersion.yearPublished && (
+                    <p><strong>Edition:</strong> {selectedVersion.yearPublished}</p>
+                  )}
+                </div>
               )}
             </>
           ) : (
