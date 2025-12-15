@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Button, Card } from '@second-turn/design-system';
-import { Package, Clock, CheckCircle, XCircle, Plus, Search, Heart } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Package, Clock, CheckCircle, XCircle, Plus, Search, Heart, LayoutDashboard } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
@@ -56,21 +56,20 @@ const WANTED_STATUS_COLORS = {
   cancelled: 'text-text-muted',
 };
 
-export default function MyListingsPage() {
+function MyListingsContent() {
   const { user } = useAuth();
   const router = useRouter();
 
   // Top-level tab: selling vs wanted vs saved (check URL param)
-  const [mainTab, setMainTab] = useState<'selling' | 'wanted' | 'saved'>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get('tab');
-      if (tab === 'wanted') return 'wanted';
-      if (tab === 'saved') return 'saved';
-      return 'selling';
-    }
-    return 'selling';
-  });
+  const searchParams = useSearchParams();
+  const [mainTab, setMainTab] = useState<'selling' | 'wanted' | 'saved'>('selling');
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'wanted') setMainTab('wanted');
+    else if (tab === 'saved') setMainTab('saved');
+    else setMainTab('selling');
+  }, [searchParams]);
 
   // Selling (regular listings)
   const [listings, setListings] = useState<Listing[]>([]);
@@ -409,22 +408,23 @@ export default function MyListingsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">My Listings</h1>
+            <div className="flex items-center gap-3 mb-2">
+              <LayoutDashboard className="w-8 h-8 text-frost-ice" />
+              <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">My listings</h1>
+            </div>
             <p className="text-sm sm:text-base text-text-secondary">
-              Manage your selling and buying activity
+              Games you're selling, seeking, and saving
             </p>
           </div>
           <div className="hidden sm:flex sm:flex-row gap-2 sm:gap-3">
             <Link href="/wanted/new" className="w-full sm:w-auto">
               <Button variant="secondary" size="lg" fullWidth className="sm:w-auto">
-                <Search className="w-5 h-5 mr-2" />
-                Looking For
+                Request a game
               </Button>
             </Link>
             <Link href="/sell" className="w-full sm:w-auto">
               <Button variant="primary" size="lg" fullWidth className="sm:w-auto">
-                <Plus className="w-5 h-5 mr-2" />
-                Sell a Game
+                Sell a game
               </Button>
             </Link>
           </div>
@@ -434,33 +434,30 @@ export default function MyListingsPage() {
         <div className="mb-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button
             onClick={() => setMainTab('selling')}
-            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${
-              mainTab === 'selling'
-                ? 'bg-frost-ice text-snow-white shadow-md'
-                : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
-            }`}
+            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${mainTab === 'selling'
+              ? 'bg-frost-ice text-snow-white shadow-md'
+              : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
+              }`}
           >
             <Package className="w-5 h-5 inline mr-2" />
             Selling ({listings.length})
           </button>
           <button
             onClick={() => setMainTab('wanted')}
-            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${
-              mainTab === 'wanted'
-                ? 'bg-aurora-orange text-snow-white shadow-md'
-                : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
-            }`}
+            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${mainTab === 'wanted'
+              ? 'bg-aurora-orange text-snow-white shadow-md'
+              : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
+              }`}
           >
             <Search className="w-5 h-5 inline mr-2" />
             Looking For ({wantedListings.length})
           </button>
           <button
             onClick={() => setMainTab('saved')}
-            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${
-              mainTab === 'saved'
-                ? 'bg-aurora-red text-snow-white shadow-md'
-                : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
-            }`}
+            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${mainTab === 'saved'
+              ? 'bg-aurora-red text-snow-white shadow-md'
+              : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
+              }`}
           >
             <Heart className="w-5 h-5 inline mr-2" />
             Saved ({savedListings.length})
@@ -474,17 +471,15 @@ export default function MyListingsPage() {
               <button
                 key={status}
                 onClick={() => setActiveTab(status)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                  activeTab === status
-                    ? 'bg-frost-ice text-snow-white'
-                    : 'bg-bg-elevated text-text-secondary hover:bg-border'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === status
+                  ? 'bg-frost-ice text-snow-white'
+                  : 'bg-bg-elevated text-text-secondary hover:bg-border'
+                  }`}
               >
                 {status === 'all' ? 'All' : STATUS_LABELS[status]}{' '}
                 <span
-                  className={`${
-                    activeTab === status ? 'text-snow-white/80' : 'text-text-muted'
-                  }`}
+                  className={`${activeTab === status ? 'text-snow-white/80' : 'text-text-muted'
+                    }`}
                 >
                   ({statusCounts[status]})
                 </span>
@@ -500,17 +495,15 @@ export default function MyListingsPage() {
               <button
                 key={status}
                 onClick={() => setWantedActiveTab(status)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                  wantedActiveTab === status
-                    ? 'bg-aurora-orange text-snow-white'
-                    : 'bg-bg-elevated text-text-secondary hover:bg-border'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${wantedActiveTab === status
+                  ? 'bg-aurora-orange text-snow-white'
+                  : 'bg-bg-elevated text-text-secondary hover:bg-border'
+                  }`}
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}{' '}
                 <span
-                  className={`${
-                    wantedActiveTab === status ? 'text-snow-white/80' : 'text-text-muted'
-                  }`}
+                  className={`${wantedActiveTab === status ? 'text-snow-white/80' : 'text-text-muted'
+                    }`}
                 >
                   ({wantedStatusCounts[status]})
                 </span>
@@ -545,7 +538,7 @@ export default function MyListingsPage() {
 
             {/* Empty State */}
             {!loading && filteredListings.length === 0 && (
-              <Card padding="lg" className="text-center">
+              <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
                 <Package className="w-16 h-16 text-text-muted mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
                   {activeTab === 'all'
@@ -590,6 +583,7 @@ export default function MyListingsPage() {
                     <div className="absolute top-3 right-3 z-10">
                       <ListingActionsMenu
                         listingId={listing.id}
+                        bggGameId={listing.bgg_game_id}
                         status={listing.status}
                         onStatusChange={(newStatus) => handleStatusChangeRequest(listing, newStatus)}
                         onDelete={() => handleDeleteRequest(listing)}
@@ -624,7 +618,7 @@ export default function MyListingsPage() {
 
             {/* Empty State */}
             {!wantedLoading && filteredWantedListings.length === 0 && (
-              <Card padding="lg" className="text-center">
+              <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
                 <Search className="w-16 h-16 text-text-muted mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
                   {wantedActiveTab === 'all'
@@ -714,7 +708,7 @@ export default function MyListingsPage() {
 
             {/* Empty State */}
             {!savedLoading && savedListings.length === 0 && (
-              <Card padding="lg" className="text-center">
+              <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
                 <Heart className="w-16 h-16 text-text-muted mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
                   No saved listings yet
@@ -802,5 +796,19 @@ export default function MyListingsPage() {
         message="Link copied to clipboard!"
       />
     </div>
+  );
+}
+
+export default function MyListingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-text-secondary">Loading...</p>
+        </div>
+      </div>
+    }>
+      <MyListingsContent />
+    </Suspense>
   );
 }

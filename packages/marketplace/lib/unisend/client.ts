@@ -1,0 +1,420 @@
+/**
+ * Unisend API Client
+ * Server-side client for Unisend Terminal-to-Terminal shipping
+ *
+ * Usage:
+ *   const client = getUnisendClient();
+ *   const terminals = await client.getTerminals('LT');
+ */
+
+import {
+  AuthResponse,
+  Terminal,
+  TerminalCountry,
+  CreateParcelRequest,
+  ParcelResponse,
+  ShippingInitiateRequest,
+  ShippingInitiateResponse,
+  BarcodeInfo,
+  TrackingEvent,
+  LabelLayout,
+  LabelOrientation,
+  UnisendValidationError,
+  UnisendApiError,
+  ValidationErrorItem,
+} from './types';
+
+// ============================================
+// Configuration
+// ============================================
+
+const UNISEND_API_URL = process.env.UNISEND_API_URL || 'https://api-manosiuntostst.post.lt';
+const UNISEND_USERNAME = process.env.UNISEND_USERNAME || '';
+const UNISEND_PASSWORD = process.env.UNISEND_PASSWORD || '';
+
+// Token cache (in-memory for serverless - consider Redis for production)
+let tokenCache: {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+} | null = null;
+
+// Terminal cache (1 hour TTL)
+const terminalCache: Map<
+  TerminalCountry,
+  { terminals: Terminal[]; expiresAt: number }
+> = new Map();
+const TERMINAL_CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+// ============================================
+// Token Management
+// ============================================
+
+async function authenticate(): Promise<AuthResponse> {
+  if (!UNISEND_USERNAME || !UNISEND_PASSWORD) {
+    throw new UnisendApiError('Unisend credentials not configured', 500);
+  }
+
+  // Unisend expects OAuth params in query string, not body
+  const params = new URLSearchParams({
+    scope: 'read+write+API_CLIENT',
+    grant_type: 'password',
+    clientSystem: 'PUBLIC',
+    username: UNISEND_USERNAME,
+    password: UNISEND_PASSWORD,
+  });
+
+  const response = await fetch(`${UNISEND_API_URL}/oauth/token?${params.toString()}`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new UnisendApiError(`Authentication failed: ${text}`, response.status);
+  }
+
+  const data: AuthResponse = await response.json();
+
+  // Cache the token (expire 60 seconds early to be safe)
+  tokenCache = {
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+    expiresAt: Date.now() + (data.expires_in - 60) * 1000,
+  };
+
+  return data;
+}
+
+async function refreshAccessToken(): Promise<void> {
+  if (!tokenCache?.refreshToken) {
+    await authenticate();
+    return;
+  }
+
+  // Unisend expects OAuth params in query string
+  const params = new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: tokenCache.refreshToken,
+  });
+
+  const response = await fetch(`${UNISEND_API_URL}/oauth/token?${params.toString()}`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    // Refresh failed, try full authentication
+    tokenCache = null;
+    await authenticate();
+    return;
+  }
+
+  const data: AuthResponse = await response.json();
+
+  tokenCache = {
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+    expiresAt: Date.now() + (data.expires_in - 60) * 1000,
+  };
+}
+
+async function getAccessToken(): Promise<string> {
+  // Check if we have a valid token
+  if (tokenCache && tokenCache.expiresAt > Date.now()) {
+    return tokenCache.accessToken;
+  }
+
+  // Try to refresh or authenticate
+  if (tokenCache?.refreshToken) {
+    await refreshAccessToken();
+  } else {
+    await authenticate();
+  }
+
+  if (!tokenCache) {
+    throw new UnisendApiError('Failed to obtain access token', 500);
+  }
+
+  return tokenCache.accessToken;
+}
+
+// ============================================
+// API Request Helper
+// ============================================
+
+async function apiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {},
+  retryCount = 0
+): Promise<T> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(`${UNISEND_API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  // Handle 401 - token might be expired
+  if (response.status === 401 && retryCount < 1) {
+    tokenCache = null;
+    return apiRequest<T>(endpoint, options, retryCount + 1);
+  }
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  // Handle empty responses
+  const text = await response.text();
+  if (!text) {
+    return {} as T;
+  }
+
+  return JSON.parse(text);
+}
+
+async function handleApiError(response: Response): Promise<never> {
+  const text = await response.text();
+
+  try {
+    const data = JSON.parse(text);
+
+    // Array of validation errors
+    if (Array.isArray(data) && data.length > 0) {
+      const validationErrors: ValidationErrorItem[] = data.map((e) => ({
+        field: e.field || '',
+        error: e.error || '',
+        error_description: e.error_description || e.error || '',
+      }));
+      throw new UnisendValidationError('Validation failed', validationErrors);
+    }
+
+    // Single error object
+    if (data.error || data.error_description) {
+      throw new UnisendApiError(
+        data.error_description || data.error,
+        response.status
+      );
+    }
+  } catch (e) {
+    if (e instanceof UnisendValidationError || e instanceof UnisendApiError) {
+      throw e;
+    }
+  }
+
+  throw new UnisendApiError(`Unisend API error: ${response.status} ${text}`, response.status);
+}
+
+// ============================================
+// Public API Methods
+// ============================================
+
+/**
+ * Get available terminals for a country
+ * Results are cached for 1 hour
+ */
+export async function getTerminals(
+  countryCode: TerminalCountry,
+  searchQuery?: string
+): Promise<Terminal[]> {
+  // Check cache first
+  const cached = terminalCache.get(countryCode);
+  if (cached && cached.expiresAt > Date.now()) {
+    const terminals = cached.terminals;
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return terminals.filter(
+        (t) =>
+          t.name.toLowerCase().includes(query) ||
+          t.address.toLowerCase().includes(query) ||
+          t.city.toLowerCase().includes(query)
+      );
+    }
+    return terminals;
+  }
+
+  // Fetch from API
+  const params = new URLSearchParams({ receiverCountryCode: countryCode });
+
+  const terminals = await apiRequest<Terminal[]>(`/api/v2/terminal?${params}`);
+
+  // Cache the results
+  terminalCache.set(countryCode, {
+    terminals,
+    expiresAt: Date.now() + TERMINAL_CACHE_TTL,
+  });
+
+  // Filter if search query provided
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    return terminals.filter(
+      (t) =>
+        t.name.toLowerCase().includes(query) ||
+        t.address.toLowerCase().includes(query) ||
+        t.city.toLowerCase().includes(query)
+    );
+  }
+
+  return terminals;
+}
+
+/**
+ * Get a specific terminal by ID
+ */
+export async function getTerminal(
+  countryCode: TerminalCountry,
+  terminalId: string
+): Promise<Terminal | null> {
+  const terminals = await getTerminals(countryCode);
+  return terminals.find((t) => t.id === terminalId) || null;
+}
+
+/**
+ * Create a parcel for shipping
+ * Called when seller accepts an order
+ */
+export async function createParcel(data: CreateParcelRequest): Promise<ParcelResponse> {
+  return apiRequest<ParcelResponse>('/api/v2/parcel', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Initiate shipping (finalize and generate label)
+ * Called after parcel is created
+ */
+export async function initiateShipping(
+  data: ShippingInitiateRequest
+): Promise<ShippingInitiateResponse> {
+  return apiRequest<ShippingInitiateResponse>(
+    '/api/v2/shipping/initiate?processAsync=false',
+    {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }
+  );
+}
+
+/**
+ * Get barcode and tracking URL for parcels
+ */
+export async function getBarcodes(parcelIds: number[]): Promise<BarcodeInfo[]> {
+  const params = new URLSearchParams();
+  parcelIds.forEach((id) => params.append('parcelIds', String(id)));
+
+  return apiRequest<BarcodeInfo[]>(`/api/v2/shipping/barcode?${params}`);
+}
+
+/**
+ * Generate shipping label PDF
+ */
+export async function generateLabel(
+  parcelIds: number[],
+  layout: LabelLayout = 'LAYOUT_10x15',
+  orientation: LabelOrientation = 'LANDSCAPE'
+): Promise<Blob> {
+  const params = new URLSearchParams({ layout, labelOrientation: orientation });
+  parcelIds.forEach((id) => params.append('parcelIds', String(id)));
+
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(`${UNISEND_API_URL}/api/v2/label?${params}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new UnisendApiError('Failed to generate label', response.status);
+  }
+
+  return response.blob();
+}
+
+/**
+ * Get tracking events for a barcode
+ */
+export async function getTrackingEvents(
+  barcode: string,
+  lang: 'en' | 'lt' = 'en'
+): Promise<TrackingEvent[]> {
+  return apiRequest<TrackingEvent[]>(`/api/v2/tracking/${barcode}/events`, {
+    headers: {
+      'Accept-Language': lang,
+    },
+  });
+}
+
+// ============================================
+// Convenience Methods
+// ============================================
+
+/**
+ * Create parcel and initiate shipping in one call
+ * Returns barcode and tracking info
+ */
+export async function createAndShipParcel(
+  data: CreateParcelRequest
+): Promise<{
+  parcelId: number;
+  barcode: string;
+  trackingUrl?: string;
+}> {
+  // Create parcel
+  const parcelResponse = await createParcel(data);
+
+  // Initiate shipping
+  await initiateShipping({ parcelIds: [parcelResponse.parcelId] });
+
+  // Get barcode
+  const barcodes = await getBarcodes([parcelResponse.parcelId]);
+
+  return {
+    parcelId: parcelResponse.parcelId,
+    barcode: barcodes[0]?.barcode || '',
+    trackingUrl: barcodes[0]?.trackingUrl,
+  };
+}
+
+/**
+ * Clear terminal cache (useful for testing or manual refresh)
+ */
+export function clearTerminalCache(): void {
+  terminalCache.clear();
+}
+
+/**
+ * Clear token cache (useful for testing)
+ */
+export function clearTokenCache(): void {
+  tokenCache = null;
+}
+
+// ============================================
+// Singleton Export
+// ============================================
+
+const unisendClient = {
+  getTerminals,
+  getTerminal,
+  createParcel,
+  initiateShipping,
+  getBarcodes,
+  generateLabel,
+  getTrackingEvents,
+  createAndShipParcel,
+  clearTerminalCache,
+  clearTokenCache,
+};
+
+export type UnisendClient = typeof unisendClient;
+
+export function getUnisendClient(): UnisendClient {
+  return unisendClient;
+}
+
+export default unisendClient;
