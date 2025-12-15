@@ -12,6 +12,7 @@ import {
 } from '@react-email/components';
 import * as React from 'react';
 
+
 interface AccountDeletedEmailProps {
     userName: string;
     recoveryDate: string; // Formatted date string
