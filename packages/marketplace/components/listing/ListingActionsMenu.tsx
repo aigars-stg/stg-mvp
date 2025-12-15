@@ -6,6 +6,7 @@ import { MoreVertical, Edit, Package, Trash2, ExternalLink, RotateCcw } from 'lu
 
 export interface ListingActionsMenuProps {
   listingId: string;
+  bggGameId: number;
   status: 'draft' | 'active' | 'sold' | 'removed';
   onStatusChange: (status: 'draft' | 'active' | 'sold' | 'removed') => void;
   onDelete: () => void;
@@ -14,6 +15,7 @@ export interface ListingActionsMenuProps {
 
 export function ListingActionsMenu({
   listingId,
+  bggGameId,
   status,
   onStatusChange,
   onDelete,
@@ -44,7 +46,7 @@ export function ListingActionsMenu({
 
   const handleView = () => {
     setIsOpen(false);
-    router.push(`/listing/${listingId}`);
+    router.push(`/game/${bggGameId}`);
   };
 
   const handleStatusChange = (newStatus: 'draft' | 'active' | 'sold' | 'removed') => {
@@ -58,7 +60,7 @@ export function ListingActionsMenu({
   };
 
   const handleCopyLink = async () => {
-    const url = `${window.location.origin}/listing/${listingId}`;
+    const url = `${window.location.origin}/game/${bggGameId}`;
     try {
       await navigator.clipboard.writeText(url);
       setIsOpen(false);
