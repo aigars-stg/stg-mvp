@@ -363,11 +363,10 @@ export default function ListingDetailPage() {
                           <button
                             key={index}
                             onClick={() => handleThumbnailClick(index)}
-                            className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all hover:border-frost-ice ${
-                              index === currentImageIndex
+                            className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all hover:border-frost-ice ${index === currentImageIndex
                                 ? 'border-frost-ice ring-2 ring-frost-ice/30'
                                 : 'border-border-subtle'
-                            }`}
+                              }`}
                           >
                             <img
                               src={image}
@@ -443,11 +442,10 @@ export default function ListingDetailPage() {
                                     e.stopPropagation();
                                     handleThumbnailClick(index);
                                   }}
-                                  className={`w-2 h-2 rounded-full transition-all ${
-                                    index === currentImageIndex
+                                  className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex
                                       ? 'bg-frost-ice w-6'
                                       : 'bg-snow-white/60 hover:bg-snow-white'
-                                  }`}
+                                    }`}
                                   aria-label={`Go to image ${index + 1}`}
                                 />
                               ))}
@@ -463,11 +461,10 @@ export default function ListingDetailPage() {
                             <button
                               key={index}
                               onClick={() => handleThumbnailClick(index)}
-                              className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all hover:border-frost-ice ${
-                                index === currentImageIndex
+                              className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all hover:border-frost-ice ${index === currentImageIndex
                                   ? 'border-frost-ice ring-2 ring-frost-ice/30'
                                   : 'border-border-subtle'
-                              }`}
+                                }`}
                             >
                               <img
                                 src={image}
@@ -667,6 +664,7 @@ export default function ListingDetailPage() {
                   <h3 className="font-semibold text-polar-night">Your Listing</h3>
                   <ListingActionsMenu
                     listingId={listing.id}
+                    bggGameId={listing.bgg_game_id}
                     status={listing.status}
                     onStatusChange={handleStatusChangeRequest}
                     onDelete={() => setDeleteModal(true)}
