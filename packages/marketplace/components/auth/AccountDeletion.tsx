@@ -8,21 +8,15 @@ import { useAuth } from '@/lib/auth/AuthContext';
 
 export function AccountDeletion() {
   const [showConfirm, setShowConfirm] = useState(false);
-  const [password, setPassword] = useState('');
   const [confirmText, setConfirmText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const handleDelete = async () => {
     if (confirmText !== 'DELETE') {
       setError('Please type DELETE to confirm');
-      return;
-    }
-
-    if (!password) {
-      setError('Password is required');
       return;
     }
 
@@ -34,22 +28,25 @@ export function AccountDeletion() {
       const response = await fetch('/api/auth/delete-account', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Failed to delete account');
+        // Display specific error message from server if available (e.g., for seller balance info)
+        setError(data.message || data.error || 'Failed to delete account');
         setLoading(false);
         return;
       }
 
       // Account deleted successfully on server
-      // The API has already signed out the user on the server side
-      // Redirect to homepage and force refresh to clear client-side session
+      // Force client-side sign out to clear local session and update UI
+      await signOut();
+
+      // Redirect to homepage with deleted flag
+      // Note: signOut() triggers a redirect to '/', so we push this after to ensure the message is shown
       router.push('/?deleted=true');
-      router.refresh(); // Force refresh to clear auth state
+      router.refresh();
     } catch (err: any) {
       setError(err.message || 'Failed to delete account');
       setLoading(false);
@@ -63,10 +60,10 @@ export function AccountDeletion() {
           <AlertTriangle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <h3 className="font-semibold text-polar-night mb-1">
-              Delete Account
+              Delete account
             </h3>
             <p className="text-sm text-text-secondary mb-3">
-              Permanently delete your account and all associated data. This action cannot be undone.
+              Permanently delete your account and all associated data. This can't be undone.
             </p>
             <Button
               variant="danger"
@@ -74,7 +71,7 @@ export function AccountDeletion() {
               onClick={() => setShowConfirm(true)}
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Delete Account
+              Delete account
             </Button>
           </div>
         </div>
@@ -102,6 +99,15 @@ export function AccountDeletion() {
           <li>Your personal information (name, email, phone) will be anonymized</li>
           <li>Your email address becomes available for reuse immediately</li>
         </ul>
+
+        <div className="p-3 bg-amber-50 rounded border border-amber-200 mb-4">
+          <p className="text-xs font-medium text-amber-800 mb-2">
+            <strong>For Sellers:</strong>
+          </p>
+          <p className="text-xs text-amber-700">
+            If you are a seller, you must have <strong>zero balance</strong>, <strong>no active orders</strong>, and <strong>no open disputes</strong> before you can delete your account. Funds must be paid out to your bank account first.
+          </p>
+        </div>
 
         <div className="p-3 bg-frost-ice/10 rounded border border-frost-ice/30 mb-4">
           <p className="text-xs font-medium text-polar-night mb-2">
@@ -158,36 +164,19 @@ export function AccountDeletion() {
           />
         </div>
 
-        {/* Password */}
-        <div>
-          <label className="block text-sm font-medium text-polar-night mb-2">
-            Confirm Your Password *
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border-2 border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-red/30 focus:border-aurora-red text-polar-night bg-snow-white"
-            placeholder="Enter your password"
-            disabled={loading}
-            autoComplete="current-password"
-          />
-        </div>
-
         {/* Action Buttons */}
         <div className="flex gap-3 pt-2">
           <Button
             variant="danger"
             onClick={handleDelete}
-            disabled={loading || confirmText !== 'DELETE' || !password}
+            disabled={loading || confirmText !== 'DELETE'}
           >
-            {loading ? 'Deleting...' : 'Yes, Delete My Account'}
+            {loading ? 'Deleting...' : 'Yes, delete my account'}
           </Button>
           <Button
             variant="secondary"
             onClick={() => {
               setShowConfirm(false);
-              setPassword('');
               setConfirmText('');
               setError('');
             }}

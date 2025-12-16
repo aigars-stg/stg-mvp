@@ -1,10 +1,8 @@
-import { Suspense } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import {
   HeroSection,
   StatsCounter,
-  FeaturedGames,
-  FeaturedGamesLoading,
+  GameCollection,
   HowItWorks,
   FinalCTA,
 } from '@/components/home';
@@ -40,12 +38,11 @@ async function getStats() {
     };
   } catch (error) {
     console.error('Error fetching stats:', error);
-    // Return real zeros if data fetch fails
     return {
       listings: 0,
       users: 0,
       sellers: 0,
-      countries: 3, // Always show 3 Baltic countries
+      countries: 3,
     };
   }
 }
@@ -54,14 +51,14 @@ export default async function HomePage() {
   const stats = await getStats();
 
   // Check if site is in "coming soon" mode
-  const isComingSoon = process.env.NEXT_PUBLIC_COMING_SOON === 'true';
+  const isComingSoon = true; // process.env.NEXT_PUBLIC_COMING_SOON === 'true';
 
-  // Prepare stats for counter - using real data
+  // Prepare stats for counter
   const statsData = [
-    { label: 'Games Listed', value: stats.listings, suffix: stats.listings > 0 ? '+' : '' },
-    { label: 'Happy Gamers', value: stats.users, suffix: stats.users > 0 ? '+' : '' },
-    { label: 'Active Sellers', value: stats.sellers, suffix: stats.sellers > 0 ? '+' : '' },
-    { label: 'Baltic Countries', value: stats.countries, suffix: '' },
+    { label: 'Games listed', value: stats.listings, suffix: stats.listings > 0 ? '+' : '' },
+    { label: 'Happy gamers', value: stats.users, suffix: stats.users > 0 ? '+' : '' },
+    { label: 'Active sellers', value: stats.sellers, suffix: stats.sellers > 0 ? '+' : '' },
+    { label: 'Baltic countries', value: stats.countries, suffix: '' },
   ];
 
   return (
@@ -75,18 +72,48 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Hero Section */}
+      {/* Hero Section with Search */}
       <HeroSection isComingSoon={isComingSoon} />
 
       {/* Stats Counter */}
       <StatsCounter stats={statsData} />
 
-      {/* Featured Games */}
-      <Suspense fallback={<FeaturedGamesLoading />}>
-        <FeaturedGames />
-      </Suspense>
+      {/* Game Collections - Algorithm-driven */}
+      {!isComingSoon && (
+        <>
+          {/* Just Listed - Newest arrivals */}
+          <GameCollection
+            type="recently_listed"
+            limit={8}
+            viewAllHref="/browse?sort=newest"
+          />
 
-      {/* How It Works - Hide in coming soon mode */}
+          {/* Popular Games - Hidden for launch
+          <GameCollection
+            type="popular"
+            limit={8}
+            viewAllHref="/browse"
+          />
+          */}
+
+          {/* Like New Games */}
+          <GameCollection
+            type="great_condition"
+            limit={8}
+            viewAllHref="/browse?condition=likeNew"
+          />
+
+          {/* From Trusted Sellers - Hidden for launch
+          <GameCollection
+            type="trusted_sellers"
+            limit={8}
+            viewAllHref="/browse"
+          />
+          */}
+        </>
+      )}
+
+      {/* How It Works */}
       {!isComingSoon && <HowItWorks />}
 
       {/* Final CTA */}

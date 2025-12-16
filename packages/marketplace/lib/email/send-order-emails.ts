@@ -1,0 +1,267 @@
+/**
+ * Order email sending service
+ * SERVER-ONLY: This file should only be imported in API routes
+ */
+
+import { sendEmail, resend, FROM_EMAIL } from './resend';
+import { OrderPlacedSellerEmail } from './templates/order-placed-seller';
+import { OrderConfirmationBuyerEmail } from './templates/order-confirmation-buyer';
+import { OrderAcceptedBuyerEmail } from './templates/order-accepted-buyer';
+import { OrderCancelledBuyerEmail } from './templates/order-cancelled-buyer';
+import { ShippingLabelSellerEmail } from './templates/shipping-label-seller';
+import { PackageDeliveredBuyerEmail } from './templates/package-delivered-buyer';
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
+
+interface OrderEmailData {
+  orderNumber: string;
+  orderId: string;
+  sellerName: string;
+  sellerEmail: string;
+  buyerName: string;
+  buyerEmail: string;
+  itemCount: number;
+  totalAmount: number;
+  shippingMethod: 't2t' | 'local_pickup';
+  destinationInfo: string; // Terminal name or pickup city
+}
+
+/**
+ * Send order placed notification to seller
+ */
+export async function sendOrderPlacedToSeller(data: OrderEmailData) {
+  const { sellerName, sellerEmail, orderNumber, orderId, itemCount, totalAmount, buyerName, shippingMethod, destinationInfo } = data;
+
+  try {
+    await sendEmail({
+      to: sellerEmail,
+      subject: `New Order #${orderNumber} - Action Required`,
+      react: OrderPlacedSellerEmail({
+        sellerName,
+        orderNumber,
+        itemCount,
+        totalAmount,
+        buyerName,
+        shippingMethod,
+        destinationInfo,
+        orderUrl: `${APP_URL}/seller/orders/${orderId}`,
+        deadlineHours: 24,
+      }),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('❌ [Email] Failed to send order placed email to seller:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send order confirmation to buyer
+ */
+export async function sendOrderConfirmationToBuyer(data: OrderEmailData) {
+  const { buyerName, buyerEmail, orderNumber, orderId, sellerName, itemCount, totalAmount, shippingMethod, destinationInfo } = data;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `Order Confirmed #${orderNumber}`,
+      react: OrderConfirmationBuyerEmail({
+        buyerName,
+        orderNumber,
+        sellerName,
+        itemCount,
+        totalAmount,
+        shippingMethod,
+        destinationInfo,
+        orderUrl: `${APP_URL}/orders/${orderId}`,
+      }),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('❌ [Email] Failed to send order confirmation to buyer:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send order accepted notification to buyer
+ */
+export async function sendOrderAcceptedToBuyer(params: {
+  buyerName: string;
+  buyerEmail: string;
+  orderNumber: string;
+  orderId: string;
+  sellerName: string;
+  shippingMethod: 't2t' | 'local_pickup';
+  destinationInfo: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+}) {
+  const { buyerName, buyerEmail, orderNumber, orderId, sellerName, shippingMethod, destinationInfo, trackingNumber, trackingUrl } = params;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `Great News! Order #${orderNumber} Accepted`,
+      react: OrderAcceptedBuyerEmail({
+        buyerName,
+        orderNumber,
+        sellerName,
+        shippingMethod,
+        destinationInfo,
+        trackingNumber,
+        trackingUrl,
+        orderUrl: `${APP_URL}/orders/${orderId}`,
+      }),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('❌ [Email] Failed to send order accepted email to buyer:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send order cancelled notification to buyer
+ */
+export async function sendOrderCancelledToBuyer(params: {
+  buyerName: string;
+  buyerEmail: string;
+  orderNumber: string;
+  sellerName: string;
+  refundAmount: number;
+  cancellationReason: string;
+}) {
+  const { buyerName, buyerEmail, orderNumber, sellerName, refundAmount, cancellationReason } = params;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `Order #${orderNumber} Cancelled - Refund Processed`,
+      react: OrderCancelledBuyerEmail({
+        buyerName,
+        orderNumber,
+        sellerName,
+        refundAmount,
+        cancellationReason,
+        browseUrl: `${APP_URL}/browse`,
+      }),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('❌ [Email] Failed to send order cancelled email to buyer:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send shipping label to seller with PDF attachment
+ */
+export async function sendShippingLabelToSeller(params: {
+  sellerName: string;
+  sellerEmail: string;
+  orderNumber: string;
+  orderId: string;
+  buyerName: string;
+  destinationTerminalName: string;
+  destinationTerminalAddress: string;
+  barcode: string;
+  trackingUrl?: string;
+  labelPdfBuffer: Buffer;
+}) {
+  const {
+    sellerName,
+    sellerEmail,
+    orderNumber,
+    orderId,
+    buyerName,
+    destinationTerminalName,
+    destinationTerminalAddress,
+    barcode,
+    trackingUrl,
+    labelPdfBuffer,
+  } = params;
+
+  try {
+    // Use Resend directly for attachment support
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: sellerEmail,
+      subject: `Shipping Label Ready - Order #${orderNumber}`,
+      react: ShippingLabelSellerEmail({
+        sellerName,
+        orderNumber,
+        buyerName,
+        destinationTerminalName,
+        destinationTerminalAddress,
+        barcode,
+        trackingUrl,
+        orderUrl: `${APP_URL}/seller/orders/${orderId}`,
+      }),
+      attachments: [
+        {
+          filename: `shipping-label-${orderNumber}.pdf`,
+          content: labelPdfBuffer,
+        },
+      ],
+    });
+
+    console.log(`✅ [Email] Shipping label sent to seller: ${sellerEmail}`);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ [Email] Failed to send shipping label to seller:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send package delivered notification to buyer
+ */
+export async function sendPackageDeliveredToBuyer(params: {
+  buyerName: string;
+  buyerEmail: string;
+  orderNumber: string;
+  orderId: string;
+  sellerName: string;
+  destinationTerminalName: string;
+  destinationTerminalAddress: string;
+  barcode: string;
+}) {
+  const {
+    buyerName,
+    buyerEmail,
+    orderNumber,
+    orderId,
+    sellerName,
+    destinationTerminalName,
+    destinationTerminalAddress,
+    barcode,
+  } = params;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `📦 Package Delivered - Order #${orderNumber}`,
+      react: PackageDeliveredBuyerEmail({
+        buyerName,
+        orderNumber,
+        sellerName,
+        destinationTerminalName,
+        destinationTerminalAddress,
+        barcode,
+        orderUrl: `${APP_URL}/orders/${orderId}`,
+        reviewUrl: `${APP_URL}/orders/${orderId}/review`,
+      }),
+    });
+
+    console.log(`✅ [Email] Package delivered notification sent to buyer: ${buyerEmail}`);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ [Email] Failed to send package delivered email to buyer:', error);
+    return { success: false, error };
+  }
+}

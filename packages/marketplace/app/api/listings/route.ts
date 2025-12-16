@@ -35,6 +35,48 @@ export async function POST(request: NextRequest) {
 
     console.log(`📝 [Create Listing] User authenticated: ${user.id}`);
 
+    // Check if seller has completed onboarding
+    const { data: profile, error: profileError } = await supabase
+      .from('seller_profiles')
+      .select('seller_status, stripe_connect_payouts_enabled')
+      .eq('user_id', user.id)
+      .single();
+
+    if (profileError) {
+      // If no seller profile exists, they need to complete onboarding
+      if (profileError.code === 'PGRST116') {
+        console.log(`⚠️ [Create Listing] No seller profile found for user ${user.id}`);
+        return NextResponse.json(
+          {
+            error: 'Please complete seller onboarding first',
+            requiresOnboarding: true,
+            onboardingUrl: '/seller/onboard'
+          },
+          { status: 403 }
+        );
+      }
+      console.error('❌ [Create Listing] Error fetching profile:', profileError);
+      return NextResponse.json(
+        { error: 'Failed to verify seller status' },
+        { status: 500 }
+      );
+    }
+
+    // Validate seller has completed onboarding
+    if (!profile?.stripe_connect_payouts_enabled || profile?.seller_status !== 'active') {
+      console.log(`⚠️ [Create Listing] Seller not onboarded - status: ${profile.seller_status}, payouts: ${profile.stripe_connect_payouts_enabled}`);
+      return NextResponse.json(
+        {
+          error: 'Please complete seller onboarding first',
+          requiresOnboarding: true,
+          onboardingUrl: '/seller/onboard'
+        },
+        { status: 403 }
+      );
+    }
+
+    console.log(`✅ [Create Listing] Seller verified (status: ${profile.seller_status})`);
+
     const body = await request.json();
     const {
       selectedGame,
@@ -100,7 +142,6 @@ export async function POST(request: NextRequest) {
 
       // Pricing
       price: parseFloat(price),
-      currency: 'EUR',
 
       // Shipping
       shipping_local_pickup: shippingLocalPickup === true,
@@ -195,18 +236,11 @@ export async function GET(request: NextRequest) {
     );
 
     // Build query with seller profile join
-    // Note: We'll fetch game images separately to avoid join issues
+    // Note: We'll fetch game images and seller trust data separately to avoid join issues
     let query = (supabase as any)
       .from('listings')
       .select(`
-        *,
-        seller:user_profiles!seller_id (
-          id,
-          full_name,
-          email,
-          avatar_url,
-          country
-        )
+        *
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(from, to);
@@ -252,6 +286,29 @@ export async function GET(request: NextRequest) {
         .select('id, thumbnail, image, player_count, min_age, playing_time, versions, is_expansion')
         .in('id', gameIds);
 
+      // Fetch seller trust data separately (no FK between listings and seller_profiles)
+      const sellerIds = [...new Set(listings.map((l: any) => l.seller_id))];
+
+      // 1. Fetch Trust Stats
+      const { data: sellerTrust } = await (supabase as any)
+        .from('public_seller_profiles')
+        .select('*')
+        .in('user_id', sellerIds);
+
+      // 2. Fetch Identity (Name, Avatar, Country)
+      const { data: sellerIdentity } = await (supabase as any)
+        .from('public_profiles')
+        .select('id, full_name, avatar_url, country')
+        .in('id', sellerIds);
+
+      const trustMap = sellerTrust
+        ? new Map(sellerTrust.map((p: any) => [p.user_id, p]))
+        : new Map();
+
+      const profileMap = sellerIdentity
+        ? new Map(sellerIdentity.map((p: any) => [p.id, p]))
+        : new Map();
+
       if (games) {
         const gamesMap = new Map(games.map((g: any) => [g.id, g]));
         listings.forEach((listing: any) => {
@@ -289,6 +346,24 @@ export async function GET(request: NextRequest) {
               is_expansion: null
             };
           }
+
+          // Merge seller trust data into seller object
+          const sellerTrust = trustMap.get(listing.seller_id);
+          const sellerProfile = profileMap.get(listing.seller_id);
+
+          listing.seller = {
+            id: listing.seller_id,
+            // Profile data (Identity)
+            full_name: sellerProfile?.full_name || 'Unknown Seller',
+            email: '', // REMOVED EMAIL FOR SECURITY
+            avatar_url: sellerProfile?.avatar_url || null,
+            country: sellerProfile?.country || null,
+            // Trust data
+            total_reviews: sellerTrust?.total_reviews ?? 0,
+            average_rating: sellerTrust?.average_rating ?? 0,
+            total_completed_sales: sellerTrust?.total_completed_sales ?? 0,
+            member_since: sellerTrust?.member_since ?? null,
+          };
         });
       }
     }

@@ -26,7 +26,6 @@ export function LoginActivity() {
   const [error, setError] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSignOutAll, setShowSignOutAll] = useState(false);
-  const [signOutPassword, setSignOutPassword] = useState('');
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [signOutError, setSignOutError] = useState('');
 
@@ -78,11 +77,6 @@ export function LoginActivity() {
   }, [user]);
 
   const handleSignOutAll = async () => {
-    if (!signOutPassword) {
-      setSignOutError('Password is required');
-      return;
-    }
-
     setSignOutLoading(true);
     setSignOutError('');
 
@@ -90,7 +84,6 @@ export function LoginActivity() {
       const response = await fetch('/api/auth/signout-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: signOutPassword }),
       });
 
       const data = await response.json();
@@ -147,11 +140,10 @@ export function LoginActivity() {
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
         >
-          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login Activity</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login activity</h2>
           <ChevronDown
-            className={`w-5 h-5 text-text-secondary transition-transform ${
-              isExpanded ? 'rotate-180' : ''
-            }`}
+            className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''
+              }`}
           />
         </button>
         {isExpanded && (
@@ -170,11 +162,10 @@ export function LoginActivity() {
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
         >
-          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login Activity</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login activity</h2>
           <ChevronDown
-            className={`w-5 h-5 text-text-secondary transition-transform ${
-              isExpanded ? 'rotate-180' : ''
-            }`}
+            className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''
+              }`}
           />
         </button>
         {isExpanded && (
@@ -196,9 +187,8 @@ export function LoginActivity() {
         >
           <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login Activity</h2>
           <ChevronDown
-            className={`w-5 h-5 text-text-secondary transition-transform ${
-              isExpanded ? 'rotate-180' : ''
-            }`}
+            className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''
+              }`}
           />
         </button>
         {isExpanded && (
@@ -220,9 +210,8 @@ export function LoginActivity() {
         <div className="flex items-center gap-2">
           <span className="text-xs text-text-secondary">Last 10 sign-ins</span>
           <ChevronDown
-            className={`w-5 h-5 text-text-secondary transition-transform ${
-              isExpanded ? 'rotate-180' : ''
-            }`}
+            className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''
+              }`}
           />
         </div>
       </button>
@@ -230,136 +219,118 @@ export function LoginActivity() {
       {isExpanded && (
         <>
           <div className="space-y-2 sm:space-y-3">
-        {activities.map((activity, index) => (
-          <div
-            key={activity.id}
-            className={`p-3 sm:p-4 rounded-lg border ${
-              index === 0
-                ? 'border-frost-ice/30 bg-frost-ice/5'
-                : 'border-border bg-bg-elevated'
-            }`}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3 flex-1">
-                <div className={`p-2 rounded-lg ${
-                  index === 0 ? 'bg-frost-ice/10' : 'bg-bg'
-                }`}>
-                  {getDeviceIcon(activity.device_type)}
-                </div>
+            {activities.map((activity, index) => (
+              <div
+                key={activity.id}
+                className={`p-3 sm:p-4 rounded-lg border ${index === 0
+                  ? 'border-frost-ice/30 bg-frost-ice/5'
+                  : 'border-border bg-bg-elevated'
+                  }`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 flex-1">
+                    <div className={`p-2 rounded-lg ${index === 0 ? 'bg-frost-ice/10' : 'bg-bg'
+                      }`}>
+                      {getDeviceIcon(activity.device_type)}
+                    </div>
 
-                <div className="flex-1 min-w-0">
-                  {/* Device and Browser */}
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-medium text-polar-night">
-                      {activity.browser} on {activity.os}
-                    </p>
-                    {index === 0 && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-frost-ice/20 text-frost-ice rounded">
-                        Current
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Location and IP */}
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary">
-                    {(activity.city || activity.country) && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        <span>
-                          {[activity.city, activity.country].filter(Boolean).join(', ')}
-                        </span>
+                    <div className="flex-1 min-w-0">
+                      {/* Device and Browser */}
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-sm font-medium text-polar-night">
+                          {activity.browser} on {activity.os}
+                        </p>
+                        {index === 0 && (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-frost-ice/20 text-frost-ice rounded">
+                            Current
+                          </span>
+                        )}
                       </div>
-                    )}
-                    <span className="text-text-muted">{activity.ip_address}</span>
+
+                      {/* Location and IP */}
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary">
+                        {(activity.city || activity.country) && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            <span>
+                              {[activity.city, activity.country].filter(Boolean).join(', ')}
+                            </span>
+                          </div>
+                        )}
+                        <span className="text-text-muted">{activity.ip_address}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Time */}
+                  <div className="flex items-center gap-1 text-xs text-text-secondary whitespace-nowrap">
+                    <Calendar className="w-3 h-3" />
+                    <span>{formatDate(activity.created_at)}</span>
                   </div>
                 </div>
               </div>
-
-              {/* Time */}
-              <div className="flex items-center gap-1 text-xs text-text-secondary whitespace-nowrap">
-                <Calendar className="w-3 h-3" />
-                <span>{formatDate(activity.created_at)}</span>
-              </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Security Actions */}
-      <div className="mt-6 space-y-3">
-        <div className="p-3 bg-bg-elevated rounded-lg border border-border">
-          <p className="text-xs text-text-secondary mb-3">
-            <strong>Security tip:</strong> If you see any unfamiliar activity, consider changing your
-            password immediately and signing out all devices.
-          </p>
-
-          {!showSignOutAll ? (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowSignOutAll(true)}
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out All Devices
-            </Button>
-          ) : (
-            <div className="mt-3 pt-3 border-t border-border">
-              <h3 className="text-sm font-semibold text-polar-night mb-2">
-                Sign Out All Devices
-              </h3>
+          {/* Security Actions */}
+          <div className="mt-6 space-y-3">
+            <div className="p-3 bg-bg-elevated rounded-lg border border-border">
               <p className="text-xs text-text-secondary mb-3">
-                This will sign you out from all devices including this one. You'll need to sign in again.
+                <strong>Security tip:</strong> If you see any unfamiliar activity, consider changing your
+                password immediately and signing out all devices.
               </p>
 
-              {signOutError && (
-                <div className="mb-3 p-2 bg-aurora-red/10 border border-aurora-red/20 rounded">
-                  <p className="text-xs text-aurora-red">{signOutError}</p>
+              {!showSignOutAll ? (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowSignOutAll(true)}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out All Devices
+                </Button>
+              ) : (
+                <div className="mt-3 pt-3 border-t border-border">
+                  <h3 className="text-sm font-semibold text-polar-night mb-2">
+                    Sign Out All Devices
+                  </h3>
+                  <p className="text-xs text-text-secondary mb-3">
+                    This will sign you out from all devices including this one. You'll need to sign in again.
+                  </p>
+
+                  {signOutError && (
+                    <div className="mb-3 p-2 bg-aurora-red/10 border border-aurora-red/20 rounded">
+                      <p className="text-xs text-aurora-red">{signOutError}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={handleSignOutAll}
+                        disabled={signOutLoading}
+                      >
+                        {signOutLoading ? 'Signing out...' : 'Confirm Sign Out'}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          setShowSignOutAll(false);
+                          setSignOutError('');
+                        }}
+                        disabled={signOutLoading}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
-
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-medium text-polar-night mb-1">
-                    Confirm Your Password
-                  </label>
-                  <input
-                    type="password"
-                    value={signOutPassword}
-                    onChange={(e) => setSignOutPassword(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border-2 border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-snow-white"
-                    placeholder="Enter your password"
-                    disabled={signOutLoading}
-                    autoComplete="current-password"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={handleSignOutAll}
-                    disabled={signOutLoading || !signOutPassword}
-                  >
-                    {signOutLoading ? 'Signing out...' : 'Confirm Sign Out'}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => {
-                      setShowSignOutAll(false);
-                      setSignOutPassword('');
-                      setSignOutError('');
-                    }}
-                    disabled={signOutLoading}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
         </>
       )}
     </Card>

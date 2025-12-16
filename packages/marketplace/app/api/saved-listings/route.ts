@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         )
       `)
       .eq('user_id', user.id)
-      .order('saved_at', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('❌ [Saved Listings] Query error:', error);

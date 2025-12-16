@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('user_profiles')
         .insert({
           id: userId,
-          full_name: user.user_metadata?.full_name || 'User',
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
           email: user.email!,
           phone: user.user_metadata?.phone || null,
           country: user.user_metadata?.country || null,
@@ -51,30 +51,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Fetch user profile from database
-  const fetchProfile = useCallback(async (userId: string) => {
+  // Fetch user profile from database (uses view that includes seller data)
+  const fetchProfile = useCallback(async (userId: string, retryCount = 0): Promise<UserProfile | null> => {
     try {
       const { data, error } = await (supabase as any)
-        .from('user_profiles')
+        .from('user_profiles_full')
         .select('*')
         .eq('id', userId)
         .single();
 
       if (error) {
-        console.error('❌ [Auth] Profile fetch error:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          userId: userId
-        });
-
-        // If profile doesn't exist (PGRST116), try to create it
+        // If profile doesn't exist (PGRST116), try to create it or retry
         if (error.code === 'PGRST116') {
-          console.warn('⚠️ [Auth] Profile not found, attempting to create...');
+          // If we haven't retried enough, wait and try again (trigger might be slow)
+          if (retryCount < 3) {
+            console.log(`⏳ [Auth] Profile not found, retrying (${retryCount + 1}/3)...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return fetchProfile(userId, retryCount + 1);
+          }
+
+          console.warn('⚠️ [Auth] Profile not found after retries, attempting to create...');
           return await createMissingProfile(userId);
         }
 
+        console.error('❌ [Auth] Profile fetch error:', {
+          code: error.code,
+          message: error.message,
+          userId: userId
+        });
         return null;
       }
 
@@ -106,6 +110,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (session?.user) {
               setUser(session.user);
               const userProfile = await fetchProfile(session.user.id);
+
+              // AUTO RECOVERY CHECK
+              if (userProfile?.deleted_at) {
+                console.log('♻️ [Auth] Deleted account detected, attempting recovery...');
+                try {
+                  const res = await fetch('/api/auth/recover-account', { method: 'POST' });
+                  if (res.ok) {
+                    console.log('✅ [Auth] Account recovered successfully');
+                    // Refresh profile one more time to get clean state
+                    const recoveredProfile = await fetchProfile(session.user.id);
+                    setProfile(recoveredProfile);
+
+                    // Refresh user session to get restored email
+                    const { data: { user: refreshedUser } } = await (supabase as any).auth.getUser();
+                    if (refreshedUser) {
+                      setUser(refreshedUser);
+                    }
+
+                    router.refresh();
+                    return; // Exit early using new profile
+                  } else {
+                    console.error('❌ [Auth] Recovery failed');
+                  }
+                } catch (recError) {
+                  console.error('❌ [Auth] Recovery exception:', recError);
+                }
+              }
+
               setProfile(userProfile);
             } else {
               setUser(null);
@@ -132,7 +164,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           setUser(session.user);
           const userProfile = await fetchProfile(session.user.id);
-          setProfile(userProfile);
+
+          // AUTO RECOVERY CHECK (Initial Load)
+          if (userProfile?.deleted_at) {
+            console.log('♻️ [Auth] Deleted account detected on init, attempting recovery...');
+            try {
+              const res = await fetch('/api/auth/recover-account', { method: 'POST' });
+              if (res.ok) {
+                console.log('✅ [Auth] Account recovered successfully');
+                const recoveredProfile = await fetchProfile(session.user.id);
+                setProfile(recoveredProfile);
+
+                // Refresh user session to get restored email
+                const { data: { user: refreshedUser } } = await (supabase as any).auth.getUser();
+                if (refreshedUser) {
+                  setUser(refreshedUser);
+                }
+              } else {
+                setProfile(userProfile);
+              }
+            } catch (recError) {
+              setProfile(userProfile);
+            }
+          } else {
+            setProfile(userProfile);
+          }
         }
 
         setLoading(false);
@@ -168,9 +224,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Log login activity (don't block on failure)
       try {
+        const { data: { session } } = await (supabase as any).auth.getSession();
+
         await fetch('/api/auth/log-activity', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {})
+          },
         });
       } catch (logError) {
         console.error('Failed to log activity:', logError);
@@ -187,7 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string,
     password: string,
     fullName: string,
-    country: string
+    country: string | null
   ) => {
     try {
       // Create auth user
@@ -216,7 +277,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Sign in with OAuth provider
-  const signInWithOAuth = async (provider: 'google' | 'github') => {
+  const signInWithOAuth = async (provider: 'google' | 'github' | 'facebook') => {
     try {
       const { error } = await (supabase as any).auth.signInWithOAuth({
         provider,
@@ -227,6 +288,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  };
+
+  // Sign in with magic link (passwordless)
+  const signInWithMagicLink = async (email: string) => {
+    try {
+      // Derive a better default name from email (e.g. "alex" from "alex@gmail.com")
+      const emailPrefix = email.split('@')[0];
+
+      const { error } = await (supabase as any).auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          shouldCreateUser: true, // Creates account if doesn't exist
+          data: {
+            full_name: emailPrefix,
+          },
+        },
+      });
+
+      if (error) {
+        return { error };
+      }
+
+      // Persist email for context on /auth/confirm page
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('pending_auth_email', email);
       }
 
       return { error: null };
@@ -288,12 +381,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(userProfile);
   };
 
+  // Computed: check if user's email is verified
+  const isEmailVerified = useMemo(() => {
+    return user?.email_confirmed_at !== null && user?.email_confirmed_at !== undefined;
+  }, [user]);
+
+  // Computed: check if profile is complete (has display name and country)
+  const isProfileComplete = useMemo(() => {
+    if (!profile) return false;
+    return !!(profile.full_name && profile.country);
+  }, [profile]);
+
   const value: AuthContextType = {
     user,
     profile,
     loading,
+    isEmailVerified,
+    isProfileComplete,
     signIn,
     signUp,
+    signInWithMagicLink,
     signInWithOAuth,
     signOut,
     updateProfile,

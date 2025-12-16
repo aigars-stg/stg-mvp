@@ -88,7 +88,6 @@ function createPreviewListing(
     all_components_present: formData.allComponentsPresent,
     missing_components: formData.missingComponents || null,
     price: parseFloat(formData.price) || 0,
-    currency: 'EUR',
     previous_price: null, // Preview listings don't have price history
     shipping_local_pickup: formData.shippingOptions.localPickup,
     shipping_parcel_locker: formData.shippingOptions.parcelLocker,
@@ -320,6 +319,30 @@ function SellPageContent() {
 
     fetchListingForEdit();
   }, [isEditMode, editListingId, user]);
+
+  // Check seller onboarding status (only for non-edit mode)
+  useEffect(() => {
+    async function checkSellerOnboarding() {
+      // Skip check in edit mode or if no user
+      if (isEditMode || !user) return;
+
+      try {
+        const response = await fetch('/api/seller/onboarding/status');
+        const data = await response.json();
+
+        // If seller hasn't completed onboarding, redirect to onboarding page
+        if (!data.onboarding_completed || !data.can_list_items) {
+          console.log('⚠️ [Sell Page] Seller not onboarded, redirecting...');
+          router.push('/seller/onboard');
+        }
+      } catch (error) {
+        console.error('Error checking seller onboarding:', error);
+        // On error, allow through but API will catch it
+      }
+    }
+
+    checkSellerOnboarding();
+  }, [user, isEditMode, router]);
 
   // Check for saved draft on mount
   useEffect(() => {
@@ -586,8 +609,8 @@ function SellPageContent() {
 
         console.log(`✅ [Sell Page] Updated listing ${editListingId}`);
 
-        // Redirect to listing detail page
-        router.push(`/listing/${editListingId}`);
+        // Redirect to game page
+        router.push(`/game/${formData.selectedGame?.id}`);
       } else {
         // Create mode: Create new listing
         console.log('📝 [Sell Page] Creating listing...');
@@ -1088,7 +1111,7 @@ function SellPageContent() {
           <div className="flex flex-col gap-3">
             <Button
               variant="primary"
-              onClick={() => router.push(`/listing/${publishedListingId}`)}
+              onClick={() => router.push(`/game/${formData.selectedGame?.id}`)}
               fullWidth
             >
               View Your Listing

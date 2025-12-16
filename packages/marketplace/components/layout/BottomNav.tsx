@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Grid, Plus, MessageCircle, User } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { useUnreadMessages } from '@/lib/hooks/useUnreadMessages';
+import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
 import { SellActionSheet } from './SellActionSheet';
 import { ProfileBottomSheet } from './ProfileBottomSheet';
 
@@ -120,13 +120,12 @@ export function BottomNav() {
             // Regular nav items
             const NavContent = (
               <div
-                className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg transition-colors relative ${
-                  isDisabled
+                className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg transition-colors relative ${isDisabled
                     ? 'opacity-40 cursor-not-allowed'
                     : item.active
-                    ? 'text-frost-ice'
-                    : 'text-text-muted hover:text-text'
-                }`}
+                      ? 'text-frost-ice'
+                      : 'text-text-muted hover:text-text'
+                  }`}
               >
                 <div className="relative">
                   <Icon className="w-6 h-6" />

@@ -32,7 +32,7 @@ export function mapAuthError(error: any): string {
   }
 
   if (message.includes('password') && message.includes('short')) {
-    return 'Password must be at least 8 characters';
+    return 'A bit longer please — at least 8 characters';
   }
 
   // Token errors
@@ -41,7 +41,7 @@ export function mapAuthError(error: any): string {
   }
 
   if (message.includes('token has expired')) {
-    return 'Reset link has expired. Please request a new one';
+    return 'That link has expired — request a fresh one';
   }
 
   // Network errors
@@ -56,7 +56,7 @@ export function mapAuthError(error: any): string {
 
   // OAuth errors
   if (message.includes('oauth')) {
-    return 'Authentication with provider failed. Please try again';
+    return "Couldn't connect with that account. Give it another try?";
   }
 
   // Generic error

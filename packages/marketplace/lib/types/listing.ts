@@ -32,7 +32,6 @@ export interface Listing {
 
   // Pricing
   price: number;
-  currency: string;
   previous_price: number | null; // For showing "Price Reduced" indicators
 
   // Shipping
@@ -65,6 +64,11 @@ export interface ListingWithSeller extends Listing {
     email: string;
     avatar_url: string | null;
     country: string | null;
+    // Trust fields (from seller_profiles)
+    total_reviews?: number;
+    average_rating?: number;
+    total_completed_sales?: number;
+    member_since?: string | null;
   };
 }
 

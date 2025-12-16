@@ -50,30 +50,31 @@ export default function ForgotPasswordPage() {
       <div className="min-h-screen bg-bg flex items-center justify-center px-4">
         <Card padding="lg" className="max-w-md w-full text-center">
           <div className="mb-6">
-            <div className="w-16 h-16 rounded-full bg-frost-ice/10 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-xl bg-frost-ice/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8 text-frost-ice" />
             </div>
             <h2 className="text-2xl font-bold text-polar-night mb-2">
-              Check your email
+              Check your inbox!
             </h2>
             <p className="text-text-secondary">
-              We've sent a password reset link to <strong>{email}</strong>
+              We've sent a reset link to <strong>{email}</strong>
             </p>
           </div>
 
           <div className="space-y-4">
             <div className="p-4 bg-frost-ice/5 rounded-lg border border-frost-ice/20 text-left">
               <p className="text-sm text-text-secondary">
-                Click the link in the email to reset your password. The link will expire in 1 hour.
-                You may need to check your spam folder.
+                Click the link to pick a new password. It expires in 1 hour — check spam if you don't see it.
               </p>
             </div>
 
-            <Link href="/auth/signin">
-              <Button variant="primary" fullWidth>
-                Back to Sign In
-              </Button>
-            </Link>
+            <div className="pt-2">
+              <Link href="/auth/signin">
+                <Button variant="primary" fullWidth>
+                  Back to sign in
+                </Button>
+              </Link>
+            </div>
 
             <button
               onClick={() => {
@@ -82,7 +83,7 @@ export default function ForgotPasswordPage() {
               }}
               className="text-sm text-frost-ice hover:underline"
             >
-              Didn't receive the email? Try again
+              Didn't get it? Try again
             </button>
           </div>
         </Card>
@@ -96,10 +97,10 @@ export default function ForgotPasswordPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-polar-night mb-2">
-            Reset your password
+            Locked out?
           </h1>
           <p className="text-text-secondary">
-            Enter your email and we'll send you a reset link
+            No worries — we'll help you get back in
           </p>
         </div>
 
@@ -143,7 +144,7 @@ export default function ForgotPasswordPage() {
               fullWidth
               disabled={loading}
             >
-              {loading ? 'Sending reset link...' : 'Send Reset Link'}
+              {loading ? 'Sending...' : 'Send me a link'}
             </Button>
           </form>
         </Card>
@@ -155,7 +156,7 @@ export default function ForgotPasswordPage() {
             className="inline-flex items-center gap-2 text-sm text-frost-ice hover:underline font-medium"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Sign In
+            Back to sign in
           </Link>
         </div>
       </div>

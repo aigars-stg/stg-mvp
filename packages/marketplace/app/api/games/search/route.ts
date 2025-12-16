@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get('q');
   const limit = parseInt(searchParams.get('limit') || '20');
+  const withListings = searchParams.get('with_listings') === 'true';
 
   if (!query || query.trim().length < 2) {
     return NextResponse.json({
@@ -140,14 +141,41 @@ export async function GET(request: NextRequest) {
       .slice(0, limit)
       .map(({ _relevanceScore, alternate_names, ...game }) => game); // Remove helper fields and alternate_names from response
 
+    // Optionally add listing counts
+    let gamesWithListings = sortedGames;
+    if (withListings && sortedGames.length > 0) {
+      const gameIds = sortedGames.map((g: { id: number }) => g.id);
+      const { data: listingCounts } = await supabase
+        .from('listings')
+        .select('bgg_game_id')
+        .in('bgg_game_id', gameIds)
+        .eq('status', 'active');
+
+      // Count listings per game
+      const countMap = new Map<number, number>();
+      listingCounts?.forEach((l: { bgg_game_id: number }) => {
+        countMap.set(l.bgg_game_id, (countMap.get(l.bgg_game_id) || 0) + 1);
+      });
+
+      gamesWithListings = sortedGames.map((game: { id: number }) => ({
+        ...game,
+        listingCount: countMap.get(game.id) || 0,
+      }));
+
+      // When showing listings, prioritize games with listings
+      gamesWithListings.sort((a: { listingCount: number }, b: { listingCount: number }) =>
+        b.listingCount - a.listingCount
+      );
+    }
+
     const duration = Date.now() - startTime;
     console.log(
-      `✅ [Search API] Found ${sortedGames.length} results in ${duration}ms (searched name + alternate names, sorted by relevance + rating)`
+      `✅ [Search API] Found ${gamesWithListings.length} results in ${duration}ms (searched name + alternate names, sorted by relevance + rating)`
     );
 
     return NextResponse.json({
-      games: sortedGames,
-      count: sortedGames.length,
+      games: gamesWithListings,
+      count: gamesWithListings.length,
       query,
       durationMs: duration,
     });

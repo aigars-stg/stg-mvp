@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Heart, Search, Settings, LogOut, X, LogIn } from 'lucide-react';
+import { Package, Heart, Search, Settings, LogOut, X, LogIn, ShoppingBag, Store } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Button } from '@second-turn/design-system';
 import { getInitials } from '@/lib/auth/utils';
@@ -19,7 +19,12 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
   const [listingsCount, setListingsCount] = useState(0);
   const [savedCount, setSavedCount] = useState(0);
   const [wantedCount, setWantedCount] = useState(0);
+  const [ordersCount, setOrdersCount] = useState(0);
+  const [salesCount, setSalesCount] = useState(0);
   const [signOutLoading, setSignOutLoading] = useState(false);
+
+  // Check if user is an active seller
+  const isActiveSeller = profile?.seller_status === 'active';
 
   // Fetch counts for authenticated users
   useEffect(() => {
@@ -59,13 +64,35 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
         } else {
           console.error('[ProfileBottomSheet] Failed to fetch wanted games:', wantedRes.status);
         }
+
+        // Fetch buyer orders count
+        const ordersRes = await fetch('/api/orders');
+        if (ordersRes.ok) {
+          const data = await ordersRes.json();
+          const count = data.orders?.length || 0;
+          console.log('[ProfileBottomSheet] Orders count:', count);
+          setOrdersCount(count);
+        } else {
+          console.error('[ProfileBottomSheet] Failed to fetch orders:', ordersRes.status);
+        }
+
+        // Fetch seller orders count
+        const salesRes = await fetch('/api/seller/orders');
+        if (salesRes.ok) {
+          const data = await salesRes.json();
+          const count = data.orders?.length || 0;
+          console.log('[ProfileBottomSheet] Sales count:', count);
+          setSalesCount(count);
+        } else {
+          console.error('[ProfileBottomSheet] Failed to fetch sales:', salesRes.status);
+        }
       } catch (error) {
         console.error('[ProfileBottomSheet] Failed to fetch counts:', error);
       }
     };
 
     fetchCounts();
-  }, [user, isOpen]);
+  }, [user, isOpen, profile?.seller_status]);
 
   // Close on escape key
   useEffect(() => {
@@ -178,6 +205,38 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                 <div className="px-4 py-2 text-xs font-semibold text-text-muted uppercase tracking-wide">
                   My Activity
                 </div>
+
+                <button
+                  onClick={() => handleNavigate('/orders')}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <ShoppingBag className="w-5 h-5 text-frost-ice" />
+                    <span className="text-polar-night font-medium">My Orders</span>
+                  </div>
+                  {ordersCount > 0 && (
+                    <span className="bg-frost-ice/10 text-frost-ice text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                      {ordersCount}
+                    </span>
+                  )}
+                </button>
+
+                {isActiveSeller && (
+                  <button
+                    onClick={() => handleNavigate('/seller/orders')}
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Store className="w-5 h-5 text-aurora-green" />
+                      <span className="text-polar-night font-medium">Sales Dashboard</span>
+                    </div>
+                    {salesCount > 0 && (
+                      <span className="bg-aurora-green/10 text-aurora-green text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                        {salesCount}
+                      </span>
+                    )}
+                  </button>
+                )}
 
                 <button
                   onClick={() => handleNavigate('/my-listings')}

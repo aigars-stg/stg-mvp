@@ -35,14 +35,13 @@ export const SESSION_CONFIG = {
 } as const;
 
 export const AUTH_ERRORS = {
-  INVALID_CREDENTIALS: 'Invalid email or password',
-  EMAIL_NOT_CONFIRMED: 'Please verify your email before signing in',
-  USER_NOT_FOUND: 'No account found with this email',
-  EMAIL_ALREADY_EXISTS: 'An account with this email already exists',
-  WEAK_PASSWORD: 'Password does not meet security requirements',
-  PASSWORDS_DONT_MATCH: 'Passwords do not match',
-  RATE_LIMIT_EXCEEDED: 'Too many attempts. Please try again later',
-  INVALID_TOKEN: 'Invalid or expired reset link',
-  NETWORK_ERROR: 'Network error. Please check your connection',
-  UNKNOWN_ERROR: 'Something went wrong. Please try again',
+  INVALID_CREDENTIALS: "Hmm, that email or password doesn't look right. Give it another try?",
+  EMAIL_NOT_CONFIRMED: 'Check your inbox — you need to verify your email before signing in',
+  USER_NOT_FOUND: "We couldn't find an account with that email",
+  EMAIL_ALREADY_EXISTS: 'Looks like you already have an account. Try signing in instead?',
+  WEAK_PASSWORD: 'Make it a bit stronger — 8+ characters with uppercase, lowercase, and a number',
+  RATE_LIMIT_EXCEEDED: "Whoa, slow down! Too many attempts. Take a breather and try again in a few minutes",
+  INVALID_TOKEN: 'That link has expired. Request a fresh one and you should be good',
+  NETWORK_ERROR: "Can't reach our servers. Check your connection and try again",
+  UNKNOWN_ERROR: 'Oops! Something went sideways. Give it another shot?',
 } as const;

@@ -4,10 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Card, Badge, Button } from '@second-turn/design-system';
 import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart } from 'lucide-react';
+import { SellerTrustCompact } from '@/components/seller/SellerTrustBadge';
+import { getSellerBadgeTier } from '@/lib/types/seller';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
-import { useIsListingSaved } from '@/lib/hooks/useSavedListings';
+import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 
@@ -36,8 +38,9 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
 
-  // Save listing functionality
-  const { isSaved, toggleSave } = useIsListingSaved(listing.id);
+  // Save listing functionality - uses context to avoid per-card API calls
+  const { isSaved: checkIsSaved, toggleSave: contextToggleSave } = useSavedListingsContext();
+  const isSaved = checkIsSaved(listing.id);
   const [saveLoading, setSaveLoading] = useState(false);
 
   // Get condition badge variant
@@ -100,13 +103,13 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
     e.stopPropagation();
 
     if (!user) {
-      router.push(`/auth/signin?redirect=/listing/${listing.id}`);
+      router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
       return;
     }
 
     try {
       setSaveLoading(true);
-      await toggleSave();
+      await contextToggleSave(listing.id);
     } catch (error) {
       console.error('Failed to toggle save:', error);
     } finally {
@@ -117,7 +120,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
   const displayImage = allImages[currentImageIndex];
 
   return (
-    <Link href={`/listing/${listing.id}`} className="h-full">
+    <Link href={`/game/${listing.bgg_game_id}`} className="h-full">
       <Card
         variant="interactive"
         padding="none"
@@ -307,32 +310,48 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
 
           {/* Bottom Section: Seller Info + Buy Now Button */}
           <div className="mt-auto pt-3 space-y-3 border-t border-border-subtle">
-            {/* Seller Info */}
+            {/* Seller Info with Trust Signals */}
             {showSeller && listing.seller && (
-              <div className="flex items-center gap-2">
-                {listing.seller.avatar_url ? (
-                  <img
-                    src={listing.seller.avatar_url}
-                    alt={listing.seller.full_name}
-                    className="w-6 h-6 rounded-sm object-cover border border-border-subtle"
-                  />
-                ) : (
-                  <div className="w-6 h-6 rounded-sm bg-frost-ice/20 flex items-center justify-center text-xs font-semibold text-frost-ice">
-                    {listing.seller.full_name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <span className="text-sm text-text-secondary line-clamp-1">
-                  {listing.seller.full_name}
-                  {listing.seller.country && getCountryFlag(listing.seller.country) && (
-                    <span
-                      className={`${getCountryFlag(listing.seller.country)} ml-1`}
-                      role="img"
-                      aria-label={`Country: ${getCountryName(listing.seller.country)}`}
-                      title={getCountryName(listing.seller.country)}
+              <Link
+                href={`/sellers/${listing.seller.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="block space-y-1.5 hover:bg-bg-secondary/50 -mx-2 px-2 py-1.5 rounded-lg transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  {listing.seller.avatar_url ? (
+                    <img
+                      src={listing.seller.avatar_url}
+                      alt={listing.seller.full_name}
+                      className="w-6 h-6 rounded-sm object-cover border border-border-subtle"
                     />
+                  ) : (
+                    <div className="w-6 h-6 rounded-sm bg-frost-ice/20 flex items-center justify-center text-xs font-semibold text-frost-ice">
+                      {listing.seller.full_name.charAt(0).toUpperCase()}
+                    </div>
                   )}
-                </span>
-              </div>
+                  <span className="text-sm text-text-secondary line-clamp-1 hover:text-frost-ice transition-colors">
+                    {listing.seller.full_name}
+                    {listing.seller.country && getCountryFlag(listing.seller.country) && (
+                      <span
+                        className={`${getCountryFlag(listing.seller.country)} ml-1`}
+                        role="img"
+                        aria-label={`Country: ${getCountryName(listing.seller.country)}`}
+                        title={getCountryName(listing.seller.country)}
+                      />
+                    )}
+                  </span>
+                </div>
+                {/* Trust Signals */}
+                <SellerTrustCompact
+                  totalSales={listing.seller.total_completed_sales ?? 0}
+                  averageRating={listing.seller.average_rating ?? 0}
+                  totalReviews={listing.seller.total_reviews ?? 0}
+                  badgeTier={getSellerBadgeTier(
+                    listing.seller.total_completed_sales ?? 0,
+                    listing.seller.average_rating ?? 0
+                  )}
+                />
+              </Link>
             )}
 
             {/* Action Button - Only show Buy Now for others' listings */}

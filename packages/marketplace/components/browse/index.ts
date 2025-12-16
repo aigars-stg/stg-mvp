@@ -1,0 +1,1 @@
+export { AggregatedGameCard } from './AggregatedGameCard';

@@ -1,37 +1,37 @@
 const buyerSteps = [
   {
-    title: 'Browse & Search',
+    title: 'Browse & search',
     description: 'Find games by title, category, condition, or location. Filter to your exact preferences.',
   },
   {
-    title: 'Review Details',
+    title: 'Review details',
     description: 'Check condition photos, completeness info, and seller ratings. Ask questions if needed.',
   },
   {
-    title: 'Purchase Securely',
+    title: 'Purchase securely',
     description: 'Pay through our secure system. Your payment is held until you confirm delivery.',
   },
   {
-    title: 'Enjoy Your Game',
+    title: 'Enjoy your game',
     description: 'Receive your game, verify condition, and start playing. Leave a review to help others.',
   },
 ];
 
 const sellerSteps = [
   {
-    title: 'List Your Game',
+    title: 'List your game',
     description: 'Add photos, describe condition honestly, and set your price. Takes just 5 minutes.',
   },
   {
-    title: 'Connect with Buyers',
+    title: 'Connect with buyers',
     description: 'Answer questions, negotiate if you\'re open to offers, and arrange shipping or pickup.',
   },
   {
-    title: 'Ship Safely',
+    title: 'Ship safely',
     description: 'Pack carefully and ship within 2 business days. Payment is released after buyer confirmation.',
   },
   {
-    title: 'Get Paid',
+    title: 'Get paid',
     description: 'Receive payment securely. List more games or use the funds to buy your next favorite.',
   },
 ];
@@ -43,7 +43,7 @@ export function HowItWorks() {
         {/* Section header */}
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
-            How It Works
+            How it works
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
             Simple, secure, and transparent for both buyers and sellers
@@ -55,7 +55,7 @@ export function HowItWorks() {
           {/* For Buyers */}
           <div>
             <h3 className="text-2xl font-semibold text-text-primary mb-8 flex items-center gap-3">
-              <span>For Buyers</span>
+              <span>For buyers</span>
               <span className="text-sm font-normal text-text-muted bg-frost-ice/10 px-3 py-1 rounded-full">
                 Find your game
               </span>
@@ -87,7 +87,7 @@ export function HowItWorks() {
           {/* For Sellers */}
           <div>
             <h3 className="text-2xl font-semibold text-text-primary mb-8 flex items-center gap-3">
-              <span>For Sellers</span>
+              <span>For sellers</span>
               <span className="text-sm font-normal text-text-muted bg-aurora-orange/10 px-3 py-1 rounded-full">
                 Earn from unused games
               </span>

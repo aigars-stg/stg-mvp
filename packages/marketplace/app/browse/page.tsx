@@ -7,10 +7,10 @@ import {
   Package, ChevronDown, Star, Sparkles, CircleCheck, Wrench, X,
   Users, Baby, Clock, Bookmark, Trash2, MapPin, AlertCircle
 } from 'lucide-react';
-import { ListingCard } from '@/components/listing/ListingCard';
+import { AggregatedGameCard } from '@/components/browse/AggregatedGameCard';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
-import type { ListingWithSeller } from '@/lib/types/listing';
+import type { AggregatedGame } from '@/lib/types/aggregated-game';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import {
   getSavedSearches,
@@ -22,6 +22,7 @@ import {
   type SavedSearchFilters,
 } from '@/lib/saved-searches';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { CountryPrompt } from '@/components/onboarding';
 import { NotificationModal } from '@/components/common/NotificationModal';
 import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { cn } from '@/lib/utils';
@@ -31,13 +32,13 @@ type ListingType = 'sell' | 'wanted';
 export default function BrowsePage() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   // Listing type state
   const [listingType, setListingType] = useState<ListingType>('sell');
 
   // Data state
-  const [listings, setListings] = useState<ListingWithSeller[]>([]);
+  const [games, setGames] = useState<AggregatedGame[]>([]);
   const [wantedListings, setWantedListings] = useState<WantedListingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -187,8 +188,8 @@ export default function BrowsePage() {
     router,
   ]);
 
-  // Fetch listings with pagination
-  const fetchListings = async (page: number, append = false) => {
+  // Fetch aggregated games with pagination
+  const fetchGames = async (page: number, append = false) => {
     try {
       if (page === 1) {
         setLoading(true);
@@ -196,21 +197,41 @@ export default function BrowsePage() {
         setLoadingMore(true);
       }
 
-      const response = await fetch(`/api/listings?page=${page}&limit=20`);
+      // Build query params for server-side filtering
+      const params = new URLSearchParams();
+      params.set('page', String(page));
+      params.set('limit', '20');
+
+      if (searchQuery) params.set('search', searchQuery);
+      if (priceMin) params.set('minPrice', priceMin);
+      if (priceMax) params.set('maxPrice', priceMax);
+
+      // Map sortBy to API sort param
+      const sortMap: Record<string, string> = {
+        'recent': 'newest',
+        'price-low': 'price_asc',
+        'price-high': 'price_desc',
+      };
+      params.set('sort', sortMap[sortBy] || 'newest');
+
+      // Add language filters
+      selectedLanguages.forEach(lang => params.append('language', lang));
+
+      const response = await fetch(`/api/games?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch listings');
+        throw new Error('Failed to fetch games');
       }
 
       const data = await response.json();
-      const newListings = data.listings || [];
+      const newGames = data.games || [];
 
       if (append && page > 1) {
-        // Append to existing listings for infinite scroll
-        setListings((prev) => [...prev, ...newListings]);
+        // Append to existing games for infinite scroll
+        setGames((prev) => [...prev, ...newGames]);
       } else {
-        // Replace listings for first page or filter changes
-        setListings(newListings);
+        // Replace games for first page or filter changes
+        setGames(newGames);
       }
 
       setCurrentPage(page);
@@ -218,8 +239,8 @@ export default function BrowsePage() {
       setTotalCount(data.pagination?.total || 0);
       setError('');
     } catch (err: any) {
-      console.error('Error fetching listings:', err);
-      setError(err.message || 'Failed to load listings');
+      console.error('Error fetching games:', err);
+      setError(err.message || 'Failed to load games');
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -252,7 +273,7 @@ export default function BrowsePage() {
   // Initial fetch on mount
   useEffect(() => {
     if (listingType === 'sell') {
-      fetchListings(1, false);
+      fetchGames(1, false);
     } else {
       fetchWantedListings();
     }
@@ -260,10 +281,10 @@ export default function BrowsePage() {
 
   // Reset to page 1 when filters change
   useEffect(() => {
-    if (filtersInitialized) {
-      fetchListings(1, false);
+    if (filtersInitialized && listingType === 'sell') {
+      fetchGames(1, false);
     }
-  }, [searchQuery, selectedConditions, selectedLanguages, selectedPlayerCounts, selectedMinAges, selectedPlayingTimes, priceMin, priceMax, sortBy]);
+  }, [searchQuery, selectedLanguages, priceMin, priceMax, sortBy, filtersInitialized, listingType]);
 
   // Infinite scroll detection
   useEffect(() => {
@@ -275,15 +296,15 @@ export default function BrowsePage() {
 
       if (scrollHeight - scrollTop - clientHeight < 300) {
         // Load more if: not currently loading, has more items, and filters are initialized
-        if (!loadingMore && !loading && hasMore && filtersInitialized) {
-          fetchListings(currentPage + 1, true);
+        if (!loadingMore && !loading && hasMore && filtersInitialized && listingType === 'sell') {
+          fetchGames(currentPage + 1, true);
         }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [loadingMore, loading, hasMore, currentPage, filtersInitialized]);
+  }, [loadingMore, loading, hasMore, currentPage, filtersInitialized, listingType]);
 
   // Load saved searches on mount
   useEffect(() => {
@@ -438,28 +459,22 @@ export default function BrowsePage() {
     }
   };
 
-  // Calculate available filter options from listings
+  // Calculate available filter options from games
   const availableOptions = useMemo(() => {
     const languages = new Set<string>();
-    const conditions = new Set<string>();
     const playerCounts = new Set<number>();
     const minAges = new Set<number>();
     const playingTimeRanges = new Set<string>();
     let minPrice = Infinity;
     let maxPrice = -Infinity;
 
-    listings.forEach((listing) => {
-      // Extract languages (handle comma-separated values)
-      if (listing.language) {
-        listing.language.split(', ').forEach((lang) => languages.add(lang.trim()));
-      }
-
-      // Extract conditions
-      conditions.add(listing.condition);
+    games.forEach((game) => {
+      // Extract languages from aggregated game
+      game.languages.forEach(lang => languages.add(lang));
 
       // Extract player counts from ranges
-      if (listing.game?.player_count) {
-        const playerCount = listing.game.player_count;
+      if (game.player_count) {
+        const playerCount = game.player_count;
         if (playerCount.includes('-')) {
           const [min, max] = playerCount.split('-').map(n => parseInt(n.trim()));
           for (let i = min; i <= Math.min(max, 8); i++) {
@@ -472,13 +487,13 @@ export default function BrowsePage() {
       }
 
       // Extract min ages
-      if (listing.game?.min_age) {
-        minAges.add(listing.game.min_age);
+      if (game.min_age) {
+        minAges.add(game.min_age);
       }
 
       // Categorize playing times
-      if (listing.game?.playing_time) {
-        const time = parseInt(listing.game.playing_time);
+      if (game.playing_time) {
+        const time = parseInt(game.playing_time);
         if (!isNaN(time)) {
           if (time <= 30) playingTimeRanges.add('0-30');
           else if (time <= 60) playingTimeRanges.add('30-60');
@@ -487,14 +502,27 @@ export default function BrowsePage() {
         }
       }
 
-      // Calculate price range
-      if (listing.price < minPrice) minPrice = listing.price;
-      if (listing.price > maxPrice) maxPrice = listing.price;
+      // Calculate price range (use lowest_price from each game)
+      if (game.lowest_price < minPrice) minPrice = game.lowest_price;
+      if (game.highest_price > maxPrice) maxPrice = game.highest_price;
+    });
+
+    // Sort languages: English first, then Baltic (Estonian, Latvian, Lithuanian), then rest alphabetically
+    const sortedLanguages = Array.from(languages).sort((a, b) => {
+      const priority: Record<string, number> = {
+        'English': 0,
+        'Estonian': 1,
+        'Latvian': 2,
+        'Lithuanian': 3,
+      };
+      const aPriority = priority[a] ?? 100;
+      const bPriority = priority[b] ?? 100;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return a.localeCompare(b);
     });
 
     return {
-      languages: Array.from(languages).sort(),
-      conditions: Array.from(conditions),
+      languages: sortedLanguages,
       playerCounts: Array.from(playerCounts).sort((a, b) => a - b),
       minAges: Array.from(minAges).sort((a, b) => a - b),
       playingTimeRanges: Array.from(playingTimeRanges).sort(),
@@ -503,23 +531,23 @@ export default function BrowsePage() {
         max: maxPrice === -Infinity ? 100 : Math.ceil(maxPrice),
       },
     };
-  }, [listings]);
+  }, [games]);
 
-  // Generate dynamic placeholder based on actual listings
+  // Generate dynamic placeholder based on actual games
   const searchPlaceholder = useMemo(() => {
-    if (listings.length === 0) {
+    if (games.length === 0) {
       return 'Search for board games...';
     }
 
     // Get unique game names
-    const uniqueGames = Array.from(new Set(listings.map(l => l.game_name)));
+    const uniqueGameNames = Array.from(new Set(games.map(g => g.game_name)));
 
-    if (uniqueGames.length === 0) {
+    if (uniqueGameNames.length === 0) {
       return 'Search for board games...';
     }
 
     // Sort by name length (prefer shorter names for better mobile display)
-    const sortedByLength = [...uniqueGames].sort((a, b) => a.length - b.length);
+    const sortedByLength = [...uniqueGameNames].sort((a, b) => a.length - b.length);
 
     // Take shorter names first, then randomly select 1 game
     const candidates = sortedByLength.slice(0, Math.min(5, sortedByLength.length));
@@ -532,18 +560,9 @@ export default function BrowsePage() {
       : selectedGame;
 
     return `Search for ${truncatedName} or any other game...`;
-  }, [listings]);
+  }, [games]);
 
   // Handle toggles
-  const toggleCondition = (condition: string) => {
-    const newSet = new Set(selectedConditions);
-    if (newSet.has(condition)) {
-      newSet.delete(condition);
-    } else {
-      newSet.add(condition);
-    }
-    setSelectedConditions(newSet);
-  };
 
   const toggleLanguage = (language: string) => {
     const newSet = new Set(selectedLanguages);
@@ -646,7 +665,6 @@ export default function BrowsePage() {
     if (searchQuery) count++;
 
     if (listingType === 'sell') {
-      if (selectedConditions.size > 0) count++;
       if (selectedLanguages.size > 0) count++;
       if (selectedPlayerCounts.size > 0) count++;
       if (selectedMinAges.size > 0) count++;
@@ -663,7 +681,6 @@ export default function BrowsePage() {
   }, [
     listingType,
     searchQuery,
-    selectedConditions,
     selectedLanguages,
     selectedPlayerCounts,
     selectedMinAges,
@@ -677,81 +694,40 @@ export default function BrowsePage() {
     showExpiringOnly
   ]);
 
-  // Filter listings
-  const filteredListings = useMemo(() => {
-    let filtered = [...listings];
+  // Filter games (client-side filtering for game-level attributes)
+  // Note: Most filtering is now done server-side via API
+  const filteredGames = useMemo(() => {
+    let filtered = [...games];
 
-    // Search filter (searches game name)
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((listing) =>
-        listing.game_name.toLowerCase().includes(query)
-      );
-    }
-
-    // Condition filter
-    if (selectedConditions.size > 0) {
-      filtered = filtered.filter((listing) => selectedConditions.has(listing.condition));
-    }
-
-    // Language filter (handle comma-separated values)
-    if (selectedLanguages.size > 0) {
-      filtered = filtered.filter((listing) =>
-        listing.language?.split(', ').some((lang) => selectedLanguages.has(lang.trim()))
-      );
-    }
-
-    // Player count filter (handle ranges)
+    // Player count filter (handle ranges) - client-side
     if (selectedPlayerCounts.size > 0) {
-      filtered = filtered.filter((listing) => {
-        if (!listing.game?.player_count) return false;
+      filtered = filtered.filter((game) => {
+        if (!game.player_count) return false;
         return Array.from(selectedPlayerCounts).some(count =>
-          playerCountMatches(listing.game.player_count || null, count)
+          playerCountMatches(game.player_count, count)
         );
       });
     }
 
-    // Min age filter
+    // Min age filter - client-side
     if (selectedMinAges.size > 0) {
-      filtered = filtered.filter((listing) =>
-        listing.game?.min_age && selectedMinAges.has(listing.game.min_age)
+      filtered = filtered.filter((game) =>
+        game.min_age && selectedMinAges.has(game.min_age)
       );
     }
 
-    // Playing time filter
+    // Playing time filter - client-side
     if (selectedPlayingTimes.size > 0) {
-      filtered = filtered.filter((listing) => {
-        if (!listing.game?.playing_time) return false;
+      filtered = filtered.filter((game) => {
+        if (!game.playing_time) return false;
         return Array.from(selectedPlayingTimes).some(time =>
-          playingTimeMatches(listing.game.playing_time || null, time)
+          playingTimeMatches(game.playing_time, time)
         );
       });
-    }
-
-    // Price filter
-    if (priceMin) {
-      filtered = filtered.filter((listing) => listing.price >= parseFloat(priceMin));
-    }
-    if (priceMax) {
-      filtered = filtered.filter((listing) => listing.price <= parseFloat(priceMax));
-    }
-
-    // Sorting
-    switch (sortBy) {
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'recent':
-      default:
-        // Already in recent order from API
-        break;
     }
 
     return filtered;
-  }, [listings, searchQuery, selectedConditions, selectedLanguages, selectedPlayerCounts, selectedMinAges, selectedPlayingTimes, priceMin, priceMax, sortBy]);
+  }, [games, selectedPlayerCounts, selectedMinAges, selectedPlayingTimes]);
 
   // Get condition icon and label
   const getConditionInfo = (condition: string) => {
@@ -939,6 +915,9 @@ export default function BrowsePage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Country Prompt - shown if logged in but no country set */}
+        {user && !profile?.country && <CountryPrompt />}
+
         {/* Top Filter Bar */}
         <div className="mb-6 space-y-4">
           {/* Toolbar */}
@@ -1062,8 +1041,8 @@ export default function BrowsePage() {
 
               <div className="text-sm text-text-secondary">
                 <span className="font-medium text-polar-night">
-                  {listingType === 'sell' ? filteredListings.length : filteredWantedListings.length}
-                </span> {listingType === 'sell' ? 'listings' : 'wanted listings'}
+                  {listingType === 'sell' ? filteredGames.length : filteredWantedListings.length}
+                </span> {listingType === 'sell' ? 'games' : 'wanted listings'}
               </div>
             </div>
 
@@ -1095,11 +1074,11 @@ export default function BrowsePage() {
           {/* Collapsible Filter Panel - Desktop Only */}
           {filtersOpen && (
             <div className="hidden lg:block border-2 border-border rounded-lg p-4 sm:p-6 bg-bg-elevated animate-in slide-in-from-top-2 duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {listingType === 'sell' ? (
                   <>
                 {/* Player Count Filter */}
-                <div>
+                <div className="p-4 rounded-lg bg-snow-white/50 border border-border-subtle">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 text-text-muted" />
@@ -1134,7 +1113,7 @@ export default function BrowsePage() {
                 </div>
 
                 {/* Min Age Filter */}
-                <div>
+                <div className="p-4 rounded-lg bg-snow-white/50 border border-border-subtle">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Baby className="w-4 h-4 text-text-muted" />
@@ -1169,7 +1148,7 @@ export default function BrowsePage() {
                 </div>
 
                 {/* Playing Time Filter */}
-                <div>
+                <div className="p-4 rounded-lg bg-snow-white/50 border border-border-subtle">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-text-muted" />
@@ -1204,7 +1183,7 @@ export default function BrowsePage() {
                 </div>
 
                 {/* Language Filter */}
-                <div>
+                <div className="p-4 rounded-lg bg-snow-white/50 border border-border-subtle">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-medium text-polar-night">Language</h3>
                     {selectedLanguages.size > 0 && (
@@ -1239,48 +1218,8 @@ export default function BrowsePage() {
                   </div>
                 </div>
 
-                {/* Condition Filter */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-polar-night">Condition</h3>
-                    {selectedConditions.size > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedConditions(new Set())}
-                        className="h-auto py-0 px-2 text-xs"
-                      >
-                        Clear
-                      </Button>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    {availableOptions.conditions.map((condition) => {
-                      const { icon: Icon, label } = getConditionInfo(condition);
-                      return (
-                        <label
-                          key={condition}
-                          className="flex items-center gap-2 cursor-pointer group"
-                        >
-                          <Checkbox
-                            checked={selectedConditions.has(condition)}
-                            onChange={() => toggleCondition(condition)}
-                          />
-                          <Icon className="w-4 h-4 text-text-muted" />
-                          <span className="text-sm group-hover:text-polar-night transition-colors">
-                            {label}
-                          </span>
-                        </label>
-                      );
-                    })}
-                    {availableOptions.conditions.length === 0 && (
-                      <p className="text-sm text-text-muted italic">No conditions available</p>
-                    )}
-                  </div>
-                </div>
-
                 {/* Price Range */}
-                <div>
+                <div className="p-4 rounded-lg bg-snow-white/50 border border-border-subtle">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-medium text-polar-night">Price (EUR)</h3>
                     {(priceMin || priceMax) && (
@@ -1485,9 +1424,9 @@ export default function BrowsePage() {
                 </div>
 
                 {/* Filter Content - Scrollable */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {/* Player Count Filter */}
-                  <div>
+                  <div className="p-4 rounded-lg bg-snow-white/50 border border-border-subtle">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-text-muted" />
@@ -1522,7 +1461,7 @@ export default function BrowsePage() {
                   </div>
 
                   {/* Min Age Filter */}
-                  <div>
+                  <div className="p-4 rounded-lg bg-snow-white/50 border border-border-subtle">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Baby className="w-4 h-4 text-text-muted" />
@@ -1557,7 +1496,7 @@ export default function BrowsePage() {
                   </div>
 
                   {/* Playing Time Filter */}
-                  <div>
+                  <div className="p-4 rounded-lg bg-snow-white/50 border border-border-subtle">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-text-muted" />
@@ -1592,7 +1531,7 @@ export default function BrowsePage() {
                   </div>
 
                   {/* Language Filter */}
-                  <div>
+                  <div className="p-4 rounded-lg bg-snow-white/50 border border-border-subtle">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-sm font-medium text-polar-night">Language</h3>
                       {selectedLanguages.size > 0 && (
@@ -1627,48 +1566,8 @@ export default function BrowsePage() {
                     </div>
                   </div>
 
-                  {/* Condition Filter */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-medium text-polar-night">Condition</h3>
-                      {selectedConditions.size > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedConditions(new Set())}
-                          className="h-auto py-0 px-2 text-xs"
-                        >
-                          Clear
-                        </Button>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      {availableOptions.conditions.map((condition) => {
-                        const { icon: Icon, label } = getConditionInfo(condition);
-                        return (
-                          <label
-                            key={condition}
-                            className="flex items-center gap-2 cursor-pointer group"
-                          >
-                            <Checkbox
-                              checked={selectedConditions.has(condition)}
-                              onChange={() => toggleCondition(condition)}
-                            />
-                            <Icon className="w-4 h-4 text-text-muted" />
-                            <span className="text-sm group-hover:text-polar-night transition-colors">
-                              {label}
-                            </span>
-                          </label>
-                        );
-                      })}
-                      {availableOptions.conditions.length === 0 && (
-                        <p className="text-sm text-text-muted italic">No conditions available</p>
-                      )}
-                    </div>
-                  </div>
-
                   {/* Price Range */}
-                  <div>
+                  <div className="p-4 rounded-lg bg-snow-white/50 border border-border-subtle">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-sm font-medium text-polar-night">Price (EUR)</h3>
                       {(priceMin || priceMax) && (
@@ -1838,7 +1737,7 @@ export default function BrowsePage() {
         </div>
 
         {/* BGG Attribution - Above Grid */}
-        {!loading && !error && filteredListings.length > 0 && (
+        {!loading && !error && filteredGames.length > 0 && (
           <div className="flex justify-end mb-4">
             <a
               href="https://boardgamegeek.com"
@@ -1878,17 +1777,15 @@ export default function BrowsePage() {
           </div>
         )}
 
-        {/* Listings Grid - Full Width, Responsive */}
-        {!loading && !error && (listingType === 'sell' ? filteredListings.length > 0 : filteredWantedListings.length > 0) && (
+        {/* Games Grid - Full Width, Responsive */}
+        {!loading && !error && (listingType === 'sell' ? filteredGames.length > 0 : filteredWantedListings.length > 0) && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {listingType === 'sell'
-                ? filteredListings.map((listing) => (
-                    <ListingCard
-                      key={listing.id}
-                      listing={listing}
-                      showSeller={true}
-                      isOwnListing={user?.id === listing.seller_id}
+                ? filteredGames.map((game) => (
+                    <AggregatedGameCard
+                      key={game.bgg_game_id}
+                      game={game}
                     />
                   ))
                 : filteredWantedListings.map((wantedListing) => (
@@ -1906,15 +1803,15 @@ export default function BrowsePage() {
             {listingType === 'sell' && loadingMore && (
               <div className="text-center py-8">
                 <div className="w-8 h-8 border-4 border-frost-ice border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                <p className="text-sm text-text-secondary">Loading more listings...</p>
+                <p className="text-sm text-text-secondary">Loading more games...</p>
               </div>
             )}
 
             {/* No More Results - Only for sell listings */}
-            {listingType === 'sell' && !hasMore && !loadingMore && filteredListings.length > 0 && (
+            {listingType === 'sell' && !hasMore && !loadingMore && filteredGames.length > 0 && (
               <div className="text-center py-8 border-t border-border-subtle">
                 <p className="text-sm text-text-secondary">
-                  You've reached the end! Showing all {totalCount} listings.
+                  You've reached the end! Showing all {totalCount} games.
                 </p>
               </div>
             )}
@@ -1922,13 +1819,13 @@ export default function BrowsePage() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && (listingType === 'sell' ? filteredListings.length === 0 : filteredWantedListings.length === 0) && (
+        {!loading && !error && (listingType === 'sell' ? filteredGames.length === 0 : filteredWantedListings.length === 0) && (
           <div className="text-center py-16">
             <div className="flex justify-center mb-4">
               <Package className="w-16 h-16 text-text-muted" />
             </div>
             <h3 className="text-xl font-semibold text-polar-night mb-2">
-              {listingType === 'sell' ? 'No listings found' : 'No wanted listings yet'}
+              {listingType === 'sell' ? 'No games found' : 'No wanted listings yet'}
             </h3>
             <p className="text-text-secondary mb-6">
               {activeFiltersCount > 0

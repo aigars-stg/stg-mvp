@@ -39,7 +39,7 @@ export function ListingContext({ conversation }: ListingContextProps) {
   return (
     <div className="border-b border-divider-subtle bg-background-secondary">
       <Link
-        href={`/listing/${listing.id}`}
+        href={`/game/${listing.game_id}`}
         className="flex items-center gap-3 p-4 hover:bg-background-tertiary transition-colors group"
       >
         {/* Listing thumbnail */}

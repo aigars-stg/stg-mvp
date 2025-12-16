@@ -41,8 +41,8 @@ export function ConversationList({
 
     fetchConversations();
 
-    // Refresh conversations every 30 seconds to show new messages
-    const interval = setInterval(fetchConversations, 30000);
+    // Refresh conversations every 60 seconds to show new messages
+    const interval = setInterval(fetchConversations, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -67,13 +67,13 @@ export function ConversationList({
   if (conversations.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
-        <MessageCircle className="w-16 h-16 text-text-tertiary" />
+        <MessageCircle className="w-16 h-16 text-text-muted mx-auto mb-4" />
         <div>
           <h3 className="text-lg font-semibold text-text-primary mb-2">
-            No messages yet
+            No conversations yet
           </h3>
           <p className="text-text-secondary max-w-sm">
-            When you contact sellers about their listings, your conversations will appear here.
+            When you reach out about a listing - or someone reaches out to you - it'll show up here.
           </p>
         </div>
       </div>

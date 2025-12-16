@@ -2,24 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-/**
- * Account Recovery Endpoint
- *
- * Allows users to recover their deleted account within 14-day grace period
- * Restores original email and clears soft delete flags
- */
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      );
-    }
-
-    // Create Supabase client with cookies
     const cookieStore = cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,52 +23,17 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    // Step 1: Find the soft-deleted profile by original_email
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('id, deleted_at, recovery_deadline, original_email, email')
-      .eq('original_email', email)
-      .not('deleted_at', 'is', null)
-      .single();
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (profileError || !profile) {
+    if (userError || !user) {
       return NextResponse.json(
-        { error: 'No deleted account found with this email' },
-        { status: 404 }
-      );
-    }
-
-    // Step 2: Check if recovery deadline has passed
-    const now = new Date();
-    const recoveryDeadline = new Date(profile.recovery_deadline);
-
-    if (now > recoveryDeadline) {
-      return NextResponse.json(
-        {
-          error: 'Recovery period has expired. This account can no longer be recovered.',
-          recovery_deadline_passed: true
-        },
-        { status: 400 }
-      );
-    }
-
-    // Step 3: Verify password using anonymized email from auth.users
-    // The email in auth.users is now deleted-{user_id}@internal.local
-    const anonymizedEmail = `deleted-${profile.id}@internal.local`;
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: anonymizedEmail,
-      password,
-    });
-
-    if (signInError) {
-      return NextResponse.json(
-        { error: 'Invalid password' },
+        { error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    // Step 4: Use service role to restore original email in auth.users
+    // Use service role to bypass RLS and perform admin updates
     const supabaseAdmin = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -103,48 +52,89 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    const { error: emailRestoreError } = await supabaseAdmin.auth.admin.updateUserById(
-      profile.id,
-      { email: profile.original_email }
+    // Get profile to access original email
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('original_email, deleted_at, recovery_deadline')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json(
+        { error: 'Profile not found' },
+        { status: 404 }
+      );
+    }
+
+    if (!profile.deleted_at) {
+      return NextResponse.json(
+        { message: 'Account is active' },
+        { status: 200 }
+      );
+    }
+
+    // Check if recovery deadline has passed
+    if (profile.recovery_deadline && new Date() > new Date(profile.recovery_deadline)) {
+      return NextResponse.json(
+        { error: 'Recovery period has expired' },
+        { status: 403 }
+      );
+    }
+
+    const originalEmail = profile.original_email;
+
+    if (!originalEmail) {
+      return NextResponse.json(
+        { error: 'Original email not found' },
+        { status: 400 }
+      );
+    }
+
+    console.log(`🔄 Recovering account for ${user.id} (${originalEmail})`);
+
+    // Step 1: Restore email in auth.users
+    const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(
+      user.id,
+      { email: originalEmail }
     );
 
-    if (emailRestoreError) {
-      console.error('Error restoring email:', emailRestoreError);
+    if (authUpdateError) {
+      console.error('Failed to restore auth email:', authUpdateError);
       return NextResponse.json(
-        { error: 'Failed to restore account. Please contact support.' },
+        { error: 'Failed to restore login credentials' },
         { status: 500 }
       );
     }
 
-    // Step 5: Restore user_profiles data and clear soft delete flags
-    const { error: restoreError } = await supabase
+    // Step 2: Undelete profile and restore email
+    const { error: profileUpdateError } = await supabaseAdmin
       .from('user_profiles')
       .update({
         deleted_at: null,
         deletion_reason: null,
         recovery_deadline: null,
         original_email: null,
-        // Note: We don't restore full_name, phone, avatar_url as they were anonymized
-        // User will need to update these in their profile settings
+        email: originalEmail,
       })
-      .eq('id', profile.id);
+      .eq('id', user.id);
 
-    if (restoreError) {
-      console.error('Error restoring profile:', restoreError);
+    if (profileUpdateError) {
+      console.error('Failed to restore profile:', profileUpdateError);
       return NextResponse.json(
-        { error: 'Failed to restore account profile' },
+        { error: 'Failed to restore profile data' },
         { status: 500 }
       );
     }
 
-    // Step 6: Sign out the current session (with anonymized email)
-    await supabase.auth.signOut();
+    // Step 3: Restore listings (Optional - for now we might leave them as removed or draft?
+    // Decision: If we marked them 'removed', we don't automatically republish them to avoid accidents.
+    // User can republish them manually.)
+
+    // Step 4: Send recovery confirmation email? (Optional)
 
     return NextResponse.json({
       success: true,
-      message: 'Account successfully recovered! Please sign in with your email address.',
-      email: profile.original_email,
-      note: 'Your profile information (name, phone, avatar) was anonymized and will need to be updated in account settings.'
+      message: 'Account successfully recovered'
     });
 
   } catch (error: any) {

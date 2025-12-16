@@ -4,16 +4,14 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { User, LogOut, Package, MessageCircle } from 'lucide-react';
+import { LogOut, Package, ShoppingBag, Store, Settings, ChevronRight, LayoutDashboard } from 'lucide-react';
 import { getInitials } from '@/lib/auth/utils';
-import { getCountryFlag, getCountryName } from '@/lib/country-utils';
-import { useUnreadMessages } from '@/lib/hooks/useUnreadMessages';
+
 
 export function UserMenu() {
   const { user, profile, signOut, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [signOutError, setSignOutError] = useState<string>('');
-  const { unreadCount } = useUnreadMessages();
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -51,9 +49,9 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <Link href="/auth/signin">
+      <Link href="/auth">
         <Button variant="primary" size="sm">
-          Sign In
+          Join
         </Button>
       </Link>
     );
@@ -62,6 +60,9 @@ export function UserMenu() {
   // User is logged in
   const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';
   const initials = getInitials(displayName);
+
+  // Check if user is an active seller
+  const isActiveSeller = profile?.seller_status === 'active';
 
   return (
     <div className="relative" ref={menuRef}>
@@ -83,74 +84,83 @@ export function UserMenu() {
             {initials}
           </div>
         )}
-        <span className="hidden sm:inline text-sm font-medium text-text">
-          {displayName}
-          {profile?.country && getCountryFlag(profile.country) && (
-            <span
-              className={`${getCountryFlag(profile.country)} ml-1.5`}
-              role="img"
-              aria-label={`Country: ${getCountryName(profile.country)}`}
-              title={getCountryName(profile.country)}
-            />
-          )}
+        <span className="hidden sm:inline text-text-muted hover:text-text transition-colors">
+          <svg
+            className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </span>
-        <svg
-          className={`w-4 h-4 text-text-muted transition-transform ${
-            isOpen ? 'rotate-180' : ''
-          }`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-snow-white rounded-lg shadow-lg border border-border py-2 z-50">
-          {/* User Info */}
-          <div className="px-4 py-3 border-b border-border-subtle">
-            <p className="text-sm font-medium text-polar-night">
-              {profile?.full_name || 'User'}
-            </p>
-            <p className="text-xs text-text-secondary truncate">
-              {user.email}
-            </p>
-          </div>
+        <div className="absolute right-0 mt-2 w-64 bg-snow-white rounded-lg shadow-lg border border-border py-2 z-50">
+          {/* User Info Header - Clickable */}
+          <Link
+            href="/account/dashboard"
+            onClick={() => setIsOpen(false)}
+            className="block px-4 py-3 border-b border-border-subtle hover:bg-bg-secondary transition-colors group relative"
+          >
+            <div className="pr-6">
+              <p className="text-sm font-medium text-polar-night group-hover:text-frost-ice transition-colors">
+                {profile?.full_name || 'User'}
+              </p>
+              <p className="text-xs text-text-secondary truncate">
+                {user.email}
+              </p>
+            </div>
+            {/* Hover arrow indicator */}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted group-hover:text-frost-ice transition-colors">
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </Link>
 
           {/* Menu Items */}
           <div className="py-1">
+            {/* 1. Seller Dashboard (if active seller) */}
+            {isActiveSeller && (
+              <Link
+                href="/seller/dashboard"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                <Store className="w-4 h-4 text-frost-ice" />
+                Seller dashboard
+              </Link>
+            )}
+
+            {/* 2. My Orders */}
             <Link
-              href="/account"
+              href="/orders"
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <User className="w-4 h-4 text-frost-ice" />
-              Account Settings
+              <ShoppingBag className="w-4 h-4 text-frost-ice" />
+              My orders
             </Link>
+
+            {/* 3. My Listings */}
             <Link
               href="/my-listings"
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <Package className="w-4 h-4 text-frost-ice" />
-              My Listings
+              <LayoutDashboard className="w-4 h-4 text-frost-ice" />
+              My listings
             </Link>
+
+            {/* 4. Account Settings */}
             <Link
-              href="/messages"
-              className="flex items-center justify-between px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
+              href="/account/settings"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <div className="flex items-center gap-3">
-                <MessageCircle className="w-4 h-4 text-frost-ice" />
-                Messages
-              </div>
-              {unreadCount > 0 && (
-                <span className="bg-frost-ice text-snow-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
+              <Settings className="w-4 h-4 text-frost-ice" />
+              Account settings
             </Link>
           </div>
 
@@ -161,7 +171,7 @@ export function UserMenu() {
               className="flex items-center gap-3 px-4 py-2 text-sm text-aurora-red hover:bg-aurora-red/10 transition-colors w-full text-left"
             >
               <LogOut className="w-4 h-4" />
-              Sign Out
+              Sign out
             </button>
           </div>
 

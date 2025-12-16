@@ -2,48 +2,86 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { logLoginActivity, getClientIP } from '@/lib/auth/activity-logger';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get('token_hash');
   const type = searchParams.get('type');
-  const next = searchParams.get('next') ?? '/';
+  const code = searchParams.get('code');
+  const next = searchParams.get('next') ?? '/account/dashboard';
 
-  if (token_hash && type) {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: CookieOptions) {
-            cookieStore.set({ name, value, ...options });
-          },
-          remove(name: string, options: CookieOptions) {
-            cookieStore.delete(name);
-          },
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
         },
-      }
-    );
+        set(name: string, value: string, options: CookieOptions) {
+          cookieStore.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          cookieStore.delete(name);
+        },
+      },
+    }
+  );
 
-    const { error } = await supabase.auth.verifyOtp({
+  let error = null;
+  let user = null;
+
+  // Handle various auth flows
+  if (token_hash && type) {
+    // Email Link / Magic Link Flow
+    const { data: { user: otpUser }, error: otpError } = await supabase.auth.verifyOtp({
       type: type as any,
       token_hash,
     });
-
-    if (!error) {
-      // Redirect to the home page or wherever you want after email verification
-      return NextResponse.redirect(new URL(next, request.url));
-    }
-
-    // If there's an error, redirect to an error page or sign-in
-    console.error('Email verification error:', error);
-    return NextResponse.redirect(new URL('/auth/signin?error=verification_failed', request.url));
+    if (otpError) error = otpError;
+    else user = otpUser;
+  } else if (code) {
+    // OAuth Code FLow
+    const { data: { user: oauthUser }, error: oauthError } = await supabase.auth.exchangeCodeForSession(code);
+    if (oauthError) error = oauthError;
+    else user = oauthUser;
+  } else {
+    // No auth params
+    return NextResponse.redirect(new URL('/auth', request.url));
   }
 
-  // No token or type provided, redirect to sign-in
-  return NextResponse.redirect(new URL('/auth/signin', request.url));
+  if (error) {
+    console.error('Auth confirming error:', error);
+    // Redirect to auth with error
+    return NextResponse.redirect(new URL('/auth?error=verification_failed', request.url));
+  }
+
+  // Log Activity if successful
+  if (user) {
+    try {
+      const ipAddress = getClientIP(request);
+      const userAgent = request.headers.get('user-agent') || 'Unknown';
+
+      // Optional: Get geo-location from IP (using Cloudflare headers if available)
+      const country = request.headers.get('cf-ipcountry') || null;
+      const city = request.headers.get('cf-ipcity') || null;
+
+      await logLoginActivity({
+        supabase,
+        userId: user.id,
+        ipAddress,
+        userAgent,
+        country,
+        city
+      });
+    } catch (logError) {
+      console.error('Failed to log login activity:', logError);
+      // Non-blocking, continue
+    }
+  }
+
+  // Redirect to application
+  return NextResponse.redirect(new URL(next, request.url));
 }

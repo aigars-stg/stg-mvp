@@ -212,9 +212,9 @@ export async function PATCH(
 
     // Photo fields
     if (body.photo_urls !== undefined) {
-      if (!Array.isArray(body.photo_urls) || body.photo_urls.length === 0) {
+      if (!Array.isArray(body.photo_urls)) {
         return NextResponse.json(
-          { error: 'At least one photo is required' },
+          { error: 'photo_urls must be an array' },
           { status: 400 }
         );
       }

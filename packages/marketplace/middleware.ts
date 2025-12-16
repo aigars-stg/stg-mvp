@@ -60,10 +60,15 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/sell', '/account', '/my-listings'];
+  const protectedRoutes = ['/sell', '/account', '/my-listings', '/seller'];
+  // Public routes that should NOT require auth (even if they match protected patterns)
+  const publicRoutes = ['/seller/terms'];
   const authRoutes = ['/auth/signin', '/auth/signup'];
 
-  const isProtectedRoute = protectedRoutes.some((route) =>
+  const isPublicRoute = publicRoutes.some((route) =>
+    request.nextUrl.pathname === route
+  );
+  const isProtectedRoute = !isPublicRoute && protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   );
   const isAuthRoute = authRoutes.some((route) =>

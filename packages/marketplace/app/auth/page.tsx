@@ -1,0 +1,816 @@
+'use client';
+
+import { useState, FormEvent, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Button, Card } from '@second-turn/design-system';
+import { useAuth } from '@/lib/auth/AuthContext';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, Check, Sparkles } from 'lucide-react';
+import { mapAuthError } from '@/lib/auth/errors';
+import type { AuthFlowState } from '@/lib/auth/types';
+
+/**
+ * Email-first authentication page.
+ * Single page that handles all auth flows with inline state transitions.
+ *
+ * Flow:
+ * 1. Email Entry → user enters email
+ * 2. Checking → system checks if email exists
+ * 3a. New User → magic link flow (no password at signup)
+ * 3b. Existing User → magic link OR password
+ * 4. Magic Link Sent → success confirmation
+ */
+export default function AuthPage() {
+  // State machine
+  const [authState, setAuthState] = useState<AuthFlowState>('email_entry');
+
+  // Form state
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Loading states
+  const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
+
+  // Error and UI state
+  const [error, setError] = useState('');
+  const [resendCount, setResendCount] = useState(0);
+  const [redirectTo, setRedirectTo] = useState('/');
+  const [providers, setProviders] = useState<string[]>([]);
+  const [manualPasswordEntry, setManualPasswordEntry] = useState(false);
+
+  const { signIn, signInWithMagicLink, signInWithOAuth, user } = useAuth();
+  const router = useRouter();
+
+  // Check if site is in "coming soon" mode
+  const isComingSoon = true; // process.env.NEXT_PUBLIC_COMING_SOON === 'true';
+
+  // Maximum resend attempts
+  const MAX_RESENDS = 3;
+
+  // Get redirect parameter from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirectTo');
+    if (redirect) {
+      setRedirectTo(redirect);
+    }
+  }, []);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.push(redirectTo);
+    }
+  }, [user, router, redirectTo]);
+
+  // Check if email exists in database
+  const checkEmailExists = async (emailToCheck: string): Promise<{ exists: boolean; providers: string[] }> => {
+    try {
+      const response = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailToCheck }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check email');
+      }
+
+      const data = await response.json();
+      return { exists: data.exists, providers: data.providers || [] };
+    } catch (err) {
+      console.error('Email check failed:', err);
+      // On error, default to new user flow (safer)
+      return { exists: false, providers: [] };
+    }
+  };
+
+  // Handle email submission (State 1 → State 2 → State 3a/3b)
+  const handleEmailSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setAuthState('checking');
+
+    const startTime = Date.now();
+    const minDuration = 400; // ms for perceived quality
+
+    try {
+      const { exists, providers: userProviders } = await checkEmailExists(email);
+
+      // Ensure minimum duration (feels more trustworthy)
+      const elapsed = Date.now() - startTime;
+      if (elapsed < minDuration) {
+        await new Promise((r) => setTimeout(r, minDuration - elapsed));
+      }
+
+      setProviders(userProviders);
+      setAuthState(exists ? 'existing_user' : 'new_user');
+      setManualPasswordEntry(false); // Reset on new email check
+    } catch (err) {
+      // Fallback: assume new user on error (safer default)
+      setAuthState('new_user');
+    }
+  };
+
+  // Handle magic link request (State 3a/3b → State 4)
+  const handleMagicLink = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const { error: magicLinkError } = await signInWithMagicLink(email);
+
+      if (magicLinkError) {
+        setError(mapAuthError(magicLinkError));
+        setLoading(false);
+        return;
+      }
+
+      setAuthState('magic_link_sent');
+      setLoading(false);
+    } catch (err: any) {
+      setError(mapAuthError(err));
+      setLoading(false);
+    }
+  };
+
+  // Handle password sign in (existing users only)
+  const handlePasswordSignIn = async (e: FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const { error: signInError } = await signIn(email, password);
+
+      if (signInError) {
+        setError(mapAuthError(signInError));
+        setLoading(false);
+        return;
+      }
+
+      // Redirect to original destination or home
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err: any) {
+      setError(mapAuthError(err));
+      setLoading(false);
+    }
+  };
+
+  // Handle OAuth sign in
+  const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+    setError('');
+    setOauthLoading(true);
+
+    try {
+      const { error: oauthError } = await signInWithOAuth(provider);
+
+      if (oauthError) {
+        setError(mapAuthError(oauthError));
+        setOauthLoading(false);
+        return;
+      }
+
+      // OAuth will redirect to provider
+    } catch (err: any) {
+      setError(mapAuthError(err));
+      setOauthLoading(false);
+    }
+  };
+
+  // Handle resend magic link
+  const handleResend = async () => {
+    if (resendCount >= MAX_RESENDS) {
+      setError(
+        "Too many attempts — let's take a breather. Try again in a few minutes."
+      );
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const { error: resendError } = await signInWithMagicLink(email);
+
+      if (resendError) {
+        setError(mapAuthError(resendError));
+      } else {
+        setResendCount((prev) => prev + 1);
+      }
+    } catch (err: any) {
+      setError(mapAuthError(err));
+    }
+
+    setLoading(false);
+  };
+
+  // Go back to email entry
+  const handleChangeEmail = () => {
+    setAuthState('email_entry');
+    setPassword('');
+    setError('');
+    setResendCount(0);
+    setManualPasswordEntry(false);
+  };
+
+  // Render email entry state (State 1)
+  const renderEmailEntry = () => (
+    <>
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">
+          Let&apos;s get you in
+        </h1>
+        <p className="text-text-secondary text-sm sm:text-base">
+          Enter your email to continue
+        </p>
+      </div>
+
+      <Card padding="lg">
+        <form onSubmit={handleEmailSubmit} className="space-y-5">
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg">
+              <p className="text-sm text-aurora-red">{error}</p>
+            </div>
+          )}
+
+          {/* Email Input */}
+          <div>
+            <label className="block text-sm font-medium text-polar-night mb-2">
+              Email
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Mail className="h-5 w-5 text-text-muted" />
+              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border-2 border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-snow-white"
+                placeholder="you@example.com"
+                required
+                disabled={loading || oauthLoading}
+                autoComplete="email"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          {/* Continue Button */}
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            fullWidth
+            disabled={loading || oauthLoading || !email}
+          >
+            Continue
+          </Button>
+        </form>
+
+        {/* OAuth Buttons - Hide in coming soon mode */}
+        {!isComingSoon && (
+          <>
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-snow-white text-text-secondary">
+                  or
+                </span>
+              </div>
+            </div>
+
+            {/* OAuth Buttons */}
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                fullWidth
+                onClick={() => handleOAuthSignIn('google')}
+                disabled={loading || oauthLoading}
+                className="flex items-center justify-center gap-3"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
+                </svg>
+                Continue with Google
+              </Button>
+
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                fullWidth
+                onClick={() => handleOAuthSignIn('facebook')}
+                disabled={loading || oauthLoading}
+                className="flex items-center justify-center gap-3"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path
+                    fill="#1877F2"
+                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                  />
+                </svg>
+                Continue with Facebook
+              </Button>
+            </div>
+          </>
+        )}
+      </Card>
+    </>
+  );
+
+  // Render checking state (State 2)
+  const renderChecking = () => (
+    <>
+      <div className="text-center mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">
+          One moment...
+        </h1>
+      </div>
+
+      <Card padding="lg">
+        <div className="flex flex-col items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-frost-ice border-t-transparent mb-4" />
+          <p className="text-text-secondary">{email}</p>
+        </div>
+      </Card>
+    </>
+  );
+
+  // Render new user flow (State 3a)
+  const renderNewUser = () => (
+    <>
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-frost-ice/20 to-aurora-purple/20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-frost-ice/10">
+          <Sparkles className="w-8 h-8 text-frost-ice" />
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-3">
+          Welcome to the table!
+        </h1>
+        <p className="text-text-secondary text-sm sm:text-base max-w-xs mx-auto">
+          Create your account securely without remembering another password.
+        </p>
+      </div>
+
+      <Card padding="lg">
+        {/* Error Message */}
+        {error && (
+          <div className="p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg mb-5">
+            <p className="text-sm text-aurora-red">{error}</p>
+          </div>
+        )}
+
+        {/* Email display with change option */}
+        <div className="flex justify-center mb-6">
+          <button
+            onClick={handleChangeEmail}
+            className="flex items-center gap-2 px-3 py-1.5 bg-snow-storm rounded-full text-sm text-polar-night hover:bg-frost-ice/10 transition-colors border border-border"
+          >
+            <span className="font-medium">{email}</span>
+            <span className="text-xs text-frost-ice font-semibold ml-1">Change</span>
+          </button>
+        </div>
+
+        {/* What is a magic link? Box */}
+        <div className="bg-frost-ice/5 border border-frost-ice/10 rounded-lg p-4 mb-6">
+          <h3 className="text-sm font-semibold text-polar-night mb-2 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-frost-ice" />
+            What is a magic link?
+          </h3>
+          <p className="text-xs text-text-secondary leading-relaxed">
+            It&apos;s a secure link we send to your email. Click it to sign in instantly.
+            No password to create, remember, or lose!
+          </p>
+        </div>
+
+        {/* Send Magic Link Button */}
+        <Button
+          type="button"
+          // variant="default"
+          size="lg"
+          fullWidth
+          onClick={handleMagicLink}
+          disabled={loading}
+          loading={loading}
+          className="shadow-md hover:shadow-lg transition-shadow !bg-[#D08770] hover:!bg-[#C97862] text-white font-medium border-none"
+        >
+          {loading ? 'Sending...' : 'Send me magic link'}
+        </Button>
+
+        {/* Implicit consent */}
+        <p className="text-xs text-text-muted text-center mt-5">
+          By continuing, you agree to our{' '}
+          <Link href="/terms" className="text-frost-ice hover:underline" target="_blank">
+            Terms of Service
+          </Link>{' '}
+          and{' '}
+          <Link href="/privacy" className="text-frost-ice hover:underline" target="_blank">
+            Privacy Policy
+          </Link>
+        </p>
+      </Card>
+    </>
+  );
+
+  // Render existing user flow (State 3b)
+  const renderExistingUser = () => {
+    // Check if user has a password set (has 'email' provider)
+    // Note: If they have NO providers (anomaly), we assume password logic to be safe/standard.
+    // If they ONLY have google/facebook and NO email provider, we guide them to OAuth.
+    const hasPassword = providers.includes('email') || providers.length === 0;
+    const isGoogleUser = providers.includes('google');
+    const isFacebookUser = providers.includes('facebook'); // Assuming 'facebook' provider name, adjust if needed
+
+    // If they have no password but have Google/Facebook, show the prompt
+    // UNLESS they manually requested to enter a password
+    if (!hasPassword && (isGoogleUser || isFacebookUser) && !manualPasswordEntry) {
+      return (
+        <>
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">
+              Welcome back!
+            </h1>
+            <p className="text-text-secondary text-sm sm:text-base">
+              It looks like you usually sign in with {isGoogleUser ? 'Google' : 'Facebook'}.
+            </p>
+          </div>
+
+          <Card padding="lg">
+            {/* Email display with change option */}
+            <div className="flex justify-center mb-6">
+              <button
+                onClick={handleChangeEmail}
+                className="flex items-center gap-2 px-3 py-1.5 bg-snow-storm rounded-full text-sm text-polar-night hover:bg-frost-ice/10 transition-colors border border-border"
+              >
+                <span className="font-medium">{email}</span>
+                <span className="text-xs text-frost-ice font-semibold ml-1">Change</span>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {isGoogleUser && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  onClick={() => handleOAuthSignIn('google')}
+                  disabled={loading || oauthLoading}
+                  className="flex items-center justify-center gap-3 relative overflow-hidden group"
+                >
+                  {/* Google visual reinforcement */}
+                  <div className="absolute inset-0 bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <svg className="w-5 h-5 relative z-10" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                  </svg>
+                  <span className="relative z-10">Sign in with Google</span>
+                </Button>
+              )}
+
+              {isFacebookUser && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  onClick={() => handleOAuthSignIn('facebook')}
+                  disabled={loading || oauthLoading}
+                  className="flex items-center justify-center gap-3"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path
+                      fill="#1877F2"
+                      d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                    />
+                  </svg>
+                  Sign in with Facebook
+                </Button>
+              )}
+
+              {/* Divider */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-snow-white text-text-secondary">or</span>
+                </div>
+              </div>
+
+              {/* Magic Link Option */}
+              <Button
+                type="button"
+                // variant="default" // Default is usually primary, but we override color
+                size="lg"
+                fullWidth
+                onClick={handleMagicLink}
+                disabled={loading}
+                loading={loading}
+                className="bg-aurora-orange hover:bg-aurora-orange/90 text-white font-medium"
+              >
+                Send magic link
+              </Button>
+            </div>
+            {/* Small link to password for edge cases */}
+            <div className="mt-4 text-center">
+              <button
+                className="text-xs text-text-muted hover:text-polar-night hover:underline"
+                onClick={() => setManualPasswordEntry(true)}
+              >
+                I have a password
+              </button>
+            </div>
+
+          </Card>
+        </>
+      );
+    }
+
+    return (
+      <>
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">
+            Welcome back!
+          </h1>
+          <p className="text-text-secondary text-sm sm:text-base">
+            Ready for another turn?
+          </p>
+        </div>
+
+        <Card padding="lg">
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg mb-5">
+              <p className="text-sm text-aurora-red">{error}</p>
+            </div>
+          )}
+
+          {/* Email display with change option */}
+          <button
+            onClick={handleChangeEmail}
+            className="flex items-center gap-2 text-frost-ice hover:underline mb-6 text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-polar-night">{email}</span>
+          </button>
+
+          {/* Password Form (Primary) */}
+          <form onSubmit={handlePasswordSignIn} className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-polar-night">
+                  Password
+                </label>
+                {/* Only show forgot password if likely to have one (or clean slate) */}
+                {(providers.includes('email') || providers.length === 0) && (
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-sm text-frost-ice hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                )}
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-text-muted" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-12 py-3 border-2 border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-snow-white"
+                  placeholder="Enter your password"
+                  required
+                  disabled={loading}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-text-muted hover:text-polar-night" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-text-muted hover:text-polar-night" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              fullWidth
+              disabled={loading || !password}
+            >
+              Sign in
+            </Button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-snow-white text-text-secondary">or</span>
+            </div>
+          </div>
+
+          {/* Magic Link Button (Secondary) */}
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            fullWidth
+            onClick={handleMagicLink}
+            disabled={loading}
+            loading={loading}
+          >
+            {loading ? 'Sending...' : 'Send magic link instead'}
+          </Button>
+
+          <p className="text-xs text-text-muted text-center mt-3">
+            We&apos;ll email you a link to sign in instantly — no password needed.
+          </p>
+
+          {/* Also show Google/Facebook here if available as secondary options */}
+          {(isGoogleUser || isFacebookUser) && (
+            <div className="mt-3 space-y-2">
+              {isGoogleUser && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  fullWidth
+                  onClick={() => handleOAuthSignIn('google')}
+                  className="flex items-center justify-center gap-2 text-xs text-text-secondary"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                  </svg>
+                  Sign in with Google
+                </Button>
+              )}
+            </div>
+          )}
+        </Card>
+      </>
+    );
+  };
+
+  // Render magic link sent state (State 4)
+  const renderMagicLinkSent = () => (
+    <>
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-aurora-green/20 to-aurora-green/10 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-aurora-green/20 shadow-sm">
+          <Check className="w-8 h-8 text-aurora-green" />
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">
+          Check your inbox!
+        </h1>
+        <p className="text-text-secondary">
+          We sent a magic link to <span className="font-semibold text-polar-night">{email}</span>
+        </p>
+      </div>
+
+      <Card padding="lg">
+        <div className="text-center">
+          {/* Next Steps Visualization */}
+          <div className="flex items-center justify-center gap-4 mb-8 text-sm font-medium text-polar-night">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 bg-snow-storm rounded-lg flex items-center justify-center border border-border text-text-muted">
+                <Mail className="w-5 h-5" />
+              </div>
+              <span>Open email</span>
+            </div>
+            <div className="h-px w-12 bg-border relative">
+              <div className="absolute right-0 -top-1 border-t-4 border-b-4 border-l-4 border-transparent border-l-border"></div>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 bg-frost-ice/10 rounded-lg flex items-center justify-center border border-frost-ice/20 text-frost-ice">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <span>Click link</span>
+            </div>
+          </div>
+
+          <p className="text-sm text-text-muted mb-6">
+            The link will sign you in instantly on this device. It expires in 1 hour.
+          </p>
+
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg mb-4">
+              <p className="text-sm text-aurora-red">{error}</p>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {/* Resend Button */}
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleResend}
+              disabled={loading || resendCount >= MAX_RESENDS}
+              className="w-full"
+            >
+              {loading ? 'Sending...' : "Didn't get it? Send again"}
+            </Button>
+
+            {resendCount > 0 && resendCount < MAX_RESENDS && (
+              <p className="text-xs text-text-muted">
+                Sent {resendCount} time{resendCount > 1 ? 's' : ''}
+              </p>
+            )}
+
+            {/* Change Email */}
+            <button
+              onClick={handleChangeEmail}
+              className="text-sm text-text-secondary hover:text-polar-night hover:underline block w-full text-center"
+            >
+              Use a different email
+            </button>
+          </div>
+        </div>
+      </Card>
+    </>
+  );
+
+  // Main render based on auth state
+  const renderContent = () => {
+    switch (authState) {
+      case 'email_entry':
+        return renderEmailEntry();
+      case 'checking':
+        return renderChecking();
+      case 'new_user':
+        return renderNewUser();
+      case 'existing_user':
+        return renderExistingUser();
+      case 'magic_link_sent':
+        return renderMagicLinkSent();
+      default:
+        return renderEmailEntry();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-12">
+      <div className="max-w-md w-full">{renderContent()}</div>
+    </div>
+  );
+}

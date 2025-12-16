@@ -4,15 +4,6 @@ import { cookies } from 'next/headers';
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { password } = await request.json();
-
-    if (!password) {
-      return NextResponse.json(
-        { error: 'Password is required' },
-        { status: 400 }
-      );
-    }
-
     // Create Supabase client with cookies
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -57,19 +48,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Verify password
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email!,
-      password,
-    });
-
-    if (signInError) {
-      return NextResponse.json(
-        { error: 'Invalid password' },
-        { status: 401 }
-      );
-    }
-
     // SOFT DELETE STRATEGY (GDPR Article 17.3.e - legal claims defense)
     // Data retained for 90 days for dispute resolution, then permanently deleted
     // Email anonymized immediately to allow reuse, but account recoverable for 14 days
@@ -81,7 +59,65 @@ export async function DELETE(request: NextRequest) {
     // Define anonymized email pattern (used for both user_profiles and auth.users)
     const anonymizedEmail = `deleted-${user.id}@internal.local`;
 
-    // Step 1: Soft delete user profile and anonymize PII
+    // Step 0.5: SELLER SAFETY CHECKS (Financial Liability)
+    // Check if user is a seller and has a Stripe account
+    const { data: sellerProfile } = await supabase
+      .from('seller_profiles')
+      .select('stripe_connect_account_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (sellerProfile?.stripe_connect_account_id) {
+      try {
+        const { checkSellerAccountStatus } = await import('@/lib/stripe/account-checks');
+        const status = await checkSellerAccountStatus(sellerProfile.stripe_connect_account_id);
+
+        if (!status.canDelete) {
+          console.warn(`Blocked deletion for user ${user.id}: ${status.reason}`);
+          return NextResponse.json(
+            {
+              error: 'Cannot delete account',
+              message: status.reason,
+              details: status.details
+            },
+            { status: 400 }
+          );
+        }
+        console.log(`✅ Seller financial checks passed for ${user.id}`);
+      } catch (stripeCheckError) {
+        console.error('Error checking seller status:', stripeCheckError);
+        // Fail safe: don't allow deletion if we can't verify financial state
+        return NextResponse.json(
+          { error: 'Failed to verify account status. Please try again or contact support.' },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Step 0: Send Confirmation Email (Before modifying data)
+    // We capture the original data before it's anonymized
+    try {
+      // Import dynamically to avoid cold start issues if possible, or just top-level
+      const { sendAccountDeletedEmail } = await import('@/lib/email/send-account-emails');
+
+      const userName = user.user_metadata?.full_name || 'User';
+
+      await sendAccountDeletedEmail({
+        email: user.email!,
+        name: userName,
+        recoveryDate: recoveryDeadline,
+      });
+
+      console.log('✅ Sent account deletion confirmation email to:', user.email);
+    } catch (emailError) {
+      // Don't block deletion if email fails, but log it
+      console.error('⚠️ Failed to send deletion confirmation email:', emailError);
+    }
+
+    // Step 1: Soft delete user profile
+    // We ONLY anonymize the email to allow reuse.
+    // Name, phone, and avatar are PRESERVED for the 14-day recovery period.
+    // They will be permanently deleted/anonymized by a scheduled job after 90 days.
     const { error: softDeleteError } = await supabase
       .from('user_profiles')
       .update({
@@ -89,10 +125,10 @@ export async function DELETE(request: NextRequest) {
         deletion_reason: 'user_request',
         recovery_deadline: recoveryDeadline.toISOString(),
         original_email: user.email, // Store for recovery
-        email: anonymizedEmail, // Anonymize email immediately
-        full_name: 'Deleted User',
-        phone: null,
-        avatar_url: null,
+        email: anonymizedEmail, // Free up the email immediately
+        // full_name: 'Deleted User', // KEEP ORIGINAL
+        // phone: null,               // KEEP ORIGINAL
+        // avatar_url: null,          // KEEP ORIGINAL
       })
       .eq('id', user.id);
 
@@ -119,7 +155,10 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Step 3: Delete avatar from storage immediately (PII anonymization)
+    // Step 3: Delete avatar from storage
+    // SKIPPED: Kept for 14-day recovery period.
+    // Cleanup handled by scheduled job.
+    /*
     try {
       const { data: files } = await supabase
         .storage
@@ -137,6 +176,7 @@ export async function DELETE(request: NextRequest) {
       console.error('Error deleting avatar:', storageError);
       // Continue even if avatar deletion fails
     }
+    */
 
     // Step 4: Use service role to sign out all devices (revoke refresh tokens)
     const supabaseAdmin = createServerClient(

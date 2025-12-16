@@ -4,15 +4,6 @@ import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
-    const { password } = await request.json();
-
-    if (!password) {
-      return NextResponse.json(
-        { error: 'Password is required' },
-        { status: 400 }
-      );
-    }
-
     const cookieStore = cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,19 +29,6 @@ export async function POST(request: NextRequest) {
     if (userError || !user) {
       return NextResponse.json(
         { error: 'Not authenticated' },
-        { status: 401 }
-      );
-    }
-
-    // Verify password
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email!,
-      password,
-    });
-
-    if (signInError) {
-      return NextResponse.json(
-        { error: 'Invalid password' },
         { status: 401 }
       );
     }
