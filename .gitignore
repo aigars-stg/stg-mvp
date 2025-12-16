@@ -41,3 +41,7 @@ coverage/
 # Misc
 .turbo/
 .vercel/
+
+# MCP configuration (contains secrets)
+.mcp.json
+.claude/mcp.json

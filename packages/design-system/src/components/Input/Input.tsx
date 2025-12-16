@@ -13,7 +13,7 @@ import { clsx } from 'clsx';
  * - 8px border radius matches buttons for consistency
  */
 const inputVariants = cva(
-  'flex w-full rounded-md border-2 bg-bg-elevated px-3 py-2 text-base transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-frost-ice/30 disabled:cursor-not-allowed disabled:opacity-50',
+  'flex w-full rounded-md border-2 bg-bg-elevated px-3 py-2 text-base transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-sm placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-frost-ice/30 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {

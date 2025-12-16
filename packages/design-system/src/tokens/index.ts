@@ -5,3 +5,11 @@ export { typography, semanticTypography } from './typography';
 export { borderRadius, semanticRadius } from './borderRadius';
 export { shadows, elevation } from './shadows';
 export { animation, semanticAnimation } from './animation';
+export {
+  breakpoints,
+  semanticBreakpoints,
+  containerMaxWidths,
+  responsivePatterns,
+  deviceCategories,
+  touchTargets,
+} from './breakpoints';

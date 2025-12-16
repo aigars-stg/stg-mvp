@@ -3,9 +3,9 @@ import { clsx } from 'clsx';
 
 export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   /**
-   * Label text displayed next to the checkbox.
+   * Label content displayed next to the checkbox. Can be a string or JSX element.
    */
-  label?: string;
+  label?: React.ReactNode;
 
   /**
    * Helper text displayed below the checkbox.
@@ -41,8 +41,8 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     const checkboxId = id || `checkbox-${React.useId()}`;
 
     return (
-      <div className="flex items-start">
-        <div className="flex items-center h-11">
+      <div className="flex items-center">
+        <div className="flex items-center min-h-11">
           <input
             id={checkboxId}
             ref={ref}
@@ -74,7 +74,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             {label && (
               <label
                 htmlFor={checkboxId}
-                className="text-base font-medium text-text cursor-pointer"
+                className="text-base text-text cursor-pointer leading-tight"
               >
                 {label}
               </label>

@@ -231,7 +231,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
             onClick={() => !disabled && setIsOpen(!isOpen)}
             onKeyDown={handleKeyDown}
           >
-            <span className={selectedOption ? 'text-text' : 'text-text-muted'}>
+            <span className={selectedOption ? 'text-text' : 'text-sm text-text-muted'}>
               {selectedOption ? selectedOption.label : placeholder}
             </span>
 

@@ -38,6 +38,12 @@ export interface ModalProps {
    * Additional className for the modal container.
    */
   className?: string;
+
+  /**
+   * Additional className for the content area.
+   * Use to override default max-height or padding.
+   */
+  contentClassName?: string;
 }
 
 /**
@@ -79,6 +85,7 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   size = 'md',
   className,
+  contentClassName,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
@@ -223,7 +230,7 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[60vh] p-6">
+        <div className={clsx('overflow-y-auto max-h-[60vh] p-6', contentClassName)}>
           {children}
         </div>
 

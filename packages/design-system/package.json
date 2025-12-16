@@ -9,15 +9,18 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./tokens": {
       "import": "./dist/tokens.js",
-      "types": "./dist/tokens.d.ts"
+      "types": "./dist/tokens.d.ts",
+      "default": "./dist/tokens.js"
     },
     "./components": {
       "import": "./dist/components.js",
-      "types": "./dist/components.d.ts"
+      "types": "./dist/components.d.ts",
+      "default": "./dist/components.js"
     },
     "./styles": "./dist/style.css"
   },
