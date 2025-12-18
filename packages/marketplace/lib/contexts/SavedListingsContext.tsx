@@ -14,7 +14,7 @@ interface SavedListingsContextType {
 const SavedListingsContext = createContext<SavedListingsContextType | null>(null);
 
 export function SavedListingsProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [savedListingIds, setSavedListingIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
@@ -45,15 +45,18 @@ export function SavedListingsProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  // Fetch saved listings when user changes
+  // Fetch saved listings when user changes (wait for auth to finish loading)
   useEffect(() => {
+    // Wait for auth to finish loading before making API calls
+    if (authLoading) return;
+
     if (user && !hasFetched) {
       fetchSavedListings();
     } else if (!user) {
       setSavedListingIds(new Set());
       setHasFetched(false);
     }
-  }, [user, hasFetched, fetchSavedListings]);
+  }, [user, authLoading, hasFetched, fetchSavedListings]);
 
   const isSaved = useCallback(
     (listingId: string): boolean => {

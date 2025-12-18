@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/lib/auth/AuthContext';
 import { SavedListingWithDetails } from '../types/listing';
 
 interface UseSavedListingsReturn {
@@ -14,11 +15,18 @@ interface UseSavedListingsReturn {
 }
 
 export function useSavedListings(): UseSavedListingsReturn {
+  const { user, loading: authLoading } = useAuth();
   const [savedListings, setSavedListings] = useState<SavedListingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchSavedListings = useCallback(async () => {
+    if (!user) {
+      setSavedListings([]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -38,11 +46,19 @@ export function useSavedListings(): UseSavedListingsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
+  // Wait for auth to finish loading before fetching
   useEffect(() => {
-    fetchSavedListings();
-  }, [fetchSavedListings]);
+    if (authLoading) return;
+
+    if (user) {
+      fetchSavedListings();
+    } else {
+      setSavedListings([]);
+      setIsLoading(false);
+    }
+  }, [user, authLoading, fetchSavedListings]);
 
   const isSaved = useCallback(
     (listingId: string): boolean => {
@@ -126,11 +142,16 @@ export function useSavedListings(): UseSavedListingsReturn {
  * Lighter weight than useSavedListings for individual listing pages
  */
 export function useIsListingSaved(listingId: string | null) {
+  const { user, loading: authLoading } = useAuth();
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!listingId) {
+    // Wait for auth to finish loading
+    if (authLoading) return;
+
+    if (!listingId || !user) {
+      setIsSaved(false);
       setIsLoading(false);
       return;
     }
@@ -150,7 +171,7 @@ export function useIsListingSaved(listingId: string | null) {
     };
 
     checkSaveStatus();
-  }, [listingId]);
+  }, [listingId, user, authLoading]);
 
   const toggleSave = useCallback(async () => {
     if (!listingId) return false;

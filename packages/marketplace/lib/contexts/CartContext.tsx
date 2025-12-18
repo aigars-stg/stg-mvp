@@ -52,7 +52,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [cart, setCart] = useState<CartData | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -88,14 +88,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
     }, [user]); // Removed 'cart' from dependency to avoid infinite loops, logic handles it
 
-    // Fetch cart on mount and when user changes
+    // Fetch cart on mount and when user changes (wait for auth to finish loading)
     useEffect(() => {
+        // Wait for auth to finish loading before making API calls
+        if (authLoading) return;
+
         if (user) {
             fetchCart();
         } else {
             setCart(null);
         }
-    }, [user, fetchCart]);
+    }, [user, authLoading, fetchCart]);
 
     const addToCart = useCallback(async (listingId: string) => {
         if (!user) {

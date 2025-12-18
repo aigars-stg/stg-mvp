@@ -12,7 +12,7 @@ interface UnreadMessagesContextType {
 const UnreadMessagesContext = createContext<UnreadMessagesContextType | undefined>(undefined);
 
 export function UnreadMessagesProvider({ children }: { children: React.ReactNode }) {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [unreadCount, setUnreadCount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -44,6 +44,9 @@ export function UnreadMessagesProvider({ children }: { children: React.ReactNode
     }, [user]);
 
     useEffect(() => {
+        // Wait for auth to finish loading before making API calls
+        if (authLoading) return;
+
         if (!user) {
             setUnreadCount(0);
             setIsLoading(false);
@@ -58,7 +61,7 @@ export function UnreadMessagesProvider({ children }: { children: React.ReactNode
         const interval = setInterval(fetchUnreadCount, 30000);
 
         return () => clearInterval(interval);
-    }, [user, fetchUnreadCount]);
+    }, [user, authLoading, fetchUnreadCount]);
 
     return (
         <UnreadMessagesContext.Provider value={{ unreadCount, isLoading, refresh: fetchUnreadCount }}>

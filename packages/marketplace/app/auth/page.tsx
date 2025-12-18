@@ -40,7 +40,7 @@ export default function AuthPage() {
   const [providers, setProviders] = useState<string[]>([]);
   const [manualPasswordEntry, setManualPasswordEntry] = useState(false);
 
-  const { signIn, signInWithMagicLink, signInWithOAuth, user } = useAuth();
+  const { signIn, signInWithMagicLink, signInWithOAuth, user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   // Check if site is in "coming soon" mode
@@ -58,12 +58,12 @@ export default function AuthPage() {
     }
   }, []);
 
-  // Redirect if already logged in
+  // Redirect if already logged in (wait for auth to finish loading)
   useEffect(() => {
-    if (user) {
+    if (user && !authLoading) {
       router.push(redirectTo);
     }
-  }, [user, router, redirectTo]);
+  }, [user, authLoading, router, redirectTo]);
 
   // Check if email exists in database
   const checkEmailExists = async (emailToCheck: string): Promise<{ exists: boolean; providers: string[] }> => {
@@ -151,9 +151,9 @@ export default function AuthPage() {
         return;
       }
 
-      // Redirect to original destination or home
-      router.push(redirectTo);
-      router.refresh();
+      // Navigation is handled by useEffect when user && !authLoading
+      // This prevents race condition where we navigate before auth state is ready
+      setLoading(false);
     } catch (err: any) {
       setError(mapAuthError(err));
       setLoading(false);

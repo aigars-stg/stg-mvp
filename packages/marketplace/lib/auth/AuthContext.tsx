@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
@@ -13,6 +13,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  // Track if we already had a session to distinguish fresh sign-in from token refresh
+  const hadSessionRef = useRef(false);
 
   // Create missing profile (in case trigger didn't fire during signup)
   const createMissingProfile = useCallback(async (userId: string) => {
@@ -65,27 +68,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (error.code === 'PGRST116') {
           // If we haven't retried enough, wait and try again (trigger might be slow)
           if (retryCount < 3) {
-            console.log(`⏳ [Auth] Profile not found, retrying (${retryCount + 1}/3)...`);
             await new Promise(resolve => setTimeout(resolve, 1000));
             return fetchProfile(userId, retryCount + 1);
           }
 
-          console.warn('⚠️ [Auth] Profile not found after retries, attempting to create...');
+          console.warn('[Auth] Profile not found after retries, attempting to create...');
           return await createMissingProfile(userId);
         }
 
-        console.error('❌ [Auth] Profile fetch error:', {
-          code: error.code,
-          message: error.message,
-          userId: userId
-        });
+        console.error('[Auth] Profile fetch error:', error.code, error.message);
         return null;
       }
 
-      console.log('✅ [Auth] Profile loaded successfully:', data.id);
       return data as UserProfile;
     } catch (error: any) {
-      console.error('❌ [Auth] Profile fetch exception:', error);
+      console.error('[Auth] Profile fetch exception:', error);
       return null;
     }
   }, [createMissingProfile]);
@@ -103,9 +100,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: { subscription: sub },
         } = (supabase as any).auth.onAuthStateChange(
           async (event: string, session: any) => {
-            console.log('🔐 Auth state changed:', event);
-
             if (!mounted) return;
+
+            // Handle SIGNED_IN specially - but only for FRESH sign-ins
+            // Token refreshes also trigger SIGNED_IN, so check if we already had a session
+            const isFreshSignIn = event === 'SIGNED_IN' && !hadSessionRef.current;
+            if (isFreshSignIn) {
+              hadSessionRef.current = true;
+
+              // The Supabase client is locked during OAuth callback - any auth operations hang.
+              // The cleanest solution is to reload the page which ensures a fully initialized state.
+              // This only happens once per sign-in session.
+              window.location.href = window.location.pathname; // Remove ?code= param
+              return;
+            }
+
+            // For token refresh (SIGNED_IN but already had session), skip profile fetch
+            // since we already loaded it during INITIAL_SESSION. Re-fetching can hang
+            // the Supabase client and block subsequent operations like sign out.
+            if (event === 'SIGNED_IN' && hadSessionRef.current) {
+              if (session?.user) {
+                setUser(session.user); // Update user in case it changed
+              }
+              return;
+            }
 
             if (session?.user) {
               setUser(session.user);
@@ -113,11 +131,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
               // AUTO RECOVERY CHECK
               if (userProfile?.deleted_at) {
-                console.log('♻️ [Auth] Deleted account detected, attempting recovery...');
                 try {
                   const res = await fetch('/api/auth/recover-account', { method: 'POST' });
                   if (res.ok) {
-                    console.log('✅ [Auth] Account recovered successfully');
                     // Refresh profile one more time to get clean state
                     const recoveredProfile = await fetchProfile(session.user.id);
                     setProfile(recoveredProfile);
@@ -131,23 +147,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     router.refresh();
                     return; // Exit early using new profile
                   } else {
-                    console.error('❌ [Auth] Recovery failed');
+                    console.error('[Auth] Account recovery failed');
                   }
                 } catch (recError) {
-                  console.error('❌ [Auth] Recovery exception:', recError);
+                  console.error('[Auth] Account recovery exception:', recError);
                 }
               }
 
               setProfile(userProfile);
+
+              // Refresh server components after fresh sign-in
+              if (isFreshSignIn) {
+                router.refresh();
+              }
             } else {
               setUser(null);
               setProfile(null);
             }
 
-            // Handle specific events
-            if (event === 'SIGNED_IN') {
-              router.refresh();
-            } else if (event === 'SIGNED_OUT') {
+            // Handle sign out
+            if (event === 'SIGNED_OUT') {
+              hadSessionRef.current = false; // Reset so next sign-in triggers reload
               router.push('/');
               router.refresh();
             }
@@ -162,6 +182,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!mounted) return;
 
         if (session?.user) {
+          // Mark that we already have a session (prevents reload on token refresh)
+          hadSessionRef.current = true;
           setUser(session.user);
           const userProfile = await fetchProfile(session.user.id);
 
@@ -339,7 +361,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // and update state/navigation automatically
       // This prevents race conditions between manual updates and listener updates
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('[Auth] Sign out error:', error);
       throw error;
     }
   };
