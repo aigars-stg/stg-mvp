@@ -45,3 +45,5 @@ coverage/
 # MCP configuration (contains secrets)
 .mcp.json
 .claude/mcp.json
+
+.vercel
