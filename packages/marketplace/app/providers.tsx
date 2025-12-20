@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 import { OnboardingProvider } from '@/components/onboarding';
 import { SavedListingsProvider } from '@/lib/contexts/SavedListingsContext';
@@ -9,19 +11,35 @@ import { UnreadMessagesProvider } from '@/lib/contexts/UnreadMessagesContext';
 import { CartProvider } from '@/lib/contexts/CartContext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  // Create QueryClient instance per component instance to avoid sharing state between requests
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000, // Consider data fresh for 1 minute
+            refetchOnWindowFocus: false, // Don't refetch on window focus
+            retry: 1, // Only retry once on failure
+          },
+        },
+      })
+  );
+
   return (
-    <AuthProvider>
-      <SavedListingsProvider>
-        <UnreadMessagesProvider>
-          <CartProvider>
-            <OnboardingProvider>
-              {children}
-            </OnboardingProvider>
-          </CartProvider>
-        </UnreadMessagesProvider>
-      </SavedListingsProvider>
-      <ConditionalAnalytics />
-      <CookieConsent />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <SavedListingsProvider>
+          <UnreadMessagesProvider>
+            <CartProvider>
+              <OnboardingProvider>
+                {children}
+              </OnboardingProvider>
+            </CartProvider>
+          </UnreadMessagesProvider>
+        </SavedListingsProvider>
+        <ConditionalAnalytics />
+        <CookieConsent />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

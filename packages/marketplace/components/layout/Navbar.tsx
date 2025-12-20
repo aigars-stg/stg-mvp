@@ -2,13 +2,39 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { UserMenu } from './UserMenu';
-import { CartIcon } from './CartIcon';
-import { SavedGamesIcon } from './SavedGamesIcon';
-import { MessagesIcon } from './MessagesIcon';
-import { NavbarSearch } from './NavbarSearch';
-import { MobileSearchButton } from './MobileSearchButton';
+
+// Lazy load non-critical navbar components to reduce TBT
+const UserMenu = dynamic(() => import('./UserMenu').then(mod => ({ default: mod.UserMenu })), {
+  ssr: false,
+  loading: () => <div className="w-8 h-8 rounded-full bg-bg-secondary animate-pulse" />,
+});
+
+const CartIcon = dynamic(() => import('./CartIcon').then(mod => ({ default: mod.CartIcon })), {
+  ssr: false,
+  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
+});
+
+const SavedGamesIcon = dynamic(() => import('./SavedGamesIcon').then(mod => ({ default: mod.SavedGamesIcon })), {
+  ssr: false,
+  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
+});
+
+const MessagesIcon = dynamic(() => import('./MessagesIcon').then(mod => ({ default: mod.MessagesIcon })), {
+  ssr: false,
+  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
+});
+
+const NavbarSearch = dynamic(() => import('./NavbarSearch').then(mod => ({ default: mod.NavbarSearch })), {
+  ssr: false,
+  loading: () => <div className="w-64 lg:w-80 h-9 rounded-lg bg-bg-secondary animate-pulse" />,
+});
+
+const MobileSearchButton = dynamic(() => import('./MobileSearchButton').then(mod => ({ default: mod.MobileSearchButton })), {
+  ssr: false,
+  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
+});
 
 export function Navbar() {
   const pathname = usePathname();

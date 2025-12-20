@@ -53,14 +53,70 @@ export function UnreadMessagesProvider({ children }: { children: React.ReactNode
             return;
         }
 
-        // Initial fetch
-        setIsLoading(true);
-        fetchUnreadCount();
+        // Defer initial fetch to avoid blocking main thread during hydration
+        let idleCallbackId: number;
+        let useIdleCallback = false;
 
-        // Poll every 30 seconds
-        const interval = setInterval(fetchUnreadCount, 30000);
+        const win = window as typeof window & {
+            requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+            cancelIdleCallback?: (id: number) => void;
+        };
 
-        return () => clearInterval(interval);
+        if (win.requestIdleCallback) {
+            useIdleCallback = true;
+            idleCallbackId = win.requestIdleCallback(() => {
+                setIsLoading(true);
+                fetchUnreadCount();
+            }, { timeout: 2000 });
+        } else {
+            idleCallbackId = window.setTimeout(() => {
+                setIsLoading(true);
+                fetchUnreadCount();
+            }, 100) as unknown as number;
+        }
+
+        // Poll every 30 seconds, but only when tab is visible
+        let interval: NodeJS.Timeout | null = null;
+
+        const startPolling = () => {
+            if (!interval) {
+                interval = setInterval(fetchUnreadCount, 30000);
+            }
+        };
+
+        const stopPolling = () => {
+            if (interval) {
+                clearInterval(interval);
+                interval = null;
+            }
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                // Refresh immediately when tab becomes visible, then resume polling
+                fetchUnreadCount();
+                startPolling();
+            } else {
+                stopPolling();
+            }
+        };
+
+        // Start polling if tab is already visible
+        if (document.visibilityState === 'visible') {
+            startPolling();
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            if (useIdleCallback && win.cancelIdleCallback) {
+                win.cancelIdleCallback(idleCallbackId);
+            } else {
+                window.clearTimeout(idleCallbackId);
+            }
+            stopPolling();
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, [user, authLoading, fetchUnreadCount]);
 
     return (

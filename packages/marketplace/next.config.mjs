@@ -1,8 +1,17 @@
 import withPWA from '@ducanh2912/next-pwa';
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['@second-turn/design-system'],
+  // Optimize bundle chunks
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@supabase/supabase-js'],
+  },
 };
 
 // Configure PWA
@@ -22,4 +31,4 @@ const withPWAConfig = withPWA({
   },
 });
 
-export default withPWAConfig(nextConfig);
+export default withBundleAnalyzer(withPWAConfig(nextConfig));

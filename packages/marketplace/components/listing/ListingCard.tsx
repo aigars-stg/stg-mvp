@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, Badge, Button } from '@second-turn/design-system';
 import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart } from 'lucide-react';
 import { SellerTrustCompact } from '@/components/seller/SellerTrustBadge';
@@ -134,10 +135,13 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
           onTouchEnd={hasMultipleImages ? onTouchEnd : undefined}
         >
           {displayImage ? (
-            <img
+            <Image
               src={displayImage}
               alt={listing.game_name}
-              className="max-w-full max-h-full object-contain p-4"
+              fill
+              className="object-contain p-4"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              unoptimized={displayImage.startsWith('http')}
             />
           ) : (
             <Package className="w-16 h-16 text-text-muted" />
@@ -319,10 +323,13 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
               >
                 <div className="flex items-center gap-2">
                   {listing.seller.avatar_url ? (
-                    <img
+                    <Image
                       src={listing.seller.avatar_url}
                       alt={listing.seller.full_name}
-                      className="w-6 h-6 rounded-sm object-cover border border-border-subtle"
+                      width={24}
+                      height={24}
+                      className="rounded-sm object-cover border border-border-subtle"
+                      unoptimized
                     />
                   ) : (
                     <div className="w-6 h-6 rounded-sm bg-frost-ice/20 flex items-center justify-center text-xs font-semibold text-frost-ice">

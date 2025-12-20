@@ -94,7 +94,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (authLoading) return;
 
         if (user) {
-            fetchCart();
+            // Defer initial fetch to avoid blocking main thread during hydration
+            let idleCallbackId: number;
+            let useIdleCallback = false;
+
+            const win = window as typeof window & {
+                requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+                cancelIdleCallback?: (id: number) => void;
+            };
+
+            if (win.requestIdleCallback) {
+                useIdleCallback = true;
+                idleCallbackId = win.requestIdleCallback(() => {
+                    fetchCart();
+                }, { timeout: 2000 });
+            } else {
+                idleCallbackId = window.setTimeout(() => {
+                    fetchCart();
+                }, 100) as unknown as number;
+            }
+
+            return () => {
+                if (useIdleCallback && win.cancelIdleCallback) {
+                    win.cancelIdleCallback(idleCallbackId);
+                } else {
+                    window.clearTimeout(idleCallbackId);
+                }
+            };
         } else {
             setCart(null);
         }

@@ -165,6 +165,10 @@ export async function GET(request: NextRequest) {
         offset,
         hasMore: offset + paginatedTransactions.length < totalCount,
       },
+    }, {
+      headers: {
+        'Cache-Control': 'private, max-age=30',
+      },
     });
   } catch (error: any) {
     console.error('❌ [Transactions API] Error:', error);

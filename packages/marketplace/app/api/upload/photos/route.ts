@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { randomUUID } from 'crypto';
 import { cookies } from 'next/headers';
-import sharp from 'sharp';
+import { processImageForUpload } from '@/lib/image-processing';
 
 const BUCKET_NAME = 'listing-photos';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
     // Upload each file
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const fileExtension = file.name.split('.').pop();
-      const fileName = `${randomUUID()}.${fileExtension}`;
+      // All processed images will be WebP format
+      const fileName = `${randomUUID()}.webp`;
       // Organize files by user ID
       const filePath = `${user.id}/${fileName}`;
 
@@ -84,27 +84,33 @@ export async function POST(request: NextRequest) {
       const arrayBuffer = await file.arrayBuffer();
       const originalBuffer = Buffer.from(arrayBuffer);
 
-      // Strip EXIF metadata for privacy (removes GPS location, camera info, timestamps)
-      // Auto-rotate based on EXIF orientation, then remove all metadata
+      // Process image: compress, resize if needed, strip ALL metadata (GPS, EXIF, XMP, IPTC, ICC)
       let processedBuffer: Buffer;
+      let contentType = 'image/webp';
       try {
-        processedBuffer = await sharp(originalBuffer)
-          .rotate() // Auto-rotate based on EXIF orientation tag
-          .withMetadata({ exif: {} }) // Remove all EXIF metadata
-          .toBuffer();
-        console.log(`🔒 [Photo Upload] Stripped EXIF metadata from ${file.name}`);
-      } catch (sharpError) {
-        console.error(`⚠️ [Photo Upload] Failed to process image with sharp:`, sharpError);
-        // Fallback: use original buffer if sharp processing fails
+        const result = await processImageForUpload(originalBuffer);
+        processedBuffer = result.buffer;
+
+        console.log(`🖼️ [Photo Upload] Processed ${file.name}:`, {
+          originalSize: `${(result.originalSize / 1024).toFixed(1)}KB`,
+          processedSize: `${(result.processedSize / 1024).toFixed(1)}KB`,
+          compression: `${result.compressionRatio.toFixed(1)}x`,
+          dimensions: `${result.width}x${result.height}`,
+          wasResized: result.wasResized,
+        });
+      } catch (processingError) {
+        console.error(`⚠️ [Photo Upload] Failed to process image:`, processingError);
+        // Fallback: use original buffer if processing fails
         processedBuffer = originalBuffer;
+        contentType = file.type;
       }
 
-      // Upload to Supabase Storage (with EXIF-stripped buffer)
+      // Upload to Supabase Storage
       const { error } = await (supabase as any).storage
         .from(BUCKET_NAME)
         .upload(filePath, processedBuffer, {
-          contentType: file.type,
-          cacheControl: '3600',
+          contentType,
+          cacheControl: '31536000', // 1 year cache (immutable content)
           upsert: false,
         });
 

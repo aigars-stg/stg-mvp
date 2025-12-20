@@ -55,6 +55,10 @@ export async function GET(request: NextRequest) {
         pendingPayoutsCount: summaryData.pending_payouts_count || 0,
         salesLast30Days: summaryData.sales_last_30_days || 0,
         earningsLast30Days: parseFloat(summaryData.earnings_last_30_days) || 0,
+      }, {
+        headers: {
+          'Cache-Control': 'private, max-age=30',
+        },
       });
     }
 
@@ -114,6 +118,10 @@ export async function GET(request: NextRequest) {
       pendingPayoutsCount,
       salesLast30Days,
       earningsLast30Days,
+    }, {
+      headers: {
+        'Cache-Control': 'private, max-age=30',
+      },
     });
   } catch (error: any) {
     console.error('❌ [Earnings API] Error:', error);

@@ -54,12 +54,21 @@ export default async function HomePage() {
   const isComingSoon = true; // process.env.NEXT_PUBLIC_COMING_SOON === 'true';
 
   // Prepare stats for counter
-  const statsData = [
-    { label: 'Games listed', value: stats.listings, suffix: stats.listings > 0 ? '+' : '' },
-    { label: 'Happy gamers', value: stats.users, suffix: stats.users > 0 ? '+' : '' },
-    { label: 'Active sellers', value: stats.sellers, suffix: stats.sellers > 0 ? '+' : '' },
-    { label: 'Baltic countries', value: stats.countries, suffix: '' },
-  ];
+  // Use alternative metrics when marketplace data is low to avoid showing zeros
+  const hasMarketplaceData = stats.listings > 10;
+
+  const statsData = hasMarketplaceData
+    ? [
+        { label: 'Games listed', value: stats.listings, suffix: '+' },
+        { label: 'Happy gamers', value: stats.users, suffix: '+' },
+        { label: 'Active sellers', value: stats.sellers, suffix: '+' },
+        { label: 'Baltic countries', value: stats.countries, suffix: '' },
+      ]
+    : [
+        { label: 'Games in database', value: 170000, suffix: '+' },
+        { label: 'Baltic countries', value: 3, suffix: '' },
+        { label: 'Flat shipping rate', value: 2, prefix: '€', suffix: '' },
+      ];
 
   return (
     <div className="overflow-hidden">

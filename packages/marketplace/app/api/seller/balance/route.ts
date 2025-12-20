@@ -84,6 +84,10 @@ export async function GET(request: NextRequest) {
         total: balance.total,
       },
       cachedAt: balance.cachedAt,
+    }, {
+      headers: {
+        'Cache-Control': 'private, max-age=30',
+      },
     });
   } catch (error: any) {
     console.error('❌ [Balance API] Error:', error);

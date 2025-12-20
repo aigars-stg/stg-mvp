@@ -5,7 +5,10 @@ import { createServiceClient } from '@/lib/supabase/client';
  * Check if an email already exists in the system.
  * Used by the email-first auth flow to determine if user is new or returning.
  *
- * Uses service role client to query auth.users (requires admin access).
+ * Performance optimized: Uses auth_providers column from user_profiles
+ * instead of making expensive Admin API calls.
+ *
+ * Fallback: If auth_providers is empty (not yet backfilled), falls back to Admin API.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -29,11 +32,11 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServiceClient();
 
-    // Check if email exists in user_profiles table
-    // Using service role to avoid RLS restrictions
+    // Query user_profiles for email AND auth_providers in a single query
+    // This avoids the expensive Admin API call in most cases
     const { data, error } = await supabase
       .from('user_profiles')
-      .select('id')
+      .select('id, auth_providers')
       .eq('email', email.toLowerCase().trim())
       .maybeSingle();
 
@@ -45,11 +48,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get full user details to check authentication methods
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(data?.id);
+    // Email doesn't exist in the system
+    if (!data) {
+      return NextResponse.json({
+        exists: false,
+        providers: [],
+      });
+    }
+
+    // Check if we have auth_providers cached (populated on sign-in or via backfill)
+    const cachedProviders = data.auth_providers;
+    if (cachedProviders && Array.isArray(cachedProviders) && cachedProviders.length > 0) {
+      // Fast path: use cached providers
+      return NextResponse.json({
+        exists: true,
+        providers: cachedProviders,
+      });
+    }
+
+    // Fallback: User exists but auth_providers not yet populated
+    // This handles users who signed up before the migration or backfill
+    // Make Admin API call (expensive but rare after backfill completes)
+    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(data.id);
 
     if (userError || !user) {
       console.error('Error fetching user details:', userError);
+      // User exists in profiles but not in auth - edge case
       return NextResponse.json({ exists: true, providers: [] });
     }
 
@@ -57,6 +81,20 @@ export async function POST(request: NextRequest) {
     const providers = Array.from(new Set(
       (user.identities || []).map((identity) => identity.provider)
     ));
+
+    // Opportunistically update auth_providers for next time (fire and forget)
+    if (providers.length > 0) {
+      void (async () => {
+        try {
+          await supabase
+            .from('user_profiles')
+            .update({ auth_providers: providers })
+            .eq('id', data.id);
+        } catch {
+          // Ignore errors - non-critical background update
+        }
+      })();
+    }
 
     return NextResponse.json({
       exists: true,

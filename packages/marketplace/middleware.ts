@@ -55,9 +55,30 @@ export async function middleware(request: NextRequest) {
   );
 
   // Validate session with Supabase server (secure - prevents cookie forgery)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error) {
+      // Handle stale/invalid refresh tokens
+      if (error.code === 'refresh_token_not_found' ||
+          error.code === 'invalid_refresh_token' ||
+          error.message?.includes('Refresh Token')) {
+        console.log('🔐 [Middleware] Stale token detected, clearing session');
+        // Clear auth cookies
+        response.cookies.delete('sb-access-token');
+        response.cookies.delete('sb-refresh-token');
+        // Also try Supabase's default cookie names
+        response.cookies.delete(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`);
+      } else {
+        console.error('🔐 [Middleware] Auth error:', error.message);
+      }
+    } else {
+      user = data.user;
+    }
+  } catch (error) {
+    console.error('🔐 [Middleware] Unexpected auth error:', error);
+  }
 
   // Protected routes that require authentication
   const protectedRoutes = ['/sell', '/account', '/my-listings', '/seller'];

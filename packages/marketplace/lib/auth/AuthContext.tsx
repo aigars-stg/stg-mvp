@@ -54,6 +54,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Update auth_providers column if needed (for performance optimization of check-email endpoint)
+  const updateAuthProviders = useCallback(async (userId: string, userIdentities: any[] | undefined) => {
+    if (!userIdentities || userIdentities.length === 0) return;
+
+    try {
+      const providers = [...new Set(userIdentities.map((identity: any) => identity.provider))];
+      if (providers.length === 0) return;
+
+      // Update only if auth_providers is empty (avoid unnecessary writes)
+      await (supabase as any)
+        .from('user_profiles')
+        .update({ auth_providers: providers })
+        .eq('id', userId)
+        .or('auth_providers.is.null,auth_providers.eq.{}');
+    } catch (error) {
+      // Non-critical - log but don't fail
+      console.warn('[Auth] Failed to update auth_providers:', error);
+    }
+  }, []);
+
   // Fetch user profile from database (uses view that includes seller data)
   const fetchProfile = useCallback(async (userId: string, retryCount = 0): Promise<UserProfile | null> => {
     try {
@@ -127,6 +147,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             if (session?.user) {
               setUser(session.user);
+
+              // Update auth_providers for check-email performance optimization
+              updateAuthProviders(session.user.id, session.user.identities);
+
               const userProfile = await fetchProfile(session.user.id);
 
               // AUTO RECOVERY CHECK
@@ -185,6 +209,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Mark that we already have a session (prevents reload on token refresh)
           hadSessionRef.current = true;
           setUser(session.user);
+
+          // Update auth_providers for check-email performance optimization
+          updateAuthProviders(session.user.id, session.user.identities);
+
           const userProfile = await fetchProfile(session.user.id);
 
           // AUTO RECOVERY CHECK (Initial Load)
@@ -230,7 +258,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         subscription.unsubscribe();
       }
     };
-  }, [fetchProfile, router]);
+  }, [fetchProfile, updateAuthProviders, router]);
 
   // Sign in with email and password
   const signIn = async (email: string, password: string) => {

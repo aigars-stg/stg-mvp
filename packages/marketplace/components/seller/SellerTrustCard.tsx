@@ -177,12 +177,13 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
         </div>
       )}
 
-      {/* View Reviews Link */}
+      {/* View Reviews Link - disabled until /seller/reviews page is implemented
       <Link href="/seller/reviews">
         <Button variant="secondary" size="sm" fullWidth>
           View Your Reviews
         </Button>
       </Link>
+      */}
     </div>
   );
 }

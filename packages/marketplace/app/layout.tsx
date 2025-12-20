@@ -1,14 +1,54 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import dynamic from 'next/dynamic';
 import './globals.css';
 import Link from 'next/link';
 import { Providers } from './providers';
 import { Navbar } from '@/components/layout/Navbar';
-import { BottomNav } from '@/components/layout/BottomNav';
 import { SkipLink } from '@/components/layout/SkipLink';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 
+// Lazy load BottomNav - it's only visible on mobile and can be deferred
+const BottomNav = dynamic(() => import('@/components/layout/BottomNav').then(mod => ({ default: mod.BottomNav })), {
+  ssr: false,
+});
+
 const inter = Inter({ subsets: ['latin'] });
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games';
+
+// JSON-LD Structured Data
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Second Turn Games',
+  alternateName: 'STG',
+  url: baseUrl,
+  description: 'The Baltic marketplace for pre-owned board games. Buy, sell, and discover games in Latvia, Estonia, and Lithuania.',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${baseUrl}/browse?q={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Second Turn Games',
+  url: baseUrl,
+  logo: `${baseUrl}/images/logo.png`,
+  description: 'Every game deserves a second turn. The Baltic marketplace for pre-loved board games.',
+  areaServed: [
+    { '@type': 'Country', name: 'Latvia' },
+    { '@type': 'Country', name: 'Estonia' },
+    { '@type': 'Country', name: 'Lithuania' },
+  ],
+  sameAs: [],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games'),
@@ -54,6 +94,14 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Second Turn" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="manifest" href="/manifest.json" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
       </head>
       <body className={inter.className}>
         <Providers>

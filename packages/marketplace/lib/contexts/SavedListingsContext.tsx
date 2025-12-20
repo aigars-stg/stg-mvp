@@ -51,7 +51,33 @@ export function SavedListingsProvider({ children }: { children: ReactNode }) {
     if (authLoading) return;
 
     if (user && !hasFetched) {
-      fetchSavedListings();
+      // Defer initial fetch to avoid blocking main thread during hydration
+      let idleCallbackId: number;
+      let useIdleCallback = false;
+
+      const win = window as typeof window & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+        cancelIdleCallback?: (id: number) => void;
+      };
+
+      if (win.requestIdleCallback) {
+        useIdleCallback = true;
+        idleCallbackId = win.requestIdleCallback(() => {
+          fetchSavedListings();
+        }, { timeout: 2000 });
+      } else {
+        idleCallbackId = window.setTimeout(() => {
+          fetchSavedListings();
+        }, 100) as unknown as number;
+      }
+
+      return () => {
+        if (useIdleCallback && win.cancelIdleCallback) {
+          win.cancelIdleCallback(idleCallbackId);
+        } else {
+          clearTimeout(idleCallbackId);
+        }
+      };
     } else if (!user) {
       setSavedListingIds(new Set());
       setHasFetched(false);

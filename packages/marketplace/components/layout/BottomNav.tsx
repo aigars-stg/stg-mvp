@@ -3,11 +3,19 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Home, Grid, Plus, MessageCircle, User } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
-import { SellActionSheet } from './SellActionSheet';
-import { ProfileBottomSheet } from './ProfileBottomSheet';
+
+// Lazy load action sheets - they're only shown on user interaction
+const SellActionSheet = dynamic(() => import('./SellActionSheet').then(mod => ({ default: mod.SellActionSheet })), {
+  ssr: false,
+});
+
+const ProfileBottomSheet = dynamic(() => import('./ProfileBottomSheet').then(mod => ({ default: mod.ProfileBottomSheet })), {
+  ssr: false,
+});
 
 export function BottomNav() {
   const pathname = usePathname();
