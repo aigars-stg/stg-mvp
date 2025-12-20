@@ -9,6 +9,7 @@ import { ConditionalAnalytics } from '@/components/ConditionalAnalytics';
 import { CookieConsent } from '@/components/CookieConsent';
 import { UnreadMessagesProvider } from '@/lib/contexts/UnreadMessagesContext';
 import { CartProvider } from '@/lib/contexts/CartContext';
+import { PathTracker } from '@/components/PathTracker';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   // Create QueryClient instance per component instance to avoid sharing state between requests
@@ -32,6 +33,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <UnreadMessagesProvider>
             <CartProvider>
               <OnboardingProvider>
+                <PathTracker />
                 {children}
               </OnboardingProvider>
             </CartProvider>

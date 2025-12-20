@@ -26,6 +26,8 @@ import { CountryPrompt } from '@/components/onboarding';
 import { NotificationModal } from '@/components/common/NotificationModal';
 import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { cn } from '@/lib/utils';
+import { isOfflineError } from '@/lib/utils/offline';
+import { OfflineError } from '@/components/common/OfflineError';
 
 type ListingType = 'sell' | 'wanted';
 
@@ -43,6 +45,7 @@ export default function BrowsePage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
+  const [isOffline, setIsOffline] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -238,9 +241,16 @@ export default function BrowsePage() {
       setHasMore(data.pagination?.hasMore || false);
       setTotalCount(data.pagination?.total || 0);
       setError('');
-    } catch (err: any) {
+      setIsOffline(false);
+    } catch (err: unknown) {
       console.error('Error fetching games:', err);
-      setError(err.message || 'Failed to load games');
+      if (isOfflineError(err)) {
+        setIsOffline(true);
+        setError('');
+      } else {
+        setIsOffline(false);
+        setError(err instanceof Error ? err.message : 'Failed to load games');
+      }
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -262,9 +272,16 @@ export default function BrowsePage() {
       const data = await response.json();
       setWantedListings(data.wantedListings || []);
       setError('');
-    } catch (err: any) {
+      setIsOffline(false);
+    } catch (err: unknown) {
       console.error('Error fetching wanted listings:', err);
-      setError(err.message || 'Failed to load wanted listings');
+      if (isOfflineError(err)) {
+        setIsOffline(true);
+        setError('');
+      } else {
+        setIsOffline(false);
+        setError(err instanceof Error ? err.message : 'Failed to load wanted listings');
+      }
     } finally {
       setLoading(false);
     }
@@ -1763,22 +1780,36 @@ export default function BrowsePage() {
           </div>
         )}
 
+        {/* Offline State */}
+        {isOffline && !loading && (
+          <OfflineError
+            onRetry={() => {
+              if (listingType === 'sell') {
+                fetchGames(1, false);
+              } else {
+                fetchWantedListings();
+              }
+            }}
+            message="We couldn't load listings. Check your connection and try again."
+          />
+        )}
+
         {/* Error State */}
-        {error && !loading && (
+        {error && !loading && !isOffline && (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">⚠️</div>
             <h3 className="text-xl font-semibold text-polar-night mb-2">
-              Failed to load listings
+              Something went wrong
             </h3>
             <p className="text-text-secondary mb-6">{error}</p>
             <Button variant="primary" onClick={() => window.location.reload()}>
-              Try Again
+              Try again
             </Button>
           </div>
         )}
 
         {/* Games Grid - Full Width, Responsive */}
-        {!loading && !error && (listingType === 'sell' ? filteredGames.length > 0 : filteredWantedListings.length > 0) && (
+        {!loading && !error && !isOffline && (listingType === 'sell' ? filteredGames.length > 0 : filteredWantedListings.length > 0) && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {listingType === 'sell'
@@ -1819,7 +1850,7 @@ export default function BrowsePage() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && (listingType === 'sell' ? filteredGames.length === 0 : filteredWantedListings.length === 0) && (
+        {!loading && !error && !isOffline && (listingType === 'sell' ? filteredGames.length === 0 : filteredWantedListings.length === 0) && (
           <div className="text-center py-16">
             <div className="flex justify-center mb-4">
               <Package className="w-16 h-16 text-text-muted" />

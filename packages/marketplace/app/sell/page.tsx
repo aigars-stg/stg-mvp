@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Modal } from '@second-turn/design-system';
-import type { BGGGame } from '@/lib/bgg-api';
+import type { BGGGame, BGGExpansionInfo } from '@/lib/bgg-api';
 import type { VersionSelection } from '@/lib/bgg-types';
 import { GameSearch } from '@/components/sell/GameSearch';
 import { GameNameSelector } from '@/components/sell/GameNameSelector';
@@ -12,8 +12,9 @@ import { ConditionSelector } from '@/components/sell/ConditionSelector';
 import { PhotoUpload, type PhotoFile } from '@/components/sell/PhotoUpload';
 import { PricingShippingSimple } from '@/components/sell/PricingShippingSimple';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
+import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
 import { ListingCard } from '@/components/listing/ListingCard';
-import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, Package, AlertCircle } from 'lucide-react';
+import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle } from 'lucide-react';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
@@ -27,6 +28,7 @@ interface ListingFormData {
   selectedGame: BGGGame | null;
   selectedGameDisplayName: string | null; // Chosen display name (primary or alternate)
   selectedVersion: VersionSelection | null;
+  selectedExpansions: SelectedExpansion[]; // Bundled expansions
   photos: PhotoFile[];
   condition: 'likeNew' | 'veryGood' | 'good' | 'acceptable' | null;
   conditionNotes: string;
@@ -45,6 +47,7 @@ const INITIAL_FORM_DATA: ListingFormData = {
   selectedGame: null,
   selectedGameDisplayName: null,
   selectedVersion: null,
+  selectedExpansions: [],
   photos: [],
   condition: null,
   conditionNotes: '',
@@ -92,6 +95,18 @@ function createPreviewListing(
     shipping_local_pickup: formData.shippingOptions.localPickup,
     shipping_parcel_locker: formData.shippingOptions.parcelLocker,
     shipping_notes: formData.shippingNotes || null,
+    included_expansions: formData.selectedExpansions.map((exp) => ({
+      bgg_id: exp.bgg_id,
+      name: exp.name,
+      year: exp.year,
+      version_source: 'bgg' as const,
+      bgg_version_id: exp.selectedVersion.id || null,
+      version_name: exp.selectedVersion.name || null,
+      language: exp.selectedVersion.languages?.join(', ') || exp.selectedVersion.language || null,
+      publisher: exp.selectedVersion.publishers?.join(', ') || exp.selectedVersion.publisher || null,
+      thumbnail: exp.thumbnail,
+      image: exp.image,
+    })),
     seller_id: user?.id || 'preview-seller',
     status: 'active',
     created_at: new Date().toISOString(),
@@ -138,6 +153,13 @@ function SellPageContent() {
   const [isLoadingListing, setIsLoadingListing] = useState(false);
   const [loadError, setLoadError] = useState('');
 
+  // Expansion state
+  const [availableExpansions, setAvailableExpansions] = useState<BGGExpansionInfo[]>([]);
+  const [isLoadingExpansions, setIsLoadingExpansions] = useState(false);
+  const [showExpansionSection, setShowExpansionSection] = useState(false);
+  const [expansionsFetched, setExpansionsFetched] = useState(false);
+  const [expansionCount, setExpansionCount] = useState(0);
+
   // Section expansion states
   const [expandedSections, setExpandedSections] = useState({
     game: true,      // Always start with game section open
@@ -163,10 +185,15 @@ function SellPageContent() {
       ...prev,
       selectedGame: game,
       selectedVersion: null,
-      selectedGameDisplayName: null // Clear display name when changing game
+      selectedGameDisplayName: null, // Clear display name when changing game
+      selectedExpansions: [], // Clear expansions when changing game
     }));
     setFallbackMode(false);
     setFallbackReason(undefined);
+    setAvailableExpansions([]); // Clear available expansions
+    setShowExpansionSection(false); // Reset expansion section
+    setExpansionsFetched(false); // Reset fetched flag
+    setExpansionCount(0); // Reset expansion count
 
     // If game is null (clearing selection), just return
     if (!game) {
@@ -177,6 +204,7 @@ function SellPageContent() {
     setIsLoadingGameDetails(true);
 
     try {
+      // Fetch game details WITHOUT expansions (lazy load later)
       const response = await fetch(`/api/games/${game.id}`);
       const data = await response.json();
 
@@ -192,6 +220,7 @@ function SellPageContent() {
           minAge: data.game.min_age,
           playingTime: data.game.playing_time,
           alternateNames: data.game.alternate_names, // For localized versions
+          isExpansion: data.game.is_expansion, // Track if game is an expansion
         };
         setFormData((prev) => ({
           ...prev,
@@ -205,6 +234,12 @@ function SellPageContent() {
         console.log(`🔄 [Sell Page] Entering fallback mode: ${data.reason}`);
         setFallbackMode(true);
         setFallbackReason(data.reason);
+      }
+
+      // Store expansion count (used to show/hide expansion toggle)
+      if (typeof data.expansionCount === 'number') {
+        setExpansionCount(data.expansionCount);
+        console.log(`📦 [Sell Page] Game has ${data.expansionCount} expansions`);
       }
     } catch (error) {
       console.error('Error fetching game details:', error);
@@ -237,6 +272,43 @@ function SellPageContent() {
   const handleChangeName = useCallback(() => {
     // Clear selected display name to show selector again
     setFormData((prev) => ({ ...prev, selectedGameDisplayName: null }));
+  }, []);
+
+  // Handler for expansion selection changes
+  const handleExpansionsChange = useCallback((expansions: SelectedExpansion[]) => {
+    setFormData((prev) => ({ ...prev, selectedExpansions: expansions }));
+  }, []);
+
+  // Handler to enable expansion section and fetch expansions
+  const handleEnableExpansions = useCallback(async () => {
+    if (!formData.selectedGame || expansionsFetched) {
+      setShowExpansionSection(true);
+      return;
+    }
+
+    setShowExpansionSection(true);
+    setIsLoadingExpansions(true);
+
+    try {
+      const response = await fetch(`/api/games/${formData.selectedGame.id}?expansions=true`);
+      const data = await response.json();
+
+      if (data.expansions && Array.isArray(data.expansions)) {
+        setAvailableExpansions(data.expansions);
+        console.log(`📦 [Sell Page] Found ${data.expansions.length} expansions for ${formData.selectedGame.name}`);
+      }
+      setExpansionsFetched(true);
+    } catch (error) {
+      console.error('Error fetching expansions:', error);
+    } finally {
+      setIsLoadingExpansions(false);
+    }
+  }, [formData.selectedGame, expansionsFetched]);
+
+  // Handler to disable expansion section
+  const handleDisableExpansions = useCallback(() => {
+    setShowExpansionSection(false);
+    setFormData((prev) => ({ ...prev, selectedExpansions: [] }));
   }, []);
 
   // Fetch listing data for edit mode
@@ -294,6 +366,7 @@ function SellPageContent() {
             thumbnail: listing.game?.thumbnail || null,
             image: listing.game?.image || null,
           },
+          selectedExpansions: [], // Expansions not editable in edit mode
           photos: [], // New photos to upload
           condition: listing.condition,
           conditionNotes: listing.condition_notes || '',
@@ -630,6 +703,19 @@ function SellPageContent() {
           shippingLocalPickup: formData.shippingOptions.localPickup,
           shippingParcelLocker: formData.shippingOptions.parcelLocker,
           shippingNotes: formData.shippingNotes,
+          // Convert selected expansions to API format
+          includedExpansions: formData.selectedExpansions.map((exp) => ({
+            bgg_id: exp.bgg_id,
+            name: exp.name,
+            year: exp.year,
+            version_source: 'bgg' as const,
+            bgg_version_id: exp.selectedVersion.id || null,
+            version_name: exp.selectedVersion.name || null,
+            language: exp.selectedVersion.languages?.join(', ') || exp.selectedVersion.language || null,
+            publisher: exp.selectedVersion.publishers?.join(', ') || exp.selectedVersion.publisher || null,
+            thumbnail: exp.thumbnail,
+            image: exp.image,
+          })),
         };
 
         const listingResponse = await fetch('/api/listings', {
@@ -916,6 +1002,65 @@ function SellPageContent() {
               })()}
             </div>
           </CollapsibleSection>
+        )}
+
+        {/* Expansion Section - Only show for base games with expansions after version is selected */}
+        {!isEditMode && formData.selectedGame && formData.selectedVersion && !formData.selectedGame.isExpansion && expansionCount > 0 && (
+          <>
+            {!showExpansionSection ? (
+              /* Toggle button to enable expansion section */
+              <Card padding="md" className="border-dashed border-2 border-border hover:border-frost-ice/50 transition-colors">
+                <button
+                  onClick={handleEnableExpansions}
+                  className="w-full flex items-center justify-between gap-3 text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-frost-ice/10 flex items-center justify-center">
+                      <Puzzle className="w-5 h-5 text-frost-ice" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-polar-night">Include Expansions?</p>
+                      <p className="text-sm text-text-secondary">Bundle expansions with this listing (optional)</p>
+                    </div>
+                  </div>
+                  <div className="text-frost-ice font-medium text-sm">Add +</div>
+                </button>
+              </Card>
+            ) : (
+              /* Expansion selector section */
+              <CollapsibleSection
+                title="Include Expansions"
+                icon={<Puzzle className="w-6 h-6 text-frost-ice" />}
+                isExpanded={true}
+                onToggle={() => {}}
+                subtitle={
+                  formData.selectedExpansions.length > 0
+                    ? `${formData.selectedExpansions.length} expansion${formData.selectedExpansions.length !== 1 ? 's' : ''} included`
+                    : 'Bundle expansions with this game (optional)'
+                }
+              >
+                <div className="space-y-4">
+                  <ExpansionSelector
+                    expansions={availableExpansions}
+                    baseGameVersion={formData.selectedVersion}
+                    selectedExpansions={formData.selectedExpansions}
+                    onExpansionsChange={handleExpansionsChange}
+                    isLoading={isLoadingExpansions}
+                  />
+
+                  {/* Close/Cancel button */}
+                  {formData.selectedExpansions.length === 0 && !isLoadingExpansions && (
+                    <button
+                      onClick={handleDisableExpansions}
+                      className="text-sm text-text-muted hover:text-text-secondary transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </CollapsibleSection>
+            )}
+          </>
         )}
 
         {/* Section 2: Condition */}

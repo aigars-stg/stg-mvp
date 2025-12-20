@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
       shippingLocalPickup,
       shippingParcelLocker,
       shippingNotes,
+      includedExpansions, // Bundled expansions
     } = body;
 
     // Validation
@@ -147,6 +148,9 @@ export async function POST(request: NextRequest) {
       shipping_local_pickup: shippingLocalPickup === true,
       shipping_parcel_locker: shippingParcelLocker === true,
       shipping_notes: shippingNotes || null,
+
+      // Bundled expansions
+      included_expansions: includedExpansions || [],
 
       // Metadata
       seller_id: sellerId,

@@ -20,6 +20,8 @@ import type { WantedListingWithDetails, WantedListingStatus } from '@/lib/types/
 import { getStatusLabel } from '@/lib/types/listing';
 import { getWantedStatusLabel } from '@/lib/types/wanted-listing';
 import { useSavedListings } from '@/lib/hooks/useSavedListings';
+import { isOfflineError } from '@/lib/utils/offline';
+import { OfflineError } from '@/components/common/OfflineError';
 
 const STATUS_LABELS = {
   draft: 'Draft',
@@ -75,12 +77,14 @@ function MyListingsContent() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isOffline, setIsOffline] = useState(false);
   const [activeTab, setActiveTab] = useState<ListingStatus | 'all'>('all');
 
   // Wanted listings
   const [wantedListings, setWantedListings] = useState<WantedListingWithDetails[]>([]);
   const [wantedLoading, setWantedLoading] = useState(true);
   const [wantedError, setWantedError] = useState('');
+  const [wantedIsOffline, setWantedIsOffline] = useState(false);
   const [wantedActiveTab, setWantedActiveTab] = useState<'all' | 'active' | 'fulfilled' | 'expired' | 'cancelled'>('all');
 
   // Saved listings
@@ -128,9 +132,17 @@ function MyListingsContent() {
 
         const data = await response.json();
         setListings(data.listings || []);
-      } catch (err: any) {
+        setIsOffline(false);
+        setError('');
+      } catch (err: unknown) {
         console.error('Error fetching listings:', err);
-        setError(err.message || 'Failed to load listings');
+        if (isOfflineError(err)) {
+          setIsOffline(true);
+          setError('');
+        } else {
+          setIsOffline(false);
+          setError(err instanceof Error ? err.message : 'Failed to load listings');
+        }
       } finally {
         setLoading(false);
       }
@@ -158,9 +170,17 @@ function MyListingsContent() {
         const data = await response.json();
         console.log('Wanted listings response:', data);
         setWantedListings(data.wantedListings || []);
-      } catch (err: any) {
+        setWantedIsOffline(false);
+        setWantedError('');
+      } catch (err: unknown) {
         console.error('Error fetching wanted listings:', err);
-        setWantedError(err.message || 'Failed to load wanted listings');
+        if (isOfflineError(err)) {
+          setWantedIsOffline(true);
+          setWantedError('');
+        } else {
+          setWantedIsOffline(false);
+          setWantedError(err instanceof Error ? err.message : 'Failed to load wanted listings');
+        }
       } finally {
         setWantedLoading(false);
       }
@@ -522,8 +542,16 @@ function MyListingsContent() {
               </Card>
             )}
 
+            {/* Offline State */}
+            {isOffline && !loading && (
+              <OfflineError
+                onRetry={() => window.location.reload()}
+                message="We couldn't load your listings. Check your connection and try again."
+              />
+            )}
+
             {/* Error Message */}
-            {error && (
+            {error && !isOffline && (
               <Card padding="md" className="mb-6 bg-aurora-red/10 border border-aurora-red/20">
                 <p className="text-sm text-aurora-red">{error}</p>
               </Card>
@@ -537,7 +565,7 @@ function MyListingsContent() {
             )}
 
             {/* Empty State */}
-            {!loading && filteredListings.length === 0 && (
+            {!loading && !isOffline && filteredListings.length === 0 && (
               <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
                 <Package className="w-16 h-16 text-text-muted mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
@@ -562,7 +590,7 @@ function MyListingsContent() {
             )}
 
             {/* Listings Grid */}
-            {!loading && filteredListings.length > 0 && (
+            {!loading && !isOffline && filteredListings.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {filteredListings.map((listing) => (
                   <div key={listing.id} className="relative">
@@ -602,8 +630,16 @@ function MyListingsContent() {
         {/* WANTED TAB CONTENT */}
         {mainTab === 'wanted' && (
           <>
+            {/* Offline State */}
+            {wantedIsOffline && !wantedLoading && (
+              <OfflineError
+                onRetry={() => window.location.reload()}
+                message="We couldn't load your wanted listings. Check your connection and try again."
+              />
+            )}
+
             {/* Error Message */}
-            {wantedError && (
+            {wantedError && !wantedIsOffline && (
               <Card padding="md" className="mb-6 bg-aurora-red/10 border border-aurora-red/20">
                 <p className="text-sm text-aurora-red">{wantedError}</p>
               </Card>
@@ -617,7 +653,7 @@ function MyListingsContent() {
             )}
 
             {/* Empty State */}
-            {!wantedLoading && filteredWantedListings.length === 0 && (
+            {!wantedLoading && !wantedIsOffline && filteredWantedListings.length === 0 && (
               <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
                 <Search className="w-16 h-16 text-text-muted mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
@@ -649,7 +685,7 @@ function MyListingsContent() {
             )}
 
             {/* Wanted Listings Grid */}
-            {!wantedLoading && filteredWantedListings.length > 0 && (
+            {!wantedLoading && !wantedIsOffline && filteredWantedListings.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {filteredWantedListings.map((listing) => (
                   <div key={listing.id} className="relative">

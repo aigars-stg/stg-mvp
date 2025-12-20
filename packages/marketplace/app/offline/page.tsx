@@ -1,99 +1,346 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { WifiOff } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { WifiOff, Wifi, RefreshCw, Home, Clock, AlertTriangle } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 
+type ConnectionStatus = 'offline' | 'slow' | 'online';
+
+interface CachedRoute {
+  path: string;
+  label: string;
+}
+
+// Routes that are likely cached by the service worker
+const CACHEABLE_ROUTES: CachedRoute[] = [
+  { path: '/', label: 'Home' },
+  { path: '/browse', label: 'Browse games' },
+  { path: '/sell', label: 'Sell a game' },
+];
+
+const AUTO_RETRY_INTERVAL = 15; // seconds
+
 export default function OfflinePage() {
-  const [isOnline, setIsOnline] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('offline');
+  const [countdown, setCountdown] = useState(AUTO_RETRY_INTERVAL);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [previousPath, setPreviousPath] = useState<string | null>(null);
+  const [cachedRoutes, setCachedRoutes] = useState<CachedRoute[]>([]);
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Detect connection quality
+  const detectConnectionQuality = useCallback((): ConnectionStatus => {
+    if (!navigator.onLine) return 'offline';
+
+    // Check Network Information API if available
+    const connection = (navigator as Navigator & { connection?: { effectiveType?: string; downlink?: number } }).connection;
+    if (connection) {
+      const { effectiveType, downlink } = connection;
+      // Slow connection: 2G, slow-2g, or very low bandwidth
+      if (effectiveType === '2g' || effectiveType === 'slow-2g' || (downlink && downlink < 0.5)) {
+        return 'slow';
+      }
+    }
+
+    return 'online';
+  }, []);
+
+  // Check which routes are actually cached
+  const checkCachedRoutes = useCallback(async () => {
+    if ('caches' in window) {
+      try {
+        const cacheNames = await caches.keys();
+        const availableRoutes: CachedRoute[] = [];
+
+        for (const route of CACHEABLE_ROUTES) {
+          for (const cacheName of cacheNames) {
+            const cache = await caches.open(cacheName);
+            const response = await cache.match(route.path);
+            if (response) {
+              availableRoutes.push(route);
+              break;
+            }
+          }
+        }
+
+        setCachedRoutes(availableRoutes);
+      } catch {
+        // Cache API not available or error
+        setCachedRoutes([]);
+      }
+    }
+  }, []);
+
+  // Get previous path from referrer or sessionStorage
   useEffect(() => {
-    // Check initial online status
-    setIsOnline(navigator.onLine);
+    // Try to get the previous path
+    const storedPath = sessionStorage.getItem('offline_return_path');
+    if (storedPath && storedPath !== '/offline') {
+      setPreviousPath(storedPath);
+    } else if (document.referrer) {
+      try {
+        const referrerUrl = new URL(document.referrer);
+        if (referrerUrl.origin === window.location.origin && referrerUrl.pathname !== '/offline') {
+          setPreviousPath(referrerUrl.pathname);
+        }
+      } catch {
+        // Invalid referrer URL
+      }
+    }
 
-    // Listen for online/offline events
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    // Store current path for future reference
+    const currentPath = sessionStorage.getItem('last_visited_path');
+    if (currentPath && currentPath !== '/offline') {
+      setPreviousPath(currentPath);
+    }
+  }, []);
+
+  // Monitor connection status
+  useEffect(() => {
+    const updateStatus = () => {
+      const status = detectConnectionQuality();
+      setConnectionStatus(status);
+
+      // Auto-redirect when back online
+      if (status === 'online') {
+        // Small delay to ensure connection is stable
+        redirectTimeoutRef.current = setTimeout(() => {
+          const returnPath = previousPath || '/';
+          window.location.href = returnPath;
+        }, 1500);
+      }
+    };
+
+    updateStatus();
+    checkCachedRoutes();
+
+    const handleOnline = () => updateStatus();
+    const handleOffline = () => setConnectionStatus('offline');
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
+    // Listen for connection changes (if supported)
+    const connection = (navigator as Navigator & { connection?: EventTarget }).connection;
+    if (connection) {
+      connection.addEventListener('change', updateStatus);
+    }
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      if (connection) {
+        connection.removeEventListener('change', updateStatus);
+      }
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
     };
-  }, []);
+  }, [detectConnectionQuality, checkCachedRoutes, previousPath]);
 
-  const handleRetry = () => {
-    if (navigator.onLine) {
-      window.location.reload();
+  // Auto-retry countdown
+  useEffect(() => {
+    if (connectionStatus !== 'offline') {
+      setCountdown(AUTO_RETRY_INTERVAL);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          // Trigger retry
+          handleRetry();
+          return AUTO_RETRY_INTERVAL;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [connectionStatus]);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+
+    try {
+      // Attempt a lightweight fetch to check connectivity
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      await fetch('/api/health', {
+        method: 'HEAD',
+        signal: controller.signal,
+        cache: 'no-store',
+      });
+
+      clearTimeout(timeoutId);
+
+      // If successful, update status and redirect
+      setConnectionStatus('online');
+      const returnPath = previousPath || '/';
+      window.location.href = returnPath;
+    } catch {
+      // Still offline
+      setConnectionStatus('offline');
+      setCountdown(AUTO_RETRY_INTERVAL);
+    } finally {
+      setIsRetrying(false);
     }
   };
 
-  const handleGoHome = () => {
-    window.location.href = '/';
+  const handleGoBack = () => {
+    if (previousPath) {
+      window.location.href = previousPath;
+    } else {
+      window.location.href = '/';
+    }
   };
+
+  const getStatusConfig = () => {
+    switch (connectionStatus) {
+      case 'online':
+        return {
+          icon: Wifi,
+          iconBg: 'bg-aurora-green/10',
+          iconColor: 'text-aurora-green',
+          dotColor: 'bg-aurora-green',
+          title: "You're back online!",
+          subtitle: 'Redirecting you back...',
+          statusText: 'Connected',
+        };
+      case 'slow':
+        return {
+          icon: AlertTriangle,
+          iconBg: 'bg-aurora-yellow/10',
+          iconColor: 'text-aurora-yellow',
+          dotColor: 'bg-aurora-yellow',
+          title: 'Slow connection',
+          subtitle: "Your connection is unstable. Some features may not work properly.",
+          statusText: 'Weak signal',
+        };
+      default:
+        return {
+          icon: WifiOff,
+          iconBg: 'bg-aurora-orange/10',
+          iconColor: 'text-aurora-orange',
+          dotColor: 'bg-aurora-red',
+          title: "You're offline",
+          subtitle: "It looks like you've lost your internet connection. We'll keep trying to reconnect.",
+          statusText: 'No connection',
+        };
+    }
+  };
+
+  const config = getStatusConfig();
+  const StatusIcon = config.icon;
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-6">
         {/* Icon */}
         <div className="flex justify-center">
-          <div className="w-20 h-20 rounded-full bg-aurora-orange/10 flex items-center justify-center">
-            <WifiOff className="w-10 h-10 text-aurora-orange" />
+          <div className={`w-20 h-20 rounded-full ${config.iconBg} flex items-center justify-center`}>
+            <StatusIcon className={`w-10 h-10 ${config.iconColor}`} />
           </div>
         </div>
 
         {/* Title */}
         <div className="space-y-2">
           <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
-            You&apos;re Offline
+            {config.title}
           </h1>
           <p className="text-text-secondary">
-            {isOnline
-              ? 'You&apos;re back online! Click retry to continue.'
-              : 'It looks like you&apos;ve lost your internet connection. Please check your network and try again.'}
+            {config.subtitle}
           </p>
         </div>
 
         {/* Status Indicator */}
         <div className="flex items-center justify-center gap-2 text-sm">
-          <div
-            className={`w-2 h-2 rounded-full ${
-              isOnline ? 'bg-aurora-green' : 'bg-aurora-red'
-            }`}
-          />
+          <div className="relative">
+            <div className={`w-2 h-2 rounded-full ${config.dotColor}`} />
+            {/* Pulse animation for offline/slow states */}
+            {connectionStatus !== 'online' && (
+              <div className={`absolute inset-0 w-2 h-2 rounded-full ${config.dotColor} animate-ping opacity-75`} />
+            )}
+          </div>
           <span className="text-text-muted">
-            {isOnline ? 'Connected' : 'No connection'}
+            {config.statusText}
           </span>
+          {connectionStatus === 'offline' && (
+            <span className="text-text-muted flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              Retrying in {countdown}s
+            </span>
+          )}
         </div>
 
         {/* Actions */}
         <div className="space-y-3 pt-4">
-          <Button
-            variant={isOnline ? 'primary' : 'secondary'}
-            size="lg"
-            fullWidth
-            onClick={handleRetry}
-          >
-            {isOnline ? 'Retry' : 'Try Again'}
-          </Button>
-          <Button variant="ghost" size="md" fullWidth onClick={handleGoHome}>
-            Go to Home
-          </Button>
+          {connectionStatus === 'online' ? (
+            <div className="flex items-center justify-center gap-2 text-aurora-green">
+              <RefreshCw className="w-5 h-5 animate-spin" />
+              <span>Redirecting...</span>
+            </div>
+          ) : (
+            <>
+              <Button
+                variant={connectionStatus === 'slow' ? 'primary' : 'secondary'}
+                size="lg"
+                fullWidth
+                onClick={handleRetry}
+                disabled={isRetrying}
+              >
+                {isRetrying ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Checking connection...
+                  </span>
+                ) : (
+                  'Try again now'
+                )}
+              </Button>
+              <Button variant="ghost" size="md" fullWidth onClick={handleGoBack}>
+                <Home className="w-4 h-4 mr-2" />
+                {previousPath ? 'Go back' : 'Go to home'}
+              </Button>
+            </>
+          )}
         </div>
 
+        {/* Cached Routes */}
+        {cachedRoutes.length > 0 && connectionStatus !== 'online' && (
+          <div className="pt-4 text-left bg-bg-elevated rounded-lg p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-polar-night">
+              Available offline:
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {cachedRoutes.map((route) => (
+                <Link
+                  key={route.path}
+                  href={route.path}
+                  className="px-3 py-1.5 text-sm bg-bg rounded-full border border-frost-gray hover:border-aurora-green transition-colors"
+                >
+                  {route.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Tips */}
-        <div className="pt-6 text-left bg-bg-elevated rounded-lg p-4 space-y-2">
-          <h3 className="text-sm font-semibold text-polar-night">
-            While you&apos;re offline:
-          </h3>
-          <ul className="text-sm text-text-secondary space-y-1 list-disc list-inside">
-            <li>Previously viewed listings are still accessible</li>
-            <li>Your saved games and listings are cached</li>
-            <li>New actions will sync when you're back online</li>
-          </ul>
-        </div>
+        {connectionStatus !== 'online' && (
+          <div className="pt-2 text-left bg-bg-elevated rounded-lg p-4 space-y-2">
+            <h3 className="text-sm font-semibold text-polar-night">
+              While you&apos;re offline:
+            </h3>
+            <ul className="text-sm text-text-secondary space-y-1 list-disc list-inside">
+              <li>Previously viewed listings are still accessible</li>
+              <li>Your saved games and listings are cached</li>
+              <li>New actions will sync when you&apos;re back online</li>
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

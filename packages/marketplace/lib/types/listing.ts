@@ -5,6 +5,22 @@
 export type ListingStatus = 'draft' | 'active' | 'sold' | 'removed';
 export type ListingCondition = 'likeNew' | 'veryGood' | 'good' | 'acceptable';
 
+// Expansion included with a listing (bundled with base game)
+export interface IncludedExpansion {
+  bgg_id: number;
+  name: string;
+  year: number | null;
+  // Version info
+  version_source: 'bgg' | 'manual';
+  bgg_version_id: number | null;
+  version_name: string | null;
+  language: string | null;
+  publisher: string | null;
+  // Images
+  thumbnail: string | null;
+  image: string | null;
+}
+
 export interface Listing {
   id: string;
 
@@ -38,6 +54,9 @@ export interface Listing {
   shipping_local_pickup: boolean;
   shipping_parcel_locker: boolean;
   shipping_notes: string | null;
+
+  // Expansions (bundled with base game)
+  included_expansions: IncludedExpansion[];
 
   // Metadata
   seller_id: string;

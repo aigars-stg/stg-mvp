@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, Badge, Button } from '@second-turn/design-system';
-import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart } from 'lucide-react';
+import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Puzzle } from 'lucide-react';
 import { SellerTrustCompact } from '@/components/seller/SellerTrustBadge';
 import { getSellerBadgeTier } from '@/lib/types/seller';
 import type { ListingWithSeller } from '@/lib/types/listing';
@@ -228,21 +228,21 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
             </h3>
 
             {/* Game Metadata */}
-            {(listing.game?.player_count || listing.game?.min_age || listing.game?.playing_time || listing.game?.is_expansion) && (
+            {(listing.game?.player_count || listing.game?.min_age || listing.game?.playing_time || listing.game?.is_expansion || (listing.included_expansions && listing.included_expansions.length > 0)) && (
               <div className="flex flex-wrap gap-3 text-xs text-text-secondary items-center">
-                {listing.game.player_count && (
+                {listing.game?.player_count && (
                   <span className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
                     {listing.game.player_count}
                   </span>
                 )}
-                {listing.game.min_age && (
+                {listing.game?.min_age && (
                   <span className="flex items-center gap-1">
                     <Baby className="w-4 h-4" />
                     {listing.game.min_age}+
                   </span>
                 )}
-                {listing.game.playing_time && (
+                {listing.game?.playing_time && (
                   <span className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
                     {listing.game.playing_time}
@@ -251,6 +251,16 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
                 {listing.game?.is_expansion && (
                   <Badge variant="warning" size="sm">
                     Expansion
+                  </Badge>
+                )}
+                {listing.included_expansions && listing.included_expansions.length > 0 && (
+                  <Badge
+                    variant="success"
+                    size="sm"
+                    icon={<Puzzle className="w-3 h-3" />}
+                    title={listing.included_expansions.map(e => e.name).join(', ')}
+                  >
+                    +{listing.included_expansions.length} expansion{listing.included_expansions.length !== 1 ? 's' : ''}
                   </Badge>
                 )}
               </div>

@@ -576,6 +576,151 @@ export async function getGameVersions(gameId: number): Promise<BGGVersion[]> {
   }
 }
 
+// Expansion info for a base game
+export interface BGGExpansionInfo {
+  bgg_id: number;
+  name: string;
+  year: number | null;
+  thumbnail: string | null;
+  image: string | null;
+  versions: BGGVersion[];
+}
+
+/**
+ * Get the count of expansions for a game (lightweight - no version fetching)
+ * Uses cached metadata if available
+ */
+export async function getExpansionCount(gameId: number): Promise<number> {
+  try {
+    const metadata = await fetchGameMetadata(gameId);
+    if (!metadata) return 0;
+
+    const expansionLinks = (metadata.outboundLinks || []).filter(
+      (link) => link.type === 'boardgameexpansion'
+    );
+
+    return expansionLinks.length;
+  } catch (error) {
+    console.error(`Error getting expansion count for ${gameId}:`, error);
+    return 0;
+  }
+}
+
+/**
+ * Fetch all expansions for a base game
+ * Uses batch API call for efficiency
+ */
+export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansionInfo[]> {
+  console.log(`📡 [BGG API] Fetching expansions for game ${gameId}`);
+
+  try {
+    // First, get the base game metadata to find expansion IDs
+    const metadata = await fetchGameMetadata(gameId);
+    if (!metadata) {
+      console.warn(`⚠️  [BGG API] No metadata for game ${gameId}`);
+      return [];
+    }
+
+    // Filter outbound links to get expansion IDs
+    const expansionLinks = (metadata.outboundLinks || []).filter(
+      (link) => link.type === 'boardgameexpansion'
+    );
+
+    if (expansionLinks.length === 0) {
+      console.log(`📦 [BGG API] No expansions found for game ${gameId}`);
+      return [];
+    }
+
+    const expansionIds = expansionLinks.map((link) => parseInt(link.id));
+    console.log(`📦 [BGG API] Found ${expansionIds.length} expansions for ${metadata.name}`);
+
+    // Batch fetch all expansions (BGG API supports up to ~20 IDs per request)
+    // Split into chunks if needed
+    const BATCH_SIZE = 20;
+    const expansions: BGGExpansionInfo[] = [];
+
+    for (let i = 0; i < expansionIds.length; i += BATCH_SIZE) {
+      const batchIds = expansionIds.slice(i, i + BATCH_SIZE);
+      const idsParam = batchIds.join(',');
+
+      const response = await fetch(
+        `https://boardgamegeek.com/xmlapi2/thing?id=${idsParam}&versions=1`,
+        {
+          headers: createBGGHeaders(),
+        }
+      );
+
+      if (!response.ok) {
+        console.error(`❌ [BGG API] Batch fetch failed: ${response.status}`);
+        continue;
+      }
+
+      const xml = await response.text();
+      const parsed = parser.parse(xml);
+
+      const items = parsed.items?.item || [];
+      const itemsArray = Array.isArray(items) ? items : [items];
+
+      for (const item of itemsArray) {
+        if (!item['@_id']) continue;
+
+        // Parse name
+        const names = item.name ? (Array.isArray(item.name) ? item.name : [item.name]) : [];
+        const primaryName = names.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'] || 'Unknown';
+
+        // Parse versions
+        const versionsData = item.versions?.item || [];
+        const versionsArray = Array.isArray(versionsData) ? versionsData : [versionsData];
+
+        const versions: BGGVersion[] = versionsArray
+          .filter((version: any) => version['@_id'])
+          .map((version: any) => {
+            const versionLinks = version.link ? (Array.isArray(version.link) ? version.link : [version.link]) : [];
+
+            const publisherLinks = versionLinks.filter((l: any) => l['@_type'] === 'boardgamepublisher');
+            const publishers = publisherLinks.map((l: any) => decodeHTMLEntities(l['@_value']));
+
+            const languageLinks = versionLinks.filter((l: any) => l['@_type'] === 'language');
+            const languages = languageLinks.map((l: any) => decodeHTMLEntities(l['@_value']));
+
+            const nameData = version.name;
+            const rawName = Array.isArray(nameData)
+              ? nameData.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || nameData[0]?.['@_value']
+              : nameData?.['@_value'];
+            const name = decodeHTMLEntities(rawName);
+
+            return {
+              id: parseInt(version['@_id']),
+              name: name || 'Unknown Version',
+              publisher: publishers[0],
+              publishers: publishers.length > 0 ? publishers : undefined,
+              language: languages[0],
+              languages: languages.length > 0 ? languages : undefined,
+              yearPublished: version.yearpublished ? parseInt(version.yearpublished['@_value']) : undefined,
+              thumbnail: version.thumbnail || item.thumbnail,
+              image: version.image || item.image,
+            };
+          });
+
+        expansions.push({
+          bgg_id: parseInt(item['@_id']),
+          name: decodeHTMLEntities(primaryName),
+          year: item.yearpublished ? parseInt(item.yearpublished['@_value']) : null,
+          thumbnail: item.thumbnail || null,
+          image: item.image || null,
+          versions,
+        });
+      }
+    }
+
+    console.log(`✅ [BGG API] Fetched ${expansions.length} expansions with versions`);
+    return expansions;
+  } catch (error: any) {
+    console.error(`❌ [BGG API] Error fetching expansions:`, error);
+    return [];
+  }
+}
+
 /**
  * Fetch game data with automatic fallback detection
  * Returns game data along with a flag indicating if manual input should be used
