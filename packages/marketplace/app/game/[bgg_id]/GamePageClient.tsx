@@ -15,6 +15,10 @@ import {
   AlertCircle,
   SlidersHorizontal,
   X,
+  Star,
+  ChevronDown,
+  ChevronUp,
+  Cog,
 } from 'lucide-react';
 import type { GameWithOffers } from '@/lib/types/aggregated-game';
 import type { ListingCondition } from '@/lib/types/listing';
@@ -45,6 +49,16 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [cartSuccess, setCartSuccess] = useState<string | null>(null);
   const [cartError, setCartError] = useState<string | null>(null);
+
+  // Description expansion
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
+
+  // Decode HTML entities in description (BGG returns HTML-encoded text)
+  const decodeHTMLEntities = (text: string): string => {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  };
 
   // Fetch game data
   useEffect(() => {
@@ -203,13 +217,37 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
 
               {/* Game Info */}
               <div className="flex-grow p-4 sm:p-6 flex flex-col">
-                {/* Game Name */}
-                <h1 className="text-xl sm:text-2xl font-bold text-polar-night mb-4 line-clamp-2">
+                {/* Game Name with Year */}
+                <h1 className="text-xl sm:text-2xl font-bold text-polar-night mb-1 line-clamp-2">
                   {game.game_name}
+                  {game.game_year && (
+                    <span className="font-normal text-text-secondary ml-2">
+                      ({game.game_year})
+                    </span>
+                  )}
                 </h1>
+
+                {/* Designers */}
+                {game.designers && game.designers.length > 0 && (
+                  <p className="text-sm text-text-secondary mb-3 flex items-center gap-1.5">
+                    <Cog className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>
+                      {game.designers.length === 1
+                        ? game.designers[0]
+                        : game.designers.join(', ')}
+                    </span>
+                  </p>
+                )}
 
                 {/* Metadata Row - compact format like listing card */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-secondary mb-4">
+                  {/* BGG Rating */}
+                  {game.rating && (
+                    <span className="flex items-center gap-1 text-aurora-yellow font-medium">
+                      <Star className="w-4 h-4 fill-aurora-yellow" />
+                      {game.rating.toFixed(1)}
+                    </span>
+                  )}
                   {game.player_count && (
                     <span className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
@@ -239,6 +277,33 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                     View on BGG
                   </a>
                 </div>
+
+                {/* Description */}
+                {game.description && (
+                  <div className="mb-4">
+                    <p className={`text-sm text-text-secondary ${descriptionExpanded ? '' : 'line-clamp-3'}`}>
+                      {decodeHTMLEntities(game.description)}
+                    </p>
+                    {game.description.length > 200 && (
+                      <button
+                        onClick={() => setDescriptionExpanded(!descriptionExpanded)}
+                        className="text-sm text-frost-ice hover:underline mt-1 flex items-center gap-1"
+                      >
+                        {descriptionExpanded ? (
+                          <>
+                            <ChevronUp className="w-4 h-4" />
+                            Show less
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-4 h-4" />
+                            Read more
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 {/* Powered by BGG - at bottom */}
                 <div className="mt-auto pt-3 border-t border-border-subtle">

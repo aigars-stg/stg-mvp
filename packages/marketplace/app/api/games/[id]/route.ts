@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
-import { fetchGameWithFallback } from '@/lib/bgg-api';
+import { fetchGameWithFallback, fetchExpansionsForGame, getExpansionCount, type BGGExpansionInfo } from '@/lib/bgg-api';
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const gameId = params.id;
+  const { searchParams } = new URL(request.url);
+  const includeExpansions = searchParams.get('expansions') === 'true';
 
   if (!gameId || isNaN(parseInt(gameId))) {
     return NextResponse.json({ error: 'Invalid game ID' }, { status: 400 });
   }
 
   try {
-    console.log(`📡 [Game Details] Fetching game ${gameId}`);
+    console.log(`📡 [Game Details] Fetching game ${gameId}${includeExpansions ? ' with expansions' : ''}`);
 
     // 1. Get basic info from database
     const { data: game, error: dbError } = await (supabase as any)
@@ -39,11 +41,26 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       const hasImages = (game as any).image || (game as any).thumbnail;
       const fallbackMode = !hasImages || cachedVersions.length === 0;
 
+      // Fetch expansions if requested and game is not an expansion itself
+      let expansions: BGGExpansionInfo[] = [];
+      let expansionCount = 0;
+      if (!(game as any).is_expansion) {
+        if (includeExpansions) {
+          expansions = await fetchExpansionsForGame(parseInt(gameId));
+          expansionCount = expansions.length;
+        } else {
+          // Just get the count (lightweight)
+          expansionCount = await getExpansionCount(parseInt(gameId));
+        }
+      }
+
       return NextResponse.json({
         game,
         versions: cachedVersions,
         fallbackMode,
         reason: fallbackMode ? 'Missing images or version data' : undefined,
+        expansions: includeExpansions ? expansions : undefined,
+        expansionCount,
       });
     }
 
@@ -62,7 +79,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       });
     }
 
-    // 4. Update database with fresh metadata (including alternate_names, versions, and bayesaverage)
+    // 4. Update database with fresh metadata (including alternate_names, versions, bayesaverage, description, designers)
     const { data: updatedGame, error: updateError } = await (supabase as any)
       .from('games')
       .update({
@@ -74,6 +91,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         player_count: bggData.playerCount || null,
         min_age: bggData.minAge || null,
         playing_time: bggData.playingTime || null,
+        description: bggData.description || null,
+        designers: bggData.designers && bggData.designers.length > 0 ? bggData.designers : null,
         metadata_fetched_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -93,11 +112,27 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     console.log(`✅ [Game Details] Cached metadata for ${(updatedGame as any).name}`);
+
+    // Fetch expansions if requested and game is not an expansion itself
+    let expansions: BGGExpansionInfo[] = [];
+    let expansionCount = 0;
+    if (!(updatedGame as any).is_expansion) {
+      if (includeExpansions) {
+        expansions = await fetchExpansionsForGame(parseInt(gameId));
+        expansionCount = expansions.length;
+      } else {
+        // Just get the count (lightweight)
+        expansionCount = await getExpansionCount(parseInt(gameId));
+      }
+    }
+
     return NextResponse.json({
       game: updatedGame,
       versions,
       fallbackMode,
       reason,
+      expansions: includeExpansions ? expansions : undefined,
+      expansionCount,
     });
   } catch (error: any) {
     console.error('❌ [Game Details] Error:', error);

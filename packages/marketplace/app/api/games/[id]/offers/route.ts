@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { GameWithOffers, GameOffersResponse } from '@/lib/types/aggregated-game';
 import type { ListingWithSeller } from '@/lib/types/listing';
+import { fetchGameMetadata } from '@/lib/bgg-api';
 
 /**
  * GET /api/games/[id]/offers
@@ -50,12 +51,52 @@ export async function GET(
     // Fetch game metadata including versions for version-specific images
     const { data: gameData, error: gameError } = await (supabase as any)
       .from('games')
-      .select('id, name, thumbnail, image, player_count, min_age, playing_time, is_expansion, yearpublished, versions')
+      .select('id, name, thumbnail, image, player_count, min_age, playing_time, is_expansion, yearpublished, versions, description, designers, bayesaverage')
       .eq('id', bggId)
       .single();
 
     if (gameError && gameError.code !== 'PGRST116') {
       console.error('❌ [Game Offers] Game fetch error:', gameError);
+    }
+
+    // On-demand metadata refresh: If description or designers are missing, fetch from BGG
+    let enrichedGameData = gameData;
+    if (gameData && (!gameData.description || !gameData.designers)) {
+      console.log(`📡 [Game Offers] Missing metadata for ${gameData.name}, fetching from BGG...`);
+      try {
+        const bggMetadata = await fetchGameMetadata(bggId);
+        if (bggMetadata) {
+          // Update database with fresh metadata (fire and forget - don't block response)
+          (supabase as any)
+            .from('games')
+            .update({
+              description: bggMetadata.description || null,
+              designers: bggMetadata.designers?.length ? bggMetadata.designers : null,
+              bayesaverage: bggMetadata.bayesaverage || gameData.bayesaverage || null,
+              player_count: bggMetadata.playerCount || gameData.player_count || null,
+              min_age: bggMetadata.minAge || gameData.min_age || null,
+              playing_time: bggMetadata.playingTime || gameData.playing_time || null,
+              metadata_fetched_at: new Date().toISOString(),
+            })
+            .eq('id', bggId)
+            .then(() => console.log(`✅ [Game Offers] Updated metadata for ${gameData.name}`))
+            .catch((err: any) => console.error(`❌ [Game Offers] Failed to update metadata:`, err));
+
+          // Use fresh data for this response
+          enrichedGameData = {
+            ...gameData,
+            description: bggMetadata.description || gameData.description,
+            designers: bggMetadata.designers?.length ? bggMetadata.designers : gameData.designers,
+            bayesaverage: bggMetadata.bayesaverage || gameData.bayesaverage,
+            player_count: bggMetadata.playerCount || gameData.player_count,
+            min_age: bggMetadata.minAge || gameData.min_age,
+            playing_time: bggMetadata.playingTime || gameData.playing_time,
+          };
+        }
+      } catch (err) {
+        console.error(`❌ [Game Offers] BGG fetch failed:`, err);
+        // Continue with existing data
+      }
     }
 
     // Build query for listings (seller trust fetched separately - no FK exists)
@@ -133,8 +174,8 @@ export async function GET(
 
     // If no game data from games table, use data from first listing
     const firstListing = listings?.[0];
-    const gameName = gameData?.name || firstListing?.game_name || 'Unknown Game';
-    const gameYear = gameData?.yearpublished || firstListing?.game_year || null;
+    const gameName = enrichedGameData?.name || firstListing?.game_name || 'Unknown Game';
+    const gameYear = enrichedGameData?.yearpublished || firstListing?.game_year || null;
 
     // Add game metadata to each listing with version-specific images
     const offersWithGame: ListingWithSeller[] = (listings || []).map((listing: any) => {
@@ -142,8 +183,8 @@ export async function GET(
       let versionThumbnail = null;
       let versionImage = null;
 
-      if (listing.bgg_version_id && gameData?.versions) {
-        const version = gameData.versions.find((v: any) => v.id === listing.bgg_version_id);
+      if (listing.bgg_version_id && enrichedGameData?.versions) {
+        const version = enrichedGameData.versions.find((v: any) => v.id === listing.bgg_version_id);
         if (version) {
           versionThumbnail = version.thumbnail;
           versionImage = version.image;
@@ -171,12 +212,12 @@ export async function GET(
         },
         game: {
           // Use version-specific image if available, otherwise fall back to base game image
-          thumbnail: versionThumbnail || gameData?.thumbnail || null,
-          image: versionImage || gameData?.image || null,
-          player_count: gameData?.player_count || null,
-          min_age: gameData?.min_age || null,
-          playing_time: gameData?.playing_time || null,
-          is_expansion: gameData?.is_expansion || false,
+          thumbnail: versionThumbnail || enrichedGameData?.thumbnail || null,
+          image: versionImage || enrichedGameData?.image || null,
+          player_count: enrichedGameData?.player_count || null,
+          min_age: enrichedGameData?.min_age || null,
+          playing_time: enrichedGameData?.playing_time || null,
+          is_expansion: enrichedGameData?.is_expansion || false,
         },
       };
     });
@@ -206,12 +247,15 @@ export async function GET(
       bgg_game_id: bggId,
       game_name: gameName,
       game_year: gameYear,
-      image: gameData?.image || null,
-      thumbnail: gameData?.thumbnail || null,
-      player_count: gameData?.player_count || null,
-      min_age: gameData?.min_age || null,
-      playing_time: gameData?.playing_time || null,
-      is_expansion: gameData?.is_expansion || false,
+      image: enrichedGameData?.image || null,
+      thumbnail: enrichedGameData?.thumbnail || null,
+      player_count: enrichedGameData?.player_count || null,
+      min_age: enrichedGameData?.min_age || null,
+      playing_time: enrichedGameData?.playing_time || null,
+      is_expansion: enrichedGameData?.is_expansion || false,
+      description: enrichedGameData?.description || null,
+      designers: enrichedGameData?.designers || null,
+      rating: enrichedGameData?.bayesaverage ? parseFloat(enrichedGameData.bayesaverage) : null,
       offers: offersWithGame,
       offer_count: offersWithGame.length,
       lowest_price: lowestPrice,

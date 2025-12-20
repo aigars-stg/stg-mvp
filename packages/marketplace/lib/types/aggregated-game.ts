@@ -62,6 +62,9 @@ export interface GameWithOffers {
   min_age: number | null;
   playing_time: string | null;
   is_expansion: boolean;
+  description: string | null;
+  designers: string[] | null;
+  rating: number | null;
 
   // All available offers for this game
   offers: ListingWithSeller[];
