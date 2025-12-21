@@ -14,12 +14,13 @@ import { PricingShippingSimple } from '@/components/sell/PricingShippingSimple';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
 import { ListingCard } from '@/components/listing/ListingCard';
-import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle } from 'lucide-react';
+import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle, Truck } from 'lucide-react';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { NotificationModal } from '@/components/common/NotificationModal';
+import { PricingAssistant } from '@/components/sell/PricingAssistant';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
@@ -166,6 +167,7 @@ function SellPageContent() {
     photos: false,
     condition: false,
     pricing: false,
+    shipping: false,
   });
 
   // Modal states
@@ -544,10 +546,10 @@ function SellPageContent() {
   const isConditionSectionComplete = !!formData.condition;
   // Photos required only for Acceptable condition
   const isPhotosSectionComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1;
-  const isPricingSectionComplete =
-    !!formData.price &&
-    parseFloat(formData.price) > 0 &&
-    Object.values(formData.shippingOptions).some((v) => v);
+  const isPriceSectionComplete = !!formData.price && parseFloat(formData.price) > 0;
+  const isShippingSectionComplete = Object.values(formData.shippingOptions).some((v) => v);
+  // Combined for backward compatibility with canPublish and validateForPublish
+  const isPricingSectionComplete = isPriceSectionComplete && isShippingSectionComplete;
 
   const canPublish = (): boolean => {
     return (
@@ -798,7 +800,7 @@ function SellPageContent() {
       {/* Header with BGG Attribution */}
       <div className="mb-8 flex items-center justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-text">
-          {isEditMode ? 'Edit Listing' : 'Sell a Game'}
+          {isEditMode ? 'Edit listing' : 'Sell a game'}
         </h1>
         {!isEditMode && (
           <a
@@ -843,7 +845,7 @@ function SellPageContent() {
                   onClick={handleDismissDraft}
                   className="px-4 py-2 bg-bg-secondary text-text rounded-lg hover:bg-border transition-colors text-sm font-medium"
                 >
-                  Start Fresh
+                  Start fresh
                 </button>
               </div>
             </div>
@@ -906,7 +908,7 @@ function SellPageContent() {
         ) : (
           // Normal game selection in create mode
           <CollapsibleSection
-            title="Find Your Game"
+            title="Find your game"
             icon={<Dices className="w-6 h-6 text-frost-ice" />}
             isComplete={isGameSectionComplete}
             isExpanded={expandedSections.game}
@@ -986,7 +988,7 @@ function SellPageContent() {
                       className="px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
                     >
                       <RefreshCw className="w-4 h-4" />
-                      Change Version
+                      Change version
                     </button>
                     {showChangeName && (
                       <button
@@ -994,7 +996,7 @@ function SellPageContent() {
                         className="px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
                       >
                         <RefreshCw className="w-4 h-4" />
-                        Change Name
+                        Change name
                       </button>
                     )}
                   </div>
@@ -1019,7 +1021,7 @@ function SellPageContent() {
                       <Puzzle className="w-5 h-5 text-frost-ice" />
                     </div>
                     <div>
-                      <p className="font-medium text-polar-night">Include Expansions?</p>
+                      <p className="font-medium text-polar-night">Include expansions?</p>
                       <p className="text-sm text-text-secondary">Bundle expansions with this listing (optional)</p>
                     </div>
                   </div>
@@ -1065,7 +1067,7 @@ function SellPageContent() {
 
         {/* Section 2: Condition */}
         <CollapsibleSection
-          title="Condition & Details"
+          title="Condition & details"
           icon={<ClipboardCheck className="w-6 h-6 text-frost-ice" />}
           isComplete={isConditionSectionComplete}
           isExpanded={expandedSections.condition}
@@ -1084,7 +1086,7 @@ function SellPageContent() {
 
         {/* Section 3: Photos */}
         <CollapsibleSection
-          title="Upload Photos"
+          title="Upload photos"
           icon={<Camera className="w-6 h-6 text-frost-ice" />}
           isExpanded={expandedSections.photos}
           onToggle={() => toggleSection('photos')}
@@ -1105,21 +1107,54 @@ function SellPageContent() {
           />
         </CollapsibleSection>
 
-        {/* Section 4: Pricing & Shipping */}
+        {/* Section 4: Pricing */}
         <CollapsibleSection
-          title="Pricing & Shipping"
+          title="Pricing"
           icon={<Euro className="w-6 h-6 text-frost-ice" />}
-          isComplete={isPricingSectionComplete}
+          isComplete={isPriceSectionComplete}
           isExpanded={expandedSections.pricing}
           onToggle={() => toggleSection('pricing')}
           required
-          subtitle="Set your price and shipping options"
+          subtitle="Set your asking price"
         >
+          {/* Pricing Assistant - shows market data after game selection */}
+          {formData.selectedGame && (
+            <PricingAssistant
+              bggGameId={formData.selectedGame.id}
+              condition={formData.condition}
+              onFillPrice={(price) => setFormData((prev) => ({ ...prev, price: price.toFixed(2) }))}
+            />
+          )}
+
           <PricingShippingSimple
             price={formData.price}
+            shippingOptions={{ localPickup: false, parcelLocker: false }}
+            shippingNotes=""
+            onChange={(field, value) => {
+              if (field === 'price') {
+                setFormData((prev) => ({ ...prev, price: value as string }));
+              }
+            }}
+            priceOnly
+          />
+        </CollapsibleSection>
+
+        {/* Section 5: Shipping */}
+        <CollapsibleSection
+          title="Shipping"
+          icon={<Truck className="w-6 h-6 text-frost-ice" />}
+          isComplete={isShippingSectionComplete}
+          isExpanded={expandedSections.shipping}
+          onToggle={() => toggleSection('shipping')}
+          required
+          subtitle="Select shipping options"
+        >
+          <PricingShippingSimple
+            price=""
             shippingOptions={formData.shippingOptions}
             shippingNotes={formData.shippingNotes}
             onChange={(field, value) => setFormData((prev) => ({ ...prev, [field]: value }))}
+            shippingOnly
           />
         </CollapsibleSection>
 
@@ -1190,7 +1225,7 @@ function SellPageContent() {
                 onClick={handleSaveDraft}
                 size="lg"
               >
-                Save Draft
+                Save draft
               </Button>
             )}
 
@@ -1203,7 +1238,7 @@ function SellPageContent() {
             >
               {isPublishing
                 ? (isEditMode ? 'Saving...' : 'Publishing...')
-                : (isEditMode ? 'Save Changes' : 'Publish Listing')}
+                : (isEditMode ? 'Save changes' : 'Publish listing')}
             </Button>
           </div>
         </div>
@@ -1217,7 +1252,7 @@ function SellPageContent() {
             {/* Live Preview with Card */}
             <div className="border-2 border-border rounded-lg overflow-hidden [&>a>div]:border-0 [&>a>div]:rounded-none">
               <div className="px-4 py-2 bg-bg-elevated border-b-2 border-border">
-                <span className="text-sm font-semibold text-polar-night">Live Preview</span>
+                <span className="text-sm font-semibold text-polar-night">Live preview</span>
               </div>
               <ListingCard
                 listing={createPreviewListing(formData, user, profile, existingPhotoUrls)}
@@ -1247,7 +1282,7 @@ function SellPageContent() {
             </div>
           </div>
           <h2 className="text-2xl font-bold text-polar-night mb-3">
-            Listing Published Successfully!
+            Listing published successfully!
           </h2>
           <p className="text-text-secondary mb-8">
             Your game is now live and ready for buyers to discover.
@@ -1259,7 +1294,7 @@ function SellPageContent() {
               onClick={() => router.push(`/game/${formData.selectedGame?.id}`)}
               fullWidth
             >
-              View Your Listing
+              View your listing
             </Button>
             <Button
               variant="secondary"
@@ -1270,7 +1305,7 @@ function SellPageContent() {
               }}
               fullWidth
             >
-              List Another Game
+              List another game
             </Button>
             <Button
               variant="ghost"
@@ -1280,7 +1315,7 @@ function SellPageContent() {
               }}
               fullWidth
             >
-              Browse Marketplace
+              Browse all games
             </Button>
           </div>
         </div>

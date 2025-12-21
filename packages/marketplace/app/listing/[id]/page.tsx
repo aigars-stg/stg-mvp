@@ -522,6 +522,7 @@ export default function ListingDetailPage() {
                     Save €{(listing.previous_price - listing.price).toFixed(2)} ({Math.round((1 - listing.price / listing.previous_price) * 100)}% off)
                   </div>
                 )}
+
               </div>
             </div>
 

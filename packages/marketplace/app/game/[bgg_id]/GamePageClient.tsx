@@ -15,7 +15,6 @@ import {
   AlertCircle,
   SlidersHorizontal,
   X,
-  Star,
   ChevronDown,
   ChevronUp,
   Cog,
@@ -241,13 +240,6 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
 
                 {/* Metadata Row - compact format like listing card */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-secondary mb-4">
-                  {/* BGG Rating */}
-                  {game.rating && (
-                    <span className="flex items-center gap-1 text-aurora-yellow font-medium">
-                      <Star className="w-4 h-4 fill-aurora-yellow" />
-                      {game.rating.toFixed(1)}
-                    </span>
-                  )}
                   {game.player_count && (
                     <span className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
@@ -266,16 +258,6 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                       {game.playing_time}
                     </span>
                   )}
-                  {/* BGG Link - inline with metadata */}
-                  <a
-                    href={`https://boardgamegeek.com/boardgame/${game.bgg_game_id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-frost-ice hover:underline"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    View on BGG
-                  </a>
                 </div>
 
                 {/* Description */}
@@ -306,7 +288,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                 )}
 
                 {/* Powered by BGG - at bottom */}
-                <div className="mt-auto pt-3 border-t border-border-subtle">
+                <div className="mt-auto pt-3 border-t border-border-subtle flex items-center justify-between">
                   <a
                     href="https://boardgamegeek.com"
                     target="_blank"
@@ -318,6 +300,15 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                       alt="Powered by BoardGameGeek"
                       className="h-6 opacity-60 hover:opacity-100 transition-opacity"
                     />
+                  </a>
+                  <a
+                    href={`https://boardgamegeek.com/boardgame/${game.bgg_game_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-frost-ice hover:underline"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View on BGG
                   </a>
                 </div>
               </div>
