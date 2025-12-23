@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { Card, Badge } from '@second-turn/design-system';
 import { Package, Users, Baby, Clock } from 'lucide-react';
@@ -10,6 +11,8 @@ interface AggregatedGameCardProps {
 }
 
 export function AggregatedGameCard({ game }: AggregatedGameCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   return (
     <Link href={`/game/${game.bgg_game_id}`} className="h-full">
       <Card
@@ -20,11 +23,21 @@ export function AggregatedGameCard({ game }: AggregatedGameCardProps) {
         {/* Image Section */}
         <div className="relative h-48 sm:h-56 lg:h-64 bg-polar-night/5 flex items-center justify-center overflow-hidden">
           {game.image || game.thumbnail ? (
-            <img
-              src={game.image || game.thumbnail || ''}
-              alt={game.game_name}
-              className="max-w-full max-h-full object-contain p-4"
-            />
+            <>
+              {/* Loading placeholder */}
+              {!imageLoaded && (
+                <div className="absolute inset-0 animate-pulse bg-polar-night/10" />
+              )}
+              <img
+                src={game.image || game.thumbnail || ''}
+                alt={game.game_name}
+                className={`max-w-full max-h-full object-contain p-4 transition-opacity duration-300 ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                loading="lazy"
+                onLoad={() => setImageLoaded(true)}
+              />
+            </>
           ) : (
             <Package className="w-16 h-16 text-text-muted" />
           )}

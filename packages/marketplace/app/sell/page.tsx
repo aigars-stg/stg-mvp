@@ -14,7 +14,7 @@ import { PricingShippingSimple } from '@/components/sell/PricingShippingSimple';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
 import { ListingCard } from '@/components/listing/ListingCard';
-import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle, Truck } from 'lucide-react';
+import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle } from 'lucide-react';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
@@ -36,11 +36,6 @@ interface ListingFormData {
   allComponentsPresent: boolean;
   missingComponents: string;
   price: string;
-  shippingOptions: {
-    localPickup: boolean;
-    parcelLocker: boolean;
-  };
-  shippingNotes: string;
   termsAccepted: boolean;
 }
 
@@ -55,11 +50,6 @@ const INITIAL_FORM_DATA: ListingFormData = {
   allComponentsPresent: true,
   missingComponents: '',
   price: '',
-  shippingOptions: {
-    localPickup: false,
-    parcelLocker: false,
-  },
-  shippingNotes: '',
   termsAccepted: false,
 };
 
@@ -93,9 +83,9 @@ function createPreviewListing(
     missing_components: formData.missingComponents || null,
     price: parseFloat(formData.price) || 0,
     previous_price: null, // Preview listings don't have price history
-    shipping_local_pickup: formData.shippingOptions.localPickup,
-    shipping_parcel_locker: formData.shippingOptions.parcelLocker,
-    shipping_notes: formData.shippingNotes || null,
+    shipping_local_pickup: false,
+    shipping_parcel_locker: true,
+    shipping_notes: null,
     included_expansions: formData.selectedExpansions.map((exp) => ({
       bgg_id: exp.bgg_id,
       name: exp.name,
@@ -167,7 +157,6 @@ function SellPageContent() {
     photos: false,
     condition: false,
     pricing: false,
-    shipping: false,
   });
 
   // Modal states
@@ -375,11 +364,6 @@ function SellPageContent() {
           allComponentsPresent: listing.all_components_present,
           missingComponents: listing.missing_components || '',
           price: listing.price.toString(),
-          shippingOptions: {
-            localPickup: listing.shipping_local_pickup,
-            parcelLocker: listing.shipping_parcel_locker,
-          },
-          shippingNotes: listing.shipping_notes || '',
           termsAccepted: true, // Already accepted when originally published
         });
 
@@ -487,8 +471,7 @@ function SellPageContent() {
     const conditionComplete = !!formData.condition;
     // Photos required only for Acceptable condition
     const photosComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1;
-    const pricingComplete = !!formData.price && parseFloat(formData.price) > 0 &&
-      Object.values(formData.shippingOptions).some((v) => v);
+    const pricingComplete = !!formData.price && parseFloat(formData.price) > 0;
 
     // Auto-expand next section that needs completion
     setExpandedSections((prev) => ({
@@ -505,7 +488,6 @@ function SellPageContent() {
     formData.photos.length,
     formData.condition,
     formData.price,
-    formData.shippingOptions,
   ]);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -544,12 +526,11 @@ function SellPageContent() {
   })();
 
   const isConditionSectionComplete = !!formData.condition;
-  // Photos required only for Acceptable condition
-  const isPhotosSectionComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1;
+  // Photos required only for Acceptable condition - check both new and existing photos
+  const isPhotosSectionComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1 || existingPhotoUrls.length >= 1;
   const isPriceSectionComplete = !!formData.price && parseFloat(formData.price) > 0;
-  const isShippingSectionComplete = Object.values(formData.shippingOptions).some((v) => v);
-  // Combined for backward compatibility with canPublish and validateForPublish
-  const isPricingSectionComplete = isPriceSectionComplete && isShippingSectionComplete;
+  // Shipping is now always T2T, no user selection needed
+  const isPricingSectionComplete = isPriceSectionComplete;
 
   const canPublish = (): boolean => {
     return (
@@ -584,21 +565,11 @@ function SellPageContent() {
       return false;
     }
     if (!isPricingSectionComplete) {
-      if (!formData.price || parseFloat(formData.price) <= 0) {
-        setValidationModal({
-          isOpen: true,
-          message: 'Please enter a valid price',
-        });
-        return false;
-      }
-      const hasShipping = Object.values(formData.shippingOptions).some((v) => v);
-      if (!hasShipping) {
-        setValidationModal({
-          isOpen: true,
-          message: 'Please select at least one shipping option',
-        });
-        return false;
-      }
+      setValidationModal({
+        isOpen: true,
+        message: 'Please enter a valid price',
+      });
+      return false;
     }
     if (!formData.termsAccepted) {
       setValidationModal({
@@ -666,9 +637,6 @@ function SellPageContent() {
           all_components_present: formData.allComponentsPresent,
           missing_components: formData.missingComponents || null,
           price: parseFloat(formData.price),
-          shipping_local_pickup: formData.shippingOptions.localPickup,
-          shipping_parcel_locker: formData.shippingOptions.parcelLocker,
-          shipping_notes: formData.shippingNotes || null,
         };
 
         const response = await fetch(`/api/listings/${editListingId}`, {
@@ -702,9 +670,6 @@ function SellPageContent() {
           allComponentsPresent: formData.allComponentsPresent,
           missingComponents: formData.missingComponents,
           price: formData.price,
-          shippingLocalPickup: formData.shippingOptions.localPickup,
-          shippingParcelLocker: formData.shippingOptions.parcelLocker,
-          shippingNotes: formData.shippingNotes,
           // Convert selected expansions to API format
           includedExpansions: formData.selectedExpansions.map((exp) => ({
             bgg_id: exp.bgg_id,
@@ -1136,25 +1101,6 @@ function SellPageContent() {
               }
             }}
             priceOnly
-          />
-        </CollapsibleSection>
-
-        {/* Section 5: Shipping */}
-        <CollapsibleSection
-          title="Shipping"
-          icon={<Truck className="w-6 h-6 text-frost-ice" />}
-          isComplete={isShippingSectionComplete}
-          isExpanded={expandedSections.shipping}
-          onToggle={() => toggleSection('shipping')}
-          required
-          subtitle="Select shipping options"
-        >
-          <PricingShippingSimple
-            price=""
-            shippingOptions={formData.shippingOptions}
-            shippingNotes={formData.shippingNotes}
-            onChange={(field, value) => setFormData((prev) => ({ ...prev, [field]: value }))}
-            shippingOnly
           />
         </CollapsibleSection>
 

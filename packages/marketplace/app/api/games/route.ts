@@ -132,6 +132,7 @@ export async function GET(request: NextRequest) {
     const gameMap = new Map<number, {
       listings: any[];
       game: any;
+      newest_listing_date: string | null;
     }>();
 
     for (const listing of listings || []) {
@@ -176,7 +177,14 @@ export async function GET(request: NextRequest) {
         gameMap.set(gameId, {
           listings: [],
           game: gameData || null,
+          newest_listing_date: listing.created_at,
         });
+      } else {
+        // Track the newest listing date
+        const existing = gameMap.get(gameId)!;
+        if (listing.created_at > (existing.newest_listing_date || '')) {
+          existing.newest_listing_date = listing.created_at;
+        }
       }
 
       gameMap.get(gameId)!.listings.push(listing);
@@ -243,6 +251,7 @@ export async function GET(request: NextRequest) {
           avatar_url: cheapest.seller?.avatar_url || null,
           country: cheapest.seller?.country || null,
         },
+        newest_listing_date: data.newest_listing_date,
       };
 
       aggregatedGames.push(aggregated);
@@ -264,8 +273,12 @@ export async function GET(request: NextRequest) {
         break;
       case 'newest':
       default:
-        // Sort by most recent listing in each game group
-        // For simplicity, we'll keep the current order which is based on iteration
+        // Sort by most recent listing in each game group (newest first)
+        aggregatedGames.sort((a, b) => {
+          const dateA = a.newest_listing_date || '';
+          const dateB = b.newest_listing_date || '';
+          return dateB.localeCompare(dateA);
+        });
         break;
     }
 

@@ -130,6 +130,7 @@ export default function RootLayout({
                     <li><Link href="/browse" className="hover:text-text">Browse Marketplace</Link></li>
                     <li><Link href="/sell" className="hover:text-text">Sell a Game</Link></li>
                     <li><Link href="/wanted/new" className="hover:text-text">Post Wanted Game</Link></li>
+                    <li><Link href="/help/grading-guide" className="hover:text-text">Condition Guide</Link></li>
                   </ul>
                 </div>
                 <div>

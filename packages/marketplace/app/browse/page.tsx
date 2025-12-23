@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Input, Select, Checkbox, Button, Badge } from '@second-turn/design-system';
 import {
@@ -28,6 +28,7 @@ import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { cn } from '@/lib/utils';
 import { isOfflineError } from '@/lib/utils/offline';
 import { OfflineError } from '@/components/common/OfflineError';
+import { debounce } from '@/lib/bgg-utils';
 
 type ListingType = 'sell' | 'wanted';
 
@@ -54,6 +55,7 @@ export default function BrowsePage() {
 
   // Filter states - will be initialized from URL params
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInputValue, setSearchInputValue] = useState(''); // Local state for immediate input display
   const [selectedConditions, setSelectedConditions] = useState<Set<string>>(new Set());
   const [selectedLanguages, setSelectedLanguages] = useState<Set<string>>(new Set());
   const [selectedPlayerCounts, setSelectedPlayerCounts] = useState<Set<number>>(new Set());
@@ -77,6 +79,22 @@ export default function BrowsePage() {
 
   // Ref for search input
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Ref for infinite scroll sentinel
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Debounced search function (300ms delay)
+  const debouncedSetSearchQuery = useMemo(
+    () => debounce((value: string) => {
+      setSearchQuery(value);
+    }, 300),
+    []
+  );
+
+  // Sync searchInputValue when searchQuery changes externally (e.g., from URL or saved search)
+  useEffect(() => {
+    setSearchInputValue(searchQuery);
+  }, [searchQuery]);
 
   // Saved searches state
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
@@ -303,24 +321,29 @@ export default function BrowsePage() {
     }
   }, [searchQuery, selectedLanguages, priceMin, priceMax, sortBy, filtersInitialized, listingType]);
 
-  // Infinite scroll detection
+  // Infinite scroll with Intersection Observer
   useEffect(() => {
-    const handleScroll = () => {
-      // Check if user scrolled near bottom (within 300px)
-      const scrollHeight = document.documentElement.scrollHeight;
-      const scrollTop = document.documentElement.scrollTop;
-      const clientHeight = document.documentElement.clientHeight;
+    if (!filtersInitialized || listingType !== 'sell') return;
 
-      if (scrollHeight - scrollTop - clientHeight < 300) {
-        // Load more if: not currently loading, has more items, and filters are initialized
-        if (!loadingMore && !loading && hasMore && filtersInitialized && listingType === 'sell') {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !loadingMore && !loading && hasMore) {
           fetchGames(currentPage + 1, true);
         }
+      },
+      {
+        root: null,
+        rootMargin: '300px', // Trigger 300px before reaching the element
+        threshold: 0,
       }
-    };
+    );
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
   }, [loadingMore, loading, hasMore, currentPage, filtersInitialized, listingType]);
 
   // Load saved searches on mount
@@ -860,12 +883,12 @@ export default function BrowsePage() {
       )}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-polar-night mb-3">
-            Browse Marketplace
+            {listingType === 'sell' ? 'Find your next game' : 'Wanted by players'}
           </h1>
           <p className="text-base sm:text-lg text-text-secondary mb-6 sm:mb-8 max-w-2xl">
             {listingType === 'sell'
-              ? 'Browse quality pre-loved board games from trusted sellers across the Baltics.'
-              : 'Browse buyer requests and respond with "I Have This" to start a conversation.'
+              ? 'Every one of these is ready for a second turn at your table.'
+              : 'See something you own but never play? Give it a second turn.'
             }
           </p>
 
@@ -896,7 +919,7 @@ export default function BrowsePage() {
                 aria-pressed={listingType === 'wanted'}
                 aria-label="Show wanted listings"
               >
-                Wanted / ISO
+                Wanted
               </button>
             </div>
           </div>
@@ -907,8 +930,11 @@ export default function BrowsePage() {
               <Input
                 ref={searchInputRef}
                 placeholder={searchPlaceholder}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchInputValue}
+                onChange={(e) => {
+                  setSearchInputValue(e.target.value);
+                  debouncedSetSearchQuery(e.target.value);
+                }}
                 leftIcon={
                   <svg className="w-5 h-5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -916,9 +942,12 @@ export default function BrowsePage() {
                 }
               />
               {/* Clear Button */}
-              {searchQuery && (
+              {searchInputValue && (
                 <button
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => {
+                    setSearchInputValue('');
+                    setSearchQuery('');
+                  }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-polar-night/5 rounded-full transition-colors"
                   aria-label="Clear search"
                 >
@@ -1829,6 +1858,11 @@ export default function BrowsePage() {
                   ))
               }
             </div>
+
+            {/* Infinite scroll sentinel - triggers loading when visible */}
+            {listingType === 'sell' && hasMore && !loading && (
+              <div ref={loadMoreRef} className="h-1" aria-hidden="true" />
+            )}
 
             {/* Loading More Indicator - Only for sell listings */}
             {listingType === 'sell' && loadingMore && (

@@ -337,17 +337,17 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
         )}
 
         {/* Filters Bar */}
-        <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <h2 className="text-xl font-semibold text-polar-night">
             Available Offers ({game.offers.length})
           </h2>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             {/* Sort Dropdown */}
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="px-3 py-2 rounded-lg border border-border bg-snow-white text-sm focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
+              className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-border bg-snow-white text-sm focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
             >
               <option value="price_asc">Price: Low to High</option>
               <option value="price_desc">Price: High to Low</option>
@@ -360,6 +360,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
               variant={filterConditions.length > 0 ? 'primary' : 'secondary'}
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
+              className="flex-shrink-0"
             >
               <SlidersHorizontal className="w-4 h-4 mr-1" />
               Filters

@@ -13,6 +13,7 @@ import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { ConditionInfoModal } from '@/components/common/ConditionInfoModal';
 
 interface ListingCardProps {
   listing: ListingWithSeller;
@@ -34,6 +35,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [showConditionInfo, setShowConditionInfo] = useState(false);
   const hasMultipleImages = allImages.length > 1;
 
   // Minimum swipe distance (in px)
@@ -121,6 +123,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
   const displayImage = allImages[currentImageIndex];
 
   return (
+    <>
     <Link href={`/game/${listing.bgg_game_id}`} className="h-full">
       <Card
         variant="interactive"
@@ -287,9 +290,20 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
                     €{listing.previous_price.toFixed(2)}
                   </span>
                 )}
-                <Badge variant={getConditionVariant()}>
-                  {conditionLabel}
-                </Badge>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowConditionInfo(true);
+                  }}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  aria-label={`Learn about ${conditionLabel} condition`}
+                >
+                  <Badge variant={getConditionVariant()}>
+                    {conditionLabel}
+                  </Badge>
+                </button>
               </div>
               {/* Savings indicator */}
               {listing.previous_price && listing.previous_price > listing.price && (
@@ -381,5 +395,13 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
         </div>
       </Card>
     </Link>
+
+    {/* Condition Info Modal */}
+    <ConditionInfoModal
+      isOpen={showConditionInfo}
+      onClose={() => setShowConditionInfo(false)}
+      condition={listing.condition}
+    />
+    </>
   );
 }

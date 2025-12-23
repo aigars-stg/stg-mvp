@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { Card } from '@second-turn/design-system';
-import { Star, Sparkles, CircleCheck, Wrench, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Star, Sparkles, CircleCheck, Wrench, ShieldCheck, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
+import { GradingGuidePanel } from './GradingGuidePanel';
 
 const CONDITION_OPTIONS = [
   {
@@ -48,6 +49,7 @@ export function ConditionSelector({
 }: ConditionSelectorProps) {
   const [showCompletenessOptions, setShowCompletenessOptions] = useState(true);
   const [showConditionOptions, setShowConditionOptions] = useState(true);
+  const [showGradingGuide, setShowGradingGuide] = useState(false);
 
   const handleConditionSelect = (value: typeof condition) => {
     onChange('condition', value);
@@ -204,8 +206,16 @@ export function ConditionSelector({
 
       {/* Condition Selection */}
       <div>
-        <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3">
+        <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3 flex items-center gap-2">
           Overall Condition *
+          <button
+            type="button"
+            onClick={() => setShowGradingGuide(true)}
+            className="text-frost-ice hover:text-aurora-blue transition-colors"
+            aria-label="Open grading guide"
+          >
+            <HelpCircle className="w-5 h-5" />
+          </button>
         </h3>
 
         {showConditionOptions || condition === null ? (
@@ -289,6 +299,13 @@ export function ConditionSelector({
           {(conditionNotes || '').length}/500 characters
         </p>
       </div>
+
+      {/* Grading Guide Panel */}
+      <GradingGuidePanel
+        isOpen={showGradingGuide}
+        onClose={() => setShowGradingGuide(false)}
+        highlightedCondition={condition}
+      />
     </div>
   );
 }

@@ -154,7 +154,7 @@ export function SellerTrustCompact({
           <span className="font-medium text-slate-600">{averageRating.toFixed(1)}</span>
         </>
       )}
-      <span>({totalSales} sales)</span>
+      <span>{totalSales === 0 ? 'New seller' : `(${totalSales} ${totalSales === 1 ? 'sale' : 'sales'})`}</span>
       {tier !== 'new_seller' && (
         <BadgeTierPill tier={tier} size="sm" />
       )}

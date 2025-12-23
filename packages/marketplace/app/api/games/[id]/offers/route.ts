@@ -162,13 +162,28 @@ export async function GET(
       }
 
       // 2. Fetch Identity (Name, Avatar, Country)
-      const { data: sellerIdentity } = await (supabase as any)
+      const { data: sellerIdentity, error: identityError } = await (supabase as any)
         .from('public_profiles')
         .select('id, full_name, avatar_url, country')
         .in('id', sellerIds);
 
+      if (identityError) {
+        console.error('❌ [Game Offers] Failed to fetch seller profiles:', identityError);
+        console.error('   Seller IDs:', sellerIds);
+        console.error('   This may be an RLS issue - public_profiles view uses security_invoker=true');
+      }
+
       if (sellerIdentity) {
         sellerProfileMap = new Map(sellerIdentity.map((p: any) => [p.id, p]));
+        console.log(`✅ [Game Offers] Fetched ${sellerIdentity.length} seller profiles for ${sellerIds.length} sellers`);
+
+        // Log any missing profiles
+        const missingProfiles = (sellerIds as string[]).filter((id) => !sellerProfileMap.has(id));
+        if (missingProfiles.length > 0) {
+          console.warn('⚠️ [Game Offers] Missing profiles for seller IDs:', missingProfiles);
+        }
+      } else {
+        console.warn('⚠️ [Game Offers] No seller profiles returned (sellerIdentity is null)');
       }
     }
 

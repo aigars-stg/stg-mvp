@@ -87,9 +87,6 @@ export async function POST(request: NextRequest) {
       allComponentsPresent,
       missingComponents,
       price,
-      shippingLocalPickup,
-      shippingParcelLocker,
-      shippingNotes,
       includedExpansions, // Bundled expansions
     } = body;
 
@@ -144,10 +141,10 @@ export async function POST(request: NextRequest) {
       // Pricing
       price: parseFloat(price),
 
-      // Shipping
-      shipping_local_pickup: shippingLocalPickup === true,
-      shipping_parcel_locker: shippingParcelLocker === true,
-      shipping_notes: shippingNotes || null,
+      // Shipping - T2T only (terminal-to-terminal via Unisend)
+      shipping_local_pickup: false,
+      shipping_parcel_locker: true,
+      shipping_notes: null,
 
       // Bundled expansions
       included_expansions: includedExpansions || [],

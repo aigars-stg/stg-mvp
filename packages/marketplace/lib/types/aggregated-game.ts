@@ -43,6 +43,9 @@ export interface AggregatedGame {
     avatar_url: string | null;
     country: string | null;
   };
+
+  // Most recent listing date (for sorting by newest)
+  newest_listing_date: string | null;
 }
 
 /**
