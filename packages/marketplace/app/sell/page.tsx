@@ -13,7 +13,7 @@ import { PhotoUpload, type PhotoFile } from '@/components/sell/PhotoUpload';
 import { PricingShippingSimple } from '@/components/sell/PricingShippingSimple';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
-import { ListingCard } from '@/components/listing/ListingCard';
+import { OfferCard } from '@/components/game/OfferCard';
 import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle } from 'lucide-react';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -114,10 +114,14 @@ function createPreviewListing(
     },
     seller: {
       id: user?.id || 'preview-seller',
-      full_name: profile?.full_name || 'Your Name', // From user_profiles table
-      email: profile?.email || user?.email || 'you@example.com', // From user_profiles table
-      avatar_url: profile?.avatar_url || null, // From user_profiles table
-      country: profile?.country || null, // From user_profiles table
+      full_name: profile?.full_name || 'Your Name',
+      email: profile?.email || user?.email || 'you@example.com',
+      avatar_url: profile?.avatar_url || null,
+      country: profile?.country || null,
+      member_since: profile?.created_at || new Date().toISOString(),
+      total_completed_sales: profile?.total_completed_sales ?? 0,
+      average_rating: profile?.average_rating ?? 0,
+      total_reviews: profile?.total_reviews ?? 0,
     },
   };
 }
@@ -150,6 +154,9 @@ function SellPageContent() {
   const [showExpansionSection, setShowExpansionSection] = useState(false);
   const [expansionsFetched, setExpansionsFetched] = useState(false);
   const [expansionCount, setExpansionCount] = useState(0);
+
+  // Existing listings warning state
+  const [existingActiveListings, setExistingActiveListings] = useState<Array<{ id: string; bgg_game_id: number; price: number; created_at: string }>>([]);
 
   // Section expansion states
   const [expandedSections, setExpandedSections] = useState({
@@ -185,11 +192,33 @@ function SellPageContent() {
     setShowExpansionSection(false); // Reset expansion section
     setExpansionsFetched(false); // Reset fetched flag
     setExpansionCount(0); // Reset expansion count
+    setExistingActiveListings([]); // Clear existing listings warning
 
     // If game is null (clearing selection), just return
     if (!game) {
       setIsLoadingGameDetails(false);
       return;
+    }
+
+    // Check for existing active listings (only in create mode, not edit mode)
+    if (user && !isEditMode) {
+      try {
+        const existingRes = await fetch(`/api/listings?sellerId=${user.id}&gameId=${game.id}&status=active`);
+        if (existingRes.ok) {
+          const existingData = await existingRes.json();
+          if (existingData.listings && existingData.listings.length > 0) {
+            setExistingActiveListings(existingData.listings.map((l: any) => ({
+              id: l.id,
+              bgg_game_id: l.bgg_game_id,
+              price: l.price,
+              created_at: l.created_at,
+            })));
+          }
+        }
+      } catch (error) {
+        console.error('Error checking existing listings:', error);
+        // Non-critical, continue with game selection
+      }
     }
 
     setIsLoadingGameDetails(true);
@@ -240,7 +269,7 @@ function SellPageContent() {
     } finally {
       setIsLoadingGameDetails(false);
     }
-  }, []);
+  }, [user, isEditMode]);
 
   // Stable callback for version selection
   const handleVersionSelect = useCallback((version: VersionSelection) => {
@@ -761,7 +790,7 @@ function SellPageContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Header with BGG Attribution */}
       <div className="mb-8 flex items-center justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-text">
@@ -827,8 +856,8 @@ function SellPageContent() {
 
       {/* Two-Column Layout: Form + Preview */}
       <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-        {/* Left Column: Form Sections (7 cols on desktop) */}
-        <div className="lg:col-span-7 space-y-4">
+        {/* Left Column: Form Sections (8 cols on desktop) */}
+        <div className="lg:col-span-8 space-y-4">
         {/* Section 1: Game Selection (or locked game info in edit mode) */}
         {isEditMode ? (
           // Locked read-only game info in edit mode
@@ -969,6 +998,37 @@ function SellPageContent() {
               })()}
             </div>
           </CollapsibleSection>
+        )}
+
+        {/* Warning: User already has active listing(s) for this game */}
+        {existingActiveListings.length > 0 && (
+          <div className="bg-polar-night/5 border-l-4 border-polar-night/30 rounded-r-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-polar-night/60 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-semibold text-polar-night mb-1">
+                  You already have {existingActiveListings.length === 1 ? 'an active listing' : `${existingActiveListings.length} active listings`} for this game
+                </p>
+                <p className="text-sm text-text-secondary mb-3">
+                  You can still create a new listing, but you might want to review your existing {existingActiveListings.length === 1 ? 'one' : 'ones'} first.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {existingActiveListings.map((listing) => (
+                    <a
+                      key={listing.id}
+                      href={`/game/${listing.bgg_game_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-snow-white border border-border rounded-lg text-sm text-frost-ice hover:text-aurora-blue hover:border-frost-ice transition-colors"
+                    >
+                      €{listing.price.toFixed(2)} • {new Date(listing.created_at).toLocaleDateString('en-GB')}
+                      <span className="text-xs">↗</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Expansion Section - Only show for base games with expansions after version is selected */}
@@ -1192,18 +1252,18 @@ function SellPageContent() {
         {/* End Left Column */}
       </div>
 
-        {/* Right Column: Live Preview (5 cols on desktop, hidden on mobile/tablet) */}
-        <div className="hidden lg:block lg:col-span-5">
-          <div className="sticky top-8">
-            {/* Live Preview with Card */}
-            <div className="border-2 border-border rounded-lg overflow-hidden [&>a>div]:border-0 [&>a>div]:rounded-none">
-              <div className="px-4 py-2 bg-bg-elevated border-b-2 border-border">
-                <span className="text-sm font-semibold text-polar-night">Live preview</span>
-              </div>
-              <ListingCard
+        {/* Right Column: Live Preview (4 cols on desktop, hidden on mobile/tablet) */}
+        <div className="hidden lg:block lg:col-span-4">
+          <div className="sticky top-8 space-y-3">
+            {/* Live Preview Header */}
+            <div className="px-3 py-2 bg-frost-ice/10 border border-frost-ice/30 rounded-lg">
+              <span className="text-sm font-semibold text-frost-ice">Live preview — how buyers will see your offer</span>
+            </div>
+            {/* OfferCard Preview - Force mobile layout via CSS overrides */}
+            <div className="[&_.sm\:grid]:!hidden [&_.sm\:hidden]:!flex [&_.sm\:hidden]:!flex-col [&_.hidden.sm\:flex]:!hidden">
+              <OfferCard
                 listing={createPreviewListing(formData, user, profile, existingPhotoUrls)}
-                showSeller={true}
-                isOwnListing={true}
+                isAddingToCart={false}
               />
             </div>
           </div>
@@ -1275,10 +1335,10 @@ function SellPageContent() {
         size="lg"
       >
         <div className="max-h-[70vh] overflow-y-auto pb-4">
-          <ListingCard
+          <p className="text-xs text-text-secondary mb-3">This is how buyers will see your offer</p>
+          <OfferCard
             listing={createPreviewListing(formData, user, profile, existingPhotoUrls)}
-            showSeller={true}
-            isOwnListing={true}
+            isAddingToCart={false}
           />
         </div>
       </Modal>

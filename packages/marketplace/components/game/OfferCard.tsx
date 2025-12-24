@@ -387,7 +387,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
                 }}
                 className="flex-shrink-0 cursor-pointer"
               >
-                <div className="w-20 h-20 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-frost-ice/50 transition-all">
+                <div className="relative w-20 h-20 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-frost-ice/50 transition-all">
                   {displayImage ? (
                     <img
                       src={displayImage}
@@ -396,6 +396,12 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
                     />
                   ) : (
                     <Package className="w-8 h-8 text-text-muted" />
+                  )}
+                  {/* Photo count badge */}
+                  {allImages.length > 1 && (
+                    <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-polar-night/80 backdrop-blur-sm rounded text-[10px] text-snow-white font-medium">
+                      {allImages.length} photos
+                    </div>
                   )}
                 </div>
               </button>

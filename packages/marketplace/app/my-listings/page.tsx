@@ -6,7 +6,7 @@ import { Button, Card } from '@second-turn/design-system';
 import { Package, Clock, CheckCircle, XCircle, Plus, Search, Heart, LayoutDashboard } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ListingCard } from '@/components/listing/ListingCard';
+import { OfferCard } from '@/components/game/OfferCard';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
 import { ListingActionsMenu } from '@/components/listing/ListingActionsMenu';
 import { StatusChangeModal } from '@/components/listing/StatusChangeModal';
@@ -589,14 +589,14 @@ function MyListingsContent() {
               </Card>
             )}
 
-            {/* Listings Grid */}
+            {/* Listings List */}
             {!loading && !isOffline && filteredListings.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className="space-y-4">
                 {filteredListings.map((listing) => (
-                  <div key={listing.id} className="relative">
-                    {/* Status Badge Overlay */}
-                    <div className="absolute top-3 left-3 z-10">
-                      <div className={`px-3 py-1 rounded-full bg-snow-white shadow-md flex items-center gap-1.5 ${STATUS_COLORS[listing.status]}`}>
+                  <div key={listing.id}>
+                    {/* Status & Actions Header */}
+                    <div className="flex items-center justify-between mb-2 px-1">
+                      <div className={`px-3 py-1 rounded-full bg-bg-secondary flex items-center gap-1.5 ${STATUS_COLORS[listing.status]}`}>
                         {(() => {
                           const StatusIcon = STATUS_ICONS[listing.status];
                           return <StatusIcon className="w-4 h-4" />;
@@ -605,10 +605,6 @@ function MyListingsContent() {
                           {getStatusLabel(listing.status)}
                         </span>
                       </div>
-                    </div>
-
-                    {/* Actions Menu Overlay */}
-                    <div className="absolute top-3 right-3 z-10">
                       <ListingActionsMenu
                         listingId={listing.id}
                         bggGameId={listing.bgg_game_id}
@@ -618,8 +614,7 @@ function MyListingsContent() {
                         onLinkCopied={() => setShowClipboardSuccess(true)}
                       />
                     </div>
-
-                    <ListingCard listing={listing as any} isOwnListing={true} />
+                    <OfferCard listing={listing as any} />
                   </div>
                 ))}
               </div>
@@ -761,15 +756,13 @@ function MyListingsContent() {
               </Card>
             )}
 
-            {/* Saved Listings Grid */}
+            {/* Saved Listings List */}
             {!savedLoading && savedListings.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className="space-y-4">
                 {savedListings.map((savedListing) => (
-                  <ListingCard
+                  <OfferCard
                     key={savedListing.id}
                     listing={savedListing.listing}
-                    showSeller={true}
-                    isOwnListing={false}
                   />
                 ))}
               </div>
