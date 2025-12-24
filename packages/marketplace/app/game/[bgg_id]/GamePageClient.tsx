@@ -23,7 +23,10 @@ import type { GameWithOffers } from '@/lib/types/aggregated-game';
 import type { ListingCondition } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import { OfferCard } from '@/components/game/OfferCard';
+import { GameNavigationArrows } from '@/components/game/GameNavigationArrows';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useGameNavigation } from '@/hooks/useGameNavigation';
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 
 type SortOption = 'price_asc' | 'price_desc' | 'condition' | 'newest';
 
@@ -38,6 +41,22 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   const [game, setGame] = useState<GameWithOffers | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Game navigation
+  const {
+    hasPrev,
+    hasNext,
+    navigatePrev,
+    navigateNext,
+    hasContext,
+  } = useGameNavigation(parseInt(bggId));
+
+  // Mobile swipe navigation
+  const { bind: swipeBind, style: swipeStyle } = useSwipeNavigation({
+    onSwipeLeft: navigateNext,
+    onSwipeRight: navigatePrev,
+    enabled: hasContext,
+  });
 
   // Filters
   const [sortBy, setSortBy] = useState<SortOption>('price_asc');
@@ -192,9 +211,25 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
             </span>
           </div>
 
-          {/* Game Header - Horizontal Card */}
-          <div className="bg-snow-white rounded-xl border-2 border-border overflow-hidden">
-            <div className="flex flex-col sm:flex-row">
+          {/* Game Header - Horizontal Card with Navigation */}
+          <div className="relative">
+            {/* Navigation Arrows (desktop) */}
+            {hasContext && (
+              <GameNavigationArrows
+                onPrev={navigatePrev}
+                onNext={navigateNext}
+                hasPrev={hasPrev}
+                hasNext={hasNext}
+              />
+            )}
+
+            {/* Game Card with swipe support */}
+            <div
+              className="bg-snow-white rounded-xl border-2 border-border overflow-hidden touch-pan-y"
+              style={swipeStyle}
+              {...swipeBind()}
+            >
+              <div className="flex flex-col sm:flex-row">
               {/* Game Image - Fixed dimensions matching AggregatedGameCard */}
               <div className="relative h-48 sm:h-56 sm:w-56 lg:h-64 lg:w-64 flex-shrink-0 bg-polar-night/5 flex items-center justify-center overflow-hidden">
                 {game.image || game.thumbnail ? (
@@ -313,6 +348,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>

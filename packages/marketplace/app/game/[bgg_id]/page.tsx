@@ -1,24 +1,65 @@
 import type { Metadata } from 'next';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { GamePageClient } from './GamePageClient';
 
 interface PageProps {
   params: { bgg_id: string };
 }
 
-// Fetch game data for metadata
+// Fetch game data for metadata using direct database access
 async function getGameData(bggId: string) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games';
-    const response = await fetch(`${baseUrl}/api/games/${bggId}/offers`, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
-    });
-
-    if (!response.ok) {
+    const bggIdNum = parseInt(bggId);
+    if (isNaN(bggIdNum)) {
       return null;
     }
 
-    const data = await response.json();
-    return data.game;
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
+    );
+
+    // Fetch game metadata
+    const { data: gameData, error: gameError } = await supabase
+      .from('games')
+      .select('id, name, thumbnail, image, yearpublished')
+      .eq('id', bggIdNum)
+      .single();
+
+    if (gameError || !gameData) {
+      console.error('Error fetching game metadata:', gameError);
+      return null;
+    }
+
+    // Fetch active listings count and lowest price
+    const { data: listings, error: listingsError } = await supabase
+      .from('listings')
+      .select('price')
+      .eq('bgg_game_id', bggIdNum)
+      .eq('status', 'active');
+
+    const offerCount = listings?.length || 0;
+    const lowestPrice = listings && listings.length > 0
+      ? Math.min(...listings.map(l => l.price))
+      : 0;
+
+    return {
+      game_name: gameData.name,
+      game_year: gameData.yearpublished,
+      image: gameData.image,
+      thumbnail: gameData.thumbnail,
+      offer_count: offerCount,
+      lowest_price: lowestPrice,
+    };
   } catch (error) {
     console.error('Error fetching game for metadata:', error);
     return null;

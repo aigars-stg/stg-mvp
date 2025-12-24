@@ -1,20 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Card, Badge } from '@second-turn/design-system';
 import { Package, Users, Baby, Clock } from 'lucide-react';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
+import { saveBrowseContext } from '@/lib/browse-context';
 
 interface AggregatedGameCardProps {
   game: AggregatedGame;
+  allGameIds?: number[];
+  index?: number;
 }
 
-export function AggregatedGameCard({ game }: AggregatedGameCardProps) {
+export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  const handleClick = useCallback(() => {
+    if (allGameIds && index !== undefined) {
+      saveBrowseContext(allGameIds, index);
+    }
+  }, [allGameIds, index]);
+
   return (
-    <Link href={`/game/${game.bgg_game_id}`} className="h-full">
+    <Link href={`/game/${game.bgg_game_id}`} className="h-full" onClick={handleClick}>
       <Card
         variant="interactive"
         padding="none"

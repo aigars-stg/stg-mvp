@@ -874,6 +874,11 @@ export default function BrowsePage() {
     return filtered;
   }, [wantedListings, searchQuery, acceptableConditions, budgetMin, budgetMax, locationFilter, showExpiringOnly, sortBy]);
 
+  // Memoized array of game IDs for navigation context
+  const gameIds = useMemo(() => {
+    return filteredGames.map(g => g.bgg_game_id);
+  }, [filteredGames]);
+
   return (
     <div>
       {/* Hero Section */}
@@ -1842,10 +1847,12 @@ export default function BrowsePage() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {listingType === 'sell'
-                ? filteredGames.map((game) => (
+                ? filteredGames.map((game, index) => (
                     <AggregatedGameCard
                       key={game.bgg_game_id}
                       game={game}
+                      allGameIds={gameIds}
+                      index={index}
                     />
                   ))
                 : filteredWantedListings.map((wantedListing) => (
