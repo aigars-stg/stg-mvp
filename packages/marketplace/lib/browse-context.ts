@@ -59,6 +59,7 @@ export function saveBrowseContext(gameIds: number[], currentIndex: number): void
       timestamp: Date.now(),
     };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(context));
+    console.log('[BrowseContext] Saved:', { gameIdsCount: gameIds.length, currentIndex });
   } catch (error) {
     console.error('Error saving browse context:', error);
   }

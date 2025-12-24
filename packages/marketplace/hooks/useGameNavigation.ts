@@ -43,6 +43,7 @@ export function useGameNavigation(currentBggId: number): UseGameNavigationReturn
   // Load navigation state from sessionStorage
   useEffect(() => {
     const navInfo = getNavigationInfo(currentBggId);
+    console.log('[GameNav] currentBggId:', currentBggId, 'navInfo:', navInfo);
 
     if (navInfo) {
       setNavState(navInfo);
