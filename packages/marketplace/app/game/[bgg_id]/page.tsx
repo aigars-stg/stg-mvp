@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import { GamePageClient } from './GamePageClient';
 
 interface PageProps {
@@ -12,20 +11,20 @@ async function getGameData(bggId: string) {
   try {
     const bggIdNum = parseInt(bggId);
     if (isNaN(bggIdNum)) {
+      console.error('[Metadata] Invalid bggId:', bggId);
       return null;
     }
 
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
+    // Check if env vars are available
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error('[Metadata] Missing Supabase env vars');
+      return null;
+    }
+
+    // Use simple client for metadata (no auth needed for public reads)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
     // Fetch game metadata
@@ -35,8 +34,13 @@ async function getGameData(bggId: string) {
       .eq('id', bggIdNum)
       .single();
 
-    if (gameError || !gameData) {
-      console.error('Error fetching game metadata:', gameError);
+    if (gameError) {
+      console.error('[Metadata] Supabase game error:', gameError.message, 'for bggId:', bggIdNum);
+      return null;
+    }
+
+    if (!gameData) {
+      console.error('[Metadata] No game data found for bggId:', bggIdNum);
       return null;
     }
 
