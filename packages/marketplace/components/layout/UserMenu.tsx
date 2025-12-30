@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { LogOut, Package, ShoppingBag, Store, Settings, ChevronRight, LayoutDashboard } from 'lucide-react';
+import { LogOut, Package, ShoppingBag, Store, Settings, ChevronRight, LayoutDashboard, Shield } from 'lucide-react';
 import { getInitials } from '@/lib/auth/utils';
 
 
@@ -50,7 +50,7 @@ export function UserMenu() {
   if (!user) {
     return (
       <Link href="/auth">
-        <Button variant="primary" size="sm">
+        <Button variant="accent" size="sm">
           Join
         </Button>
       </Link>
@@ -63,6 +63,9 @@ export function UserMenu() {
 
   // Check if user is an active seller
   const isActiveSeller = profile?.seller_status === 'active';
+
+  // Check if user is staff
+  const isStaff = profile?.is_staff === true;
 
   return (
     <div className="relative" ref={menuRef}>
@@ -162,6 +165,18 @@ export function UserMenu() {
               <Settings className="w-4 h-4 text-frost-ice" />
               Account settings
             </Link>
+
+            {/* 5. Staff Dashboard (if staff) */}
+            {isStaff && (
+              <Link
+                href="/staff/transactions"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                <Shield className="w-4 h-4 text-aurora-purple" />
+                Staff dashboard
+              </Link>
+            )}
           </div>
 
           {/* Sign Out */}

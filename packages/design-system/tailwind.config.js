@@ -24,6 +24,7 @@ export default {
         // Text shortcuts
         text: {
           DEFAULT: colors.semantic.textPrimary,
+          heading: colors.semantic.textHeading,
           secondary: colors.semantic.textSecondary,
           muted: colors.semantic.textMuted,
           inverse: colors.semantic.textInverse,

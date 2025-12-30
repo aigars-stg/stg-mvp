@@ -6,8 +6,6 @@
 import { sendEmail } from './resend';
 import { AccountDeletedEmail } from './templates/account-deleted';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
-
 /**
  * Send account deletion confirmation to user
  */
@@ -32,7 +30,7 @@ export async function sendAccountDeletedEmail(params: {
             react: AccountDeletedEmail({
                 userName: name,
                 recoveryDate: formattedDate,
-                supportUrl: `${APP_URL}/support`,
+                supportUrl: 'mailto:info@secondturn.games',
             }),
         });
 

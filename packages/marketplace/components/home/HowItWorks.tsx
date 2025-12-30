@@ -1,7 +1,7 @@
 const buyerSteps = [
   {
     title: 'Browse & search',
-    description: 'Find games by title, category, condition, or location. Filter to your exact preferences.',
+    description: 'Find games by title, category, condition, or location. Filter by what matters to you.',
   },
   {
     title: 'Review details',
@@ -65,7 +65,7 @@ export function HowItWorks() {
                 <div key={index} className="flex gap-4 group">
                   {/* Number badge */}
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-frost-ice text-snow-white rounded-full flex items-center justify-center font-semibold text-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                    <div className="w-10 h-10 bg-frost-ice text-snow-white rounded-md flex items-center justify-center font-semibold text-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
                       {index + 1}
                     </div>
                   </div>
@@ -89,7 +89,7 @@ export function HowItWorks() {
             <h3 className="text-2xl font-semibold text-text-primary mb-8 flex items-center gap-3">
               <span>For sellers</span>
               <span className="text-sm font-normal text-text-muted bg-aurora-orange/10 px-3 py-1 rounded-full">
-                Earn from unused games
+                Earn from your shelf
               </span>
             </h3>
             <div className="space-y-6">
@@ -97,7 +97,7 @@ export function HowItWorks() {
                 <div key={index} className="flex gap-4 group">
                   {/* Number badge */}
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-aurora-orange text-snow-white rounded-full flex items-center justify-center font-semibold text-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                    <div className="w-10 h-10 bg-aurora-orange text-snow-white rounded-md flex items-center justify-center font-semibold text-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
                       {index + 1}
                     </div>
                   </div>

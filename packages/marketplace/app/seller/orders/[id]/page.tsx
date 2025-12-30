@@ -17,6 +17,7 @@ import {
   Download,
   FileText,
   ExternalLink,
+  MessageSquare,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
@@ -216,6 +217,12 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
             </Badge>
           </div>
           <p className="text-text-secondary">Buyer: {order.buyer_name}</p>
+          <Link href={`/transactions/${order.id}`} className="mt-3 inline-block">
+            <Button variant="secondary" size="sm">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              View Transaction & Messages
+            </Button>
+          </Link>
         </div>
       </div>
 

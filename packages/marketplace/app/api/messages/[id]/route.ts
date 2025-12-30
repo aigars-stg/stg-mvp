@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { checkRateLimit } from '@/lib/ratelimit';
 import type { Message, SendMessageRequest, Conversation } from '@/lib/types/message';
 import { MESSAGE_CONSTRAINTS } from '@/lib/types/message';
+import { sendNewMessageEmailAsync } from '@/lib/email/send-message-emails';
 
 /**
  * GET /api/messages/[id]
@@ -198,19 +199,30 @@ export async function POST(
   try {
     const conversationId = params.id;
     const body: SendMessageRequest = await request.json();
-    const { content } = body;
+    const { content, photo_urls } = body;
 
-    // Validate content
-    if (!content || !content.trim()) {
+    // Validate that at least content or photos are provided
+    const hasContent = content && content.trim().length > 0;
+    const hasPhotos = photo_urls && photo_urls.length > 0;
+
+    if (!hasContent && !hasPhotos) {
       return NextResponse.json(
-        { error: 'Message content is required' },
+        { error: 'Message content or photos required' },
         { status: 400 }
       );
     }
 
-    if (content.length > MESSAGE_CONSTRAINTS.MAX_LENGTH) {
+    if (hasContent && content.length > MESSAGE_CONSTRAINTS.MAX_LENGTH) {
       return NextResponse.json(
         { error: `Message cannot exceed ${MESSAGE_CONSTRAINTS.MAX_LENGTH} characters` },
+        { status: 400 }
+      );
+    }
+
+    // Validate photo_urls count
+    if (hasPhotos && photo_urls.length > MESSAGE_CONSTRAINTS.MAX_PHOTOS) {
+      return NextResponse.json(
+        { error: `Cannot attach more than ${MESSAGE_CONSTRAINTS.MAX_PHOTOS} photos` },
         { status: 400 }
       );
     }
@@ -262,7 +274,7 @@ export async function POST(
     // Verify conversation exists and user is a participant
     const { data: conversation, error: conversationError } = await supabase
       .from('conversations')
-      .select('id, buyer_id, seller_id, buyer_archived_at, seller_archived_at')
+      .select('id, buyer_id, seller_id, order_id, buyer_archived_at, seller_archived_at')
       .eq('id', conversationId)
       .single();
 
@@ -300,7 +312,8 @@ export async function POST(
       .insert({
         conversation_id: conversationId,
         sender_id: user.id,
-        content: content.trim(),
+        content: hasContent ? content.trim() : '',
+        photo_urls: hasPhotos ? photo_urls : [],
       })
       .select('*')
       .single();
@@ -328,6 +341,21 @@ export async function POST(
         avatar_url: senderProfile?.avatar_url || null,
       },
     };
+
+    // Send email notification to the other party (only for transaction conversations)
+    if (conversation.order_id) {
+      const recipientId = conversation.buyer_id === user.id
+        ? conversation.seller_id
+        : conversation.buyer_id;
+
+      sendNewMessageEmailAsync({
+        recipientId,
+        senderId: user.id,
+        orderId: conversation.order_id,
+        messageContent: hasContent ? content.trim() : '',
+        hasPhotos: !!hasPhotos,
+      });
+    }
 
     return NextResponse.json(
       { message: messageWithProfile },

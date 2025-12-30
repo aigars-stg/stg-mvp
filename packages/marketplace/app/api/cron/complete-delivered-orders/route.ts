@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { postOrderCompletedMessage } from '@/lib/transactions';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -77,6 +78,11 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(`✅ [Cron] Completed ${orders.length} orders`);
+
+    // Post system messages for each completed order (non-blocking)
+    for (const order of orders) {
+      postOrderCompletedMessage(order.id);
+    }
 
     return NextResponse.json({
       success: true,

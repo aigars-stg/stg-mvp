@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import { createServerClient } from '@supabase/ssr';
 import Stripe from 'stripe';
+import { postOrderCreatedMessage, postRefundProcessedMessage } from '@/lib/transactions';
 
 /**
  * POST /api/webhooks/stripe
@@ -169,6 +170,9 @@ export async function POST(request: NextRequest) {
       );
       console.log(`💰 [Webhook] Total amount: €${orderResult.total_amount}`);
 
+      // Post system message to transaction conversation (non-blocking)
+      postOrderCreatedMessage(orderResult.order_id);
+
       // Fetch buyer and seller profiles for email
       const { data: buyerProfile } = await supabase
         .from('user_profiles')
@@ -262,6 +266,13 @@ export async function POST(request: NextRequest) {
           : charge.payment_intent?.id;
 
       if (paymentIntentId) {
+        // First get the order ID before updating
+        const { data: order } = await supabase
+          .from('orders')
+          .select('id, total_amount')
+          .eq('stripe_payment_intent_id', paymentIntentId)
+          .single();
+
         const { error } = await supabase
           .from('orders')
           .update({ status: 'refunded' })
@@ -269,6 +280,12 @@ export async function POST(request: NextRequest) {
 
         if (error) {
           console.error('❌ [Webhook] Failed to update order status:', error);
+        }
+
+        // Post system message for refund (non-blocking)
+        if (order) {
+          const refundAmount = (charge.amount_refunded / 100).toFixed(2);
+          postRefundProcessedMessage(order.id, refundAmount);
         }
       }
       return NextResponse.json({ received: true });

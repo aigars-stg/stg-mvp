@@ -201,13 +201,13 @@ export default function SellerOrdersPage() {
     <div className="min-h-screen bg-bg-primary">
       {/* Header */}
       <div className="bg-frost-ice/5 border-b border-frost-ice/20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">Seller Orders</h1>
           <p className="text-text-secondary mt-1">Manage your orders and respond to buyers</p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Error State */}
         {error && (
           <div className="mb-6 p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">

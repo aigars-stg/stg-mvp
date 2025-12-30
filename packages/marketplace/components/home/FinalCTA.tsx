@@ -1,11 +1,6 @@
 import Link from 'next/link';
-import { Button } from '@second-turn/design-system';
 
-interface FinalCTAProps {
-  isComingSoon?: boolean;
-}
-
-export function FinalCTA({ isComingSoon = false }: FinalCTAProps) {
+export function FinalCTA() {
   return (
     <section className="py-12 sm:py-16 lg:py-20">
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
@@ -14,20 +9,15 @@ export function FinalCTA({ isComingSoon = false }: FinalCTAProps) {
             Ready to give a game its second turn?
           </h2>
           <p className="text-lg sm:text-xl text-text-secondary mb-10 max-w-2xl mx-auto">
-            Join the Baltic board game community.
-            Buy, sell, and discover amazing games.
+            Join the Baltic board game community. Buy pre-loved games, sell your collection, or post what you're hunting for.
           </p>
-          {isComingSoon ? (
-            <Button variant="primary" size="lg" className="min-w-[240px]" disabled>
-              Coming Soon
-            </Button>
-          ) : (
-            <Link href="/browse">
-              <Button variant="primary" size="lg" className="min-w-[240px]">
-                Start browsing games
-              </Button>
-            </Link>
-          )}
+          <Link
+            href="/auth"
+            className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all bg-aurora-orange text-snow-white hover:shadow-md"
+          >
+            Join
+            <span className="transition-transform group-hover:translate-x-0.5">→</span>
+          </Link>
         </div>
       </div>
     </section>

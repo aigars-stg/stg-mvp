@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Cookie } from 'lucide-react';
 import {
   getConsentStatus,
   saveConsentStatus,
@@ -58,7 +59,8 @@ export function CookieConsent() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Message */}
           <div className="flex-1">
-            <h2 className="text-lg font-semibold text-polar-night">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-polar-night">
+              <Cookie className="h-5 w-5 text-frost-ice" />
               We use cookies
             </h2>
             <p className="mt-1 text-sm text-text-secondary">

@@ -30,9 +30,14 @@ export function ConversationListItem({
     return text.slice(0, maxLength) + '...';
   };
 
+  // Link to transaction page for order-based conversations, otherwise messages
+  const href = conversation.order_id
+    ? `/transactions/${conversation.order_id}`
+    : `/messages/${conversation.id}`;
+
   return (
     <Link
-      href={`/messages/${conversation.id}`}
+      href={href}
       className={`block border-b border-divider-subtle hover:bg-background-tertiary transition-colors ${
         isActive ? 'bg-background-tertiary' : 'bg-background-primary'
       }`}
@@ -78,29 +83,46 @@ export function ConversationListItem({
             )}
           </div>
 
-          {/* Listing info */}
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded bg-background-tertiary flex items-center justify-center overflow-hidden flex-shrink-0">
-              {listing.thumbnail ? (
-                <img
-                  src={listing.thumbnail}
-                  alt={listing.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <Package className="w-4 h-4 text-text-tertiary" />
-              )}
-            </div>
+          {/* Listing or order info */}
+          {listing && (
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded bg-background-tertiary flex items-center justify-center overflow-hidden flex-shrink-0">
+                {listing.thumbnail ? (
+                  <img
+                    src={listing.thumbnail}
+                    alt={listing.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Package className="w-4 h-4 text-text-tertiary" />
+                )}
+              </div>
 
-            <div className="min-w-0 flex-1">
-              <p className="text-xs text-text-secondary truncate">
-                {listing.title}
-              </p>
-              <p className="text-xs font-medium text-text-primary">
-                €{listing.price.toFixed(2)}
-              </p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-text-secondary truncate">
+                  {listing.title}
+                </p>
+                <p className="text-xs font-medium text-text-primary">
+                  €{listing.price.toFixed(2)}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
+          {!listing && conversation.order && (
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded bg-background-tertiary flex items-center justify-center overflow-hidden flex-shrink-0">
+                <Package className="w-4 h-4 text-text-tertiary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-text-secondary truncate">
+                  Order {conversation.order.order_number}
+                </p>
+                <p className="text-xs font-medium text-text-primary">
+                  €{conversation.order.total_amount.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Last message */}
           {last_message && (

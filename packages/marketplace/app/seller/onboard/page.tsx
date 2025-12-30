@@ -14,7 +14,15 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
+import type { CountryCode } from '@/lib/country-utils';
+
+const COUNTRIES: { code: CountryCode; flagClass: string; name: string }[] = [
+  { code: 'LV', flagClass: 'fi fi-lv', name: 'Latvia' },
+  { code: 'EE', flagClass: 'fi fi-ee', name: 'Estonia' },
+  { code: 'LT', flagClass: 'fi fi-lt', name: 'Lithuania' },
+];
 
 interface OnboardingStatus {
   seller_status: string;
@@ -26,14 +34,37 @@ interface OnboardingStatus {
 
 export default function SellerOnboardingPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, profile, refreshProfile, loading: authLoading } = useAuth();
 
   const [status, setStatus] = useState<OnboardingStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [acceptingTerms, setAcceptingTerms] = useState(false);
   const [startingStripe, setStartingStripe] = useState(false);
+  const [savingCountry, setSavingCountry] = useState<CountryCode | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleSelectCountry = async (country: CountryCode) => {
+    if (!user || savingCountry) return;
+
+    setSavingCountry(country);
+    setError(null);
+
+    try {
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({ country })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+      await refreshProfile();
+    } catch (err) {
+      console.error('Failed to save country:', err);
+      setError('Failed to save country. Please try again.');
+    } finally {
+      setSavingCountry(null);
+    }
+  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -172,7 +203,7 @@ export default function SellerOnboardingPage() {
           {/* Step 1: Accept Terms */}
           <div className="mb-8">
             <div className="flex items-start gap-3 sm:gap-4 mb-4">
-              <div className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 ${status?.terms_accepted ? 'bg-aurora-green' : 'bg-frost-ice'
+              <div className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex-shrink-0 ${status?.terms_accepted ? 'bg-aurora-green' : 'bg-frost-ice'
                 }`}>
                 {status?.terms_accepted ? (
                   <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -185,7 +216,7 @@ export default function SellerOnboardingPage() {
                   {status?.terms_accepted ? 'Seller terms accepted' : 'Accept seller terms'}
                 </h3>
                 <p className="text-sm text-text-secondary mb-4">
-                  {status?.terms_accepted ? '' : 'Review and accept our seller terms to confirm you&apos;re selling as a private individual.'}
+                  {status?.terms_accepted ? '' : "Review and accept our seller terms to confirm you're selling as a private individual."}
                 </p>
 
                 {!status?.terms_accepted && (
@@ -193,6 +224,10 @@ export default function SellerOnboardingPage() {
                     <div className="bg-snow-stormLight border border-border rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">
                       <p className="font-semibold text-polar-night mb-2 sm:mb-3 text-sm sm:text-base">Key points:</p>
                       <ul className="space-y-2 text-xs sm:text-sm text-text-secondary">
+                        <li className="flex items-start gap-2">
+                          <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
+                          <span><strong>Zero fees</strong> — you keep 100% of your sale price</span>
+                        </li>
                         <li className="flex items-start gap-2">
                           <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
                           <span>You must be at least <strong>18 years old</strong></span>
@@ -203,15 +238,7 @@ export default function SellerOnboardingPage() {
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-                          <span>We'll report sales to tax authorities if you exceed 30 transactions or €2,000/year (DAC7)</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
                           <span>You're responsible for accurate listings and timely shipping</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-                          <span>Currently <strong>zero fees</strong> - you keep 100% of sale price</span>
                         </li>
                       </ul>
                       <p className="mt-3 sm:mt-4 pt-3 border-t border-border">
@@ -230,7 +257,7 @@ export default function SellerOnboardingPage() {
                         aria-label="Accept seller terms"
                       />
                       <span className="text-xs sm:text-sm text-text-secondary">
-                        I confirm I am 18+ years old, selling as a private individual (not a business), and I agree to the{' '}
+                        I confirm I'm 18+, selling personal items, and agree to the{' '}
                         <Link href="/seller/terms" target="_blank" className="text-frost-ice hover:underline">
                           Seller Terms
                         </Link>.
@@ -265,7 +292,7 @@ export default function SellerOnboardingPage() {
           {/* Step 2: Stripe Connect */}
           <div>
             <div className="flex items-start gap-3 sm:gap-4">
-              <div className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 ${status?.stripe_connected ? 'bg-aurora-green' : status?.terms_accepted ? 'bg-frost-ice' : 'bg-snow-storm'
+              <div className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex-shrink-0 ${status?.stripe_connected ? 'bg-aurora-green' : status?.terms_accepted ? 'bg-frost-ice' : 'bg-snow-storm'
                 }`}>
                 {status?.stripe_connected ? (
                   <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -278,12 +305,46 @@ export default function SellerOnboardingPage() {
                   {status?.stripe_connected ? 'Payment account connected' : 'Connect payment account'}
                 </h3>
                 <p className="text-sm text-text-secondary mb-4">
-                  Set up your Stripe Connect account to receive payouts. Takes about 2 minutes.
+                  We use Stripe to handle payouts securely - a payment platform trusted by Airbnb, Shopify, and millions of businesses worldwide. Your money goes directly to your bank. We never see or hold your funds.
                 </p>
 
                 {!status?.stripe_connected && status?.terms_accepted && (
                   <>
+                    {/* Country Selection */}
                     <div className="bg-frost-ice/10 border border-frost-ice/20 rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">
+                      <p className="text-xs sm:text-sm text-text-secondary mb-3">
+                        <strong>Select your country:</strong>
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {COUNTRIES.map((c) => (
+                          <button
+                            key={c.code}
+                            onClick={() => handleSelectCountry(c.code)}
+                            disabled={savingCountry !== null}
+                            className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${
+                              profile?.country === c.code
+                                ? 'bg-frost-ice text-white'
+                                : 'bg-snow-white hover:bg-frost-ice/20 border border-border'
+                            }`}
+                          >
+                            {savingCountry === c.code ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <span className={c.flagClass} />
+                            )}
+                            <span>{c.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                      {profile?.country && (
+                        <p className="text-xs text-frost-ice mt-2">
+                          Stripe will be set up for {COUNTRIES.find(c => c.code === profile.country)?.name}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Requirements */}
+                    <div className="bg-snow-stormLight border border-border rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">
                       <p className="text-xs sm:text-sm text-text-secondary mb-3">
                         <strong>You'll need:</strong>
                       </p>
@@ -310,19 +371,26 @@ export default function SellerOnboardingPage() {
                       className="sm:w-auto"
                       onClick={handleStartStripeOnboarding}
                       loading={startingStripe}
+                      disabled={!profile?.country}
                       rightIcon={<ArrowRight className="w-5 h-5" />}
                     >
                       Continue to Stripe
                     </Button>
-                    <p className="text-xs text-text-secondary mt-2">
-                      You'll be redirected to Stripe's secure onboarding (2 min)
-                    </p>
+                    {!profile?.country ? (
+                      <p className="text-xs text-aurora-orange mt-2">
+                        Select your country above to continue
+                      </p>
+                    ) : (
+                      <p className="text-xs text-text-secondary mt-2">
+                        You'll be redirected to Stripe's secure onboarding (2 min)
+                      </p>
+                    )}
                   </>
                 )}
 
                 {!status?.terms_accepted && (
                   <p className="text-sm text-text-secondary italic">
-                    Complete step 1 to unlock this step
+                    Accept terms above to continue
                   </p>
                 )}
 

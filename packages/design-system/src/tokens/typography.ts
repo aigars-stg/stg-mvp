@@ -57,24 +57,28 @@ export const semanticTypography = {
     fontWeight: typography.fontWeight.bold,
     lineHeight: typography.lineHeight.tight,
     letterSpacing: typography.letterSpacing.tight,
+    color: colors.semantic.textHeading,
   },
   h2: {
     fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.semibold,
     lineHeight: typography.lineHeight.tight,
     letterSpacing: typography.letterSpacing.tight,
+    color: colors.semantic.textHeading,
   },
   h3: {
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.semibold,
     lineHeight: typography.lineHeight.snug,
     letterSpacing: typography.letterSpacing.normal,
+    color: colors.semantic.textHeading,
   },
   h4: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold,
     lineHeight: typography.lineHeight.snug,
     letterSpacing: typography.letterSpacing.normal,
+    color: colors.semantic.textHeading,
   },
 
   // Body text

@@ -127,7 +127,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
 
   return (
     <>
-      <div className={`bg-snow-white border-2 rounded-xl transition-all ${isExpanded ? 'border-frost-ice' : 'border-border hover:border-frost-ice/50'}`}>
+      <div className={`bg-snow-white border-2 rounded-xl overflow-hidden transition-all ${isExpanded ? 'border-frost-ice' : 'border-border hover:border-frost-ice/50'}`}>
         {/* Collapsed View */}
         <div className="p-3 sm:p-4">
           {/* Desktop: 3-column grid layout */}

@@ -64,12 +64,16 @@ export async function GET(request: NextRequest) {
     if (refundsNeeded.length > 0) {
       console.log(`💰 [Cron] Processing ${refundsNeeded.length} refunds...`);
 
-      // Import stripe and email functions
+      // Import stripe, email, and transaction message functions
       const { stripe } = await import('@/lib/stripe');
       const { sendOrderCancelledToBuyer } = await import('@/lib/email/send-order-emails');
+      const { postOrderCancelledMessage } = await import('@/lib/transactions');
 
       for (const refundInfo of refundsNeeded) {
         const { order_id, buyer_id, amount, payment_intent_id } = refundInfo;
+
+        // Post system message to transaction conversation (non-blocking)
+        postOrderCancelledMessage(order_id, 'seller_timeout');
 
         // Process Stripe refund
         if (payment_intent_id) {

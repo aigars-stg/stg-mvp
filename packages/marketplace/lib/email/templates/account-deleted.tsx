@@ -19,7 +19,7 @@ interface AccountDeletedEmailProps {
 export const AccountDeletedEmail = ({
     userName = 'User',
     recoveryDate = 'December 31, 2025',
-    supportUrl = 'https://secondturn.games/support',
+    supportUrl = 'mailto:info@secondturn.games',
 }: AccountDeletedEmailProps) => {
     const previewText = `Your account has been deleted - Recovery available until ${recoveryDate}`;
 
@@ -93,6 +93,7 @@ const container = {
     padding: '20px 0 48px',
     marginBottom: '64px',
     maxWidth: '600px',
+    wordWrap: 'break-word' as const,
 };
 
 const h1 = {

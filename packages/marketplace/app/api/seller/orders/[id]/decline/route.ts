@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { sendOrderCancelledToBuyer } from '@/lib/email/send-order-emails';
 import { stripe } from '@/lib/stripe';
+import { postOrderDeclinedMessage } from '@/lib/transactions';
 
 interface DeclineOrderBody {
   reason?: string;
@@ -75,6 +76,9 @@ export async function POST(
     }
 
     console.log(`✅ [Seller] Order ${orderId} declined`);
+
+    // Post system message to transaction conversation (non-blocking)
+    postOrderDeclinedMessage(orderId, reason);
 
     // Process refund if required
     if (result.requires_refund && result.payment_intent_id) {

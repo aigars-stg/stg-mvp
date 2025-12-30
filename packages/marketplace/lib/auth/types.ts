@@ -36,6 +36,8 @@ export interface UserProfile {
   last_onboarding_email_at?: string | null;
   // Legacy: seller_status still available during migration
   seller_status?: SellerStatus;
+  // Staff access
+  is_staff?: boolean;
 }
 
 /**

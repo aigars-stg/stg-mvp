@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { syncAllActiveOrders } from '@/lib/unisend/tracking-service';
 import { sendPackageDeliveredToBuyer } from '@/lib/email/send-order-emails';
 import { createClient } from '@supabase/supabase-js';
+import {
+  postOrderShippedMessage,
+  postOrderInTransitMessage,
+  postOrderDeliveredMessage,
+} from '@/lib/transactions';
 
 // Use service role for cron jobs
 const supabase = createClient(
@@ -37,10 +42,18 @@ export async function GET(request: NextRequest) {
     console.log(`✅ [Cron] Success: ${result.successCount}, Errors: ${result.errorCount}`);
     console.log(`📊 [Cron] Status changes: ${result.statusChanges.length}`);
 
-    // Send emails for newly delivered packages
+    // Post system messages and send emails for status changes
     const deliveryEmailResults = [];
     for (const change of result.statusChanges) {
-      if (change.newStatus === 'delivered') {
+      // Post system message for each status change (non-blocking)
+      // Note: Terminal/destination info not available from tracking sync,
+      // so we use default messages without specific location details
+      if (change.newStatus === 'shipped') {
+        postOrderShippedMessage(change.orderId);
+      } else if (change.newStatus === 'in_transit') {
+        postOrderInTransitMessage(change.orderId);
+      } else if (change.newStatus === 'delivered') {
+        postOrderDeliveredMessage(change.orderId);
         console.log(`📧 [Cron] Sending delivery email for ${change.orderNumber}`);
 
         // Fetch order details for email

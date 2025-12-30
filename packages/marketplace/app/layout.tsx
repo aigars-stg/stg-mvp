@@ -53,11 +53,11 @@ const organizationJsonLd = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games'),
   title: {
-    default: 'Second Turn Games | Buy & Sell Used Board Games',
+    default: 'Second Turn Games | Buy & Sell Board Games',
     template: '%s | Second Turn Games',
   },
-  description: 'The Baltic marketplace for pre-owned board games. Buy, sell, and discover games in Latvia, Estonia, and Lithuania.',
-  keywords: ['board games', 'used board games', 'galda spēles', 'lauamängud', 'stalo žaidimai', 'marketplace'],
+  description: 'The Baltic marketplace for pre-loved board games. Buy, sell, and discover games in Latvia, Estonia, and Lithuania.',
+  keywords: ['board games', 'used board games', 'secondhand board games', 'galda spēles', 'lauamängud', 'stalo žaidimai', 'marketplace'],
   robots: {
     index: true,
     follow: true,
@@ -71,11 +71,16 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Second Turn Games',
-    description: 'Every game deserves a second turn. Buy and sell used board games in the Baltics.',
+    description: 'Every game deserves a second turn. Buy and sell pre-loved board games in the Baltics.',
     url: 'https://www.secondturn.games',
     siteName: 'Second Turn Games',
-    locale: 'en_US',
+    locale: 'en_GB',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Second Turn Games',
+    description: 'Every game deserves a second turn. Buy and sell pre-loved board games in the Baltics.',
   },
 };
 
@@ -117,47 +122,44 @@ export default function RootLayout({
           {/* Footer */}
           <footer className="bg-bg-elevated border-t border-border-subtle mt-12 sm:mt-24 pb-20 lg:pb-0">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-                <div>
-                  <h3 className="font-semibold text-polar-night mb-3 sm:mb-4">Second Turn Games</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
+                <div className="md:col-span-2">
+                  <img src="/images/logo_nav.svg" alt="Second Turn Games" className="h-10 mb-3 sm:mb-4" />
                   <p className="text-sm text-text-secondary">
-                    Every game deserves a second turn. The Baltic marketplace for pre-loved board games.
+                    Where games find new homes.
+                    <br />
+                    Join board game enthusiasts across Latvia, Estonia, and Lithuania.
                   </p>
                 </div>
                 <div>
                   <h4 className="font-medium text-polar-night mb-2 sm:mb-3">Marketplace</h4>
                   <ul className="space-y-2 text-sm text-text-secondary">
-                    <li><Link href="/browse" className="hover:text-text">Browse Marketplace</Link></li>
-                    <li><Link href="/sell" className="hover:text-text">Sell a Game</Link></li>
-                    <li><Link href="/wanted/new" className="hover:text-text">Post Wanted Game</Link></li>
-                    <li><Link href="/help/grading-guide" className="hover:text-text">Condition Guide</Link></li>
+                    <li><Link href="/browse" className="hover:text-text">Browse games</Link></li>
+                    <li><Link href="/sell" className="hover:text-text">Sell a game</Link></li>
+                    <li><Link href="/wanted/new" className="hover:text-text">Request a game</Link></li>
+                    <li><Link href="/help/grading-guide" className="hover:text-text">Condition guide</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">Company</h4>
+                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">Legal</h4>
                   <ul className="space-y-2 text-sm text-text-secondary">
-                    <li><Link href="/privacy" className="hover:text-text">Privacy Policy</Link></li>
-                    <li><Link href="/terms" className="hover:text-text">Terms of Service</Link></li>
-                    <li><Link href="/seller/terms" className="hover:text-text">Seller Terms</Link></li>
+                    <li><Link href="/privacy" className="hover:text-text">Privacy policy</Link></li>
+                    <li><Link href="/terms" className="hover:text-text">Terms of service</Link></li>
+                    <li><Link href="/seller/terms" className="hover:text-text">Seller terms</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">Contact</h4>
+                  <ul className="space-y-2 text-sm text-text-secondary">
+                    <li><a href="mailto:info@secondturn.games" className="hover:text-text">info@secondturn.games</a></li>
+                    <li>Second Turn Games SIA</li>
+                    <li>Reg. No. 50203665371</li>
+                    <li>Riga, Latvia</li>
                   </ul>
                 </div>
               </div>
               <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border-subtle text-center text-xs sm:text-sm text-text-secondary space-y-4">
-                <p>© 2025 Second Turn Games. Built in the Baltics with Nordic minimalism.</p>
-                <div className="flex justify-center">
-                  <a
-                    href="https://boardgamegeek.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block"
-                  >
-                    <img
-                      src="/images/powered-by-bgg-rgb.svg"
-                      alt="Powered by BoardGameGeek"
-                      className="h-5 opacity-60 hover:opacity-100 transition-opacity"
-                    />
-                  </a>
-                </div>
+                <p>Copyright © {new Date().getFullYear()} Second Turn Games SIA</p>
               </div>
             </div>
           </footer>

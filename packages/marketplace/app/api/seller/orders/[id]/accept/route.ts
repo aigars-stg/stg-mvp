@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { sendOrderAcceptedToBuyer, sendShippingLabelToSeller } from '@/lib/email/send-order-emails';
 import { generateShippingLabel, getLabelPdfBuffer } from '@/lib/unisend/label-service';
+import { postOrderAcceptedMessage } from '@/lib/transactions';
 
 interface AcceptOrderBody {
   parcelSize?: 'XS' | 'S' | 'M' | 'L'; // Required for T2T orders
@@ -78,6 +79,9 @@ export async function POST(
     }
 
     console.log(`✅ [Seller] Order ${orderId} accepted`);
+
+    // Post system message to transaction conversation (non-blocking)
+    postOrderAcceptedMessage(orderId, result.shipping_method || 't2t');
 
     // Fetch complete order details for email and label generation
     const { data: order } = await supabase

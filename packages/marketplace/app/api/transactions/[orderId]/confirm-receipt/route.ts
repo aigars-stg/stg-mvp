@@ -1,0 +1,114 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { postReceiptConfirmedMessage, postOrderCompletedMessage } from '@/lib/transactions';
+
+/**
+ * POST /api/transactions/[orderId]/confirm-receipt
+ *
+ * Buyer confirms receipt of the order, marking it as completed.
+ * Available when order status is 'delivered'.
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { orderId: string } }
+) {
+  try {
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
+    );
+
+    // Check authentication
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'You must be signed in to confirm receipt' },
+        { status: 401 }
+      );
+    }
+
+    const orderId = params.orderId;
+
+    // Fetch order and verify access
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        order_number,
+        buyer_id,
+        seller_id,
+        status
+      `)
+      .eq('id', orderId)
+      .single();
+
+    if (orderError || !order) {
+      return NextResponse.json(
+        { error: 'Order not found' },
+        { status: 404 }
+      );
+    }
+
+    // Only buyer can confirm receipt
+    if (order.buyer_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Only the buyer can confirm receipt' },
+        { status: 403 }
+      );
+    }
+
+    // Order must be in 'delivered' status
+    if (order.status !== 'delivered') {
+      return NextResponse.json(
+        { error: `Cannot confirm receipt for order with status '${order.status}'. Order must be 'delivered'.` },
+        { status: 400 }
+      );
+    }
+
+    // Update order to completed
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({
+        status: 'completed',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', orderId);
+
+    if (updateError) {
+      console.error('Failed to update order status:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to confirm receipt' },
+        { status: 500 }
+      );
+    }
+
+    // Post system messages (non-blocking)
+    await postReceiptConfirmedMessage(orderId);
+    await postOrderCompletedMessage(orderId);
+
+    return NextResponse.json({
+      success: true,
+      order_number: order.order_number,
+      message: 'Receipt confirmed. Order is now complete.',
+    });
+  } catch (error: any) {
+    console.error('Confirm receipt error:', error);
+    return NextResponse.json(
+      { error: 'Failed to confirm receipt', details: error.message },
+      { status: 500 }
+    );
+  }
+}

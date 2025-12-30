@@ -156,8 +156,8 @@ function SellerPayoutSettingsContent() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Success Message */}
-        {success && (
+        {/* Success Message - only show if actually complete */}
+        {success && canReceivePayouts && (
           <div className="mb-6 p-4 bg-aurora-green/10 border border-aurora-green/20 rounded-lg flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 text-aurora-green flex-shrink-0 mt-0.5" />
             <div>
@@ -169,14 +169,14 @@ function SellerPayoutSettingsContent() {
           </div>
         )}
 
-        {/* Refresh Message */}
-        {refresh && !success && (
+        {/* Incomplete Message - returned from Stripe but not finished */}
+        {(refresh || (success && !canReceivePayouts)) && (
           <div className="mb-6 p-4 bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-lg flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-aurora-yellow flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-aurora-yellow font-medium">Onboarding Incomplete</p>
               <p className="text-sm text-text-secondary mt-1">
-                You need to complete all required steps to receive payouts.
+                You need to complete all required steps to receive payouts. Click "Continue Onboarding" below.
               </p>
             </div>
           </div>

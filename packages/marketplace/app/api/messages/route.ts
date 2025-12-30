@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
       .select(`
         id,
         listing_id,
+        order_id,
         buyer_id,
         seller_id,
         last_message_at,
@@ -84,8 +85,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ conversations: [] }, { status: 200 });
     }
 
-    // Get unique listing IDs
-    const listingIds = [...new Set(conversations.map(c => c.listing_id))];
+    // Get unique listing IDs and order IDs
+    const listingIds = [...new Set(conversations.map(c => c.listing_id).filter(Boolean))];
+    const orderIds = [...new Set(conversations.map(c => c.order_id).filter(Boolean))];
 
     // Get unique user IDs (all buyers and sellers except current user)
     const userIds = [...new Set(
@@ -94,13 +96,27 @@ export async function GET(request: NextRequest) {
     )];
 
     // Fetch all listings data
-    const { data: listings } = await supabase
-      .from('listings')
-      .select('id, title, price, status, photo_urls, game_name')
-      .in('id', listingIds);
+    const { data: listings } = listingIds.length > 0
+      ? await supabase
+          .from('listings')
+          .select('id, title, price, status, photo_urls, game_name')
+          .in('id', listingIds)
+      : { data: [] };
+
+    // Fetch all orders data for transaction-based conversations
+    const { data: orders } = orderIds.length > 0
+      ? await supabase
+          .from('orders')
+          .select('id, order_number, status, total_amount, shipping_method')
+          .in('id', orderIds)
+      : { data: [] };
 
     const listingsMap = new Map(
       listings?.map(l => [l.id, l]) || []
+    );
+
+    const ordersMap = new Map(
+      orders?.map(o => [o.id, o]) || []
     );
 
     // Fetch all user profiles
@@ -139,7 +155,8 @@ export async function GET(request: NextRequest) {
 
     // Build conversation list items
     const conversationList: ConversationListItem[] = conversations.map(conv => {
-      const listing = listingsMap.get(conv.listing_id);
+      const listing = conv.listing_id ? listingsMap.get(conv.listing_id) : null;
+      const order = conv.order_id ? ordersMap.get(conv.order_id) : null;
       const otherUserId = conv.buyer_id === user.id ? conv.seller_id : conv.buyer_id;
       const otherUserProfile = profilesMap.get(otherUserId);
       const lastMessage = lastMessageMap.get(conv.id);
@@ -151,18 +168,25 @@ export async function GET(request: NextRequest) {
       return {
         id: conv.id,
         listing_id: conv.listing_id,
+        order_id: conv.order_id || null,
         other_user: {
           id: otherUserId,
           full_name: otherUserProfile?.full_name || null,
           avatar_url: otherUserProfile?.avatar_url || null,
         },
-        listing: {
-          id: listing?.id || conv.listing_id,
-          title: listing?.title || 'Unknown Listing',
-          price: listing?.price || 0,
-          status: listing?.status || 'unknown',
-          thumbnail: listing?.photo_urls?.[0] || null,
-        },
+        listing: listing ? {
+          id: listing.id,
+          title: listing.title || 'Unknown Listing',
+          price: listing.price || 0,
+          status: listing.status || 'unknown',
+          thumbnail: listing.photo_urls?.[0] || null,
+        } : null,
+        order: order ? {
+          id: order.id,
+          order_number: order.order_number,
+          status: order.status,
+          total_amount: order.total_amount,
+        } : null,
         last_message: lastMessage ? {
           content: lastMessage.content,
           sender_id: lastMessage.sender_id,

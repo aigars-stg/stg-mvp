@@ -125,7 +125,7 @@ export function NavbarSearch({
   const handleSubmit = () => {
     if (query.trim()) {
       onSearch?.(query.trim());
-      router.push(`/browse?search=${encodeURIComponent(query.trim())}`);
+      router.push(`/browse?q=${encodeURIComponent(query.trim())}`);
       setIsOpen(false);
       setQuery('');
       onNavigate?.();
@@ -216,17 +216,15 @@ export function NavbarSearch({
               )}
             >
               {/* Game Thumbnail */}
-              <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-bg-secondary overflow-hidden">
+              <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-bg-secondary overflow-hidden flex items-center justify-center">
                 {game.thumbnail ? (
                   <img
                     src={game.thumbnail}
                     alt=""
-                    className="w-full h-full object-cover"
+                    className="max-w-full max-h-full object-contain"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-text-muted">
-                    <Search className="w-4 h-4" />
-                  </div>
+                  <Search className="w-4 h-4 text-text-muted" />
                 )}
               </div>
 

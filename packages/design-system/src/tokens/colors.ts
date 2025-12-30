@@ -60,7 +60,8 @@ export const colors = {
     warningActive: '#DDBB6D',
 
     // Text colors
-    textPrimary: '#2E3440',       // polar.night
+    textHeading: '#2E3440',       // polar.night - headings (darker)
+    textPrimary: '#3B4252',       // polar.nightLight - body text (lighter)
     textSecondary: '#434C5E',     // polar.nightMedium at 70% opacity
     textMuted: '#4C566A',         // polar.nightDark at 50% opacity
     textInverse: '#ECEFF4',       // For dark backgrounds
