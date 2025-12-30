@@ -122,9 +122,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           async (event: string, session: any) => {
             if (!mounted) return;
 
-            // Handle SIGNED_IN specially - but only for FRESH sign-ins
+            // Handle SIGNED_IN specially - but only for FRESH OAuth sign-ins
             // Token refreshes also trigger SIGNED_IN, so check if we already had a session
-            const isFreshSignIn = event === 'SIGNED_IN' && !hadSessionRef.current;
+            // AND if this is an OAuth callback (has ?code= in URL)
+            const isOAuthCallback = typeof window !== 'undefined' && window.location.search.includes('code=');
+            const isFreshSignIn = event === 'SIGNED_IN' && !hadSessionRef.current && isOAuthCallback;
             if (isFreshSignIn) {
               hadSessionRef.current = true;
 
@@ -133,6 +135,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               // This only happens once per sign-in session.
               window.location.href = window.location.pathname; // Remove ?code= param
               return;
+            }
+
+            // Mark that we have a session (prevents reload on subsequent events)
+            if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+              hadSessionRef.current = true;
             }
 
             // For token refresh (SIGNED_IN but already had session), skip profile fetch
