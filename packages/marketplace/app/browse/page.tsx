@@ -4,31 +4,19 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Input, Select, Checkbox, Button, Badge } from '@second-turn/design-system';
 import {
-  Package, ChevronDown, Star, Sparkles, CircleCheck, Wrench, X,
-  Users, Baby, Clock, Bookmark, Trash2, MapPin, AlertCircle
+  Package, Star, Sparkles, CircleCheck, Wrench, X,
+  Users, Baby, Clock, MapPin, AlertCircle, SlidersHorizontal
 } from 'lucide-react';
 import { AggregatedGameCard } from '@/components/browse/AggregatedGameCard';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
-import {
-  getSavedSearches,
-  saveSearch,
-  deleteSavedSearch,
-  countActiveFilters,
-  getMaxSavedSearches,
-  type SavedSearch,
-  type SavedSearchFilters,
-} from '@/lib/saved-searches';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { CountryPrompt } from '@/components/onboarding';
-import { NotificationModal } from '@/components/common/NotificationModal';
-import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { cn } from '@/lib/utils';
 import { isOfflineError } from '@/lib/utils/offline';
 import { OfflineError } from '@/components/common/OfflineError';
-import { debounce } from '@/lib/bgg-utils';
 
 type ListingType = 'sell' | 'wanted';
 
@@ -55,7 +43,6 @@ export default function BrowsePage() {
 
   // Filter states - will be initialized from URL params
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchInputValue, setSearchInputValue] = useState(''); // Local state for immediate input display
   const [selectedConditions, setSelectedConditions] = useState<Set<string>>(new Set());
   const [selectedLanguages, setSelectedLanguages] = useState<Set<string>>(new Set());
   const [selectedPlayerCounts, setSelectedPlayerCounts] = useState<Set<number>>(new Set());
@@ -77,36 +64,8 @@ export default function BrowsePage() {
   // Track if filters have been initialized from URL
   const [filtersInitialized, setFiltersInitialized] = useState(false);
 
-  // Ref for search input
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
   // Ref for infinite scroll sentinel
   const loadMoreRef = useRef<HTMLDivElement>(null);
-
-  // Debounced search function (300ms delay)
-  const debouncedSetSearchQuery = useMemo(
-    () => debounce((value: string) => {
-      setSearchQuery(value);
-    }, 300),
-    []
-  );
-
-  // Sync searchInputValue when searchQuery changes externally (e.g., from URL or saved search)
-  useEffect(() => {
-    setSearchInputValue(searchQuery);
-  }, [searchQuery]);
-
-  // Saved searches state
-  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [saveSearchName, setSaveSearchName] = useState('');
-  const [saveSearchError, setSaveSearchError] = useState('');
-  const [showSavedSearchesMenu, setShowSavedSearchesMenu] = useState(false);
-
-  // Modal states
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
-  const [searchToDelete, setSearchToDelete] = useState<string | null>(null);
 
   // Initialize filters from URL params on mount (avoiding useSearchParams for SSG compatibility)
   useEffect(() => {
@@ -346,123 +305,6 @@ export default function BrowsePage() {
     return () => observer.disconnect();
   }, [loadingMore, loading, hasMore, currentPage, filtersInitialized, listingType]);
 
-  // Load saved searches on mount
-  useEffect(() => {
-    setSavedSearches(getSavedSearches());
-  }, []);
-
-  // Close saved searches menu on outside click
-  useEffect(() => {
-    if (!showSavedSearchesMenu) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('[data-saved-searches-menu]')) {
-        setShowSavedSearchesMenu(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showSavedSearchesMenu]);
-
-  // Keyboard shortcuts for search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // "/" key to focus search (but not when already typing in an input)
-      if (e.key === '/' && e.target instanceof HTMLElement && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      }
-
-      // Escape key to clear search when focused
-      if (e.key === 'Escape' && document.activeElement === searchInputRef.current) {
-        setSearchQuery('');
-        searchInputRef.current?.blur();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Get current filter state
-  const getCurrentFilters = (): SavedSearchFilters => ({
-    searchQuery: searchQuery || undefined,
-    selectedConditions: selectedConditions.size > 0 ? Array.from(selectedConditions) : undefined,
-    selectedLanguages: selectedLanguages.size > 0 ? Array.from(selectedLanguages) : undefined,
-    selectedPlayerCounts: selectedPlayerCounts.size > 0 ? Array.from(selectedPlayerCounts) : undefined,
-    selectedMinAges: selectedMinAges.size > 0 ? Array.from(selectedMinAges) : undefined,
-    selectedPlayingTimes: selectedPlayingTimes.size > 0 ? Array.from(selectedPlayingTimes) : undefined,
-    priceMin: priceMin || undefined,
-    priceMax: priceMax || undefined,
-    sortBy: sortBy !== 'recent' ? sortBy : undefined,
-  });
-
-  // Handle save search
-  const handleSaveSearch = () => {
-    try {
-      setSaveSearchError('');
-
-      if (!saveSearchName.trim()) {
-        setSaveSearchError('Please enter a name for your search');
-        return;
-      }
-
-      if (saveSearchName.length > 50) {
-        setSaveSearchError('Name must be 50 characters or less');
-        return;
-      }
-
-      const filters = getCurrentFilters();
-      const newSearch = saveSearch(saveSearchName.trim(), filters);
-
-      if (newSearch) {
-        setSavedSearches(getSavedSearches());
-        setShowSaveDialog(false);
-        setSaveSearchName('');
-        setShowSuccessModal(true);
-      }
-    } catch (error: any) {
-      setSaveSearchError(error.message || 'Failed to save search');
-    }
-  };
-
-  // Handle load saved search
-  const handleLoadSavedSearch = (search: SavedSearch) => {
-    const { filters } = search;
-
-    // Apply all filters
-    setSearchQuery(filters.searchQuery || '');
-    setSelectedConditions(new Set(filters.selectedConditions || []));
-    setSelectedLanguages(new Set(filters.selectedLanguages || []));
-    setSelectedPlayerCounts(new Set(filters.selectedPlayerCounts || []));
-    setSelectedMinAges(new Set(filters.selectedMinAges || []));
-    setSelectedPlayingTimes(new Set(filters.selectedPlayingTimes || []));
-    setPriceMin(filters.priceMin || '');
-    setPriceMax(filters.priceMax || '');
-    setSortBy(filters.sortBy || 'recent');
-
-    setShowSavedSearchesMenu(false);
-  };
-
-  // Handle delete saved search
-  const handleDeleteSavedSearch = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSearchToDelete(id);
-    setShowDeleteConfirmModal(true);
-  };
-
-  // Confirm delete saved search
-  const confirmDeleteSavedSearch = () => {
-    if (searchToDelete) {
-      deleteSavedSearch(searchToDelete);
-      setSavedSearches(getSavedSearches());
-      setShowDeleteConfirmModal(false);
-      setSearchToDelete(null);
-    }
-  };
-
   // Helper: Check if a player count matches a game's player range
   const playerCountMatches = (gamePlayerCount: string | null, selectedCount: number): boolean => {
     if (!gamePlayerCount) return false;
@@ -571,35 +413,6 @@ export default function BrowsePage() {
         max: maxPrice === -Infinity ? 100 : Math.ceil(maxPrice),
       },
     };
-  }, [games]);
-
-  // Generate dynamic placeholder based on actual games
-  const searchPlaceholder = useMemo(() => {
-    if (games.length === 0) {
-      return 'Search for board games...';
-    }
-
-    // Get unique game names
-    const uniqueGameNames = Array.from(new Set(games.map(g => g.game_name)));
-
-    if (uniqueGameNames.length === 0) {
-      return 'Search for board games...';
-    }
-
-    // Sort by name length (prefer shorter names for better mobile display)
-    const sortedByLength = [...uniqueGameNames].sort((a, b) => a.length - b.length);
-
-    // Take shorter names first, then randomly select 1 game
-    const candidates = sortedByLength.slice(0, Math.min(5, sortedByLength.length));
-    const randomIndex = Math.floor(Math.random() * candidates.length);
-    const selectedGame = candidates[randomIndex];
-
-    // Truncate if too long (max 25 chars for mobile)
-    const truncatedName = selectedGame.length > 25
-      ? selectedGame.substring(0, 25) + '...'
-      : selectedGame;
-
-    return `Search for ${truncatedName} or any other game...`;
   }, [games]);
 
   // Handle toggles
@@ -881,224 +694,50 @@ export default function BrowsePage() {
 
   return (
     <div>
-      {/* Hero Section */}
+      {/* Compact Unified Toolbar */}
       <div className={cn(
-        "border-b transition-colors",
-        listingType === 'sell' ? "bg-frost-ice/5 border-frost-ice/20" : "bg-aurora-orange/5 border-aurora-orange/20"
+        "border-b transition-colors sticky top-16 z-40 backdrop-blur-sm",
+        listingType === 'sell' ? "bg-snow-white/95 border-frost-ice/20" : "bg-snow-white/95 border-aurora-orange/20"
       )}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-polar-night mb-3">
-            {listingType === 'sell' ? 'Find your next game' : 'Wanted by players'}
-          </h1>
-          <p className="text-base sm:text-lg text-text-secondary mb-6 sm:mb-8 max-w-2xl">
-            {listingType === 'sell'
-              ? 'Every one of these is ready for a second turn at your table.'
-              : 'See something you own but never play? Give it a second turn.'
-            }
-          </p>
-
-          {/* Tab Toggle */}
-          <div className="mb-6 sm:mb-8">
-            <div className="inline-flex rounded-lg border-2 border-border p-1 bg-snow-white shadow-sm">
-              <button
-                onClick={() => setListingType('sell')}
-                className={cn(
-                  "px-6 py-2.5 rounded-md font-medium transition-all text-sm sm:text-base min-w-[140px]",
-                  listingType === 'sell'
-                    ? "bg-frost-ice text-snow-white shadow-sm"
-                    : "text-text-secondary hover:text-text"
-                )}
-                aria-pressed={listingType === 'sell'}
-                aria-label="Show games for sale"
-              >
-                For Sale
-              </button>
-              <button
-                onClick={() => setListingType('wanted')}
-                className={cn(
-                  "px-6 py-2.5 rounded-md font-medium transition-all text-sm sm:text-base min-w-[140px]",
-                  listingType === 'wanted'
-                    ? "bg-aurora-orange text-snow-white shadow-sm"
-                    : "text-text-secondary hover:text-text"
-                )}
-                aria-pressed={listingType === 'wanted'}
-                aria-label="Show wanted listings"
-              >
-                Wanted
-              </button>
-            </div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="max-w-2xl">
-            <div className="relative">
-              <Input
-                ref={searchInputRef}
-                placeholder={searchPlaceholder}
-                value={searchInputValue}
-                onChange={(e) => {
-                  setSearchInputValue(e.target.value);
-                  debouncedSetSearchQuery(e.target.value);
-                }}
-                leftIcon={
-                  <svg className="w-5 h-5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                }
-              />
-              {/* Clear Button */}
-              {searchInputValue && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+          {/* Desktop: Single row */}
+          <div className="hidden sm:flex items-center justify-between gap-4">
+            {/* Left side: Tabs + Count */}
+            <div className="flex items-center gap-4">
+              {/* Compact Tab Toggle */}
+              <div className="inline-flex rounded-lg border border-border p-0.5 bg-snow-white/80 shadow-sm">
                 <button
-                  onClick={() => {
-                    setSearchInputValue('');
-                    setSearchQuery('');
-                  }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-polar-night/5 rounded-full transition-colors"
-                  aria-label="Clear search"
-                >
-                  <X className="w-4 h-4 text-text-muted" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Country Prompt - shown if logged in but no country set */}
-        {user && !profile?.country && <CountryPrompt />}
-
-        {/* Top Filter Bar */}
-        <div className="mb-6 space-y-4">
-          {/* Toolbar */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 sm:justify-between">
-            {/* Left: Filters Toggle + Listing Count */}
-            <div className="flex items-center gap-3 flex-wrap">
-              {/* Mobile: Open drawer */}
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setMobileFiltersOpen(true)}
-                className="lg:hidden"
-                leftIcon={
-                  <ChevronDown className="w-4 h-4" />
-                }
-              >
-                Filters
-                {activeFiltersCount > 0 && (
-                  <Badge variant="trust" className="ml-2">
-                    {activeFiltersCount}
-                  </Badge>
-                )}
-              </Button>
-
-              {/* Desktop: Toggle collapsible panel */}
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setFiltersOpen(!filtersOpen)}
-                className="hidden lg:flex"
-                leftIcon={
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform ${filtersOpen ? 'rotate-180' : ''}`}
-                  />
-                }
-              >
-                Filters
-                {activeFiltersCount > 0 && (
-                  <Badge variant="trust" className="ml-2">
-                    {activeFiltersCount}
-                  </Badge>
-                )}
-              </Button>
-
-              {/* Saved Searches Dropdown */}
-              <div className="relative" data-saved-searches-menu>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowSavedSearchesMenu(!showSavedSearchesMenu)}
-                  leftIcon={<Bookmark className="w-4 h-4" />}
-                >
-                  Saved
-                  {savedSearches.length > 0 && (
-                    <Badge variant="default" className="ml-2">
-                      {savedSearches.length}
-                    </Badge>
+                  onClick={() => setListingType('sell')}
+                  className={cn(
+                    "px-4 py-1.5 rounded-md text-sm font-medium transition-all",
+                    listingType === 'sell'
+                      ? "bg-frost-ice text-snow-white shadow-sm"
+                      : "text-text-secondary hover:text-text"
                   )}
-                </Button>
-
-                {/* Saved Searches Menu */}
-                {showSavedSearchesMenu && (
-                  <div className="absolute top-full left-0 mt-2 w-72 bg-snow-white border-2 border-border rounded-lg shadow-lg z-50">
-                    <div className="p-3 border-b border-border-subtle">
-                      <h3 className="font-semibold text-sm text-polar-night">Saved Searches</h3>
-                    </div>
-                    <div className="max-h-80 overflow-y-auto">
-                      {savedSearches.length === 0 ? (
-                        <div className="p-6 text-center text-text-muted text-sm">
-                          <Bookmark className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                          No saved searches yet
-                        </div>
-                      ) : (
-                        <div className="py-1">
-                          {savedSearches.map((search) => (
-                            <button
-                              key={search.id}
-                              onClick={() => handleLoadSavedSearch(search)}
-                              className="w-full px-4 py-3 hover:bg-bg-elevated text-left flex items-center justify-between group"
-                            >
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium text-sm text-polar-night truncate">
-                                  {search.name}
-                                </div>
-                                <div className="text-xs text-text-secondary">
-                                  {countActiveFilters(search.filters)} filters
-                                </div>
-                              </div>
-                              <button
-                                onClick={(e) => handleDeleteSavedSearch(search.id, e)}
-                                className="ml-2 p-1 hover:bg-aurora-red/10 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="Delete search"
-                              >
-                                <Trash2 className="w-4 h-4 text-aurora-red" />
-                              </button>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Save Search Button - only show when filters active */}
-              {activeFiltersCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setShowSaveDialog(true);
-                    setSaveSearchName('');
-                    setSaveSearchError('');
-                  }}
-                  disabled={savedSearches.length >= getMaxSavedSearches()}
-                  title={savedSearches.length >= getMaxSavedSearches() ? `Maximum ${getMaxSavedSearches()} saved searches` : 'Save current filters'}
+                  aria-pressed={listingType === 'sell'}
+                  aria-label="Show games for sale"
                 >
-                  Save Search
-                </Button>
-              )}
-
-              <div className="text-sm text-text-secondary">
-                <span className="font-medium text-polar-night">
-                  {listingType === 'sell' ? filteredGames.length : filteredWantedListings.length}
-                </span> {listingType === 'sell' ? 'games' : 'wanted listings'}
+                  For Sale
+                </button>
+                <button
+                  onClick={() => setListingType('wanted')}
+                  className={cn(
+                    "px-4 py-1.5 rounded-md text-sm font-medium transition-all",
+                    listingType === 'wanted'
+                      ? "bg-aurora-orange text-snow-white shadow-sm"
+                      : "text-text-secondary hover:text-text"
+                  )}
+                  aria-pressed={listingType === 'wanted'}
+                  aria-label="Show wanted listings"
+                >
+                  Wanted
+                </button>
               </div>
             </div>
 
-            {/* Right: Sort */}
-            <div className="w-full sm:w-auto">
+            {/* Right side: Sort, Filters, Saved */}
+            <div className="flex items-center gap-2">
+              {/* Sort Dropdown */}
               <Select
                 options={
                   listingType === 'sell'
@@ -1119,9 +758,100 @@ export default function BrowsePage() {
                 onChange={setSortBy}
                 selectSize="sm"
               />
+
+              {/* Filters Button */}
+              <Button
+                variant={filtersOpen ? 'primary' : 'secondary'}
+                size="sm"
+                onClick={() => setFiltersOpen(!filtersOpen)}
+              >
+                <SlidersHorizontal className="w-4 h-4 mr-1.5" />
+                Filters
+              </Button>
             </div>
           </div>
 
+          {/* Mobile: Two rows */}
+          <div className="sm:hidden space-y-3">
+            {/* Row 1: Full-width tabs */}
+            <div className="flex rounded-lg border border-border p-0.5 bg-snow-white/80">
+              <button
+                onClick={() => setListingType('sell')}
+                className={cn(
+                  "flex-1 py-2 rounded-md text-sm font-medium transition-all",
+                  listingType === 'sell'
+                    ? "bg-frost-ice text-snow-white"
+                    : "text-text-secondary"
+                )}
+                aria-pressed={listingType === 'sell'}
+                aria-label="Show games for sale"
+              >
+                For Sale
+              </button>
+              <button
+                onClick={() => setListingType('wanted')}
+                className={cn(
+                  "flex-1 py-2 rounded-md text-sm font-medium transition-all",
+                  listingType === 'wanted'
+                    ? "bg-aurora-orange text-snow-white"
+                    : "text-text-secondary"
+                )}
+                aria-pressed={listingType === 'wanted'}
+                aria-label="Show wanted listings"
+              >
+                Wanted
+              </button>
+            </div>
+
+            {/* Row 2: Controls - Sort first, then Filters */}
+            <div className="flex items-center gap-2">
+              {/* Sort Dropdown */}
+              <div className="flex-1">
+                <Select
+                  options={
+                    listingType === 'sell'
+                      ? [
+                          { value: 'recent', label: 'Recently listed' },
+                          { value: 'price-low', label: 'Price: Low to High' },
+                          { value: 'price-high', label: 'Price: High to Low' },
+                        ]
+                      : [
+                          { value: 'recent', label: 'Recently posted' },
+                          { value: 'expiring', label: 'Expiring Soon' },
+                          { value: 'budget-high', label: 'Budget: High to Low' },
+                          { value: 'budget-low', label: 'Budget: Low to High' },
+                          { value: 'popular', label: 'Most Responses' },
+                        ]
+                  }
+                  value={sortBy}
+                  onChange={setSortBy}
+                  selectSize="sm"
+                />
+              </div>
+
+              {/* Mobile Filters Button */}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setMobileFiltersOpen(true)}
+                className="flex-shrink-0"
+                aria-label="Open filters"
+              >
+                <SlidersHorizontal className="w-4 h-4 mr-1.5" />
+                Filters
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+        {/* Country Prompt - shown if logged in but no country set */}
+        {user && !profile?.country && <CountryPrompt />}
+
+        {/* Filter Panels Container */}
+        <div className="mb-6 space-y-4">
           {/* Collapsible Filter Panel - Desktop Only */}
           {filtersOpen && (
             <div className="hidden lg:block border-2 border-border rounded-lg p-4 sm:p-6 bg-bg-elevated animate-in slide-in-from-top-2 duration-300">
@@ -1440,15 +1170,6 @@ export default function BrowsePage() {
               </>
                 )}
               </div>
-
-              {/* Clear All Button */}
-              {activeFiltersCount > 0 && (
-                <div className="mt-4 pt-4 border-t border-border-subtle">
-                  <Button variant="ghost" size="sm" onClick={clearFilters} className="w-full sm:w-auto">
-                    Clear all filters
-                  </Button>
-                </div>
-              )}
             </div>
           )}
 
@@ -1787,24 +1508,6 @@ export default function BrowsePage() {
           )}
         </div>
 
-        {/* BGG Attribution - Above Grid */}
-        {!loading && !error && filteredGames.length > 0 && (
-          <div className="flex justify-end mb-4">
-            <a
-              href="https://boardgamegeek.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block"
-            >
-              <img
-                src="/images/powered-by-bgg-rgb.svg"
-                alt="Powered by BoardGameGeek"
-                className="h-6 opacity-60 hover:opacity-100 transition-opacity"
-              />
-            </a>
-          </div>
-        )}
-
         {/* Loading State - Skeleton Cards */}
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
@@ -1881,10 +1584,23 @@ export default function BrowsePage() {
 
             {/* No More Results - Only for sell listings */}
             {listingType === 'sell' && !hasMore && !loadingMore && filteredGames.length > 0 && (
-              <div className="text-center py-8 border-t border-border-subtle">
+              <div className="text-center py-8 border-t border-border-subtle space-y-4">
                 <p className="text-sm text-text-secondary">
                   You've reached the end! Showing all {totalCount} games.
                 </p>
+                {/* BGG Attribution */}
+                <a
+                  href="https://boardgamegeek.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block"
+                >
+                  <img
+                    src="/images/powered-by-bgg-rgb.svg"
+                    alt="Powered by BoardGameGeek"
+                    className="h-5 opacity-50 hover:opacity-80 transition-opacity"
+                  />
+                </a>
               </div>
             )}
           </>
@@ -1915,86 +1631,7 @@ export default function BrowsePage() {
           </div>
         )}
 
-        {/* Save Search Dialog */}
-        {showSaveDialog && (
-          <div className="fixed inset-0 bg-polar-night/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-snow-white rounded-lg shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-200">
-              <h2 className="text-xl font-bold text-polar-night mb-4">Save Search</h2>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-polar-night mb-2">
-                  Search Name
-                </label>
-                <Input
-                  value={saveSearchName}
-                  onChange={(e) => setSaveSearchName(e.target.value)}
-                  placeholder="e.g., Family Games under €30"
-                  maxLength={50}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSaveSearch();
-                    } else if (e.key === 'Escape') {
-                      setShowSaveDialog(false);
-                    }
-                  }}
-                  autoFocus
-                />
-                <div className="flex items-center justify-between mt-1">
-                  <p className="text-xs text-text-secondary">
-                    {activeFiltersCount} filter{activeFiltersCount !== 1 ? 's' : ''} will be saved
-                  </p>
-                  <p className="text-xs text-text-muted">
-                    {saveSearchName.length}/50
-                  </p>
-                </div>
-                {saveSearchError && (
-                  <p className="text-sm text-aurora-red mt-2">{saveSearchError}</p>
-                )}
-              </div>
-
-              <div className="flex gap-3 justify-end">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowSaveDialog(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={handleSaveSearch}
-                >
-                  Save Search
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* Success Modal */}
-      <NotificationModal
-        isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
-        type="success"
-        message="Search saved successfully!"
-      />
-
-      {/* Delete Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={showDeleteConfirmModal}
-        onClose={() => {
-          setShowDeleteConfirmModal(false);
-          setSearchToDelete(null);
-        }}
-        onConfirm={confirmDeleteSavedSearch}
-        title="Delete Saved Search"
-        message="Are you sure you want to delete this saved search?"
-        confirmText="Delete"
-        cancelText="Cancel"
-        icon={<Trash2 className="w-12 h-12 text-aurora-red" />}
-      />
     </div>
   );
 }

@@ -70,7 +70,8 @@ export async function middleware(request: NextRequest) {
         response.cookies.delete('sb-refresh-token');
         // Also try Supabase's default cookie names
         response.cookies.delete(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`);
-      } else {
+      } else if (!error.message?.includes('Auth session missing')) {
+        // Only log unexpected auth errors (session missing is normal for anonymous users)
         console.error('🔐 [Middleware] Auth error:', error.message);
       }
     } else {

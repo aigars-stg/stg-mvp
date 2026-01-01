@@ -310,38 +310,35 @@ export default function SellerOnboardingPage() {
 
                 {!status?.stripe_connected && status?.terms_accepted && (
                   <>
-                    {/* Country Selection */}
-                    <div className="bg-frost-ice/10 border border-frost-ice/20 rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">
-                      <p className="text-xs sm:text-sm text-text-secondary mb-3">
-                        <strong>Select your country:</strong>
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {COUNTRIES.map((c) => (
-                          <button
-                            key={c.code}
-                            onClick={() => handleSelectCountry(c.code)}
-                            disabled={savingCountry !== null}
-                            className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${
-                              profile?.country === c.code
-                                ? 'bg-frost-ice text-white'
-                                : 'bg-snow-white hover:bg-frost-ice/20 border border-border'
-                            }`}
-                          >
-                            {savingCountry === c.code ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <span className={c.flagClass} />
-                            )}
-                            <span>{c.name}</span>
-                          </button>
-                        ))}
-                      </div>
-                      {profile?.country && (
-                        <p className="text-xs text-frost-ice mt-2">
-                          Stripe will be set up for {COUNTRIES.find(c => c.code === profile.country)?.name}
+                    {/* Country Selection - only show if country not already set */}
+                    {!profile?.country && (
+                      <div className="bg-frost-ice/10 border border-frost-ice/20 rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">
+                        <p className="text-xs sm:text-sm text-text-secondary mb-3">
+                          <strong>Select your country:</strong>
                         </p>
-                      )}
-                    </div>
+                        <div className="flex flex-wrap gap-2">
+                          {COUNTRIES.map((c) => (
+                            <button
+                              key={c.code}
+                              onClick={() => handleSelectCountry(c.code)}
+                              disabled={savingCountry !== null}
+                              className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${
+                                profile?.country === c.code
+                                  ? 'bg-frost-ice text-white'
+                                  : 'bg-snow-white hover:bg-frost-ice/20 border border-border'
+                              }`}
+                            >
+                              {savingCountry === c.code ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <span className={c.flagClass} />
+                              )}
+                              <span>{c.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Requirements */}
                     <div className="bg-snow-stormLight border border-border rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">

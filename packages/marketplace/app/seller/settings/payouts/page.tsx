@@ -9,7 +9,7 @@ import {
   Loader2,
   AlertCircle,
   ExternalLink,
-  DollarSign,
+  Euro,
   ArrowLeft,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -148,8 +148,8 @@ function SellerPayoutSettingsContent() {
             </Button>
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <DollarSign className="w-8 h-8 text-frost-ice" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">Payout Settings</h1>
+            <Euro className="w-8 h-8 text-frost-ice" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">Payout settings</h1>
           </div>
           <p className="text-text-secondary">Manage how you receive payments from sales</p>
         </div>

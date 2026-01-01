@@ -39,7 +39,7 @@ export default function SellerOnboardingCompletePage() {
             <CheckCircle2 className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-polar-night mb-4">
-            You're All Set!
+            You're all set!
           </h1>
           <p className="text-lg text-text-secondary">
             Welcome to Second Turn Games. You can now start listing and selling your board games.
@@ -243,7 +243,7 @@ export default function SellerOnboardingCompletePage() {
                 href="/seller/settings/payouts"
                 className="text-sm text-frost-ice hover:underline font-medium"
               >
-                View Payout Settings →
+                View payout settings →
               </Link>
             </div>
           </div>

@@ -260,7 +260,11 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
             <div
               id={`${selectId}-listbox`}
               role="listbox"
-              className="absolute z-50 w-full mt-2 bg-bg-elevated border-2 border-border rounded-md shadow-lg max-h-60 overflow-auto"
+              className={clsx(
+                "absolute z-50 min-w-full mt-2 bg-bg-elevated border-2 border-border rounded-md shadow-lg max-h-60 overflow-auto",
+                selectSize === 'sm' && 'text-sm',
+                selectSize === 'lg' && 'text-lg'
+              )}
             >
               {options.map((option, index) => (
                 <div
@@ -268,7 +272,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                   role="option"
                   aria-selected={option.value === value}
                   className={clsx(
-                    'px-3 py-2 cursor-pointer transition-colors',
+                    'px-3 py-2 cursor-pointer transition-colors whitespace-nowrap',
                     option.value === value && 'bg-frost-ice/10 text-frost-arctic font-medium',
                     option.value !== value && 'text-text hover:bg-snow-stormLight',
                     focusedIndex === index && 'bg-frost-ice/20'
