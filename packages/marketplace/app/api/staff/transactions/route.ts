@@ -3,6 +3,8 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { createServiceClient } from '@/lib/supabase/client';
 
+export const dynamic = 'force-dynamic';
+
 interface OrderRow {
   id: string;
   order_number: string;
