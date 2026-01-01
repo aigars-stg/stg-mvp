@@ -34,5 +34,13 @@
     "baseline-browser-mapping": "^2.9.7",
     "csv-parser": "^3.2.0",
     "sharp": "^0.34.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@vercel/speed-insights",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }
