@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * PATCH /api/wanted/[id]/status
@@ -16,21 +15,7 @@ export async function PATCH(
     const body = await request.json();
     const { status } = body;
 
-    console.log(`📝 [Update Wanted Listing Status] Updating wanted listing ${id} - status: ${status}`);
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -61,8 +46,6 @@ export async function PATCH(
       .single();
 
     if (updateError) {
-      console.error('❌ [Update Wanted Listing Status] Update error:', updateError);
-
       if (updateError.code === 'PGRST116') {
         return NextResponse.json(
           { error: 'Wanted listing not found or you do not have permission to update it' },
@@ -76,16 +59,14 @@ export async function PATCH(
       );
     }
 
-    console.log(`✅ [Update Wanted Listing Status] Successfully updated wanted listing ${id} to ${status}`);
-
     return NextResponse.json({
       wantedListing,
       message: `Wanted listing ${status === 'fulfilled' ? 'marked as fulfilled' : status === 'cancelled' ? 'cancelled' : status === 'active' ? 'reactivated' : 'updated'} successfully`,
     });
-  } catch (error: any) {
-    console.error('❌ [Update Wanted Listing Status] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to update wanted listing status', details: error.message },
+      { error: 'Failed to update wanted listing status', details: message },
       { status: 500 }
     );
   }

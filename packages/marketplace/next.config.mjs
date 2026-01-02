@@ -12,6 +12,31 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@supabase/supabase-js'],
   },
+  // Enable image optimization for external domains
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cf.geekdo-images.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
+  // Redirect old seller profile URLs to new unified profile URLs
+  async redirects() {
+    return [
+      {
+        source: '/sellers/:id',
+        destination: '/profile/:id',
+        permanent: true, // 301 redirect for SEO
+      },
+    ];
+  },
 };
 
 // Configure PWA

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * GET /api/reviews
@@ -13,18 +12,7 @@ import { cookies } from 'next/headers';
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     const { searchParams } = new URL(request.url);
     const sellerId = searchParams.get('seller_id');
@@ -47,7 +35,6 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + limit - 1);
 
     if (reviewsError) {
-      console.error('❌ [Reviews] Error fetching reviews:', reviewsError);
       return NextResponse.json(
         { error: 'Failed to fetch reviews', details: reviewsError.message },
         { status: 500 }
@@ -59,7 +46,7 @@ export async function GET(request: NextRequest) {
       .rpc('get_seller_trust_summary', { p_seller_id: sellerId });
 
     if (trustError) {
-      console.error('❌ [Reviews] Error fetching trust summary:', trustError);
+      // Non-blocking error - continue without trust summary
     }
 
     return NextResponse.json({
@@ -68,7 +55,6 @@ export async function GET(request: NextRequest) {
       trust_summary: trustSummary || null,
     });
   } catch (error: unknown) {
-    console.error('❌ [Reviews] Unexpected error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch reviews', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
@@ -87,18 +73,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -140,20 +115,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if buyer can review this order
-    const { data: canReview, error: canReviewError } = await supabase
+    const { data: canReviewData, error: canReviewError } = await supabase
       .rpc('can_buyer_review_order', {
         p_order_id: order_id,
         p_buyer_id: user.id,
       });
 
     if (canReviewError) {
-      console.error('❌ [Reviews] Error checking review eligibility:', canReviewError);
       return NextResponse.json(
         { error: 'Failed to check review eligibility', details: canReviewError.message },
         { status: 500 }
       );
     }
 
+    const canReview = canReviewData as { can_review: boolean; reason?: string } | null;
     if (!canReview?.can_review) {
       return NextResponse.json(
         { error: canReview?.reason || 'Cannot review this order' },
@@ -189,8 +164,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (reviewError) {
-      console.error('❌ [Reviews] Error creating review:', reviewError);
-
       // Check for unique constraint violation
       if (reviewError.code === '23505') {
         return NextResponse.json(
@@ -205,14 +178,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('✅ [Reviews] Review created:', review.id);
-
     return NextResponse.json({
       success: true,
       review,
     });
   } catch (error: unknown) {
-    console.error('❌ [Reviews] Unexpected error:', error);
     return NextResponse.json(
       { error: 'Failed to submit review', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

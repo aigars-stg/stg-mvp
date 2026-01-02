@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/ratelimit';
 import type { Message, SendMessageRequest, Conversation } from '@/lib/types/message';
 import { MESSAGE_CONSTRAINTS } from '@/lib/types/message';
@@ -16,26 +15,7 @@ export async function GET(
 ) {
   try {
     const conversationId = params.id;
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set(name, value, options);
-          },
-          remove(name: string, options: any) {
-            cookieStore.delete(name);
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -79,12 +59,23 @@ export async function GET(
       );
     }
 
-    // Get listing details
-    const { data: listing } = await supabase
-      .from('listings')
-      .select('id, title, price, status, photo_urls, game_name, game_id')
-      .eq('id', conversation.listing_id)
-      .single();
+    // Get listing details (only if conversation has a listing)
+    let listing: {
+      id: string;
+      game_name: string;
+      price: number;
+      status: string;
+      photo_urls: string[];
+      bgg_game_id: number;
+    } | null = null;
+    if (conversation.listing_id) {
+      const { data } = await supabase
+        .from('listings')
+        .select('id, game_name, price, status, photo_urls, bgg_game_id')
+        .eq('id', conversation.listing_id)
+        .single();
+      listing = data;
+    }
 
     // Get other user's profile
     const otherUserId = conversation.buyer_id === user.id
@@ -113,16 +104,24 @@ export async function GET(
       .order('created_at', { ascending: true });
 
     if (messagesError) {
-      console.error('Error fetching messages:', messagesError);
       return NextResponse.json(
         { error: 'Failed to fetch messages' },
         { status: 500 }
       );
     }
 
-    // Attach sender profiles to messages
+    // Attach sender profiles to messages, coercing nullable DB fields
     const messagesWithProfiles: Message[] = (messages || []).map(msg => ({
-      ...msg,
+      id: msg.id,
+      conversation_id: msg.conversation_id,
+      sender_id: msg.sender_id,
+      content: msg.content,
+      is_system_message: msg.is_system_message ?? false,
+      system_message_type: msg.system_message_type as Message['system_message_type'],
+      photo_urls: msg.photo_urls ?? [],
+      created_at: msg.created_at ?? new Date().toISOString(),
+      updated_at: msg.updated_at ?? new Date().toISOString(),
+      deleted_at: msg.deleted_at,
       sender: msg.sender_id === user.id
         ? {
             id: userProfile?.id || user.id,
@@ -136,16 +135,24 @@ export async function GET(
           },
     }));
 
-    // Build full conversation response
+    // Build full conversation response, coercing nullable DB fields
     const conversationData: Conversation = {
-      ...conversation,
+      id: conversation.id,
+      listing_id: conversation.listing_id,
+      buyer_id: conversation.buyer_id,
+      seller_id: conversation.seller_id,
+      last_message_at: conversation.last_message_at ?? new Date().toISOString(),
+      buyer_archived_at: conversation.buyer_archived_at,
+      seller_archived_at: conversation.seller_archived_at,
+      created_at: conversation.created_at ?? new Date().toISOString(),
+      updated_at: conversation.updated_at ?? new Date().toISOString(),
       listing: listing ? {
         id: listing.id,
-        title: listing.title,
+        title: listing.game_name,
         price: listing.price,
         status: listing.status,
         photos: listing.photo_urls || [],
-        game_id: listing.game_id,
+        game_id: listing.bgg_game_id,
         game_name: listing.game_name,
       } : undefined,
       buyer_profile: conversation.buyer_id === user.id
@@ -179,8 +186,7 @@ export async function GET(
       },
       { status: 200 }
     );
-  } catch (error: any) {
-    console.error('Get messages error:', error);
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -227,25 +233,7 @@ export async function POST(
       );
     }
 
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set(name, value, options);
-          },
-          remove(name: string, options: any) {
-            cookieStore.delete(name);
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -319,7 +307,6 @@ export async function POST(
       .single();
 
     if (messageError) {
-      console.error('Error creating message:', messageError);
       return NextResponse.json(
         { error: 'Failed to send message' },
         { status: 500 }
@@ -334,7 +321,16 @@ export async function POST(
       .single();
 
     const messageWithProfile: Message = {
-      ...newMessage,
+      id: newMessage.id,
+      conversation_id: newMessage.conversation_id,
+      sender_id: newMessage.sender_id,
+      content: newMessage.content,
+      is_system_message: newMessage.is_system_message ?? false,
+      system_message_type: newMessage.system_message_type as Message['system_message_type'],
+      photo_urls: newMessage.photo_urls ?? [],
+      created_at: newMessage.created_at ?? new Date().toISOString(),
+      updated_at: newMessage.updated_at ?? new Date().toISOString(),
+      deleted_at: newMessage.deleted_at,
       sender: {
         id: senderProfile?.id || user.id,
         full_name: senderProfile?.full_name || null,
@@ -361,8 +357,7 @@ export async function POST(
       { message: messageWithProfile },
       { status: 201 }
     );
-  } catch (error: any) {
-    console.error('Send message error:', error);
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

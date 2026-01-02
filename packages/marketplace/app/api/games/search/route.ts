@@ -72,17 +72,9 @@ export async function GET(request: NextRequest) {
 
     // Also search in alternate names (slower, client-side filtering)
     // Only do this if we have room for more results
-    type GameResult = {
-      id: number;
-      name: string;
-      yearpublished: number | null;
-      thumbnail: string | null;
-      bayesaverage: number | null;
-      is_expansion: boolean | null;
-      alternate_names: string[] | null;
-    };
+    type GameRow = NonNullable<typeof nameMatches>[number];
 
-    let alternateMatches: GameResult[] = [];
+    let alternateMatches: GameRow[] = [];
     if ((nameMatches?.length || 0) < limit) {
       const { data: allGamesWithAlternates } = await supabase
         .from('games')
@@ -91,12 +83,12 @@ export async function GET(request: NextRequest) {
         .limit(500); // Fetch more to filter client-side
 
       if (allGamesWithAlternates) {
-        alternateMatches = allGamesWithAlternates.filter((game: GameResult) => {
+        alternateMatches = allGamesWithAlternates.filter((game) => {
           if (!game.alternate_names) return false;
           const alternateNames = Array.isArray(game.alternate_names)
-            ? game.alternate_names
+            ? (game.alternate_names as string[])
             : [];
-          return alternateNames.some((altName: string) =>
+          return alternateNames.some((altName) =>
             altName.toLowerCase().includes(query.toLowerCase())
           );
         });
@@ -104,16 +96,18 @@ export async function GET(request: NextRequest) {
     }
 
     // Combine results, removing duplicates
-    const nameMatchIds = new Set(nameMatches?.map((g: GameResult) => g.id) || []);
-    const uniqueAlternateMatches = alternateMatches.filter((g: GameResult) => !nameMatchIds.has(g.id));
+    const nameMatchIds = new Set(nameMatches?.map((g) => g.id) || []);
+    const uniqueAlternateMatches = alternateMatches.filter((g) => !nameMatchIds.has(g.id));
     const games = [...(nameMatches || []), ...uniqueAlternateMatches];
 
     // Sort by: 1) relevance, 2) base games before expansions, 3) rating
     const sortedGames = (games || [])
       .map((game) => {
         // Check if match was in alternate names
-        const alternateNames = Array.isArray(game.alternate_names) ? game.alternate_names : [];
-        const matchedInAlternate = alternateNames.some((altName: string) =>
+        const alternateNames = Array.isArray(game.alternate_names)
+          ? (game.alternate_names as string[])
+          : [];
+        const matchedInAlternate = alternateNames.some((altName) =>
           altName.toLowerCase().includes(query.toLowerCase())
         ) && !game.name.toLowerCase().includes(query.toLowerCase());
 
@@ -142,9 +136,11 @@ export async function GET(request: NextRequest) {
       .map(({ _relevanceScore, alternate_names, ...game }) => game); // Remove helper fields and alternate_names from response
 
     // Optionally add listing counts
-    let gamesWithListings = sortedGames;
+    type GameWithOptionalListingCount = (typeof sortedGames)[number] & { listingCount?: number };
+    let gamesWithListings: GameWithOptionalListingCount[] = sortedGames;
+
     if (withListings && sortedGames.length > 0) {
-      const gameIds = sortedGames.map((g: { id: number }) => g.id);
+      const gameIds = sortedGames.map((g) => g.id);
       const { data: listingCounts } = await supabase
         .from('listings')
         .select('bgg_game_id')
@@ -153,18 +149,18 @@ export async function GET(request: NextRequest) {
 
       // Count listings per game
       const countMap = new Map<number, number>();
-      listingCounts?.forEach((l: { bgg_game_id: number }) => {
+      listingCounts?.forEach((l) => {
         countMap.set(l.bgg_game_id, (countMap.get(l.bgg_game_id) || 0) + 1);
       });
 
-      gamesWithListings = sortedGames.map((game: { id: number }) => ({
+      gamesWithListings = sortedGames.map((game) => ({
         ...game,
         listingCount: countMap.get(game.id) || 0,
       }));
 
       // When showing listings, prioritize games with listings
-      gamesWithListings.sort((a: { listingCount: number }, b: { listingCount: number }) =>
-        b.listingCount - a.listingCount
+      gamesWithListings.sort((a, b) =>
+        (b.listingCount || 0) - (a.listingCount || 0)
       );
     }
 

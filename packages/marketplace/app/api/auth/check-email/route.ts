@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (error) {
-      console.error('Error checking email:', error);
       return NextResponse.json(
         { error: 'Failed to check email' },
         { status: 500 }
@@ -72,7 +71,6 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(data.id);
 
     if (userError || !user) {
-      console.error('Error fetching user details:', userError);
       // User exists in profiles but not in auth - edge case
       return NextResponse.json({ exists: true, providers: [] });
     }
@@ -100,8 +98,7 @@ export async function POST(request: NextRequest) {
       exists: true,
       providers,
     });
-  } catch (error: any) {
-    console.error('Check email error:', error);
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

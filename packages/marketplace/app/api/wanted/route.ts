@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * POST /api/wanted
@@ -8,34 +7,17 @@ import { cookies } from 'next/headers';
  */
 export async function POST(request: NextRequest) {
   try {
-    console.log('📝 [Create Wanted Listing] Starting wanted listing creation...');
-
-    // Create Supabase client with cookies for auth
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error('❌ [Create Wanted Listing] Unauthorized:', authError);
       return NextResponse.json(
         { error: 'You must be signed in to create a wanted listing' },
         { status: 401 }
       );
     }
-
-    console.log(`📝 [Create Wanted Listing] User authenticated: ${user.id}`);
 
     const body = await request.json();
     const {
@@ -125,12 +107,6 @@ export async function POST(request: NextRequest) {
       // expires_at defaults to NOW() + 30 days (set in DB)
     };
 
-    console.log('📝 [Create Wanted Listing] Inserting wanted listing:', {
-      game: selectedGame.name,
-      budget: `€${wantedListingData.min_price || 0}-${wantedListingData.max_price}`,
-      conditions: acceptableConditions.length,
-    });
-
     // Insert wanted listing into database
     const { data: wantedListing, error: insertError } = await (supabase as any)
       .from('wanted_listings')
@@ -139,7 +115,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('❌ [Create Wanted Listing] Insert error:', insertError);
       return NextResponse.json(
         {
           error: 'Failed to create wanted listing',
@@ -149,18 +124,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`✅ [Create Wanted Listing] Successfully created wanted listing ${wantedListing.id}`);
-
     return NextResponse.json({
       wantedListing,
       message: 'Wanted listing created successfully',
     });
-  } catch (error: any) {
-    console.error('❌ [Create Wanted Listing] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       {
         error: 'Failed to create wanted listing',
-        details: error.message,
+        details: message,
       },
       { status: 500 }
     );
@@ -189,22 +162,7 @@ export async function GET(request: NextRequest) {
     // Calculate offset for pagination
     const from = (page - 1) * limit;
     const to = from + limit - 1;
-
-    console.log(`📋 [Get Wanted Listings] Fetching wanted listings - gameId: ${gameId}, buyerId: ${buyerId}, status: ${status}, page: ${page}, limit: ${limit}`);
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Build query with buyer profile join
     let query = (supabase as any)
@@ -242,7 +200,6 @@ export async function GET(request: NextRequest) {
     const { data: wantedListings, error, count } = await query;
 
     if (error) {
-      console.error('❌ [Get Wanted Listings] Query error:', JSON.stringify(error, null, 2));
       return NextResponse.json(
         { error: 'Failed to fetch wanted listings', details: error.message },
         { status: 500 }
@@ -288,8 +245,6 @@ export async function GET(request: NextRequest) {
     const total = count || 0;
     const hasMore = (from + (wantedListings?.length || 0)) < total;
 
-    console.log(`✅ [Get Wanted Listings] Successfully fetched ${wantedListings?.length || 0} wanted listings (page ${page}, total: ${total}, hasMore: ${hasMore})`);
-
     return NextResponse.json({
       wantedListings: wantedListings || [],
       pagination: {
@@ -299,10 +254,10 @@ export async function GET(request: NextRequest) {
         hasMore,
       },
     });
-  } catch (error: any) {
-    console.error('❌ [Get Wanted Listings] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch wanted listings', details: error.message },
+      { error: 'Failed to fetch wanted listings', details: message },
       { status: 500 }
     );
   }

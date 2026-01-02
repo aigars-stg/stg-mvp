@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * GET /api/collections
@@ -17,18 +16,7 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') || 'recently_listed';
     const limit = parseInt(searchParams.get('limit') || '8');
 
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     let listings: any[] = [];
     let title = '';
@@ -82,7 +70,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    console.error('❌ [Collections] Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch collection', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
@@ -102,7 +89,6 @@ async function getRecentlyListed(supabase: any, limit: number) {
     .limit(limit);
 
   if (error) {
-    console.error('Error fetching recently listed:', error);
     return { listings: [] };
   }
 
@@ -154,7 +140,6 @@ async function getPopularGames(supabase: any, limit: number) {
     .limit(limit * 3);
 
   if (error) {
-    console.error('Error fetching popular games:', error);
     return { listings: [] };
   }
 
@@ -190,7 +175,6 @@ async function getPriceDrops(supabase: any, limit: number) {
     .limit(limit * 2);
 
   if (error) {
-    console.error('Error fetching price drops:', error);
     return { listings: [] };
   }
 
@@ -263,7 +247,6 @@ async function getTrustedSellerListings(supabase: any, limit: number) {
     .limit(limit);
 
   if (error) {
-    console.error('Error fetching trusted seller listings:', error);
     return { listings: [] };
   }
 
@@ -286,7 +269,6 @@ async function getGreatCondition(supabase: any, limit: number) {
     .limit(limit);
 
   if (error) {
-    console.error('Error fetching great condition:', error);
     return { listings: [] };
   }
 

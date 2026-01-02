@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 export async function GET(
   request: NextRequest,
@@ -8,22 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = params;
-
-    console.log(`📋 [Get Listing] Fetching listing ${id}`);
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Fetch listing with seller profile
     const { data: listing, error } = await (supabase as any)
@@ -41,8 +25,6 @@ export async function GET(
       .single();
 
     if (error) {
-      console.error('❌ [Get Listing] Query error:', error);
-
       if (error.code === 'PGRST116') {
         return NextResponse.json(
           { error: 'Listing not found' },
@@ -98,13 +80,11 @@ export async function GET(
       }
     }
 
-    console.log(`✅ [Get Listing] Successfully fetched listing ${id}`);
-
     return NextResponse.json({ listing });
-  } catch (error: any) {
-    console.error('❌ [Get Listing] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch listing', details: error.message },
+      { error: 'Failed to fetch listing', details: message },
       { status: 500 }
     );
   }
@@ -121,22 +101,7 @@ export async function PATCH(
   try {
     const { id } = params;
     const body = await request.json();
-
-    console.log(`📝 [Update Listing] Updating listing ${id}`);
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -260,8 +225,6 @@ export async function PATCH(
       .single();
 
     if (updateError) {
-      console.error('❌ [Update Listing] Update error:', updateError);
-
       if (updateError.code === 'PGRST116') {
         return NextResponse.json(
           { error: 'Listing not found or you do not have permission to update it' },
@@ -275,16 +238,14 @@ export async function PATCH(
       );
     }
 
-    console.log(`✅ [Update Listing] Successfully updated listing ${id}`);
-
     return NextResponse.json({
       listing,
       message: 'Listing updated successfully',
     });
-  } catch (error: any) {
-    console.error('❌ [Update Listing] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to update listing', details: error.message },
+      { error: 'Failed to update listing', details: message },
       { status: 500 }
     );
   }
@@ -303,22 +264,7 @@ export async function DELETE(
     const { id } = params;
     const { searchParams } = new URL(request.url);
     const hardDelete = searchParams.get('hard') === 'true';
-
-    console.log(`🗑️ [Delete Listing] Deleting listing ${id} (hard: ${hardDelete})`);
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -339,8 +285,6 @@ export async function DELETE(
         .eq('seller_id', user.id); // Ensure user owns this listing
 
       if (deleteError) {
-        console.error('❌ [Delete Listing] Hard delete error:', deleteError);
-
         if (deleteError.code === 'PGRST116') {
           return NextResponse.json(
             { error: 'Listing not found or you do not have permission to delete it' },
@@ -353,8 +297,6 @@ export async function DELETE(
           { status: 500 }
         );
       }
-
-      console.log(`✅ [Delete Listing] Permanently deleted listing ${id}`);
 
       return NextResponse.json({
         message: 'Listing permanently deleted',
@@ -370,8 +312,6 @@ export async function DELETE(
         .single();
 
       if (updateError) {
-        console.error('❌ [Delete Listing] Soft delete error:', updateError);
-
         if (updateError.code === 'PGRST116') {
           return NextResponse.json(
             { error: 'Listing not found or you do not have permission to delete it' },
@@ -385,17 +325,15 @@ export async function DELETE(
         );
       }
 
-      console.log(`✅ [Delete Listing] Soft deleted listing ${id}`);
-
       return NextResponse.json({
         listing,
         message: 'Listing removed successfully',
       });
     }
-  } catch (error: any) {
-    console.error('❌ [Delete Listing] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to delete listing', details: error.message },
+      { error: 'Failed to delete listing', details: message },
       { status: 500 }
     );
   }

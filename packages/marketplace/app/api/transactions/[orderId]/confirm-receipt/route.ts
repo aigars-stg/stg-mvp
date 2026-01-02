@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { postReceiptConfirmedMessage, postOrderCompletedMessage } from '@/lib/transactions';
 
 /**
@@ -14,18 +13,7 @@ export async function POST(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -88,7 +76,6 @@ export async function POST(
       .eq('id', orderId);
 
     if (updateError) {
-      console.error('Failed to update order status:', updateError);
       return NextResponse.json(
         { error: 'Failed to confirm receipt' },
         { status: 500 }
@@ -104,10 +91,10 @@ export async function POST(
       order_number: order.order_number,
       message: 'Receipt confirmed. Order is now complete.',
     });
-  } catch (error: any) {
-    console.error('Confirm receipt error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to confirm receipt', details: error.message },
+      { error: 'Failed to confirm receipt', details: message },
       { status: 500 }
     );
   }

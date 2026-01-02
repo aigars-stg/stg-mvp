@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import type { AggregatedGame, AggregatedGamesResponse } from '@/lib/types/aggregated-game';
 import type { ListingCondition } from '@/lib/types/listing';
 
@@ -43,21 +42,7 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || 'newest';
     const includeExpansions = searchParams.get('includeExpansions') !== 'false';
 
-    console.log(`🎮 [Get Games] Fetching aggregated games - page: ${page}, limit: ${limit}, search: ${search || 'none'}`);
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Build query for active listings with seller info
     let query = (supabase as any)
@@ -105,7 +90,6 @@ export async function GET(request: NextRequest) {
     const { data: listings, error } = await query;
 
     if (error) {
-      console.error('❌ [Get Games] Query error:', error);
       return NextResponse.json(
         { error: 'Failed to fetch games', details: error.message },
         { status: 500 }
@@ -288,8 +272,6 @@ export async function GET(request: NextRequest) {
     const paginatedGames = aggregatedGames.slice(from, from + limit);
     const hasMore = from + paginatedGames.length < total;
 
-    console.log(`✅ [Get Games] Returning ${paginatedGames.length} games (page ${page}, total: ${total})`);
-
     const response: AggregatedGamesResponse = {
       games: paginatedGames,
       pagination: {
@@ -305,10 +287,10 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
     });
-  } catch (error: any) {
-    console.error('❌ [Get Games] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch games', details: error.message },
+      { error: 'Failed to fetch games', details: message },
       { status: 500 }
     );
   }

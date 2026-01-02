@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import type { ConversationListItem } from '@/lib/types/message';
 
 // Force dynamic rendering for this route (uses cookies)
@@ -14,25 +13,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set(name, value, options);
-          },
-          remove(name: string, options: any) {
-            cookieStore.delete(name);
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -74,7 +55,6 @@ export async function GET(request: NextRequest) {
     const { data: conversations, error: conversationsError } = await conversationsQuery;
 
     if (conversationsError) {
-      console.error('Error fetching conversations:', conversationsError);
       return NextResponse.json(
         { error: 'Failed to fetch conversations' },
         { status: 500 }
@@ -85,9 +65,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ conversations: [] }, { status: 200 });
     }
 
-    // Get unique listing IDs and order IDs
-    const listingIds = [...new Set(conversations.map(c => c.listing_id).filter(Boolean))];
-    const orderIds = [...new Set(conversations.map(c => c.order_id).filter(Boolean))];
+    // Get unique listing IDs and order IDs (filter out nulls)
+    const listingIds = [...new Set(conversations.map(c => c.listing_id).filter((id): id is string => id !== null))];
+    const orderIds = [...new Set(conversations.map(c => c.order_id).filter((id): id is string => id !== null))];
 
     // Get unique user IDs (all buyers and sellers except current user)
     const userIds = [...new Set(
@@ -99,7 +79,7 @@ export async function GET(request: NextRequest) {
     const { data: listings } = listingIds.length > 0
       ? await supabase
           .from('listings')
-          .select('id, title, price, status, photo_urls, game_name')
+          .select('id, game_name, price, status, photo_urls')
           .in('id', listingIds)
       : { data: [] };
 
@@ -176,7 +156,7 @@ export async function GET(request: NextRequest) {
         },
         listing: listing ? {
           id: listing.id,
-          title: listing.title || 'Unknown Listing',
+          title: listing.game_name || 'Unknown Listing',
           price: listing.price || 0,
           status: listing.status || 'unknown',
           thumbnail: listing.photo_urls?.[0] || null,
@@ -195,7 +175,7 @@ export async function GET(request: NextRequest) {
         } : null,
         unread_count: Number(unreadCount),
         is_archived: isArchived,
-        updated_at: conv.updated_at,
+        updated_at: conv.updated_at || new Date().toISOString(),
       };
     });
 
@@ -203,8 +183,8 @@ export async function GET(request: NextRequest) {
       { conversations: conversationList },
       { status: 200 }
     );
-  } catch (error: any) {
-    console.error('List conversations error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

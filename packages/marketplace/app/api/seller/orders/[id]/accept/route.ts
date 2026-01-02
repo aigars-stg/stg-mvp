@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { sendOrderAcceptedToBuyer, sendShippingLabelToSeller } from '@/lib/email/send-order-emails';
 import { generateShippingLabel, getLabelPdfBuffer } from '@/lib/unisend/label-service';
 import { postOrderAcceptedMessage } from '@/lib/transactions';
@@ -20,18 +19,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -50,11 +38,6 @@ export async function POST(
     const body: AcceptOrderBody = await request.json();
     const { parcelSize } = body;
 
-    console.log(`📦 [Seller] User ${user.id} accepting order ${orderId}`);
-
-    // Validate parcel size for T2T orders
-    // We'll check shipping method after fetching the order
-
     // Call database function to accept order
     const { data: result, error: acceptError } = await (supabase as any).rpc(
       'seller_accept_order',
@@ -66,7 +49,6 @@ export async function POST(
     );
 
     if (acceptError) {
-      console.error('❌ [Seller] Error accepting order:', acceptError);
       return NextResponse.json(
         { error: 'Failed to accept order', details: acceptError.message },
         { status: 500 }
@@ -74,11 +56,8 @@ export async function POST(
     }
 
     if (!result.success) {
-      console.error('❌ [Seller] Accept order failed:', result.error);
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
-
-    console.log(`✅ [Seller] Order ${orderId} accepted`);
 
     // Post system message to transaction conversation (non-blocking)
     postOrderAcceptedMessage(orderId, result.shipping_method || 't2t');
@@ -121,28 +100,24 @@ export async function POST(
         // For T2T orders, generate Unisend shipping label
         if (order.shipping_method === 't2t') {
           try {
-            console.log(`📦 [Unisend] Generating shipping label for order ${order.order_number}...`);
-
             const labelResult = await generateShippingLabel({
               orderId,
               orderNumber: order.order_number,
               senderName: sellerProfile.full_name,
-              senderPhone: sellerProfile.phone,
-              senderCountry: sellerProfile.country as 'LT' | 'LV' | 'EE',
+              senderPhone: sellerProfile.phone || '',
+              senderCountry: (sellerProfile.country || 'LT') as 'LT' | 'LV' | 'EE',
               receiverName: buyerProfile.full_name,
-              receiverPhone: buyerProfile.phone,
-              receiverCountry: order.destination_country as 'LT' | 'LV' | 'EE',
-              destinationTerminalId: order.destination_terminal_id,
-              parcelSize: order.parcel_size as 'XS' | 'S' | 'M' | 'L',
+              receiverPhone: buyerProfile.phone || '',
+              receiverCountry: (order.destination_country || 'LT') as 'LT' | 'LV' | 'EE',
+              destinationTerminalId: order.destination_terminal_id || '',
+              parcelSize: (order.parcel_size || 'M') as 'XS' | 'S' | 'M' | 'L',
             });
 
             trackingNumber = labelResult.barcode;
             trackingUrl = labelResult.trackingUrl;
 
-            console.log(`✅ [Unisend] Label generated: ${labelResult.barcode}`);
-
             // Update order with Unisend tracking data
-            const { error: updateError } = await supabase
+            await supabase
               .from('orders')
               .update({
                 unisend_parcel_id: labelResult.parcelId,
@@ -152,10 +127,6 @@ export async function POST(
                 label_generated_at: new Date().toISOString(),
               })
               .eq('id', orderId);
-
-            if (updateError) {
-              console.error('❌ [Unisend] Failed to update order with tracking data:', updateError);
-            }
 
             // Get label PDF for email attachment
             const labelPdfBuffer = await getLabelPdfBuffer(labelResult.labelUrl);
@@ -172,13 +143,9 @@ export async function POST(
               barcode: labelResult.barcode,
               trackingUrl: labelResult.trackingUrl,
               labelPdfBuffer,
-            }).catch((err) => console.error('Failed to send label email to seller:', err));
-
-            console.log(`📧 [Unisend] Sending shipping label to seller...`);
-          } catch (labelError: any) {
-            console.error('❌ [Unisend] Failed to generate shipping label:', labelError);
+            }).catch(() => {});
+          } catch {
             // Don't fail the entire request - order is already accepted
-            // Seller can still be notified to handle shipping manually
           }
         }
 
@@ -194,13 +161,11 @@ export async function POST(
           orderNumber: order.order_number,
           orderId: orderId,
           sellerName: sellerProfile.full_name,
-          shippingMethod: order.shipping_method,
+          shippingMethod: (order.shipping_method || 't2t') as 'local_pickup' | 't2t',
           destinationInfo,
           trackingNumber,
           trackingUrl,
-        }).catch((err) => console.error('Failed to send buyer email:', err));
-
-        console.log(`📧 [Seller] Sending acceptance email to buyer...`);
+        }).catch(() => {});
       }
     }
 
@@ -210,10 +175,10 @@ export async function POST(
       shippingMethod: result.shipping_method,
       message: 'Order accepted successfully',
     });
-  } catch (error: any) {
-    console.error('❌ [Seller] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to accept order', details: error.message },
+      { error: 'Failed to accept order', details: message },
       { status: 500 }
     );
   }

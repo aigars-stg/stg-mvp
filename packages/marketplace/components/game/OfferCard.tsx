@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
 import {
   Package,
@@ -143,18 +144,24 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
                 }}
                 className="cursor-pointer group"
               >
-                <div className="w-full aspect-square rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden group-hover:ring-2 group-hover:ring-frost-ice/50 transition-all">
+                <div className="w-full aspect-square rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden group-hover:ring-2 group-hover:ring-frost-ice/50 transition-all relative">
                   {allImages[currentImageIndex] ? (
-                    <img
+                    <Image
                       src={allImages[currentImageIndex]}
                       alt={listing.game_name}
-                      className="max-w-full max-h-full object-contain"
+                      fill
+                      className="object-contain p-2"
+                      sizes="160px"
+                      unoptimized
                     />
                   ) : displayImage ? (
-                    <img
+                    <Image
                       src={displayImage}
                       alt={listing.game_name}
-                      className="max-w-full max-h-full object-contain"
+                      fill
+                      className="object-contain p-2"
+                      sizes="160px"
+                      unoptimized
                     />
                   ) : (
                     <Package className="w-10 h-10 text-text-muted" />
@@ -251,16 +258,19 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
 
               {/* Seller Info with Trust Signals */}
               <Link
-                href={`/sellers/${listing.seller.id}`}
-                className="flex items-center gap-2 hover:bg-bg-secondary/50 -ml-1 pl-1 pr-2 py-1 rounded-lg transition-colors mt-auto"
+                href={`/profile/${listing.seller.id}`}
+                className="group flex items-center gap-2.5 hover:bg-frost-ice/5 -ml-1.5 pl-1.5 pr-2.5 py-2 rounded-lg transition-colors mt-3 border-t border-border-subtle pt-3"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Avatar */}
                 {listing.seller.avatar_url ? (
-                  <img
+                  <Image
                     src={listing.seller.avatar_url}
                     alt={listing.seller.full_name}
-                    className="w-9 h-9 rounded-md object-cover border border-border-subtle"
+                    width={36}
+                    height={36}
+                    className="rounded-md object-cover border border-border-subtle"
+                    unoptimized
                   />
                 ) : (
                   <div className="w-9 h-9 rounded-md bg-frost-ice/20 flex items-center justify-center text-sm font-semibold text-frost-ice">
@@ -269,7 +279,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
                 )}
                 {/* Name & Stats stacked */}
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm text-text-secondary hover:text-frost-ice transition-colors truncate">
+                  <span className="text-sm text-polar-night group-hover:text-frost-ice group-hover:underline transition-colors truncate">
                     {listing.seller.full_name}
                     {listing.seller.country && getCountryFlag(listing.seller.country) && (
                       <span
@@ -389,17 +399,20 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
               >
                 <div className="relative w-20 h-20 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-frost-ice/50 transition-all">
                   {displayImage ? (
-                    <img
+                    <Image
                       src={displayImage}
                       alt={listing.game_name}
-                      className="max-w-full max-h-full object-contain"
+                      fill
+                      className="object-contain p-1"
+                      sizes="80px"
+                      unoptimized
                     />
                   ) : (
                     <Package className="w-8 h-8 text-text-muted" />
                   )}
                   {/* Photo count badge */}
                   {allImages.length > 1 && (
-                    <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-polar-night/80 backdrop-blur-sm rounded text-[10px] text-snow-white font-medium">
+                    <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-polar-night/80 backdrop-blur-sm rounded text-[10px] text-snow-white font-medium z-10">
                       {allImages.length} photos
                     </div>
                   )}
@@ -502,16 +515,19 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
 
             {/* Seller Info */}
             <Link
-              href={`/sellers/${listing.seller.id}`}
-              className="flex items-center gap-2 hover:bg-bg-secondary/50 -ml-1 pl-1 pr-2 py-1 rounded-lg transition-colors"
+              href={`/profile/${listing.seller.id}`}
+              className="group flex items-center gap-2.5 hover:bg-frost-ice/5 -ml-1.5 pl-1.5 pr-2.5 py-2 rounded-lg transition-colors mt-2 border-t border-border-subtle pt-3"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Avatar - spans both lines */}
               {listing.seller.avatar_url ? (
-                <img
+                <Image
                   src={listing.seller.avatar_url}
                   alt={listing.seller.full_name}
-                  className="w-9 h-9 rounded-md object-cover border border-border-subtle self-center"
+                  width={36}
+                  height={36}
+                  className="rounded-md object-cover border border-border-subtle self-center"
+                  unoptimized
                 />
               ) : (
                 <div className="w-9 h-9 rounded-md bg-frost-ice/20 flex items-center justify-center text-sm font-semibold text-frost-ice self-center">
@@ -520,7 +536,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
               )}
               {/* Name & Stats stacked */}
               <div className="flex flex-col">
-                <span className="text-sm text-text-secondary hover:text-frost-ice transition-colors">
+                <span className="text-sm text-polar-night group-hover:text-frost-ice group-hover:underline transition-colors">
                   {listing.seller.full_name}
                   {listing.seller.country && getCountryFlag(listing.seller.country) && (
                     <span
@@ -647,12 +663,15 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
                         className="flex-shrink-0"
                         disabled={!expansion.image}
                       >
-                        <div className={`w-14 h-14 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden ${expansion.image ? 'hover:ring-2 hover:ring-frost-ice/50 cursor-pointer' : ''} transition-all`}>
+                        <div className={`relative w-14 h-14 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden ${expansion.image ? 'hover:ring-2 hover:ring-frost-ice/50 cursor-pointer' : ''} transition-all`}>
                           {expansion.thumbnail || expansion.image ? (
-                            <img
+                            <Image
                               src={expansion.thumbnail || expansion.image || ''}
                               alt={expansion.name}
-                              className="max-w-full max-h-full object-contain"
+                              fill
+                              className="object-contain p-1"
+                              sizes="56px"
+                              unoptimized
                             />
                           ) : (
                             <Package className="w-6 h-6 text-text-muted" />

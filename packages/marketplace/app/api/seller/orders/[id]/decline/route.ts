@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { sendOrderCancelledToBuyer } from '@/lib/email/send-order-emails';
 import { stripe } from '@/lib/stripe';
 import { postOrderDeclinedMessage } from '@/lib/transactions';
@@ -20,18 +19,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -50,8 +38,6 @@ export async function POST(
     const body: DeclineOrderBody = await request.json();
     const { reason } = body;
 
-    console.log(`❌ [Seller] User ${user.id} declining order ${orderId}`);
-
     // Call database function to decline order
     const { data: result, error: declineError } = await (supabase as any).rpc(
       'seller_decline_order',
@@ -63,7 +49,6 @@ export async function POST(
     );
 
     if (declineError) {
-      console.error('❌ [Seller] Error declining order:', declineError);
       return NextResponse.json(
         { error: 'Failed to decline order', details: declineError.message },
         { status: 500 }
@@ -71,11 +56,8 @@ export async function POST(
     }
 
     if (!result.success) {
-      console.error('❌ [Seller] Decline order failed:', result.error);
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
-
-    console.log(`✅ [Seller] Order ${orderId} declined`);
 
     // Post system message to transaction conversation (non-blocking)
     postOrderDeclinedMessage(orderId, reason);
@@ -83,14 +65,10 @@ export async function POST(
     // Process refund if required
     if (result.requires_refund && result.payment_intent_id) {
       try {
-        console.log(`💰 [Seller] Processing refund for ${result.payment_intent_id}`);
-
         const refund = await stripe.refunds.create({
           payment_intent: result.payment_intent_id,
-          reason: 'requested_by_customer', // Closest match to seller decline
+          reason: 'requested_by_customer',
         });
-
-        console.log(`✅ [Seller] Refund created: ${refund.id}`);
 
         // Update order with refund info
         await supabase
@@ -100,8 +78,7 @@ export async function POST(
             refund_amount: result.refund_amount,
           })
           .eq('id', orderId);
-      } catch (refundError: any) {
-        console.error('❌ [Seller] Refund failed:', refundError);
+      } catch {
         // Don't fail the whole request, order is already declined
       }
     }
@@ -136,9 +113,7 @@ export async function POST(
           sellerName: sellerProfile.full_name,
           refundAmount: order.total_amount,
           cancellationReason: order.seller_decline_reason || 'Seller declined',
-        }).catch((err) => console.error('Failed to send cancellation email:', err));
-
-        console.log(`📧 [Seller] Sending cancellation email to buyer...`);
+        }).catch(() => {});
       }
     }
 
@@ -149,10 +124,10 @@ export async function POST(
       refundAmount: result.refund_amount,
       message: 'Order declined and buyer refunded',
     });
-  } catch (error: any) {
-    console.error('❌ [Seller] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to decline order', details: error.message },
+      { error: 'Failed to decline order', details: message },
       { status: 500 }
     );
   }

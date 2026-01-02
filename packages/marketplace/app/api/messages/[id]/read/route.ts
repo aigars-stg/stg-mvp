@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import type { MarkAsReadRequest } from '@/lib/types/message';
 
 /**
@@ -24,25 +23,7 @@ export async function POST(
       );
     }
 
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set(name, value, options);
-          },
-          remove(name: string, options: any) {
-            cookieStore.delete(name);
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -107,7 +88,6 @@ export async function POST(
       );
 
     if (upsertError) {
-      console.error('Error updating read status:', upsertError);
       return NextResponse.json(
         { error: 'Failed to mark as read' },
         { status: 500 }
@@ -118,8 +98,7 @@ export async function POST(
       { success: true, message: 'Messages marked as read' },
       { status: 200 }
     );
-  } catch (error: any) {
-    console.error('Mark as read error:', error);
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -341,7 +341,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
             {/* Seller Info with Trust Signals */}
             {showSeller && listing.seller && (
               <Link
-                href={`/sellers/${listing.seller.id}`}
+                href={`/profile/${listing.seller.id}`}
                 onClick={(e) => e.stopPropagation()}
                 className="block space-y-1.5 hover:bg-bg-secondary/50 -mx-2 px-2 py-1.5 rounded-lg transition-colors"
               >

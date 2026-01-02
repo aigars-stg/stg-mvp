@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 // Force dynamic rendering for this route (uses cookies)
 export const dynamic = 'force-dynamic';
@@ -13,34 +12,17 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    console.log('📦 [Data Export] Starting data export request...');
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error('❌ [Data Export] Unauthorized:', authError);
       return NextResponse.json(
         { error: 'You must be signed in to export your data' },
         { status: 401 }
       );
     }
-
-    console.log(`📦 [Data Export] Exporting data for user: ${user.id}`);
 
     // Fetch all user data in parallel
     const [
@@ -104,7 +86,6 @@ export async function GET(request: NextRequest) {
 
     // Check for errors
     if (profileResult.error) {
-      console.error('❌ [Data Export] Failed to fetch profile:', profileResult.error);
       return NextResponse.json(
         { error: 'Failed to fetch profile data' },
         { status: 500 }
@@ -165,14 +146,6 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    console.log(`✅ [Data Export] Successfully exported data for user ${user.id}`);
-    console.log(`   - Profile: ${exportData.profile ? 'included' : 'not found'}`);
-    console.log(`   - Listings: ${exportData.listings.count}`);
-    console.log(`   - Wanted Listings: ${exportData.wanted_listings.count}`);
-    console.log(`   - Conversations: ${exportData.conversations.count}`);
-    console.log(`   - Messages: ${exportData.messages.count}`);
-    console.log(`   - Login Activity: ${exportData.login_activity.count}`);
-
     // Return JSON with appropriate headers for download
     return new NextResponse(JSON.stringify(exportData, null, 2), {
       status: 200,
@@ -182,10 +155,10 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'no-store, no-cache, must-revalidate',
       },
     });
-  } catch (error: any) {
-    console.error('❌ [Data Export] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to export data', details: error.message },
+      { error: 'Failed to export data', details: message },
       { status: 500 }
     );
   }

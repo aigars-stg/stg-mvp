@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { addBankAccount, getBankAccountInfo, validateIBAN } from '@/lib/stripe/bank-account-service';
 
 /**
@@ -10,18 +9,7 @@ import { addBankAccount, getBankAccountInfo, validateIBAN } from '@/lib/stripe/b
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -39,10 +27,10 @@ export async function GET(request: NextRequest) {
     const bankInfo = await getBankAccountInfo(user.id);
 
     return NextResponse.json(bankInfo);
-  } catch (error: any) {
-    console.error('❌ [Bank Account API] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch bank account info' },
+      { error: 'Failed to fetch bank account info', details: message },
       { status: 500 }
     );
   }
@@ -55,18 +43,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -158,10 +135,10 @@ export async function POST(request: NextRequest) {
       success: true,
       bankAccount: result.bankAccount,
     });
-  } catch (error: any) {
-    console.error('❌ [Bank Account API] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to add bank account', details: error.message },
+      { error: 'Failed to add bank account', details: message },
       { status: 500 }
     );
   }

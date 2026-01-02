@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServiceClient } from '@/lib/supabase/client';
 
 /**
  * Cleanup job for permanently deleting soft-deleted accounts after 90-day retention period
@@ -28,31 +27,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Use service role for admin operations
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set(name, value, options);
-          },
-          remove(name: string, options: any) {
-            cookieStore.delete(name);
-          },
-        },
-      }
-    );
+    const supabase = createServiceClient();
 
     // Calculate date 90 days ago
     const retentionDate = new Date();
     retentionDate.setDate(retentionDate.getDate() - 90);
     const retentionDateISO = retentionDate.toISOString();
 
-    console.log(`[Cleanup] Looking for accounts deleted before: ${retentionDateISO}`);
 
     // Find all soft-deleted accounts past retention period
     const { data: deletedProfiles, error: fetchError } = await supabase
@@ -62,7 +43,6 @@ export async function POST(request: NextRequest) {
       .lt('deleted_at', retentionDateISO);
 
     if (fetchError) {
-      console.error('[Cleanup] Error fetching deleted profiles:', fetchError);
       return NextResponse.json(
         { error: 'Failed to fetch deleted accounts' },
         { status: 500 }
@@ -70,7 +50,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!deletedProfiles || deletedProfiles.length === 0) {
-      console.log('[Cleanup] No accounts to delete');
       return NextResponse.json({
         success: true,
         deleted: 0,
@@ -78,7 +57,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log(`[Cleanup] Found ${deletedProfiles.length} accounts to permanently delete`);
 
     const results = {
       success: 0,
@@ -89,7 +67,6 @@ export async function POST(request: NextRequest) {
     // Process each account
     for (const profile of deletedProfiles) {
       try {
-        console.log(`[Cleanup] Deleting account: ${profile.id} (${profile.email})`);
 
         // 1. Delete all storage files for this user
         try {
@@ -100,45 +77,34 @@ export async function POST(request: NextRequest) {
 
           if (files && files.length > 0) {
             const filePaths = files.map(file => `${profile.id}/${file.name}`);
-            const { error: storageError } = await supabase
+            await supabase
               .storage
               .from('listing-photos')
               .remove(filePaths);
-
-            if (storageError) {
-              console.error(`[Cleanup] Error deleting storage for ${profile.id}:`, storageError);
-            } else {
-              console.log(`[Cleanup] Deleted ${files.length} storage files for ${profile.id}`);
-            }
           }
-        } catch (storageError) {
-          console.error(`[Cleanup] Storage deletion error for ${profile.id}:`, storageError);
-          // Continue anyway
+        } catch {
+          // Continue anyway - storage deletion failure shouldn't block account cleanup
         }
 
         // 2. Delete auth user (this will CASCADE delete user_profiles and related data)
         const { error: deleteError } = await supabase.auth.admin.deleteUser(profile.id);
 
         if (deleteError) {
-          console.error(`[Cleanup] Error deleting auth user ${profile.id}:`, deleteError);
           results.failed++;
           results.errors.push(`${profile.id}: ${deleteError.message}`);
         } else {
-          console.log(`[Cleanup] Successfully deleted account ${profile.id}`);
           results.success++;
         }
 
         // Small delay to avoid rate limits
         await new Promise(resolve => setTimeout(resolve, 100));
 
-      } catch (error: any) {
-        console.error(`[Cleanup] Error processing ${profile.id}:`, error);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
         results.failed++;
-        results.errors.push(`${profile.id}: ${error.message}`);
+        results.errors.push(`${profile.id}: ${message}`);
       }
     }
-
-    console.log(`[Cleanup] Completed: ${results.success} deleted, ${results.failed} failed`);
 
     return NextResponse.json({
       success: true,
@@ -149,10 +115,10 @@ export async function POST(request: NextRequest) {
       message: `Cleanup completed: ${results.success} accounts permanently deleted`
     });
 
-  } catch (error: any) {
-    console.error('[Cleanup] Cleanup job error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Cleanup job failed', details: error.message },
+      { error: 'Cleanup job failed', details: message },
       { status: 500 }
     );
   }

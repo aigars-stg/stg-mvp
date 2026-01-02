@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/ratelimit';
 
 /**
@@ -21,8 +20,6 @@ export async function POST(
       response_notes,
       photo_urls, // Optional photos from seller
     } = body;
-
-    console.log(`📝 [Respond to Wanted Listing] Seller responding to wanted listing ${wantedListingId}`);
 
     // Validation
     if (!offered_price || parseFloat(offered_price) <= 0) {
@@ -47,19 +44,7 @@ export async function POST(
       );
     }
 
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -81,7 +66,6 @@ export async function POST(
       .single();
 
     if (fetchError || !wantedListing) {
-      console.error('❌ [Respond to Wanted Listing] Fetch error:', fetchError);
       return NextResponse.json(
         { error: 'Wanted listing not found' },
         { status: 404 }
@@ -205,7 +189,6 @@ export async function POST(
         .single();
 
       if (createError) {
-        console.error('❌ [Respond to Wanted Listing] Error creating conversation:', createError);
         return NextResponse.json(
           { error: 'Failed to create conversation', details: createError.message },
           { status: 500 }
@@ -237,7 +220,6 @@ export async function POST(
       .single();
 
     if (responseError) {
-      console.error('❌ [Respond to Wanted Listing] Error creating response:', responseError);
       return NextResponse.json(
         { error: 'Failed to create response', details: responseError.message },
         { status: 500 }
@@ -277,14 +259,7 @@ export async function POST(
       });
 
     if (messageError) {
-      console.error('❌ [Respond to Wanted Listing] Error sending initial message:', messageError);
       // Don't fail the whole request if message fails
-    }
-
-    console.log(`✅ [Respond to Wanted Listing] Successfully created response ${response.id} and conversation ${conversationId}`);
-
-    if (isQuickResponse) {
-      console.log(`⚡ [Respond to Wanted Listing] Quick response badge earned!`);
     }
 
     return NextResponse.json({
@@ -293,10 +268,10 @@ export async function POST(
       is_quick_response: isQuickResponse,
       message: 'Response created successfully',
     });
-  } catch (error: any) {
-    console.error('❌ [Respond to Wanted Listing] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to respond to wanted listing', details: error.message },
+      { error: 'Failed to respond to wanted listing', details: message },
       { status: 500 }
     );
   }

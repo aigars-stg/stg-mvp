@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Get authenticated user
     const {
@@ -55,7 +43,6 @@ export async function POST(request: NextRequest) {
       });
 
     if (updateError) {
-      console.error('Error accepting seller terms:', updateError);
       return NextResponse.json(
         { error: 'Failed to accept terms' },
         { status: 500 }
@@ -66,10 +53,10 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Seller terms accepted successfully',
     });
-  } catch (error) {
-    console.error('Accept terms error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: message },
       { status: 500 }
     );
   }

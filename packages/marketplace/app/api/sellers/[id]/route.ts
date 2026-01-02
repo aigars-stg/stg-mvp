@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import type { SellerBadgeTier } from '@/lib/types/seller';
 
 /**
@@ -25,20 +24,7 @@ export async function GET(
     const reviewsPage = parseInt(searchParams.get('reviews_page') || '1');
     const reviewsLimit = parseInt(searchParams.get('reviews_limit') || '10');
 
-    console.log(`👤 [Seller Profile] Fetching profile for seller ${sellerId}`);
-
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Fetch basic user profile (from secure view)
     const { data: userProfile, error: userError } = await supabase
@@ -48,7 +34,6 @@ export async function GET(
       .single();
 
     if (userError || !userProfile) {
-      console.error('❌ [Seller Profile] User not found:', userError);
       return NextResponse.json(
         { error: 'Seller not found' },
         { status: 404 }
@@ -81,8 +66,8 @@ export async function GET(
 
     // Calculate badge tier
     const badgeTier = getBadgeTier(
-      trustData.total_completed_sales,
-      trustData.average_rating
+      trustData.total_completed_sales ?? 0,
+      trustData.average_rating ?? 0
     );
 
     // Build response
@@ -112,14 +97,14 @@ export async function GET(
     } = {
       seller: {
         id: sellerId,
-        name: userProfile.full_name,
+        name: userProfile.full_name ?? 'Anonymous',
         avatar_url: userProfile.avatar_url,
         country: userProfile.country,
-        member_since: trustData.member_since || userProfile.created_at,
-        total_reviews: trustData.total_reviews,
-        average_rating: trustData.average_rating,
-        positive_rating_percent: trustData.positive_rating_percent,
-        total_completed_sales: trustData.total_completed_sales,
+        member_since: trustData.member_since || userProfile.created_at || new Date().toISOString(),
+        total_reviews: trustData.total_reviews ?? 0,
+        average_rating: trustData.average_rating ?? 0,
+        positive_rating_percent: trustData.positive_rating_percent ?? 100,
+        total_completed_sales: trustData.total_completed_sales ?? 0,
         badge_tier: badgeTier,
       },
     };
@@ -159,7 +144,6 @@ export async function GET(
         .range(from, to);
 
       if (reviewsError) {
-        console.error('❌ [Seller Profile] Reviews fetch error:', reviewsError);
         // Continue without reviews rather than failing
       } else {
         // Fetch buyer profiles separately
@@ -201,11 +185,8 @@ export async function GET(
       }
     }
 
-    console.log(`✅ [Seller Profile] Returning profile for "${userProfile.full_name}"`);
-
     return NextResponse.json(response);
   } catch (error: unknown) {
-    console.error('❌ [Seller Profile] Unexpected error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch seller profile', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

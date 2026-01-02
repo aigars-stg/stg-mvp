@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import type { GameWithOffers, GameOffersResponse } from '@/lib/types/aggregated-game';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { fetchGameMetadata } from '@/lib/bgg-api';
@@ -32,21 +31,7 @@ export async function GET(
     const sort = searchParams.get('sort') || 'price_asc';
     const conditions = searchParams.getAll('condition');
 
-    console.log(`🎮 [Game Offers] Fetching offers for game ${bggId}`);
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Fetch game metadata including versions for version-specific images
     const { data: gameData, error: gameError } = await (supabase as any)

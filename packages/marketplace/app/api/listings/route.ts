@@ -1,39 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
 import { isManualVersion, type VersionSelection } from '@/lib/bgg-types';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
-// Fixed: Added !seller_id to foreign key join for user_profiles
 export async function POST(request: NextRequest) {
   try {
-    console.log('📝 [Create Listing] Starting listing creation...');
-
-    // Create Supabase client with cookies for auth
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error('❌ [Create Listing] Unauthorized:', authError);
       return NextResponse.json(
         { error: 'You must be signed in to create a listing' },
         { status: 401 }
       );
     }
 
-    console.log(`📝 [Create Listing] User authenticated: ${user.id}`);
 
     // Check if seller has completed onboarding
     const { data: profile, error: profileError } = await supabase
@@ -45,7 +27,6 @@ export async function POST(request: NextRequest) {
     if (profileError) {
       // If no seller profile exists, they need to complete onboarding
       if (profileError.code === 'PGRST116') {
-        console.log(`⚠️ [Create Listing] No seller profile found for user ${user.id}`);
         return NextResponse.json(
           {
             error: 'Please complete seller onboarding first',
@@ -55,7 +36,6 @@ export async function POST(request: NextRequest) {
           { status: 403 }
         );
       }
-      console.error('❌ [Create Listing] Error fetching profile:', profileError);
       return NextResponse.json(
         { error: 'Failed to verify seller status' },
         { status: 500 }
@@ -64,7 +44,6 @@ export async function POST(request: NextRequest) {
 
     // Validate seller has completed onboarding
     if (!profile?.stripe_connect_payouts_enabled || profile?.seller_status !== 'active') {
-      console.log(`⚠️ [Create Listing] Seller not onboarded - status: ${profile.seller_status}, payouts: ${profile.stripe_connect_payouts_enabled}`);
       return NextResponse.json(
         {
           error: 'Please complete seller onboarding first',
@@ -75,7 +54,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`✅ [Create Listing] Seller verified (status: ${profile.seller_status})`);
 
     const body = await request.json();
     const {
@@ -154,12 +132,6 @@ export async function POST(request: NextRequest) {
       status: 'active',
     };
 
-    console.log('📝 [Create Listing] Inserting listing:', {
-      game: selectedGame.name,
-      version_source: listingData.version_source,
-      price: listingData.price,
-      photos: photoUrls.length,
-    });
 
     // Insert listing into database
     const { data: listing, error: insertError } = await (supabase as any)
@@ -169,7 +141,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('❌ [Create Listing] Insert error:', insertError);
       return NextResponse.json(
         {
           error: 'Failed to create listing',
@@ -179,18 +150,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`✅ [Create Listing] Successfully created listing ${listing.id}`);
 
     return NextResponse.json({
       listing,
       message: 'Listing created successfully',
     });
-  } catch (error: any) {
-    console.error('❌ [Create Listing] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       {
         error: 'Failed to create listing',
-        details: error.message,
+        details: message,
       },
       { status: 500 }
     );
@@ -206,6 +176,8 @@ export async function POST(request: NextRequest) {
  * - ?status=active - Filter by status (default: active for public browse, all for seller's own listings)
  * - ?page=1 - Page number (default: 1)
  * - ?limit=20 - Items per page (default: 20)
+ *
+ * Uses the listings_with_details view for optimized single-query fetching.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -220,29 +192,12 @@ export async function GET(request: NextRequest) {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    console.log(`📋 [Get Listings] Fetching listings - gameId: ${gameId}, sellerId: ${sellerId}, status: ${status}, page: ${page}, limit: ${limit}`);
+    const supabase = await createServerSupabase();
 
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
-
-    // Build query with seller profile join
-    // Note: We'll fetch game images and seller trust data separately to avoid join issues
+    // Use the optimized view that joins listings + games + seller data in one query
     let query = (supabase as any)
-      .from('listings')
-      .select(`
-        *
-      `, { count: 'exact' })
+      .from('listings_with_details')
+      .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(from, to);
 
@@ -263,119 +218,89 @@ export async function GET(request: NextRequest) {
       query = query.eq('status', status);
     }
 
-    const { data: listings, error, count } = await query;
+    const { data: rawListings, error, count } = await query;
 
     if (error) {
-      console.error('❌ [Get Listings] Query error:', JSON.stringify(error, null, 2));
-      console.error('❌ [Get Listings] Error details:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint
-      });
       return NextResponse.json(
         { error: 'Failed to fetch listings', details: error.message },
         { status: 500 }
       );
     }
 
-    // Fetch game images and metadata for all listings
-    if (listings && listings.length > 0) {
-      const gameIds = [...new Set(listings.map((l: any) => l.bgg_game_id))];
-      const { data: games } = await (supabase as any)
-        .from('games')
-        .select('id, thumbnail, image, player_count, min_age, playing_time, versions, is_expansion')
-        .in('id', gameIds);
+    // Transform flat view data into nested structure expected by frontend
+    const listings = (rawListings || []).map((row: any) => {
+      // Check for version-specific images
+      let thumbnail = row.game_thumbnail;
+      let image = row.game_image;
 
-      // Fetch seller trust data separately (no FK between listings and seller_profiles)
-      const sellerIds = [...new Set(listings.map((l: any) => l.seller_id))];
-
-      // 1. Fetch Trust Stats
-      const { data: sellerTrust } = await (supabase as any)
-        .from('public_seller_profiles')
-        .select('*')
-        .in('user_id', sellerIds);
-
-      // 2. Fetch Identity (Name, Avatar, Country)
-      const { data: sellerIdentity } = await (supabase as any)
-        .from('public_profiles')
-        .select('id, full_name, avatar_url, country')
-        .in('id', sellerIds);
-
-      const trustMap = sellerTrust
-        ? new Map(sellerTrust.map((p: any) => [p.user_id, p]))
-        : new Map();
-
-      const profileMap = sellerIdentity
-        ? new Map(sellerIdentity.map((p: any) => [p.id, p]))
-        : new Map();
-
-      if (games) {
-        const gamesMap = new Map(games.map((g: any) => [g.id, g]));
-        listings.forEach((listing: any) => {
-          const game: any = gamesMap.get(listing.bgg_game_id);
-
-          if (game) {
-            // Check if listing has a version-specific image
-            let versionThumbnail = null;
-            let versionImage = null;
-
-            if (listing.bgg_version_id && game.versions) {
-              const version = game.versions.find((v: any) => v.id === listing.bgg_version_id);
-              if (version) {
-                versionThumbnail = version.thumbnail;
-                versionImage = version.image;
-              }
-            }
-
-            // Priority: 1) Version image, 2) Base game image
-            listing.game = {
-              thumbnail: versionThumbnail || game.thumbnail,
-              image: versionImage || game.image,
-              player_count: game.player_count,
-              min_age: game.min_age,
-              playing_time: game.playing_time,
-              is_expansion: game.is_expansion
-            };
-          } else {
-            listing.game = {
-              thumbnail: null,
-              image: null,
-              player_count: null,
-              min_age: null,
-              playing_time: null,
-              is_expansion: null
-            };
-          }
-
-          // Merge seller trust data into seller object
-          const sellerTrust = trustMap.get(listing.seller_id);
-          const sellerProfile = profileMap.get(listing.seller_id);
-
-          listing.seller = {
-            id: listing.seller_id,
-            // Profile data (Identity)
-            full_name: sellerProfile?.full_name || 'Unknown Seller',
-            email: '', // REMOVED EMAIL FOR SECURITY
-            avatar_url: sellerProfile?.avatar_url || null,
-            country: sellerProfile?.country || null,
-            // Trust data
-            total_reviews: sellerTrust?.total_reviews ?? 0,
-            average_rating: sellerTrust?.average_rating ?? 0,
-            total_completed_sales: sellerTrust?.total_completed_sales ?? 0,
-            member_since: sellerTrust?.member_since ?? null,
-          };
-        });
+      if (row.bgg_version_id && row.game_versions) {
+        const versions = Array.isArray(row.game_versions) ? row.game_versions : [];
+        const version = versions.find((v: any) => v.id === row.bgg_version_id);
+        if (version) {
+          thumbnail = version.thumbnail || thumbnail;
+          image = version.image || image;
+        }
       }
-    }
+
+      return {
+        // Listing core fields
+        id: row.id,
+        bgg_game_id: row.bgg_game_id,
+        game_name: row.game_name,
+        game_year: row.game_year,
+        version_source: row.version_source,
+        bgg_version_id: row.bgg_version_id,
+        version_name: row.version_name,
+        publisher: row.publisher,
+        language: row.language,
+        edition_year: row.edition_year,
+        photo_urls: row.photo_urls,
+        condition: row.condition,
+        condition_notes: row.condition_notes,
+        all_components_present: row.all_components_present,
+        missing_components: row.missing_components,
+        price: row.price,
+        shipping_local_pickup: row.shipping_local_pickup,
+        shipping_parcel_locker: row.shipping_parcel_locker,
+        shipping_notes: row.shipping_notes,
+        seller_id: row.seller_id,
+        status: row.status,
+        reserved_by: row.reserved_by,
+        reserved_until: row.reserved_until,
+        included_expansions: row.included_expansions,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+
+        // Nested game object
+        game: {
+          thumbnail,
+          image,
+          player_count: row.game_player_count,
+          min_age: row.game_min_age,
+          playing_time: row.game_playing_time,
+          is_expansion: row.game_is_expansion,
+        },
+
+        // Nested seller object
+        seller: {
+          id: row.seller_id,
+          full_name: row.seller_name || 'Unknown Seller',
+          email: '', // Not exposed for security
+          avatar_url: row.seller_avatar_url,
+          country: row.seller_country,
+          total_reviews: row.seller_total_reviews ?? 0,
+          average_rating: row.seller_average_rating ?? 0,
+          total_completed_sales: row.seller_total_completed_sales ?? 0,
+          member_since: row.seller_member_since,
+        },
+      };
+    });
 
     const total = count || 0;
-    const hasMore = (from + (listings?.length || 0)) < total;
-
-    console.log(`✅ [Get Listings] Successfully fetched ${listings?.length || 0} listings (page ${page}, total: ${total}, hasMore: ${hasMore})`);
+    const hasMore = (from + listings.length) < total;
 
     return NextResponse.json({
-      listings: listings || [],
+      listings,
       pagination: {
         page,
         limit,
@@ -383,11 +308,10 @@ export async function GET(request: NextRequest) {
         hasMore,
       },
     });
-  } catch (error: any) {
-    console.error('❌ [Get Listings] Unexpected error:', error);
-    console.error('❌ [Get Listings] Error stack:', error.stack);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch listings', details: error.message },
+      { error: 'Failed to fetch listings', details: message },
       { status: 500 }
     );
   }

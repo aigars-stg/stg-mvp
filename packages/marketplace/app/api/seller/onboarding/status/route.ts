@@ -1,22 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Get authenticated user
     const {
@@ -38,8 +26,7 @@ export async function GET(request: NextRequest) {
       .eq('user_id', user.id)
       .single();
 
-    if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is "Review not found" (no row)
-      console.error('Error fetching onboarding status:', profileError);
+    if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is "not found" (no row)
       return NextResponse.json(
         { error: 'Failed to fetch onboarding status' },
         { status: 500 }
@@ -67,10 +54,10 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(statusData);
-  } catch (error) {
-    console.error('Onboarding status error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: message },
       { status: 500 }
     );
   }

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/client';
 import { postIssueReportedMessage } from '@/lib/transactions';
 
@@ -38,18 +37,7 @@ export async function POST(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -139,7 +127,6 @@ export async function POST(
     );
 
     if (issueError) {
-      console.error('Failed to report issue:', issueError);
       return NextResponse.json(
         { error: 'Failed to report issue' },
         { status: 500 }
@@ -176,10 +163,10 @@ export async function POST(
       order_number: order.order_number,
       message: 'Issue reported successfully. Our team will review and respond.',
     });
-  } catch (error: any) {
-    console.error('Report issue error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to report issue', details: error.message },
+      { error: 'Failed to report issue', details: message },
       { status: 500 }
     );
   }
@@ -195,18 +182,7 @@ export async function GET(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -263,7 +239,6 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     if (issuesError) {
-      console.error('Failed to fetch issues:', issuesError);
       return NextResponse.json(
         { error: 'Failed to fetch issues' },
         { status: 500 }
@@ -273,10 +248,10 @@ export async function GET(
     return NextResponse.json({
       issues: issues || [],
     });
-  } catch (error: any) {
-    console.error('Get issues error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch issues', details: error.message },
+      { error: 'Failed to fetch issues', details: message },
       { status: 500 }
     );
   }

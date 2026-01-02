@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { stripe, calculateMarketplacePricing } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js'; // For service role
 import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
@@ -53,18 +52,7 @@ interface CartBasket {
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -128,7 +116,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`💳 [Checkout] User ${user.id} creating session for basket ${basketId}`);
 
     // Fetch cart to get basket
     const cartResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart`, {
@@ -176,12 +163,6 @@ export async function POST(request: NextRequest) {
       shippingMethod
     );
 
-    console.log(`💰 [Checkout] Pricing:`, {
-      items: pricing.itemsTotalCents,
-      shipping: pricing.shippingCostCents,
-      serviceFee: pricing.serviceFeeCents,
-      total: pricing.totalChargeCents,
-    });
 
     // Create Stripe line items
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
@@ -248,7 +229,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (sellerError || !sellerProfile?.stripe_connect_account_id) {
-      console.error('❌ [Checkout] Seller not connected to Stripe:', basket.seller_id);
       return NextResponse.json(
         { error: 'Seller is not setup to receive payments' },
         { status: 400 }
@@ -256,7 +236,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!sellerProfile.stripe_connect_charges_enabled) {
-      console.error('❌ [Checkout] Seller charges not enabled:', basket.seller_id);
       return NextResponse.json(
         { error: 'Seller account is restricted' },
         { status: 400 }
@@ -264,7 +243,6 @@ export async function POST(request: NextRequest) {
     }
 
     const sellerStripeId = sellerProfile.stripe_connect_account_id;
-    console.log(`💳 [Checkout] Routing payment to seller: ${sellerStripeId}`);
 
     // Create Stripe Checkout session
     // USING DESTINATION CHARGE (on_behalf_of)
@@ -322,16 +300,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log(`✅ [Checkout] Created Stripe session ${session.id} for basket ${basketId}`);
-
     return NextResponse.json({
       url: session.url,
       sessionId: session.id,
     });
-  } catch (error: any) {
-    console.error('❌ [Checkout] Error creating session:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to create checkout session', details: error.message },
+      { error: 'Failed to create checkout session', details: message },
       { status: 500 }
     );
   }

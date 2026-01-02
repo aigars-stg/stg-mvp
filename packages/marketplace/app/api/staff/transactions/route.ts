@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/client';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +12,7 @@ interface OrderRow {
   status: string;
   shipping_method: string;
   total_amount: number;
-  created_at: string;
+  created_at: string | null;
   paid_at: string | null;
 }
 
@@ -32,18 +31,7 @@ interface OrderWithIssueCount extends OrderRow {
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -67,7 +55,6 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (profileError || !profile?.is_staff) {
-      console.log('[Staff API] Access denied for user:', user.id, 'is_staff:', profile?.is_staff);
       return NextResponse.json(
         { error: 'Staff access required' },
         { status: 403 }
@@ -115,7 +102,6 @@ export async function GET(request: NextRequest) {
     const { data: orders, error: ordersError, count } = await query;
 
     if (ordersError) {
-      console.error('Failed to fetch orders:', ordersError);
       return NextResponse.json(
         { error: 'Failed to fetch orders' },
         { status: 500 }
@@ -195,10 +181,10 @@ export async function GET(request: NextRequest) {
         total_pages: Math.ceil((count || 0) / limit),
       },
     });
-  } catch (error: any) {
-    console.error('Staff transactions list error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch transactions', details: error.message },
+      { error: 'Failed to fetch transactions', details: message },
       { status: 500 }
     );
   }

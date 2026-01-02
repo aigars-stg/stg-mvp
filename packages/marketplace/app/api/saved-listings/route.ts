@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * GET /api/saved-listings
@@ -8,21 +7,7 @@ import { cookies } from 'next/headers';
  */
 export async function GET(request: NextRequest) {
   try {
-    console.log('📚 [Saved Listings] Fetching saved listings');
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -54,7 +39,6 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('❌ [Saved Listings] Query error:', error);
       return NextResponse.json(
         { error: 'Failed to fetch saved listings', details: error.message },
         { status: 500 }
@@ -106,13 +90,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log(`✅ [Saved Listings] Found ${savedListings?.length || 0} saved listings`);
-
     return NextResponse.json({ savedListings: savedListings || [] });
-  } catch (error: any) {
-    console.error('❌ [Saved Listings] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch saved listings', details: error.message },
+      { error: 'Failed to fetch saved listings', details: message },
       { status: 500 }
     );
   }
@@ -128,8 +110,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { listing_id, notes } = body;
 
-    console.log(`💾 [Save Listing] Saving listing ${listing_id}`);
-
     if (!listing_id) {
       return NextResponse.json(
         { error: 'listing_id is required' },
@@ -137,19 +117,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -187,8 +155,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (saveError) {
-      console.error('❌ [Save Listing] Save error:', saveError);
-
       // Check if already saved (unique constraint violation)
       if (saveError.code === '23505') {
         return NextResponse.json(
@@ -203,16 +169,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`✅ [Save Listing] Successfully saved listing ${listing_id}`);
-
     return NextResponse.json({
       savedListing,
       message: 'Listing saved successfully',
     });
-  } catch (error: any) {
-    console.error('❌ [Save Listing] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to save listing', details: error.message },
+      { error: 'Failed to save listing', details: message },
       { status: 500 }
     );
   }

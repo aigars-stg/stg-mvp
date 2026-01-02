@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * GET /api/seller/orders
@@ -13,18 +12,7 @@ import { cookies } from 'next/headers';
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -70,7 +58,6 @@ export async function GET(request: NextRequest) {
     });
 
     if (ordersError) {
-      console.error('❌ [Seller Orders] Error fetching orders:', ordersError);
       return NextResponse.json(
         { error: 'Failed to fetch orders', details: ordersError.message },
         { status: 500 }
@@ -119,10 +106,10 @@ export async function GET(request: NextRequest) {
         cancelled: cancelled.length,
       },
     });
-  } catch (error: any) {
-    console.error('❌ [Seller Orders] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch orders', details: error.message },
+      { error: 'Failed to fetch orders', details: message },
       { status: 500 }
     );
   }

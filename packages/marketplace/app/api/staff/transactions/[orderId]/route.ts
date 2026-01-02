@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { getOrCreateTransactionConversation } from '@/lib/transactions';
 import { createServiceClient } from '@/lib/supabase/client';
 
@@ -48,18 +47,7 @@ export async function GET(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -141,8 +129,7 @@ export async function GET(
     let conversationId: string;
     try {
       conversationId = await getOrCreateTransactionConversation(orderId);
-    } catch (error) {
-      console.error('Failed to get/create conversation:', error);
+    } catch {
       return NextResponse.json(
         { error: 'Failed to load conversation' },
         { status: 500 }
@@ -190,7 +177,7 @@ export async function GET(
       .order('created_at', { ascending: true });
 
     if (messagesError) {
-      console.error('Failed to fetch messages:', messagesError);
+      // Continue - non-blocking error
     }
 
     // Fetch user profiles for messages
@@ -338,10 +325,10 @@ export async function GET(
       buyer: buyerProfile,
       seller: sellerProfile,
     });
-  } catch (error: any) {
-    console.error('Staff transaction error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to load transaction', details: error.message },
+      { error: 'Failed to load transaction', details: message },
       { status: 500 }
     );
   }

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * POST /api/listings/[id]/save
@@ -12,22 +11,7 @@ export async function POST(
 ) {
   try {
     const { id } = params;
-
-    console.log(`🔄 [Toggle Save] Toggling save status for listing ${id}`);
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -70,14 +54,11 @@ export async function POST(
         .eq('user_id', user.id);
 
       if (deleteError) {
-        console.error('❌ [Toggle Save] Delete error:', deleteError);
         return NextResponse.json(
           { error: 'Failed to unsave listing', details: deleteError.message },
           { status: 500 }
         );
       }
-
-      console.log(`✅ [Toggle Save] Unsaved listing ${id}`);
 
       return NextResponse.json({
         saved: false,
@@ -95,14 +76,11 @@ export async function POST(
         .single();
 
       if (saveError) {
-        console.error('❌ [Toggle Save] Save error:', saveError);
         return NextResponse.json(
           { error: 'Failed to save listing', details: saveError.message },
           { status: 500 }
         );
       }
-
-      console.log(`✅ [Toggle Save] Saved listing ${id}`);
 
       return NextResponse.json({
         saved: true,
@@ -110,10 +88,10 @@ export async function POST(
         message: 'Listing saved successfully',
       });
     }
-  } catch (error: any) {
-    console.error('❌ [Toggle Save] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to toggle save status', details: error.message },
+      { error: 'Failed to toggle save status', details: message },
       { status: 500 }
     );
   }
@@ -129,20 +107,7 @@ export async function GET(
 ) {
   try {
     const { id } = params;
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -162,8 +127,7 @@ export async function GET(
     return NextResponse.json({
       saved: !!existingSave,
     });
-  } catch (error: any) {
-    console.error('❌ [Check Save] Unexpected error:', error);
+  } catch (error: unknown) {
     return NextResponse.json({ saved: false });
   }
 }

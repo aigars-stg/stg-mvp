@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { createConnectAccount, createOnboardingLink } from '@/lib/stripe/connect-service';
 
 /**
@@ -10,18 +9,7 @@ import { createConnectAccount, createOnboardingLink } from '@/lib/stripe/connect
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -36,7 +24,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`💳 [Connect] Creating onboarding for user ${user.id}`);
 
     // Get user profile (core user data)
     const { data: profile, error: profileError } = await supabase
@@ -63,7 +50,6 @@ export async function POST(request: NextRequest) {
 
     if (sellerProfile?.stripe_connect_account_id) {
       // Account exists, create new onboarding link
-      console.log(`💳 [Connect] Account exists: ${sellerProfile.stripe_connect_account_id}`);
       onboardingUrl = await createOnboardingLink(
         sellerProfile.stripe_connect_account_id,
         {
@@ -73,7 +59,6 @@ export async function POST(request: NextRequest) {
       );
     } else {
       // Create new account and onboarding link
-      console.log(`💳 [Connect] Creating new account`);
       const result = await createConnectAccount(
         user.id,
         profile.email,
@@ -90,10 +75,10 @@ export async function POST(request: NextRequest) {
       success: true,
       onboardingUrl,
     });
-  } catch (error: any) {
-    console.error('❌ [Connect] Onboarding error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to create onboarding link', details: error.message },
+      { error: 'Failed to create onboarding link', details: message },
       { status: 500 }
     );
   }

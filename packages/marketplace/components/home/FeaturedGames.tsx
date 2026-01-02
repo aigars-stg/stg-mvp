@@ -37,7 +37,8 @@ async function getFeaturedListings() {
     return [];
   }
 
-  return (listings || []) as ListingWithSeller[];
+  // Cast through unknown due to JSONB columns (included_expansions) typed as generic Json
+  return (listings || []) as unknown as ListingWithSeller[];
 }
 
 export async function FeaturedGames() {

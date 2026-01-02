@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 export async function GET(
   request: NextRequest,
@@ -12,21 +11,7 @@ export async function GET(
     const excludeListingId = searchParams.get('excludeListing');
     const excludeSellerId = searchParams.get('excludeSeller');
 
-    console.log(`📋 [Game Listings] Fetching listings for game ${gameId}`);
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Build query
     let query = (supabase as any)
@@ -58,7 +43,6 @@ export async function GET(
     const { data: listings, error } = await query;
 
     if (error) {
-      console.error('❌ [Game Listings] Query error:', error);
       return NextResponse.json(
         { error: 'Failed to fetch game listings', details: error.message },
         { status: 500 }
@@ -99,13 +83,11 @@ export async function GET(
       }
     }
 
-    console.log(`✅ [Game Listings] Found ${listings?.length || 0} listings for game ${gameId}`);
-
     return NextResponse.json({ listings: listings || [] });
-  } catch (error: any) {
-    console.error('❌ [Game Listings] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch game listings', details: error.message },
+      { error: 'Failed to fetch game listings', details: message },
       { status: 500 }
     );
   }

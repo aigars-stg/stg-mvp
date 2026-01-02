@@ -69,8 +69,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, logged: true });
-  } catch (error: any) {
-    console.error('Login activity error:', error);
+  } catch (error: unknown) {
     // Don't fail the request if logging fails
     return NextResponse.json({ success: true, logged: false });
   }

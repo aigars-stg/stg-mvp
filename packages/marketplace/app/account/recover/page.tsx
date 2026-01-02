@@ -58,8 +58,8 @@ export default function RecoverAccountPage() {
         router.push('/auth/signin?message=account-recovered');
       }, 3000);
 
-    } catch (err: any) {
-      setError(err.message || 'Failed to recover account');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to recover account');
       setLoading(false);
     }
   };

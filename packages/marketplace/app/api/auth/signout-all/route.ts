@@ -56,7 +56,6 @@ export async function POST(request: NextRequest) {
     const { error: signOutError } = await supabaseAdmin.auth.admin.signOut(user.id, 'global');
 
     if (signOutError) {
-      console.error('Error signing out all devices:', signOutError);
       return NextResponse.json(
         { error: 'Failed to sign out all devices' },
         { status: 500 }
@@ -67,8 +66,7 @@ export async function POST(request: NextRequest) {
     await supabase.auth.signOut();
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Sign out all devices error:', error);
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: 'Failed to sign out all devices' },
       { status: 500 }

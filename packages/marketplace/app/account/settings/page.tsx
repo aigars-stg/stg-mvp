@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getInitials } from '@/lib/auth/utils';
 import { Button, Card } from '@second-turn/design-system';
-import { User, Mail, Phone, CheckCircle2, AlertCircle, Download, Settings, AtSign, Globe, Pencil, Check, X } from 'lucide-react';
+import { User, Mail, Phone, CheckCircle2, AlertCircle, Download, Settings, AtSign, Globe, Pencil, Check, X, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { AvatarUpload } from '@/components/auth/AvatarUpload';
@@ -30,13 +30,13 @@ export default function AccountSettingsPage() {
   const [isChangingPhone, setIsChangingPhone] = useState(false);
 
   // Update local state when profile changes
-  useState(() => {
+  useEffect(() => {
     if (profile) {
       setFullName(profile.full_name);
       setPhone(profile.phone || '');
       setCountry(profile.country as CountryCode || '');
     }
-  });
+  }, [profile]);
 
   /* Individual Update Handlers */
 
@@ -60,8 +60,8 @@ export default function AccountSettingsPage() {
       setSuccess('Name updated successfully');
       setIsChangingName(false);
       await refreshProfile();
-    } catch (err: any) {
-      setError(err.message || 'Failed to update name');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to update name');
     } finally {
       setLoading(false);
     }
@@ -82,8 +82,8 @@ export default function AccountSettingsPage() {
       setSuccess('Phone number updated successfully');
       setIsChangingPhone(false);
       await refreshProfile();
-    } catch (err: any) {
-      setError(err.message || 'Failed to update phone');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to update phone');
     } finally {
       setLoading(false);
     }
@@ -104,8 +104,8 @@ export default function AccountSettingsPage() {
       setSuccess('Country updated successfully');
       setIsChangingCountry(false);
       await refreshProfile();
-    } catch (err: any) {
-      setError(err.message || 'Failed to update country');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to update country');
     } finally {
       setLoading(false);
     }
@@ -404,6 +404,8 @@ export default function AccountSettingsPage() {
                           placeholder="+371 12345678"
                           aria-labelledby="phone-label"
                           disabled={loading}
+                          maxLength={20}
+                          pattern="[\d\s\+\-\(\)]+"
                           autoFocus
                           onKeyDown={(e) => {
                             if (e.key === 'Escape') {
@@ -530,6 +532,28 @@ export default function AccountSettingsPage() {
                   month: 'long',
                   day: 'numeric',
                 })}
+              </div>
+            </div>
+          </Card>
+
+          {/* View Public Profile */}
+          <Card padding="lg" className="sm:p-6 p-4">
+            <div className="flex items-start gap-3">
+              <User className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-polar-night mb-1">Public profile</h3>
+                <p className="text-sm text-text-secondary mb-3">
+                  See how your profile appears to other users on Second Turn Games.
+                </p>
+                <a
+                  href={`/profile/${user.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-frost-ice hover:text-frost-deep transition-colors"
+                >
+                  View public profile
+                  <ExternalLink className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </Card>

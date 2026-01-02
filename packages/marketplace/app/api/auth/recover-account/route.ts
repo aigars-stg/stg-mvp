@@ -90,7 +90,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`🔄 Recovering account for ${user.id} (${originalEmail})`);
 
     // Step 1: Restore email in auth.users
     const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(
@@ -99,7 +98,6 @@ export async function POST(request: NextRequest) {
     );
 
     if (authUpdateError) {
-      console.error('Failed to restore auth email:', authUpdateError);
       return NextResponse.json(
         { error: 'Failed to restore login credentials' },
         { status: 500 }
@@ -119,7 +117,6 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id);
 
     if (profileUpdateError) {
-      console.error('Failed to restore profile:', profileUpdateError);
       return NextResponse.json(
         { error: 'Failed to restore profile data' },
         { status: 500 }
@@ -137,8 +134,7 @@ export async function POST(request: NextRequest) {
       message: 'Account successfully recovered'
     });
 
-  } catch (error: any) {
-    console.error('Account recovery error:', error);
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: 'Failed to recover account' },
       { status: 500 }

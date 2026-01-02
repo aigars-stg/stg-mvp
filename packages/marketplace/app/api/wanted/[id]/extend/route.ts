@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * POST /api/wanted/[id]/extend
@@ -12,22 +11,7 @@ export async function POST(
 ) {
   try {
     const { id } = params;
-
-    console.log(`📝 [Extend Wanted Listing] Extending wanted listing ${id}`);
-
-    // Create Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -47,7 +31,6 @@ export async function POST(
       .single();
 
     if (fetchError || !currentListing) {
-      console.error('❌ [Extend Wanted Listing] Fetch error:', fetchError);
       return NextResponse.json(
         { error: 'Wanted listing not found' },
         { status: 404 }
@@ -89,24 +72,21 @@ export async function POST(
       .single();
 
     if (updateError) {
-      console.error('❌ [Extend Wanted Listing] Update error:', updateError);
       return NextResponse.json(
         { error: 'Failed to extend wanted listing', details: updateError.message },
         { status: 500 }
       );
     }
 
-    console.log(`✅ [Extend Wanted Listing] Successfully extended wanted listing ${id} to ${newExpiration.toISOString()}`);
-
     return NextResponse.json({
       wantedListing,
       message: 'Wanted listing extended by 30 days',
       newExpiresAt: wantedListing.expires_at,
     });
-  } catch (error: any) {
-    console.error('❌ [Extend Wanted Listing] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to extend wanted listing', details: error.message },
+      { error: 'Failed to extend wanted listing', details: message },
       { status: 500 }
     );
   }

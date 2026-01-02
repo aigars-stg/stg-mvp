@@ -73,7 +73,6 @@ export async function DELETE(request: NextRequest) {
         const status = await checkSellerAccountStatus(sellerProfile.stripe_connect_account_id);
 
         if (!status.canDelete) {
-          console.warn(`Blocked deletion for user ${user.id}: ${status.reason}`);
           return NextResponse.json(
             {
               error: 'Cannot delete account',
@@ -83,9 +82,7 @@ export async function DELETE(request: NextRequest) {
             { status: 400 }
           );
         }
-        console.log(`✅ Seller financial checks passed for ${user.id}`);
-      } catch (stripeCheckError) {
-        console.error('Error checking seller status:', stripeCheckError);
+      } catch {
         // Fail safe: don't allow deletion if we can't verify financial state
         return NextResponse.json(
           { error: 'Failed to verify account status. Please try again or contact support.' },
@@ -108,10 +105,8 @@ export async function DELETE(request: NextRequest) {
         recoveryDate: recoveryDeadline,
       });
 
-      console.log('✅ Sent account deletion confirmation email to:', user.email);
-    } catch (emailError) {
-      // Don't block deletion if email fails, but log it
-      console.error('⚠️ Failed to send deletion confirmation email:', emailError);
+    } catch {
+      // Don't block deletion if email fails
     }
 
     // Step 1: Soft delete user profile
@@ -133,7 +128,6 @@ export async function DELETE(request: NextRequest) {
       .eq('id', user.id);
 
     if (softDeleteError) {
-      console.error('Error soft deleting profile:', softDeleteError);
       return NextResponse.json(
         { error: 'Failed to delete account' },
         { status: 500 }
@@ -148,7 +142,6 @@ export async function DELETE(request: NextRequest) {
       .in('status', ['draft', 'active', 'sold']); // Don't update already removed ones
 
     if (listingsError) {
-      console.error('Error marking listings as removed:', listingsError);
       return NextResponse.json(
         { error: 'Failed to hide listings from public view' },
         { status: 500 }
@@ -209,7 +202,6 @@ export async function DELETE(request: NextRequest) {
     );
 
     if (emailUpdateError) {
-      console.error('Error anonymizing auth.users:', emailUpdateError);
       // Don't fail the whole deletion if auth update fails
       // Profile email is already anonymized in user_profiles
       // Original email stored in user_profiles.original_email for recovery
@@ -243,8 +235,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Account deleted. You can recover your account within 14 days. Data will be permanently removed after 90 days retention period.',
       recovery_deadline: recoveryDeadline.toISOString()
     });
-  } catch (error: any) {
-    console.error('Account deletion error:', error);
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: 'Failed to delete account' },
       { status: 500 }

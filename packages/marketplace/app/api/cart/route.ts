@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * GET /api/cart
@@ -10,18 +9,7 @@ import { cookies } from 'next/headers';
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -42,7 +30,6 @@ export async function GET(request: NextRequest) {
     });
 
     if (cartError) {
-      console.error('❌ [Cart] Error fetching cart:', cartError);
       return NextResponse.json(
         { error: 'Failed to fetch cart', details: cartError.message },
         { status: 500 }
@@ -69,10 +56,10 @@ export async function GET(request: NextRequest) {
         currency: 'EUR',
       },
     });
-  } catch (error: any) {
-    console.error('❌ [Cart] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch cart', details: error.message },
+      { error: 'Failed to fetch cart', details: message },
       { status: 500 }
     );
   }
@@ -86,18 +73,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -119,8 +95,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Listing ID is required' }, { status: 400 });
     }
 
-    console.log(`🛒 [Cart] User ${user.id} adding listing ${listingId}`);
-
     // Add to cart using the database function
     const { data: result, error: addError } = await (supabase as any).rpc('add_to_cart', {
       p_buyer_id: user.id,
@@ -128,7 +102,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (addError) {
-      console.error('❌ [Cart] Error adding to cart:', addError);
       return NextResponse.json(
         { error: 'Failed to add to cart', details: addError.message },
         { status: 500 }
@@ -136,11 +109,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.success) {
-      console.log(`⚠️ [Cart] Add failed: ${result.error}`);
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
-
-    console.log(`✅ [Cart] Added listing ${listingId} to basket ${result.basket_id}`);
 
     return NextResponse.json({
       success: true,
@@ -149,10 +119,10 @@ export async function POST(request: NextRequest) {
       expiresAt: result.expires_at,
       message: 'Item added to cart. Reserved for 30 minutes.',
     });
-  } catch (error: any) {
-    console.error('❌ [Cart] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to add to cart', details: error.message },
+      { error: 'Failed to add to cart', details: message },
       { status: 500 }
     );
   }
@@ -173,18 +143,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Listing ID is required' }, { status: 400 });
     }
 
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -199,8 +158,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    console.log(`🛒 [Cart] User ${user.id} removing listing ${listingId}`);
-
     // Remove from cart using the database function
     const { data: result, error: removeError } = await (supabase as any).rpc(
       'remove_from_cart',
@@ -211,7 +168,6 @@ export async function DELETE(request: NextRequest) {
     );
 
     if (removeError) {
-      console.error('❌ [Cart] Error removing from cart:', removeError);
       return NextResponse.json(
         { error: 'Failed to remove from cart', details: removeError.message },
         { status: 500 }
@@ -222,16 +178,14 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    console.log(`✅ [Cart] Removed listing ${listingId} from cart`);
-
     return NextResponse.json({
       success: true,
       message: 'Item removed from cart',
     });
-  } catch (error: any) {
-    console.error('❌ [Cart] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to remove from cart', details: error.message },
+      { error: 'Failed to remove from cart', details: message },
       { status: 500 }
     );
   }

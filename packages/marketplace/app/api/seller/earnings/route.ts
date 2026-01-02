@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * GET /api/seller/earnings
@@ -11,18 +10,7 @@ import { cookies } from 'next/headers';
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -48,13 +36,13 @@ export async function GET(request: NextRequest) {
     if (summaryData && !summaryError) {
       return NextResponse.json({
         totalSalesCount: summaryData.total_sales_count || 0,
-        totalGross: parseFloat(summaryData.total_gross) || 0,
-        totalPlatformFees: parseFloat(summaryData.total_platform_fees) || 0,
-        totalNet: parseFloat(summaryData.total_net) || 0,
+        totalGross: Number(summaryData.total_gross) || 0,
+        totalPlatformFees: Number(summaryData.total_platform_fees) || 0,
+        totalNet: Number(summaryData.total_net) || 0,
         completedPayoutsCount: summaryData.completed_payouts_count || 0,
         pendingPayoutsCount: summaryData.pending_payouts_count || 0,
         salesLast30Days: summaryData.sales_last_30_days || 0,
-        earningsLast30Days: parseFloat(summaryData.earnings_last_30_days) || 0,
+        earningsLast30Days: Number(summaryData.earnings_last_30_days) || 0,
       }, {
         headers: {
           'Cache-Control': 'private, max-age=30',
@@ -70,7 +58,6 @@ export async function GET(request: NextRequest) {
       .eq('status', 'completed');
 
     if (ordersError) {
-      console.error('❌ [Earnings API] Error fetching orders:', ordersError);
       throw new Error('Failed to fetch earnings data');
     }
 
@@ -88,8 +75,9 @@ export async function GET(request: NextRequest) {
 
     if (orders) {
       for (const order of orders) {
-        const gross = parseFloat(order.items_total) + parseFloat(order.shipping_cost);
-        const fee = parseFloat(order.service_fee);
+        const gross = Number(order.items_total) + Number(order.shipping_cost);
+        const fee = Number(order.service_fee);
+        if (!order.updated_at) continue;
         const orderDate = new Date(order.updated_at);
 
         totalSalesCount++;
@@ -123,10 +111,10 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'private, max-age=30',
       },
     });
-  } catch (error: any) {
-    console.error('❌ [Earnings API] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch earnings', details: error.message },
+      { error: 'Failed to fetch earnings', details: message },
       { status: 500 }
     );
   }

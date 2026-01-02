@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 /**
  * POST /api/reviews/[id]/respond
@@ -14,18 +13,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -110,21 +98,17 @@ export async function POST(
       .single();
 
     if (updateError) {
-      console.error('❌ [Reviews] Error updating review response:', updateError);
       return NextResponse.json(
         { error: 'Failed to save response', details: updateError.message },
         { status: 500 }
       );
     }
 
-    console.log('✅ [Reviews] Seller responded to review:', reviewId);
-
     return NextResponse.json({
       success: true,
       review: updatedReview,
     });
   } catch (error: unknown) {
-    console.error('❌ [Reviews] Unexpected error:', error);
     return NextResponse.json(
       { error: 'Failed to submit response', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

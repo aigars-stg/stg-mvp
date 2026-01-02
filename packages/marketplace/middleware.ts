@@ -64,21 +64,18 @@ export async function middleware(request: NextRequest) {
       if (error.code === 'refresh_token_not_found' ||
           error.code === 'invalid_refresh_token' ||
           error.message?.includes('Refresh Token')) {
-        console.log('🔐 [Middleware] Stale token detected, clearing session');
-        // Clear auth cookies
+        // Clear auth cookies silently
         response.cookies.delete('sb-access-token');
         response.cookies.delete('sb-refresh-token');
         // Also try Supabase's default cookie names
         response.cookies.delete(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`);
-      } else if (!error.message?.includes('Auth session missing')) {
-        // Only log unexpected auth errors (session missing is normal for anonymous users)
-        console.error('🔐 [Middleware] Auth error:', error.message);
       }
+      // Auth errors are handled silently - session missing is normal for anonymous users
     } else {
       user = data.user;
     }
-  } catch (error) {
-    console.error('🔐 [Middleware] Unexpected auth error:', error);
+  } catch {
+    // Auth errors handled silently
   }
 
   // Protected routes that require authentication
@@ -97,18 +94,8 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route)
   );
 
-  // Debug logging
-  if (isProtectedRoute) {
-    console.log(`🔐 [Middleware] Protected route: ${request.nextUrl.pathname}`);
-    console.log(`🔐 [Middleware] User authenticated: ${!!user}`);
-    if (user) {
-      console.log(`🔐 [Middleware] User ID: ${user.id}`);
-    }
-  }
-
   // Redirect to signin if accessing protected route without auth
   if (isProtectedRoute && !user) {
-    console.log(`❌ [Middleware] Redirecting to sign-in (no auth)`);
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/auth/signin';
     redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname);

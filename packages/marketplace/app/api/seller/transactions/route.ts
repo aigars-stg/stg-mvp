@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 interface Transaction {
   id: string;
@@ -24,18 +23,7 @@ interface Transaction {
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const {
@@ -78,9 +66,7 @@ export async function GET(request: NextRequest) {
         .not('status', 'in', '("pending_payment","cancelled")')
         .order('created_at', { ascending: false });
 
-      if (ordersError) {
-        console.error('❌ [Transactions API] Error fetching orders:', ordersError);
-      } else if (orders) {
+      if (!ordersError && orders) {
         // Get game names for orders
         const orderIds = orders.map(o => o.id);
         const { data: orderItems } = await supabase
@@ -98,18 +84,18 @@ export async function GET(request: NextRequest) {
         }
 
         for (const order of orders) {
-          const gross = parseFloat(order.items_total) + parseFloat(order.shipping_cost);
+          const gross = Number(order.items_total) + Number(order.shipping_cost);
           transactions.push({
             id: order.id,
             type: 'sale',
             reference: order.order_number,
             status: order.status,
-            payoutStatus: order.payout_status,
+            payoutStatus: order.payout_status || undefined,
             grossAmount: gross,
-            platformFee: parseFloat(order.service_fee),
+            platformFee: Number(order.service_fee),
             netAmount: gross, // Seller gets full gross
             description: gameNameMap.get(order.id) || 'Game sale',
-            createdAt: order.created_at,
+            createdAt: order.created_at || new Date().toISOString(),
             completedAt: order.updated_at,
           });
         }
@@ -126,21 +112,19 @@ export async function GET(request: NextRequest) {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (payoutsError) {
-        console.error('❌ [Transactions API] Error fetching payouts:', payoutsError);
-      } else if (payouts) {
+      if (!payoutsError && payouts) {
         for (const payout of payouts) {
-          const amount = parseFloat(payout.amount);
+          const amount = Number(payout.amount);
           transactions.push({
             id: payout.id,
             type: 'payout',
-            reference: payout.stripe_payout_id,
-            status: payout.status,
+            reference: payout.stripe_payout_id || '',
+            status: payout.status || 'unknown',
             grossAmount: -amount, // Negative for payouts (money out)
             platformFee: 0,
             netAmount: -amount,
-            description: `Payout to ****${payout.bank_account_last4}`,
-            createdAt: payout.created_at,
+            description: `Payout to ****${payout.bank_account_last4 || '****'}`,
+            createdAt: payout.created_at || new Date().toISOString(),
             completedAt: payout.paid_at,
           });
         }
@@ -170,10 +154,10 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'private, max-age=30',
       },
     });
-  } catch (error: any) {
-    console.error('❌ [Transactions API] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch transactions' },
+      { error: 'Failed to fetch transactions', details: message },
       { status: 500 }
     );
   }

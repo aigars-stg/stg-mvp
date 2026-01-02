@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { createBrowserClient } from '@supabase/ssr';
+import type { Database } from './database.types';
 
 // Lazy initialization to ensure env vars are loaded
-let _supabase: ReturnType<typeof createBrowserClient> | null = null;
+let _supabase: ReturnType<typeof createBrowserClient<Database>> | null = null;
 
 function getSupabaseClient() {
   if (_supabase) return _supabase;
@@ -18,7 +19,7 @@ function getSupabaseClient() {
   }
 
   // Use createBrowserClient for proper cookie handling in Next.js
-  _supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+  _supabase = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
   return _supabase;
 }
 
@@ -31,10 +32,10 @@ function getSupabaseClient() {
  */
 export const supabase = typeof window !== 'undefined'
   ? getSupabaseClient()
-  : new Proxy({} as ReturnType<typeof createBrowserClient>, {
-      get: (target, prop) => {
+  : new Proxy({} as ReturnType<typeof createBrowserClient<Database>>, {
+      get: (_target, prop) => {
         const client = getSupabaseClient();
-        return (client as any)[prop];
+        return client[prop as keyof typeof client];
       }
     });
 
@@ -53,7 +54,7 @@ export function createServiceClient() {
     );
   }
 
-  return createClient(supabaseUrl, serviceRoleKey, {
+  return createClient<Database>(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

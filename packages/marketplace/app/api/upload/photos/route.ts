@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { createServerSupabase } from '@/lib/supabase/server';
 import { randomUUID } from 'crypto';
-import { cookies } from 'next/headers';
 import { processImageForUpload } from '@/lib/image-processing';
 
 const BUCKET_NAME = 'listing-photos';
@@ -10,34 +9,17 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📸 [Photo Upload] Starting photo upload...');
-
-    // Create Supabase client with cookies for auth
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error('❌ [Photo Upload] Unauthorized:', authError);
       return NextResponse.json(
         { error: 'You must be signed in to upload photos' },
         { status: 401 }
       );
     }
-
-    console.log(`📸 [Photo Upload] User authenticated: ${user.id}`);
 
     // Parse form data
     const formData = await request.formData();
@@ -78,8 +60,6 @@ export async function POST(request: NextRequest) {
       // Organize files by user ID
       const filePath = `${user.id}/${fileName}`;
 
-      console.log(`📸 [Photo Upload] Uploading file ${i + 1}/${files.length}: ${file.name}`);
-
       // Convert File to ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
       const originalBuffer = Buffer.from(arrayBuffer);
@@ -90,16 +70,7 @@ export async function POST(request: NextRequest) {
       try {
         const result = await processImageForUpload(originalBuffer);
         processedBuffer = result.buffer;
-
-        console.log(`🖼️ [Photo Upload] Processed ${file.name}:`, {
-          originalSize: `${(result.originalSize / 1024).toFixed(1)}KB`,
-          processedSize: `${(result.processedSize / 1024).toFixed(1)}KB`,
-          compression: `${result.compressionRatio.toFixed(1)}x`,
-          dimensions: `${result.width}x${result.height}`,
-          wasResized: result.wasResized,
-        });
-      } catch (processingError) {
-        console.error(`⚠️ [Photo Upload] Failed to process image:`, processingError);
+      } catch {
         // Fallback: use original buffer if processing fails
         processedBuffer = originalBuffer;
         contentType = file.type;
@@ -115,11 +86,8 @@ export async function POST(request: NextRequest) {
         });
 
       if (error) {
-        console.error(`❌ [Photo Upload] Upload failed for ${file.name}:`, error);
-
         // Clean up already uploaded files
         if (uploadedUrls.length > 0) {
-          console.log('🧹 [Photo Upload] Cleaning up previously uploaded files...');
           const uploadedPaths = uploadedUrls.map(url => {
             const urlParts = url.split('/');
             return urlParts[urlParts.length - 1];
@@ -139,7 +107,6 @@ export async function POST(request: NextRequest) {
         .getPublicUrl(filePath);
 
       if (!urlData?.publicUrl) {
-        console.error(`❌ [Photo Upload] Failed to get public URL for ${file.name}`);
         return NextResponse.json(
           { error: `Failed to get public URL for ${file.name}` },
           { status: 500 }
@@ -147,19 +114,16 @@ export async function POST(request: NextRequest) {
       }
 
       uploadedUrls.push(urlData.publicUrl);
-      console.log(`✅ [Photo Upload] Uploaded: ${urlData.publicUrl}`);
     }
-
-    console.log(`✅ [Photo Upload] Successfully uploaded ${uploadedUrls.length} photos`);
 
     return NextResponse.json({
       urls: uploadedUrls,
       count: uploadedUrls.length,
     });
-  } catch (error: any) {
-    console.error('❌ [Photo Upload] Unexpected error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to upload photos', details: error.message },
+      { error: 'Failed to upload photos', details: message },
       { status: 500 }
     );
   }

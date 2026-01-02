@@ -29,8 +29,8 @@ async function main() {
   console.log('\n⏳ Executing migration...\n');
 
   try {
-    // Execute the SQL
-    const { error } = await supabase.rpc('exec_sql', { sql_query: sql });
+    // Execute the SQL using custom RPC function (may not exist in all Supabase instances)
+    const { error } = await (supabase.rpc as any)('exec_sql', { sql_query: sql });
 
     if (error) {
       // If RPC doesn't exist, try direct SQL execution
