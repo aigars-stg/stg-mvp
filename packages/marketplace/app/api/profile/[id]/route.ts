@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import type { SellerBadgeTier } from '@/lib/types/seller';
+import { handleApiError } from '@/lib/api/error-handler';
 
 export const dynamic = 'force-dynamic';
 
@@ -268,11 +269,8 @@ export async function GET(
     }
 
     return NextResponse.json(response);
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: 'Failed to fetch profile', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Fetch profile');
   }
 }
 

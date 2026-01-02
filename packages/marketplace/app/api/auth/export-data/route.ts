@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 // Force dynamic rendering for this route (uses cookies)
 export const dynamic = 'force-dynamic';
@@ -12,17 +13,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to export your data' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     // Fetch all user data in parallel
     const [
@@ -155,11 +147,7 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'no-store, no-cache, must-revalidate',
       },
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to export data', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Export data');
   }
 }

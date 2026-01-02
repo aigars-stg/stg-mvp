@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/seller/orders/[id]
@@ -11,20 +12,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to view orders' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     const orderId = params.id;
 
@@ -107,11 +96,7 @@ export async function GET(
     };
 
     return NextResponse.json({ order: orderWithDetails });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to fetch order', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Fetch seller order');
   }
 }

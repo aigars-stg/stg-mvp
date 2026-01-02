@@ -1,23 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Get authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     // Get seller onboarding status directly from the table to avoid RPC issues
     const { data: sellerProfile, error: profileError } = await supabase
@@ -54,11 +43,7 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(statusData);
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Internal server error', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Check onboarding status');
   }
 }

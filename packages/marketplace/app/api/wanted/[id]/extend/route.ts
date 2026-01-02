@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * POST /api/wanted/[id]/extend
@@ -10,18 +11,10 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
+
     const { id } = params;
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to extend a wanted listing' },
-        { status: 401 }
-      );
-    }
 
     // Fetch current wanted listing to verify ownership and get current expiration
     const { data: currentListing, error: fetchError } = await (supabase as any)
@@ -83,11 +76,7 @@ export async function POST(
       message: 'Wanted listing extended by 30 days',
       newExpiresAt: wantedListing.expires_at,
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to extend wanted listing', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Extend wanted listing');
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/ratelimit';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * POST /api/wanted/[id]/respond
@@ -44,17 +45,8 @@ export async function POST(
       );
     }
 
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to respond to a wanted listing' },
-        { status: 401 }
-      );
-    }
+    const { response: authResponse, user, supabase } = await requireAuth();
+    if (authResponse) return authResponse;
 
     const sellerId = user.id;
 
@@ -268,11 +260,7 @@ export async function POST(
       is_quick_response: isQuickResponse,
       message: 'Response created successfully',
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to respond to wanted listing', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Respond to wanted listing');
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/cart
@@ -9,20 +10,8 @@ import { createServerSupabase } from '@/lib/supabase/server';
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to view your cart' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     // Get cart using the database function
     const { data: cart, error: cartError } = await (supabase as any).rpc('get_cart', {
@@ -56,12 +45,8 @@ export async function GET(request: NextRequest) {
         currency: 'EUR',
       },
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to fetch cart', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Fetch cart');
   }
 }
 
@@ -73,20 +58,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to add items to cart' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     const body = await request.json();
     const { listingId } = body;
@@ -119,12 +92,8 @@ export async function POST(request: NextRequest) {
       expiresAt: result.expires_at,
       message: 'Item added to cart. Reserved for 30 minutes.',
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to add to cart', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Add to cart');
   }
 }
 
@@ -136,26 +105,14 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
+
     const { searchParams } = new URL(request.url);
     const listingId = searchParams.get('listingId');
 
     if (!listingId) {
       return NextResponse.json({ error: 'Listing ID is required' }, { status: 400 });
-    }
-
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to modify your cart' },
-        { status: 401 }
-      );
     }
 
     // Remove from cart using the database function
@@ -182,11 +139,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Item removed from cart',
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to remove from cart', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Remove from cart');
   }
 }

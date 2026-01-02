@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { handleApiError } from '@/lib/api/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,10 +50,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { success: false, error: 'Verification error' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Verify captcha');
   }
 }

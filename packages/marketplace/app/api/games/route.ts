@@ -181,28 +181,42 @@ export async function GET(request: NextRequest) {
       const { listings: gameListings, game } = data;
       if (gameListings.length === 0) continue;
 
-      // Sort listings by price to get cheapest
-      gameListings.sort((a: any, b: any) => a.price - b.price);
-      const cheapest = gameListings[0];
-
-      // Collect unique values
-      const conditions = [...new Set(gameListings.map((l: any) => l.condition))] as ListingCondition[];
-      const sellerCountries = [...new Set(
-        gameListings
-          .map((l: any) => l.seller?.country)
-          .filter(Boolean)
-      )] as string[];
-
-      // Collect unique languages (handle comma-separated values)
+      // Single-pass aggregation: collect all metrics in one loop
+      const conditions = new Set<ListingCondition>();
+      const sellerCountries = new Set<string>();
       const gameLanguages = new Set<string>();
-      gameListings.forEach((l: any) => {
-        if (l.language) {
-          l.language.split(',').forEach((lang: string) => {
+      let lowestPrice = Infinity;
+      let highestPrice = -Infinity;
+      let hasLocalPickup = false;
+      let hasParcelShipping = false;
+      let cheapest: any = null;
+
+      for (const listing of gameListings) {
+        // Track cheapest listing
+        if (cheapest === null || listing.price < cheapest.price) {
+          cheapest = listing;
+        }
+
+        // Aggregate unique values
+        if (listing.condition) conditions.add(listing.condition);
+        if (listing.seller?.country) sellerCountries.add(listing.seller.country);
+
+        // Parse languages (comma-separated)
+        if (listing.language) {
+          for (const lang of listing.language.split(',')) {
             const trimmed = lang.trim();
             if (trimmed) gameLanguages.add(trimmed);
-          });
+          }
         }
-      });
+
+        // Track price range
+        if (listing.price < lowestPrice) lowestPrice = listing.price;
+        if (listing.price > highestPrice) highestPrice = listing.price;
+
+        // Track shipping options
+        if (listing.shipping_local_pickup) hasLocalPickup = true;
+        if (listing.shipping_parcel_locker) hasParcelShipping = true;
+      }
 
       // Filter by language: skip game if it doesn't have any matching language
       if (languages.length > 0) {
@@ -221,13 +235,13 @@ export async function GET(request: NextRequest) {
         playing_time: game?.playing_time || null,
         is_expansion: game?.is_expansion || false,
         offer_count: gameListings.length,
-        lowest_price: Math.min(...gameListings.map((l: any) => l.price)),
-        highest_price: Math.max(...gameListings.map((l: any) => l.price)),
-        conditions,
-        languages: Array.from(gameLanguages).sort(),
-        seller_countries: sellerCountries,
-        has_local_pickup: gameListings.some((l: any) => l.shipping_local_pickup),
-        has_parcel_shipping: gameListings.some((l: any) => l.shipping_parcel_locker),
+        lowest_price: lowestPrice === Infinity ? 0 : lowestPrice,
+        highest_price: highestPrice === -Infinity ? 0 : highestPrice,
+        conditions: [...conditions] as ListingCondition[],
+        languages: [...gameLanguages].sort(),
+        seller_countries: [...sellerCountries],
+        has_local_pickup: hasLocalPickup,
+        has_parcel_shipping: hasParcelShipping,
         featured_listing_id: cheapest.id,
         featured_seller: {
           id: cheapest.seller?.id || '',

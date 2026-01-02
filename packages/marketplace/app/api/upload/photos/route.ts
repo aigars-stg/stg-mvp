@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { randomUUID } from 'crypto';
 import { processImageForUpload } from '@/lib/image-processing';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 const BUCKET_NAME = 'listing-photos';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -9,17 +10,8 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to upload photos' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     // Parse form data
     const formData = await request.formData();
@@ -120,11 +112,7 @@ export async function POST(request: NextRequest) {
       urls: uploadedUrls,
       count: uploadedUrls.length,
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to upload photos', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Upload photos');
   }
 }

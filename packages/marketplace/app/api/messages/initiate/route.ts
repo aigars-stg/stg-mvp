@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/ratelimit';
 import type { InitiateConversationRequest, InitiateConversationResponse } from '@/lib/types/message';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * POST /api/messages/initiate
@@ -9,6 +10,9 @@ import type { InitiateConversationRequest, InitiateConversationResponse } from '
  */
 export async function POST(request: NextRequest) {
   try {
+    const { response: authResponse, user, supabase } = await requireAuth();
+    if (authResponse) return authResponse;
+
     const body: InitiateConversationRequest = await request.json();
     const { listing_id, seller_id, initial_message } = body;
 
@@ -17,18 +21,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'listing_id and seller_id are required' },
         { status: 400 }
-      );
-    }
-
-    const supabase = await createServerSupabase();
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
       );
     }
 
@@ -171,10 +163,7 @@ export async function POST(request: NextRequest) {
     };
 
     return NextResponse.json(response, { status: 201 });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Initiate conversation');
   }
 }

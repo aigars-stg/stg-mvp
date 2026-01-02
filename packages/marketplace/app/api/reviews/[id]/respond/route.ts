@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * POST /api/reviews/[id]/respond
@@ -13,20 +14,8 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to respond to a review' },
-        { status: 401 }
-      );
-    }
+    const { response: authResponse, user, supabase } = await requireAuth();
+    if (authResponse) return authResponse;
 
     const reviewId = params.id;
     const body = await request.json();
@@ -108,10 +97,7 @@ export async function POST(
       success: true,
       review: updatedReview,
     });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: 'Failed to submit response', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Submit review response');
   }
 }

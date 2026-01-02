@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { getOrCreateTransactionConversation } from '@/lib/transactions';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 interface MessageRow {
   id: string;
@@ -32,20 +33,8 @@ export async function GET(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to view transactions' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     const orderId = params.orderId;
 
@@ -298,11 +287,7 @@ export async function GET(
         role: isBuyer ? 'buyer' : 'seller',
       },
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to load transaction', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Load transaction');
   }
 }

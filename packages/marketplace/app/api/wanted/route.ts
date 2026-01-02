@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * POST /api/wanted
@@ -7,17 +9,8 @@ import { createServerSupabase } from '@/lib/supabase/server';
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to create a wanted listing' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     const body = await request.json();
     const {
@@ -128,15 +121,8 @@ export async function POST(request: NextRequest) {
       wantedListing,
       message: 'Wanted listing created successfully',
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      {
-        error: 'Failed to create wanted listing',
-        details: message,
-      },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Create wanted listing');
   }
 }
 
@@ -254,11 +240,7 @@ export async function GET(request: NextRequest) {
         hasMore,
       },
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to fetch wanted listings', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Fetch wanted listings');
   }
 }

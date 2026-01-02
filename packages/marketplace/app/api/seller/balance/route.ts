@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { getSellerBalance } from '@/lib/stripe/balance-service';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/seller/balance
@@ -11,20 +12,8 @@ import { getSellerBalance } from '@/lib/stripe/balance-service';
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     // Get seller profile with Connect info
     const { data: profile, error: profileError } = await supabase
@@ -77,11 +66,7 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'private, max-age=30',
       },
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to fetch balance', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Fetch balance');
   }
 }

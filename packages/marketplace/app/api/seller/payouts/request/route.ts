@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { requestBankPayout } from '@/lib/stripe/payout-service';
 import { clearBalanceCache } from '@/lib/stripe/balance-service';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * POST /api/seller/payouts/request
@@ -10,20 +11,8 @@ import { clearBalanceCache } from '@/lib/stripe/balance-service';
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in' },
-        { status: 401 }
-      );
-    }
+    const { response, user } = await requireAuth();
+    if (response) return response;
 
     // Parse request body (optional amount)
     let amountInCents: number | undefined;
@@ -58,11 +47,7 @@ export async function POST(request: NextRequest) {
         arrivalDate: result.arrivalDate,
       },
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to request payout', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Request payout');
   }
 }

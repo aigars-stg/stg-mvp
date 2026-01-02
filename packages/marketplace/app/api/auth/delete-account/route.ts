@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { handleApiError } from '@/lib/api/error-handler';
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -235,10 +236,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Account deleted. You can recover your account within 14 days. Data will be permanently removed after 90 days retention period.',
       recovery_deadline: recoveryDeadline.toISOString()
     });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: 'Failed to delete account' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Delete account');
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 import type { MarkAsReadRequest } from '@/lib/types/message';
 
 /**
@@ -11,6 +12,9 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
+
     const conversationId = params.id;
     const body: MarkAsReadRequest = await request.json();
     const { message_id } = body;
@@ -20,18 +24,6 @@ export async function POST(
       return NextResponse.json(
         { error: 'message_id is required' },
         { status: 400 }
-      );
-    }
-
-    const supabase = await createServerSupabase();
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
       );
     }
 
@@ -98,10 +90,7 @@ export async function POST(
       { success: true, message: 'Messages marked as read' },
       { status: 200 }
     );
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Mark messages as read');
   }
 }

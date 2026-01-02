@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { sendOrderCancelledToBuyer } from '@/lib/email/send-order-emails';
 import { stripe } from '@/lib/stripe';
 import { postOrderDeclinedMessage } from '@/lib/transactions';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 interface DeclineOrderBody {
   reason?: string;
@@ -19,20 +20,8 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to decline orders' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     const orderId = params.id;
     const body: DeclineOrderBody = await request.json();
@@ -124,11 +113,7 @@ export async function POST(
       refundAmount: result.refund_amount,
       message: 'Order declined and buyer refunded',
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to decline order', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Decline order');
   }
 }

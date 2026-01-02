@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { addBankAccount, getBankAccountInfo, validateIBAN } from '@/lib/stripe/bank-account-service';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/seller/bank-account
@@ -9,30 +10,14 @@ import { addBankAccount, getBankAccountInfo, validateIBAN } from '@/lib/stripe/b
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in' },
-        { status: 401 }
-      );
-    }
+    const { response, user } = await requireAuth();
+    if (response) return response;
 
     const bankInfo = await getBankAccountInfo(user.id);
 
     return NextResponse.json(bankInfo);
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to fetch bank account info', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Fetch bank account info');
   }
 }
 
@@ -43,20 +28,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     // Parse request body
     const body = await request.json();
@@ -135,11 +108,7 @@ export async function POST(request: NextRequest) {
       success: true,
       bankAccount: result.bankAccount,
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to add bank account', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Add bank account');
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { handleApiError } from '@/lib/api/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -66,10 +67,7 @@ export async function POST(request: NextRequest) {
     await supabase.auth.signOut();
 
     return NextResponse.json({ success: true });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: 'Failed to sign out all devices' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Sign out all devices');
   }
 }

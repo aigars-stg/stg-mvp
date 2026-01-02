@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/saved-listings
@@ -7,17 +8,8 @@ import { createServerSupabase } from '@/lib/supabase/server';
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to view saved listings' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     // Fetch saved listings with full listing details
     const { data: savedListings, error } = await (supabase as any)
@@ -91,12 +83,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ savedListings: savedListings || [] });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to fetch saved listings', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Fetch saved listings');
   }
 }
 
@@ -107,6 +95,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
+
     const body = await request.json();
     const { listing_id, notes } = body;
 
@@ -114,18 +105,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'listing_id is required' },
         { status: 400 }
-      );
-    }
-
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to save a listing' },
-        { status: 401 }
       );
     }
 
@@ -173,11 +152,7 @@ export async function POST(request: NextRequest) {
       savedListing,
       message: 'Listing saved successfully',
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to save listing', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Save listing');
   }
 }

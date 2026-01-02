@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/reviews
@@ -54,11 +56,8 @@ export async function GET(request: NextRequest) {
       total: count || 0,
       trust_summary: trustSummary || null,
     });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: 'Failed to fetch reviews', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Fetch reviews');
   }
 }
 
@@ -73,20 +72,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to submit a review' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     const body = await request.json();
     const { order_id, rating, review_text } = body;
@@ -182,10 +169,7 @@ export async function POST(request: NextRequest) {
       success: true,
       review,
     });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: 'Failed to submit review', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Submit review');
   }
 }

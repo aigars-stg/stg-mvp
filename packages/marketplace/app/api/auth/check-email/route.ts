@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/client';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * Check if an email already exists in the system.
@@ -98,10 +99,7 @@ export async function POST(request: NextRequest) {
       exists: true,
       providers,
     });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Check email');
   }
 }

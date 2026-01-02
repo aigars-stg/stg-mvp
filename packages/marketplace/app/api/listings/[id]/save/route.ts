@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * POST /api/listings/[id]/save
@@ -10,18 +12,10 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
+
     const { id } = params;
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to save a listing' },
-        { status: 401 }
-      );
-    }
 
     // Check if listing exists and is active
     const { data: listing, error: listingError } = await (supabase as any)
@@ -88,12 +82,8 @@ export async function POST(
         message: 'Listing saved successfully',
       });
     }
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to toggle save status', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Toggle save status');
   }
 }
 

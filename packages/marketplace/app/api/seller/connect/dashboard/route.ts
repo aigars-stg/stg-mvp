@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { createDashboardLink } from '@/lib/stripe/connect-service';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * POST /api/seller/connect/dashboard
@@ -9,20 +10,8 @@ import { createDashboardLink } from '@/lib/stripe/connect-service';
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     // Get Connect account ID from seller_profiles
     const { data: profile, error: profileError } = await supabase
@@ -45,11 +34,7 @@ export async function POST(request: NextRequest) {
       success: true,
       dashboardUrl,
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to create dashboard link', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Create dashboard link');
   }
 }

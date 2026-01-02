@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { postReceiptConfirmedMessage, postOrderCompletedMessage } from '@/lib/transactions';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * POST /api/transactions/[orderId]/confirm-receipt
@@ -13,20 +14,8 @@ export async function POST(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to confirm receipt' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     const orderId = params.orderId;
 
@@ -91,11 +80,7 @@ export async function POST(
       order_number: order.order_number,
       message: 'Receipt confirmed. Order is now complete.',
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to confirm receipt', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Confirm receipt');
   }
 }

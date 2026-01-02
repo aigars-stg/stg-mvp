@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 export async function GET(
   request: NextRequest,
@@ -81,12 +83,8 @@ export async function GET(
     }
 
     return NextResponse.json({ listing });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to fetch listing', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Fetch listing');
   }
 }
 
@@ -99,19 +97,11 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
+
     const { id } = params;
     const body = await request.json();
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to update a listing' },
-        { status: 401 }
-      );
-    }
 
     // Build updates object from allowed fields
     const updates: any = {};
@@ -242,12 +232,8 @@ export async function PATCH(
       listing,
       message: 'Listing updated successfully',
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to update listing', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Update listing');
   }
 }
 
@@ -261,20 +247,12 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
+
     const { id } = params;
     const { searchParams } = new URL(request.url);
     const hardDelete = searchParams.get('hard') === 'true';
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to delete a listing' },
-        { status: 401 }
-      );
-    }
 
     if (hardDelete) {
       // Hard delete - permanently remove from database
@@ -330,11 +308,7 @@ export async function DELETE(
         message: 'Listing removed successfully',
       });
     }
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to delete listing', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Delete listing');
   }
 }

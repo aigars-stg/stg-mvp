@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * DELETE /api/saved-listings/[id]
@@ -10,18 +11,10 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
+
     const { id } = params;
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to delete a saved listing' },
-        { status: 401 }
-      );
-    }
 
     // Delete saved listing (RLS policy ensures only owner can delete)
     const { error: deleteError } = await (supabase as any)
@@ -47,11 +40,7 @@ export async function DELETE(
     return NextResponse.json({
       message: 'Saved listing deleted successfully',
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to delete saved listing', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Delete saved listing');
   }
 }

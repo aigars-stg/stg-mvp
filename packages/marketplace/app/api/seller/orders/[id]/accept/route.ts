@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { sendOrderAcceptedToBuyer, sendShippingLabelToSeller } from '@/lib/email/send-order-emails';
 import { generateShippingLabel, getLabelPdfBuffer } from '@/lib/unisend/label-service';
 import { postOrderAcceptedMessage } from '@/lib/transactions';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 interface AcceptOrderBody {
   parcelSize?: 'XS' | 'S' | 'M' | 'L'; // Required for T2T orders
@@ -19,20 +20,8 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to accept orders' },
-        { status: 401 }
-      );
-    }
+    const { response, user, supabase } = await requireAuth();
+    if (response) return response;
 
     const orderId = params.id;
     const body: AcceptOrderBody = await request.json();
@@ -175,11 +164,7 @@ export async function POST(
       shippingMethod: result.shipping_method,
       message: 'Order accepted successfully',
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to accept order', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Accept order');
   }
 }

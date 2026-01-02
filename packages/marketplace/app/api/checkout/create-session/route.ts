@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
 import { stripe, calculateMarketplacePricing } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js'; // For service role
 import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
 import type Stripe from 'stripe';
+import { requireAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 interface CreateSessionBody {
   basketId: string;
@@ -52,20 +53,8 @@ interface CartBasket {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'You must be signed in to checkout' },
-        { status: 401 }
-      );
-    }
+    const { response, user } = await requireAuth();
+    if (response) return response;
 
     // Parse request body
     const body: CreateSessionBody = await request.json();
@@ -304,11 +293,7 @@ export async function POST(request: NextRequest) {
       url: session.url,
       sessionId: session.id,
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to create checkout session', details: message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return handleApiError(error, 'Create checkout session');
   }
 }
