@@ -94,7 +94,7 @@ export function GameCollection({
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const cardWidth = 280; // Approximate card width + gap
+    const cardWidth = 260; // Card width + gap
     const scrollAmount = cardWidth * 2;
     container.scrollBy({
       left: direction === 'left' ? -scrollAmount : scrollAmount,
@@ -170,25 +170,32 @@ export function GameCollection({
           {/* Cards Container */}
           <div
             ref={scrollContainerRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 snap-x snap-mandatory"
+            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 snap-x snap-mandatory scroll-pl-4 sm:scroll-pl-6"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {loading ? (
               // Loading skeletons
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex-shrink-0 w-[280px] snap-start">
+                <div key={i} className="flex-shrink-0 w-[260px] snap-start">
                   <ListingCardSkeleton />
                 </div>
               ))
             ) : (
               // Actual listings
               collection?.listings.map((listing) => (
-                <div key={listing.id} className="flex-shrink-0 w-[280px] snap-start">
+                <div key={listing.id} className="flex-shrink-0 w-[260px] snap-start">
                   <ListingCard listing={listing} showSeller />
                 </div>
               ))
             )}
           </div>
+
+          {/* Price disclaimer */}
+          {!loading && (
+            <p className="text-xs text-text-secondary mt-3">
+              Item prices only. Full cost shown before checkout.
+            </p>
+          )}
         </div>
 
         {/* Mobile View All */}
@@ -220,7 +227,7 @@ export function GameCollectionSkeleton() {
         </div>
         <div className="flex gap-4 overflow-hidden">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 w-[280px]">
+            <div key={i} className="flex-shrink-0 w-[260px]">
               <ListingCardSkeleton />
             </div>
           ))}

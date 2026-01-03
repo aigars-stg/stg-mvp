@@ -3,10 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Card, Badge, Button } from '@second-turn/design-system';
-import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Puzzle } from 'lucide-react';
-import { SellerTrustCompact } from '@/components/seller/SellerTrustBadge';
-import { getSellerBadgeTier } from '@/lib/types/seller';
+import { Card, Badge } from '@second-turn/design-system';
+import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Puzzle, BookOpen } from 'lucide-react';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
@@ -19,6 +17,41 @@ interface ListingCardProps {
   listing: ListingWithSeller;
   showSeller?: boolean;
   isOwnListing?: boolean; // Whether this listing belongs to the current user
+}
+
+// Priority languages for Baltic region
+const PRIORITY_LANGUAGES = ['Latvian', 'Lithuanian', 'Estonian', 'English', 'German'];
+
+/**
+ * Format languages for display - if more than 4, show all priority languages + count of others
+ * e.g., "Latvian, Lithuanian, Estonian, English, Russian" → "Latvian / Lithuanian / Estonian / English +1"
+ * e.g., "Czech, English, French, German, Hungarian, Polish" → "English / German +4"
+ */
+function formatLanguages(languageString: string): string {
+  const languages = languageString.split(/,\s*/).map(l => l.trim()).filter(Boolean);
+
+  if (languages.length <= 4) {
+    return languages.join(' / ');
+  }
+
+  // Find all priority languages present, sorted by priority order
+  const priorityPresent = PRIORITY_LANGUAGES.filter(lang => languages.includes(lang));
+  const nonPriorityCount = languages.length - priorityPresent.length;
+
+  // If we have priority languages, show them all + count of others
+  if (priorityPresent.length > 0 && nonPriorityCount > 0) {
+    return `${priorityPresent.join(' / ')} +${nonPriorityCount}`;
+  }
+
+  // If all languages are priority (or none are), just show first 2 + count
+  const displayLangs = priorityPresent.length > 0 ? priorityPresent : languages.slice(0, 2);
+  const remaining = languages.length - displayLangs.length;
+
+  if (remaining > 0) {
+    return `${displayLangs.slice(0, 2).join(' / ')} +${languages.length - 2}`;
+  }
+
+  return displayLangs.join(' / ');
 }
 
 export function ListingCard({ listing, showSeller = false, isOwnListing = false }: ListingCardProps) {
@@ -210,9 +243,25 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
             </div>
           )}
 
-          {/* Image counter badge */}
+          {/* Condition ribbon - top right */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowConditionInfo(true);
+            }}
+            className="absolute top-3 right-3 cursor-pointer hover:opacity-90 transition-opacity"
+            aria-label={`Learn about ${conditionLabel} condition`}
+          >
+            <Badge variant={getConditionVariant()} size="sm">
+              {conditionLabel}
+            </Badge>
+          </button>
+
+          {/* Image counter - bottom right */}
           {allImages.length > 1 && (
-            <div className="absolute top-3 right-3 px-2 py-1 bg-polar-night/80 backdrop-blur-sm rounded-md text-xs text-snow-white font-medium">
+            <div className="absolute bottom-3 right-3 px-2 py-1 bg-polar-night/80 backdrop-blur-sm rounded-md text-xs text-snow-white font-medium">
               {currentImageIndex + 1}/{allImages.length}
             </div>
           )}
@@ -220,177 +269,113 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
 
         {/* Content Section */}
         <div className="p-4 flex flex-col flex-grow">
-          {/* Middle Content */}
-          <div className="space-y-3 pb-1">
-            {/* Game Name with Year */}
+          {/* Variable height content */}
+          <div className="space-y-2">
+            {/* Game Name - with expansion label if this IS an expansion */}
             <h3 className="font-bold text-lg text-polar-night line-clamp-2 min-h-[2.5rem]">
               {listing.game_name}
-              {listing.edition_year && (
-                <span className="text-text-muted font-normal"> ({listing.edition_year})</span>
+              {listing.game?.is_expansion && (
+                <span className="text-text-muted font-normal text-sm"> (Expansion)</span>
               )}
             </h3>
 
-            {/* Game Metadata */}
-            {(listing.game?.player_count || listing.game?.min_age || listing.game?.playing_time || listing.game?.is_expansion || (listing.included_expansions && listing.included_expansions.length > 0)) && (
-              <div className="flex flex-wrap gap-3 text-xs text-text-secondary items-center">
+            {/* Game Metadata - tighter spacing */}
+            {(listing.game?.player_count || listing.game?.min_age || listing.game?.playing_time || (listing.included_expansions && listing.included_expansions.length > 0)) && (
+              <div className="flex flex-wrap gap-2 text-xs text-text-secondary items-center">
                 {listing.game?.player_count && (
-                  <span className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
+                  <span className="flex items-center gap-0.5">
+                    <Users className="w-3.5 h-3.5" />
                     {listing.game.player_count}
                   </span>
                 )}
                 {listing.game?.min_age && (
-                  <span className="flex items-center gap-1">
-                    <Baby className="w-4 h-4" />
+                  <span className="flex items-center gap-0.5">
+                    <Baby className="w-3.5 h-3.5" />
                     {listing.game.min_age}+
                   </span>
                 )}
                 {listing.game?.playing_time && (
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
+                  <span className="flex items-center gap-0.5">
+                    <Clock className="w-3.5 h-3.5" />
                     {listing.game.playing_time}
                   </span>
                 )}
-                {listing.game?.is_expansion && (
-                  <Badge variant="warning" size="sm">
-                    Expansion
-                  </Badge>
-                )}
                 {listing.included_expansions && listing.included_expansions.length > 0 && (
-                  <Badge
-                    variant="success"
-                    size="sm"
-                    icon={<Puzzle className="w-3 h-3" />}
+                  <span
+                    className="flex items-center gap-0.5 text-aurora-green"
                     title={listing.included_expansions.map(e => e.name).join(', ')}
                   >
-                    +{listing.included_expansions.length} expansion{listing.included_expansions.length !== 1 ? 's' : ''}
-                  </Badge>
-                )}
-              </div>
-            )}
-
-            {/* Version/Publisher Info */}
-            {(listing.language || listing.publisher) && (
-              <p className="text-sm text-text-secondary line-clamp-2">
-                {listing.language?.replace(/, /g, ' / ')}
-                {listing.language && listing.publisher && ' • '}
-                {listing.publisher?.replace(/, /g, ' / ')}
-              </p>
-            )}
-
-            {/* Price & Condition */}
-            <div className="space-y-1">
-              {/* Price with previous price strikethrough */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="text-2xl font-bold text-polar-night">
-                  €{listing.price.toFixed(2)}
-                </div>
-                {listing.previous_price && listing.previous_price > listing.price && (
-                  <span className="text-base text-text-muted line-through">
-                    €{listing.previous_price.toFixed(2)}
+                    <Puzzle className="w-3.5 h-3.5" />
+                    +{listing.included_expansions.length}
                   </span>
                 )}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowConditionInfo(true);
-                  }}
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                  aria-label={`Learn about ${conditionLabel} condition`}
-                >
-                  <Badge variant={getConditionVariant()}>
-                    {conditionLabel}
-                  </Badge>
-                </button>
-              </div>
-              {/* Savings indicator */}
-              {listing.previous_price && listing.previous_price > listing.price && (
-                <div className="text-sm font-medium text-aurora-green">
-                  Save €{(listing.previous_price - listing.price).toFixed(2)} ({Math.round((1 - listing.price / listing.previous_price) * 100)}% off)
-                </div>
-              )}
-            </div>
-
-            {/* Components Warning */}
-            {!listing.all_components_present && (
-              <div className="flex items-center gap-1.5 text-xs text-aurora-red">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>Missing components</span>
               </div>
             )}
 
-            {/* Shipping Options */}
-            <div className="flex flex-wrap gap-1.5 text-xs text-text-secondary">
-              {listing.shipping_local_pickup && (
-                <Badge variant="default" size="sm" icon={<MapPin className="w-3 h-3" />}>
-                  Local Pickup
-                </Badge>
-              )}
-              {listing.shipping_parcel_locker && (
-                <Badge variant="default" size="sm" icon={<Package className="w-3 h-3" />}>
-                  Parcel Locker
-                </Badge>
-              )}
-            </div>
+            {/* Language + Missing Components Warning */}
+            {(listing.language || !listing.all_components_present) && (
+              <div className="flex items-center gap-1.5 text-sm text-text-secondary">
+                {listing.language && (
+                  <span
+                    className="flex items-center gap-1 line-clamp-1"
+                    title={listing.language.split(/,\s*/).length > 4 ? listing.language : undefined}
+                  >
+                    <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
+                    {formatLanguages(listing.language)}
+                  </span>
+                )}
+                {!listing.all_components_present && (
+                  <span title="Missing components" className="flex-shrink-0">
+                    <AlertCircle className="w-4 h-4 text-aurora-red" />
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Bottom Section: Seller Info + Buy Now Button */}
-          <div className="mt-auto pt-3 space-y-3 border-t border-border-subtle">
-            {/* Seller Info with Trust Signals */}
-            {showSeller && listing.seller && (
-              <Link
-                href={`/profile/${listing.seller.id}`}
-                onClick={(e) => e.stopPropagation()}
-                className="block space-y-1.5 hover:bg-bg-secondary/50 -mx-2 px-2 py-1.5 rounded-lg transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  {listing.seller.avatar_url ? (
-                    <Image
-                      src={listing.seller.avatar_url}
-                      alt={listing.seller.full_name}
-                      width={24}
-                      height={24}
-                      className="rounded-sm object-cover border border-border-subtle"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-6 h-6 rounded-sm bg-frost-ice/20 flex items-center justify-center text-xs font-semibold text-frost-ice">
-                      {listing.seller.full_name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <span className="text-sm text-text-secondary line-clamp-1 hover:text-frost-ice transition-colors">
-                    {listing.seller.full_name}
-                    {listing.seller.country && getCountryFlag(listing.seller.country) && (
-                      <span
-                        className={`${getCountryFlag(listing.seller.country)} ml-1`}
-                        role="img"
-                        aria-label={`Country: ${getCountryName(listing.seller.country)}`}
-                        title={getCountryName(listing.seller.country)}
-                      />
-                    )}
+          {/* Spacer to push price down */}
+          <div className="flex-grow" />
+
+          {/* Price - aligned at bottom */}
+          <div className="flex items-center gap-2 pt-2">
+            <span className="text-2xl font-bold text-polar-night">
+              €{listing.price.toFixed(2)}
+            </span>
+            {listing.previous_price && listing.previous_price > listing.price && (
+              <span className="text-base text-text-muted line-through">
+                €{listing.previous_price.toFixed(2)}
+              </span>
+            )}
+          </div>
+
+          {/* Bottom Section: Location + Shipping + Buy Now Button */}
+          <div className="pt-2 space-y-2 border-t border-border-subtle">
+            {/* Location + Shipping - answers "Can I get this?" and "How?" */}
+            {showSeller && listing.seller?.country && (
+              <div className="flex items-center gap-1.5 text-sm text-text-secondary">
+                {getCountryFlag(listing.seller.country) && (
+                  <span
+                    className={getCountryFlag(listing.seller.country)}
+                    role="img"
+                    aria-label={getCountryName(listing.seller.country)}
+                  />
+                )}
+                <span>{getCountryName(listing.seller.country)}</span>
+                <span className="text-text-muted">•</span>
+                {listing.shipping_parcel_locker ? (
+                  <span className="flex items-center gap-1">
+                    <Package className="w-3.5 h-3.5" />
+                    Parcel Locker
                   </span>
-                </div>
-                {/* Trust Signals */}
-                <SellerTrustCompact
-                  totalSales={listing.seller.total_completed_sales ?? 0}
-                  averageRating={listing.seller.average_rating ?? 0}
-                  totalReviews={listing.seller.total_reviews ?? 0}
-                  badgeTier={getSellerBadgeTier(
-                    listing.seller.total_completed_sales ?? 0,
-                    listing.seller.average_rating ?? 0
-                  )}
-                />
-              </Link>
+                ) : listing.shipping_local_pickup ? (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5" />
+                    Pickup only
+                  </span>
+                ) : null}
+              </div>
             )}
 
-            {/* Action Button - Only show Buy Now for others' listings */}
-            {!isOwnListing && (
-              <Button variant="accent" fullWidth>
-                Buy Now
-              </Button>
-            )}
           </div>
         </div>
       </Card>
