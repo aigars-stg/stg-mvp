@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { ExternalLink, Puzzle } from 'lucide-react';
 import { GameImageWithBackdrop } from './GameImageWithBackdrop';
 
 interface GameResultCardProps {
@@ -125,12 +126,33 @@ export function GameResultCard({
 
       {/* Game Info */}
       <div className="flex-1 flex flex-col justify-center min-w-0">
-        <h3 className="font-semibold text-polar-night leading-tight">
-          {name}
-          {(versionYear || yearpublished) && (
-            <span className="text-text-muted font-normal"> ({versionYear || yearpublished})</span>
-          )}
-        </h3>
+        <div className="flex items-center gap-1.5">
+          <h3 className="font-semibold text-polar-night leading-tight">
+            {name}
+            {(versionYear || yearpublished) && (
+              <span className="text-text-muted font-normal"> ({versionYear || yearpublished})</span>
+            )}
+          </h3>
+          <a
+            href={`https://boardgamegeek.com/boardgame/${id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-text-muted hover:text-frost-ice transition-colors flex-shrink-0"
+            title="View on BoardGameGeek"
+            aria-label="View on BoardGameGeek"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
+
+        {/* Expansion Badge */}
+        {isExpansion && (
+          <span className="inline-flex items-center gap-1 text-xs text-aurora-purple mt-0.5">
+            <Puzzle className="w-3 h-3" />
+            Expansion
+          </span>
+        )}
 
         {/* Version Details - Language • Publisher */}
         {(versionLanguage || versionPublisher) && (

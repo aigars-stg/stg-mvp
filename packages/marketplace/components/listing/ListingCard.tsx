@@ -188,11 +188,11 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
             <button
               onClick={handleSaveToggle}
               disabled={saveLoading}
-              className="absolute top-3 left-3 w-9 h-9 rounded-full bg-snow-white/90 hover:bg-snow-white flex items-center justify-center transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+              className="absolute top-3 left-3 w-8 h-8 rounded-md bg-snow-white/90 hover:bg-snow-white flex items-center justify-center transition-all shadow-sm hover:shadow-md disabled:opacity-50"
               aria-label={isSaved ? "Remove from saved" : "Save listing"}
             >
               <Heart
-                className={`w-5 h-5 transition-all ${
+                className={`w-4 h-4 transition-all ${
                   isSaved
                     ? 'fill-aurora-red text-aurora-red'
                     : 'text-text-secondary'

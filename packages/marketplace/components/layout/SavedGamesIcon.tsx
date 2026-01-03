@@ -4,15 +4,15 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { useSavedListings } from '@/lib/hooks/useSavedListings';
+import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 
 export function SavedGamesIcon() {
     const { user } = useAuth();
-    const { savedListings } = useSavedListings();
+    const { savedListingIds } = useSavedListingsContext();
     const router = useRouter();
     const pathname = usePathname();
 
-    const savedCount = user ? savedListings.length : 0;
+    const savedCount = user ? savedListingIds.size : 0;
 
     const handleClick = (e: React.MouseEvent) => {
         if (!user) {

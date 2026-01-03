@@ -52,6 +52,7 @@ interface CartSummary {
 export default function CartPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
+  const { fetchCart: refreshCartContext } = useCart();
 
   const [baskets, setBaskets] = useState<CartBasket[]>([]);
   const [summary, setSummary] = useState<CartSummary | null>(null);
@@ -135,8 +136,10 @@ export default function CartPage() {
         throw new Error(data.error || 'Failed to remove item');
       }
 
-      // Refresh cart
+      // Refresh local cart state
       await fetchCart();
+      // Refresh cart context so navbar count updates
+      refreshCartContext();
     } catch (err) {
       console.error('Error removing item:', err);
       // Could show a toast notification here
@@ -154,10 +157,13 @@ export default function CartPage() {
       });
       // Refresh cart to update UI
       await fetchCart();
+      // Refresh cart context so navbar count updates
+      refreshCartContext();
     } catch (err) {
       console.error('Error removing expired item:', err);
       // Still refresh to show current state
       await fetchCart();
+      refreshCartContext();
     }
   };
 

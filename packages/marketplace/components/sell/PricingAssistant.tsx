@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { Card, Button } from '@second-turn/design-system';
-import { TrendingUp, ExternalLink, Loader2, AlertCircle, Tag, BarChart3 } from 'lucide-react';
+import { TrendingUp, ExternalLink, Loader2, AlertCircle, Tag, BarChart3, Puzzle, Info } from 'lucide-react';
+
+interface ExpansionPricing {
+  bggGameId: number;
+  gameName: string | null;
+  lowestPrice: number | null;
+}
 
 interface PricingData {
   bggGameId: number;
@@ -25,12 +31,14 @@ interface PricingData {
     avgSoldPrice: number | null;
     completedSalesCount: number;
   } | null;
+  expansions?: ExpansionPricing[];
 }
 
 interface PricingAssistantProps {
   bggGameId: number;
   condition?: string | null;
   onFillPrice: (price: number) => void;
+  expansionIds?: number[];
 }
 
 /**
@@ -49,10 +57,15 @@ export function PricingAssistant({
   bggGameId,
   condition,
   onFillPrice,
+  expansionIds = [],
 }: PricingAssistantProps) {
   const [pricingData, setPricingData] = useState<PricingData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Create a stable key for expansion IDs to avoid unnecessary re-fetches
+  // Use numeric sort to ensure consistent key regardless of add order
+  const expansionKey = expansionIds.slice(0, 10).sort((a, b) => a - b).join(',');
 
   useEffect(() => {
     if (!bggGameId) return;
@@ -62,7 +75,14 @@ export function PricingAssistant({
       setError(null);
 
       try {
-        const response = await fetch(`/api/games/${bggGameId}/pricing`);
+        // Build URL with optional expansion IDs (capped at 10)
+        let url = `/api/games/${bggGameId}/pricing`;
+        if (expansionIds.length > 0) {
+          const idsToFetch = expansionIds.slice(0, 10);
+          url += `?expansions=${idsToFetch.join(',')}`;
+        }
+
+        const response = await fetch(url);
 
         if (!response.ok) {
           throw new Error('Failed to fetch pricing data');
@@ -79,21 +99,31 @@ export function PricingAssistant({
     };
 
     fetchPricing();
-  }, [bggGameId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bggGameId, expansionKey]); // expansionKey derived from expansionIds, triggers re-fetch when expansions change
 
-  // Calculate suggested price based on condition
+  // Calculate suggested price based on condition (includes expansions)
   const getSuggestedPrice = (): number | null => {
     if (!pricingData) return null;
 
-    const { external, internal } = pricingData;
+    const { external, internal, expansions } = pricingData;
 
-    // Priority: median sold price > external lowest > lowest active listing
-    const basePrice =
+    // Base game price: priority is median sold > external lowest > lowest active listing
+    const baseGamePrice =
       internal?.medianSoldPrice ||
       external?.lowestPrice ||
-      internal?.lowestActivePrice;
+      internal?.lowestActivePrice ||
+      0;
 
-    if (!basePrice) return null;
+    // Sum expansion prices (only those that have pricing data)
+    const expansionTotal = expansions?.reduce(
+      (sum, exp) => sum + (exp.lowestPrice || 0),
+      0
+    ) || 0;
+
+    const totalRetailValue = baseGamePrice + expansionTotal;
+
+    if (totalRetailValue === 0) return null;
 
     // Apply condition discount from new retail
     const conditionMultipliers: Record<string, number> = {
@@ -104,7 +134,25 @@ export function PricingAssistant({
     };
 
     const multiplier = condition ? conditionMultipliers[condition] || 0.7 : 0.7;
-    return Math.round(basePrice * multiplier * 100) / 100;
+    return Math.round(totalRetailValue * multiplier * 100) / 100;
+  };
+
+  // Get bundle info for display
+  const getBundleInfo = () => {
+    const totalExpansions = expansionIds.length;
+    if (totalExpansions === 0) return null;
+
+    const pricedExpansions = pricingData?.expansions?.filter(e => e.lowestPrice !== null).length || 0;
+    const expansionTotal = pricingData?.expansions?.reduce(
+      (sum, exp) => sum + (exp.lowestPrice || 0),
+      0
+    ) || 0;
+
+    return {
+      totalExpansions,
+      pricedExpansions,
+      expansionTotal,
+    };
   };
 
   const formatCondition = (cond: string): string => {
@@ -147,6 +195,11 @@ export function PricingAssistant({
 
   const { external, internal } = pricingData;
   const suggestedPrice = getSuggestedPrice();
+  const bundleInfo = getBundleInfo();
+
+  // Calculate total bundle retail value for display
+  const baseGameRetail = external?.lowestPrice || 0;
+  const bundleRetailValue = baseGameRetail + (bundleInfo?.expansionTotal || 0);
 
   // If no pricing data available at all, don't show the component
   if (!external?.lowestPrice && !internal?.medianSoldPrice && !internal?.lowestActivePrice) {
@@ -161,27 +214,89 @@ export function PricingAssistant({
       </div>
 
       <div className="space-y-3">
-        {/* External Retail Price */}
+        {/* External Retail Price - Stacked breakdown for bundles */}
         {external?.lowestPrice && (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Tag className="w-4 h-4 text-text-muted" />
-              <span className="text-sm text-text-secondary">New retail:</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-polar-night">
-                {external.lowestPrice.toFixed(2)}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onFillPrice(external.lowestPrice!)}
-                className="text-xs px-2 h-7"
-              >
-                Fill
-              </Button>
-            </div>
+          <div className="space-y-2">
+            {/* Single game - simple row (also used when no expansion prices available) */}
+            {(!bundleInfo || bundleInfo.expansionTotal === 0) && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-text-secondary" />
+                  <span className="text-sm text-text-secondary">New retail:</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-polar-night tabular-nums">
+                    €{external.lowestPrice.toFixed(2)}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onFillPrice(external.lowestPrice!)}
+                    className="text-xs px-3 h-7"
+                  >
+                    Fill
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Bundle breakdown - only when we have expansion pricing data */}
+            {bundleInfo && bundleInfo.expansionTotal > 0 && (
+              <>
+                {/* Base game line */}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-text-secondary" />
+                    <span className="text-text-secondary">Base game:</span>
+                  </div>
+                  <span className="text-text-secondary tabular-nums">
+                    €{external.lowestPrice.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Expansions line */}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <Puzzle className="w-4 h-4 text-frost-ice" />
+                    <span className="text-text-secondary">
+                      + {bundleInfo.totalExpansions} expansion{bundleInfo.totalExpansions !== 1 ? 's' : ''}
+                      {bundleInfo.pricedExpansions < bundleInfo.totalExpansions && (
+                        <span className="text-text-muted"> ({bundleInfo.pricedExpansions} priced)</span>
+                      )}
+                      :
+                    </span>
+                  </div>
+                  <span className="text-text-secondary tabular-nums">
+                    €{bundleInfo.expansionTotal.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Bundle total with divider */}
+                <div className="border-t border-frost-ice/20 my-1" />
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-polar-night">Bundle retail:</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-polar-night tabular-nums">
+                      €{bundleRetailValue.toFixed(2)}
+                    </span>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => onFillPrice(bundleRetailValue)}
+                      className="text-xs px-3 h-7"
+                    >
+                      Fill
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
+        )}
+
+        {/* Second Turn Marketplace Data - visual separation from external */}
+        {(internal?.medianSoldPrice || internal?.lowestActivePrice) && external?.lowestPrice && (
+          <div className="border-t border-border/50 pt-3 mt-1" />
         )}
 
         {/* Internal Median Sold Price */}
@@ -189,20 +304,20 @@ export function PricingAssistant({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-text-muted" />
-              <span className="text-sm text-text-secondary">Avg. Used Sold:</span>
+              <span className="text-sm text-text-secondary">Avg. sold here:</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-polar-night">
-                {internal.medianSoldPrice.toFixed(2)}
+              <span className="font-semibold text-polar-night tabular-nums">
+                €{internal.medianSoldPrice.toFixed(2)}
               </span>
               <span className="text-xs text-text-muted">
                 ({internal.completedSalesCount} sales)
               </span>
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="sm"
                 onClick={() => onFillPrice(internal.medianSoldPrice!)}
-                className="text-xs px-2 h-7"
+                className="text-xs px-3 h-7"
               >
                 Fill
               </Button>
@@ -210,14 +325,14 @@ export function PricingAssistant({
           </div>
         )}
 
-        {/* Current Competition */}
+        {/* Current Competition on Second Turn */}
         {internal?.lowestActivePrice && internal.activeListingCount > 0 && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-text-muted">
-              Lowest active listing:
+              Lowest on Second Turn Games:
             </span>
-            <span className="text-text-secondary">
-              {internal.lowestActivePrice.toFixed(2)} ({internal.activeListingCount} listed)
+            <span className="text-text-secondary tabular-nums">
+              €{internal.lowestActivePrice.toFixed(2)}
             </span>
           </div>
         )}
@@ -230,14 +345,14 @@ export function PricingAssistant({
                 Suggested for {formatCondition(condition)}:
               </span>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-frost-ice text-lg">
-                  {suggestedPrice.toFixed(2)}
+                <span className="font-bold text-frost-ice text-lg tabular-nums">
+                  €{suggestedPrice.toFixed(2)}
                 </span>
                 <Button
                   variant="primary"
                   size="sm"
                   onClick={() => onFillPrice(suggestedPrice)}
-                  className="h-8"
+                  className="h-8 px-4"
                 >
                   Use price
                 </Button>
@@ -248,7 +363,7 @@ export function PricingAssistant({
 
         {/* Attribution */}
         {external?.attribution && (
-          <div className="pt-3 mt-3 border-t border-frost-ice/10">
+          <div className="pt-3 mt-3 border-t border-frost-ice/10 flex items-center justify-between">
             <a
               href={external.attribution.url}
               target="_blank"
@@ -258,6 +373,12 @@ export function PricingAssistant({
               {external.attribution.text}
               <ExternalLink className="w-3 h-3" />
             </a>
+            <span
+              className="text-text-muted cursor-help"
+              title="Based on lowest EU retail prices. Your local market may differ - use as a guide."
+            >
+              <Info className="w-3.5 h-3.5" />
+            </span>
           </div>
         )}
       </div>

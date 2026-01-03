@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -17,7 +17,10 @@ import {
   BookOpen,
   Globe,
   Building2,
+  Info,
 } from 'lucide-react';
+import { calculateMarketplacePricing } from '@/lib/stripe-utils';
+import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
@@ -27,14 +30,18 @@ import { getSellerBadgeTier } from '@/lib/types/seller';
 import { ImageLightbox } from '@/components/listing/ImageLightbox';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 import { ConditionInfoModal } from '@/components/common/ConditionInfoModal';
+import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 
 interface OfferCardProps {
   listing: ListingWithSeller;
   onAddToCart?: (listingId: string) => Promise<void>;
   isAddingToCart?: boolean;
+  onSaveChange?: (listingId: string, saved: boolean) => void;
+  /** Buyer's country for calculating accurate shipping estimate */
+  buyerCountry?: TerminalCountry;
 }
 
-export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardProps) {
+export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, buyerCountry }: OfferCardProps) {
   const router = useRouter();
   const { user } = useAuth();
   const [localLoading, setLocalLoading] = useState(false);
@@ -42,14 +49,80 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [showConditionInfo, setShowConditionInfo] = useState(false);
+  const [showPriceBreakdown, setShowPriceBreakdown] = useState(false);
 
   // Saved listing - uses context to avoid per-card API calls
   const { isSaved: checkIsSaved, toggleSave: contextToggleSave } = useSavedListingsContext();
   const isSaved = checkIsSaved(listing.id);
   const [saveLoading, setSaveLoading] = useState(false);
 
+  // Reservation state - check if listing is currently reserved
+  const [listingStatus, setListingStatus] = useState<'available' | 'reserved' | 'sold'>(
+    listing.reserved_until && new Date(listing.reserved_until) > new Date()
+      ? 'reserved'
+      : 'available'
+  );
+
+  // Sync listingStatus when prop changes (e.g., after adding to cart)
+  useEffect(() => {
+    if (listing.reserved_until && new Date(listing.reserved_until) > new Date()) {
+      setListingStatus('reserved');
+    }
+  }, [listing.reserved_until]);
+
+  // Handle reservation timer expiry - refetch to check if sold or available
+  const handleReservationExpire = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/listings/${listing.id}/status`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status === 'sold' || data.status === 'removed') {
+          setListingStatus('sold');
+        } else if (data.status === 'reserved') {
+          // Still reserved by someone else, keep as reserved
+          setListingStatus('reserved');
+        } else {
+          setListingStatus('available');
+        }
+      } else {
+        // On error, assume available
+        setListingStatus('available');
+      }
+    } catch {
+      setListingStatus('available');
+    }
+  }, [listing.id]);
+
   const isOwnListing = user?.id === listing.seller_id;
   const loading = isAddingToCart || localLoading;
+
+  // Calculate total delivered price (item + shipping + service fee)
+  const deliveredPricing = useMemo(() => {
+    const sellerCountry = listing.seller.country as TerminalCountry | undefined;
+
+    // If seller has no country, we can't calculate shipping
+    if (!sellerCountry || !['LT', 'LV', 'EE'].includes(sellerCountry)) {
+      return null;
+    }
+
+    // If buyer country is known, calculate exact price
+    // Otherwise, use same-country estimate (typically cheapest route)
+    const destinationCountry = buyerCountry || sellerCountry;
+    const isEstimate = !buyerCountry;
+
+    const shippingPrice = getShippingPrice(sellerCountry, destinationCountry, 'M');
+    const pricing = calculateMarketplacePricing(listing.price, shippingPrice, 't2t');
+
+    return {
+      itemPrice: listing.price,
+      shippingPrice,
+      serviceFee: pricing.serviceFeeCents / 100,
+      total: pricing.totalChargeCents / 100,
+      isEstimate,
+      sellerCountry,
+      destinationCountry,
+    };
+  }, [listing.price, listing.seller.country, buyerCountry]);
 
   // All images for lightbox (BGG images + user photos + expansion images)
   const allImages = [
@@ -83,6 +156,39 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
     }
   };
 
+  // Price breakdown popover content
+  const PriceBreakdownContent = () => {
+    if (!deliveredPricing) return null;
+
+    const countryName = {
+      LT: 'Lithuania',
+      LV: 'Latvia',
+      EE: 'Estonia',
+    }[deliveredPricing.destinationCountry];
+
+    return (
+      <div className="text-xs space-y-1.5">
+        <div className="flex justify-between gap-4">
+          <span className="text-text-secondary">Shipping to {countryName}:</span>
+          <span className="text-polar-night font-medium">€{deliveredPricing.shippingPrice.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-text-secondary">Service fee:</span>
+          <span className="text-polar-night font-medium">€{deliveredPricing.serviceFee.toFixed(2)}</span>
+        </div>
+        <div className="border-t border-border pt-1.5 mt-1.5 flex justify-between gap-4">
+          <span className="text-polar-night font-medium">Total:</span>
+          <span className="text-polar-night font-bold">€{deliveredPricing.total.toFixed(2)}</span>
+        </div>
+        {deliveredPricing.isEstimate && (
+          <p className="text-text-muted italic pt-1">
+            *Estimate based on same-country shipping. Final price at checkout.
+          </p>
+        )}
+      </div>
+    );
+  };
+
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -108,7 +214,9 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
 
     try {
       setSaveLoading(true);
-      await contextToggleSave(listing.id);
+      const newSavedState = await contextToggleSave(listing.id);
+      // Notify parent of save change (e.g., for my-listings page to remove unsaved items)
+      onSaveChange?.(listing.id, newSavedState);
     } catch (error) {
       console.error('Failed to toggle save:', error);
     } finally {
@@ -328,6 +436,20 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
                     </span>
                   </div>
                 )}
+                {/* Total delivered price - desktop with hover tooltip */}
+                {deliveredPricing && (
+                  <div className="relative group mt-0.5">
+                    <span className="text-xs text-text-secondary cursor-help inline-flex items-center gap-0.5">
+                      {deliveredPricing.isEstimate ? 'From ' : ''}
+                      €{deliveredPricing.total.toFixed(2)} delivered
+                      <Info className="w-3 h-3 text-text-muted" />
+                    </span>
+                    {/* Hover tooltip */}
+                    <div className="absolute right-0 top-full mt-1 z-20 w-48 p-2.5 bg-white rounded-lg shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                      <PriceBreakdownContent />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Save Button */}
@@ -346,19 +468,40 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
               {/* Action Buttons */}
               <div className="flex flex-col gap-1.5 w-full">
                 {!isOwnListing && (
-                  <Button
-                    variant="accent"
-                    size="sm"
-                    onClick={handleAddToCart}
-                    disabled={loading}
-                    className="w-full"
-                  >
-                    {loading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      'Add to Cart'
+                  <>
+                    {listingStatus === 'reserved' && listing.reserved_until && (
+                      <div
+                        className="flex items-center justify-center py-1"
+                        title="Someone is checking out — available soon if they don't complete"
+                      >
+                        <ReservationTimer
+                          expiresAt={listing.reserved_until}
+                          onExpire={handleReservationExpire}
+                          showLabel={false}
+                          size="sm"
+                        />
+                      </div>
                     )}
-                  </Button>
+                    {listingStatus === 'sold' ? (
+                      <div className="text-center text-sm text-text-muted py-2">Sold</div>
+                    ) : (
+                      <Button
+                        variant={listingStatus === 'reserved' ? 'secondary' : 'accent'}
+                        size="sm"
+                        onClick={handleAddToCart}
+                        disabled={loading || listingStatus === 'reserved'}
+                        className="w-full"
+                      >
+                        {loading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : listingStatus === 'reserved' ? (
+                          'Reserved'
+                        ) : (
+                          'Add to Cart'
+                        )}
+                      </Button>
+                    )}
+                  </>
                 )}
                 <Button
                   variant="ghost"
@@ -462,6 +605,36 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
                     {listing.previous_price && listing.previous_price > listing.price && (
                       <div className="text-sm text-text-muted line-through">
                         €{listing.previous_price.toFixed(2)}
+                      </div>
+                    )}
+                    {/* Total delivered price - mobile with tap popover */}
+                    {deliveredPricing && (
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setShowPriceBreakdown(!showPriceBreakdown);
+                          }}
+                          className="text-xs text-text-secondary inline-flex items-center gap-0.5"
+                        >
+                          {deliveredPricing.isEstimate ? 'From ' : ''}
+                          €{deliveredPricing.total.toFixed(2)} delivered
+                          <Info className="w-3 h-3 text-text-muted" />
+                        </button>
+                        {/* Tap popover */}
+                        {showPriceBreakdown && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-10"
+                              onClick={() => setShowPriceBreakdown(false)}
+                            />
+                            <div className="absolute right-0 top-full mt-1 z-20 w-48 p-2.5 bg-white rounded-lg shadow-lg border border-border">
+                              <PriceBreakdownContent />
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                     {/* Save Button */}
@@ -577,18 +750,39 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
             <div className="flex flex-col gap-2">
               {/* Add to Cart - hide when expanded (sticky bar shows instead) */}
               {!isOwnListing && !isExpanded && (
-                <Button
-                  variant="accent"
-                  onClick={handleAddToCart}
-                  disabled={loading}
-                  fullWidth
-                >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    'Add to Cart'
+                <>
+                  {listingStatus === 'reserved' && listing.reserved_until && (
+                    <div
+                      className="flex items-center justify-center py-2"
+                      title="Someone is checking out — available soon if they don't complete"
+                    >
+                      <ReservationTimer
+                        expiresAt={listing.reserved_until}
+                        onExpire={handleReservationExpire}
+                        showLabel={false}
+                        size="sm"
+                      />
+                    </div>
                   )}
-                </Button>
+                  {listingStatus === 'sold' ? (
+                    <div className="text-center text-sm text-text-muted py-3">Sold</div>
+                  ) : (
+                    <Button
+                      variant={listingStatus === 'reserved' ? 'secondary' : 'accent'}
+                      onClick={handleAddToCart}
+                      disabled={loading || listingStatus === 'reserved'}
+                      fullWidth
+                    >
+                      {loading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : listingStatus === 'reserved' ? (
+                        'Reserved'
+                      ) : (
+                        'Add to Cart'
+                      )}
+                    </Button>
+                  )}
+                </>
               )}
               {/* Details button */}
               <Button
@@ -720,18 +914,39 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart }: OfferCardPro
                 </div>
               )}
             </div>
-            <Button
-              variant="accent"
-              onClick={handleAddToCart}
-              disabled={loading}
-              className="flex-grow"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                'Add to Cart'
-              )}
-            </Button>
+            {listingStatus === 'sold' ? (
+              <div className="flex-grow text-center text-sm text-text-muted py-2">Sold</div>
+            ) : (
+              <div className="flex-grow flex flex-col gap-1">
+                {listingStatus === 'reserved' && listing.reserved_until && (
+                  <div
+                    className="flex items-center justify-center"
+                    title="Someone is checking out — available soon if they don't complete"
+                  >
+                    <ReservationTimer
+                      expiresAt={listing.reserved_until}
+                      onExpire={handleReservationExpire}
+                      showLabel={false}
+                      size="sm"
+                    />
+                  </div>
+                )}
+                <Button
+                  variant={listingStatus === 'reserved' ? 'secondary' : 'accent'}
+                  onClick={handleAddToCart}
+                  disabled={loading || listingStatus === 'reserved'}
+                  className="w-full"
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : listingStatus === 'reserved' ? (
+                    'Reserved'
+                  ) : (
+                    'Add to Cart'
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

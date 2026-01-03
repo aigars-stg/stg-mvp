@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createServerSupabase();
 
     // Build query for active listings with seller info
+    // Note: We include reserved listings so they can be shown with "Reserved" indicator
     let query = (supabase as any)
       .from('listings')
       .select(`
@@ -58,6 +59,7 @@ export async function GET(request: NextRequest) {
         shipping_local_pickup,
         shipping_parcel_locker,
         created_at,
+        reserved_until,
         seller:user_profiles!seller_id (
           id,
           full_name,
@@ -65,9 +67,7 @@ export async function GET(request: NextRequest) {
           country
         )
       `)
-      .eq('status', 'active')
-      // Show listings that are not reserved OR where reservation has expired
-      .or(`reserved_by.is.null,reserved_until.lt.${new Date().toISOString()}`);
+      .eq('status', 'active');
 
     // Apply search filter
     if (search) {

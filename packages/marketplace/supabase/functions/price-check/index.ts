@@ -48,6 +48,12 @@ interface BGPResponse {
   error?: string
 }
 
+interface ExpansionPricing {
+  bggGameId: number
+  gameName: string | null
+  lowestPrice: number | null
+}
+
 interface PriceCheckResponse {
   bggGameId: number
   gameName: string | null
@@ -69,6 +75,7 @@ interface PriceCheckResponse {
     avgSoldPrice: number | null
     completedSalesCount: number
   } | null
+  expansions?: ExpansionPricing[]
   error?: string
 }
 
@@ -81,6 +88,7 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url)
     const bggGameId = url.searchParams.get('bgg_game_id')
+    const expansionIdsParam = url.searchParams.get('expansion_ids')
 
     if (!bggGameId || isNaN(parseInt(bggGameId))) {
       return new Response(
@@ -90,6 +98,11 @@ Deno.serve(async (req) => {
     }
 
     const gameId = parseInt(bggGameId)
+
+    // Parse expansion IDs (capped at 10)
+    const expansionIds = expansionIdsParam
+      ? expansionIdsParam.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id)).slice(0, 10)
+      : []
 
     // Initialize Supabase client with service role for write access
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -186,7 +199,66 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 3. Build response
+    // 3. Fetch expansion prices if requested
+    let expansionPricing: ExpansionPricing[] = []
+    if (expansionIds.length > 0) {
+      console.log(`[PriceCheck] Fetching prices for ${expansionIds.length} expansions`)
+
+      // Fetch game names for expansions
+      const { data: expansionGames } = await supabase
+        .from('games')
+        .select('id, name')
+        .in('id', expansionIds)
+
+      const expansionNameMap = new Map(expansionGames?.map(g => [g.id, g.name]) || [])
+
+      // Check cache for all expansions first
+      const { data: cachedExpansions } = await supabase
+        .from('external_pricing_cache')
+        .select('bgg_game_id, lowest_price')
+        .in('bgg_game_id', expansionIds)
+        .gt('expires_at', new Date().toISOString())
+
+      const cachedMap = new Map(cachedExpansions?.map(c => [c.bgg_game_id, c.lowest_price]) || [])
+
+      // Identify which expansions need fresh API calls
+      const uncachedIds = expansionIds.filter(id => !cachedMap.has(id))
+
+      // Fetch uncached expansion prices from BoardGamePrices (in sequence to be respectful)
+      for (const expId of uncachedIds) {
+        try {
+          const expPricing = await fetchBoardGamePrices(expId)
+          if (expPricing) {
+            // Cache the result
+            const cacheData = {
+              bgg_game_id: expId,
+              cached_at: new Date().toISOString(),
+              raw_response: expPricing,
+              lowest_price: expPricing.lowestPrice,
+              lowest_price_url: expPricing.url,
+              offer_count: expPricing.offerCount,
+            }
+            await supabase
+              .from('external_pricing_cache')
+              .upsert(cacheData, { onConflict: 'bgg_game_id' })
+
+            cachedMap.set(expId, expPricing.lowestPrice)
+          }
+        } catch (err: any) {
+          console.error(`[PriceCheck] Failed to fetch expansion ${expId}:`, err.message)
+          // Continue with next expansion
+        }
+      }
+
+      // Build expansion pricing array
+      expansionPricing = expansionIds.map(expId => ({
+        bggGameId: expId,
+        gameName: expansionNameMap.get(expId) || null,
+        lowestPrice: cachedMap.get(expId) ?? null,
+      }))
+    }
+
+    // 4. Build response
     const response: PriceCheckResponse = {
       bggGameId: gameId,
       gameName: game.name,
@@ -200,6 +272,7 @@ Deno.serve(async (req) => {
             completedSalesCount: internalStats.completed_sales_count || 0,
           }
         : null,
+      expansions: expansionPricing.length > 0 ? expansionPricing : undefined,
     }
 
     return new Response(JSON.stringify(response), {

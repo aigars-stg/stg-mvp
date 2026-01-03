@@ -85,15 +85,14 @@ export async function GET(
     }
 
     // Build query for listings (seller trust fetched separately - no FK exists)
+    // Note: We include reserved listings so they can be shown with "Reserved" indicator
     let query = (supabase as any)
       .from('listings')
       .select(`
         *
       `)
       .eq('bgg_game_id', bggId)
-      .eq('status', 'active')
-      // Show listings that are not reserved OR where reservation has expired
-      .or(`reserved_by.is.null,reserved_until.lt.${new Date().toISOString()}`);
+      .eq('status', 'active');
 
     // Apply condition filter
     if (conditions.length > 0) {

@@ -228,10 +228,10 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, onChangeVe
           <div className="space-y-3 text-sm">
             <p className="text-aurora-red font-medium flex items-center gap-2">
               <SearchX className="w-4 h-4" />
-              No games found matching "{searchQuery}"
+              We couldn't find "{searchQuery}"
             </p>
             <p className="text-text-secondary">
-              Check the game box or search{' '}
+              Check the spelling on your game box, or search{' '}
               <a
                 href="https://boardgamegeek.com/geeksearch.php"
                 target="_blank"
@@ -240,16 +240,17 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, onChangeVe
               >
                 BoardGameGeek.com
               </a>
-              {' '}for the exact name.
+              {' '}for the exact title.
             </p>
             <p className="text-text-secondary">
-              Need help?{' '}
+              Still can't find it?{' '}
               <a
                 href="mailto:info@secondturn.games"
                 className="text-frost-ice hover:underline"
               >
-                Contact us
+                Let us know
               </a>
+              {' '}and we'll help.
             </p>
           </div>
         </Card>

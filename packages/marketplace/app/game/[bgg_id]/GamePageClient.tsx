@@ -25,6 +25,7 @@ import { getConditionLabel } from '@/lib/types/listing';
 import { OfferCard } from '@/components/game/OfferCard';
 import { GameNavigationArrows } from '@/components/game/GameNavigationArrows';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useCart } from '@/lib/contexts/CartContext';
 import { useGameNavigation } from '@/hooks/useGameNavigation';
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 
@@ -36,7 +37,11 @@ interface GamePageClientProps {
 
 export function GamePageClient({ bggId }: GamePageClientProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const { fetchCart } = useCart();
+
+  // Buyer's country for pricing estimates (from profile)
+  const buyerCountry = profile?.country as 'LT' | 'LV' | 'EE' | undefined;
 
   const [game, setGame] = useState<GameWithOffers | null>(null);
   const [loading, setLoading] = useState(true);
@@ -131,6 +136,21 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to add to cart');
       }
+
+      // Update the listing's reserved_until in local state so UI shows "Reserved" immediately
+      if (data.expiresAt && game) {
+        setGame({
+          ...game,
+          offers: game.offers.map((offer) =>
+            offer.id === listingId
+              ? { ...offer, reserved_until: data.expiresAt, reserved_by: user.id }
+              : offer
+          ),
+        });
+      }
+
+      // Refresh cart context so navbar cart count updates
+      fetchCart();
 
       setCartSuccess(listingId);
       setTimeout(() => setCartSuccess(null), 3000);
@@ -461,6 +481,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                 listing={offer}
                 onAddToCart={handleAddToCart}
                 isAddingToCart={addingToCart === offer.id}
+                buyerCountry={buyerCountry}
               />
             ))}
           </div>

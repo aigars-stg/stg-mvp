@@ -88,7 +88,7 @@ function MyListingsContent() {
   const [wantedActiveTab, setWantedActiveTab] = useState<'all' | 'active' | 'fulfilled' | 'expired' | 'cancelled'>('all');
 
   // Saved listings
-  const { savedListings, isLoading: savedLoading, error: savedError } = useSavedListings();
+  const { savedListings, isLoading: savedLoading, error: savedError, refetch: refetchSavedListings } = useSavedListings();
 
   // Modal state for listing actions
   const [statusChangeModal, setStatusChangeModal] = useState<{
@@ -763,6 +763,10 @@ function MyListingsContent() {
                   <OfferCard
                     key={savedListing.id}
                     listing={savedListing.listing}
+                    onSaveChange={(_, saved) => {
+                      // When unsaved, refetch to remove from list
+                      if (!saved) refetchSavedListings();
+                    }}
                   />
                 ))}
               </div>

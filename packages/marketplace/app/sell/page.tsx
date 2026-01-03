@@ -14,7 +14,7 @@ import { PricingShippingSimple } from '@/components/sell/PricingShippingSimple';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
 import { OfferCard } from '@/components/game/OfferCard';
-import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle } from 'lucide-react';
+import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle, Package } from 'lucide-react';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
@@ -104,6 +104,8 @@ function createPreviewListing(
     updated_at: new Date().toISOString(),
     sold_at: null,
     removed_at: null,
+    reserved_by: null,
+    reserved_until: null,
     game: {
       thumbnail: formData.selectedVersion?.thumbnail || formData.selectedGame?.thumbnail || null,
       // Priority: 1) Version image, 2) Base game image, 3) User photos (in photo_urls)
@@ -1148,6 +1150,7 @@ function SellPageContent() {
               bggGameId={formData.selectedGame.id}
               condition={formData.condition}
               onFillPrice={(price) => setFormData((prev) => ({ ...prev, price: price.toFixed(2) }))}
+              expansionIds={formData.selectedExpansions.map(e => e.bgg_id)}
             />
           )}
 
@@ -1260,12 +1263,19 @@ function SellPageContent() {
               <span className="text-sm font-semibold text-frost-ice">Live preview — how buyers will see your offer</span>
             </div>
             {/* OfferCard Preview - Force mobile layout via CSS overrides */}
-            <div className="[&_.sm\:grid]:!hidden [&_.sm\:hidden]:!flex [&_.sm\:hidden]:!flex-col [&_.hidden.sm\:flex]:!hidden">
-              <OfferCard
-                listing={createPreviewListing(formData, user, profile, existingPhotoUrls)}
-                isAddingToCart={false}
-              />
-            </div>
+            {formData.selectedGame ? (
+              <div className="[&_.sm\:grid]:!hidden [&_.sm\:hidden]:!flex [&_.sm\:hidden]:!flex-col [&_.hidden.sm\:flex]:!hidden">
+                <OfferCard
+                  listing={createPreviewListing(formData, user, profile, existingPhotoUrls)}
+                  isAddingToCart={false}
+                />
+              </div>
+            ) : (
+              <Card className="p-8 text-center border-2 border-dashed border-border">
+                <Package className="w-12 h-12 text-text-muted mx-auto mb-3" />
+                <p className="text-text-muted">Select a game to preview</p>
+              </Card>
+            )}
           </div>
         </div>
         {/* End Right Column */}

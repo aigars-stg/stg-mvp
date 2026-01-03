@@ -15,7 +15,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { TerminalSelector } from '@/components/checkout/TerminalSelector';
+import { TerminalSelectorWithMap } from '@/components/checkout/TerminalSelectorWithMap';
 import { PhoneInput, validatePhone } from '@/components/checkout/PhoneInput';
 import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
@@ -264,7 +264,7 @@ function CheckoutPageContent() {
     <div className="min-h-screen bg-bg-primary pb-24 lg:pb-8">
       {/* Header */}
       <div className="bg-frost-ice/5 border-b border-frost-ice/20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
             <Link href="/cart" className="hover:text-frost-ice">
@@ -287,7 +287,7 @@ function CheckoutPageContent() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
@@ -321,7 +321,7 @@ function CheckoutPageContent() {
               <h2 className="text-lg font-semibold text-polar-night mb-4">
                 1. Select Pickup Terminal
               </h2>
-              <TerminalSelector
+              <TerminalSelectorWithMap
                 country={selectedCountry}
                 onCountryChange={setSelectedCountry}
                 selectedTerminal={selectedTerminal}

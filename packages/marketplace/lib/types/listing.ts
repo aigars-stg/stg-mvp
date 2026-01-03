@@ -65,6 +65,10 @@ export interface Listing {
   updated_at: string;
   sold_at: string | null;
   removed_at: string | null;
+
+  // Reservation fields
+  reserved_by: string | null;
+  reserved_until: string | null;
 }
 
 // Listing with seller profile and game images populated
