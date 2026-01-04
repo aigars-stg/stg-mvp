@@ -368,6 +368,54 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_questions: {
+        Row: {
+          id: string
+          listing_id: string
+          user_id: string
+          content: string
+          parent_id: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          listing_id: string
+          user_id: string
+          content: string
+          parent_id?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          listing_id?: string
+          user_id?: string
+          content?: string
+          parent_id?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_questions_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listing_questions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "listing_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           all_components_present: boolean | null
@@ -1531,6 +1579,22 @@ export type Database = {
       }
     }
     Views: {
+      listing_questions_with_author: {
+        Row: {
+          id: string | null
+          listing_id: string | null
+          user_id: string | null
+          content: string | null
+          parent_id: string | null
+          created_at: string | null
+          updated_at: string | null
+          deleted_at: string | null
+          author_name: string | null
+          author_avatar: string | null
+          is_seller: boolean | null
+        }
+        Relationships: []
+      }
       listings_with_details: {
         Row: {
           all_components_present: boolean | null
@@ -1859,6 +1923,10 @@ export type Database = {
       expire_wanted_listings: { Args: never; Returns: number }
       generate_order_number: { Args: never; Returns: string }
       get_cart: { Args: { p_buyer_id: string }; Returns: Json }
+      get_listing_question_count: {
+        Args: { p_listing_id: string }
+        Returns: number
+      }
       get_or_create_transaction_conversation: {
         Args: { p_order_id: string }
         Returns: string

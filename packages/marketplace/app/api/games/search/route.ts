@@ -107,13 +107,22 @@ export async function GET(request: NextRequest) {
         const alternateNames = Array.isArray(game.alternate_names)
           ? (game.alternate_names as string[])
           : [];
-        const matchedInAlternate = alternateNames.some((altName) =>
-          altName.toLowerCase().includes(query.toLowerCase())
-        ) && !game.name.toLowerCase().includes(query.toLowerCase());
+
+        // Find the specific alternate name that matched (if any)
+        const lowerQuery = query.toLowerCase();
+        const matchedAlternateName = alternateNames.find((altName) =>
+          altName.toLowerCase().includes(lowerQuery)
+        );
+
+        // Only consider it an "alternate match" if primary name doesn't contain query
+        const matchedInAlternate = !!matchedAlternateName &&
+          !game.name.toLowerCase().includes(lowerQuery);
 
         return {
           ...game,
           _relevanceScore: calculateRelevance(game.name, query, alternateNames, matchedInAlternate),
+          // Include matched alternate name if it was the primary match reason
+          _matchedAlternateName: matchedInAlternate ? matchedAlternateName : null,
         };
       })
       .sort((a, b) => {
@@ -133,7 +142,11 @@ export async function GET(request: NextRequest) {
         return bRating - aRating;
       })
       .slice(0, limit)
-      .map(({ _relevanceScore, alternate_names, ...game }) => game); // Remove helper fields and alternate_names from response
+      .map(({ _relevanceScore, _matchedAlternateName, alternate_names, ...game }) => ({
+        ...game,
+        // Include matched alternate name so UI can auto-select version/display name
+        matchedAlternateName: _matchedAlternateName || undefined,
+      }));
 
     // Optionally add listing counts
     type GameWithOptionalListingCount = (typeof sortedGames)[number] & { listingCount?: number };

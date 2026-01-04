@@ -584,6 +584,7 @@ export interface BGGExpansionInfo {
   thumbnail: string | null;
   image: string | null;
   versions: BGGVersion[];
+  alternateNames?: string[]; // Localized names (e.g., "Spārnotie: Eiropas putni")
 }
 
 /**
@@ -664,9 +665,15 @@ export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansi
       for (const item of itemsArray) {
         if (!item['@_id']) continue;
 
-        // Parse name
+        // Parse names (primary and alternates)
         const names = item.name ? (Array.isArray(item.name) ? item.name : [item.name]) : [];
         const primaryName = names.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'] || 'Unknown';
+
+        // Parse alternate names (localized titles like "Spārnotie: Eiropas putni")
+        const alternateNames = names
+          .filter((n: any) => n['@_type'] !== 'primary')
+          .map((n: any) => decodeHTMLEntities(n['@_value']))
+          .filter((name: string) => name && name.length > 0);
 
         // Parse versions
         const versionsData = item.versions?.item || [];
@@ -702,6 +709,13 @@ export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansi
             };
           });
 
+        // Log alternate names for debugging
+        if (alternateNames.length > 0) {
+          console.log(`📝 [BGG API] Expansion "${primaryName}" has ${alternateNames.length} alternate names:`, alternateNames);
+        } else {
+          console.log(`📝 [BGG API] Expansion "${primaryName}" has NO alternate names`);
+        }
+
         expansions.push({
           bgg_id: parseInt(item['@_id']),
           name: decodeHTMLEntities(primaryName),
@@ -709,6 +723,7 @@ export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansi
           thumbnail: item.thumbnail || null,
           image: item.image || null,
           versions,
+          alternateNames: alternateNames.length > 0 ? alternateNames : undefined,
         });
       }
     }

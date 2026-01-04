@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronUp,
   Cog,
+  Puzzle,
 } from 'lucide-react';
 import type { GameWithOffers } from '@/lib/types/aggregated-game';
 import type { ListingCondition } from '@/lib/types/listing';
@@ -264,7 +265,9 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                 {/* Expansion Badge - overlaid on image */}
                 {game.is_expansion && (
                   <div className="absolute top-3 left-3">
-                    <Badge variant="warning" size="sm">Expansion</Badge>
+                    <Badge variant="default" size="sm" icon={<Puzzle className="w-3 h-3" />}>
+                      Expansion
+                    </Badge>
                   </div>
                 )}
               </div>
@@ -392,45 +395,47 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
           </div>
         )}
 
-        {/* Filters Bar */}
+        {/* Filters Bar - only show sort/filter controls when there are multiple offers */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <h2 className="text-xl font-semibold text-polar-night">
             Available Offers ({game.offers.length})
           </h2>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            {/* Sort Dropdown */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-border bg-snow-white text-sm focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
-            >
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="condition">Condition: Best First</option>
-              <option value="newest">Newest First</option>
-            </select>
+          {game.offers.length > 1 && (
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {/* Sort Dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-border bg-snow-white text-sm focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
+              >
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="condition">Condition: Best First</option>
+                <option value="newest">Newest First</option>
+              </select>
 
-            {/* Filter Toggle */}
-            <Button
-              variant={filterConditions.length > 0 ? 'primary' : 'secondary'}
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex-shrink-0"
-            >
-              <SlidersHorizontal className="w-4 h-4 mr-1" />
-              Filters
-              {filterConditions.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 bg-snow-white/20 rounded text-xs">
-                  {filterConditions.length}
-                </span>
-              )}
-            </Button>
-          </div>
+              {/* Filter Toggle */}
+              <Button
+                variant={filterConditions.length > 0 ? 'primary' : 'secondary'}
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex-shrink-0"
+              >
+                <SlidersHorizontal className="w-4 h-4 mr-1" />
+                Filters
+                {filterConditions.length > 0 && (
+                  <span className="ml-1 px-1.5 py-0.5 bg-snow-white/20 rounded text-xs">
+                    {filterConditions.length}
+                  </span>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Filter Panel */}
-        {showFilters && (
+        {showFilters && game.offers.length > 1 && (
           <div className="mb-6 p-4 bg-snow-white border-2 border-border rounded-xl">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium text-polar-night">Filter by Condition</h3>

@@ -88,8 +88,8 @@ function createPreviewListing(
     shipping_notes: null,
     included_expansions: formData.selectedExpansions.map((exp) => ({
       bgg_id: exp.bgg_id,
-      name: exp.name,
-      year: exp.year,
+      name: exp.displayName, // Use localized display name
+      year: exp.selectedVersion.yearPublished || exp.year, // Prefer version year
       version_source: 'bgg' as const,
       bgg_version_id: exp.selectedVersion.id || null,
       version_name: exp.selectedVersion.name || null,
@@ -113,6 +113,7 @@ function createPreviewListing(
       player_count: formData.selectedGame?.playerCount || null,
       min_age: formData.selectedGame?.minAge || null,
       playing_time: formData.selectedGame?.playingTime || null,
+      is_expansion: formData.selectedGame?.isExpansion || false,
     },
     seller: {
       id: user?.id || 'preview-seller',
@@ -156,6 +157,7 @@ function SellPageContent() {
   const [showExpansionSection, setShowExpansionSection] = useState(false);
   const [expansionsFetched, setExpansionsFetched] = useState(false);
   const [expansionCount, setExpansionCount] = useState(0);
+  const [versionCount, setVersionCount] = useState(0); // Track available versions for UI
 
   // Existing listings warning state
   const [existingActiveListings, setExistingActiveListings] = useState<Array<{ id: string; bgg_game_id: number; price: number; created_at: string }>>([]);
@@ -194,6 +196,7 @@ function SellPageContent() {
     setShowExpansionSection(false); // Reset expansion section
     setExpansionsFetched(false); // Reset fetched flag
     setExpansionCount(0); // Reset expansion count
+    setVersionCount(0); // Reset version count
     setExistingActiveListings([]); // Clear existing listings warning
 
     // If game is null (clearing selection), just return
@@ -243,6 +246,8 @@ function SellPageContent() {
           playingTime: data.game.playing_time,
           alternateNames: data.game.alternate_names, // For localized versions
           isExpansion: data.game.is_expansion, // Track if game is an expansion
+          // Preserve matchedAlternateName from search for auto-selection
+          matchedAlternateName: game.matchedAlternateName,
         };
         setFormData((prev) => ({
           ...prev,
@@ -704,8 +709,8 @@ function SellPageContent() {
           // Convert selected expansions to API format
           includedExpansions: formData.selectedExpansions.map((exp) => ({
             bgg_id: exp.bgg_id,
-            name: exp.name,
-            year: exp.year,
+            name: exp.displayName, // Use localized display name
+            year: exp.selectedVersion.yearPublished || exp.year, // Prefer version year
             version_source: 'bgg' as const,
             bgg_version_id: exp.selectedVersion.id || null,
             version_name: exp.selectedVersion.name || null,
@@ -920,6 +925,7 @@ function SellPageContent() {
               <GameSearch
                 selectedGame={formData.selectedGame}
                 selectedVersion={formData.selectedVersion}
+                selectedDisplayName={formData.selectedGameDisplayName}
                 onSelect={handleGameSelect}
                 onChangeVersion={handleChangeVersion}
                 hideChangeVersionButton={true}
@@ -940,6 +946,7 @@ function SellPageContent() {
                       onSelect={handleVersionSelect}
                       fallbackMode={fallbackMode}
                       fallbackReason={fallbackReason}
+                      onVersionCountChange={setVersionCount}
                     />
                   )}
                 </>
@@ -959,6 +966,7 @@ function SellPageContent() {
                   }}
                   onChangeName={handleChangeName}
                   hideChangeNameButton={true}
+                  matchedAlternateName={formData.selectedGame.matchedAlternateName}
                 />
               )}
 
@@ -975,17 +983,27 @@ function SellPageContent() {
                   hasEnglish = formData.selectedVersion.language === 'English';
                 }
 
+                const showChangeVersion = versionCount > 1; // Only show if multiple versions available
                 const showChangeName = hasAlternateNames && !hasEnglish && formData.selectedGameDisplayName;
 
+                // Don't render anything if neither button should show
+                if (!showChangeVersion && !showChangeName) {
+                  return null;
+                }
+
+                const gridCols = showChangeVersion && showChangeName ? 'md:grid-cols-2' : '';
+
                 return (
-                  <div className={`grid grid-cols-1 ${showChangeName ? 'md:grid-cols-2' : ''} gap-3`}>
-                    <button
-                      onClick={handleChangeVersion}
-                      className="px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                      Change version
-                    </button>
+                  <div className={`grid grid-cols-1 ${gridCols} gap-3`}>
+                    {showChangeVersion && (
+                      <button
+                        onClick={handleChangeVersion}
+                        className="px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        Change version
+                      </button>
+                    )}
                     {showChangeName && (
                       <button
                         onClick={handleChangeName}

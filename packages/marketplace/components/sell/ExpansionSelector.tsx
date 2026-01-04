@@ -1,16 +1,20 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { Card, Modal, Input } from '@second-turn/design-system';
-import { Package, RefreshCw, Search, X } from 'lucide-react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { Card, Modal, Input, Button } from '@second-turn/design-system';
+import { Package, RefreshCw, Search, X, ExternalLink, Type, ChevronDown, ChevronUp } from 'lucide-react';
 import type { VersionSelection } from '@/lib/bgg-types';
 import type { BGGExpansionInfo } from '@/lib/bgg-api';
 import { LanguageVersionSelector } from './LanguageVersionSelector';
 
+// Constants
+const COLLAPSED_SELECTED_LIMIT = 2; // Show first 2 selected in collapsed view
+
 // Selected expansion with version info
 export interface SelectedExpansion {
   bgg_id: number;
-  name: string;
+  name: string; // Primary BGG name (for reference)
+  displayName: string; // Name to display/save (localized or primary)
   year: number | null;
   thumbnail: string | null;
   image: string | null;
@@ -28,6 +32,104 @@ interface ExpansionSelectorProps {
 // Threshold for showing search bar
 const SEARCH_THRESHOLD = 4;
 
+/**
+ * Language-specific character patterns for matching alternate names.
+ * These characters are distinctive to each language and help identify localized titles.
+ */
+const LANGUAGE_CHAR_PATTERNS: Record<string, RegExp> = {
+  // Baltic
+  'Latvian': /[āēīūķļņģ]/i,
+  'Lithuanian': /[ąčęėįšųū]/i,
+  'Estonian': /[äöüõ]/i,
+  // Slavic
+  'Polish': /[ąćęłńóśźż]/i,
+  'Czech': /[áčďéěíňóřšťúůýž]/i,
+  'Russian': /[а-яА-ЯёЁ]/,
+  'Ukrainian': /[іїєґ]/i,
+  // Nordic
+  'Swedish': /[åäö]/i,
+  'Danish': /[æøå]/i,
+  'Norwegian': /[æøå]/i,
+  'Finnish': /[äö]/i,
+  // Asian
+  'Japanese': /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/,
+  'Chinese': /[\u4E00-\u9FFF]/,
+  'Korean': /[\uAC00-\uD7AF\u1100-\u11FF]/,
+  'Thai': /[\u0E00-\u0E7F]/,
+  // Other European
+  'Hungarian': /[áéíóöőúüű]/i,
+  'German': /[äöüß]/i,
+  'French': /[àâçéèêëîïôùûüÿœæ]/i,
+  'Spanish': /[áéíóúüñ¿¡]/i,
+  'Portuguese': /[áàâãçéêíóôõú]/i,
+  'Italian': /[àèéìíîòóùú]/i,
+  'Dutch': /[éëïöü]/i,
+  'Romanian': /[ăâîșț]/i,
+};
+
+/**
+ * Find the best display name for an expansion based on selected language.
+ * Uses language-specific character patterns to match alternate names.
+ */
+function findBestDisplayName(
+  primaryName: string,
+  alternateNames: string[] | undefined,
+  language: string | undefined
+): { displayName: string; needsSelection: boolean; candidates: string[] } {
+  // If English or no alternates, use primary name
+  if (language === 'English' || !alternateNames || alternateNames.length === 0) {
+    return { displayName: primaryName, needsSelection: false, candidates: [] };
+  }
+
+  // Try to match using language-specific character patterns
+  const pattern = language ? LANGUAGE_CHAR_PATTERNS[language] : null;
+  if (pattern) {
+    const matchingNames = alternateNames.filter(name => pattern.test(name));
+    console.log(`📝 [findBestDisplayName] Language "${language}" pattern matched ${matchingNames.length} names:`, matchingNames);
+
+    if (matchingNames.length === 1) {
+      // Exact match - auto-select
+      return { displayName: matchingNames[0], needsSelection: false, candidates: [] };
+    } else if (matchingNames.length > 1) {
+      // Multiple matches for this language - let user choose from filtered list
+      return {
+        displayName: matchingNames[0], // Default to first match
+        needsSelection: true,
+        candidates: matchingNames,
+      };
+    }
+  }
+
+  // Fallback: check for any non-ASCII names
+  const hasNonAscii = (str: string) => /[^\x00-\x7F]/.test(str);
+  const localizedNames = alternateNames.filter(hasNonAscii);
+
+  if (localizedNames.length === 1) {
+    return { displayName: localizedNames[0], needsSelection: false, candidates: [] };
+  }
+
+  // Multiple or no localized names - user needs to choose
+  return {
+    displayName: primaryName,
+    needsSelection: true,
+    candidates: alternateNames,
+  };
+}
+
+/**
+ * Find which alternate name matched the search query (if any)
+ */
+function findMatchedAlternateName(
+  expansion: BGGExpansionInfo,
+  query: string
+): string | null {
+  if (!query.trim() || !expansion.alternateNames) return null;
+  const lowerQuery = query.toLowerCase();
+  return expansion.alternateNames.find(alt =>
+    alt.toLowerCase().includes(lowerQuery)
+  ) || null;
+}
+
 export function ExpansionSelector({
   expansions,
   baseGameVersion,
@@ -36,18 +138,48 @@ export function ExpansionSelector({
   isLoading = false,
 }: ExpansionSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
   const [versionModalExpansion, setVersionModalExpansion] = useState<BGGExpansionInfo | null>(null);
+  const [nameModalExpansionId, setNameModalExpansionId] = useState<number | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Filter expansions by search query
+  // Debounce search query (150ms)
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 150);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  // Auto-expand when user starts searching
+  useEffect(() => {
+    if (debouncedQuery.trim()) {
+      setIsExpanded(true);
+    }
+  }, [debouncedQuery]);
+
+  // Filter expansions by search query (searches name AND alternateNames)
   const filteredExpansions = useMemo(() => {
-    if (!searchQuery.trim()) {
+    if (!debouncedQuery.trim()) {
       return expansions;
     }
-    const query = searchQuery.toLowerCase();
-    return expansions.filter((exp) =>
-      exp.name.toLowerCase().includes(query)
-    );
-  }, [expansions, searchQuery]);
+    const query = debouncedQuery.toLowerCase();
+    return expansions.filter((exp) => {
+      // Search primary name
+      if (exp.name.toLowerCase().includes(query)) return true;
+      // Search alternate names
+      if (exp.alternateNames?.some(alt => alt.toLowerCase().includes(query))) return true;
+      return false;
+    });
+  }, [expansions, debouncedQuery]);
 
   // Sort: selected first, then by year (newest first)
   const sortedExpansions = useMemo(() => {
@@ -134,10 +266,29 @@ export function ExpansionSelector({
         return;
       }
 
-      // Add with auto-matched version
+      // Check if search query matches an alternate name - use that as displayName
+      const matchedAlternateName = findMatchedAlternateName(expansion, debouncedQuery);
+
+      let displayName: string;
+      if (matchedAlternateName) {
+        // User searched by localized name - use it automatically
+        displayName = matchedAlternateName;
+        console.log(`📝 [ExpansionSelector] Using matched alternate name: "${matchedAlternateName}"`);
+      } else {
+        // Fall back to language-based matching
+        const versionLanguage = matchedVersion.language || matchedVersion.languages?.[0];
+        const result = findBestDisplayName(
+          expansion.name,
+          expansion.alternateNames,
+          versionLanguage
+        );
+        displayName = result.displayName;
+      }
+
       const newExpansion: SelectedExpansion = {
         bgg_id: expansion.bgg_id,
-        name: expansion.name,
+        name: expansion.name, // Always store primary name
+        displayName,
         year: expansion.year,
         thumbnail: matchedVersion.thumbnail || expansion.thumbnail,
         image: matchedVersion.image || expansion.image,
@@ -145,16 +296,29 @@ export function ExpansionSelector({
       };
 
       onExpansionsChange([...selectedExpansions, newExpansion]);
+
+      // Clear search input after selection (keep panel expanded for multi-select)
+      setSearchQuery('');
+      setDebouncedQuery('');
     }
-  }, [selectedExpansions, onExpansionsChange, findMatchingVersion, baseGameVersion]);
+  }, [selectedExpansions, onExpansionsChange, findMatchingVersion, baseGameVersion, debouncedQuery]);
 
   // Handle version selection from modal
   const handleVersionSelect = useCallback((version: VersionSelection) => {
     if (!versionModalExpansion) return;
 
+    // Find best display name based on selected version's language
+    const versionLanguage = version.language || version.languages?.[0];
+    const { displayName } = findBestDisplayName(
+      versionModalExpansion.name,
+      versionModalExpansion.alternateNames,
+      versionLanguage
+    );
+
     const newExpansion: SelectedExpansion = {
       bgg_id: versionModalExpansion.bgg_id,
-      name: versionModalExpansion.name,
+      name: versionModalExpansion.name, // Always store primary name
+      displayName,
       year: versionModalExpansion.year,
       thumbnail: version.thumbnail || versionModalExpansion.thumbnail,
       image: version.image || versionModalExpansion.image,
@@ -180,6 +344,31 @@ export function ExpansionSelector({
     setVersionModalExpansion(expansion);
   }, []);
 
+  // Open name picker for change
+  const handleChangeName = useCallback((expansionId: number) => {
+    setNameModalExpansionId(expansionId);
+  }, []);
+
+  // Handle name selection from modal
+  const handleNameSelect = useCallback((newDisplayName: string) => {
+    if (!nameModalExpansionId) return;
+
+    const updated = selectedExpansions.map((exp) => {
+      if (exp.bgg_id === nameModalExpansionId) {
+        return { ...exp, displayName: newDisplayName };
+      }
+      return exp;
+    });
+
+    onExpansionsChange(updated);
+    setNameModalExpansionId(null);
+  }, [nameModalExpansionId, selectedExpansions, onExpansionsChange]);
+
+  // Get expansion info by ID (for accessing alternateNames)
+  const getExpansionInfo = useCallback((expansionId: number) => {
+    return expansions.find((e) => e.bgg_id === expansionId);
+  }, [expansions]);
+
   // Format version display
   const formatVersionDisplay = (version: VersionSelection) => {
     const language = version.languages?.join(', ') || version.language || 'Unknown';
@@ -192,6 +381,25 @@ export function ExpansionSelector({
     expansion.versions && expansion.versions.length === 1;
 
   const showSearch = expansions.length > SEARCH_THRESHOLD;
+
+  // Determine if we should show collapsed or expanded view
+  const isSearching = debouncedQuery.trim().length > 0;
+  const showCollapsedView = !isExpanded && !isSearching && showSearch;
+
+  // For collapsed view: get selected expansions to show (first N)
+  const selectedForCollapsedView = useMemo(() => {
+    if (!showCollapsedView) return [];
+    return selectedExpansions.slice(0, COLLAPSED_SELECTED_LIMIT);
+  }, [showCollapsedView, selectedExpansions]);
+
+  // Get expansion info for selected items (for collapsed view rendering)
+  const getExpansionForSelected = useCallback((selected: SelectedExpansion) => {
+    return expansions.find(e => e.bgg_id === selected.bgg_id);
+  }, [expansions]);
+
+  // Count of unselected expansions
+  const unselectedCount = expansions.length - selectedExpansions.length;
+  const hiddenSelectedCount = selectedExpansions.length - COLLAPSED_SELECTED_LIMIT;
 
   if (isLoading) {
     return (
@@ -243,17 +451,184 @@ export function ExpansionSelector({
         </p>
       )}
 
-      {/* Expansion list - scrollable container */}
-      <div className={`space-y-2 ${showSearch ? 'max-h-80 overflow-y-auto pr-1' : ''}`}>
-        {sortedExpansions.length === 0 ? (
-          <p className="text-sm text-text-muted text-center py-4">
-            No expansions match "{searchQuery}"
-          </p>
-        ) : (
+      {/* Collapsed view: show selected expansions summary + expand button */}
+      {showCollapsedView && (
+        <div className="space-y-2">
+          {/* Show first N selected expansions */}
+          {selectedForCollapsedView.map((selected) => {
+            const expansion = getExpansionForSelected(selected);
+            if (!expansion) return null;
+            const singleVersion = hasSingleVersion(expansion);
+
+            return (
+              <Card
+                key={selected.bgg_id}
+                padding="sm"
+                className="border-frost-ice bg-frost-ice/5"
+              >
+                <div className="flex items-start gap-3 min-w-0">
+                  {/* Checkbox */}
+                  <div className="flex-shrink-0 mt-1">
+                    <input
+                      type="checkbox"
+                      checked={true}
+                      onChange={() => handleToggleExpansion(expansion)}
+                      className="w-4 h-4 rounded border-border text-frost-ice focus:ring-frost-ice cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Thumbnail */}
+                  <div className="flex-shrink-0">
+                    {selected.thumbnail ? (
+                      <img
+                        src={selected.thumbnail}
+                        alt={selected.displayName}
+                        className="w-10 h-10 rounded object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded bg-bg-secondary flex items-center justify-center">
+                        <Package className="w-5 h-5 text-text-muted" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <p className="font-medium text-polar-night text-sm truncate" title={selected.displayName}>
+                        {selected.displayName}
+                      </p>
+                      {selected.selectedVersion.yearPublished && (
+                        <span className="text-xs text-text-muted flex-shrink-0">
+                          ({selected.selectedVersion.yearPublished})
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-1 flex items-center gap-2 text-xs min-w-0 flex-wrap">
+                      <span className="text-text-secondary truncate">
+                        {formatVersionDisplay(selected.selectedVersion)}
+                      </span>
+                      {!singleVersion && (
+                        <button
+                          onClick={() => handleChangeVersion(expansion)}
+                          className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 flex-shrink-0"
+                        >
+                          <RefreshCw className="w-3 h-3" />
+                          Change
+                        </button>
+                      )}
+                      {expansion.alternateNames && expansion.alternateNames.length > 0 && (
+                        <button
+                          onClick={() => handleChangeName(expansion.bgg_id)}
+                          className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 flex-shrink-0"
+                        >
+                          <Type className="w-3 h-3" />
+                          Name
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+
+          {/* "+ N more selected" summary */}
+          {hiddenSelectedCount > 0 && (
+            <button
+              onClick={() => setIsExpanded(true)}
+              className="w-full text-left p-3 rounded-lg border border-border hover:border-frost-ice/50 hover:bg-frost-ice/5 transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-frost-ice font-medium">
+                  + {hiddenSelectedCount} more selected
+                </span>
+                <ChevronDown className="w-4 h-4 text-text-muted" />
+              </div>
+            </button>
+          )}
+
+          {/* "X expansions available" expand button */}
+          {unselectedCount > 0 && (
+            <button
+              onClick={() => setIsExpanded(true)}
+              className="w-full text-left p-3 rounded-lg border border-dashed border-border hover:border-frost-ice/50 hover:bg-frost-ice/5 transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-text-muted" />
+                  <span className="text-sm text-text-secondary">
+                    {unselectedCount} expansion{unselectedCount !== 1 ? 's' : ''} available
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-frost-ice text-sm">
+                  Show
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+              </div>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Expanded view: full expansion list */}
+      {!showCollapsedView && (
+        <>
+          {/* Collapse button when expanded */}
+          {isExpanded && !isSearching && showSearch && (
+            <button
+              onClick={() => setIsExpanded(false)}
+              className="flex items-center gap-1 text-sm text-frost-ice hover:text-aurora-blue transition-colors"
+            >
+              <ChevronUp className="w-4 h-4" />
+              Collapse
+            </button>
+          )}
+
+          {/* Expansion list - scrollable container */}
+          <div className={`space-y-2 ${showSearch ? 'max-h-80 overflow-y-auto pr-1' : ''}`}>
+            {sortedExpansions.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-sm text-text-secondary">
+                  No expansions match &quot;{searchQuery}&quot;
+                </p>
+                <p className="text-xs text-text-muted mt-1">
+                  Try searching in English or check spelling
+                </p>
+              </div>
+            ) : (
           sortedExpansions.map((expansion) => {
             const selected = isSelected(expansion.bgg_id);
             const selectedData = getSelectedExpansion(expansion.bgg_id);
             const singleVersion = hasSingleVersion(expansion);
+
+            // Check if this expansion was matched via alternate name in search
+            const matchedAltName = debouncedQuery.trim()
+              ? findMatchedAlternateName(expansion, debouncedQuery)
+              : null;
+
+            // Find matching version for year display (even when not selected)
+            const matchingVersion = findMatchingVersion(expansion);
+
+            // Determine what name to display as primary
+            let primaryDisplayName: string;
+            let subtitleName: string | null = null;
+
+            if (selected && selectedData) {
+              // Already selected - show the chosen display name
+              primaryDisplayName = selectedData.displayName;
+              // Show English name as subtitle if different
+              if (selectedData.displayName !== expansion.name) {
+                subtitleName = expansion.name;
+              }
+            } else if (matchedAltName) {
+              // Matched via alternate name - show matched name first
+              primaryDisplayName = matchedAltName;
+              subtitleName = expansion.name; // English name as subtitle
+            } else {
+              // Default - show primary name
+              primaryDisplayName = expansion.name;
+            }
 
             return (
               <Card
@@ -294,18 +669,42 @@ export function ExpansionSelector({
 
                   {/* Content - with overflow handling */}
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className="flex items-baseline gap-2 min-w-0">
-                      <p className="font-medium text-polar-night text-sm truncate" title={expansion.name}>
-                        {expansion.name}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <p className="font-medium text-polar-night text-sm truncate" title={primaryDisplayName}>
+                        {primaryDisplayName}
                       </p>
-                      {expansion.year && (
-                        <span className="text-xs text-text-muted flex-shrink-0">({expansion.year})</span>
-                      )}
+                      {/* Show version year when selected, or matching version year, or base expansion year */}
+                      {(() => {
+                        const displayYear = selected && selectedData?.selectedVersion.yearPublished
+                          ? selectedData.selectedVersion.yearPublished
+                          : matchingVersion?.yearPublished || expansion.year;
+                        return displayYear ? (
+                          <span className="text-xs text-text-muted flex-shrink-0">({displayYear})</span>
+                        ) : null;
+                      })()}
+                      <a
+                        href={`https://boardgamegeek.com/boardgameexpansion/${expansion.bgg_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-text-muted hover:text-frost-ice transition-colors flex-shrink-0"
+                        title="View on BoardGameGeek"
+                        aria-label="View on BoardGameGeek"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
                     </div>
+
+                    {/* Subtitle: Show original English name when displaying localized name */}
+                    {subtitleName && !selected && (
+                      <p className="text-xs text-text-muted truncate" title={subtitleName}>
+                        {subtitleName}
+                      </p>
+                    )}
 
                     {/* Selected version info */}
                     {selected && selectedData && (
-                      <div className="mt-1 flex items-center gap-2 text-xs min-w-0">
+                      <div className="mt-1 flex items-center gap-2 text-xs min-w-0 flex-wrap">
                         <span className="text-text-secondary truncate">
                           {formatVersionDisplay(selectedData.selectedVersion)}
                         </span>
@@ -323,6 +722,19 @@ export function ExpansionSelector({
                             Change
                           </button>
                         )}
+                        {/* Change name button - show when alternateNames exist */}
+                        {expansion.alternateNames && expansion.alternateNames.length > 0 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleChangeName(expansion.bgg_id);
+                            }}
+                            className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 flex-shrink-0"
+                          >
+                            <Type className="w-3 h-3" />
+                            Name
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -331,7 +743,9 @@ export function ExpansionSelector({
             );
           })
         )}
-      </div>
+          </div>
+        </>
+      )}
 
       {/* Selected count - sticky at bottom */}
       {selectedExpansions.length > 0 && (
@@ -367,6 +781,68 @@ export function ExpansionSelector({
             />
           </div>
         )}
+      </Modal>
+
+      {/* Name selection modal */}
+      <Modal
+        open={!!nameModalExpansionId}
+        onClose={() => setNameModalExpansionId(null)}
+        title="Select Display Name"
+        size="md"
+      >
+        {nameModalExpansionId && (() => {
+          const expansionInfo = getExpansionInfo(nameModalExpansionId);
+          const selectedData = getSelectedExpansion(nameModalExpansionId);
+          if (!expansionInfo || !selectedData) return null;
+
+          // Build list of name options: primary name + alternates
+          const nameOptions = [
+            expansionInfo.name, // Primary name first
+            ...(expansionInfo.alternateNames || []),
+          ];
+
+          return (
+            <div className="p-4 space-y-4">
+              <p className="text-sm text-text-secondary">
+                Choose the name that matches your edition:
+              </p>
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {nameOptions.map((name, index) => {
+                  const isSelected = name === selectedData.displayName;
+                  const isPrimary = index === 0;
+                  return (
+                    <button
+                      key={name}
+                      onClick={() => handleNameSelect(name)}
+                      className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                        isSelected
+                          ? 'border-frost-ice bg-frost-ice/10'
+                          : 'border-border hover:border-frost-ice/50 hover:bg-frost-ice/5'
+                      }`}
+                    >
+                      <span className="font-medium text-polar-night">{name}</span>
+                      {isPrimary && (
+                        <span className="ml-2 text-xs text-text-muted">(Primary)</span>
+                      )}
+                      {isSelected && (
+                        <span className="ml-2 text-xs text-frost-ice">(Current)</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="pt-2 border-t border-border-subtle">
+                <Button
+                  variant="secondary"
+                  onClick={() => setNameModalExpansionId(null)}
+                  fullWidth
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          );
+        })()}
       </Modal>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Badge } from '@second-turn/design-system';
 import type { VersionSelection } from '@/lib/bgg-types';
 import { RefreshCw, Info, ChevronDown } from 'lucide-react';
@@ -14,6 +14,7 @@ interface GameNameSelectorProps {
   onAutoComplete?: () => void; // Callback when auto-completed
   onChangeName?: () => void; // Callback to change/clear the selected name
   hideChangeNameButton?: boolean; // Hide button to render it externally
+  matchedAlternateName?: string; // Auto-select this name if provided (from search)
 }
 
 /**
@@ -42,9 +43,14 @@ export function GameNameSelector({
   onAutoComplete,
   onChangeName,
   hideChangeNameButton,
+  matchedAlternateName,
 }: GameNameSelectorProps) {
   // Track if the "Other" (non-Latin) panel is expanded
   const [showOtherNames, setShowOtherNames] = useState(false);
+
+  // Track which matched name we've already auto-selected to prevent infinite loops
+  // (onChange is recreated each render, causing effect to re-run)
+  const autoSelectedNameRef = useRef<string | null>(null);
 
   // Helper to detect if a string contains non-Latin characters
   const hasNonLatinCharacters = (str: string) => {
@@ -85,6 +91,39 @@ export function GameNameSelector({
       onAutoComplete?.();
     }
   }, [shouldAutoComplete, selectedName, primaryName, onChange, onAutoComplete]);
+
+  // Auto-select matched alternate name from search (if valid and no name selected yet)
+  useEffect(() => {
+    // Only auto-select if:
+    // 1. matchedAlternateName is provided
+    // 2. No name is currently selected
+    // 3. Not in auto-complete mode (otherwise primary name takes over)
+    // 4. The matched name is valid (primary or in alternates)
+    // 5. We haven't already auto-selected this name (prevents infinite loops)
+    if (matchedAlternateName && !selectedName && !shouldAutoComplete) {
+      // Skip if we've already auto-selected this exact name
+      if (autoSelectedNameRef.current === matchedAlternateName) {
+        return;
+      }
+
+      const isValid =
+        matchedAlternateName === primaryName ||
+        alternateNames?.includes(matchedAlternateName);
+
+      if (isValid) {
+        console.log(`🔍 [GameNameSelector] Auto-selecting matched name from search: "${matchedAlternateName}"`);
+        autoSelectedNameRef.current = matchedAlternateName;
+        onChange(matchedAlternateName);
+      }
+    }
+  }, [matchedAlternateName, selectedName, shouldAutoComplete, primaryName, alternateNames, onChange]);
+
+  // Reset auto-select tracking when matchedAlternateName changes (new search)
+  useEffect(() => {
+    if (matchedAlternateName !== autoSelectedNameRef.current) {
+      autoSelectedNameRef.current = null;
+    }
+  }, [matchedAlternateName]);
 
   // Hide selector if auto-complete conditions are met
   if (shouldAutoComplete) {

@@ -17,6 +17,8 @@ interface GameResultCardProps {
   versionLanguage?: string;
   versionYear?: number;
   versionThumbnail?: string;
+  // Matched alternate name (from search) - shown as primary with name as subtitle
+  matchedAlternateName?: string;
 }
 
 export function GameResultCard({
@@ -31,7 +33,11 @@ export function GameResultCard({
   versionLanguage,
   versionYear,
   versionThumbnail,
+  matchedAlternateName,
 }: GameResultCardProps) {
+  // Determine display name - show matched alternate name as primary if provided
+  const displayName = matchedAlternateName || name;
+  const subtitleName = matchedAlternateName ? name : null;
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -112,6 +118,7 @@ export function GameResultCard({
           name,
           yearPublished: yearpublished, // Map to camelCase for BGGGame interface
           thumbnail,
+          matchedAlternateName, // Preserve for auto-selection of display name
         })
       }
       className="w-full text-left p-3 sm:p-4 rounded-lg border-2 border-border hover:border-frost-ice hover:bg-frost-ice/5 transition-all flex gap-3 sm:gap-4"
@@ -128,8 +135,13 @@ export function GameResultCard({
       <div className="flex-1 flex flex-col justify-center min-w-0">
         <div className="flex items-center gap-1.5">
           <h3 className="font-semibold text-polar-night leading-tight">
-            {name}
-            {(versionYear || yearpublished) && (
+            {displayName}
+            {/* Year display logic:
+                - If showing localized name + version selected: year with localized name
+                - If showing localized name + no version: year with subtitle (base game context)
+                - If no localized name: year with primary name
+            */}
+            {(versionYear || (!subtitleName && yearpublished)) && (
               <span className="text-text-muted font-normal"> ({versionYear || yearpublished})</span>
             )}
           </h3>
@@ -145,6 +157,15 @@ export function GameResultCard({
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
+
+        {/* Subtitle: Show English name when displaying matched alternate name
+            Only show year if no version year (for base game context in search results) */}
+        {subtitleName && (
+          <p className="text-xs text-text-muted truncate">
+            {subtitleName}
+            {!versionYear && yearpublished && ` (${yearpublished})`}
+          </p>
+        )}
 
         {/* Expansion Badge */}
         {isExpansion && (

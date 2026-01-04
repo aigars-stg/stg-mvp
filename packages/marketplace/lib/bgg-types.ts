@@ -15,6 +15,9 @@ export interface BGGGame {
   isExpansion?: boolean; // Classification flag
   alternateNames?: string[]; // Localized and alternate names from BGG
 
+  // Set when game was found via alternate name search (for auto-selection)
+  matchedAlternateName?: string;
+
   // Optional metadata for stale cache handling
   _isStaleCache?: boolean;
   _cacheAge?: number; // hours

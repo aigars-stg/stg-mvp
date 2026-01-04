@@ -13,11 +13,12 @@ interface GameSearchProps {
   onSelect: (game: BGGGame | null) => void;
   selectedGame: BGGGame | null;
   selectedVersion?: BGGVersion | null;
+  selectedDisplayName?: string | null; // Localized display name
   onChangeVersion?: () => void;
   hideChangeVersionButton?: boolean; // Hide button to render it externally
 }
 
-export function GameSearch({ onSelect, selectedGame, selectedVersion, onChangeVersion, hideChangeVersionButton }: GameSearchProps) {
+export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDisplayName, onChangeVersion, hideChangeVersionButton }: GameSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<BGGGame[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +62,8 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, onChangeVe
           thumbnail: game.thumbnail,
           bayesaverage: game.bayesaverage,
           isExpansion: game.is_expansion,
+          // Include matched alternate name for auto-selection of version/display name
+          matchedAlternateName: game.matchedAlternateName,
         }));
 
         setSearchResults(games);
@@ -93,19 +96,28 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, onChangeVe
   };
 
   if (selectedGame) {
+    // Determine if we should show alternate/localized name as primary with English as subtitle
+    // Priority: explicitly selected display name > matched alternate name from search
+    const showAlternateNameAsPrimary =
+      (selectedDisplayName && selectedDisplayName !== selectedGame.name)
+        ? selectedDisplayName
+        : selectedGame.matchedAlternateName;
+
     return (
       <div className="space-y-3">
         <div className="relative">
           <GameResultCard
             id={selectedGame.id}
             name={selectedGame.name}
-            yearpublished={selectedGame.yearPublished}
+            yearpublished={selectedVersion?.yearPublished || selectedGame.yearPublished}
+            isExpansion={selectedGame.isExpansion}
             onClick={() => {}} // No-op since already selected
             hideChevron={true}
             versionPublisher={selectedVersion?.publishers?.join(' / ') || selectedVersion?.publisher}
             versionLanguage={selectedVersion?.languages?.join(' / ') || selectedVersion?.language}
             versionYear={selectedVersion?.yearPublished}
             versionThumbnail={selectedVersion?.thumbnail}
+            matchedAlternateName={showAlternateNameAsPrimary}
           />
           <div className="absolute inset-0 border-2 border-frost-ice rounded-lg pointer-events-none" />
           {/* X button to change game */}
@@ -199,7 +211,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, onChangeVe
       {!isLoading && searchResults.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm text-text-muted">
-            Found {searchResults.length} games - select yours:
+            Found {searchResults.length} game{searchResults.length !== 1 ? 's' : ''} - select yours:
           </p>
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {searchResults.map((game: any) => (
@@ -211,6 +223,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, onChangeVe
                 bayesaverage={game.bayesaverage}
                 isExpansion={game.isExpansion}
                 onClick={onSelect}
+                matchedAlternateName={game.matchedAlternateName}
               />
             ))}
           </div>

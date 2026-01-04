@@ -11,6 +11,7 @@ interface LanguageVersionSelectorProps {
   onSelect: (version: VersionSelection) => void;
   fallbackMode?: boolean;
   fallbackReason?: string;
+  onVersionCountChange?: (count: number) => void; // Callback when version count is known
 }
 
 export function LanguageVersionSelector({
@@ -19,6 +20,7 @@ export function LanguageVersionSelector({
   onSelect,
   fallbackMode = false,
   fallbackReason,
+  onVersionCountChange,
 }: LanguageVersionSelectorProps) {
   const [versions, setVersions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(!fallbackMode);
@@ -50,6 +52,9 @@ export function LanguageVersionSelector({
         const fetchedVersions = data.versions;
 
         setVersions(fetchedVersions);
+
+        // Notify parent of version count (for hiding "Change version" button when only 1)
+        onVersionCountChange?.(fetchedVersions.length);
 
         // Auto-select if only 1 version available
         if (fetchedVersions.length === 1 && !selectedVersion) {
