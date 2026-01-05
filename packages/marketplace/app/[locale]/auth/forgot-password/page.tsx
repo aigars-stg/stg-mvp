@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
               {tSuccess('title')}
             </h2>
             <p className="text-text-secondary">
-              {tSuccess('subtitle', { email: <strong>{email}</strong> })}
+              {tSuccess('subtitle', { email: email })}
             </p>
           </div>
 
