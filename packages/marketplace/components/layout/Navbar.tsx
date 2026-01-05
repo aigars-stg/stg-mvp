@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { LocaleSwitcher } from './LocaleSwitcher';
+import { useTranslations } from 'next-intl';
 
 // Lazy load non-critical navbar components to reduce TBT
 const UserMenu = dynamic(() => import('./UserMenu').then(mod => ({ default: mod.UserMenu })), {
@@ -39,6 +41,7 @@ const MobileSearchButton = dynamic(() => import('./MobileSearchButton').then(mod
 export function Navbar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const t = useTranslations('Navigation');
 
   // Helper to check if a nav link is active
   const isActive = (href: string) => {
@@ -69,7 +72,7 @@ export function Navbar() {
 
         {/* Desktop Search Bar - visible on lg and up */}
         <div className="hidden lg:block flex-1 max-w-md mx-4">
-          <NavbarSearch placeholder="Search games..." />
+          <NavbarSearch placeholder={t('searchPlaceholder')} />
         </div>
 
         {/* Mobile Icons - visible below lg */}
@@ -81,13 +84,13 @@ export function Navbar() {
         {/* Desktop Navigation - visible on lg and up */}
         <nav className="hidden lg:flex items-center gap-2 flex-shrink-0" role="navigation" aria-label="Main navigation">
           <Link href="/browse" className={getNavLinkClasses('/browse')}>
-            Browse
+            {t('browse')}
           </Link>
           <Link
             href="/sell"
             className="ml-2 px-4 py-1.5 bg-frost-ice text-polar-night rounded-md hover:bg-frost-polar transition-colors font-medium text-sm min-h-[36px] inline-flex items-center whitespace-nowrap"
           >
-            Sell a game
+            {t('sell')}
           </Link>
 
           {/* Icons Group with Divider */}
@@ -96,6 +99,9 @@ export function Navbar() {
             <SavedGamesIcon />
             <MessagesIcon />
           </div>
+
+          {/* Language Switcher */}
+          <LocaleSwitcher variant="buttons" className="mr-2" />
 
           <UserMenu />
         </nav>

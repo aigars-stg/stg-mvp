@@ -4,32 +4,13 @@ import { useState } from 'react';
 import { Card } from '@second-turn/design-system';
 import { Star, Sparkles, CircleCheck, Wrench, ShieldCheck, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
 import { GradingGuidePanel } from './GradingGuidePanel';
+import { useTranslations } from 'next-intl';
 
 const CONDITION_OPTIONS = [
-  {
-    value: 'likeNew',
-    label: 'Like New',
-    icon: Star,
-    description: 'Almost no visible wear',
-  },
-  {
-    value: 'veryGood',
-    label: 'Very Good',
-    icon: Sparkles,
-    description: 'Minor wear, excellent condition',
-  },
-  {
-    value: 'good',
-    label: 'Good',
-    icon: CircleCheck,
-    description: 'Moderate wear, fully functional',
-  },
-  {
-    value: 'acceptable',
-    label: 'Acceptable',
-    icon: Wrench,
-    description: 'Heavy wear, still playable',
-  },
+  { value: 'likeNew', icon: Star },
+  { value: 'veryGood', icon: Sparkles },
+  { value: 'good', icon: CircleCheck },
+  { value: 'acceptable', icon: Wrench },
 ] as const;
 
 interface ConditionSelectorProps {
@@ -47,6 +28,11 @@ export function ConditionSelector({
   missingComponents,
   onChange,
 }: ConditionSelectorProps) {
+  const tTrust = useTranslations('Sell.ConditionSelector.trustSignal');
+  const tComplete = useTranslations('Sell.ConditionSelector.completeness');
+  const tCond = useTranslations('Sell.ConditionSelector.condition');
+  const tDetails = useTranslations('Sell.ConditionSelector.additionalDetails');
+
   const [showCompletenessOptions, setShowCompletenessOptions] = useState(true);
   const [showConditionOptions, setShowConditionOptions] = useState(true);
   const [showGradingGuide, setShowGradingGuide] = useState(false);
@@ -55,6 +41,10 @@ export function ConditionSelector({
     onChange('condition', value);
     setShowConditionOptions(false);
   };
+
+  // Helper to get condition label and description
+  const getConditionLabel = (value: string) => tCond(value);
+  const getConditionDescription = (value: string) => tCond(`${value}Description`);
 
   // Hide info card once user makes any selection
   const hasAnySelection = allComponentsPresent !== null || condition !== null;
@@ -73,10 +63,10 @@ export function ConditionSelector({
             </div>
             <div className="flex-1 text-sm">
               <div className="font-semibold text-polar-night mb-1">
-                Honest descriptions build trust
+                {tTrust('title')}
               </div>
               <div className="text-text-secondary">
-                Accurate condition information helps buyers make confident decisions.
+                {tTrust('description')}
               </div>
             </div>
           </div>
@@ -85,7 +75,7 @@ export function ConditionSelector({
       {/* Component Completeness */}
       <div>
         <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3">
-          Are all original components included? *
+          {tComplete('question')}
         </h3>
 
         {showCompletenessOptions || allComponentsPresent === null ? (
@@ -107,8 +97,8 @@ export function ConditionSelector({
             >
               <CheckCircle2 className="w-5 h-5 text-frost-ice flex-shrink-0" />
               <div className="flex-1">
-                <div className="font-semibold text-polar-night">Yes, complete</div>
-                <div className="text-xs sm:text-sm text-text-secondary">All pieces included</div>
+                <div className="font-semibold text-polar-night">{tComplete('yesComplete')}</div>
+                <div className="text-xs sm:text-sm text-text-secondary">{tComplete('yesDescription')}</div>
               </div>
             </button>
 
@@ -129,8 +119,8 @@ export function ConditionSelector({
             >
               <AlertCircle className="w-5 h-5 text-frost-ice flex-shrink-0" />
               <div className="flex-1">
-                <div className="font-semibold text-polar-night">No, incomplete</div>
-                <div className="text-xs sm:text-sm text-text-secondary">Some pieces missing</div>
+                <div className="font-semibold text-polar-night">{tComplete('noIncomplete')}</div>
+                <div className="text-xs sm:text-sm text-text-secondary">{tComplete('noDescription')}</div>
               </div>
             </button>
           </div>
@@ -141,8 +131,8 @@ export function ConditionSelector({
               <div className="flex items-start gap-3 flex-1">
                 <AlertCircle className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <div className="font-semibold text-polar-night text-sm">No, incomplete</div>
-                  <div className="text-xs text-text-secondary">Some pieces missing</div>
+                  <div className="font-semibold text-polar-night text-sm">{tComplete('noIncomplete')}</div>
+                  <div className="text-xs text-text-secondary">{tComplete('noDescription')}</div>
                 </div>
               </div>
               <button
@@ -150,7 +140,7 @@ export function ConditionSelector({
                 onClick={() => setShowCompletenessOptions(true)}
                 className="text-sm text-frost-ice hover:text-frost-ice/80 font-medium whitespace-nowrap"
               >
-                Change
+                {tComplete('change')}
               </button>
             </div>
           </div>
@@ -166,14 +156,14 @@ export function ConditionSelector({
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-polar-night text-sm">
-                    {allComponentsPresent ? 'Yes, complete' : 'No, incomplete'}
+                    {allComponentsPresent ? tComplete('yesComplete') : tComplete('noIncomplete')}
                   </div>
                   <div className="text-xs text-text-secondary">
                     {allComponentsPresent
-                      ? 'All pieces included'
+                      ? tComplete('yesDescription')
                       : missingComponents
-                        ? `Missing: ${missingComponents.substring(0, 50)}${missingComponents.length > 50 ? '...' : ''}`
-                        : 'Some pieces missing'
+                        ? tComplete('missing', { components: missingComponents.substring(0, 50) + (missingComponents.length > 50 ? '...' : '') })
+                        : tComplete('noDescription')
                     }
                   </div>
                 </div>
@@ -183,7 +173,7 @@ export function ConditionSelector({
                 onClick={() => setShowCompletenessOptions(true)}
                 className="text-sm text-frost-ice hover:text-frost-ice/80 font-medium whitespace-nowrap"
               >
-                Change
+                {tComplete('change')}
               </button>
             </div>
           </div>
@@ -192,12 +182,12 @@ export function ConditionSelector({
         {allComponentsPresent === false && (
           <div className="mt-3">
             <label className="text-sm font-medium text-polar-night mb-2 block">
-              What's missing? *
+              {tComplete('whatsMissing')}
             </label>
             <textarea
               value={missingComponents || ''}
               onChange={(e) => onChange('missingComponents', e.target.value)}
-              placeholder="e.g., Missing 2 red cubes and 1 action card"
+              placeholder={tComplete('placeholder')}
               className="w-full h-24 px-3 py-2 rounded-lg border-2 border-border focus:border-frost-ice resize-none"
             />
           </div>
@@ -207,12 +197,12 @@ export function ConditionSelector({
       {/* Condition Selection */}
       <div>
         <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3 flex items-center gap-2">
-          Overall Condition *
+          {tCond('title')}
           <button
             type="button"
             onClick={() => setShowGradingGuide(true)}
             className="text-frost-ice hover:text-aurora-blue transition-colors"
-            aria-label="Open grading guide"
+            aria-label={tCond('openGuide')}
           >
             <HelpCircle className="w-5 h-5" />
           </button>
@@ -237,8 +227,8 @@ export function ConditionSelector({
                 >
                   <Icon className="w-5 h-5 text-frost-ice flex-shrink-0" />
                   <div className="flex-1">
-                    <div className="font-semibold text-polar-night mb-1">{option.label}</div>
-                    <div className="text-sm text-text-secondary">{option.description}</div>
+                    <div className="font-semibold text-polar-night mb-1">{getConditionLabel(option.value)}</div>
+                    <div className="text-sm text-text-secondary">{getConditionDescription(option.value)}</div>
                   </div>
                 </button>
               );
@@ -255,10 +245,10 @@ export function ConditionSelector({
                 })()}
                 <div className="flex-1">
                   <div className="font-semibold text-polar-night text-sm">
-                    {selectedCondition.label}
+                    {getConditionLabel(selectedCondition.value)}
                   </div>
                   <div className="text-xs text-text-secondary">
-                    {selectedCondition.description}
+                    {getConditionDescription(selectedCondition.value)}
                   </div>
                 </div>
               </div>
@@ -267,7 +257,7 @@ export function ConditionSelector({
                 onClick={() => setShowConditionOptions(true)}
                 className="text-sm text-frost-ice hover:text-frost-ice/80 font-medium whitespace-nowrap"
               >
-                Change
+                {tComplete('change')}
               </button>
             </div>
           </div>
@@ -277,26 +267,26 @@ export function ConditionSelector({
       {/* Additional Details */}
       <div>
         <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3">
-          Additional Details {condition === 'acceptable' ? '*' : '(Optional)'}
+          {tDetails('title')} {condition === 'acceptable' ? tDetails('required') : tDetails('optional')}
         </h3>
         <p className="text-sm text-text-secondary mb-3">
           {condition === 'acceptable'
-            ? 'Please describe in more detail'
-            : 'Describe any extras, or other important details'}
+            ? tDetails('descriptionRequired')
+            : tDetails('descriptionOptional')}
         </p>
         <textarea
           value={conditionNotes || ''}
           onChange={(e) => onChange('conditionNotes', e.target.value)}
           placeholder={
             condition === 'acceptable'
-              ? 'e.g., Box has water damage on one corner, manual has torn pages, all components present and functional'
-              : 'e.g., Cards are sleeved. Custom insert included.'
+              ? tDetails('placeholderAcceptable')
+              : tDetails('placeholderOptional')
           }
           className="w-full h-32 px-3 py-2 rounded-lg border-2 border-border focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 resize-none"
           maxLength={500}
         />
         <p className="text-xs text-text-muted mt-1">
-          {(conditionNotes || '').length}/500 characters
+          {tDetails('characterCount', { count: (conditionNotes || '').length })}
         </p>
       </div>
 

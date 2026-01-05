@@ -6,12 +6,12 @@ import Image from 'next/image';
 import { Card, Badge } from '@second-turn/design-system';
 import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Puzzle, BookOpen } from 'lucide-react';
 import type { ListingWithSeller } from '@/lib/types/listing';
-import { getConditionLabel } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { ConditionInfoModal } from '@/components/common/ConditionInfoModal';
+import { useTranslations } from 'next-intl';
 
 interface ListingCardProps {
   listing: ListingWithSeller;
@@ -55,7 +55,7 @@ function formatLanguages(languageString: string): string {
 }
 
 export function ListingCard({ listing, showSeller = false, isOwnListing = false }: ListingCardProps) {
-  const conditionLabel = getConditionLabel(listing.condition);
+  const t = useTranslations('Listings');
   const router = useRouter();
   const { user } = useAuth();
 
@@ -189,7 +189,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
               onClick={handleSaveToggle}
               disabled={saveLoading}
               className="absolute top-3 left-3 w-8 h-8 rounded-md bg-snow-white/90 hover:bg-snow-white flex items-center justify-center transition-all shadow-sm hover:shadow-md disabled:opacity-50"
-              aria-label={isSaved ? "Remove from saved" : "Save listing"}
+              aria-label={isSaved ? t('card.unsaveAria') : t('card.saveAria')}
             >
               <Heart
                 className={`w-4 h-4 transition-all ${
@@ -207,14 +207,14 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
               <button
                 onClick={handlePrevImage}
                 className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-polar-night/60 hover:bg-polar-night/80 backdrop-blur-sm flex items-center justify-center text-snow-white sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                aria-label="Previous image"
+                aria-label={t('card.prevImageAria')}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={handleNextImage}
                 className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-polar-night/60 hover:bg-polar-night/80 backdrop-blur-sm flex items-center justify-center text-snow-white sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                aria-label="Next image"
+                aria-label={t('card.nextImageAria')}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -237,7 +237,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
                       ? 'bg-snow-white w-6'
                       : 'bg-snow-white/50 hover:bg-snow-white/75'
                   }`}
-                  aria-label={`View image ${index + 1}`}
+                  aria-label={t('card.viewImageAria', { number: index + 1 })}
                 />
               ))}
             </div>
@@ -252,10 +252,10 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
               setShowConditionInfo(true);
             }}
             className="absolute top-3 right-3 cursor-pointer hover:opacity-90 transition-opacity"
-            aria-label={`Learn about ${conditionLabel} condition`}
+            aria-label={t('card.learnConditionAria', { condition: t(`conditions.${listing.condition}`) })}
           >
             <Badge variant={getConditionVariant()} size="sm">
-              {conditionLabel}
+              {t(`conditions.${listing.condition}`)}
             </Badge>
           </button>
 
@@ -275,7 +275,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
             <h3 className="font-bold text-lg text-polar-night line-clamp-2 min-h-[2.5rem]">
               {listing.game_name}
               {listing.game?.is_expansion && (
-                <span className="text-text-muted font-normal text-sm"> (Expansion)</span>
+                <span className="text-text-muted font-normal text-sm"> ({t('card.expansion')})</span>
               )}
             </h3>
 
@@ -325,7 +325,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
                   </span>
                 )}
                 {!listing.all_components_present && (
-                  <span title="Missing components" className="flex-shrink-0">
+                  <span title={t('card.missingComponents')} className="flex-shrink-0">
                     <AlertCircle className="w-4 h-4 text-aurora-red" />
                   </span>
                 )}
@@ -365,12 +365,12 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
                 {listing.shipping_parcel_locker ? (
                   <span className="flex items-center gap-1">
                     <Package className="w-3.5 h-3.5" />
-                    Parcel Locker
+                    {t('card.parcelLocker')}
                   </span>
                 ) : listing.shipping_local_pickup ? (
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5" />
-                    Pickup only
+                    {t('card.pickupOnly')}
                   </span>
                 ) : null}
               </div>

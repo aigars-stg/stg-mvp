@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
 import { ChevronLeft, ChevronRight, ArrowRight, Plus, Search } from 'lucide-react';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
@@ -23,16 +24,21 @@ interface WantedCollectionProps {
  */
 export function WantedCollection({
   limit = 8,
-  title = 'Wanted by Community',
-  subtitle = 'Games that buyers are actively looking for',
+  title,
+  subtitle,
   showViewAll = true,
 }: WantedCollectionProps) {
+  const t = useTranslations('HomePage.wantedCollection');
   const [listings, setListings] = useState<WantedListingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Use translations as defaults if not provided
+  const displayTitle = title ?? t('title');
+  const displaySubtitle = subtitle ?? t('subtitle');
 
   useEffect(() => {
     async function fetchWantedListings() {
@@ -96,9 +102,9 @@ export function WantedCollection({
           <div className="flex items-end justify-between mb-6">
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold text-polar-night">
-                {title}
+                {displayTitle}
               </h2>
-              <p className="text-text-secondary mt-1">{subtitle}</p>
+              <p className="text-text-secondary mt-1">{displaySubtitle}</p>
             </div>
           </div>
 
@@ -108,15 +114,15 @@ export function WantedCollection({
               <Search className="w-8 h-8 text-aurora-orange" />
             </div>
             <h3 className="text-xl font-bold text-polar-night mb-2">
-              Be the first to post a wanted listing!
+              {t('empty.title')}
             </h3>
             <p className="text-text-secondary mb-6 max-w-md mx-auto">
-              Looking for a specific game? Post a wanted listing and let sellers know what you're searching for.
+              {t('empty.description')}
             </p>
             <Link href="/wanted/new">
               <Button variant="accent">
                 <Plus className="w-4 h-4 mr-2" />
-                Post Wanted Listing
+                {t('empty.button')}
               </Button>
             </Link>
           </div>
@@ -135,15 +141,15 @@ export function WantedCollection({
               {loading ? (
                 <span className="inline-block w-48 h-8 bg-bg-elevated rounded animate-pulse" />
               ) : (
-                title
+                displayTitle
               )}
             </h2>
-            {(loading || subtitle) && (
+            {(loading || displaySubtitle) && (
               <p className="text-text-secondary mt-1">
                 {loading ? (
                   <span className="inline-block w-64 h-5 bg-bg-elevated rounded animate-pulse" />
                 ) : (
-                  subtitle
+                  displaySubtitle
                 )}
               </p>
             )}
@@ -155,14 +161,14 @@ export function WantedCollection({
                 href="/browse?type=wanted"
                 className="flex items-center gap-1 text-frost-ice hover:text-frost-polar transition-colors font-medium"
               >
-                View all
+                {t('viewAll')}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             )}
             <Link href="/wanted/new">
               <Button variant="accent" size="sm">
                 <Plus className="w-4 h-4 mr-1" />
-                Post wanted
+                {t('postWanted')}
               </Button>
             </Link>
           </div>
@@ -175,7 +181,7 @@ export function WantedCollection({
             <button
               onClick={() => scroll('left')}
               className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-snow-white border border-border rounded-full shadow-lg flex items-center justify-center text-polar-night hover:bg-bg-secondary transition-all opacity-0 group-hover:opacity-100 -translate-x-1/2"
-              aria-label="Scroll left"
+              aria-label={t('scrollLeft')}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -184,7 +190,7 @@ export function WantedCollection({
             <button
               onClick={() => scroll('right')}
               className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-snow-white border border-border rounded-full shadow-lg flex items-center justify-center text-polar-night hover:bg-bg-secondary transition-all opacity-0 group-hover:opacity-100 translate-x-1/2"
-              aria-label="Scroll right"
+              aria-label={t('scrollRight')}
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -220,13 +226,13 @@ export function WantedCollection({
             <Link href="/wanted/new" className="w-full">
               <Button variant="accent" fullWidth>
                 <Plus className="w-4 h-4 mr-2" />
-                Post Wanted Listing
+                {t('postWantedListing')}
               </Button>
             </Link>
             {showViewAll && (
               <Link href="/browse?type=wanted" className="w-full">
                 <Button variant="secondary" fullWidth>
-                  View all wanted
+                  {t('viewAllWanted')}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>

@@ -2,6 +2,7 @@
 
 import { Input } from '@second-turn/design-system';
 import { Package, MapPin } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface PricingShippingProps {
   price: string;
@@ -21,6 +22,11 @@ export function PricingShipping({
   parcelLockerPaidBy,
   onChange,
 }: PricingShippingProps) {
+  const tPricing = useTranslations('Sell.PricingShipping.pricing');
+  const tShipping = useTranslations('Sell.PricingShipping.shipping');
+  const tLocalPickup = useTranslations('Sell.PricingShipping.shipping.localPickup');
+  const tParcelLocker = useTranslations('Sell.PricingShipping.shipping.parcelLocker');
+
   const handlePriceBlur = () => {
     if (price && !isNaN(parseFloat(price))) {
       // Format to 2 decimal places
@@ -34,15 +40,15 @@ export function PricingShipping({
       {/* Pricing Section */}
       <div>
         <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3">
-          Asking Price *
+          {tPricing('title')}
         </h3>
         <Input
-          label="Price (€)"
+          label={tPricing('label')}
           type="number"
           value={price || ''}
           onChange={(e) => onChange('price', e.target.value)}
           onBlur={handlePriceBlur}
-          placeholder="25.00"
+          placeholder={tPricing('placeholder')}
           min="1"
           step="0.01"
           required
@@ -53,10 +59,10 @@ export function PricingShipping({
       {/* Shipping Options */}
       <div>
         <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3">
-          Shipping Options *
+          {tShipping('title')}
         </h3>
         <p className="text-sm text-text-secondary mb-4">
-          Select at least one option
+          {tShipping('selectOne')}
         </p>
 
         <div className="space-y-3">
@@ -75,20 +81,20 @@ export function PricingShipping({
           >
             <MapPin className="w-5 h-5 text-frost-ice flex-shrink-0" />
             <div className="flex-1">
-              <div className="font-semibold text-polar-night">Local pickup</div>
-              <div className="text-xs sm:text-sm text-text-secondary">Meet at a local area</div>
+              <div className="font-semibold text-polar-night">{tLocalPickup('title')}</div>
+              <div className="text-xs sm:text-sm text-text-secondary">{tLocalPickup('description')}</div>
             </div>
           </button>
 
           {shippingOptions.localPickup && (
             <div className="ml-11 mt-3">
               <label className="text-sm font-medium text-polar-night mb-2 block">
-                Pickup location details
+                {tLocalPickup('locationLabel')}
               </label>
               <textarea
                 value={pickupLocation || ''}
                 onChange={(e) => onChange('pickupLocation', e.target.value)}
-                placeholder="e.g., Riga, Old Town area or near Central Market"
+                placeholder={tLocalPickup('locationPlaceholder')}
                 className="w-full h-20 px-3 py-2 rounded-lg border-2 border-border focus:border-frost-ice resize-none"
               />
             </div>
@@ -109,15 +115,15 @@ export function PricingShipping({
           >
             <Package className="w-5 h-5 text-frost-ice flex-shrink-0" />
             <div className="flex-1">
-              <div className="font-semibold text-polar-night">Parcel lockers</div>
-              <div className="text-xs sm:text-sm text-text-secondary">Omniva, DPD, or similar</div>
+              <div className="font-semibold text-polar-night">{tParcelLocker('title')}</div>
+              <div className="text-xs sm:text-sm text-text-secondary">{tParcelLocker('description')}</div>
             </div>
           </button>
 
           {shippingOptions.parcelLocker && (
             <div className="ml-11 mt-3 space-y-3">
               <label className="text-sm font-medium text-polar-night mb-2 block">
-                Who pays for shipping?
+                {tParcelLocker('paymentLabel')}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
@@ -132,8 +138,8 @@ export function PricingShipping({
                     }
                   `}
                 >
-                  <div className="font-semibold text-polar-night text-sm">I'll cover shipping</div>
-                  <div className="text-xs text-text-secondary mt-0.5">Free shipping for buyer</div>
+                  <div className="font-semibold text-polar-night text-sm">{tParcelLocker('sellerPays')}</div>
+                  <div className="text-xs text-text-secondary mt-0.5">{tParcelLocker('sellerPaysDescription')}</div>
                 </button>
 
                 <button
@@ -148,8 +154,8 @@ export function PricingShipping({
                     }
                   `}
                 >
-                  <div className="font-semibold text-polar-night text-sm">Buyer pays</div>
-                  <div className="text-xs text-text-secondary mt-0.5">Shipping cost added at checkout</div>
+                  <div className="font-semibold text-polar-night text-sm">{tParcelLocker('buyerPays')}</div>
+                  <div className="text-xs text-text-secondary mt-0.5">{tParcelLocker('buyerPaysDescription')}</div>
                 </button>
               </div>
             </div>

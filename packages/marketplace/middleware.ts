@@ -1,12 +1,43 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+import { routing } from './i18n/routing';
+
+// Create i18n middleware
+const intlMiddleware = createMiddleware(routing);
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
+  const { pathname } = request.nextUrl;
+
+  // Step 1: Handle i18n routing FIRST (before auth)
+  // Skip i18n for API routes and static assets
+  const shouldSkipI18n =
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.match(/\.(svg|png|jpg|jpeg|gif|webp)$/);
+
+  let response: NextResponse;
+
+  if (shouldSkipI18n) {
+    // Skip i18n, create response for Supabase auth
+    response = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+  } else {
+    // Apply i18n middleware
+    const intlResponse = intlMiddleware(request);
+    if (intlResponse) {
+      response = intlResponse;
+    } else {
+      response = NextResponse.next({
+        request: {
+          headers: request.headers,
+        },
+      });
+    }
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -78,31 +109,63 @@ export async function middleware(request: NextRequest) {
     // Auth errors handled silently
   }
 
-  // Protected routes that require authentication
-  const protectedRoutes = ['/sell', '/account', '/my-listings', '/seller'];
-  // Public routes that should NOT require auth (even if they match protected patterns)
-  const publicRoutes = ['/seller/terms'];
-  const authRoutes = ['/auth/signin', '/auth/signup'];
+  // Step 2: Set locale cookie for next-intl based on user preference
+  // This allows next-intl to handle the redirect correctly without creating loops
+  if (user && !shouldSkipI18n) {
+    try {
+      // Fetch user's preferred locale from database
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('preferred_locale')
+        .eq('id', user.id)
+        .single();
 
-  const isPublicRoute = publicRoutes.some((route) =>
-    request.nextUrl.pathname === route
-  );
-  const isProtectedRoute = !isPublicRoute && protectedRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
-  );
-  const isAuthRoute = authRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
-  );
+      // Set NEXT_LOCALE cookie so next-intl uses the user's preference
+      if (profile?.preferred_locale) {
+        response.cookies.set('NEXT_LOCALE', profile.preferred_locale, {
+          path: '/',
+          maxAge: 31536000, // 1 year
+        });
+      }
+    } catch (error) {
+      // Silently fail - locale detection is not critical
+      console.error('[Middleware] Locale cookie error:', error);
+    }
+  }
+
+  // Protected routes that require authentication
+  // Note: Must handle both /route and /[locale]/route patterns
+  const protectedRoutes = ['/sell', '/account', '/my-listings', '/seller'];
+  const publicRoutes = ['/seller/terms'];
+  const authRoutes = ['/auth/signin', '/auth/signup', '/auth'];
+
+  // Helper to check if path matches route (with or without locale prefix)
+  const matchesRoute = (path: string, route: string) => {
+    // Check direct match: /sell
+    if (path === route || path.startsWith(route + '/')) return true;
+    // Check with locale prefix: /lv/sell
+    const localePattern = new RegExp(`^/(en|lv)${route}(/|$)`);
+    return localePattern.test(path);
+  };
+
+  const isPublicRoute = publicRoutes.some((route) => matchesRoute(pathname, route));
+  const isProtectedRoute = !isPublicRoute && protectedRoutes.some((route) => matchesRoute(pathname, route));
+  const isAuthRoute = authRoutes.some((route) => matchesRoute(pathname, route));
 
   // Redirect to signin if accessing protected route without auth
+  // Preserve locale in redirect URL
   if (isProtectedRoute && !user) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/auth/signin';
-    redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname);
+    // Extract locale from pathname if present
+    const localeMatch = pathname.match(/^\/(en|lv)/);
+    const locale = localeMatch ? localeMatch[1] : '';
+    redirectUrl.pathname = locale ? `/${locale}/auth/signin` : '/auth/signin';
+    redirectUrl.searchParams.set('redirectTo', pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
   // Redirect away from auth pages if already logged in
+  // Preserve locale in redirect URL
   if (isAuthRoute && user) {
     const redirectTo = request.nextUrl.searchParams.get('redirectTo') || '/';
     const redirectUrl = request.nextUrl.clone();

@@ -1,0 +1,755 @@
+{
+  "Common": {
+    "loading": "Ielādē...",
+    "error": "Kļūda",
+    "save": "Saglabāt",
+    "cancel": "Atcelt",
+    "closeModal": "Aizvērt",
+    "confirm": "Apstiprināt",
+    "delete": "Dzēst",
+    "edit": "Rediģēt"
+  },
+  "Navigation": {
+    "home": "Sākums",
+    "browse": "Pārlūkot",
+    "sell": "Pārdot spēli",
+    "sellShort": "Pārdot",
+    "cart": "Grozs",
+    "messages": "Ziņojumi",
+    "profile": "Profils",
+    "searchPlaceholder": "Meklēt spēles...",
+    "language": "Valoda",
+    "userMenu": {
+      "sellerDashboard": "Pārdevēja panelis",
+      "myOrders": "Mani pasūtījumi",
+      "myListings": "Mani sludinājumi",
+      "accountSettings": "Konta iestatījumi",
+      "staffDashboard": "Darbinieku panelis",
+      "signOut": "Iziet",
+      "signOutError": "Neizdevās iziet. Lūdzu, mēģiniet vēlreiz.",
+      "join": "Pievienoties"
+    },
+    "sellActionSheet": {
+      "title": "Ko vēlaties darīt?",
+      "sellGame": "Pārdot spēli",
+      "sellGameDescription": "Pievienot galda spēli pārdošanai",
+      "postWantedGame": "Meklēt spēli",
+      "postWantedGameDescription": "Meklēju konkrētu spēli (ISO)"
+    }
+  },
+  "Auth": {
+    "emailEntry": {
+      "title": "Ienāciet sistēmā",
+      "subtitle": "Ievadiet savu e-pastu, lai turpinātu",
+      "emailLabel": "E-pasts",
+      "emailPlaceholder": "jusu.epasts@piemers.lv",
+      "continueButton": "Turpināt",
+      "divider": "vai",
+      "continueWithGoogle": "Turpināt ar Google",
+      "continueWithFacebook": "Turpināt ar Facebook"
+    },
+    "checking": {
+      "title": "Brītiņu..."
+    },
+    "newUser": {
+      "title": "Laipni lūdzam!",
+      "subtitle": "Izveidojiet kontu droši, bez nepieciešamības atcerēties vēl vienu paroli.",
+      "changeEmail": "Mainīt",
+      "magicLinkTitle": "Kas ir maģiskā saite?",
+      "magicLinkDescription": "Tā ir droša saite, ko nosūtām uz jūsu e-pastu. Noklikšķiniet uz tās, lai uzreiz pieteiktos. Nav nepieciešams izveidot, atcerēties vai zaudēt paroli!",
+      "sendMagicLink": "Nosūtīt maģisko saiti",
+      "sending": "Nosūta...",
+      "termsPrefix": "Turpinot, jūs piekrītat mūsu",
+      "termsOfService": "Pakalpojumu noteikumiem",
+      "termsAnd": "un",
+      "privacyPolicy": "Privātuma politikai"
+    },
+    "existingUser": {
+      "welcomeBack": "Laipni lūdzam atpakaļ!",
+      "readyForAnotherTurn": "Gatavs vēl vienai partijai?",
+      "usuallySignInWith": "Parasti jūs piesakāties ar {provider}.",
+      "changeEmail": "Mainīt",
+      "signInWithGoogle": "Pierakstīties ar Google",
+      "signInWithFacebook": "Pierakstīties ar Facebook",
+      "divider": "vai",
+      "sendMagicLink": "Nosūtīt maģisko saiti",
+      "sendMagicLinkInstead": "Nosūtīt maģisko saiti",
+      "iHavePassword": "Man ir parole",
+      "passwordLabel": "Parole",
+      "forgotPassword": "Aizmirsāt paroli?",
+      "passwordPlaceholder": "Ievadiet savu paroli",
+      "showPassword": "Rādīt paroli",
+      "hidePassword": "Slēpt paroli",
+      "signInButton": "Pierakstīties",
+      "magicLinkDescription": "Mēs nosūtīsim jums saiti, lai uzreiz pieteiktos — nav nepieciešama parole.",
+      "sending": "Nosūta..."
+    },
+    "magicLinkSent": {
+      "title": "Pārbaudiet savu e-pastu!",
+      "subtitle": "Nosūtījām maģisko saiti uz {email}",
+      "stepOpenEmail": "Atveriet e-pastu",
+      "stepClickLink": "Noklikšķiniet uz saites",
+      "expiryInfo": "Saite uzreiz pieteiks jūs šajā ierīcē. Tā derīga 1 stundu.",
+      "resendButton": "Nesaņēmāt? Nosūtīt vēlreiz",
+      "sending": "Nosūta...",
+      "sentCount_one": "Nosūtīts {count} reizi",
+      "sentCount_other": "Nosūtīts {count} reizes",
+      "useDifferentEmail": "Izmantot citu e-pastu"
+    },
+    "errors": {
+      "tooManyAttempts": "Pārāk daudz mēģinājumu — uztaisīsim pauzi. Mēģiniet vēlreiz pēc dažām minūtēm."
+    },
+    "forgotPassword": {
+      "title": "Nevar iekļūt?",
+      "subtitle": "Neuztraucieties — palīdzēsim jums atgriezties",
+      "emailLabel": "E-pasta adrese",
+      "emailPlaceholder": "jusu.epasts@piemers.lv",
+      "sendButton": "Nosūtīt saiti",
+      "sending": "Nosūta...",
+      "backToSignIn": "Atpakaļ uz pierakstīšanos",
+      "validationError": "Lūdzu, ievadiet derīgu e-pasta adresi",
+      "success": {
+        "title": "Pārbaudiet savu e-pastu!",
+        "subtitle": "Nosūtījām atiestatīšanas saiti uz {email}",
+        "instructions": "Noklikšķiniet uz saites, lai izvēlētos jaunu paroli. Tā derīga 1 stundu — pārbaudiet mēstuļu mapi, ja neredzat.",
+        "backButton": "Atpakaļ uz pierakstīšanos",
+        "tryAgain": "Nesaņēmāt? Mēģiniet vēlreiz"
+      }
+    },
+    "resetPassword": {
+      "title": "Izvēlieties jaunu paroli",
+      "subtitle": "Padariet to spēcīgu un viegli atceramu",
+      "passwordLabel": "Jaunā parole",
+      "passwordPlaceholder": "8+ rakstzīmes, burtu un ciparu kombinācija",
+      "showPassword": "Rādīt paroli",
+      "hidePassword": "Slēpt paroli",
+      "saveButton": "Saglabāt jauno paroli",
+      "updating": "Atjaunina...",
+      "backToSignIn": "Atpakaļ uz pierakstīšanos",
+      "validationError": "Padariet to stiprāku — 8+ rakstzīmes ar lielajiem, mazajiem burtiem un ciparu",
+      "checkingToken": "Pārbaudām jūsu atiestatīšanas saiti...",
+      "expired": {
+        "title": "Saite beigusies",
+        "subtitle": "Šī paroles atiestatīšanas saite vairs nav derīga. Neuztraucieties — vienkārši pieprasiet jaunu.",
+        "requestButton": "Pieprasīt jaunu saiti",
+        "backButton": "Atpakaļ uz pierakstīšanos",
+        "errorMessage": "Šī atiestatīšanas saite ir beigusies. Pieprasiet jaunu, un viss būs kārtībā."
+      },
+      "success": {
+        "title": "Viss ir gatavs!",
+        "subtitle": "Jūsu parole ir atjaunināta. Pārvieto uz pierakstīšanos..."
+      }
+    }
+  },
+  "Listings": {
+    "card": {
+      "expansion": "Papildinājums",
+      "parcelLocker": "Paku termināls",
+      "pickupOnly": "Tikai saņemšana klātienē",
+      "missingComponents": "Trūkst komponentes",
+      "saveAria": "Saglabāt sludinājumu",
+      "unsaveAria": "Noņemt no saglabātajiem",
+      "prevImageAria": "Iepriekšējais attēls",
+      "nextImageAria": "Nākamais attēls",
+      "viewImageAria": "Skatīt attēlu {number}",
+      "learnConditionAria": "Uzzināt par {condition} stāvokli"
+    },
+    "detail": {},
+    "create": {},
+    "conditions": {
+      "likeNew": "Kā jauns",
+      "veryGood": "Ļoti laba",
+      "good": "Laba",
+      "acceptable": "Pieņemama"
+    },
+    "statuses": {
+      "draft": "Melnraksts",
+      "active": "Aktīvs",
+      "sold": "Pārdots",
+      "removed": "Noņemts"
+    }
+  },
+  "OfferCard": {
+    "priceBreakdown": {
+      "shippingTo": "Piegāde uz {country}:",
+      "serviceFee": "Servisa maksa:",
+      "total": "Kopā:",
+      "estimateNote": "*Aptuvens aprēķins, pamatojoties uz piegādi vienas valsts ietvaros. Galīgā cena pie norēķināšanās."
+    },
+    "price": {
+      "from": "No",
+      "delivered": "ar piegādi",
+      "save": "Ietaupi {percentage}%"
+    },
+    "listing": {
+      "listed": "Publicēts {date}",
+      "edition": "{year}. gada izdevums",
+      "expansion": "Papildinājums",
+      "missingParts": "Trūkst daļas",
+      "photosCount": "{count} foto",
+      "viewImageAria": "Skatīt attēlu {number}",
+      "viewOnBGG": "Skatīt BoardGameGeek",
+      "learnConditionAria": "Uzzināt par {condition} stāvokli",
+      "conditionGradesTooltip": "Noklikšķiniet, lai uzzinātu par stāvokļa novērtējumiem"
+    },
+    "expansions": {
+      "title": "Iekļautie papildinājumi ({count})",
+      "moreCount": "+{count} vairāk"
+    },
+    "conditionDetails": {
+      "title": "Stāvokļa detaļas"
+    },
+    "actions": {
+      "saveAria": "Saglabāt sludinājumu",
+      "unsaveAria": "Noņemt no saglabātajiem",
+      "saveTooltip": "Saglabāt sludinājumu",
+      "unsaveTooltip": "Noņemt no saglabātajiem",
+      "askQuestion": "Uzdot jautājumu",
+      "addToCart": "Pievienot grozam",
+      "sold": "Pārdots",
+      "reserved": "Rezervēts",
+      "reservedTooltip": "Kāds norēķinās — drīzumā pieejams, ja viņi nepabeigs"
+    }
+  },
+  "Checkout": {
+    "loading": "Ielādē norēķināšanos...",
+    "errorTitle": "Neizdevās ielādēt norēķināšanos",
+    "returnToCart": "Atgriezties pie groza",
+    "breadcrumb": {
+      "cart": "Grozs",
+      "checkout": "Norēķināšanās"
+    },
+    "title": "Norēķināšanās",
+    "orderFrom": "Pasūtījums no {sellerName}",
+    "shipping": {
+      "title": "Piegāde uz paku termināli",
+      "description": "Saņem ērtā paku termināli pie Tevis. Ātra un droša piegāde 1-3 darba dienu laikā."
+    },
+    "sections": {
+      "selectTerminal": "1. Izvēlies saņemšanas termināli",
+      "contactInfo": "2. Kontaktinformācija"
+    },
+    "form": {
+      "fullName": "Vārds un uzvārds",
+      "email": "E-pasts",
+      "phone": "Tālruņa numurs",
+      "required": "*",
+      "namePlaceholder": "Tavs vārds un uzvārds",
+      "emailPlaceholder": "tavs@epasts.lv",
+      "emailHint": "Pasūtījuma atjauninājumi un izsekošanas informācija tiks nosūtīta šeit",
+      "savePhone": "Saglabāt tālruņa numuru turpmākiem pasūtījumiem",
+      "savePhoneHint": "Mēs atcerēsimies tavu tālruņa numuru, lai ātrāk norēķinātos nākamreiz",
+      "phoneError": "Lūdzu, ievadi derīgu tālruņa numuru izvēlētajai valstij"
+    },
+    "summary": {
+      "title": "Pasūtījuma kopsavilkums",
+      "subtotal": "Starpsumma ({count, plural, one {# prece} other {# preces}})",
+      "shipping": "Piegāde",
+      "serviceFee": "Servisa maksa",
+      "total": "Kopā"
+    },
+    "actions": {
+      "paySecurely": "Droši samaksāt",
+      "processing": "Apstrādā...",
+      "backToCart": "Atpakaļ uz grozu"
+    },
+    "info": {
+      "sellerDeadline": "Pārdevējam ir 24 stundas, lai pieņemtu",
+      "refundPolicy": "Ja pārdevējs neatbild, tu saņemsi pilnu atmaksu automātiski."
+    },
+    "errors": {
+      "expiredItems": "Dažas preces tavā grozā ir beigušās derīguma termiņš. Lūdzu, atgriezies pie groza.",
+      "basketNotFound": "Grozs nav atrasts",
+      "fetchCartFailed": "Neizdevās ielādēt grozu",
+      "createSessionFailed": "Neizdevās izveidot norēķināšanās sesiju",
+      "noCheckoutUrl": "Nav atgriezta norēķināšanās URL",
+      "paymentFailed": "Neizdevās apstrādāt maksājumu. Lūdzu, mēģini vēlreiz."
+    },
+    "success": {
+      "loading": "Apstrādā tavu pasūtījumu...",
+      "errorTitle": "Nederīga sesija",
+      "errorDescription": "Mēs nevarējām ielādēt tava pasūtījuma detaļas. Lūdzu, pārbaudi savu e-pastu apstiprinājumam.",
+      "title": "Maksājums veiksmīgs!",
+      "subtitle": "Tavs pasūtījums ir veikts un maksājums apstiprināts",
+      "nextSteps": {
+        "title": "Kas notiks tālāk",
+        "step1Title": "Pārdevējs pārskata tavu pasūtījumu",
+        "step1Description": "Pārdevējam ir 24 stundas, lai pieņemtu tavu pasūtījumu. Tu saņemsi e-pasta paziņojumu, kad viņš atbildēs.",
+        "step1Deadline": "Atbildes termiņš: 24 stundas",
+        "step2Title": "Piegāde tiek organizēta",
+        "step2Description": "Pēc pieņemšanas pārdevējs organizēs piegādi vai saskaņos saņemšanas detaļas ar tevi, izmantojot ziņojumapmaiņu.",
+        "step3Title": "Saņem savas spēles",
+        "step3Description": "Paņem savas spēles no termināļa vai satiec pārdevēju. Baudi savas jaunās galda spēles!"
+      },
+      "email": {
+        "title": "Pasūtījuma apstiprinājums nosūtīts",
+        "description": "Mēs esam nosūtījuši apstiprinājuma e-pastu ar tava pasūtījuma detaļām un izsekošanas informāciju."
+      },
+      "refund": {
+        "title": "Automātiskā atmaksas aizsardzība",
+        "description": "Ja pārdevējs neatbild 24 stundu laikā vai noraida tavu pasūtījumu, tu saņemsi automātisku pilnu atmaksu uz savu maksājuma metodi."
+      },
+      "actions": {
+        "viewOrders": "Skatīt manus pasūtījumus",
+        "continueShopping": "Turpināt iepirkties"
+      },
+      "sessionId": "Sesijas ID: {sessionId}"
+    }
+  },
+  "Emails": {
+    "orderConfirmation": {},
+    "shipping": {}
+  },
+  "HomePage": {
+    "hero": {
+      "discover": "Atklāj.",
+      "list": "Pārdod.",
+      "play": "Spēlē.",
+      "tagline": "Katrai spēlei pienākas otrā iespēja.",
+      "subtitle": "Pērc un pārdod lietotas galda spēles Latvijā, Igaunijā un Lietuvā.",
+      "browseCard": {
+        "title": "Atklāj spēles",
+        "description": "Spēles, kas gaida savu nākamo piedzīvojumu. No slēptiem dārgumiem līdz izpārdotiem klasiskiem.",
+        "button": "Skatīt pieejamās"
+      },
+      "sellCard": {
+        "title": "Atbrīvo plauktu",
+        "description": "Tavām spēlēm ir nepieciešami spēlētāji, kas tās mīlēs. Izveido sludinājumu mazāk nekā 5 minūtēs.",
+        "button": "Pārdot spēli"
+      },
+      "wantedCard": {
+        "title": "Nevari atrast?",
+        "description": "Beidz atjaunot lapu. Publicē, ko meklē, un mēs tevi informēsim, kad tā parādīsies.",
+        "button": "Pastāsti, ko vēlies"
+      }
+    },
+    "collections": {
+      "viewAll": "Skatīt visu",
+      "scrollLeft": "Ritināt pa kreisi",
+      "scrollRight": "Ritināt pa labi",
+      "priceDisclaimer": "Tikai preces cenas. Pilnā cena tiek parādīta pirms apmaksas."
+    },
+    "wantedCollection": {
+      "title": "Kopiena meklē",
+      "subtitle": "Spēles, kuras pircēji aktīvi meklē",
+      "empty": {
+        "title": "Esi pirmais, kas publicē meklējuma sludinājumu!",
+        "description": "Meklē konkrētu spēli? Publicē meklējuma sludinājumu un ļauj pārdevējiem zināt, ko meklē.",
+        "button": "Publicēt meklējuma sludinājumu"
+      },
+      "viewAll": "Skatīt visu",
+      "viewAllWanted": "Skatīt visus meklējumus",
+      "postWanted": "Publicēt meklējumu",
+      "postWantedListing": "Publicēt meklējuma sludinājumu",
+      "scrollLeft": "Ritināt pa kreisi",
+      "scrollRight": "Ritināt pa labi"
+    },
+    "howItWorks": {
+      "title": "Kā tas darbojas",
+      "subtitle": "Vienkārši, droši un caurspīdīgi gan pircējiem, gan pārdevējiem",
+      "forBuyers": "Pircējiem",
+      "forBuyersTag": "Atrodi savu spēli",
+      "forSellers": "Pārdevējiem",
+      "forSellersTag": "Nopelni no sava plaukta",
+      "buyerSteps": {
+        "step1": {
+          "title": "Pārlūko un meklē",
+          "description": "Atrodi spēles pēc nosaukuma, kategorijas, stāvokļa vai atrašanās vietas. Filtrē pēc tā, kas tev svarīgi."
+        },
+        "step2": {
+          "title": "Pārskata detaļas",
+          "description": "Pārbaudi stāvokļa fotogrāfijas, pilnības informāciju un pārdevēja vērtējumus. Uzdod jautājumus, ja nepieciešams."
+        },
+        "step3": {
+          "title": "Pērc droši",
+          "description": "Maksā caur mūsu drošo sistēmu. Tava maksājums tiek turēts līdz piegādes apstiprinājumam."
+        },
+        "step4": {
+          "title": "Baudi savu spēli",
+          "description": "Saņem savu spēli, pārbaudi stāvokli un sāc spēlēt. Atstāj atsauksmi, lai palīdzētu citiem."
+        }
+      },
+      "sellerSteps": {
+        "step1": {
+          "title": "Izvieto savu spēli",
+          "description": "Pievieno fotogrāfijas, godīgi apraksti stāvokli un nosaki cenu. Aizņem tikai 5 minūtes."
+        },
+        "step2": {
+          "title": "Sazinies ar pircējiem",
+          "description": "Atbildi uz jautājumiem, sarunā, ja esi atvērts piedāvājumiem, un vienojies par piegādi vai saņemšanu."
+        },
+        "step3": {
+          "title": "Nosūti droši",
+          "description": "Iepako rūpīgi un nosūti 2 darba dienu laikā. Maksājums tiek izdots pēc pircēja apstiprinājuma."
+        },
+        "step4": {
+          "title": "Saņem naudu",
+          "description": "Saņem maksājumu droši. Izvieto vairāk spēļu vai izmanto līdzekļus, lai iegādātos nākamo favorītu."
+        }
+      }
+    },
+    "finalCTA": {
+      "title": "Gatavs dot spēlei otro iespēju?",
+      "subtitle": "Pievienojies Baltijas galda spēļu kopienai. Pērc lietotas spēles, pārdod savu kolekciju vai publicē, ko meklē.",
+      "button": "Pievienoties"
+    }
+  },
+  "Browse": {
+    "tabs": {
+      "forSale": "Pārdošanā",
+      "wanted": "Meklē",
+      "forSaleAria": "Rādīt spēles pārdošanā",
+      "wantedAria": "Rādīt meklētos sludinājumus"
+    },
+    "sort": {
+      "recentlyListed": "Nesen pievienots",
+      "recentlyPosted": "Nesen publicēts",
+      "priceLowHigh": "Cena: no zemākās",
+      "priceHighLow": "Cena: no augstākās",
+      "expiringSoon": "Drīz beigsies",
+      "budgetHighLow": "Budžets: no augstākā",
+      "budgetLowHigh": "Budžets: no zemākā",
+      "mostResponses": "Visvairāk atbilžu"
+    },
+    "filters": {
+      "title": "Filtri",
+      "openFiltersAria": "Atvērt filtrus",
+      "clear": "Notīrīt",
+      "clearAll": "Notīrīt visu",
+      "applyFilters": "Pielietot filtrus",
+      "activeFilters": "Aktīvie filtri:",
+      "players": "Spēlētāji",
+      "minAge": "Min. vecums",
+      "playTime": "Spēles ilgums",
+      "language": "Valoda",
+      "priceEur": "Cena (EUR)",
+      "acceptableConditions": "Pieņemamie stāvokļi",
+      "budgetEur": "Budžets (EUR)",
+      "location": "Atrašanās vieta",
+      "expiringSoon": "Drīz beigsies",
+      "expiringToggle": "Rādīt tikai sludinājumus, kas beidzas 7 dienu laikā",
+      "searchLocationPlaceholder": "Meklēt atrašanās vietu...",
+      "minPlaceholder": "Min",
+      "maxPlaceholder": "Maks"
+    },
+    "playerCount": {
+      "solo": "Solo",
+      "eightPlus": "8+"
+    },
+    "playingTime": {
+      "under30": "< 30 min",
+      "thirtyTo60": "30-60 min",
+      "oneToTwoHours": "1-2 stundas",
+      "twoPlus": "2+ stundas"
+    },
+    "messages": {
+      "noDataAvailable": "Nav pieejamu datu",
+      "noLanguagesAvailable": "Nav pieejamu valodu",
+      "loadingMore": "Ielādē vairāk spēļu...",
+      "reachedEnd": "Esi sasniedzis beigas! Rāda visas {totalCount} spēles.",
+      "offlineError": "Neizdevās ielādēt sludinājumus. Pārbaudi savienojumu un mēģini vēlreiz.",
+      "genericError": "Kaut kas nogāja greizi",
+      "tryAgain": "Mēģini vēlreiz"
+    },
+    "emptyState": {
+      "noGamesFound": "Spēles nav atrastas",
+      "noWantedListings": "Vēl nav meklēto sludinājumu",
+      "tryAdjustingFilters": "Mēģini pielāgot filtrus vai meklēšanas vaicājumu",
+      "beFirstToList": "Esi pirmais, kas pievieno spēli!",
+      "beFirstToPost": "Esi pirmais, kas publicē, ko meklē!",
+      "clearAllFilters": "Notīrīt visus filtrus"
+    }
+  },
+  "GameDetail": {
+    "loading": "Ielādē spēli...",
+    "description": {
+      "showLess": "Rādīt mazāk",
+      "readMore": "Lasīt vairāk"
+    },
+    "bgg": {
+      "viewOnBGG": "Skatīt BGG"
+    },
+    "offers": {
+      "availableOffers": "Pieejamie piedāvājumi ({count})"
+    },
+    "sort": {
+      "priceLowHigh": "Cena: no zemākās",
+      "priceHighLow": "Cena: no augstākās",
+      "conditionBestFirst": "Stāvoklis: labākie pirmie",
+      "newestFirst": "Jaunākie pirmie"
+    },
+    "filter": {
+      "filters": "Filtri",
+      "filterByCondition": "Filtrēt pēc stāvokļa",
+      "clearAll": "Notīrīt visu",
+      "clearFilters": "Notīrīt filtrus"
+    },
+    "cart": {
+      "addedToCart": "Pievienots grozam!",
+      "viewCart": "Skatīt grozu"
+    },
+    "emptyState": {
+      "noOffersMatch": "Neviens piedāvājums neatbilst filtriem",
+      "tryAdjusting": "Mēģini pielāgot filtrus, lai redzētu vairāk rezultātu."
+    },
+    "errors": {
+      "gameNotFound": "Spēle nav atrasta",
+      "noActiveListings": "Šai spēlei, iespējams, nav aktīvu sludinājumu.",
+      "browseGames": "Pārlūkot spēles"
+    },
+    "metadata": {
+      "gameNotFoundTitle": "Spēle nav atrasta",
+      "gameNotFoundDescription": "Šī spēle netika atrasta Second Turn Games.",
+      "buyFrom": "Pērc {gameName} no €{price}. {count, plural, one {# piedāvājums} other {# piedāvājumi}} pieejami no pārdevējiem Baltijā.",
+      "findGame": "Atrod {gameName} Second Turn Games - Baltijas tirgus lietotām galda spēlēm."
+    }
+  },
+  "metadata": {
+    "title": "Second Turn Games | Pērc un Pārdod Galda Spēles",
+    "description": "Baltijas tirgus lietotām galda spēlēm. Katrai spēlei pienākas otrā iespēja.",
+    "keywords": "galda spēles, lietotas galda spēles, galda spēļu tirgus, board games"
+  },
+  "Footer": {
+    "tagline": {
+      "line1": "Vieta, kur spēles atrod jaunas mājas.",
+      "line2": "Pievienojies galda spēļu entuziastiem visā Latvijā, Igaunijā un Lietuvā."
+    },
+    "sections": {
+      "marketplace": "Tirgus",
+      "legal": "Juridiskā informācija",
+      "contact": "Kontakti"
+    },
+    "links": {
+      "browseGames": "Pārlūkot spēles",
+      "sellGame": "Pārdot spēli",
+      "requestGame": "Pieprasīt spēli",
+      "conditionGuide": "Stāvokļa vadlīnijas",
+      "privacyPolicy": "Privātuma politika",
+      "termsOfService": "Lietošanas noteikumi",
+      "sellerTerms": "Pārdevēja noteikumi"
+    },
+    "company": {
+      "name": "Second Turn Games SIA",
+      "regNumber": "Reģ. Nr. 50203665371",
+      "location": "Rīga, Latvija"
+    },
+    "copyright": "Autortiesības © 2025-{year} Second Turn Games SIA"
+  },
+  "Legal": {
+    "lastUpdated": "Pēdējoreiz atjaunināts: {date}",
+    "backToHome": "← Atpakaļ uz sākumlapu"
+  },
+  "Sell": {
+    "page": {
+      "title": "Pārdot spēli",
+      "editTitle": "Rediģēt sludinājumu",
+      "bggAttribution": "Spēļu datus nodrošina BoardGameGeek",
+      "loading": "Ielādē...",
+      "loadingGameDetails": "Ielādē spēles informāciju...",
+      "loadingListing": "Ielādē sludinājumu..."
+    },
+    "draftBanner": {
+      "title": "Jums ir saglabāts melnraksts",
+      "subtitle": "Vai vēlaties turpināt no vietas, kur pārtraucāt?",
+      "loadButton": "Ielādēt melnrakstu",
+      "startFreshButton": "Sākt no jauna",
+      "dismiss": "Aizvērt",
+      "savedMessage": "Melnraksts saglabāts! Varat turpināt vēlāk no vietas, kur pārtraucāt."
+    },
+    "existingListings": {
+      "warningTitle_one": "Jums jau ir aktīvs sludinājums šai spēlei",
+      "warningTitle_other": "Jums jau ir {count} aktīvi sludinājumi šai spēlei",
+      "warningSubtitle_one": "Jūs joprojām varat izveidot jaunu sludinājumu, bet varbūt vēlaties vispirms pārskatīt esošo.",
+      "warningSubtitle_other": "Jūs joprojām varat izveidot jaunu sludinājumu, bet varbūt vēlaties vispirms pārskatīt esošos."
+    },
+    "editMode": {
+      "lockedInfo": "Spēles un izdevuma detaļas nevar mainīt. Ja nepieciešams mainīt spēli, lūdzu, izdzēsiet šo sludinājumu un izveidojiet jaunu.",
+      "edition": "Izdevums:",
+      "language": "Valoda:",
+      "publisher": "Izdevējs:"
+    },
+    "sections": {
+      "game": {
+        "title": "Atrodiet savu spēli",
+        "subtitle": "Sāciet rakstīt, lai meklētu tūkstošiem galda spēļu",
+        "subtitleWithGame": "{gameName}"
+      },
+      "expansions": {
+        "title": "Iekļaut papildinājumus",
+        "subtitle": "Pievienojiet papildinājumus šai spēlei (izvēles)",
+        "subtitleWithCount_one": "{count} papildinājums iekļauts",
+        "subtitleWithCount_other": "{count} papildinājumi iekļauti",
+        "toggleTitle": "Iekļaut papildinājumus?",
+        "toggleSubtitle": "Pievienojiet papildinājumus šim sludinājumam (izvēles)",
+        "addButton": "Pievienot +",
+        "cancelButton": "Atcelt"
+      },
+      "condition": {
+        "title": "Stāvoklis un detaļas",
+        "subtitle": "Esiet godīgi — pircēji novērtē caurredzamību"
+      },
+      "photos": {
+        "title": "Augšupielādēt fotoattēlus",
+        "subtitleOptional": "Pievienojiet līdz 8 fotoattēliem (izvēles, bet ieteicams)",
+        "subtitleRequired": "Nepieciešams vismaz 1 fotoattēls, lai parādītu stāvokli"
+      },
+      "pricing": {
+        "title": "Cena",
+        "subtitle": "Iestatiet savu cenu"
+      }
+    },
+    "terms": {
+      "prefix": "Es piekrītu",
+      "termsLink": "Pakalpojumu noteikumiem",
+      "middle": "un apstiprinu, ka visa sniegtā informācija ir precīza. Es saprotu, ka Second Turn Games patur tiesības noņemt sludinājumus, kas neatbilst mūsu vadlīnijām."
+    },
+    "actions": {
+      "publishListing": "Publicēt sludinājumu",
+      "saveChanges": "Saglabāt izmaiņas",
+      "publishing": "Publicē...",
+      "saving": "Saglabā...",
+      "saveDraft": "Saglabāt melnrakstu",
+      "preview": "Priekšskatījums"
+    },
+    "preview": {
+      "title": "Tiešraides priekšskatījums — kā pircēji redzēs jūsu piedāvājumu",
+      "selectGame": "Izvēlieties spēli, lai redzētu priekšskatījumu",
+      "mobileTitle": "Tiešraides priekšskatījums",
+      "mobileSubtitle": "Tā pircēji redzēs jūsu piedāvājumu"
+    },
+    "successModal": {
+      "title": "Sludinājums veiksmīgi publicēts!",
+      "subtitle": "Jūsu spēle tagad ir pieejama un gatava pircējiem.",
+      "viewListing": "Skatīt savu sludinājumu",
+      "listAnother": "Pievienot citu spēli",
+      "browseAll": "Pārlūkot visas spēles"
+    },
+    "validation": {
+      "selectGameVersion": "Lūdzu, izvēlieties spēli un versiju",
+      "selectCondition": "Lūdzu, izvēlieties savas spēles stāvokli",
+      "photoRequired": "Lūdzu, augšupielādējiet vismaz 1 fotoattēlu priekšmetiem ar pieņemamu stāvokli",
+      "priceRequired": "Lūdzu, ievadiet derīgu cenu",
+      "termsRequired": "Lūdzu, piekrītiet noteikumiem un nosacījumiem",
+      "emailVerificationRequired": "Lūdzu, verificējiet savu e-pasta adresi pirms sludinājuma izveidošanas. Pārbaudiet savu iesūtni, lai atrastu verificēšanas saiti."
+    },
+    "errors": {
+      "loadDraftFailed": "Neizdevās ielādēt melnrakstu. Lūdzu, sāciet no jauna.",
+      "publishFailed": "Neizdevās publicēt sludinājumu: {message}",
+      "updateFailed": "Neizdevās atjaunināt sludinājumu: {message}",
+      "permissionDenied": "Jūs varat rediģēt tikai savus sludinājumus.",
+      "listingNotFound": "Šis sludinājums, iespējams, ir noņemts vai neeksistē.",
+      "goToMyListings": "Doties uz Maniem sludinājumiem"
+    },
+    "GameSearch": {
+      "changeGame": "Mainīt spēli",
+      "changeVersion": "Mainīt versiju",
+      "placeholder": "piem., Wingspan, Catan, Icecool",
+      "clearSearch": "Notīrīt meklēšanu",
+      "searching": "Meklē spēles...",
+      "resultsFound": "Atrasta {count} spēle - izvēlieties savu:",
+      "resultsFound_other": "Atrastas {count} spēles - izvēlieties savu:",
+      "noResults": {
+        "title": "Neizdevās atrast \"{query}\"",
+        "helpText1": "Pārbaudiet pareizrakstību uz spēles kastes vai meklējiet",
+        "bggLink": "BoardGameGeek.com",
+        "helpText2": "precīzu nosaukumu.",
+        "helpText3": "Joprojām nevarat atrast?",
+        "contactLink": "Paziņojiet mums",
+        "helpText4": "un mēs palīdzēsim."
+      }
+    },
+    "ConditionSelector": {
+      "trustSignal": {
+        "title": "Godīgi apraksti veido uzticību",
+        "description": "Precīza stāvokļa informācija palīdz pircējiem pieņemt pārliecinātu lēmumu."
+      },
+      "completeness": {
+        "question": "Vai iekļautas visas oriģinālās sastāvdaļas? *",
+        "yesComplete": "Jā, pilnīga",
+        "yesDescription": "Visas detaļas iekļautas",
+        "noIncomplete": "Nē, nepilnīga",
+        "noDescription": "Trūkst dažas detaļas",
+        "change": "Mainīt",
+        "missing": "Trūkst: {components}",
+        "whatsMissing": "Kas trūkst? *",
+        "placeholder": "piem., Trūkst 2 sarkanie kauliņi un 1 darbības karte"
+      },
+      "condition": {
+        "title": "Vispārējais stāvoklis *",
+        "openGuide": "Atvērt vērtējuma ceļvedi",
+        "likeNew": "Kā jauna",
+        "likeNewDescription": "Gandrīz bez redzamiem nolietojuma pazīmēm",
+        "veryGood": "Ļoti laba",
+        "veryGoodDescription": "Neliels nolietojums, izcils stāvoklis",
+        "good": "Laba",
+        "goodDescription": "Mērens nolietojums, pilnībā funkcionāla",
+        "acceptable": "Pieņemama",
+        "acceptableDescription": "Liels nolietojums, joprojām spēlējama"
+      },
+      "additionalDetails": {
+        "title": "Papildu informācija",
+        "required": "*",
+        "optional": "(Pēc izvēles)",
+        "descriptionRequired": "Lūdzu, aprakstiet sīkāk",
+        "descriptionOptional": "Aprakstiet jebkādus papildinājumus vai citus svarīgus detaļus",
+        "placeholderAcceptable": "piem., Kastei ir ūdens bojājumi vienā stūrī, rokasgrāmatai ir plīsušas lapas, visas sastāvdaļas ir klāt un funkcionē",
+        "placeholderOptional": "piem., Kartes ir ievietotas plēves kabatās. Iekļauts pielāgots ieliktnis.",
+        "characterCount": "{count}/500 rakstzīmes"
+      }
+    },
+    "PhotoUpload": {
+      "guidelines": {
+        "requiredTitle": "Fotogrāfijas ir obligātas Pieņemama stāvokļa precēm",
+        "optionalTitle": "Fotogrāfijas palīdz veidot pircēju uzticību (pēc izvēles)",
+        "tip1": "Nofotografējiet kasti, sastāvdaļas",
+        "tip2": "Parādiet jebkādus bojājumus vai nolietojumu"
+      },
+      "upload": {
+        "clickOrDrag": "Noklikšķiniet vai velciet fotogrāfijas šeit",
+        "formats": "JPEG, PNG, WebP vai AVIF",
+        "maxSize": "Maks. 5MB vienam attēlam",
+        "uploaded": "{current}/{max} augšupielādētas",
+        "photoCount": "{count} fotogrāfija",
+        "photoCount_other": "{count} fotogrāfijas",
+        "addMore": "• Noklikšķiniet, lai pievienotu vairāk (līdz {max})"
+      },
+      "errors": {
+        "invalidType": "{filename}: Atļauti tikai JPEG, PNG, WebP un AVIF attēli",
+        "tooLarge": "{filename}: Faila lielums jābūt mazākam par 5MB (pašreizējais: {size}MB)",
+        "maxPhotos": "Maksimums {max} fotogrāfijas atļautas. Jūs varat augšupielādēt vēl {remaining}."
+      },
+      "grid": {
+        "title": "Jūsu fotogrāfijas ({current}/{max})",
+        "photoAlt": "Fotogrāfija {number}",
+        "uploadAlt": "Augšupielāde {number}",
+        "removePhoto": "Noņemt fotogrāfiju"
+      }
+    },
+    "PricingShipping": {
+      "pricing": {
+        "title": "Pieprasītā cena *",
+        "label": "Cena (€)",
+        "placeholder": "25.00"
+      },
+      "shipping": {
+        "title": "Piegādes iespējas *",
+        "selectOne": "Izvēlieties vismaz vienu opciju",
+        "localPickup": {
+          "title": "Saņemšana klātienē",
+          "description": "Tikšanās vietējā rajonā",
+          "locationLabel": "Saņemšanas vietas detaļas",
+          "locationPlaceholder": "piem., Rīga, Vecrīga vai pie Centrāltirgus"
+        },
+        "parcelLocker": {
+          "title": "Paku termināļi",
+          "description": "Omniva, DPD vai līdzīgi",
+          "paymentLabel": "Kas maksā par piegādi?",
+          "sellerPays": "Es sedzu piegādes izmaksas",
+          "sellerPaysDescription": "Bezmaksas piegāde pircējam",
+          "buyerPays": "Pircējs maksā",
+          "buyerPaysDescription": "Piegādes izmaksas pievienotas apmaksāšanai"
+        }
+      }
+    }
+  }
+}

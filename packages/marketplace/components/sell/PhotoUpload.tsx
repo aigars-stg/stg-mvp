@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Card } from '@second-turn/design-system';
 import { Camera, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export interface PhotoFile {
   file: File;
@@ -29,6 +30,11 @@ export function PhotoUpload({
   existingPhotoUrls = [],
   onExistingPhotosChange
 }: PhotoUploadProps) {
+  const tGuidelines = useTranslations('Sell.PhotoUpload.guidelines');
+  const tUpload = useTranslations('Sell.PhotoUpload.upload');
+  const tErrors = useTranslations('Sell.PhotoUpload.errors');
+  const tGrid = useTranslations('Sell.PhotoUpload.grid');
+
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -39,13 +45,16 @@ export function PhotoUpload({
 
   const validateFile = useCallback((file: File): string | null => {
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return `${file.name}: Only JPEG, PNG, WebP, and AVIF images are allowed`;
+      return tErrors('invalidType', { filename: file.name });
     }
     if (file.size > MAX_FILE_SIZE) {
-      return `${file.name}: File size must be less than 5MB (current: ${(file.size / 1024 / 1024).toFixed(1)}MB)`;
+      return tErrors('tooLarge', {
+        filename: file.name,
+        size: (file.size / 1024 / 1024).toFixed(1)
+      });
     }
     return null;
-  }, []);
+  }, [tErrors]);
 
   const handleFiles = useCallback((fileList: FileList | null) => {
     if (!fileList) return;
@@ -55,7 +64,10 @@ export function PhotoUpload({
 
     // Check max photos limit
     if (photos.length + files.length > maxPhotos) {
-      setUploadError(`Maximum ${maxPhotos} photos allowed. You can upload ${maxPhotos - photos.length} more.`);
+      setUploadError(tErrors('maxPhotos', {
+        max: maxPhotos,
+        remaining: maxPhotos - photos.length
+      }));
       return;
     }
 
@@ -81,7 +93,7 @@ export function PhotoUpload({
     if (newPhotos.length > 0) {
       onPhotosChange([...photos, ...newPhotos]);
     }
-  }, [photos, maxPhotos, validateFile, onPhotosChange]);
+  }, [photos, maxPhotos, validateFile, onPhotosChange, tErrors]);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleFiles(e.target.files);
@@ -169,13 +181,13 @@ export function PhotoUpload({
             <p className="text-frost-ice font-medium flex items-center gap-2">
               <Camera className="w-4 h-4" />
               {condition === 'acceptable'
-                ? 'Photos are required for Acceptable condition items'
-                : 'Photos help build buyer trust (optional)'}
+                ? tGuidelines('requiredTitle')
+                : tGuidelines('optionalTitle')}
             </p>
             <div>
               <ul className="list-disc list-inside space-y-1 text-text-secondary ml-2">
-                <li>Photograph the box, components</li>
-                <li>Show any damage or wear</li>
+                <li>{tGuidelines('tip1')}</li>
+                <li>{tGuidelines('tip2')}</li>
               </ul>
             </div>
           </div>
@@ -227,11 +239,11 @@ export function PhotoUpload({
             <div className="flex items-center gap-2 text-sm">
               <Camera className="w-5 h-5 text-frost-ice flex-shrink-0" />
               <span className="font-medium text-polar-night">
-                {totalPhotoCount} {totalPhotoCount === 1 ? 'photo' : 'photos'}
+                {tUpload(totalPhotoCount === 1 ? 'photoCount' : 'photoCount_other', { count: totalPhotoCount })}
               </span>
               {totalPhotoCount < maxPhotos && (
                 <span className="text-text-secondary text-xs">
-                  • Click to add more (up to {maxPhotos})
+                  {tUpload('addMore', { max: maxPhotos })}
                 </span>
               )}
             </div>
@@ -239,12 +251,12 @@ export function PhotoUpload({
             // Full layout when no photos
             <>
               <p className="text-base sm:text-lg font-medium text-polar-night mb-2">
-                Click or drag photos here
+                {tUpload('clickOrDrag')}
               </p>
               <div className="text-sm text-text-secondary space-y-1">
-                <p>JPEG, PNG, WebP, or AVIF</p>
-                <p>Max 5MB per image</p>
-                <p>{totalPhotoCount}/{maxPhotos} uploaded</p>
+                <p>{tUpload('formats')}</p>
+                <p>{tUpload('maxSize')}</p>
+                <p>{tUpload('uploaded', { current: totalPhotoCount, max: maxPhotos })}</p>
               </div>
             </>
           )}
@@ -261,7 +273,7 @@ export function PhotoUpload({
       {hasPhotos && (
         <div>
           <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-4">
-            Your Photos ({totalPhotoCount}/{maxPhotos})
+            {tGrid('title', { current: totalPhotoCount, max: maxPhotos })}
           </h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
@@ -274,7 +286,7 @@ export function PhotoUpload({
                 {/* Photo Preview */}
                 <img
                   src={url}
-                  alt={`Photo ${index + 1}`}
+                  alt={tGrid('photoAlt', { number: index + 1 })}
                   className="w-full h-full object-cover rounded-lg"
                 />
 
@@ -291,7 +303,7 @@ export function PhotoUpload({
                     flex items-center justify-center
                     hover:bg-polar-night
                   "
-                  aria-label="Remove photo"
+                  aria-label={tGrid('removePhoto')}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -317,7 +329,7 @@ export function PhotoUpload({
                 {/* Photo Preview */}
                 <img
                   src={photo.preview}
-                  alt={`Upload ${index + 1}`}
+                  alt={tGrid('uploadAlt', { number: index + 1 })}
                   className="w-full h-full object-cover rounded-lg pointer-events-none"
                 />
 
@@ -334,7 +346,7 @@ export function PhotoUpload({
                     flex items-center justify-center
                     hover:bg-polar-night
                   "
-                  aria-label="Remove photo"
+                  aria-label={tGrid('removePhoto')}
                 >
                   <X className="w-4 h-4" />
                 </button>

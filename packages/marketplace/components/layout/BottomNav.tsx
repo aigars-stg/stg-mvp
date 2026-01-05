@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { Home, Grid, Plus, MessageCircle, User } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
+import { useTranslations } from 'next-intl';
 
 // Lazy load action sheets - they're only shown on user interaction
 const SellActionSheet = dynamic(() => import('./SellActionSheet').then(mod => ({ default: mod.SellActionSheet })), {
@@ -23,6 +24,7 @@ export function BottomNav() {
   const { unreadCount } = useUnreadMessages();
   const [sellSheetOpen, setSellSheetOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+  const t = useTranslations('Navigation');
 
   // Routes where bottom nav should be hidden
   const hideOnRoutes = ['/auth/', '/privacy', '/terms'];
@@ -42,26 +44,26 @@ export function BottomNav() {
   // Navigation items configuration
   const navItems = [
     {
-      label: 'Home',
+      label: t('home'),
       icon: Home,
       path: '/',
       active: isActive('/') && pathname === '/',
     },
     {
-      label: 'Browse',
+      label: t('browse'),
       icon: Grid,
       path: '/browse',
       active: isActive('/browse') || isActive('/listing') || isActive('/games') || isActive('/wanted'),
     },
     {
-      label: 'Sell',
+      label: t('sellShort'),
       icon: Plus,
       path: null, // Opens action sheet instead
       active: false,
       isCenter: true, // Special styling for center button
     },
     {
-      label: 'Messages',
+      label: t('messages'),
       icon: MessageCircle,
       path: '/messages',
       active: isActive('/messages'),
@@ -69,7 +71,7 @@ export function BottomNav() {
       requiresAuth: true,
     },
     {
-      label: 'Profile',
+      label: t('profile'),
       icon: User,
       path: null, // Opens bottom sheet instead
       active: isActive('/account') || isActive('/my-listings'),
@@ -78,13 +80,13 @@ export function BottomNav() {
 
   const handleNavClick = (item: typeof navItems[0]) => {
     // Handle Sell button
-    if (item.label === 'Sell') {
+    if (item.label === t('sellShort')) {
       setSellSheetOpen(true);
       return;
     }
 
     // Handle Profile button
-    if (item.label === 'Profile') {
+    if (item.label === t('profile')) {
       setProfileSheetOpen(true);
       return;
     }

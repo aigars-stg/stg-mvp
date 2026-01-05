@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Package, Search, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useTranslations } from 'next-intl';
 
 interface SellActionSheetProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface SellActionSheetProps {
 export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations('Navigation.sellActionSheet');
 
   // Close on escape key
   useEffect(() => {
@@ -69,7 +71,7 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border-subtle">
-          <h2 className="text-lg font-semibold text-polar-night">What would you like to do?</h2>
+          <h2 className="text-lg font-semibold text-polar-night">{t('title')}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-bg-elevated rounded-lg transition-colors"
@@ -91,10 +93,10 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
             </div>
             <div className="text-left flex-1">
               <div className="font-semibold text-polar-night group-hover:text-frost-ice transition-colors">
-                Sell a Game
+                {t('sellGame')}
               </div>
               <div className="text-sm text-text-secondary">
-                List your board game for sale
+                {t('sellGameDescription')}
               </div>
             </div>
             <svg
@@ -117,10 +119,10 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
             </div>
             <div className="text-left flex-1">
               <div className="font-semibold text-polar-night group-hover:text-aurora-orange transition-colors">
-                Post Wanted Game
+                {t('postWantedGame')}
               </div>
               <div className="text-sm text-text-secondary">
-                Looking for a specific game (ISO)
+                {t('postWantedGameDescription')}
               </div>
             </div>
             <svg

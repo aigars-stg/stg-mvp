@@ -4,11 +4,14 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { LogOut, Package, ShoppingBag, Store, Settings, ChevronRight, LayoutDashboard, Shield } from 'lucide-react';
+import { LogOut, Package, ShoppingBag, Store, Settings, ChevronRight, LayoutDashboard, Shield, Globe } from 'lucide-react';
 import { getInitials } from '@/lib/auth/utils';
+import { LocaleSwitcher } from './LocaleSwitcher';
+import { useTranslations } from 'next-intl';
 
 
 export function UserMenu() {
+  const t = useTranslations('Navigation');
   const { user, profile, signOut, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [signOutError, setSignOutError] = useState<string>('');
@@ -36,7 +39,7 @@ export function UserMenu() {
       // AuthContext handles the redirect to '/'
     } catch (error) {
       console.error('Failed to sign out:', error);
-      setSignOutError('Failed to sign out. Please try again.');
+      setSignOutError(t('userMenu.signOutError'));
       // Keep menu open so user can see the error
     }
   };
@@ -51,7 +54,7 @@ export function UserMenu() {
     return (
       <Link href="/auth">
         <Button variant="accent" size="sm">
-          Join
+          {t('userMenu.join')}
         </Button>
       </Link>
     );
@@ -132,7 +135,7 @@ export function UserMenu() {
                 onClick={() => setIsOpen(false)}
               >
                 <Store className="w-4 h-4 text-frost-ice" />
-                Seller dashboard
+                {t('userMenu.sellerDashboard')}
               </Link>
             )}
 
@@ -143,7 +146,7 @@ export function UserMenu() {
               onClick={() => setIsOpen(false)}
             >
               <ShoppingBag className="w-4 h-4 text-frost-ice" />
-              My orders
+              {t('userMenu.myOrders')}
             </Link>
 
             {/* 3. My Listings */}
@@ -153,7 +156,7 @@ export function UserMenu() {
               onClick={() => setIsOpen(false)}
             >
               <LayoutDashboard className="w-4 h-4 text-frost-ice" />
-              My listings
+              {t('userMenu.myListings')}
             </Link>
 
             {/* 4. Account Settings */}
@@ -163,7 +166,7 @@ export function UserMenu() {
               onClick={() => setIsOpen(false)}
             >
               <Settings className="w-4 h-4 text-frost-ice" />
-              Account settings
+              {t('userMenu.accountSettings')}
             </Link>
 
             {/* 5. Staff Dashboard (if staff) */}
@@ -174,9 +177,18 @@ export function UserMenu() {
                 onClick={() => setIsOpen(false)}
               >
                 <Shield className="w-4 h-4 text-aurora-purple" />
-                Staff dashboard
+                {t('userMenu.staffDashboard')}
               </Link>
             )}
+          </div>
+
+          {/* Language Selection */}
+          <div className="border-t border-border-subtle py-2 px-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Globe className="w-4 h-4 text-text-secondary" />
+              <span className="text-xs text-text-secondary font-medium">{t('language')}</span>
+            </div>
+            <LocaleSwitcher variant="buttons" />
           </div>
 
           {/* Sign Out */}
@@ -186,7 +198,7 @@ export function UserMenu() {
               className="flex items-center gap-3 px-4 py-2 text-sm text-aurora-red hover:bg-aurora-red/10 transition-colors w-full text-left"
             >
               <LogOut className="w-4 h-4" />
-              Sign out
+              {t('userMenu.signOut')}
             </button>
           </div>
 

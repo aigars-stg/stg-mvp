@@ -8,6 +8,7 @@ import { BGGError } from '@/lib/bgg-errors';
 import ErrorDisplay from './ErrorDisplay';
 import { GameResultCard } from './GameResultCard';
 import { SearchX, X, RefreshCw, Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface GameSearchProps {
   onSelect: (game: BGGGame | null) => void;
@@ -19,6 +20,9 @@ interface GameSearchProps {
 }
 
 export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDisplayName, onChangeVersion, hideChangeVersionButton }: GameSearchProps) {
+  const t = useTranslations('Sell.GameSearch');
+  const tNoResults = useTranslations('Sell.GameSearch.noResults');
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<BGGGame[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -129,7 +133,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
               setHasSearched(false);
             }}
             className="absolute top-2 right-2 p-1.5 bg-white hover:bg-aurora-red/10 rounded-full border border-border hover:border-aurora-red transition-all shadow-sm group"
-            title="Change game"
+            title={t('changeGame')}
           >
             <X className="w-4 h-4 text-text-muted group-hover:text-aurora-red transition-colors" />
           </button>
@@ -142,7 +146,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
             className="w-full px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
           >
             <RefreshCw className="w-4 h-4" />
-            Change Version
+            {t('changeVersion')}
           </button>
         )}
       </div>
@@ -163,7 +167,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
         <div className={`relative ${!hasSearched && searchQuery.length === 0 ? 'animate-pulse-border' : ''}`}>
           <Input
             type="text"
-            placeholder="e.g., Wingspan, Catan, Icecool"
+            placeholder={t('placeholder')}
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             inputSize="lg"
@@ -176,7 +180,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
           <button
             onClick={handleClearSearch}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-bg-secondary rounded-full transition-colors z-10"
-            title="Clear search"
+            title={t('clearSearch')}
           >
             <X className="w-5 h-5 text-text-muted hover:text-polar-night" />
           </button>
@@ -203,7 +207,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
       {isLoading && (
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-frost-ice" />
-          <p className="mt-3 text-text-secondary">Searching games...</p>
+          <p className="mt-3 text-text-secondary">{t('searching')}</p>
         </div>
       )}
 
@@ -211,7 +215,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
       {!isLoading && searchResults.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm text-text-muted">
-            Found {searchResults.length} game{searchResults.length !== 1 ? 's' : ''} - select yours:
+            {t(searchResults.length === 1 ? 'resultsFound' : 'resultsFound_other', { count: searchResults.length })}
           </p>
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {searchResults.map((game: any) => (
@@ -241,29 +245,29 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
           <div className="space-y-3 text-sm">
             <p className="text-aurora-red font-medium flex items-center gap-2">
               <SearchX className="w-4 h-4" />
-              We couldn't find "{searchQuery}"
+              {tNoResults('title', { query: searchQuery })}
             </p>
             <p className="text-text-secondary">
-              Check the spelling on your game box, or search{' '}
+              {tNoResults('helpText1')}{' '}
               <a
                 href="https://boardgamegeek.com/geeksearch.php"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-frost-ice hover:underline"
               >
-                BoardGameGeek.com
+                {tNoResults('bggLink')}
               </a>
-              {' '}for the exact title.
+              {' '}{tNoResults('helpText2')}
             </p>
             <p className="text-text-secondary">
-              Still can't find it?{' '}
+              {tNoResults('helpText3')}{' '}
               <a
                 href="mailto:info@secondturn.games"
                 className="text-frost-ice hover:underline"
               >
-                Let us know
+                {tNoResults('contactLink')}
               </a>
-              {' '}and we'll help.
+              {' '}{tNoResults('helpText4')}
             </p>
           </div>
         </Card>

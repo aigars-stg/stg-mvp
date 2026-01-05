@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ShoppingBag, Tag, Bell } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 type ColorVariant = 'frost-ice' | 'frost-polar' | 'aurora-orange';
 
@@ -77,6 +78,7 @@ function ActionCard({ href, icon, title, description, buttonText, color }: Actio
 }
 
 export function HeroSection() {
+  const t = useTranslations('HomePage.hero');
   const hasHeroImage = true;
 
   return (
@@ -107,16 +109,16 @@ export function HeroSection() {
         <div className="text-center mb-10 sm:mb-14">
           {/* Main headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-polar-night mb-4 tracking-tight">
-            <span className="text-frost-ice">Discover.</span>{' '}
-            <span className="text-frost-polar">List.</span>{' '}
-            <span className="text-aurora-orange">Play.</span>
+            <span className="text-frost-ice">{t('discover')}</span>{' '}
+            <span className="text-frost-polar">{t('list')}</span>{' '}
+            <span className="text-aurora-orange">{t('play')}</span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-text-secondary max-w-3xl mx-auto">
-            Every game deserves a second turn.
+            {t('tagline')}
             <br />
-            Buy and sell pre-loved board games across Latvia, Estonia, and Lithuania.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -126,9 +128,9 @@ export function HeroSection() {
           <ActionCard
             href="/browse"
             icon={<ShoppingBag className="w-7 h-7" />}
-            title="Discover games"
-            description="Games waiting for their next adventure. From hidden gems to sold-out classics."
-            buttonText="See what's available"
+            title={t('browseCard.title')}
+            description={t('browseCard.description')}
+            buttonText={t('browseCard.button')}
             color="frost-ice"
           />
 
@@ -136,9 +138,9 @@ export function HeroSection() {
           <ActionCard
             href="/sell"
             icon={<Tag className="w-7 h-7" />}
-            title="Clear your shelf"
-            description="Your games deserve players who'll love them. Create a listing in under 5 minutes."
-            buttonText="Sell a game"
+            title={t('sellCard.title')}
+            description={t('sellCard.description')}
+            buttonText={t('sellCard.button')}
             color="frost-polar"
           />
 
@@ -146,9 +148,9 @@ export function HeroSection() {
           <ActionCard
             href="/wanted/new"
             icon={<Bell className="w-7 h-7" />}
-            title="Can't find it?"
-            description="Stop refreshing. Post what you're hunting and we'll alert you when it appears."
-            buttonText="Tell us what you want"
+            title={t('wantedCard.title')}
+            description={t('wantedCard.description')}
+            buttonText={t('wantedCard.button')}
             color="aurora-orange"
           />
         </div>

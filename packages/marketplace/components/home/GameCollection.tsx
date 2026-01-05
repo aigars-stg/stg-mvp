@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { ListingCard } from '@/components/listing/ListingCard';
@@ -42,6 +43,7 @@ export function GameCollection({
   showViewAll = true,
   viewAllHref = '/browse',
 }: GameCollectionProps) {
+  const t = useTranslations('HomePage.collections');
   const [collection, setCollection] = useState<CollectionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -139,7 +141,7 @@ export function GameCollection({
               href={viewAllHref}
               className="hidden sm:flex items-center gap-1 text-frost-ice hover:text-frost-polar transition-colors font-medium"
             >
-              View all
+              {t('viewAll')}
               <ArrowRight className="w-4 h-4" />
             </Link>
           )}
@@ -152,7 +154,7 @@ export function GameCollection({
             <button
               onClick={() => scroll('left')}
               className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-snow-white border border-border rounded-full shadow-lg flex items-center justify-center text-polar-night hover:bg-bg-secondary transition-all opacity-0 group-hover:opacity-100 -translate-x-1/2"
-              aria-label="Scroll left"
+              aria-label={t('scrollLeft')}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -161,7 +163,7 @@ export function GameCollection({
             <button
               onClick={() => scroll('right')}
               className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-snow-white border border-border rounded-full shadow-lg flex items-center justify-center text-polar-night hover:bg-bg-secondary transition-all opacity-0 group-hover:opacity-100 translate-x-1/2"
-              aria-label="Scroll right"
+              aria-label={t('scrollRight')}
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -193,7 +195,7 @@ export function GameCollection({
           {/* Price disclaimer */}
           {!loading && (
             <p className="text-xs text-text-secondary mt-3">
-              Item prices only. Full cost shown before checkout.
+              {t('priceDisclaimer')}
             </p>
           )}
         </div>
@@ -203,7 +205,7 @@ export function GameCollection({
           <div className="mt-6 text-center sm:hidden">
             <Link href={viewAllHref}>
               <Button variant="secondary">
-                View all
+                {t('viewAll')}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
