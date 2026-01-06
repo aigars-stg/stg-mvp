@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, Badge } from '@second-turn/design-system';
-import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Puzzle, BookOpen } from 'lucide-react';
+import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Puzzle, BookOpen, MessageSquare } from 'lucide-react';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
@@ -263,6 +263,14 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
           {allImages.length > 1 && (
             <div className="absolute bottom-3 right-3 px-2 py-1 bg-polar-night/80 backdrop-blur-sm rounded-md text-xs text-snow-white font-medium">
               {currentImageIndex + 1}/{allImages.length}
+            </div>
+          )}
+
+          {/* Contact Seller badge - bottom left */}
+          {listing.listing_type === 'contact_seller' && (
+            <div className="absolute bottom-3 left-3 px-2 py-1 bg-polar-night/80 backdrop-blur-sm rounded-md text-xs text-snow-white font-medium flex items-center gap-1">
+              <MessageSquare className="w-3 h-3" />
+              {t('card.contactSeller')}
             </div>
           )}
         </div>

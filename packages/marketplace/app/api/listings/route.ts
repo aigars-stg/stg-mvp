@@ -9,10 +9,23 @@ export async function POST(request: NextRequest) {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;
 
+    const body = await request.json();
+
+    // Extract listingType from body (default to instant_buy for backwards compatibility)
+    const listingType = body.listingType || 'instant_buy';
+
+    // Validate listing type
+    if (!['instant_buy', 'contact_seller'].includes(listingType)) {
+      return NextResponse.json(
+        { error: 'Invalid listing type' },
+        { status: 400 }
+      );
+    }
+
     // Check if seller has completed onboarding
     const { data: profile, error: profileError } = await supabase
       .from('seller_profiles')
-      .select('seller_status, stripe_connect_payouts_enabled')
+      .select('seller_status, stripe_connect_payouts_enabled, seller_terms_accepted_at')
       .eq('user_id', user.id)
       .single();
 
@@ -34,8 +47,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate seller has completed onboarding
-    if (!profile?.stripe_connect_payouts_enabled || profile?.seller_status !== 'active') {
+    // Must have accepted terms for ANY listing type
+    if (!profile?.seller_terms_accepted_at || profile?.seller_status !== 'active') {
       return NextResponse.json(
         {
           error: 'Please complete seller onboarding first',
@@ -46,8 +59,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // For instant_buy listings, also require Stripe to be connected
+    if (listingType === 'instant_buy' && !profile?.stripe_connect_payouts_enabled) {
+      return NextResponse.json(
+        {
+          error: 'Payment setup required for instant buy listings',
+          requiresStripe: true,
+          upgradeUrl: '/seller/settings/payouts'
+        },
+        { status: 403 }
+      );
+    }
 
-    const body = await request.json();
+
     const {
       selectedGame,
       selectedVersion,
@@ -122,6 +146,7 @@ export async function POST(request: NextRequest) {
       // Metadata
       seller_id: sellerId,
       status: 'active',
+      listing_type: listingType,
     };
 
 
@@ -159,6 +184,7 @@ export async function POST(request: NextRequest) {
  * - ?gameId=123 - Get listings for a specific game
  * - ?sellerId=xyz - Get listings by a specific seller
  * - ?status=active - Filter by status (default: active for public browse, all for seller's own listings)
+ * - ?listingType=instant_buy|contact_seller - Filter by listing type
  * - ?page=1 - Page number (default: 1)
  * - ?limit=20 - Items per page (default: 20)
  *
@@ -170,6 +196,7 @@ export async function GET(request: NextRequest) {
     const gameId = searchParams.get('gameId');
     const sellerId = searchParams.get('sellerId');
     const status = searchParams.get('status');
+    const listingType = searchParams.get('listingType');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
 
@@ -201,6 +228,11 @@ export async function GET(request: NextRequest) {
 
     if (status) {
       query = query.eq('status', status);
+    }
+
+    // Filter by listing type (instant_buy or contact_seller)
+    if (listingType && ['instant_buy', 'contact_seller'].includes(listingType)) {
+      query = query.eq('listing_type', listingType);
     }
 
     const { data: rawListings, error, count } = await query;
@@ -250,6 +282,7 @@ export async function GET(request: NextRequest) {
         shipping_notes: row.shipping_notes,
         seller_id: row.seller_id,
         status: row.status,
+        listing_type: row.listing_type || 'instant_buy', // Default for backwards compatibility
         reserved_by: row.reserved_by,
         reserved_until: row.reserved_until,
         included_expansions: row.included_expansions,

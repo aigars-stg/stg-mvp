@@ -13,6 +13,7 @@ import { fetchGameMetadata } from '@/lib/bgg-api';
  * Query params:
  * - sort: Sort order (price_asc, price_desc, condition, newest)
  * - condition: Filter by condition(s)
+ * - listingType: Filter by listing type (instant_buy, contact_seller)
  */
 export async function GET(
   request: NextRequest,
@@ -30,6 +31,7 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const sort = searchParams.get('sort') || 'price_asc';
     const conditions = searchParams.getAll('condition');
+    const listingType = searchParams.get('listingType');
 
     const supabase = await createServerSupabase();
 
@@ -97,6 +99,11 @@ export async function GET(
     // Apply condition filter
     if (conditions.length > 0) {
       query = query.in('condition', conditions);
+    }
+
+    // Apply listing type filter
+    if (listingType && ['instant_buy', 'contact_seller'].includes(listingType)) {
+      query = query.eq('listing_type', listingType);
     }
 
     // Apply sorting

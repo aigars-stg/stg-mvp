@@ -13,12 +13,13 @@ import { PhotoUpload, type PhotoFile } from '@/components/sell/PhotoUpload';
 import { PricingShippingSimple } from '@/components/sell/PricingShippingSimple';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
+import { ListingTypeSelector } from '@/components/sell/ListingTypeSelector';
 import { OfferCard } from '@/components/game/OfferCard';
-import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle, Package } from 'lucide-react';
+import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle, Package, Loader2 } from 'lucide-react';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
-import type { ListingWithSeller } from '@/lib/types/listing';
+import type { ListingWithSeller, ListingType } from '@/lib/types/listing';
 import { NotificationModal } from '@/components/common/NotificationModal';
 import { PricingAssistant } from '@/components/sell/PricingAssistant';
 import { useTranslations } from 'next-intl';
@@ -27,6 +28,7 @@ export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
 interface ListingFormData {
+  listingType: ListingType;
   selectedGame: BGGGame | null;
   selectedGameDisplayName: string | null; // Chosen display name (primary or alternate)
   selectedVersion: VersionSelection | null;
@@ -41,6 +43,7 @@ interface ListingFormData {
 }
 
 const INITIAL_FORM_DATA: ListingFormData = {
+  listingType: 'contact_seller', // Default to contact_seller (no Stripe required)
   selectedGame: null,
   selectedGameDisplayName: null,
   selectedVersion: null,
@@ -101,6 +104,7 @@ function createPreviewListing(
     })),
     seller_id: user?.id || 'preview-seller',
     status: 'active',
+    listing_type: formData.listingType,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     sold_at: null,
@@ -165,6 +169,9 @@ function SellPageContent() {
   const [isLoadingListing, setIsLoadingListing] = useState(false);
   const [loadError, setLoadError] = useState('');
 
+  // Onboarding check state (prevents flash of form for non-onboarded users)
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(!isEditMode);
+
   // Expansion state
   const [availableExpansions, setAvailableExpansions] = useState<BGGExpansionInfo[]>([]);
   const [isLoadingExpansions, setIsLoadingExpansions] = useState(false);
@@ -175,6 +182,13 @@ function SellPageContent() {
 
   // Existing listings warning state
   const [existingActiveListings, setExistingActiveListings] = useState<Array<{ id: string; bgg_game_id: number; price: number; created_at: string }>>([]);
+
+  // Seller capabilities for dual-listing model
+  const [sellerCapabilities, setSellerCapabilities] = useState({
+    canCreateContactSeller: false,
+    canCreateInstantBuy: false,
+    isLoading: true,
+  });
 
   // Section expansion states
   const [expandedSections, setExpandedSections] = useState({
@@ -352,6 +366,50 @@ function SellPageContent() {
     setFormData((prev) => ({ ...prev, selectedExpansions: [] }));
   }, []);
 
+  // Fetch seller capabilities on mount
+  useEffect(() => {
+    async function fetchSellerCapabilities() {
+      if (!user) return;
+
+      try {
+        const response = await fetch('/api/seller/onboarding/status');
+        const data = await response.json();
+
+        if (response.ok) {
+          const canCreateContactSeller = data.can_create_contact_seller ?? false;
+          const canCreateInstantBuy = data.can_create_instant_buy ?? false;
+
+          setSellerCapabilities({
+            canCreateContactSeller,
+            canCreateInstantBuy,
+            isLoading: false,
+          });
+
+          // Default to instant_buy if available, otherwise contact_seller
+          setFormData((prev) => ({
+            ...prev,
+            listingType: canCreateInstantBuy ? 'instant_buy' : 'contact_seller',
+          }));
+        } else {
+          setSellerCapabilities({
+            canCreateContactSeller: false,
+            canCreateInstantBuy: false,
+            isLoading: false,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch seller capabilities:', err);
+        setSellerCapabilities({
+          canCreateContactSeller: false,
+          canCreateInstantBuy: false,
+          isLoading: false,
+        });
+      }
+    }
+
+    fetchSellerCapabilities();
+  }, [user]);
+
   // Fetch listing data for edit mode
   useEffect(() => {
     async function fetchListingForEdit() {
@@ -383,6 +441,7 @@ function SellPageContent() {
 
         // Pre-populate form with listing data
         setFormData({
+          listingType: listing.listing_type || 'contact_seller',
           selectedGame: {
             id: listing.bgg_game_id,
             name: listing.game_name,
@@ -433,7 +492,10 @@ function SellPageContent() {
   useEffect(() => {
     async function checkSellerOnboarding() {
       // Skip check in edit mode or if no user
-      if (isEditMode || !user) return;
+      if (isEditMode || !user) {
+        setIsCheckingOnboarding(false);
+        return;
+      }
 
       try {
         const response = await fetch('/api/seller/onboarding/status');
@@ -443,10 +505,13 @@ function SellPageContent() {
         if (!data.onboarding_completed || !data.can_list_items) {
           console.log('⚠️ [Sell Page] Seller not onboarded, redirecting...');
           router.push('/seller/onboard');
+          return; // Keep loading state while redirecting
         }
+
+        setIsCheckingOnboarding(false);
       } catch (error) {
         console.error('Error checking seller onboarding:', error);
-        // On error, allow through but API will catch it
+        setIsCheckingOnboarding(false); // Allow through but API will catch it
       }
     }
 
@@ -720,6 +785,7 @@ function SellPageContent() {
           allComponentsPresent: formData.allComponentsPresent,
           missingComponents: formData.missingComponents,
           price: formData.price,
+          listingType: formData.listingType, // Dual-listing model support
           // Convert selected expansions to API format
           includedExpansions: formData.selectedExpansions.map((exp) => ({
             bgg_id: exp.bgg_id,
@@ -777,6 +843,18 @@ function SellPageContent() {
     setHasDraft(true);
     setDraftSavedModal(true);
   };
+
+  // Show loading state while checking onboarding (prevents flash of form for non-onboarded users)
+  if (isCheckingOnboarding && !isEditMode) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-frost-ice animate-spin mx-auto mb-4" />
+          <p className="text-text-secondary">{t('preparing') || 'Preparing...'}</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state for edit mode
   if (isEditMode && isLoadingListing) {
@@ -881,6 +959,18 @@ function SellPageContent() {
       <div className="lg:grid lg:grid-cols-12 lg:gap-8">
         {/* Left Column: Form Sections (8 cols on desktop) */}
         <div className="lg:col-span-8 space-y-4">
+        {/* Listing Type Selection (only in create mode) */}
+        {!isEditMode && !sellerCapabilities.isLoading && (
+          <Card padding="lg">
+            <ListingTypeSelector
+              value={formData.listingType}
+              onChange={(type) => setFormData((prev) => ({ ...prev, listingType: type }))}
+              canUseInstantBuy={sellerCapabilities.canCreateInstantBuy}
+              onUpgradeClick={() => router.push('/seller/settings/payouts')}
+            />
+          </Card>
+        )}
+
         {/* Section 1: Game Selection (or locked game info in edit mode) */}
         {isEditMode ? (
           // Locked read-only game info in edit mode

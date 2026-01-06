@@ -25,12 +25,20 @@ export async function GET(request: NextRequest) {
     // Determine status based on profile data
     const termsAccepted = !!sellerProfile?.seller_terms_accepted_at;
     const stripeConnected = !!sellerProfile?.stripe_connect_payouts_enabled;
+    const isActive = sellerProfile?.seller_status === 'active';
 
-    // Check completion criteria (mirrors logic in 043_update_seller_functions_for_split.sql)
-    const onboardingCompleted =
-      sellerProfile?.seller_status === 'active' &&
-      termsAccepted &&
-      stripeConnected;
+    // Dual-listing model capabilities:
+    // - Contact Seller: Only requires terms accepted + active status
+    // - Instant Buy: Also requires Stripe connected
+    const canCreateContactSeller = termsAccepted && isActive;
+    const canCreateInstantBuy = termsAccepted && isActive && stripeConnected;
+
+    // Onboarding is "completed" if seller can create at least one type of listing
+    // (either contact_seller via terms-only, or instant_buy via full Stripe setup)
+    const onboardingCompleted = canCreateContactSeller || canCreateInstantBuy;
+
+    // Can list items if either capability is available
+    const canListItems = canCreateContactSeller || canCreateInstantBuy;
 
     // Construct response object
     const statusData = {
@@ -38,7 +46,10 @@ export async function GET(request: NextRequest) {
       terms_accepted: termsAccepted,
       stripe_connected: stripeConnected,
       onboarding_completed: onboardingCompleted,
-      can_list_items: onboardingCompleted, // Currently same as onboarding completed
+      can_list_items: canListItems,
+      // Dual-listing model capabilities
+      can_create_contact_seller: canCreateContactSeller,
+      can_create_instant_buy: canCreateInstantBuy,
       needs_dac7_info: false // Default to false for now as this is a new seller
     };
 

@@ -147,6 +147,7 @@
       "parcelLocker": "Parcel Locker",
       "pickupOnly": "Pickup only",
       "missingComponents": "Missing components",
+      "contactSeller": "Contact",
       "saveAria": "Save listing",
       "unsaveAria": "Remove from saved",
       "prevImageAria": "Previous image",
@@ -206,10 +207,12 @@
       "unsaveTooltip": "Remove from saved",
       "askQuestion": "Ask a question",
       "addToCart": "Add to Cart",
+      "contactSeller": "Contact Seller",
       "sold": "Sold",
       "reserved": "Reserved",
       "reservedTooltip": "Someone is checking out — available soon if they don't complete"
-    }
+    },
+    "contactSellerWarning": "This listing is not processed through our payment system. Arrange payment directly with the seller. We cannot provide buyer protection for this transaction."
   },
   "Checkout": {
     "loading": "Loading checkout...",
@@ -482,7 +485,10 @@
       "filters": "Filters",
       "filterByCondition": "Filter by Condition",
       "clearAll": "Clear all",
-      "clearFilters": "Clear Filters"
+      "clearFilters": "Clear Filters",
+      "allListings": "All Listings",
+      "instantBuy": "Instant Buy",
+      "contactSeller": "Contact Seller"
     },
     "cart": {
       "addedToCart": "Added to cart!",
@@ -546,7 +552,8 @@
       "bggAttribution": "Game data provided by BoardGameGeek",
       "loading": "Loading...",
       "loadingGameDetails": "Loading game details...",
-      "loadingListing": "Loading listing..."
+      "loadingListing": "Loading listing...",
+      "preparing": "Preparing..."
     },
     "draftBanner": {
       "title": "You have a saved draft",
@@ -750,6 +757,328 @@
           "buyerPaysDescription": "Shipping cost added at checkout"
         }
       }
+    },
+    "VersionSelector": {
+      "loading": {
+        "title": "Loading versions from BoardGameGeek...",
+        "subtitle": "This may take a few seconds"
+      },
+      "noVersions": {
+        "title": "No version data available from BoardGameGeek",
+        "description": "This game doesn't have detailed version information in BGG's database. You'll be able to enter edition details manually in the next step.",
+        "continueButton": "Continue Without Version Selection →"
+      },
+      "fetchError": {
+        "title": "Error loading versions",
+        "description": "Couldn't load version data from BoardGameGeek. Please try again.",
+        "retryButton": "Retry"
+      },
+      "gameInfo": {
+        "originalRelease": "Original release: {year}"
+      },
+      "versionList": {
+        "foundVersions": "Found {count} version - select yours:",
+        "foundVersions_other": "Found {count} versions - select yours:",
+        "publisher": "Publisher:",
+        "language": "Language:",
+        "year": "Year:",
+        "productCode": "Product Code:"
+      },
+      "help": {
+        "title": "Not sure which version you have?",
+        "description": "Check the box bottom or rulebook for publisher name and year. The product code (if present) is the most accurate identifier. If you can't find your exact version, choose the closest match."
+      }
+    },
+    "LanguageVersionSelector": {
+      "loading": "Loading versions from BoardGameGeek...",
+      "noVersions": {
+        "title": "No version data available",
+        "description": "This game doesn't have detailed version information in BGG's database. You can continue without selecting a version.",
+        "continueButton": "Continue Without Version Selection →"
+      },
+      "autoSelected": {
+        "title": "Version automatically selected",
+        "onlyVersion": "Only one version available for this game:",
+        "onlyLanguageVersion": "Only one {language} version available:"
+      },
+      "selectLanguage": "Select Language",
+      "required": "*",
+      "otherLanguages": "Other languages ({count})",
+      "showLess": "Show less",
+      "languagesAvailable": "{count} language available",
+      "languagesAvailable_other": "{count} languages available",
+      "selectVersion": "Select Your Version",
+      "versionsAvailable": "{count} version(s) available in {language}",
+      "noVersionsForLanguage": "No versions found for {language}. This shouldn't happen - please try selecting a different language."
+    },
+    "ManualVersionInput": {
+      "title": "Specify Your Edition",
+      "subtitle": "Tell us about your copy of {gameName}",
+      "infoBanner": {
+        "line1": "We couldn't automatically retrieve version information from BoardGameGeek.",
+        "line2": "Please provide details about your copy to help buyers understand what they're purchasing."
+      },
+      "publisher": {
+        "label": "Publisher",
+        "placeholder": "e.g., Stonemaier Games, Z-Man Games, etc.",
+        "error": "Publisher is required"
+      },
+      "language": {
+        "label": "Language",
+        "placeholder": "e.g., English, German, French, etc.",
+        "error": "Language is required"
+      },
+      "versionName": {
+        "label": "Edition/Version Name",
+        "optional": "(optional)",
+        "placeholder": "e.g., Retail Edition, Kickstarter Edition, Second Edition",
+        "hint": "If left blank, we'll use \"{publisher} Edition\""
+      },
+      "editionYear": {
+        "label": "Edition Year",
+        "optional": "(optional)",
+        "placeholder": "e.g., 2023",
+        "error": "Please enter a valid year"
+      },
+      "continueButton": "Continue",
+      "cancelButton": "Cancel"
+    },
+    "ExpansionSelector": {
+      "loading": "Loading expansions...",
+      "noExpansions": "No expansions found for this game",
+      "searchPlaceholder": "Search {count} expansions...",
+      "clearSearch": "Clear search",
+      "resultsCount": "{filtered} of {total} expansions",
+      "selectedCount": "{count} selected",
+      "noResults": {
+        "title": "No expansions match \"{query}\"",
+        "hint": "Try searching in English or check spelling"
+      },
+      "moreSelected": "+ {count} more selected",
+      "expansionsAvailable": "{count} expansion available",
+      "expansionsAvailable_other": "{count} expansions available",
+      "show": "Show",
+      "collapse": "Collapse",
+      "change": "Change",
+      "name": "Name",
+      "onlyEdition": "(only edition)",
+      "expansionsIncluded": "{count} expansion included",
+      "expansionsIncluded_other": "{count} expansions included",
+      "selectEditionModal": "Select Edition",
+      "selectNameModal": "Select Display Name",
+      "chooseNamePrompt": "Choose the name that matches your edition:",
+      "primary": "(Primary)",
+      "current": "(Current)",
+      "cancel": "Cancel"
+    },
+    "ErrorDisplay": {
+      "title": "Unable to Search",
+      "networkError": {
+        "title": "Try these steps:",
+        "step1": "Check your internet connection",
+        "step2": "Make sure WiFi or mobile data is enabled",
+        "step3": "Try refreshing the page"
+      },
+      "rateLimit": "BoardGameGeek is busy right now. Wait a moment and try again.",
+      "apiUnavailable": "BoardGameGeek may be experiencing issues. This usually resolves quickly.",
+      "timeout": "BoardGameGeek is responding slowly. Try again or wait a few minutes.",
+      "retryButton": "Try Again",
+      "contactSupport": "If this persists, please contact support with error code: {code}"
+    },
+    "PricingAssistant": {
+      "title": "Pricing assistant",
+      "loading": "Loading pricing data...",
+      "error": "Unable to load pricing suggestions",
+      "newRetail": "New retail:",
+      "baseGame": "Base game:",
+      "expansions": "+ {count} expansion",
+      "expansions_other": "+ {count} expansions",
+      "priced": "({count} priced)",
+      "bundleRetail": "Bundle retail:",
+      "fill": "Fill",
+      "avgSoldHere": "Avg. sold here:",
+      "sales": "({count} sales)",
+      "lowestOnPlatform": "Lowest on Second Turn Games:",
+      "suggestedFor": "Suggested for {condition}:",
+      "usePrice": "Use price",
+      "conditions": {
+        "likeNew": "Like New",
+        "veryGood": "Very Good",
+        "good": "Good",
+        "acceptable": "Acceptable"
+      },
+      "tooltip": "Based on lowest EU retail prices. Your local market may differ - use as a guide."
+    },
+    "GradingGuidePanel": {
+      "title": "Condition grading guide",
+      "tabs": {
+        "grades": "Grades",
+        "tips": "Tips"
+      },
+      "selected": "(selected)",
+      "specialConsiderations": "Special Considerations",
+      "quickTips": {
+        "title": "Quick tips",
+        "tip1": "When in doubt, grade down - buyers love positive surprises",
+        "tip2": "Use natural daylight for photos",
+        "tip3": "Mention sleeved cards as a positive",
+        "tip4": "Be specific about any damage"
+      },
+      "viewFullGuide": "View full grading guide"
+    },
+    "listingType": {
+      "title": "How do you want to sell?",
+      "subtitle": "Choose how you want to connect with buyers.",
+      "instantBuy": {
+        "title": "Instant Buy",
+        "description": "Buyers pay instantly through our secure system. Money goes directly to your bank.",
+        "disabled": "Complete payment setup to enable",
+        "upgrade": "Set up payments"
+      },
+      "contactSeller": {
+        "title": "Contact Seller",
+        "description": "Buyers message you first. Arrange payment yourselves.",
+        "note": "You'll handle payment and delivery directly with the buyer. We cannot provide buyer protection for these transactions."
+      }
+    }
+  },
+  "SellerOnboard": {
+    "header": {
+      "title": "Become a seller",
+      "subtitle": "Turn your games into cash. Quick setup — start selling in under a minute."
+    },
+    "step1": {
+      "title": "Step 1: Accept seller terms",
+      "heading": "Accept seller terms",
+      "description": "Review and accept our seller terms to confirm you're selling as a private individual.",
+      "keyPoints": {
+        "title": "Key points:",
+        "zeroFees": "<strong>Zero listing fees</strong> — free to list your games",
+        "ageRequirement": "You must be at least <strong>16 years old</strong>",
+        "personalItems": "You're selling <strong>personal items</strong>, not operating a business",
+        "accurateDescriptions": "You're responsible for <strong>accurate descriptions</strong> of your games"
+      },
+      "readFullTerms": "Read full Seller Terms →",
+      "country": {
+        "title": "Where are you located?",
+        "hint": "This helps us show you available payment and shipping options.",
+        "latvia": "Latvia",
+        "estonia": "Estonia",
+        "lithuania": "Lithuania"
+      },
+      "checkbox": "I confirm I'm 16+, selling personal items, and agree to the",
+      "sellerTerms": "Seller Terms",
+      "acceptButton": "Accept seller terms",
+      "countryRequired": "Please select your country above to continue"
+    },
+    "step2": {
+      "termsAccepted": "Terms accepted",
+      "title": "How would you like to sell?",
+      "subtitle": "Choose how you want to connect with buyers.",
+      "contactSeller": {
+        "title": "Contact Seller",
+        "description": "Buyers message you to arrange payment and delivery. You handle everything yourself.",
+        "benefit1": "No platform fees",
+        "benefit2": "You arrange payment",
+        "benefit3": "You arrange shipping",
+        "button": "Start selling"
+      },
+      "instantBuy": {
+        "badge": "Recommended",
+        "title": "Instant Buy",
+        "description": "Buyers purchase instantly. You ship, you get paid. Done.",
+        "benefit1": "Sell faster — one-click checkout",
+        "benefit2": "€2 shipping via parcel lockers",
+        "benefit3": "Money direct to your bank",
+        "benefit4": "Buyers trust secure payments",
+        "button": "Set up payments",
+        "buttonTime": "2 min",
+        "comingSoon": "Instant Buy is coming soon to your country",
+        "comingSoonButton": "Coming soon"
+      },
+      "upgradeNote": "You can upgrade anytime from seller settings."
+    },
+    "step3": {
+      "backButton": "← Back to options",
+      "title": "Set up payments with Stripe",
+      "heading": "Connect payment account",
+      "description": "We use Stripe to handle payouts securely - a payment platform trusted by Airbnb, Shopify, and millions of businesses worldwide. Your money goes directly to your bank. We never see or hold your funds.",
+      "requirements": {
+        "title": "You'll need:",
+        "id": "Government-issued ID (passport, ID card, or driver's license)",
+        "bank": "Bank account details (IBAN for SEPA transfers)",
+        "personal": "Personal information (name, date of birth, address)"
+      },
+      "continueButton": "Continue to Stripe",
+      "redirectNote": "You'll be redirected to Stripe's secure onboarding (2 min)"
+    },
+    "whatsNext": {
+      "title": "What's next?",
+      "step1": "Create your first listing - describe your game and set a price",
+      "step2": "When someone buys, you'll get an email with shipping details",
+      "step3": "Drop off at any Unisend parcel terminal within 2 business days",
+      "step4": "Receive payment directly to your bank account",
+      "createListing": "Create first listing",
+      "viewDashboard": "View dashboard"
+    },
+    "support": {
+      "needHelp": "Need help?",
+      "contactUs": "Contact us"
+    },
+    "choiceScreen": {
+      "title": "How would you like to sell?",
+      "contactSeller": {
+        "title": "Contact Seller",
+        "description": "Buyers message you first. Arrange payment yourselves.",
+        "button": "Start selling"
+      },
+      "instantBuy": {
+        "title": "Instant Buy",
+        "description": "Accept secure payments. Money goes directly to your bank.",
+        "button": "Set up payments"
+      },
+      "upgradeNote": "You can add payment support later",
+      "countryNotSupported": "Payments coming soon to your country"
+    }
+  },
+  "StatusChangeModal": {
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "sold": {
+      "title": "Mark as Sold",
+      "message": "Are you sure you want to mark \"{gameName}\" as sold?",
+      "description": "This will hide the listing from public search. You can reactivate it later if needed.",
+      "descriptionContactSeller": "Mark this listing as sold? It will be hidden from public search.",
+      "confirm": "Mark as Sold"
+    },
+    "removed": {
+      "title": "Remove Listing",
+      "message": "Are you sure you want to remove \"{gameName}\"?",
+      "description": "This will hide the listing from public search. You can reactivate or permanently delete it later.",
+      "confirm": "Remove Listing"
+    },
+    "publish": {
+      "title": "Publish Listing",
+      "message": "Are you sure you want to publish \"{gameName}\"?",
+      "description": "This will make your listing visible to buyers on the marketplace.",
+      "confirm": "Publish"
+    },
+    "reactivate": {
+      "title": "Reactivate Listing",
+      "message": "Are you sure you want to reactivate \"{gameName}\"?",
+      "description": "This will make your listing visible to buyers again.",
+      "confirm": "Reactivate"
+    },
+    "unpublish": {
+      "title": "Unpublish Listing",
+      "message": "Are you sure you want to unpublish \"{gameName}\"?",
+      "description": "This will hide the listing from public search and save it as a draft.",
+      "confirm": "Unpublish"
+    },
+    "default": {
+      "title": "Change Status",
+      "message": "Change status of \"{gameName}\"?",
+      "confirm": "Confirm"
     }
   }
 }

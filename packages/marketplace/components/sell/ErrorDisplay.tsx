@@ -1,6 +1,7 @@
 'use client';
 
 import { BGGError } from '@/lib/bgg-errors';
+import { useTranslations } from 'next-intl';
 
 interface ErrorDisplayProps {
   error: BGGError;
@@ -8,6 +9,9 @@ interface ErrorDisplayProps {
 }
 
 export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
+  const t = useTranslations('Sell.ErrorDisplay');
+  const tNetwork = useTranslations('Sell.ErrorDisplay.networkError');
+
   // Determine if error is retryable
   const isRetryable = ['RATE_LIMIT', 'NETWORK_ERROR', 'TIMEOUT', 'API_UNAVAILABLE'].includes(error.code);
 
@@ -24,7 +28,7 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
         <div className="flex-1">
           {/* Error Message */}
           <h3 className="font-semibold text-red-900 mb-2">
-            Unable to Search
+            {t('title')}
           </h3>
           <p className="text-red-800 mb-4">
             {error.getUserMessage()}
@@ -34,12 +38,12 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
           {error.code === 'NETWORK_ERROR' && (
             <div className="bg-white border border-red-200 rounded p-3 mb-4">
               <p className="text-sm text-gray-700">
-                <strong>Try these steps:</strong>
+                <strong>{tNetwork('title')}</strong>
               </p>
               <ul className="text-sm text-gray-600 mt-2 space-y-1 list-disc list-inside">
-                <li>Check your internet connection</li>
-                <li>Make sure WiFi or mobile data is enabled</li>
-                <li>Try refreshing the page</li>
+                <li>{tNetwork('step1')}</li>
+                <li>{tNetwork('step2')}</li>
+                <li>{tNetwork('step3')}</li>
               </ul>
             </div>
           )}
@@ -47,7 +51,7 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
           {error.code === 'RATE_LIMIT' && (
             <div className="bg-white border border-red-200 rounded p-3 mb-4">
               <p className="text-sm text-gray-700">
-                BoardGameGeek is busy right now. Wait a moment and try again.
+                {t('rateLimit')}
               </p>
             </div>
           )}
@@ -55,7 +59,7 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
           {error.code === 'API_UNAVAILABLE' && (
             <div className="bg-white border border-red-200 rounded p-3 mb-4">
               <p className="text-sm text-gray-700">
-                BoardGameGeek may be experiencing issues. This usually resolves quickly.
+                {t('apiUnavailable')}
               </p>
             </div>
           )}
@@ -63,7 +67,7 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
           {error.code === 'TIMEOUT' && (
             <div className="bg-white border border-red-200 rounded p-3 mb-4">
               <p className="text-sm text-gray-700">
-                BoardGameGeek is responding slowly. Try again or wait a few minutes.
+                {t('timeout')}
               </p>
             </div>
           )}
@@ -74,14 +78,14 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
               onClick={onRetry}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
             >
-              Try Again
+              {t('retryButton')}
             </button>
           )}
 
           {/* Non-retryable error guidance */}
           {!isRetryable && (
             <div className="text-sm text-red-700">
-              If this persists, please contact support with error code: <code className="bg-red-100 px-1 py-0.5 rounded">{error.code}</code>
+              {t('contactSupport', { code: error.code })}
             </div>
           )}
         </div>

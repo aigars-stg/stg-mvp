@@ -8,6 +8,7 @@ import { Badge, Button } from '@second-turn/design-system';
 import {
   Package,
   AlertCircle,
+  AlertTriangle,
   Loader2,
   Heart,
   Calendar,
@@ -757,8 +758,22 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
           )}
         </div>
 
+        {/* Contact Seller Warning Banner (Legal Requirement) - Desktop */}
+        {listing.listing_type === 'contact_seller' && (
+          <div className="hidden sm:block border-t border-border-subtle">
+            <div className="bg-aurora-yellow/10 border-b border-aurora-yellow/30 px-4 py-2.5">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-aurora-yellow flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  {t('contactSellerWarning')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* FOOTER: Seller info + actions (desktop and mobile) */}
-        <div className="hidden sm:flex items-center justify-between gap-4 px-3 sm:px-4 py-3 border-t border-border-subtle">
+        <div className={`hidden sm:flex items-center justify-between gap-4 px-3 sm:px-4 py-3 ${listing.listing_type !== 'contact_seller' ? 'border-t border-border-subtle' : ''}`}>
           {/* Left: Seller Info */}
           <Link
             href={`/profile/${listing.seller.id}`}
@@ -866,6 +881,19 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                 )}
                 {listingStatus === 'sold' ? (
                   <div className="text-sm text-text-muted px-4 py-2">{t('actions.sold')}</div>
+                ) : listing.listing_type === 'contact_seller' ? (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsQADrawerOpen(true);
+                    }}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-1.5" />
+                    {t('actions.contactSeller')}
+                  </Button>
                 ) : (
                   <Button
                     variant={listingStatus === 'reserved' ? 'secondary' : 'accent'}
@@ -940,9 +968,23 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
           </Link>
         </div>
 
+        {/* Contact Seller Warning Banner (Legal Requirement) - Mobile */}
+        {listing.listing_type === 'contact_seller' && (
+          <div className="sm:hidden border-t border-border-subtle">
+            <div className="bg-aurora-yellow/10 px-3 py-2">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-aurora-yellow flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  {t('contactSellerWarning')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Mobile Footer: Actions */}
         {!isOwnListing && (
-          <div className="sm:hidden sticky bottom-0 left-0 right-0 bg-snow-white border-t border-border-subtle p-3 shadow-lg">
+          <div className={`sm:hidden sticky bottom-0 left-0 right-0 bg-snow-white ${listing.listing_type !== 'contact_seller' ? 'border-t border-border-subtle' : ''} p-3 shadow-lg`}>
             <div className="flex items-center justify-between gap-2">
               {/* Price */}
               <div className="flex-shrink-0">
@@ -979,7 +1021,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   )}
                 </button>
 
-                {/* Reservation Timer / Add to Cart */}
+                {/* Reservation Timer / Add to Cart / Contact Seller */}
                 {listingStatus === 'reserved' && listing.reserved_until ? (
                   <ReservationTimer
                     expiresAt={listing.reserved_until}
@@ -989,6 +1031,19 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   />
                 ) : listingStatus === 'sold' ? (
                   <span className="text-sm text-text-muted px-3">{t('actions.sold')}</span>
+                ) : listing.listing_type === 'contact_seller' ? (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsQADrawerOpen(true);
+                    }}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-1.5" />
+                    {t('actions.contactSeller')}
+                  </Button>
                 ) : (
                   <Button
                     variant="accent"

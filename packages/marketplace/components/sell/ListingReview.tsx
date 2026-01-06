@@ -3,6 +3,7 @@
 import { Card, Button, Badge, Checkbox } from '@second-turn/design-system';
 import type { BGGGame, BGGVersion } from '@/lib/bgg-api';
 import type { PhotoFile } from './PhotoUpload';
+import { useTranslations } from 'next-intl';
 
 interface ListingFormData {
   selectedGame: BGGGame | null;
@@ -55,16 +56,29 @@ const CONDITION_VARIANTS = {
 };
 
 export function ListingReview({ formData, onEdit, onPublish, isPublishing = false, onTermsChange }: ListingReviewProps) {
+  const t = useTranslations('Sell.ListingReview');
+  const tConditions = useTranslations('Sell.ListingReview.conditions');
+  const tExtras = useTranslations('Sell.ListingReview.extras');
+  const tSections = useTranslations('Sell.ListingReview.sections');
+  const tPricing = useTranslations('Sell.ListingReview.pricing');
   const mainPhoto = formData.photos[0];
+
+  // Condition labels with translations
+  const conditionLabels = {
+    likeNew: `📦 ${tConditions('likeNew')}`,
+    veryGood: `✨ ${tConditions('veryGood')}`,
+    good: `🎲 ${tConditions('good')}`,
+    acceptable: `🔧 ${tConditions('acceptable')}`,
+  };
 
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-polar-night mb-2">
-          Review Your Listing
+          {t('title')}
         </h2>
         <p className="text-sm sm:text-base text-text-secondary">
-          Make sure everything looks good before publishing
+          {t('subtitle')}
         </p>
       </div>
 
@@ -72,10 +86,10 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
       <Card padding="md" className="bg-frost-ice/5 border border-frost-ice/20">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base sm:text-lg font-semibold text-polar-night">
-            Listing Preview
+            {t('preview.title')}
           </h3>
           <Badge variant="default" size="sm">
-            How buyers will see it
+            {t('preview.badge')}
           </Badge>
         </div>
 
@@ -92,7 +106,7 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
               <div className="w-full h-full flex items-center justify-center text-text-muted">
                 <div className="text-center">
                   <div className="text-4xl mb-2">🎲</div>
-                  <div className="text-sm">No photo</div>
+                  <div className="text-sm">{t('preview.noPhoto')}</div>
                 </div>
               </div>
             )}
@@ -120,7 +134,7 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
               {formData.condition && (
                 <div className="mb-4">
                   <Badge variant={CONDITION_VARIANTS[formData.condition]} size="md">
-                    {CONDITION_LABELS[formData.condition]}
+                    {conditionLabels[formData.condition]}
                   </Badge>
                 </div>
               )}
@@ -129,21 +143,21 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
                 €{formData.price || '0'}
               </div>
               <div className="text-sm text-text-secondary mb-4">
-                {formData.shippingOptions.standard && '+ €5 standard shipping'}
-                {formData.shippingOptions.standard && formData.shippingOptions.express && ' or '}
-                {formData.shippingOptions.express && '+ €12 express'}
+                {formData.shippingOptions.standard && tPricing('standardShipping')}
+                {formData.shippingOptions.standard && formData.shippingOptions.express && ` ${tPricing('or')} `}
+                {formData.shippingOptions.express && tPricing('expressShipping')}
                 {formData.shippingOptions.localPickup && (
                   <span className="text-success">
-                    {(formData.shippingOptions.standard || formData.shippingOptions.express) && ' or '}
-                    Free local pickup in {formData.pickupCity || 'your city'}
+                    {(formData.shippingOptions.standard || formData.shippingOptions.express) && ` ${tPricing('or')} `}
+                    {tPricing('freePickup', { city: formData.pickupCity || tPricing('yourCity') })}
                   </span>
                 )}
               </div>
 
               {formData.acceptOffers && (
                 <div className="text-sm text-frost-ice mb-4">
-                  ✓ Seller accepts offers
-                  {formData.minimumOffer && ` (minimum €${formData.minimumOffer})`}
+                  {tPricing('acceptsOffers')}
+                  {formData.minimumOffer && ` (${tPricing('minimum', { amount: formData.minimumOffer })})`}
                 </div>
               )}
             </div>
@@ -156,29 +170,29 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
         {/* Game Information */}
         <Card padding="md">
           <div className="flex items-start justify-between mb-3">
-            <h3 className="font-semibold text-polar-night">Game Information</h3>
+            <h3 className="font-semibold text-polar-night">{tSections('gameInfo')}</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onEdit(1)}
             >
-              Edit
+              {t('edit')}
             </Button>
           </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-text-muted">Game:</span>
+              <span className="text-text-muted">{tSections('game')}:</span>
               <span className="text-polar-night font-medium">{formData.selectedGame?.name || '-'}</span>
             </div>
             {formData.selectedVersion && (
               <>
                 <div className="flex justify-between">
-                  <span className="text-text-muted">Version:</span>
+                  <span className="text-text-muted">{tSections('version')}:</span>
                   <span className="text-polar-night">{formData.selectedVersion.name}</span>
                 </div>
                 {formData.selectedVersion.publisher && (
                   <div className="flex justify-between">
-                    <span className="text-text-muted">Publisher:</span>
+                    <span className="text-text-muted">{tSections('publisher')}:</span>
                     <span className="text-polar-night">{formData.selectedVersion.publisher}</span>
                   </div>
                 )}
@@ -186,7 +200,7 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
                 {formData.selectedVersion.languages && formData.selectedVersion.languages.length > 0 ? (
                   <div className="flex justify-between">
                     <span className="text-text-muted">
-                      {formData.selectedVersion.languages.length > 1 ? 'Languages:' : 'Language:'}
+                      {formData.selectedVersion.languages.length > 1 ? `${tSections('languages')}:` : `${tSections('language')}:`}
                     </span>
                     <span className="text-polar-night">
                       {formData.selectedVersion.languages.join(' / ')}
@@ -194,13 +208,13 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
                   </div>
                 ) : formData.selectedVersion.language ? (
                   <div className="flex justify-between">
-                    <span className="text-text-muted">Language:</span>
+                    <span className="text-text-muted">{tSections('language')}:</span>
                     <span className="text-polar-night">{formData.selectedVersion.language}</span>
                   </div>
                 ) : null}
                 {formData.selectedVersion.yearPublished && (
                   <div className="flex justify-between">
-                    <span className="text-text-muted">Year:</span>
+                    <span className="text-text-muted">{tSections('year')}:</span>
                     <span className="text-polar-night">{formData.selectedVersion.yearPublished}</span>
                   </div>
                 )}
@@ -212,49 +226,49 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
         {/* Condition */}
         <Card padding="md">
           <div className="flex items-start justify-between mb-3">
-            <h3 className="font-semibold text-polar-night">Condition</h3>
+            <h3 className="font-semibold text-polar-night">{tSections('condition')}</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onEdit(1)}
             >
-              Edit
+              {t('edit')}
             </Button>
           </div>
           <div className="space-y-3 text-sm">
             <div className="flex items-center gap-2">
-              <span className="text-text-muted">Overall:</span>
+              <span className="text-text-muted">{tSections('overall')}:</span>
               {formData.condition && (
                 <Badge variant={CONDITION_VARIANTS[formData.condition]} size="sm">
-                  {CONDITION_LABELS[formData.condition]}
+                  {conditionLabels[formData.condition]}
                 </Badge>
               )}
             </div>
             <div>
-              <span className="text-text-muted block mb-1">Description:</span>
+              <span className="text-text-muted block mb-1">{tSections('description')}:</span>
               <p className="text-polar-night leading-relaxed whitespace-pre-line">
                 {formData.conditionNotes || '-'}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-text-muted">Components:</span>
+              <span className="text-text-muted">{tSections('components')}:</span>
               <span className="text-polar-night">
-                {formData.allComponentsPresent ? '✓ All present' : '⚠️ Some missing'}
+                {formData.allComponentsPresent ? tSections('allPresent') : tSections('someMissing')}
               </span>
             </div>
             {!formData.allComponentsPresent && formData.missingComponents && (
               <div>
-                <span className="text-text-muted block mb-1">Missing details:</span>
+                <span className="text-text-muted block mb-1">{tSections('missingDetails')}:</span>
                 <p className="text-polar-night text-sm">{formData.missingComponents}</p>
               </div>
             )}
             {(formData.extras.sleeved || formData.extras.promos || formData.extras.customInsert || formData.extras.other) && (
               <div>
-                <span className="text-text-muted block mb-1">Extras:</span>
+                <span className="text-text-muted block mb-1">{tSections('extrasLabel')}:</span>
                 <div className="flex flex-wrap gap-2">
-                  {formData.extras.sleeved && <Badge variant="success" size="sm">Sleeved Cards</Badge>}
-                  {formData.extras.promos && <Badge variant="success" size="sm">Promo Items</Badge>}
-                  {formData.extras.customInsert && <Badge variant="success" size="sm">Custom Insert</Badge>}
+                  {formData.extras.sleeved && <Badge variant="success" size="sm">{tExtras('sleeved')}</Badge>}
+                  {formData.extras.promos && <Badge variant="success" size="sm">{tExtras('promos')}</Badge>}
+                  {formData.extras.customInsert && <Badge variant="success" size="sm">{tExtras('customInsert')}</Badge>}
                   {formData.extras.other && <Badge variant="success" size="sm">{formData.extras.other}</Badge>}
                 </div>
               </div>
@@ -265,13 +279,13 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
         {/* Photos */}
         <Card padding="md">
           <div className="flex items-start justify-between mb-3">
-            <h3 className="font-semibold text-polar-night">Photos ({formData.photos.length})</h3>
+            <h3 className="font-semibold text-polar-night">{tSections('photos', { count: formData.photos.length })}</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onEdit(2)}
             >
-              Edit
+              {t('edit')}
             </Button>
           </div>
           {formData.photos.length > 0 ? (
@@ -280,63 +294,63 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
                 <div key={index} className="relative aspect-square">
                   <img
                     src={photo.preview}
-                    alt={`Photo ${index + 1}`}
+                    alt={`${tSections('photoAlt')} ${index + 1}`}
                     className="w-full h-full object-cover rounded"
                   />
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-text-secondary text-sm">No photos uploaded</p>
+            <p className="text-text-secondary text-sm">{tSections('noPhotos')}</p>
           )}
         </Card>
 
         {/* Pricing & Shipping */}
         <Card padding="md">
           <div className="flex items-start justify-between mb-3">
-            <h3 className="font-semibold text-polar-night">Pricing & Shipping</h3>
+            <h3 className="font-semibold text-polar-night">{tSections('pricingShipping')}</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onEdit(2)}
             >
-              Edit
+              {t('edit')}
             </Button>
           </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-text-muted">Price:</span>
+              <span className="text-text-muted">{tPricing('price')}:</span>
               <span className="text-polar-night font-medium">€{formData.price || '0'}</span>
             </div>
             {formData.acceptOffers && (
               <div className="flex justify-between">
-                <span className="text-text-muted">Accepts offers:</span>
+                <span className="text-text-muted">{tPricing('acceptsOffersLabel')}:</span>
                 <span className="text-polar-night">
-                  Yes{formData.minimumOffer && ` (min €${formData.minimumOffer})`}
+                  {tPricing('yes')}{formData.minimumOffer && ` (${tPricing('min')} €${formData.minimumOffer})`}
                 </span>
               </div>
             )}
             <div className="flex justify-between items-start">
-              <span className="text-text-muted">Shipping:</span>
+              <span className="text-text-muted">{tPricing('shipping')}:</span>
               <div className="text-right text-polar-night">
-                {formData.shippingOptions.standard && <div>Standard (€5)</div>}
-                {formData.shippingOptions.express && <div>Express (€12)</div>}
+                {formData.shippingOptions.standard && <div>{tPricing('standard')}</div>}
+                {formData.shippingOptions.express && <div>{tPricing('express')}</div>}
                 {formData.shippingOptions.localPickup && (
                   <div className="text-success">
-                    Local pickup{formData.pickupCity && ` in ${formData.pickupCity}`}
+                    {tPricing('localPickup')}{formData.pickupCity && ` ${tPricing('in')} ${formData.pickupCity}`}
                   </div>
                 )}
               </div>
             </div>
             {formData.shippingNotes && (
               <div>
-                <span className="text-text-muted block mb-1">Shipping notes:</span>
+                <span className="text-text-muted block mb-1">{tPricing('shippingNotes')}:</span>
                 <p className="text-polar-night">{formData.shippingNotes}</p>
               </div>
             )}
             {formData.whySelling && (
               <div>
-                <span className="text-text-muted block mb-1">Why selling:</span>
+                <span className="text-text-muted block mb-1">{tPricing('whySelling')}:</span>
                 <p className="text-polar-night">{formData.whySelling}</p>
               </div>
             )}
@@ -355,10 +369,7 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
               />
             </div>
             <div className="flex-1 text-sm text-polar-night">
-              I confirm that I have accurately described this game's condition including any wear or
-              missing components, and I agree to ship within 2 business days or respond within 1 day
-              to arrange local pickup. I understand that dishonest listings may result in account
-              suspension.
+              {t('termsText')}
             </div>
           </label>
 
@@ -369,7 +380,7 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
               fullWidth
               onClick={() => onEdit(1)}
             >
-              ← Back to Edit
+              {t('backToEdit')}
             </Button>
             <Button
               variant="accent"
@@ -381,10 +392,10 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
               {isPublishing ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                  Publishing...
+                  {t('publishing')}
                 </span>
               ) : (
-                '🚀 Publish Listing'
+                t('publishButton')
               )}
             </Button>
           </div>
@@ -404,9 +415,7 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
             </svg>
           </div>
           <div className="flex-1 text-sm text-text-secondary">
-            Once published, your listing will be visible to all buyers. You'll receive notifications
-            when someone asks a question or makes an offer. Fast responses build trust and increase
-            sales!
+            {t('helpText')}
           </div>
         </div>
       </Card>

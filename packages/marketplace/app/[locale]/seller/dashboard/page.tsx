@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Settings, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, CreditCard, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
@@ -16,6 +16,7 @@ import { PayoutConfirmModal } from '@/components/seller/PayoutConfirmModal';
 import { SellerTrustCard } from '@/components/seller/SellerTrustCard';
 
 interface SellerProfile {
+  seller_status: string;
   stripe_connect_account_id: string | null;
   stripe_connect_onboarding_completed: boolean;
   stripe_connect_payouts_enabled: boolean;
@@ -57,6 +58,7 @@ export default function SellerDashboardPage() {
       const { data: profileData, error } = await supabase
         .from('seller_profiles')
         .select(`
+          seller_status,
           stripe_connect_account_id,
           stripe_connect_onboarding_completed,
           stripe_connect_payouts_enabled,
@@ -76,9 +78,10 @@ export default function SellerDashboardPage() {
       setProfile(profileData);
       setLoading(false);
 
-      // Check if seller onboarding is complete
-      if (!profileData?.stripe_connect_onboarding_completed) {
+      // Check if seller onboarding is complete (use seller_status, not Stripe status)
+      if (profileData?.seller_status !== 'active') {
         router.push('/seller/onboard');
+        return;
       }
 
       // Fetch balance for payout modal
@@ -154,7 +157,9 @@ export default function SellerDashboardPage() {
             <div>
               <h1 className="text-2xl font-bold text-polar-night">Seller Dashboard</h1>
               <p className="text-sm text-text-secondary">
-                Manage your earnings, payouts, and transactions
+                {profile?.stripe_connect_payouts_enabled
+                  ? 'Manage your earnings, payouts, and transactions'
+                  : 'Manage your listings and connect with buyers'}
               </p>
             </div>
           </div>
@@ -178,56 +183,124 @@ export default function SellerDashboardPage() {
         </div>
 
         {/* Main Content */}
-        <div className="space-y-6">
-          {/* Top Row: Balance & Earnings */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <BalanceCard
-              key={`balance-${refreshKey}`}
-              onRequestPayout={handleRequestPayout}
-              onAddBankAccount={() => setShowBankForm(true)}
-            />
-            <EarningsSummary key={`earnings-${refreshKey}`} />
+        {profile?.stripe_connect_payouts_enabled ? (
+          // Full dashboard for Stripe-enabled sellers
+          <div className="space-y-6">
+            {/* Top Row: Balance & Earnings */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BalanceCard
+                key={`balance-${refreshKey}`}
+                onRequestPayout={handleRequestPayout}
+                onAddBankAccount={() => setShowBankForm(true)}
+              />
+              <EarningsSummary key={`earnings-${refreshKey}`} />
+            </div>
+
+            {/* Trust & Reputation */}
+            <SellerTrustCard key={`trust-${refreshKey}`} />
+
+            {/* Bank Account Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {profile?.has_bank_account ? (
+                <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-polar-night mb-4">Bank Account</h3>
+                  <BankAccountCard
+                    last4={profile.bank_account_last4 || '****'}
+                    bankName={profile.bank_account_bank_name || 'Bank'}
+                  />
+                  <button
+                    onClick={() => setShowBankForm(true)}
+                    className="mt-4 text-sm text-frost-ice hover:text-frost-ice/80 transition-colors"
+                  >
+                    Update bank account
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-polar-night mb-2">
+                    Bank Account
+                  </h3>
+                  <p className="text-text-secondary text-sm mb-4">
+                    Add a bank account to withdraw your earnings
+                  </p>
+                  <Button onClick={() => setShowBankForm(true)}>
+                    Add Bank Account
+                  </Button>
+                </div>
+              )}
+
+              <PayoutHistory key={`payouts-${refreshKey}`} limit={3} />
+            </div>
+
+            {/* Recent Transactions */}
+            <TransactionList key={`transactions-${refreshKey}`} limit={5} showViewAll />
           </div>
+        ) : (
+          // Simplified dashboard for Contact Seller only
+          <div className="space-y-6">
+            {/* Trust & Reputation */}
+            <SellerTrustCard key={`trust-${refreshKey}`} />
 
-          {/* Trust & Reputation */}
-          <SellerTrustCard key={`trust-${refreshKey}`} />
+            {/* Quick Actions Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Link
+                href="/sell"
+                className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group"
+              >
+                <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
+                  <Package className="w-6 h-6 text-frost-ice" />
+                </div>
+                <h3 className="font-semibold text-polar-night mb-1">Create Listing</h3>
+                <p className="text-sm text-text-secondary">List a game for sale</p>
+              </Link>
 
-          {/* Bank Account Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {profile?.has_bank_account ? (
-              <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-polar-night mb-4">Bank Account</h3>
-                <BankAccountCard
-                  last4={profile.bank_account_last4 || '****'}
-                  bankName={profile.bank_account_bank_name || 'Bank'}
-                />
-                <button
-                  onClick={() => setShowBankForm(true)}
-                  className="mt-4 text-sm text-frost-ice hover:text-frost-ice/80 transition-colors"
-                >
-                  Update bank account
-                </button>
+              <Link
+                href="/my-listings"
+                className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group"
+              >
+                <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
+                  <ShoppingBag className="w-6 h-6 text-frost-ice" />
+                </div>
+                <h3 className="font-semibold text-polar-night mb-1">My Listings</h3>
+                <p className="text-sm text-text-secondary">Manage your active listings</p>
+              </Link>
+
+              <Link
+                href="/seller/orders"
+                className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group"
+              >
+                <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
+                  <MessageSquare className="w-6 h-6 text-frost-ice" />
+                </div>
+                <h3 className="font-semibold text-polar-night mb-1">Messages & Orders</h3>
+                <p className="text-sm text-text-secondary">View buyer inquiries</p>
+              </Link>
+            </div>
+
+            {/* Upgrade to Instant Buy prompt */}
+            <div className="bg-aurora-green/5 border border-aurora-green/20 rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-aurora-green/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <CreditCard className="w-6 h-6 text-aurora-green" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-polar-night mb-1">
+                    Enable Instant Buy
+                  </h3>
+                  <p className="text-sm text-text-secondary mb-3">
+                    Accept secure payments and get money directly to your bank account.
+                    Buyers can purchase instantly without messaging first.
+                  </p>
+                  <Link href="/seller/onboard">
+                    <Button variant="secondary" size="sm">
+                      Set up payments
+                    </Button>
+                  </Link>
+                </div>
               </div>
-            ) : (
-              <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-polar-night mb-2">
-                  Bank Account
-                </h3>
-                <p className="text-text-secondary text-sm mb-4">
-                  Add a bank account to withdraw your earnings
-                </p>
-                <Button onClick={() => setShowBankForm(true)}>
-                  Add Bank Account
-                </Button>
-              </div>
-            )}
-
-            <PayoutHistory key={`payouts-${refreshKey}`} limit={3} />
+            </div>
           </div>
-
-          {/* Recent Transactions */}
-          <TransactionList key={`transactions-${refreshKey}`} limit={5} showViewAll />
-        </div>
+        )}
 
         {/* Quick Links */}
         <div className="mt-8 pt-6 border-t border-border">

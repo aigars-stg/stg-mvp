@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, Button, Badge } from '@second-turn/design-system';
 import { getLanguageFlag } from '@/lib/bgg-utils';
 import type { BGGGame, BGGVersion } from '@/lib/bgg-types';
+import { useTranslations } from 'next-intl';
 
 interface VersionSelectorProps {
   game: BGGGame;
@@ -12,6 +13,13 @@ interface VersionSelectorProps {
 }
 
 export function VersionSelector({ game, selectedVersion, onSelect }: VersionSelectorProps) {
+  const tLoading = useTranslations('Sell.VersionSelector.loading');
+  const tNoVersions = useTranslations('Sell.VersionSelector.noVersions');
+  const tFetchError = useTranslations('Sell.VersionSelector.fetchError');
+  const tGameInfo = useTranslations('Sell.VersionSelector.gameInfo');
+  const tVersionList = useTranslations('Sell.VersionSelector.versionList');
+  const tHelp = useTranslations('Sell.VersionSelector.help');
+
   const [versions, setVersions] = useState<BGGVersion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,8 +62,8 @@ export function VersionSelector({ game, selectedVersion, onSelect }: VersionSele
     return (
       <div className="text-center py-12">
         <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-frost-ice" />
-        <p className="mt-4 text-text-secondary">Loading versions from BoardGameGeek...</p>
-        <p className="text-sm text-text-muted mt-2">This may take a few seconds</p>
+        <p className="mt-4 text-text-secondary">{tLoading('title')}</p>
+        <p className="text-sm text-text-muted mt-2">{tLoading('subtitle')}</p>
       </div>
     );
   }
@@ -65,11 +73,10 @@ export function VersionSelector({ game, selectedVersion, onSelect }: VersionSele
       <Card padding="md" className="bg-aurora-yellow/10 border border-aurora-yellow/20">
         <div className="text-sm">
           <div className="font-semibold text-polar-night mb-2">
-            No version data available from BoardGameGeek
+            {tNoVersions('title')}
           </div>
           <p className="text-text-secondary mb-4">
-            This game doesn't have detailed version information in BGG's database.
-            You'll be able to enter edition details manually in the next step.
+            {tNoVersions('description')}
           </p>
           <Button
             variant="secondary"
@@ -84,7 +91,7 @@ export function VersionSelector({ game, selectedVersion, onSelect }: VersionSele
               });
             }}
           >
-            Continue Without Version Selection →
+            {tNoVersions('continueButton')}
           </Button>
         </div>
       </Card>
@@ -96,16 +103,16 @@ export function VersionSelector({ game, selectedVersion, onSelect }: VersionSele
       <Card padding="md" className="bg-aurora-red/10 border border-aurora-red/20">
         <div className="text-sm">
           <div className="font-semibold text-polar-night mb-2">
-            Error loading versions
+            {tFetchError('title')}
           </div>
           <p className="text-text-secondary mb-4">
-            Couldn't load version data from BoardGameGeek. Please try again.
+            {tFetchError('description')}
           </p>
           <Button
             variant="secondary"
             onClick={() => window.location.reload()}
           >
-            Retry
+            {tFetchError('retryButton')}
           </Button>
         </div>
       </Card>
@@ -123,7 +130,7 @@ export function VersionSelector({ game, selectedVersion, onSelect }: VersionSele
             </h3>
             {game.yearPublished && (
               <p className="text-sm text-text-secondary mt-1">
-                Original release: {game.yearPublished}
+                {tGameInfo('originalRelease', { year: game.yearPublished })}
               </p>
             )}
           </div>
@@ -135,7 +142,7 @@ export function VersionSelector({ game, selectedVersion, onSelect }: VersionSele
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium text-polar-night">
-              Found {versions.length} version{versions.length !== 1 ? 's' : ''} - select yours:
+              {tVersionList(versions.length === 1 ? 'foundVersions' : 'foundVersions_other', { count: versions.length })}
             </div>
           </div>
 
@@ -165,14 +172,14 @@ export function VersionSelector({ game, selectedVersion, onSelect }: VersionSele
                     <div className="space-y-1">
                       {version.publisher && (
                         <div className="text-sm flex items-start gap-2">
-                          <span className="text-text-muted min-w-[80px]">Publisher:</span>
+                          <span className="text-text-muted min-w-[80px]">{tVersionList('publisher')}</span>
                           <span className="text-text-secondary">{version.publisher}</span>
                         </div>
                       )}
 
                       {version.language && (
                         <div className="text-sm flex items-start gap-2">
-                          <span className="text-text-muted min-w-[80px]">Language:</span>
+                          <span className="text-text-muted min-w-[80px]">{tVersionList('language')}</span>
                           <span className="text-text-secondary flex items-center gap-1">
                             {getLanguageFlag(version.language)}
                             {version.language}
@@ -182,14 +189,14 @@ export function VersionSelector({ game, selectedVersion, onSelect }: VersionSele
 
                       {version.yearPublished && (
                         <div className="text-sm flex items-start gap-2">
-                          <span className="text-text-muted min-w-[80px]">Year:</span>
+                          <span className="text-text-muted min-w-[80px]">{tVersionList('year')}</span>
                           <span className="text-text-secondary">{version.yearPublished}</span>
                         </div>
                       )}
 
                       {version.productCode && (
                         <div className="text-sm flex items-start gap-2">
-                          <span className="text-text-muted min-w-[80px]">Product Code:</span>
+                          <span className="text-text-muted min-w-[80px]">{tVersionList('productCode')}</span>
                           <span className="text-text-secondary font-mono text-xs">
                             {version.productCode}
                           </span>
@@ -233,12 +240,10 @@ export function VersionSelector({ game, selectedVersion, onSelect }: VersionSele
           </div>
           <div className="flex-1 text-sm">
             <div className="font-semibold text-polar-night mb-1">
-              Not sure which version you have?
+              {tHelp('title')}
             </div>
             <div className="text-text-secondary">
-              Check the box bottom or rulebook for publisher name and year.
-              The product code (if present) is the most accurate identifier.
-              If you can't find your exact version, choose the closest match.
+              {tHelp('description')}
             </div>
           </div>
         </div>

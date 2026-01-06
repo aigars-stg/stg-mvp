@@ -4,6 +4,7 @@
 
 export type ListingStatus = 'draft' | 'active' | 'sold' | 'removed';
 export type ListingCondition = 'likeNew' | 'veryGood' | 'good' | 'acceptable';
+export type ListingType = 'instant_buy' | 'contact_seller';
 
 // Expansion included with a listing (bundled with base game)
 export interface IncludedExpansion {
@@ -61,6 +62,7 @@ export interface Listing {
   // Metadata
   seller_id: string;
   status: ListingStatus;
+  listing_type: ListingType;
   created_at: string;
   updated_at: string;
   sold_at: string | null;
@@ -150,4 +152,16 @@ export function getStatusLabel(status: ListingStatus): string {
     removed: 'Removed',
   };
   return labels[status];
+}
+
+export function getListingTypeLabel(type: ListingType): string {
+  const labels: Record<ListingType, string> = {
+    instant_buy: 'Instant Buy',
+    contact_seller: 'Contact Seller',
+  };
+  return labels[type];
+}
+
+export function isContactSellerListing(listing: { listing_type?: ListingType }): boolean {
+  return listing.listing_type === 'contact_seller';
 }

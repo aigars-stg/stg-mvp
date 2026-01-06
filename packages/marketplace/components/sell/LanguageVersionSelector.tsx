@@ -4,6 +4,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Card, Button } from '@second-turn/design-system';
 import type { BGGGame, BGGVersion, VersionSelection, ManualVersion } from '@/lib/bgg-types';
 import { ManualVersionInput } from './ManualVersionInput';
+import { useTranslations } from 'next-intl';
 
 interface LanguageVersionSelectorProps {
   game: BGGGame;
@@ -22,6 +23,10 @@ export function LanguageVersionSelector({
   fallbackReason,
   onVersionCountChange,
 }: LanguageVersionSelectorProps) {
+  const t = useTranslations('Sell.LanguageVersionSelector');
+  const tNoVersions = useTranslations('Sell.LanguageVersionSelector.noVersions');
+  const tAutoSelected = useTranslations('Sell.LanguageVersionSelector.autoSelected');
+
   const [versions, setVersions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(!fallbackMode);
   const [selectedLanguage, setSelectedLanguage] = useState<string>(
@@ -159,7 +164,7 @@ export function LanguageVersionSelector({
     return (
       <div className="text-center py-8">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-frost-ice" />
-        <p className="mt-4 text-text-secondary">Loading versions from BoardGameGeek...</p>
+        <p className="mt-4 text-text-secondary">{t('loading')}</p>
       </div>
     );
   }
@@ -169,10 +174,10 @@ export function LanguageVersionSelector({
       <Card padding="md" className="bg-aurora-yellow/10 border border-aurora-yellow/20">
         <div className="text-sm">
           <div className="font-semibold text-polar-night mb-2">
-            No version data available
+            {tNoVersions('title')}
           </div>
           <p className="text-text-secondary mb-4">
-            This game doesn't have detailed version information in BGG's database. You can continue without selecting a version.
+            {tNoVersions('description')}
           </p>
           <Button
             variant="secondary"
@@ -186,7 +191,7 @@ export function LanguageVersionSelector({
               });
             }}
           >
-            Continue Without Version Selection →
+            {tNoVersions('continueButton')}
           </Button>
         </div>
       </Card>
@@ -209,10 +214,10 @@ export function LanguageVersionSelector({
           </div>
           <div className="flex-1">
             <div className="font-semibold text-polar-night mb-2">
-              Version automatically selected
+              {tAutoSelected('title')}
             </div>
             <p className="text-sm text-text-secondary mb-3">
-              Only one version available for this game:
+              {tAutoSelected('onlyVersion')}
             </p>
             <div className="bg-bg-elevated rounded-lg p-3 flex gap-3">
               {selectedVersion.thumbnail && (
@@ -253,7 +258,7 @@ export function LanguageVersionSelector({
       {/* Language Selection */}
       <div>
         <label className="block text-sm font-medium text-text mb-3">
-          Select Language <span className="text-error">*</span>
+          {t('selectLanguage')} <span className="text-error">{t('required')}</span>
         </label>
         <div className="flex flex-wrap gap-2">
           {/* Primary languages (Baltic region priority) */}
@@ -277,7 +282,7 @@ export function LanguageVersionSelector({
               onClick={() => setShowOtherLanguages(true)}
               className="px-4 py-2 rounded-lg font-medium transition-all bg-bg-secondary text-text-secondary border-2 border-border hover:border-frost-ice hover:bg-frost-ice/10 hover:text-text"
             >
-              Other languages ({otherLanguages.length})
+              {t('otherLanguages', { count: otherLanguages.length })}
             </button>
           )}
 
@@ -302,12 +307,12 @@ export function LanguageVersionSelector({
               onClick={() => setShowOtherLanguages(false)}
               className="px-4 py-2 rounded-lg font-medium transition-all bg-bg-secondary text-text-secondary border-2 border-border hover:border-frost-ice hover:bg-frost-ice/10 hover:text-text"
             >
-              Show less
+              {t('showLess')}
             </button>
           )}
         </div>
         <p className="mt-3 text-xs text-text-muted">
-          {primaryLanguages.length + otherLanguages.length} language{primaryLanguages.length + otherLanguages.length !== 1 ? 's' : ''} available
+          {t(primaryLanguages.length + otherLanguages.length === 1 ? 'languagesAvailable' : 'languagesAvailable_other', { count: primaryLanguages.length + otherLanguages.length })}
         </p>
       </div>
 
@@ -326,10 +331,10 @@ export function LanguageVersionSelector({
             </div>
             <div className="flex-1">
               <div className="font-semibold text-polar-night mb-2">
-                Version automatically selected
+                {tAutoSelected('title')}
               </div>
               <p className="text-sm text-text-secondary mb-3">
-                Only one {selectedLanguage} version available:
+                {tAutoSelected('onlyLanguageVersion', { language: selectedLanguage })}
               </p>
               <div className="bg-bg-elevated rounded-lg p-3 flex gap-3">
                 {selectedVersion.thumbnail && (
@@ -369,10 +374,10 @@ export function LanguageVersionSelector({
         <div className="space-y-3 animate-fade-in">
           <div>
             <label className="block text-sm font-medium text-text mb-2">
-              Select Your Version <span className="text-error">*</span>
+              {t('selectVersion')} <span className="text-error">{t('required')}</span>
             </label>
             <p className="text-xs text-text-muted mb-3">
-              {filteredVersions.length} version(s) available in {selectedLanguage}
+              {t('versionsAvailable', { count: filteredVersions.length, language: selectedLanguage })}
             </p>
           </div>
 
@@ -460,7 +465,7 @@ export function LanguageVersionSelector({
       {selectedLanguage && filteredVersions.length === 0 && (
         <Card padding="md" className="bg-snow-storm-1 animate-fade-in">
           <p className="text-sm text-text-secondary">
-            No versions found for {selectedLanguage}. This shouldn't happen - please try selecting a different language.
+            {t('noVersionsForLanguage', { language: selectedLanguage })}
           </p>
         </Card>
       )}

@@ -6,6 +6,7 @@ import { Package, RefreshCw, Search, X, ExternalLink, Type, ChevronDown, Chevron
 import type { VersionSelection } from '@/lib/bgg-types';
 import type { BGGExpansionInfo } from '@/lib/bgg-api';
 import { LanguageVersionSelector } from './LanguageVersionSelector';
+import { useTranslations } from 'next-intl';
 
 // Constants
 const COLLAPSED_SELECTED_LIMIT = 2; // Show first 2 selected in collapsed view
@@ -137,6 +138,8 @@ export function ExpansionSelector({
   onExpansionsChange,
   isLoading = false,
 }: ExpansionSelectorProps) {
+  const t = useTranslations('Sell.ExpansionSelector');
+  const tNameModal = useTranslations('Sell.ExpansionSelector.nameModal');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -405,7 +408,7 @@ export function ExpansionSelector({
     return (
       <div className="text-center py-8">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-frost-ice" />
-        <p className="mt-4 text-text-secondary">Loading expansions...</p>
+        <p className="mt-4 text-text-secondary">{t('loading')}</p>
       </div>
     );
   }
@@ -414,7 +417,7 @@ export function ExpansionSelector({
     return (
       <div className="text-center py-6 text-text-muted">
         <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
-        <p className="text-sm">No expansions found for this game</p>
+        <p className="text-sm">{t('noExpansions')}</p>
       </div>
     );
   }
@@ -425,7 +428,7 @@ export function ExpansionSelector({
       {showSearch && (
         <div className="relative">
           <Input
-            placeholder={`Search ${expansions.length} expansions...`}
+            placeholder={t('searchPlaceholder', { count: expansions.length })}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             leftIcon={<Search className="w-4 h-4 text-text-muted" />}
@@ -435,7 +438,7 @@ export function ExpansionSelector({
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-polar-night/5 rounded-full transition-colors"
-              aria-label="Clear search"
+              aria-label={t('clearSearch')}
             >
               <X className="w-4 h-4 text-text-muted" />
             </button>
@@ -446,8 +449,8 @@ export function ExpansionSelector({
       {/* Results count when searching */}
       {showSearch && searchQuery && (
         <p className="text-xs text-text-muted">
-          {filteredExpansions.length} of {expansions.length} expansions
-          {selectedExpansions.length > 0 && ` · ${selectedExpansions.length} selected`}
+          {t('resultsCount', { filtered: filteredExpansions.length, total: expansions.length })}
+          {selectedExpansions.length > 0 && ` · ${t('selectedCount', { count: selectedExpansions.length })}`}
         </p>
       )}
 
@@ -514,7 +517,7 @@ export function ExpansionSelector({
                           className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 flex-shrink-0"
                         >
                           <RefreshCw className="w-3 h-3" />
-                          Change
+                          {t('changeVersion')}
                         </button>
                       )}
                       {expansion.alternateNames && expansion.alternateNames.length > 0 && (
@@ -523,7 +526,7 @@ export function ExpansionSelector({
                           className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 flex-shrink-0"
                         >
                           <Type className="w-3 h-3" />
-                          Name
+                          {t('changeName')}
                         </button>
                       )}
                     </div>
@@ -541,7 +544,7 @@ export function ExpansionSelector({
             >
               <div className="flex items-center justify-between">
                 <span className="text-sm text-frost-ice font-medium">
-                  + {hiddenSelectedCount} more selected
+                  {t('moreSelected', { count: hiddenSelectedCount })}
                 </span>
                 <ChevronDown className="w-4 h-4 text-text-muted" />
               </div>
@@ -558,11 +561,11 @@ export function ExpansionSelector({
                 <div className="flex items-center gap-2">
                   <Package className="w-4 h-4 text-text-muted" />
                   <span className="text-sm text-text-secondary">
-                    {unselectedCount} expansion{unselectedCount !== 1 ? 's' : ''} available
+                    {t('expansionsAvailable', { count: unselectedCount })}
                   </span>
                 </div>
                 <div className="flex items-center gap-1 text-frost-ice text-sm">
-                  Show
+                  {t('show')}
                   <ChevronDown className="w-4 h-4" />
                 </div>
               </div>
@@ -581,7 +584,7 @@ export function ExpansionSelector({
               className="flex items-center gap-1 text-sm text-frost-ice hover:text-aurora-blue transition-colors"
             >
               <ChevronUp className="w-4 h-4" />
-              Collapse
+              {t('collapse')}
             </button>
           )}
 
@@ -590,10 +593,10 @@ export function ExpansionSelector({
             {sortedExpansions.length === 0 ? (
               <div className="text-center py-6">
                 <p className="text-sm text-text-secondary">
-                  No expansions match &quot;{searchQuery}&quot;
+                  {t('noMatch', { query: searchQuery })}
                 </p>
                 <p className="text-xs text-text-muted mt-1">
-                  Try searching in English or check spelling
+                  {t('searchTip')}
                 </p>
               </div>
             ) : (
@@ -709,7 +712,7 @@ export function ExpansionSelector({
                           {formatVersionDisplay(selectedData.selectedVersion)}
                         </span>
                         {singleVersion ? (
-                          <span className="text-text-muted flex-shrink-0">(only edition)</span>
+                          <span className="text-text-muted flex-shrink-0">({t('onlyEdition')})</span>
                         ) : (
                           <button
                             onClick={(e) => {
@@ -719,7 +722,7 @@ export function ExpansionSelector({
                             className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 flex-shrink-0"
                           >
                             <RefreshCw className="w-3 h-3" />
-                            Change
+                            {t('changeVersion')}
                           </button>
                         )}
                         {/* Change name button - show when alternateNames exist */}
@@ -732,7 +735,7 @@ export function ExpansionSelector({
                             className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 flex-shrink-0"
                           >
                             <Type className="w-3 h-3" />
-                            Name
+                            {t('changeName')}
                           </button>
                         )}
                       </div>
@@ -751,7 +754,7 @@ export function ExpansionSelector({
       {selectedExpansions.length > 0 && (
         <div className="pt-2 border-t border-border-subtle">
           <p className="text-sm text-frost-ice font-medium">
-            {selectedExpansions.length} expansion{selectedExpansions.length !== 1 ? 's' : ''} included
+            {t('expansionsIncluded', { count: selectedExpansions.length })}
           </p>
         </div>
       )}
@@ -760,7 +763,7 @@ export function ExpansionSelector({
       <Modal
         open={!!versionModalExpansion}
         onClose={() => setVersionModalExpansion(null)}
-        title={`Select Edition`}
+        title={t('selectEdition')}
         size="lg"
       >
         {versionModalExpansion && (
@@ -787,7 +790,7 @@ export function ExpansionSelector({
       <Modal
         open={!!nameModalExpansionId}
         onClose={() => setNameModalExpansionId(null)}
-        title="Select Display Name"
+        title={tNameModal('title')}
         size="md"
       >
         {nameModalExpansionId && (() => {
@@ -804,7 +807,7 @@ export function ExpansionSelector({
           return (
             <div className="p-4 space-y-4">
               <p className="text-sm text-text-secondary">
-                Choose the name that matches your edition:
+                {tNameModal('instruction')}
               </p>
               <div className="space-y-2 max-h-80 overflow-y-auto">
                 {nameOptions.map((name, index) => {
@@ -822,10 +825,10 @@ export function ExpansionSelector({
                     >
                       <span className="font-medium text-polar-night">{name}</span>
                       {isPrimary && (
-                        <span className="ml-2 text-xs text-text-muted">(Primary)</span>
+                        <span className="ml-2 text-xs text-text-muted">({tNameModal('primary')})</span>
                       )}
                       {isSelected && (
-                        <span className="ml-2 text-xs text-frost-ice">(Current)</span>
+                        <span className="ml-2 text-xs text-frost-ice">({tNameModal('current')})</span>
                       )}
                     </button>
                   );
@@ -837,7 +840,7 @@ export function ExpansionSelector({
                   onClick={() => setNameModalExpansionId(null)}
                   fullWidth
                 >
-                  Cancel
+                  {tNameModal('cancel')}
                 </Button>
               </div>
             </div>

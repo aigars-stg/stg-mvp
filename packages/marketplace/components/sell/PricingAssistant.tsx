@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Button } from '@second-turn/design-system';
 import { TrendingUp, ExternalLink, Loader2, AlertCircle, Tag, BarChart3, Puzzle, Info } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ExpansionPricing {
   bggGameId: number;
@@ -59,6 +60,8 @@ export function PricingAssistant({
   onFillPrice,
   expansionIds = [],
 }: PricingAssistantProps) {
+  const t = useTranslations('Sell.PricingAssistant');
+  const tConditions = useTranslations('Sell.PricingAssistant.conditions');
   const [pricingData, setPricingData] = useState<PricingData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -156,13 +159,14 @@ export function PricingAssistant({
   };
 
   const formatCondition = (cond: string): string => {
-    const labels: Record<string, string> = {
-      likeNew: 'Like New',
-      veryGood: 'Very Good',
-      good: 'Good',
-      acceptable: 'Acceptable',
+    const conditionKeys: Record<string, string> = {
+      likeNew: 'likeNew',
+      veryGood: 'veryGood',
+      good: 'good',
+      acceptable: 'acceptable',
     };
-    return labels[cond] || cond;
+    const key = conditionKeys[cond];
+    return key ? tConditions(key as any) : cond;
   };
 
   if (!bggGameId) {
@@ -174,7 +178,7 @@ export function PricingAssistant({
       <Card padding="md" className="bg-frost-ice/5 border-frost-ice/20 mb-4">
         <div className="flex items-center gap-2 text-text-secondary">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-sm">Loading pricing data...</span>
+          <span className="text-sm">{t('loading')}</span>
         </div>
       </Card>
     );
@@ -185,7 +189,7 @@ export function PricingAssistant({
       <Card padding="md" className="bg-aurora-yellow/5 border border-aurora-yellow/20 mb-4">
         <div className="flex items-center gap-2 text-text-secondary">
           <AlertCircle className="w-4 h-4 text-aurora-yellow" />
-          <span className="text-sm">{error}</span>
+          <span className="text-sm">{t('error')}</span>
         </div>
       </Card>
     );
@@ -210,7 +214,7 @@ export function PricingAssistant({
     <Card padding="md" className="bg-frost-ice/5 border border-frost-ice/20 mb-4">
       <div className="flex items-center gap-2 mb-3">
         <TrendingUp className="w-4 h-4 text-frost-ice" />
-        <h4 className="font-semibold text-polar-night text-sm">Pricing assistant</h4>
+        <h4 className="font-semibold text-polar-night text-sm">{t('title')}</h4>
       </div>
 
       <div className="space-y-3">
@@ -222,7 +226,7 @@ export function PricingAssistant({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4 text-text-secondary" />
-                  <span className="text-sm text-text-secondary">New retail:</span>
+                  <span className="text-sm text-text-secondary">{t('newRetail')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-polar-night tabular-nums">
@@ -234,7 +238,7 @@ export function PricingAssistant({
                     onClick={() => onFillPrice(external.lowestPrice!)}
                     className="text-xs px-3 h-7"
                   >
-                    Fill
+                    {t('fillButton')}
                   </Button>
                 </div>
               </div>
@@ -247,7 +251,7 @@ export function PricingAssistant({
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4 text-text-secondary" />
-                    <span className="text-text-secondary">Base game:</span>
+                    <span className="text-text-secondary">{t('baseGame')}</span>
                   </div>
                   <span className="text-text-secondary tabular-nums">
                     €{external.lowestPrice.toFixed(2)}
@@ -259,9 +263,9 @@ export function PricingAssistant({
                   <div className="flex items-center gap-2">
                     <Puzzle className="w-4 h-4 text-frost-ice" />
                     <span className="text-text-secondary">
-                      + {bundleInfo.totalExpansions} expansion{bundleInfo.totalExpansions !== 1 ? 's' : ''}
+                      + {t('expansions', { count: bundleInfo.totalExpansions })}
                       {bundleInfo.pricedExpansions < bundleInfo.totalExpansions && (
-                        <span className="text-text-muted"> ({bundleInfo.pricedExpansions} priced)</span>
+                        <span className="text-text-muted"> ({t('pricedCount', { count: bundleInfo.pricedExpansions })})</span>
                       )}
                       :
                     </span>
@@ -274,7 +278,7 @@ export function PricingAssistant({
                 {/* Bundle total with divider */}
                 <div className="border-t border-frost-ice/20 my-1" />
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-polar-night">Bundle retail:</span>
+                  <span className="text-sm font-medium text-polar-night">{t('bundleRetail')}</span>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-polar-night tabular-nums">
                       €{bundleRetailValue.toFixed(2)}
@@ -285,7 +289,7 @@ export function PricingAssistant({
                       onClick={() => onFillPrice(bundleRetailValue)}
                       className="text-xs px-3 h-7"
                     >
-                      Fill
+                      {t('fillButton')}
                     </Button>
                   </div>
                 </div>
@@ -304,14 +308,14 @@ export function PricingAssistant({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-text-muted" />
-              <span className="text-sm text-text-secondary">Avg. sold here:</span>
+              <span className="text-sm text-text-secondary">{t('avgSoldHere')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-polar-night tabular-nums">
                 €{internal.medianSoldPrice.toFixed(2)}
               </span>
               <span className="text-xs text-text-muted">
-                ({internal.completedSalesCount} sales)
+                ({t('salesCount', { count: internal.completedSalesCount })})
               </span>
               <Button
                 variant="secondary"
@@ -319,7 +323,7 @@ export function PricingAssistant({
                 onClick={() => onFillPrice(internal.medianSoldPrice!)}
                 className="text-xs px-3 h-7"
               >
-                Fill
+                {t('fillButton')}
               </Button>
             </div>
           </div>
@@ -329,7 +333,7 @@ export function PricingAssistant({
         {internal?.lowestActivePrice && internal.activeListingCount > 0 && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-text-muted">
-              Lowest on Second Turn Games:
+              {t('lowestOnSecondTurn')}
             </span>
             <span className="text-text-secondary tabular-nums">
               €{internal.lowestActivePrice.toFixed(2)}
@@ -342,7 +346,7 @@ export function PricingAssistant({
           <div className="pt-3 mt-3 border-t border-frost-ice/20">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-frost-ice">
-                Suggested for {formatCondition(condition)}:
+                {t('suggestedFor', { condition: formatCondition(condition) })}
               </span>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-frost-ice text-lg tabular-nums">
@@ -354,7 +358,7 @@ export function PricingAssistant({
                   onClick={() => onFillPrice(suggestedPrice)}
                   className="h-8 px-4"
                 >
-                  Use price
+                  {t('usePrice')}
                 </Button>
               </div>
             </div>
@@ -375,7 +379,7 @@ export function PricingAssistant({
             </a>
             <span
               className="text-text-muted cursor-help"
-              title="Based on lowest EU retail prices. Your local market may differ - use as a guide."
+              title={t('disclaimer')}
             >
               <Info className="w-3.5 h-3.5" />
             </span>

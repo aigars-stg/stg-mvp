@@ -22,7 +22,7 @@ import {
   Puzzle,
 } from 'lucide-react';
 import type { GameWithOffers } from '@/lib/types/aggregated-game';
-import type { ListingCondition } from '@/lib/types/listing';
+import type { ListingCondition, ListingType } from '@/lib/types/listing';
 import { OfferCard } from '@/components/game/OfferCard';
 import { GameNavigationArrows } from '@/components/game/GameNavigationArrows';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -70,6 +70,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   // Filters
   const [sortBy, setSortBy] = useState<SortOption>('price_asc');
   const [filterConditions, setFilterConditions] = useState<ListingCondition[]>([]);
+  const [listingTypeFilter, setListingTypeFilter] = useState<ListingType | 'all'>('all');
   const [showFilters, setShowFilters] = useState(false);
 
   // Cart states
@@ -97,6 +98,9 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
         const queryParams = new URLSearchParams();
         queryParams.set('sort', sortBy);
         filterConditions.forEach((c) => queryParams.append('condition', c));
+        if (listingTypeFilter !== 'all') {
+          queryParams.set('listingType', listingTypeFilter);
+        }
 
         const response = await fetch(`/api/games/${bggId}/offers?${queryParams.toString()}`);
         const data = await response.json();
@@ -116,7 +120,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
     if (bggId) {
       fetchGame();
     }
-  }, [bggId, sortBy, filterConditions]);
+  }, [bggId, sortBy, filterConditions, listingTypeFilter]);
 
   // Add to cart handler
   const handleAddToCart = async (listingId: string) => {
@@ -178,6 +182,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   // Clear all filters
   const clearFilters = () => {
     setFilterConditions([]);
+    setListingTypeFilter('all');
     setSortBy('price_asc');
   };
 
@@ -406,6 +411,17 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
 
           {game.offers.length > 1 && (
             <div className="flex items-center gap-2 w-full sm:w-auto">
+              {/* Listing Type Dropdown */}
+              <select
+                value={listingTypeFilter}
+                onChange={(e) => setListingTypeFilter(e.target.value as ListingType | 'all')}
+                className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-border bg-snow-white text-sm focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
+              >
+                <option value="all">{t('filter.allListings')}</option>
+                <option value="instant_buy">{t('filter.instantBuy')}</option>
+                <option value="contact_seller">{t('filter.contactSeller')}</option>
+              </select>
+
               {/* Sort Dropdown */}
               <select
                 value={sortBy}

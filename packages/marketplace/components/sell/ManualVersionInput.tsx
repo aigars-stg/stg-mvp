@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card, Button, Input } from '@second-turn/design-system';
 import { ManualVersion } from '@/lib/bgg-types';
 import { Info } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ManualVersionInputProps {
   gameName: string;
@@ -13,6 +14,13 @@ interface ManualVersionInputProps {
 }
 
 export function ManualVersionInput({ gameName, gameYear, onSubmit, onCancel }: ManualVersionInputProps) {
+  const t = useTranslations('Sell.ManualVersionInput');
+  const tPublisher = useTranslations('Sell.ManualVersionInput.publisher');
+  const tLanguage = useTranslations('Sell.ManualVersionInput.language');
+  const tVersionName = useTranslations('Sell.ManualVersionInput.versionName');
+  const tEditionYear = useTranslations('Sell.ManualVersionInput.editionYear');
+  const tInfoBanner = useTranslations('Sell.ManualVersionInput.infoBanner');
+
   const [versionName, setVersionName] = useState('');
   const [publisher, setPublisher] = useState('');
   const [language, setLanguage] = useState('');
@@ -23,15 +31,15 @@ export function ManualVersionInput({ gameName, gameYear, onSubmit, onCancel }: M
     const newErrors: Record<string, string> = {};
 
     if (!publisher.trim()) {
-      newErrors.publisher = 'Publisher is required';
+      newErrors.publisher = tPublisher('error');
     }
 
     if (!language.trim()) {
-      newErrors.language = 'Language is required';
+      newErrors.language = tLanguage('error');
     }
 
     if (editionYear && (isNaN(Number(editionYear)) || Number(editionYear) < 1900 || Number(editionYear) > new Date().getFullYear() + 1)) {
-      newErrors.editionYear = 'Please enter a valid year';
+      newErrors.editionYear = tEditionYear('error');
     }
 
     setErrors(newErrors);
@@ -62,9 +70,9 @@ export function ManualVersionInput({ gameName, gameYear, onSubmit, onCancel }: M
       <div className="space-y-6">
         {/* Header */}
         <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-polar-night">Specify Your Edition</h3>
+          <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
           <p className="text-sm text-text-secondary">
-            Tell us about your copy of <span className="font-semibold text-polar-night">{gameName}</span>
+            {t('subtitle', { gameName: '' })} <span className="font-semibold text-polar-night">{gameName}</span>
           </p>
         </div>
 
@@ -74,8 +82,8 @@ export function ManualVersionInput({ gameName, gameYear, onSubmit, onCancel }: M
             <div className="flex gap-3">
               <Info className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
               <div className="text-sm text-text-secondary space-y-1">
-                <p>We couldn't automatically retrieve version information from BoardGameGeek.</p>
-                <p>Please provide details about your copy to help buyers understand what they're purchasing.</p>
+                <p>{tInfoBanner('line1')}</p>
+                <p>{tInfoBanner('line2')}</p>
               </div>
             </div>
           </div>
@@ -83,12 +91,12 @@ export function ManualVersionInput({ gameName, gameYear, onSubmit, onCancel }: M
           {/* Publisher - Required */}
           <div className="space-y-2">
             <label htmlFor="publisher" className="block text-sm font-medium text-polar-night">
-              Publisher <span className="text-error">*</span>
+              {tPublisher('label')} <span className="text-error">*</span>
             </label>
             <Input
               id="publisher"
               type="text"
-              placeholder="e.g., Stonemaier Games, Z-Man Games, etc."
+              placeholder={tPublisher('placeholder')}
               value={publisher}
               onChange={(e) => {
                 setPublisher(e.target.value);
@@ -106,12 +114,12 @@ export function ManualVersionInput({ gameName, gameYear, onSubmit, onCancel }: M
           {/* Language - Required */}
           <div className="space-y-2">
             <label htmlFor="language" className="block text-sm font-medium text-polar-night">
-              Language <span className="text-error">*</span>
+              {tLanguage('label')} <span className="text-error">*</span>
             </label>
             <Input
               id="language"
               type="text"
-              placeholder="e.g., English, German, French, etc."
+              placeholder={tLanguage('placeholder')}
               value={language}
               onChange={(e) => {
                 setLanguage(e.target.value);
@@ -129,29 +137,29 @@ export function ManualVersionInput({ gameName, gameYear, onSubmit, onCancel }: M
           {/* Edition/Version Name - Optional */}
           <div className="space-y-2">
             <label htmlFor="versionName" className="block text-sm font-medium text-polar-night">
-              Edition/Version Name <span className="text-text-secondary font-normal">(optional)</span>
+              {tVersionName('label')} <span className="text-text-secondary font-normal">{tVersionName('optional')}</span>
             </label>
             <Input
               id="versionName"
               type="text"
-              placeholder="e.g., Retail Edition, Kickstarter Edition, Second Edition"
+              placeholder={tVersionName('placeholder')}
               value={versionName}
               onChange={(e) => setVersionName(e.target.value)}
             />
             <p className="text-sm text-text-secondary">
-              If left blank, we'll use "{publisher || 'Publisher'} Edition"
+              {tVersionName('hint', { publisher: publisher || 'Publisher' })}
             </p>
           </div>
 
           {/* Edition Year - Optional */}
           <div className="space-y-2">
             <label htmlFor="editionYear" className="block text-sm font-medium text-polar-night">
-              Edition Year <span className="text-text-secondary font-normal">(optional)</span>
+              {tEditionYear('label')} <span className="text-text-secondary font-normal">{tEditionYear('optional')}</span>
             </label>
             <Input
               id="editionYear"
               type="number"
-              placeholder={gameYear?.toString() || 'e.g., 2023'}
+              placeholder={gameYear?.toString() || tEditionYear('placeholder')}
               value={editionYear}
               onChange={(e) => {
                 setEditionYear(e.target.value);
@@ -174,7 +182,7 @@ export function ManualVersionInput({ gameName, gameYear, onSubmit, onCancel }: M
               variant="primary"
               className="flex-1"
             >
-              Continue
+              {t('continueButton')}
             </Button>
             {onCancel && (
               <Button
@@ -182,7 +190,7 @@ export function ManualVersionInput({ gameName, gameYear, onSubmit, onCancel }: M
                 variant="secondary"
                 onClick={onCancel}
               >
-                Cancel
+                {t('cancelButton')}
               </Button>
             )}
           </div>

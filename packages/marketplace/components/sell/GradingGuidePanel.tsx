@@ -19,6 +19,7 @@ import {
   GRADING_PHILOSOPHY,
 } from '../../lib/grading-guide-content';
 import type { ListingCondition } from '../../lib/types/listing';
+import { useTranslations } from 'next-intl';
 
 // Grade icons mapping
 const GRADE_ICONS = {
@@ -56,6 +57,7 @@ function GradeItem({
   gradeKey: ListingCondition;
   isHighlighted: boolean;
 }) {
+  const t = useTranslations('Sell.GradingGuidePanel');
   const [expanded, setExpanded] = useState(isHighlighted);
   const grade = CONDITION_GRADES[gradeKey];
   const Icon = GRADE_ICONS[gradeKey];
@@ -82,7 +84,7 @@ function GradeItem({
                   {grade.label}
                   {isHighlighted && (
                     <span className="ml-2 text-xs font-normal text-frost-ice">
-                      (selected)
+                      {t('selected')}
                     </span>
                   )}
                 </h3>
@@ -154,13 +156,16 @@ export function GradingGuidePanel({
   onClose,
   highlightedCondition,
 }: GradingGuidePanelProps) {
+  const t = useTranslations('Sell.GradingGuidePanel');
+  const tTabs = useTranslations('Sell.GradingGuidePanel.tabs');
+  const tQuickTips = useTranslations('Sell.GradingGuidePanel.quickTips');
   const [activeTab, setActiveTab] = useState<'grades' | 'tips'>('grades');
 
   return (
     <SlidePanel
       open={isOpen}
       onClose={onClose}
-      title="Condition grading guide"
+      title={t('title')}
       size="md"
     >
       <div className="space-y-6">
@@ -175,7 +180,7 @@ export function GradingGuidePanel({
                 : 'text-text-secondary hover:text-polar-night'
             }`}
           >
-            Grades
+            {tTabs('grades')}
           </button>
           <button
             type="button"
@@ -186,7 +191,7 @@ export function GradingGuidePanel({
                 : 'text-text-secondary hover:text-polar-night'
             }`}
           >
-            Tips
+            {tTabs('tips')}
           </button>
         </div>
 
@@ -220,7 +225,7 @@ export function GradingGuidePanel({
             {/* Special Considerations */}
             <div>
               <h3 className="font-semibold text-polar-night mb-3">
-                Special Considerations
+                {t('specialConsiderations')}
               </h3>
               <div className="space-y-3">
                 {Object.entries(SPECIAL_CONSIDERATIONS).map(([key, consideration]) => (
@@ -249,23 +254,23 @@ export function GradingGuidePanel({
 
             {/* Quick Tips */}
             <Card padding="sm" className="bg-aurora-orange/5 border border-aurora-orange/20">
-              <h4 className="font-medium text-polar-night text-sm mb-2">Quick tips</h4>
+              <h4 className="font-medium text-polar-night text-sm mb-2">{tQuickTips('title')}</h4>
               <ul className="space-y-1.5 text-xs text-text-secondary">
                 <li className="flex items-start gap-1">
                   <span className="text-aurora-orange">•</span>
-                  When in doubt, grade down - buyers love positive surprises
+                  {tQuickTips('tip1')}
                 </li>
                 <li className="flex items-start gap-1">
                   <span className="text-aurora-orange">•</span>
-                  Use natural daylight for photos
+                  {tQuickTips('tip2')}
                 </li>
                 <li className="flex items-start gap-1">
                   <span className="text-aurora-orange">•</span>
-                  Mention sleeved cards as a positive
+                  {tQuickTips('tip3')}
                 </li>
                 <li className="flex items-start gap-1">
                   <span className="text-aurora-orange">•</span>
-                  Be specific about any damage
+                  {tQuickTips('tip4')}
                 </li>
               </ul>
             </Card>
@@ -279,7 +284,7 @@ export function GradingGuidePanel({
             target="_blank"
             className="flex items-center justify-center gap-2 text-frost-ice hover:text-aurora-blue text-sm font-medium transition-colors"
           >
-            View full grading guide
+            {t('viewFullGuide')}
             <ExternalLink className="w-4 h-4" />
           </Link>
         </div>
