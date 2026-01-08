@@ -5,17 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
-import {
-  CheckCircle2,
-  Package,
-  Clock,
-  MessageCircle,
-  ArrowRight,
-  Loader2,
-  AlertCircle,
-  Mail,
-  TruckIcon,
-} from 'lucide-react';
+import { CheckCircleAlt01 as CheckCircle2, Package, Time as Clock, ChatBubble as MessageCircle, ArrowRight, RefreshCw as Loader2, AlertCircle, Email as Mail, Truck as TruckIcon } from 'griddy-icons';
 
 interface OrderDetails {
   order_id: string;

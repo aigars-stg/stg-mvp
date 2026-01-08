@@ -3,14 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@second-turn/design-system';
-import {
-  CheckCircle2,
-  ArrowRight,
-  Package,
-  DollarSign,
-  TrendingUp,
-  Heart,
-} from 'lucide-react';
+import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Package, CurrencyDollar as DollarSign, TrendUp as TrendingUp, Heart } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import Link from 'next/link';
 

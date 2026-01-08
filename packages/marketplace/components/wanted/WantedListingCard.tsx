@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Card, Badge, Button } from '@second-turn/design-system';
-import { Package, MapPin, Users, Baby, Clock, TrendingUp } from 'lucide-react';
+import { Package, LocationPin as MapPin, Users, User as Baby, Time as Clock, TrendUp as TrendingUp } from 'griddy-icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { getBudgetDisplay, getTimeRemaining, getTimeRemainingDisplay } from '@/lib/types/wanted-listing';
 import { getConditionLabel } from '@/lib/types/listing';

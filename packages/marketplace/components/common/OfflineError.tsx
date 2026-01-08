@@ -1,6 +1,6 @@
 'use client';
 
-import { WifiOff, RefreshCw } from 'lucide-react';
+import { WifiOff, RefreshCw } from 'griddy-icons';
 import { Button } from '@second-turn/design-system';
 
 interface OfflineErrorProps {

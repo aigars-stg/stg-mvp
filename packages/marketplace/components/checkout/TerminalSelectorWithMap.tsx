@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { Search, MapPin, Check, Loader2, Map as MapIcon, List } from 'lucide-react';
+import { Search, LocationPin as MapPin, Check, RefreshCw as Loader2, Map as MapIcon, ListBulleted as List } from 'griddy-icons';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
 
 // Dynamically import the map component to avoid SSR issues and reduce initial bundle

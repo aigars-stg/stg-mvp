@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, CreditCard, MessageSquare } from 'lucide-react';
+import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, CreditCard, Chat as MessageSquare } from 'griddy-icons';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';

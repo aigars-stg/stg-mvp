@@ -1,6 +1,6 @@
 'use client';
 
-import { Info } from 'lucide-react';
+import { InfoCircle as Info } from 'griddy-icons';
 import type { ListingCondition } from '@/lib/types/listing';
 
 interface MinimumConditionSelectorProps {

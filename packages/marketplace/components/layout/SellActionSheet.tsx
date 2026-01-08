@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Search, X } from 'lucide-react';
+import { Package, Search, X } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';
 
@@ -101,11 +101,10 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
             </div>
             <svg
               className="w-5 h-5 text-text-muted group-hover:text-frost-ice transition-colors"
-              fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </button>
 
@@ -127,11 +126,10 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
             </div>
             <svg
               className="w-5 h-5 text-text-muted group-hover:text-aurora-orange transition-colors"
-              fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>

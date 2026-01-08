@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Heart } from 'lucide-react';
+import { Heart } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 

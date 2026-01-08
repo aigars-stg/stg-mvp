@@ -4,22 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge } from '@second-turn/design-system';
-import {
-  Loader2,
-  AlertCircle,
-  Shield,
-  ArrowLeft,
-  User,
-  Package,
-  MapPin,
-  ExternalLink,
-  MessageSquare,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  Phone,
-  Mail,
-} from 'lucide-react';
+import { RefreshCw as Loader2, AlertCircle, Shield, ArrowLeft, User, Package, LocationPin as MapPin, LinkExternal as ExternalLink, Chat as MessageSquare, AlertTriangle, CheckCircleAlt01 as CheckCircle2, Time as Clock, Phone, Email as Mail } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { MessageBubble } from '@/components/messaging/MessageBubble';

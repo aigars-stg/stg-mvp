@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, Button } from '@second-turn/design-system';
-import { TrendingUp, ExternalLink, Loader2, AlertCircle, Tag, BarChart3, Puzzle, Info } from 'lucide-react';
+import { TrendUp as TrendingUp, LinkExternal as ExternalLink, RefreshCw as Loader2, AlertCircle, Tag, ChartBar as BarChart3, PuzzlePiece as Puzzle, InfoCircle as Info } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 
 interface ExpansionPricing {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Phone, AlertCircle, Check } from 'lucide-react';
+import { Phone, AlertCircle, Check } from 'griddy-icons';
 import { PHONE_FORMATS, type TerminalCountry } from '@/lib/unisend/types';
 
 interface PhoneInputProps {

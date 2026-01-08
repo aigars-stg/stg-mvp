@@ -2,7 +2,7 @@
 
 import { useState, useRef, KeyboardEvent } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Send, Loader2, ImagePlus, X } from 'lucide-react';
+import { Send, RefreshCw as Loader2, ImagePlus, X } from 'griddy-icons';
 import { MESSAGE_CONSTRAINTS } from '@/lib/types/message';
 import { supabase } from '@/lib/supabase/client';
 

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button, Card } from '@second-turn/design-system';
-import { Search, MessageSquare, Shield, Truck, Check } from 'lucide-react';
+import { Search, Chat as MessageSquare, Shield, Truck, Check } from 'griddy-icons';
 
 /**
  * Platform features card - Educational content about how the marketplace works.

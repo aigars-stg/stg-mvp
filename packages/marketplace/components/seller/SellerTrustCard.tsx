@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Star, Award, TrendingUp, Users, Loader2, AlertCircle } from 'lucide-react';
+import { Star, Trophy as Award, TrendUp as TrendingUp, Users, RefreshCw as Loader2, AlertCircle } from 'griddy-icons';
 import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 import {
@@ -92,7 +92,7 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
         {/* Rating */}
         <div className="bg-bg-secondary rounded-lg p-3">
           <div className="flex items-center gap-1 mb-1">
-            <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+            <Star className="w-4 h-4 text-amber-400" filled />
             <span className="text-xs text-text-secondary">Rating</span>
           </div>
           {data.total_reviews > 0 ? (

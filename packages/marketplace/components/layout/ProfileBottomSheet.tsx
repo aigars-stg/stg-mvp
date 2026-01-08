@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Heart, Search, Settings, LogOut, X, LogIn, ShoppingBag, Store } from 'lucide-react';
+import { Package, Heart, Search, Settings, LogOut, X, LogIn, ShoppingBag, Store } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Button } from '@second-turn/design-system';
 import { getInitials } from '@/lib/auth/utils';

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Home, Grid, Plus, MessageCircle, User } from 'lucide-react';
+import { Home, Grid, Plus, ChatBubble as MessageCircle, User } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
 import { useTranslations } from 'next-intl';

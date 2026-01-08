@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { Card } from '@second-turn/design-system';
-import { Camera, X } from 'lucide-react';
+import { PhotoCamera as Camera, X } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 
 export interface PhotoFile {

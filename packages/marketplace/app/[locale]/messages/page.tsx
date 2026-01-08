@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { ConversationList } from '@/components/messaging/ConversationList';
-import { MessageCircle } from 'lucide-react';
+import { ChatBubble as MessageCircle } from 'griddy-icons';
 import { Card } from '@second-turn/design-system';
 
 export const metadata: Metadata = {

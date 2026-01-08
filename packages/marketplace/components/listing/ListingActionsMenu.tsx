@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreVertical, Edit, Package, Trash2, ExternalLink, RotateCcw } from 'lucide-react';
+import { MoreVertical, Edit, Package, TrashAlt as Trash2, LinkExternal as ExternalLink, Undo as RotateCcw } from 'griddy-icons';
 
 export interface ListingActionsMenuProps {
   listingId: string;

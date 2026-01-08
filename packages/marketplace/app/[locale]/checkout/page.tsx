@@ -4,16 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
-import {
-  Package,
-  ArrowLeft,
-  Loader2,
-  AlertCircle,
-  Truck,
-  User,
-  Mail,
-  CreditCard,
-} from 'lucide-react';
+import { Package, ArrowLeft, RefreshCw as Loader2, AlertCircle, Truck, User, Email as Mail, CreditCard } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { TerminalSelectorWithMap } from '@/components/checkout/TerminalSelectorWithMap';
 import { PhoneInput, validatePhone } from '@/components/checkout/PhoneInput';

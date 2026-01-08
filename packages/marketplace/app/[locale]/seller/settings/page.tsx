@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, DollarSign, ChevronRight, Building2 } from 'lucide-react';
+import {  ArrowLeft, CurrencyDollar as DollarSign, ChevronRight, Building as Building2  } from 'griddy-icons';
 import Link from 'next/link';
 
 const settingsItems = [

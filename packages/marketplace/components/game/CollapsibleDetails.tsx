@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'griddy-icons';
 
 interface CollapsibleDetailsProps {
   /** Section title */

@@ -2,15 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
-import {
-  Wallet,
-  Loader2,
-  AlertCircle,
-  ArrowUpRight,
-  Plus,
-  RefreshCw,
-  Clock,
-} from 'lucide-react';
+import { Wallet, RefreshCw as Loader2, AlertCircle, ArrowUpRight, Plus, RefreshCw, Time as Clock } from 'griddy-icons';
 import Link from 'next/link';
 
 interface BalanceData {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { SlidePanel, Button, Input, Select, Badge } from '@second-turn/design-system';
-import { Upload, Zap, AlertTriangle, Check } from 'lucide-react';
+import { Upload, Flash as Zap, AlertTriangle, Check } from 'griddy-icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 

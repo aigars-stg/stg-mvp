@@ -1,7 +1,7 @@
 'use client';
 
 import { Input } from '@second-turn/design-system';
-import { Package, MapPin } from 'lucide-react';
+import { Package, LocationPin as MapPin } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 
 interface PricingShippingProps {

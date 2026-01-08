@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@second-turn/design-system';
-import { AlertTriangle, Trash2 } from 'lucide-react';
+import { AlertTriangle, TrashAlt as Trash2 } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 export function AccountDeletion() {

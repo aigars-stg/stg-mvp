@@ -2,14 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Badge } from '@second-turn/design-system';
-import {
-  Clock,
-  CheckCircle2,
-  XCircle,
-  ArrowDownRight,
-  Loader2,
-  AlertCircle,
-} from 'lucide-react';
+import { Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, ArrowDownRight, RefreshCw as Loader2, AlertCircle } from 'griddy-icons';
 
 interface Payout {
   id: string;

@@ -5,7 +5,7 @@ import { Button, Card } from '@second-turn/design-system';
 import clsx from 'clsx';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { COUNTRIES } from '@/lib/country-utils';
-import { User, MapPin, Check, X } from 'lucide-react';
+import { User, LocationPin as MapPin, Check, X } from 'griddy-icons';
 import type { UserProfile } from '@/lib/auth/types';
 
 interface ProfileCompletionCardProps {

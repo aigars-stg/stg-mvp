@@ -4,7 +4,7 @@ import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { Button, Card } from '@second-turn/design-system';
 import { supabase } from '@/lib/supabase/client';
-import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Email as Mail, ArrowLeft, CheckCircleAlt01 as CheckCircle2 } from 'griddy-icons';
 import { validateEmail } from '@/lib/auth/utils';
 import { mapAuthError } from '@/lib/auth/errors';
 import { useTranslations } from 'next-intl';

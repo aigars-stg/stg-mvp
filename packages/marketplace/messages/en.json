@@ -9,6 +9,18 @@
     "delete": "Delete",
     "edit": "Edit"
   },
+  "CookieConsent": {
+    "title": "We use cookies",
+    "description": "We use essential cookies to make our site work. With your consent, we may also use analytics cookies to improve your experience.",
+    "learnMore": "Learn more about cookies",
+    "rejectOptional": "Reject Optional",
+    "acceptAll": "Accept All",
+    "essential": "Essential cookies:",
+    "essentialDescription": "Authentication, security (always active)",
+    "analytics": "Analytics cookies:",
+    "analyticsDescription": "Vercel Analytics, Speed Insights (requires consent)",
+    "ariaLabel": "Cookie consent"
+  },
   "Navigation": {
     "home": "Home",
     "browse": "Browse",

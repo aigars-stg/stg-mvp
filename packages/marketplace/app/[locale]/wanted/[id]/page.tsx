@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Button, Badge, Card } from '@second-turn/design-system';
-import {
-  Package, MapPin, Users, Baby, Clock, TrendingUp, Calendar, AlertCircle, AlertTriangle, ChevronLeft, ExternalLink, Share2, Heart
-} from 'lucide-react';
+import { Package, LocationPin as MapPin, Users, User as Baby, Time as Clock, TrendUp as TrendingUp, Calendar, AlertCircle, AlertTriangle, ChevronLeft, LinkExternal as ExternalLink, ShareAndroid as Share2, Heart } from 'griddy-icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import {
   getBudgetDisplay,

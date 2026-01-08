@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, Loader2 } from 'lucide-react';
+import { Search, X, RefreshCw as Loader2 } from 'griddy-icons';
 import { cn } from '@/lib/utils';
 
 interface SearchResult {

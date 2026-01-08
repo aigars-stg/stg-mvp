@@ -2,18 +2,7 @@
 
 import Link from 'next/link';
 import { Card } from '@second-turn/design-system';
-import {
-  Star,
-  Sparkles,
-  CircleCheck,
-  Wrench,
-  Camera,
-  AlertTriangle,
-  Lightbulb,
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
+import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, PhotoCamera as Camera, AlertTriangle, LightbulbOn as Lightbulb, BookOpen, ChevronDown, ChevronUp  } from 'griddy-icons';
 import { useState } from 'react';
 import {
   CONDITION_GRADES,

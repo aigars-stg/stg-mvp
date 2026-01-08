@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, Badge } from '@second-turn/design-system';
-import { Package, MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, Baby, Clock, Heart, Puzzle, BookOpen, MessageSquare } from 'lucide-react';
+import { Package, LocationPin as MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Chat as MessageSquare } from 'griddy-icons';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';

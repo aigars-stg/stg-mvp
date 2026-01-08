@@ -13,7 +13,7 @@ import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import type { BGGGame, VersionSelection } from '@/lib/bgg-types';
 import type { ListingCondition } from '@/lib/types/listing';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
-import { Dices, Euro, ClipboardCheck, MapPin, Lightbulb, RefreshCw, AlertCircle } from 'lucide-react';
+import {  PuzzlePiece as Dices, CurrencyEuro as Euro, ClipboardCheck, LocationPin as MapPin, LightbulbOn as Lightbulb, RefreshCw, AlertCircle  } from 'griddy-icons';
 
 function CreateWantedListingPageContent() {
   const router = useRouter();

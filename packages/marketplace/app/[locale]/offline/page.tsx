@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { WifiOff, Wifi, RefreshCw, Home, Clock, AlertTriangle } from 'lucide-react';
+import { WifiOff, Wifi, RefreshCw, Home, Time as Clock, AlertTriangle } from 'griddy-icons';
 import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 

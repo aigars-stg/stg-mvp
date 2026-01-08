@@ -15,7 +15,7 @@ import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
 import { ListingTypeSelector } from '@/components/sell/ListingTypeSelector';
 import { OfferCard } from '@/components/game/OfferCard';
-import { Dices, Camera, ClipboardCheck, Euro, Info, X, CheckCircle2, RefreshCw, AlertCircle, Puzzle, Package, Loader2 } from 'lucide-react';
+import { PuzzlePiece as Dices, PhotoCamera as Camera, ClipboardCheck, CurrencyEuro as Euro, InfoCircle as Info, X, CheckCircleAlt01 as CheckCircle2, RefreshCw, AlertCircle, PuzzlePiece as Puzzle, Package, RefreshCw as Loader2 } from 'griddy-icons';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';

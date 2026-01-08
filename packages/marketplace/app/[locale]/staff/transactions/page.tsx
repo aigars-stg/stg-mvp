@@ -4,16 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge } from '@second-turn/design-system';
-import {
-  Search,
-  Loader2,
-  AlertCircle,
-  Shield,
-  ChevronLeft,
-  ChevronRight,
-  AlertTriangle,
-  Package,
-} from 'lucide-react';
+import { Search, RefreshCw as Loader2, AlertCircle, Shield, ChevronLeft, ChevronRight, AlertTriangle, Package } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 interface OrderSummary {

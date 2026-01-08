@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Cookie } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   getConsentStatus,
   saveConsentStatus,
@@ -17,6 +17,7 @@ import {
  * Stores consent in localStorage.
  */
 export function CookieConsent() {
+  const t = useTranslations('CookieConsent');
   const [consentStatus, setConsentStatus] = useState<ConsentStatus>('pending');
   const [isVisible, setIsVisible] = useState(false);
 
@@ -53,24 +54,24 @@ export function CookieConsent() {
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-bg-elevated p-4 shadow-lg backdrop-blur-sm sm:p-6"
       role="dialog"
       aria-live="polite"
-      aria-label="Cookie consent"
+      aria-label={t('ariaLabel')}
     >
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Message */}
           <div className="flex-1">
             <h2 className="flex items-center gap-2 text-lg font-semibold text-polar-night">
-              <Cookie className="h-5 w-5 text-frost-ice" />
-              We use cookies
+              <span className="text-xl">🍪</span>
+              {t('title')}
             </h2>
             <p className="mt-1 text-sm text-text-secondary">
-              We use essential cookies to make our site work. With your consent, we may also use analytics cookies to improve your experience.
+              {t('description')}
               <br />
               <Link
                 href="/privacy#cookies"
                 className="text-frost-ice underline hover:text-frost-sky"
               >
-                Learn more about cookies
+                {t('learnMore')}
               </Link>
             </p>
           </div>
@@ -82,7 +83,7 @@ export function CookieConsent() {
               className="rounded-lg border-2 border-border bg-transparent px-6 py-2.5 text-sm font-medium text-text transition-colors hover:border-frost-ice hover:bg-bg focus:outline-none focus:ring-2 focus:ring-frost-ice focus:ring-offset-2 focus:ring-offset-bg-elevated"
               type="button"
             >
-              Reject Optional
+              {t('rejectOptional')}
             </button>
 
             <button
@@ -90,7 +91,7 @@ export function CookieConsent() {
               className="rounded-lg border-2 border-frost-ice bg-frost-ice px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-frost-sky hover:border-frost-sky focus:outline-none focus:ring-2 focus:ring-frost-ice focus:ring-offset-2 focus:ring-offset-bg-elevated"
               type="button"
             >
-              Accept All
+              {t('acceptAll')}
             </button>
           </div>
         </div>
@@ -98,10 +99,10 @@ export function CookieConsent() {
         {/* Additional info */}
         <div className="mt-3 text-xs text-text-muted">
           <p>
-            <strong>Essential cookies:</strong> Authentication, security (always active)
+            <strong>{t('essential')}</strong> {t('essentialDescription')}
           </p>
           <p>
-            <strong>Analytics cookies:</strong> Vercel Analytics, Speed Insights (requires consent)
+            <strong>{t('analytics')}</strong> {t('analyticsDescription')}
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, Button, Input } from '@second-turn/design-system';
 import { ManualVersion } from '@/lib/bgg-types';
-import { Info } from 'lucide-react';
+import { InfoCircle as Info } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 
 interface ManualVersionInputProps {

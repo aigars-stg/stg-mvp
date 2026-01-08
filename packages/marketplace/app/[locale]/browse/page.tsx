@@ -3,10 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Input, Select, Checkbox, Button, Badge } from '@second-turn/design-system';
-import {
-  Package, Star, Sparkles, CircleCheck, Wrench, X,
-  Users, Baby, Clock, MapPin, AlertCircle, SlidersHorizontal
-} from 'lucide-react';
+import {  Package, Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, X, Users, User as Baby, Time as Clock, LocationPin as MapPin, AlertCircle, SettingsAdjustHorizontal as SlidersHorizontal  } from 'griddy-icons';
 import { AggregatedGameCard } from '@/components/browse/AggregatedGameCard';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';

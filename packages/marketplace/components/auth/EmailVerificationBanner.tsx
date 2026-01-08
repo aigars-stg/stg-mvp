@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { AlertCircle, Mail, X } from 'lucide-react';
+import { AlertCircle, Email as Mail, X } from 'griddy-icons';
 import { Button } from '@second-turn/design-system';
 import { supabase } from '@/lib/supabase/client';
 

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { Package } from 'lucide-react';
+import { Package } from 'griddy-icons';
 import type { ConversationListItem as ConversationListItemType } from '@/lib/types/message';
 
 interface ConversationListItemProps {

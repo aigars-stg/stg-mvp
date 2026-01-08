@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Card } from '@second-turn/design-system';
-import { Star, Sparkles, CircleCheck, Wrench, ShieldCheck, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
+import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, ShieldCheck, CheckCircleAlt01 as CheckCircle2, AlertCircle, HelpCircle  } from 'griddy-icons';
 import { GradingGuidePanel } from './GradingGuidePanel';
 import { useTranslations } from 'next-intl';
 

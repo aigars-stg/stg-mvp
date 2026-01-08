@@ -15,7 +15,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { X, Minus, Plus, Locate, Maximize, Loader2 } from "lucide-react";
+import { X, Minus, Plus, LocationMy as Locate, Maximize, RefreshCw as Loader2 } from 'griddy-icons';
 
 import { cn } from "@/lib/utils";
 

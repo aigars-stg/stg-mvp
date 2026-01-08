@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { LogOut, Package, ShoppingBag, Store, Settings, ChevronRight, LayoutDashboard, Shield, Globe } from 'lucide-react';
+import {  LogOut, Package, ShoppingBag, Store, Settings, ChevronRight, Layout as LayoutDashboard, Shield, Globe  } from 'griddy-icons';
 import { getInitials } from '@/lib/auth/utils';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { useTranslations } from 'next-intl';
@@ -93,11 +93,10 @@ export function UserMenu() {
         <span className="hidden sm:inline text-text-muted hover:text-text transition-colors">
           <svg
             className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-            fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </span>
       </button>

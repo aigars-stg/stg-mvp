@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingBag, Tag, Bell } from 'lucide-react';
+import { ShoppingBag, Tag, Notification as Bell } from 'griddy-icons';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 

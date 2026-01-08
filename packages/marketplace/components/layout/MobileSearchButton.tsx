@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X } from 'griddy-icons';
 import { NavbarSearch } from './NavbarSearch';
 
 export function MobileSearchButton() {

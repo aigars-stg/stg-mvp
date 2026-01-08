@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, MessageSquare, ChevronDown, User } from 'lucide-react';
+import { Star, Chat as MessageSquare, ChevronDown, User } from 'griddy-icons';
 import { Button, Card } from '@second-turn/design-system';
 import { cn } from '@/lib/utils';
 

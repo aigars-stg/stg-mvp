@@ -4,22 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge } from '@second-turn/design-system';
-import {
-  Package,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  AlertCircle,
-  ArrowLeft,
-  Truck,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  ExternalLink,
-  MessageSquare,
-} from 'lucide-react';
+import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ArrowLeft, Truck, User, Email as Mail, Phone, LocationPin as MapPin, LinkExternal as ExternalLink, Chat as MessageSquare } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';

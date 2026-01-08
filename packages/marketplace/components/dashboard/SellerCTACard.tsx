@@ -4,15 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card } from '@second-turn/design-system';
-import {
-  Package,
-  Euro,
-  Landmark,
-  ChevronDown,
-  ChevronUp,
-  ExternalLink,
-  Loader2,
-} from 'lucide-react';
+import {  Package, CurrencyEuro as Euro, Bank as Landmark, ChevronDown, ChevronUp, LinkExternal as ExternalLink, RefreshCw as Loader2  } from 'griddy-icons';
 
 interface SellerCTACardProps {
   sellerStatus: string;

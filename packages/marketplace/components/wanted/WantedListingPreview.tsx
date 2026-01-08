@@ -1,6 +1,6 @@
 'use client';
 
-import { Package, MapPin } from 'lucide-react';
+import { Package, LocationPin as MapPin } from 'griddy-icons';
 import { Card, Badge } from '@second-turn/design-system';
 import type { ListingCondition } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';

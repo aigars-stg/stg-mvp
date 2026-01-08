@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { supabase } from '@/lib/supabase/client';
-import { Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircleAlt01 as CheckCircle2 } from 'griddy-icons';
 import { validatePassword } from '@/lib/auth/utils';
 import { mapAuthError } from '@/lib/auth/errors';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';

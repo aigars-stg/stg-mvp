@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { Button } from '@second-turn/design-system';
-import { AtSign, AlertCircle, CheckCircle2, Pencil, Check, X } from 'lucide-react';
+import { At as AtSign, AlertCircle, CheckCircleAlt01 as CheckCircle2, Edit as Pencil, Check, X } from 'griddy-icons';
 import { supabase } from '@/lib/supabase/client';
 import { validateEmail } from '@/lib/auth/utils';
 import { mapAuthError } from '@/lib/auth/errors';

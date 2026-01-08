@@ -2,16 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@second-turn/design-system';
-import {
-  X,
-  ArrowUpRight,
-  Loader2,
-  AlertCircle,
-  CheckCircle2,
-  Calendar,
-  CreditCard,
-  Info,
-} from 'lucide-react';
+import { X, ArrowUpRight, RefreshCw as Loader2, AlertCircle, CheckCircleAlt01 as CheckCircle2, Calendar, CreditCard, InfoCircle as Info } from 'griddy-icons';
 
 interface PayoutConfirmModalProps {
   isOpen: boolean;

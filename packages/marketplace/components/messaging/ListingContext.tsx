@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ExternalLink, Package } from 'lucide-react';
+import { LinkExternal as ExternalLink, Package } from 'griddy-icons';
 import type { Conversation } from '@/lib/types/message';
 
 interface ListingContextProps {

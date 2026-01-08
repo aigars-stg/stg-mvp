@@ -5,21 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
-import {
-  Package,
-  AlertCircle,
-  AlertTriangle,
-  Loader2,
-  Heart,
-  Calendar,
-  Puzzle,
-  BookOpen,
-  Globe,
-  Building2,
-  Info,
-  ExternalLink,
-  MessageSquare,
-} from 'lucide-react';
+import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, Calendar, PuzzlePiece as Puzzle, BookOpen, Globe, Building as Building2, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare } from 'griddy-icons';
 import { calculateMarketplacePricing } from '@/lib/stripe-utils';
 import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
 import type { ListingWithSeller } from '@/lib/types/listing';
@@ -838,7 +824,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                 aria-label={isSaved ? t('actions.unsaveAria') : t('actions.saveAria')}
                 title={isSaved ? t('actions.unsaveTooltip') : t('actions.saveTooltip')}
               >
-                <Heart className={`w-5 h-5 ${isSaved ? 'fill-aurora-red text-aurora-red' : 'text-text-muted hover:text-aurora-red'}`} />
+                <Heart className={`w-5 h-5 ${isSaved ? 'text-aurora-red' : 'text-text-muted hover:text-aurora-red'}`} filled={isSaved} />
               </button>
             )}
 
@@ -1000,7 +986,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   className="p-2 rounded-md hover:bg-bg-secondary transition-colors disabled:opacity-50"
                   aria-label={isSaved ? t('actions.unsaveAria') : t('actions.saveAria')}
                 >
-                  <Heart className={`w-5 h-5 ${isSaved ? 'fill-aurora-red text-aurora-red' : 'text-text-muted'}`} />
+                  <Heart className={`w-5 h-5 ${isSaved ? 'text-aurora-red' : 'text-text-muted'}`} filled={isSaved} />
                 </button>
 
                 {/* Message Button */}

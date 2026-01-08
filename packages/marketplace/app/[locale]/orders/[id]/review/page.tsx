@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card } from '@second-turn/design-system';
-import { Star, ArrowLeft, Loader2, CheckCircle2, Package } from 'lucide-react';
+import { Star, ArrowLeft, RefreshCw as Loader2, CheckCircleAlt01 as CheckCircle2, Package } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 interface OrderDetails {

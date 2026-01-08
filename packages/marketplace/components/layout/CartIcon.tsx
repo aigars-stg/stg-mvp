@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingBasket as ShoppingCart } from 'griddy-icons';
 import { useCart } from '@/lib/contexts/CartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
 

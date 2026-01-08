@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { format, isToday, isYesterday } from 'date-fns';
-import { X } from 'lucide-react';
+import { X } from 'griddy-icons';
 import type { Message } from '@/lib/types/message';
 
 interface MessageBubbleProps {

@@ -2,15 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Badge } from '@second-turn/design-system';
-import {
-  ShoppingBag,
-  ArrowDownRight,
-  Loader2,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  ChevronRight,
-} from 'lucide-react';
+import { ShoppingBag, ArrowDownRight, RefreshCw as Loader2, AlertCircle, CheckCircleAlt01 as CheckCircle2, Time as Clock, ChevronRight } from 'griddy-icons';
 import Link from 'next/link';
 
 interface Transaction {

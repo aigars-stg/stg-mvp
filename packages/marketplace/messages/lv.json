@@ -9,6 +9,18 @@
     "delete": "Dzēst",
     "edit": "Rediģēt"
   },
+  "CookieConsent": {
+    "title": "Mēs izmantojam sīkdatnes",
+    "description": "Mēs izmantojam nepieciešamās sīkdatnes, lai mūsu vietne darbotos. Ar tavu piekrišanu mēs varam izmantot arī analītikas sīkdatnes, lai uzlabotu tavu pieredzi.",
+    "learnMore": "Uzzini vairāk par sīkdatnēm",
+    "rejectOptional": "Noraidīt papildu",
+    "acceptAll": "Pieņemt visas",
+    "essential": "Nepieciešamās sīkdatnes:",
+    "essentialDescription": "Autentifikācija, drošība (vienmēr aktīvas)",
+    "analytics": "Analītikas sīkdatnes:",
+    "analyticsDescription": "Vercel Analytics, Speed Insights (nepieciešama piekrišana)",
+    "ariaLabel": "Sīkdatņu piekrišana"
+  },
   "Navigation": {
     "home": "Sākums",
     "browse": "Pārlūkot",

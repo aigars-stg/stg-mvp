@@ -3,16 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { SlidePanel, Card } from '@second-turn/design-system';
-import {
-  Star,
-  Sparkles,
-  CircleCheck,
-  Wrench,
-  ChevronDown,
-  ChevronUp,
-  Lightbulb,
-  ExternalLink,
-} from 'lucide-react';
+import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, ChevronDown, ChevronUp, LightbulbOn as Lightbulb, LinkExternal as ExternalLink  } from 'griddy-icons';
 import {
   CONDITION_GRADES,
   SPECIAL_CONSIDERATIONS,

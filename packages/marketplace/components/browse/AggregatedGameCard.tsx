@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Card, Badge } from '@second-turn/design-system';
-import { Package, Users, Baby, Clock } from 'lucide-react';
+import { Package, Users, User as Baby, Time as Clock } from 'griddy-icons';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
 import { saveBrowseContext } from '@/lib/browse-context';
 

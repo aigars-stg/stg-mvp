@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, Check, Sparkles } from 'lucide-react';
+import { Email as Mail, Lock, Eye, EyeOff, ArrowLeft, Check, Sparks as Sparkles } from 'griddy-icons';
 import { mapAuthError } from '@/lib/auth/errors';
 import type { AuthFlowState } from '@/lib/auth/types';
 import { useTranslations } from 'next-intl';

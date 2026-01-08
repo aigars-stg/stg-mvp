@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
-import { Mail, Lock, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Email as Mail, Lock, CheckCircleAlt01 as CheckCircle2, AlertCircle, RefreshCw } from 'griddy-icons';
 import Link from 'next/link';
 
 export default function RecoverAccountPage() {

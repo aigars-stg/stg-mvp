@@ -142,6 +142,61 @@ Form inputs with clear labels, error states, and 44px touch targets.
 />
 ```
 
+## Icons
+
+This design system uses [Griddy Icons](https://griddyicons.com) - a free, open-source icon library with 1.5px strokes designed at 24x24px for a refined, Nordic-minimalist aesthetic.
+
+### Installation
+
+Icons are provided by `griddy-icons`:
+
+```bash
+pnpm add griddy-icons
+```
+
+### Usage
+
+```tsx
+import { Heart, Star, ShoppingBag } from 'griddy-icons';
+
+// Basic usage
+<Heart size={24} />
+
+// Filled variant (for toggles like wishlists)
+<Heart size={24} filled />
+
+// With Tailwind classes
+<Heart className="w-5 h-5 text-frost-ice" />
+```
+
+### Common Icons
+
+| Icon | Usage |
+|------|-------|
+| `Heart` | Wishlist/favorites |
+| `Star` | Ratings |
+| `ShoppingBag` | Cart/purchase |
+| `Package` | Listings/games |
+| `LocationPin` | Location display |
+| `Time` | Time/schedule |
+| `CheckCircle` | Success states |
+| `AlertCircle` | Warning states |
+
+### Filled States
+
+Use the `filled` prop for toggle states:
+
+```tsx
+<Heart filled={isWishlisted} className={isWishlisted ? 'text-aurora-red' : 'text-text-muted'} />
+<Star filled={rating >= star} className={rating >= star ? 'text-aurora-orange' : 'text-text-muted'} />
+```
+
+### Size Guidelines
+
+- `14-16px`: Inline with text (use sparingly, 1.5px stroke can look thin)
+- `20-24px`: Standard UI icons
+- `32-48px`: Feature highlights, empty states
+
 ## Development
 
 ```bash

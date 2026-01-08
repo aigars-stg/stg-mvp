@@ -3,15 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Badge } from '@second-turn/design-system';
-import {
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  AlertCircle,
-  ExternalLink,
-  Euro,
-  ArrowLeft,
-} from 'lucide-react';
+import {  CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, LinkExternal as ExternalLink, CurrencyEuro as Euro, ArrowLeft  } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import Link from 'next/link';
 

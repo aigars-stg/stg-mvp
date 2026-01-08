@@ -1,7 +1,7 @@
 'use client';
 
 import { Modal, Button } from '@second-turn/design-system';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle } from 'griddy-icons';
 import { ReactNode } from 'react';
 
 export interface ConfirmationModalProps {

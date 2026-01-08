@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Button, Card } from '@second-turn/design-system';
-import { Package, Clock, CheckCircle, XCircle, Plus, Search, Heart, LayoutDashboard } from 'lucide-react';
+import {  Package, Time as Clock, CheckCircle, CloseCircle as XCircle, Plus, Search, Heart, Layout as LayoutDashboard  } from 'griddy-icons';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { OfferCard } from '@/components/game/OfferCard';

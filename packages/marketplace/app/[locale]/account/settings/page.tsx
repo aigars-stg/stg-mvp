@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getInitials } from '@/lib/auth/utils';
 import { Button, Card } from '@second-turn/design-system';
-import { User, Mail, Phone, CheckCircle2, AlertCircle, Download, Settings, AtSign, Globe, Pencil, Check, X, ExternalLink } from 'lucide-react';
+import { User, Email as Mail, Phone, CheckCircleAlt01 as CheckCircle2, AlertCircle, Download, Settings, At as AtSign, Globe, Edit as Pencil, Check, X, LinkExternal as ExternalLink } from 'griddy-icons';
 import { useRouter } from 'next/navigation';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { AvatarUpload } from '@/components/auth/AvatarUpload';

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { SlidePanel } from '@second-turn/design-system';
-import { MessageSquare, Loader2 } from 'lucide-react';
+import { Chat as MessageSquare, RefreshCw as Loader2 } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { QuestionInput } from './QuestionInput';
 import { QuestionThread } from './QuestionThread';

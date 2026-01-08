@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import {  X, ChevronLeft, ChevronRight, SearchPlus as ZoomIn, SearchMinus as ZoomOut  } from 'griddy-icons';
 
 interface ImageLightboxProps {
   images: string[];

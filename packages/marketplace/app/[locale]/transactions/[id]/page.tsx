@@ -4,23 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge } from '@second-turn/design-system';
-import {
-  Package,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  AlertCircle,
-  ArrowLeft,
-  Truck,
-  MapPin,
-  ExternalLink,
-  MessageSquare,
-  ChevronDown,
-  ChevronUp,
-  AlertTriangle,
-  Check,
-} from 'lucide-react';
+import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ArrowLeft, Truck, LocationPin as MapPin, LinkExternal as ExternalLink, Chat as MessageSquare, ChevronDown, ChevronUp, AlertTriangle, Check } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';

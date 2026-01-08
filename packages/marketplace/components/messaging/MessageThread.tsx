@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 import { ListingContext } from './ListingContext';
-import { Loader2, AlertCircle, Archive, ArrowLeft } from 'lucide-react';
+import { RefreshCw as Loader2, AlertCircle, Archive, ArrowLeft } from 'griddy-icons';
 import { Button } from '@second-turn/design-system';
 import type { Message, Conversation } from '@/lib/types/message';
 import Link from 'next/link';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Search, MapPin, Check, Loader2 } from 'lucide-react';
+import { Search, LocationPin as MapPin, Check, RefreshCw as Loader2 } from 'griddy-icons';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
 
 interface TerminalSelectorProps {

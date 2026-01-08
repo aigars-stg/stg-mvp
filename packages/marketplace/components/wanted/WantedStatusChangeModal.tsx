@@ -1,7 +1,7 @@
 'use client';
 
 import { Modal, Button } from '@second-turn/design-system';
-import { AlertCircle, CheckCircle, RotateCcw, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Undo as RotateCcw, CloseCircle as XCircle } from 'griddy-icons';
 
 export interface WantedStatusChangeModalProps {
   isOpen: boolean;

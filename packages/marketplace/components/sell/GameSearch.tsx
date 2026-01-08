@@ -7,7 +7,7 @@ import type { BGGGame, BGGVersion } from '@/lib/bgg-types';
 import { BGGError } from '@/lib/bgg-errors';
 import ErrorDisplay from './ErrorDisplay';
 import { GameResultCard } from './GameResultCard';
-import { SearchX, X, RefreshCw, Search } from 'lucide-react';
+import { Search as SearchX, X, RefreshCw, Search } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 
 interface GameSearchProps {

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Modal, Button } from '@second-turn/design-system';
-import { Star, Sparkles, CircleCheck, Wrench, ExternalLink } from 'lucide-react';
+import { Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, LinkExternal as ExternalLink } from 'griddy-icons';
 import { CONDITION_GRADES } from '../../lib/grading-guide-content';
 import type { ListingCondition } from '../../lib/types/listing';
 

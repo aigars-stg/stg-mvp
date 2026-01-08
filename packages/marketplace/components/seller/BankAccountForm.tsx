@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@second-turn/design-system';
-import { CreditCard, Loader2, Shield, AlertCircle } from 'lucide-react';
+import { CreditCard, RefreshCw as Loader2, Shield, AlertCircle } from 'griddy-icons';
 
 interface BankAccountFormProps {
   onSuccess: (bankAccount: { last4: string; bankName: string }) => void;

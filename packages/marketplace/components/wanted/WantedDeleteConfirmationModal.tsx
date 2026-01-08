@@ -1,7 +1,7 @@
 'use client';
 
 import { Modal, Button } from '@second-turn/design-system';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'griddy-icons';
 
 export interface WantedDeleteConfirmationModalProps {
   isOpen: boolean;

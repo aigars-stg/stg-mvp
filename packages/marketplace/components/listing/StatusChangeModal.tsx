@@ -1,7 +1,7 @@
 'use client';
 
 import { Modal, Button } from '@second-turn/design-system';
-import { AlertCircle, Package, RotateCcw, Eye, EyeOff, MessageSquare } from 'lucide-react';
+import { AlertCircle, Package, Undo as RotateCcw, Eye, EyeOff, Chat as MessageSquare } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import type { ListingType } from '@/lib/types/listing';
 

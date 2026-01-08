@@ -5,22 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
-import {
-  Package,
-  Users,
-  Baby,
-  Clock,
-  ExternalLink,
-  ArrowLeft,
-  Loader2,
-  AlertCircle,
-  SlidersHorizontal,
-  X,
-  ChevronDown,
-  ChevronUp,
-  Cog,
-  Puzzle,
-} from 'lucide-react';
+import { Package, Users, User as Baby, Time as Clock, LinkExternal as ExternalLink, ArrowLeft, RefreshCw as Loader2, AlertCircle, SettingsAdjustHorizontal as SlidersHorizontal, X, ChevronDown, ChevronUp, Settings as Cog, PuzzlePiece as Puzzle } from 'griddy-icons';
 import type { GameWithOffers } from '@/lib/types/aggregated-game';
 import type { ListingCondition, ListingType } from '@/lib/types/listing';
 import { OfferCard } from '@/components/game/OfferCard';

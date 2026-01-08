@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Clock, AlertTriangle } from 'lucide-react';
+import { Time as Clock, AlertTriangle } from 'griddy-icons';
 
 interface ReservationTimerProps {
   expiresAt: string | Date;

@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from '@second-turn/design-system';
-import { MessageSquare, CreditCard, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Chat as MessageSquare, CreditCard, CheckCircleAlt01 as CheckCircle2, ArrowRight } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import type { ListingType } from '@/lib/types/listing';
 

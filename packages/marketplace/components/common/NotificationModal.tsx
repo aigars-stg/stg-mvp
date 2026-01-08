@@ -1,7 +1,7 @@
 'use client';
 
 import { Modal, Button } from '@second-turn/design-system';
-import { CheckCircle, AlertCircle, Info, XCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, InfoCircle as Info, CloseCircle as XCircle } from 'griddy-icons';
 
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 

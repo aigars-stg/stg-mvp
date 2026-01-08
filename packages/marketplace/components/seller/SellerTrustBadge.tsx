@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, Award, Shield, Sparkles, User } from 'lucide-react';
+import {  Star, Trophy as Award, Shield, Sparks as Sparkles, User  } from 'griddy-icons';
 import {
   SellerBadgeTier,
   SellerTrustInfo,
@@ -105,7 +105,7 @@ export function SellerTrustBadge({
       {/* Rating */}
       {totalReviews > 0 ? (
         <div className="flex items-center gap-0.5 text-slate-600">
-          <Star className={cn(styles.star, 'text-amber-400 fill-amber-400')} />
+          <Star className={cn(styles.star, 'text-amber-400')} filled />
           <span className="font-medium">{averageRating.toFixed(1)}</span>
         </div>
       ) : null}
@@ -150,7 +150,7 @@ export function SellerTrustCompact({
     <div className={cn('flex items-center gap-1 text-xs text-slate-500', className)}>
       {totalReviews > 0 && (
         <>
-          <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+          <Star className="w-3 h-3 text-amber-400" filled />
           <span className="font-medium text-slate-600">{averageRating.toFixed(1)}</span>
         </>
       )}

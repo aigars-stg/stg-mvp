@@ -1,6 +1,6 @@
 'use client';
 
-import { CreditCard, CheckCircle2 } from 'lucide-react';
+import { CreditCard, CheckCircleAlt01 as CheckCircle2 } from 'griddy-icons';
 
 interface BankAccountCardProps {
   last4: string;

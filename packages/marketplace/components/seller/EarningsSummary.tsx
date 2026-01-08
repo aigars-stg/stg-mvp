@@ -1,13 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  TrendingUp,
-  ShoppingBag,
-  Calendar,
-  Loader2,
-  AlertCircle,
-} from 'lucide-react';
+import { TrendUp as TrendingUp, ShoppingBag, Calendar, RefreshCw as Loader2, AlertCircle } from 'griddy-icons';
 
 interface EarningsData {
   totalSalesCount: number;

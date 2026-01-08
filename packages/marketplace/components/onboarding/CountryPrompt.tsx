@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MapPin, Loader2 } from 'lucide-react';
+import { LocationPin as MapPin, RefreshCw as Loader2 } from 'griddy-icons';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
 import type { CountryCode } from '@/lib/country-utils';
