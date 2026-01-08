@@ -3,6 +3,7 @@
 import { Modal, Button } from '@second-turn/design-system';
 import { HelpCircle } from 'griddy-icons';
 import { ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 
 export interface ConfirmationModalProps {
   isOpen: boolean;
@@ -20,18 +21,20 @@ export function ConfirmationModal({
   isOpen,
   onClose,
   onConfirm,
-  title = 'Confirm Action',
+  title,
   message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
+  confirmText,
+  cancelText,
   icon,
   isLoading = false,
 }: ConfirmationModalProps) {
+  const t = useTranslations('ConfirmationModal');
+
   return (
     <Modal
       open={isOpen}
       onClose={onClose}
-      title={title}
+      title={title || t('defaultTitle')}
       size="sm"
       footer={
         <>
@@ -40,14 +43,14 @@ export function ConfirmationModal({
             onClick={onClose}
             disabled={isLoading}
           >
-            {cancelText}
+            {cancelText || t('cancel')}
           </Button>
           <Button
             variant="primary"
             onClick={onConfirm}
             disabled={isLoading}
           >
-            {isLoading ? 'Processing...' : confirmText}
+            {isLoading ? t('processing') : (confirmText || t('confirm'))}
           </Button>
         </>
       }

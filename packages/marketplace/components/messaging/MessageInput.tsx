@@ -5,6 +5,7 @@ import { Button } from '@second-turn/design-system';
 import { Send, RefreshCw as Loader2, ImagePlus, X } from 'griddy-icons';
 import { MESSAGE_CONSTRAINTS } from '@/lib/types/message';
 import { supabase } from '@/lib/supabase/client';
+import { useTranslations } from 'next-intl';
 
 interface MessageInputProps {
   onSend: (content: string, photoUrls?: string[]) => Promise<void>;
@@ -22,10 +23,11 @@ interface PhotoPreview {
 export function MessageInput({
   onSend,
   disabled = false,
-  placeholder = 'Type your message...',
+  placeholder,
   conversationId,
   allowPhotos = false,
 }: MessageInputProps) {
+  const t = useTranslations('MessageInput');
   const [content, setContent] = useState('');
   const [sending, setSending] = useState(false);
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
@@ -218,7 +220,7 @@ export function MessageInput({
               onClick={() => fileInputRef.current?.click()}
               disabled={!canAddMorePhotos || disabled || sending}
               className="h-11 px-3"
-              title={canAddMorePhotos ? 'Add photos' : `Maximum ${MESSAGE_CONSTRAINTS.MAX_PHOTOS} photos`}
+              title={canAddMorePhotos ? t('addPhotos') : t('maxPhotos', { count: MESSAGE_CONSTRAINTS.MAX_PHOTOS })}
             >
               <ImagePlus className="w-5 h-5" />
             </Button>
@@ -232,7 +234,7 @@ export function MessageInput({
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             disabled={disabled || sending}
-            placeholder={placeholder}
+            placeholder={placeholder || t('placeholder')}
             className={`w-full resize-none rounded-lg border px-4 py-3 focus:outline-none focus:ring-2 transition-colors ${
               isOverLimit
                 ? 'border-aurora-red focus:ring-aurora-red'
@@ -268,7 +270,7 @@ export function MessageInput({
           ) : (
             <>
               <Send className="w-5 h-5 mr-2" />
-              Send
+              {t('send')}
             </>
           )}
         </Button>
@@ -276,8 +278,7 @@ export function MessageInput({
 
       {isOverLimit && (
         <p className="text-sm text-aurora-red mt-2">
-          Message is too long. Please shorten it by {Math.abs(remainingChars)}{' '}
-          character{Math.abs(remainingChars) !== 1 ? 's' : ''}.
+          {t('tooLong', { count: Math.abs(remainingChars) })}
         </p>
       )}
     </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@second-turn/design-system';
 import { X, ArrowUpRight, RefreshCw as Loader2, AlertCircle, CheckCircleAlt01 as CheckCircle2, Calendar, CreditCard, InfoCircle as Info } from 'griddy-icons';
+import { useTranslations } from 'next-intl';
 
 interface PayoutConfirmModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export function PayoutConfirmModal({
   bankLast4,
   bankName,
 }: PayoutConfirmModalProps) {
+  const t = useTranslations('PayoutConfirmModal');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
@@ -131,14 +133,14 @@ export function PayoutConfirmModal({
               <CheckCircle2 className="w-8 h-8 text-aurora-green" />
             </div>
             <h3 className="text-xl font-bold text-polar-night mb-2">
-              Payout Requested!
+              {t('successTitle')}
             </h3>
             <p className="text-text-secondary mb-4">
-              {success.amount} is on its way to your bank account.
+              {t('successMessage', { amount: success.amount })}
             </p>
             {success.arrivalDate && (
               <p className="text-sm text-text-muted">
-                Expected arrival: {formatDate(success.arrivalDate)}
+                {t('expectedArrival')}: {formatDate(success.arrivalDate)}
               </p>
             )}
           </div>
@@ -146,14 +148,14 @@ export function PayoutConfirmModal({
           <>
             {/* Header */}
             <h2 className="text-xl font-bold text-polar-night mb-6 pr-8">
-              Request Payout
+              {t('title')}
             </h2>
 
             {/* Payout Details */}
             <div className="space-y-4 mb-6">
               {/* Amount */}
               <div className="flex justify-between items-center">
-                <span className="text-text-secondary">Amount</span>
+                <span className="text-text-secondary">{t('amount')}</span>
                 <span className="text-xl font-bold text-polar-night">
                   {formatCurrency(availableAmount)}
                 </span>
@@ -161,7 +163,7 @@ export function PayoutConfirmModal({
 
               {/* Bank Account */}
               <div className="flex justify-between items-center">
-                <span className="text-text-secondary">To</span>
+                <span className="text-text-secondary">{t('to')}</span>
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-text-muted" />
                   <span className="font-medium text-polar-night">
@@ -173,7 +175,7 @@ export function PayoutConfirmModal({
 
               {/* Estimated Arrival */}
               <div className="flex justify-between items-center">
-                <span className="text-text-secondary">Expected arrival</span>
+                <span className="text-text-secondary">{t('expectedArrival')}</span>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-text-muted" />
                   <span className="font-medium text-polar-night">
@@ -187,7 +189,7 @@ export function PayoutConfirmModal({
               {/* Info */}
               <div className="flex items-start gap-2 text-sm text-text-muted">
                 <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>Payouts typically arrive within 2 business days.</span>
+                <span>{t('infoMessage')}</span>
               </div>
             </div>
 
@@ -207,7 +209,7 @@ export function PayoutConfirmModal({
                 disabled={loading}
                 className="flex-1"
               >
-                Cancel
+                {t('cancel')}
               </Button>
               <Button
                 variant="accent"
@@ -218,12 +220,12 @@ export function PayoutConfirmModal({
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processing...
+                    {t('processing')}
                   </>
                 ) : (
                   <>
                     <ArrowUpRight className="w-4 h-4 mr-2" />
-                    Confirm Payout
+                    {t('confirmPayout')}
                   </>
                 )}
               </Button>

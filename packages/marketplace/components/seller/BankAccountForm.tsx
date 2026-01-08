@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@second-turn/design-system';
 import { CreditCard, RefreshCw as Loader2, Shield, AlertCircle } from 'griddy-icons';
+import { useTranslations } from 'next-intl';
 
 interface BankAccountFormProps {
   onSuccess: (bankAccount: { last4: string; bankName: string }) => void;
@@ -18,6 +19,7 @@ const IBAN_HINTS: Record<string, string> = {
 };
 
 export function BankAccountForm({ onSuccess, onCancel, defaultName }: BankAccountFormProps) {
+  const t = useTranslations('BankAccountForm');
   const [iban, setIban] = useState('');
   const [accountHolderName, setAccountHolderName] = useState(defaultName || '');
   const [loading, setLoading] = useState(false);
@@ -53,12 +55,12 @@ export function BankAccountForm({ onSuccess, onCancel, defaultName }: BankAccoun
 
     // Basic validation
     if (!iban.trim()) {
-      setError('IBAN is required');
+      setError(t('ibanRequired'));
       return;
     }
 
     if (!accountHolderName.trim()) {
-      setError('Account holder name is required');
+      setError(t('nameRequired'));
       return;
     }
 
@@ -101,7 +103,7 @@ export function BankAccountForm({ onSuccess, onCancel, defaultName }: BankAccoun
           htmlFor="accountHolderName"
           className="block text-sm font-medium text-polar-night mb-1"
         >
-          Account Holder Name
+          {t('accountHolderName')}
         </label>
         <input
           id="accountHolderName"
@@ -111,7 +113,7 @@ export function BankAccountForm({ onSuccess, onCancel, defaultName }: BankAccoun
             setAccountHolderName(e.target.value);
             setError(null);
           }}
-          placeholder="Enter name as it appears on your bank account"
+          placeholder={t('namePlaceholder')}
           className="w-full px-4 py-3 rounded-lg border-2 border-border bg-snow-white
                      text-polar-night placeholder:text-text-muted
                      focus:outline-none focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20
@@ -126,7 +128,7 @@ export function BankAccountForm({ onSuccess, onCancel, defaultName }: BankAccoun
           htmlFor="iban"
           className="block text-sm font-medium text-polar-night mb-1"
         >
-          IBAN
+          {t('ibanLabel')}
         </label>
         <input
           id="iban"
@@ -142,7 +144,7 @@ export function BankAccountForm({ onSuccess, onCancel, defaultName }: BankAccoun
           autoComplete="off"
         />
         <p className="text-xs text-text-muted mt-1">
-          Format: {hint}
+          {t('format')}: {hint}
         </p>
       </div>
 
@@ -158,7 +160,7 @@ export function BankAccountForm({ onSuccess, onCancel, defaultName }: BankAccoun
       <div className="flex items-start gap-2 p-3 bg-frost-ice/5 rounded-lg">
         <Shield className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
         <p className="text-xs text-text-secondary">
-          Your bank details are securely stored by Stripe. We only store the last 4 digits for display.
+          {t('securityNote')}
         </p>
       </div>
 
@@ -171,7 +173,7 @@ export function BankAccountForm({ onSuccess, onCancel, defaultName }: BankAccoun
           disabled={loading}
           className="flex-1"
         >
-          Cancel
+          {t('cancel')}
         </Button>
         <Button
           type="submit"
@@ -182,12 +184,12 @@ export function BankAccountForm({ onSuccess, onCancel, defaultName }: BankAccoun
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Adding...
+              {t('adding')}
             </>
           ) : (
             <>
               <CreditCard className="w-4 h-4 mr-2" />
-              Add Bank Account
+              {t('addBankAccount')}
             </>
           )}
         </Button>

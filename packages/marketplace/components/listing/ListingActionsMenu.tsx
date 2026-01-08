@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { MoreVertical, Edit, Package, TrashAlt as Trash2, LinkExternal as ExternalLink, Undo as RotateCcw } from 'griddy-icons';
 
 export interface ListingActionsMenuProps {
@@ -21,6 +22,7 @@ export function ListingActionsMenu({
   onDelete,
   onLinkCopied,
 }: ListingActionsMenuProps) {
+  const t = useTranslations('ListingActionsMenu');
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -76,7 +78,7 @@ export function ListingActionsMenu({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="p-2 rounded-lg bg-snow-white shadow-md hover:shadow-lg hover:bg-gray-50 transition-all border border-border"
-        aria-label="Listing actions"
+        aria-label={t('ariaLabel')}
       >
         <MoreVertical className="w-5 h-5 text-polar-night" />
       </button>
@@ -90,7 +92,7 @@ export function ListingActionsMenu({
             className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
           >
             <ExternalLink className="w-4 h-4 text-frost-ice" />
-            View Listing
+            {t('viewListing')}
           </button>
 
           {/* Edit Listing */}
@@ -99,7 +101,7 @@ export function ListingActionsMenu({
             className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
           >
             <Edit className="w-4 h-4 text-frost-ice" />
-            Edit
+            {t('edit')}
           </button>
 
           <div className="border-t border-border-subtle my-1" />
@@ -111,7 +113,7 @@ export function ListingActionsMenu({
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
             >
               <RotateCcw className="w-4 h-4 text-northern-lights-green" />
-              {status === 'draft' ? 'Publish' : 'Reactivate'}
+              {status === 'draft' ? t('publish') : t('reactivate')}
             </button>
           )}
 
@@ -121,7 +123,7 @@ export function ListingActionsMenu({
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
             >
               <Package className="w-4 h-4 text-frost-ice" />
-              Mark as Sold
+              {t('markAsSold')}
             </button>
           )}
 
@@ -131,7 +133,7 @@ export function ListingActionsMenu({
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
             >
               <Trash2 className="w-4 h-4 text-text-muted" />
-              Remove Listing
+              {t('removeListing')}
             </button>
           )}
 
@@ -143,7 +145,7 @@ export function ListingActionsMenu({
             className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
           >
             <ExternalLink className="w-4 h-4 text-frost-ice" />
-            Copy Link
+            {t('copyLink')}
           </button>
 
           {/* Delete (only for removed listings) */}
@@ -155,7 +157,7 @@ export function ListingActionsMenu({
                 className="flex items-center gap-3 px-4 py-2 text-sm text-aurora-red hover:bg-aurora-red/10 transition-colors w-full text-left"
               >
                 <Trash2 className="w-4 h-4" />
-                Delete Permanently
+                {t('deletePermanently')}
               </button>
             </>
           )}

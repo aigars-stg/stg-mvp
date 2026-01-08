@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Search, LocationPin as MapPin, Check, RefreshCw as Loader2 } from 'griddy-icons';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
+import { useTranslations } from 'next-intl';
 
 interface TerminalSelectorProps {
   country: TerminalCountry;
@@ -25,6 +26,7 @@ export function TerminalSelector({
   onSelect,
   error,
 }: TerminalSelectorProps) {
+  const t = useTranslations('TerminalSelector');
   const [terminals, setTerminals] = useState<Terminal[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -95,7 +97,7 @@ export function TerminalSelector({
       {/* Country Selection */}
       <div>
         <label id="country-label" className="block text-sm font-medium text-polar-night mb-2">
-          Delivery Country
+          {t('deliveryCountry')}
         </label>
         <div className="grid grid-cols-3 gap-2 sm:gap-3" role="radiogroup" aria-labelledby="country-label">
           {COUNTRIES.map((c) => (
@@ -132,7 +134,7 @@ export function TerminalSelector({
       {isExpanded && (
         <div>
           <label htmlFor="terminal-search" className="block text-sm font-medium text-polar-night mb-2">
-            Find Terminal
+            {t('findTerminal')}
           </label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" aria-hidden="true" />
@@ -141,8 +143,8 @@ export function TerminalSelector({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, address, or city..."
-              aria-label="Search terminals by name, address, or city"
+              placeholder={t('searchPlaceholder')}
+              aria-label={t('searchAriaLabel')}
               className="w-full pl-10 pr-4 py-3 sm:py-3.5 rounded-lg border border-border bg-bg-primary text-polar-night placeholder-text-muted focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none transition-all min-h-[48px]"
             />
           </div>
@@ -154,7 +156,7 @@ export function TerminalSelector({
         {loading ? (
           <div className="flex items-center justify-center py-8" role="status">
             <Loader2 className="w-6 h-6 animate-spin text-frost-ice" aria-hidden="true" />
-            <span className="ml-2 text-text-secondary">Loading terminals...</span>
+            <span className="ml-2 text-text-secondary">{t('loadingTerminals')}</span>
           </div>
         ) : fetchError ? (
           <div className="text-center py-8 text-aurora-red" role="alert">
@@ -164,31 +166,31 @@ export function TerminalSelector({
               onClick={() => onCountryChange(country)}
               className="mt-2 text-sm text-frost-ice hover:underline min-h-[32px] px-3 py-1"
             >
-              Try again
+              {t('tryAgain')}
             </button>
           </div>
         ) : filteredTerminals.length === 0 ? (
           <div className="text-center py-8 text-text-secondary" role="status">
             {searchQuery
-              ? 'No terminals found matching your search'
-              : 'No terminals available'}
+              ? t('noTerminalsSearch')
+              : t('noTerminalsAvailable')}
           </div>
         ) : !isExpanded && selectedTerminal ? (
           <button
             type="button"
             onClick={() => setIsExpanded(true)}
-            aria-label="Change selected terminal"
+            aria-label={t('changeTerminal')}
             className="w-full text-left p-4 sm:p-5 rounded-lg bg-aurora-green/10 border-2 border-aurora-green/20 hover:border-aurora-green/40 transition-all min-h-[80px]"
           >
             <div className="flex items-center gap-2 text-aurora-green">
               <Check className="w-5 h-5" aria-hidden="true" />
-              <span className="font-medium">Selected Terminal</span>
+              <span className="font-medium">{t('selectedTerminal')}</span>
             </div>
             <p className="mt-1 text-sm text-polar-night">
               {selectedTerminal.name} - {selectedTerminal.address}, {selectedTerminal.city}
             </p>
             <p className="mt-1 text-xs text-frost-ice">
-              Click to change terminal
+              {t('clickToChange')}
             </p>
           </button>
         ) : (

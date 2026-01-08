@@ -2,6 +2,7 @@
 
 import { Modal, Button } from '@second-turn/design-system';
 import { AlertTriangle } from 'griddy-icons';
+import { useTranslations } from 'next-intl';
 
 export interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -18,11 +19,13 @@ export function DeleteConfirmationModal({
   gameName,
   isLoading = false,
 }: DeleteConfirmationModalProps) {
+  const t = useTranslations('DeleteConfirmationModal');
+
   return (
     <Modal
       open={isOpen}
       onClose={onClose}
-      title="Delete Listing"
+      title={t('title')}
       size="sm"
       footer={
         <>
@@ -31,7 +34,7 @@ export function DeleteConfirmationModal({
             onClick={onClose}
             disabled={isLoading}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             variant="primary"
@@ -39,7 +42,7 @@ export function DeleteConfirmationModal({
             disabled={isLoading}
             className="bg-aurora-red hover:bg-aurora-red/90"
           >
-            {isLoading ? 'Deleting...' : 'Delete Listing'}
+            {isLoading ? t('deleting') : t('delete')}
           </Button>
         </>
       }
@@ -49,14 +52,14 @@ export function DeleteConfirmationModal({
           <AlertTriangle className="w-12 h-12 text-aurora-red" />
         </div>
         <p className="text-base text-text mb-2 font-medium">
-          Are you sure you want to permanently delete "{gameName}"?
+          {t('message', { gameName })}
         </p>
         <p className="text-sm text-text-secondary">
-          This action cannot be undone. The listing will be permanently removed from the database.
+          {t('warning')}
         </p>
         <div className="mt-4 p-3 bg-aurora-red/10 rounded-lg border border-aurora-red/20 w-full">
           <p className="text-xs text-aurora-red font-medium">
-            Warning: This is a permanent action and cannot be reversed.
+            {t('permanentWarning')}
           </p>
         </div>
       </div>

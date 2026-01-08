@@ -21,6 +21,164 @@
     "analyticsDescription": "Vercel Analytics, Speed Insights (requires consent)",
     "ariaLabel": "Cookie consent"
   },
+  "ListingActionsMenu": {
+    "ariaLabel": "Listing actions",
+    "viewListing": "View Listing",
+    "edit": "Edit",
+    "publish": "Publish",
+    "reactivate": "Reactivate",
+    "markAsSold": "Mark as Sold",
+    "removeListing": "Remove Listing",
+    "copyLink": "Copy Link",
+    "deletePermanently": "Delete Permanently"
+  },
+  "DeleteConfirmationModal": {
+    "title": "Delete Listing",
+    "message": "Are you sure you want to permanently delete \"{gameName}\"?",
+    "warning": "This action cannot be undone. All listing data will be permanently removed.",
+    "permanentWarning": "Warning: This is a permanent action and cannot be reversed.",
+    "cancel": "Cancel",
+    "delete": "Delete Listing",
+    "deleting": "Deleting..."
+  },
+  "WantedListingActionsMenu": {
+    "ariaLabel": "Wanted listing actions",
+    "viewListing": "View Listing",
+    "edit": "Edit",
+    "extend": "Extend +30 Days",
+    "reactivate": "Reactivate",
+    "markAsFulfilled": "Mark as Fulfilled",
+    "cancelListing": "Cancel Listing",
+    "copyLink": "Copy Link",
+    "deletePermanently": "Delete Permanently"
+  },
+  "WantedStatusChangeModal": {
+    "fulfilled": {
+      "title": "Mark as Fulfilled",
+      "message": "Great news! Mark this wanted listing as fulfilled?",
+      "confirm": "Mark as Fulfilled"
+    },
+    "cancelled": {
+      "title": "Cancel Listing",
+      "message": "Are you sure you want to cancel this wanted listing?",
+      "confirm": "Cancel Listing"
+    },
+    "active": {
+      "title": "Reactivate Listing",
+      "message": "Reactivate this wanted listing?",
+      "confirm": "Reactivate"
+    },
+    "expired": {
+      "title": "Mark as Expired",
+      "message": "Mark this wanted listing as expired?",
+      "confirm": "Mark as Expired"
+    },
+    "cancel": "Cancel",
+    "processing": "Processing..."
+  },
+  "ConfirmationModal": {
+    "defaultTitle": "Confirm Action",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "processing": "Processing..."
+  },
+  "NotificationModal": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Information",
+    "ok": "OK"
+  },
+  "OfflineError": {
+    "title": "You're offline",
+    "message": "Check your internet connection and try again.",
+    "retry": "Try again"
+  },
+  "EmailVerificationBanner": {
+    "title": "Email Verification Required",
+    "message": "Please verify your email address to create listings and access all features. We sent a verification link to {email}.",
+    "sending": "Sending...",
+    "resend": "Resend Verification Email"
+  },
+  "AccountDeletion": {
+    "title": "Delete account",
+    "description": "Permanently delete your account and all associated data. This can't be undone.",
+    "confirmTitle": "Are you absolutely sure?",
+    "immediateEffects": "When you delete your account, the following happens immediately:",
+    "effect1": "All your active listings will be removed",
+    "effect2": "Your saved games and wishlist will be deleted",
+    "effect3": "Your profile and reviews will be anonymized",
+    "sellerTitle": "For Sellers:",
+    "sellerEffect1": "Any pending payouts will be processed within 7 days",
+    "sellerEffect2": "Transaction history is retained for legal compliance",
+    "recoveryTitle": "Account Recovery (14-Day Grace Period):",
+    "recoveryMessage": "You have 14 days to recover your account by logging in again. After this period, deletion is permanent.",
+    "dataRetentionTitle": "Data Retention (GDPR Compliance):",
+    "dataRetentionMessage": "Some data may be retained for up to 90 days for legal and fraud prevention purposes.",
+    "typeToConfirm": "Type DELETE to confirm",
+    "deleting": "Deleting...",
+    "confirmButton": "Yes, delete my account"
+  },
+  "MessageInput": {
+    "placeholder": "Type your message...",
+    "addPhotos": "Add photos",
+    "maxPhotos": "Maximum {max} photos",
+    "send": "Send",
+    "tooLong": "Message is too long. Please shorten it by {count} character(s)."
+  },
+  "BankAccountForm": {
+    "holderName": "Account Holder Name",
+    "holderNameHint": "Enter name as it appears on your bank account",
+    "iban": "IBAN",
+    "ibanRequired": "IBAN is required",
+    "holderNameRequired": "Account holder name is required",
+    "addFailed": "Failed to add bank account",
+    "formatHint": "Format: {hint}",
+    "securityNote": "Your bank details are securely stored by Stripe. We only store the last 4 digits for display.",
+    "cancel": "Cancel",
+    "addButton": "Add Bank Account",
+    "adding": "Adding..."
+  },
+  "TerminalSelector": {
+    "country": "Delivery Country",
+    "findTerminal": "Find Terminal",
+    "searchPlaceholder": "Search by name, address, or city...",
+    "loading": "Loading terminals...",
+    "retry": "Try again",
+    "noResults": "No terminals found matching your search",
+    "noTerminals": "No terminals available",
+    "selectedTerminal": "Selected Terminal",
+    "clickToChange": "Click to change terminal"
+  },
+  "QuestionInput": {
+    "askPlaceholder": "Ask a question about this listing...",
+    "replyPlaceholder": "Write your reply...",
+    "reply": "Reply",
+    "ask": "Ask",
+    "tooLong": "Please shorten by {count} character(s)"
+  },
+  "PayoutConfirmModal": {
+    "title": "Request Payout",
+    "amount": "Amount",
+    "to": "To",
+    "expectedArrival": "Expected arrival",
+    "arrivalNote": "Payouts typically arrive within 2 business days.",
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "confirm": "Confirm Payout",
+    "successTitle": "Payout Requested!",
+    "successMessage": "{amount} is on its way to your bank account.",
+    "successArrival": "Expected arrival: {date}"
+  },
+  "AvatarUpload": {
+    "loginRequired": "You must be logged in to upload an avatar",
+    "sizeTooLarge": "Image must be less than 5MB",
+    "invalidType": "File must be an image",
+    "changePhoto": "Change photo",
+    "addPhoto": "Add a photo",
+    "remove": "Remove",
+    "hint": "JPG, PNG, or GIF – up to 5MB"
+  },
   "Navigation": {
     "home": "Home",
     "browse": "Browse",

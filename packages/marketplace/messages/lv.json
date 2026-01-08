@@ -21,6 +21,164 @@
     "analyticsDescription": "Vercel Analytics, Speed Insights (nepieciešama piekrišana)",
     "ariaLabel": "Sīkdatņu piekrišana"
   },
+  "ListingActionsMenu": {
+    "ariaLabel": "Sludinājuma darbības",
+    "viewListing": "Skatīt sludinājumu",
+    "edit": "Rediģēt",
+    "publish": "Publicēt",
+    "reactivate": "Aktivizēt atkārtoti",
+    "markAsSold": "Atzīmēt kā pārdotu",
+    "removeListing": "Noņemt sludinājumu",
+    "copyLink": "Kopēt saiti",
+    "deletePermanently": "Dzēst neatgriezeniski"
+  },
+  "DeleteConfirmationModal": {
+    "title": "Dzēst sludinājumu",
+    "message": "Vai tiešām vēlies neatgriezeniski dzēst \"{gameName}\"?",
+    "warning": "Šo darbību nevar atsaukt. Visi sludinājuma dati tiks neatgriezeniski dzēsti.",
+    "permanentWarning": "Brīdinājums: Šī ir neatgriezeniska darbība.",
+    "cancel": "Atcelt",
+    "delete": "Dzēst sludinājumu",
+    "deleting": "Dzēš..."
+  },
+  "WantedListingActionsMenu": {
+    "ariaLabel": "Meklējuma darbības",
+    "viewListing": "Skatīt meklējumu",
+    "edit": "Rediģēt",
+    "extend": "Pagarināt +30 dienas",
+    "reactivate": "Aktivizēt atkārtoti",
+    "markAsFulfilled": "Atzīmēt kā atrastu",
+    "cancelListing": "Atcelt meklējumu",
+    "copyLink": "Kopēt saiti",
+    "deletePermanently": "Dzēst neatgriezeniski"
+  },
+  "WantedStatusChangeModal": {
+    "fulfilled": {
+      "title": "Atzīmēt kā atrastu",
+      "message": "Lieliski! Atzīmēt šo meklējumu kā atrastu?",
+      "confirm": "Atzīmēt kā atrastu"
+    },
+    "cancelled": {
+      "title": "Atcelt meklējumu",
+      "message": "Vai tiešām vēlies atcelt šo meklējumu?",
+      "confirm": "Atcelt meklējumu"
+    },
+    "active": {
+      "title": "Aktivizēt atkārtoti",
+      "message": "Aktivizēt šo meklējumu atkārtoti?",
+      "confirm": "Aktivizēt"
+    },
+    "expired": {
+      "title": "Atzīmēt kā beigušos",
+      "message": "Atzīmēt šo meklējumu kā beigušos?",
+      "confirm": "Atzīmēt kā beigušos"
+    },
+    "cancel": "Atcelt",
+    "processing": "Apstrādā..."
+  },
+  "ConfirmationModal": {
+    "defaultTitle": "Apstiprināt darbību",
+    "confirm": "Apstiprināt",
+    "cancel": "Atcelt",
+    "processing": "Apstrādā..."
+  },
+  "NotificationModal": {
+    "success": "Izdevās",
+    "error": "Kļūda",
+    "warning": "Brīdinājums",
+    "info": "Informācija",
+    "ok": "Labi"
+  },
+  "OfflineError": {
+    "title": "Tu esi bezsaistē",
+    "message": "Pārbaudi interneta savienojumu un mēģini vēlreiz.",
+    "retry": "Mēģināt vēlreiz"
+  },
+  "EmailVerificationBanner": {
+    "title": "Nepieciešams verificēt e-pastu",
+    "message": "Lūdzu verificē savu e-pasta adresi, lai varētu veidot sludinājumus un piekļūt visām funkcijām. Mēs nosūtījām verifikācijas saiti uz {email}.",
+    "sending": "Sūta...",
+    "resend": "Nosūtīt verifikācijas e-pastu vēlreiz"
+  },
+  "AccountDeletion": {
+    "title": "Dzēst kontu",
+    "description": "Neatgriezeniski dzēst savu kontu un visus saistītos datus. Šo nevar atsaukt.",
+    "confirmTitle": "Vai esi pilnīgi drošs?",
+    "immediateEffects": "Dzēšot kontu, nekavējoties notiks:",
+    "effect1": "Visi tavi aktīvie sludinājumi tiks noņemti",
+    "effect2": "Tavas saglabātās spēles un vēlmju saraksts tiks dzēsts",
+    "effect3": "Tavs profils un atsauksmes tiks anonimizētas",
+    "sellerTitle": "Pārdevējiem:",
+    "sellerEffect1": "Visas neizmaksātās summas tiks apstrādātas 7 dienu laikā",
+    "sellerEffect2": "Darījumu vēsture tiks saglabāta juridiskām vajadzībām",
+    "recoveryTitle": "Konta atjaunošana (14 dienu periods):",
+    "recoveryMessage": "Tev ir 14 dienas, lai atjaunotu kontu, piesakoties vēlreiz. Pēc šī perioda dzēšana ir galīga.",
+    "dataRetentionTitle": "Datu glabāšana (GDPR atbilstība):",
+    "dataRetentionMessage": "Daži dati var tikt saglabāti līdz 90 dienām juridiskām un krāpšanas novēršanas vajadzībām.",
+    "typeToConfirm": "Ieraksti DELETE, lai apstiprinātu",
+    "deleting": "Dzēš...",
+    "confirmButton": "Jā, dzēst manu kontu"
+  },
+  "MessageInput": {
+    "placeholder": "Raksti ziņojumu...",
+    "addPhotos": "Pievienot bildes",
+    "maxPhotos": "Maksimums {max} bildes",
+    "send": "Sūtīt",
+    "tooLong": "Ziņojums ir pārāk garš. Lūdzu saīsini par {count} rakstzīmi(-ēm)."
+  },
+  "BankAccountForm": {
+    "holderName": "Konta īpašnieka vārds",
+    "holderNameHint": "Ievadi vārdu, kā tas parādās tavā bankas kontā",
+    "iban": "IBAN",
+    "ibanRequired": "IBAN ir obligāts",
+    "holderNameRequired": "Konta īpašnieka vārds ir obligāts",
+    "addFailed": "Neizdevās pievienot bankas kontu",
+    "formatHint": "Formāts: {hint}",
+    "securityNote": "Tavas bankas detaļas tiek droši glabātas Stripe sistēmā. Mēs saglabājam tikai pēdējos 4 ciparus attēlošanai.",
+    "cancel": "Atcelt",
+    "addButton": "Pievienot bankas kontu",
+    "adding": "Pievieno..."
+  },
+  "TerminalSelector": {
+    "country": "Piegādes valsts",
+    "findTerminal": "Atrast pakomātu",
+    "searchPlaceholder": "Meklē pēc nosaukuma, adreses vai pilsētas...",
+    "loading": "Ielādē pakomātus...",
+    "retry": "Mēģināt vēlreiz",
+    "noResults": "Nav atrasts neviens pakomāts, kas atbilst meklējumam",
+    "noTerminals": "Nav pieejamu pakomātu",
+    "selectedTerminal": "Izvēlētais pakomāts",
+    "clickToChange": "Noklikšķini, lai mainītu pakomātu"
+  },
+  "QuestionInput": {
+    "askPlaceholder": "Uzdod jautājumu par šo sludinājumu...",
+    "replyPlaceholder": "Raksti atbildi...",
+    "reply": "Atbildēt",
+    "ask": "Jautāt",
+    "tooLong": "Lūdzu saīsini par {count} rakstzīmi(-ēm)"
+  },
+  "PayoutConfirmModal": {
+    "title": "Pieprasīt izmaksu",
+    "amount": "Summa",
+    "to": "Uz",
+    "expectedArrival": "Paredzamā saņemšana",
+    "arrivalNote": "Izmaksas parasti nonāk 2 darba dienu laikā.",
+    "cancel": "Atcelt",
+    "processing": "Apstrādā...",
+    "confirm": "Apstiprināt izmaksu",
+    "successTitle": "Izmaksa pieprasīta!",
+    "successMessage": "{amount} ir ceļā uz tavu bankas kontu.",
+    "successArrival": "Paredzamā saņemšana: {date}"
+  },
+  "AvatarUpload": {
+    "loginRequired": "Tev jābūt pieteiktam, lai augšupielādētu avataru",
+    "sizeTooLarge": "Attēlam jābūt mazākam par 5MB",
+    "invalidType": "Failam jābūt attēlam",
+    "changePhoto": "Mainīt bildi",
+    "addPhoto": "Pievienot bildi",
+    "remove": "Noņemt",
+    "hint": "JPG, PNG vai GIF – līdz 5MB"
+  },
   "Navigation": {
     "home": "Sākums",
     "browse": "Pārlūkot",

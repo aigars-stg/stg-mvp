@@ -7,6 +7,7 @@ import { Upload, X, User } from 'griddy-icons';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getInitials } from '@/lib/auth/utils';
+import { useTranslations } from 'next-intl';
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
@@ -14,6 +15,7 @@ interface AvatarUploadProps {
 }
 
 export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploadProps) {
+  const t = useTranslations('AvatarUpload');
   const { user, profile } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -26,7 +28,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     console.log('AvatarUpload: onDrop called, user:', user ? 'present' : 'null');
     if (!user) {
-      setError('You must be logged in to upload an avatar');
+      setError(t('mustBeLoggedIn'));
       console.error('❌ AvatarUpload: No user');
       return;
     }
@@ -41,13 +43,13 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
 
     // Validate file
     if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB');
+      setError(t('fileTooLarge'));
       console.error('❌ AvatarUpload: File too large');
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      setError('File must be an image');
+      setError(t('mustBeImage'));
       console.error('❌ AvatarUpload: Invalid file type:', file.type);
       return;
     }
@@ -142,7 +144,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
       // Clean up blob URL on error
       URL.revokeObjectURL(objectUrl);
     }
-  }, [user, currentAvatarUrl, onUploadComplete]);
+  }, [user, currentAvatarUrl, onUploadComplete, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -230,7 +232,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
                 className="text-sm font-medium text-polar-night hover:underline focus:outline-none disabled:opacity-50"
                 disabled={uploading}
               >
-                {preview ? 'Change photo' : 'Add a photo'}
+                {preview ? t('changePhoto') : t('addPhoto')}
               </button>
             </div>
             {preview && (
@@ -245,13 +247,13 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
                   disabled={uploading}
                   className="text-sm font-medium text-aurora-red hover:underline focus:outline-none disabled:opacity-50"
                 >
-                  Remove
+                  {t('remove')}
                 </button>
               </>
             )}
           </div>
           <p className="text-xs text-text-secondary">
-            JPG, PNG, or GIF – up to 5MB
+            {t('fileFormats')}
           </p>
         </div>
       </div>

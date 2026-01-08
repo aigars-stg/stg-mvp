@@ -5,12 +5,14 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { AlertCircle, Email as Mail, X } from 'griddy-icons';
 import { Button } from '@second-turn/design-system';
 import { supabase } from '@/lib/supabase/client';
+import { useTranslations } from 'next-intl';
 
 interface EmailVerificationBannerProps {
   dismissible?: boolean;
 }
 
 export function EmailVerificationBanner({ dismissible = false }: EmailVerificationBannerProps) {
+  const t = useTranslations('EmailVerificationBanner');
   const { user } = useAuth();
   const [isDismissed, setIsDismissed] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -32,12 +34,12 @@ export function EmailVerificationBanner({ dismissible = false }: EmailVerificati
       });
 
       if (error) {
-        setResendMessage(`Error: ${error.message}`);
+        setResendMessage(t('errorPrefix', { message: error.message }));
       } else {
-        setResendMessage('Verification email sent! Check your inbox.');
+        setResendMessage(t('successMessage'));
       }
     } catch (err: any) {
-      setResendMessage(`Error: ${err.message || 'Failed to resend email'}`);
+      setResendMessage(t('errorPrefix', { message: err.message || t('failedToResend') }));
     } finally {
       setIsResending(false);
     }
@@ -49,7 +51,7 @@ export function EmailVerificationBanner({ dismissible = false }: EmailVerificati
         <button
           onClick={() => setIsDismissed(true)}
           className="absolute top-3 right-3 text-text-secondary hover:text-polar-night transition-colors"
-          aria-label="Dismiss"
+          aria-label={t('dismiss')}
         >
           <X className="w-5 h-5" />
         </button>
@@ -59,17 +61,16 @@ export function EmailVerificationBanner({ dismissible = false }: EmailVerificati
         <AlertCircle className="w-6 h-6 text-aurora-yellow flex-shrink-0 mt-0.5" />
         <div className="flex-1">
           <h3 className="font-semibold text-polar-night mb-1">
-            Email Verification Required
+            {t('title')}
           </h3>
           <p className="text-sm text-text-secondary mb-3">
-            Please verify your email address to create listings and access all features.
-            We sent a verification link to <strong>{user.email}</strong>.
+            {t('description', { email: user.email || '' })}
           </p>
 
           {resendMessage && (
             <p
               className={`text-sm mb-3 ${
-                resendMessage.startsWith('Error')
+                resendMessage.includes('Error') || resendMessage.includes('Kļūda')
                   ? 'text-aurora-red'
                   : 'text-aurora-green'
               }`}
@@ -85,7 +86,7 @@ export function EmailVerificationBanner({ dismissible = false }: EmailVerificati
             disabled={isResending}
           >
             <Mail className="w-4 h-4 mr-2" />
-            {isResending ? 'Sending...' : 'Resend Verification Email'}
+            {isResending ? t('sending') : t('resendButton')}
           </Button>
         </div>
       </div>

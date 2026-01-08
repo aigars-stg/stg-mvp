@@ -4,6 +4,7 @@ import { useState, useRef, KeyboardEvent } from 'react';
 import { Button } from '@second-turn/design-system';
 import { Send, RefreshCw as Loader2 } from 'griddy-icons';
 import { QUESTION_CONSTRAINTS } from '@/lib/types/question';
+import { useTranslations } from 'next-intl';
 
 interface QuestionInputProps {
   onSubmit: (content: string) => Promise<void>;
@@ -16,9 +17,10 @@ interface QuestionInputProps {
 export function QuestionInput({
   onSubmit,
   disabled = false,
-  placeholder = 'Ask a question about this listing...',
+  placeholder,
   isReply = false,
 }: QuestionInputProps) {
+  const t = useTranslations('QuestionInput');
   const [content, setContent] = useState('');
   const [sending, setSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -92,7 +94,7 @@ export function QuestionInput({
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             disabled={disabled || sending}
-            placeholder={placeholder}
+            placeholder={placeholder || t('placeholder')}
             className={`w-full resize-none rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-colors ${
               isOverLimit
                 ? 'border-aurora-red focus:ring-aurora-red'
@@ -124,7 +126,7 @@ export function QuestionInput({
           ) : (
             <>
               <Send className="w-4 h-4 mr-1.5" />
-              {isReply ? 'Reply' : 'Ask'}
+              {isReply ? t('reply') : t('ask')}
             </>
           )}
         </Button>
@@ -132,7 +134,9 @@ export function QuestionInput({
 
       {isOverLimit && (
         <p className="text-xs text-aurora-red mt-2">
-          Your {isReply ? 'reply' : 'question'} is too long. Please shorten it by {Math.abs(remainingChars)} character{Math.abs(remainingChars) !== 1 ? 's' : ''}.
+          {isReply
+            ? t('replyTooLong', { count: Math.abs(remainingChars) })
+            : t('questionTooLong', { count: Math.abs(remainingChars) })}
         </p>
       )}
     </div>

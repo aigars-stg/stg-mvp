@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@second-turn/design-system';
 import { AlertTriangle, TrashAlt as Trash2 } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useTranslations } from 'next-intl';
 
 export function AccountDeletion() {
+  const t = useTranslations('AccountDeletion');
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,7 +18,7 @@ export function AccountDeletion() {
 
   const handleDelete = async () => {
     if (confirmText !== 'DELETE') {
-      setError('Please type DELETE to confirm');
+      setError(t('pleaseTypeDelete'));
       return;
     }
 
@@ -60,10 +62,10 @@ export function AccountDeletion() {
           <AlertTriangle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <h3 className="font-semibold text-polar-night mb-1">
-              Delete account
+              {t('title')}
             </h3>
             <p className="text-sm text-text-secondary mb-3">
-              Permanently delete your account and all associated data. This can't be undone.
+              {t('description')}
             </p>
             <Button
               variant="danger"
@@ -71,7 +73,7 @@ export function AccountDeletion() {
               onClick={() => setShowConfirm(true)}
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Delete account
+              {t('title')}
             </Button>
           </div>
         </div>
@@ -85,60 +87,58 @@ export function AccountDeletion() {
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle className="w-5 h-5 text-aurora-red flex-shrink-0" />
           <h3 className="text-lg font-bold text-polar-night">
-            Are you absolutely sure?
+            {t('confirmTitle')}
           </h3>
         </div>
 
         <p className="text-sm text-text-secondary mb-3">
-          When you delete your account, the following happens immediately:
+          {t('immediateEffects')}
         </p>
         <ul className="text-sm text-text-secondary space-y-1 list-disc list-inside mb-4">
-          <li>Your profile will be hidden from public view</li>
-          <li>All your listings will be removed from public view</li>
-          <li>You'll be signed out from all devices</li>
-          <li>Your personal information (name, email, phone) will be anonymized</li>
-          <li>Your email address becomes available for reuse immediately</li>
+          <li>{t('effects.profileHidden')}</li>
+          <li>{t('effects.listingsRemoved')}</li>
+          <li>{t('effects.signedOut')}</li>
+          <li>{t('effects.infoAnonymized')}</li>
+          <li>{t('effects.emailAvailable')}</li>
         </ul>
 
         <div className="p-3 bg-amber-50 rounded border border-amber-200 mb-4">
           <p className="text-xs font-medium text-amber-800 mb-2">
-            <strong>For Sellers:</strong>
+            <strong>{t('forSellers')}</strong>
           </p>
           <p className="text-xs text-amber-700">
-            If you are a seller, you must have <strong>zero balance</strong>, <strong>no active orders</strong>, and <strong>no open disputes</strong> before you can delete your account. Funds must be paid out to your bank account first.
+            {t('sellerRequirements')}
           </p>
         </div>
 
         <div className="p-3 bg-frost-ice/10 rounded border border-frost-ice/30 mb-4">
           <p className="text-xs font-medium text-polar-night mb-2">
-            <strong>Account Recovery (14-Day Grace Period):</strong>
+            <strong>{t('recoveryTitle')}</strong>
           </p>
           <p className="text-xs text-text-secondary">
-            You can recover your account within <strong>14 days</strong> of deletion. After 14 days,
-            recovery is no longer possible, but your data will be retained for an additional 76 days
-            for legal compliance. Visit <strong>/account/recover</strong> to restore your account.
+            {t('recoveryDescription')}
           </p>
         </div>
 
         <div className="p-3 bg-snow-white rounded border border-border mb-4">
           <p className="text-xs font-medium text-polar-night mb-2">
-            <strong>Data Retention (GDPR Compliance):</strong>
+            <strong>{t('dataRetentionTitle')}</strong>
           </p>
           <p className="text-xs text-text-secondary mb-2">
-            For legal compliance and dispute resolution, we retain the following data for <strong>90 days</strong>:
+            {t('dataRetentionDescription')}
           </p>
           <ul className="text-xs text-text-secondary space-y-1 list-disc list-inside ml-2">
-            <li>Transaction and purchase history</li>
-            <li>Listing information (hidden from public, kept for disputes)</li>
-            <li>Communication records related to sales/purchases</li>
+            <li>{t('retention.transactions')}</li>
+            <li>{t('retention.listings')}</li>
+            <li>{t('retention.communications')}</li>
           </ul>
           <p className="text-xs text-text-secondary mt-2">
-            After 90 days, all data will be permanently deleted from our systems.
+            {t('dataRetentionAfter')}
           </p>
         </div>
 
         <p className="text-sm font-semibold text-aurora-red">
-          After the 14-day grace period, this action cannot be undone.
+          {t('finalWarning')}
         </p>
       </div>
 
@@ -152,14 +152,14 @@ export function AccountDeletion() {
         {/* Confirmation Text */}
         <div>
           <label className="block text-sm font-medium text-polar-night mb-2">
-            Type <span className="font-bold">DELETE</span> to confirm
+            {t('typeDeleteLabel')}
           </label>
           <input
             type="text"
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             className="w-full px-4 py-3 border-2 border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-red/30 focus:border-aurora-red text-polar-night bg-snow-white"
-            placeholder="Type DELETE"
+            placeholder={t('typeDeletePlaceholder')}
             disabled={loading}
           />
         </div>
@@ -171,7 +171,7 @@ export function AccountDeletion() {
             onClick={handleDelete}
             disabled={loading || confirmText !== 'DELETE'}
           >
-            {loading ? 'Deleting...' : 'Yes, delete my account'}
+            {loading ? t('deleting') : t('confirmDelete')}
           </Button>
           <Button
             variant="secondary"
@@ -182,7 +182,7 @@ export function AccountDeletion() {
             }}
             disabled={loading}
           >
-            Cancel
+            {t('cancel')}
           </Button>
         </div>
       </div>

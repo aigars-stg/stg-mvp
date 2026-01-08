@@ -2,6 +2,7 @@
 
 import { Modal, Button } from '@second-turn/design-system';
 import { AlertCircle, CheckCircle, Undo as RotateCcw, CloseCircle as XCircle } from 'griddy-icons';
+import { useTranslations } from 'next-intl';
 
 export interface WantedStatusChangeModalProps {
   isOpen: boolean;
@@ -22,53 +23,55 @@ export function WantedStatusChangeModal({
   gameName,
   isLoading = false,
 }: WantedStatusChangeModalProps) {
+  const t = useTranslations('WantedStatusChangeModal');
+
   const getStatusConfig = () => {
     switch (newStatus) {
       case 'fulfilled':
         return {
           icon: <CheckCircle className="w-12 h-12 text-northern-lights-green" />,
-          title: 'Mark as Fulfilled',
-          message: `Are you sure you want to mark "${gameName}" as fulfilled?`,
-          description: 'This indicates you have found and acquired this game. The listing will be hidden from public search.',
-          confirmText: 'Mark as Fulfilled',
+          title: t('fulfilled.title'),
+          message: t('fulfilled.message', { gameName }),
+          description: t('fulfilled.description'),
+          confirmText: t('fulfilled.confirmText'),
           confirmVariant: 'primary' as const,
         };
       case 'cancelled':
         return {
           icon: <XCircle className="w-12 h-12 text-text-muted" />,
-          title: 'Cancel Listing',
-          message: `Are you sure you want to cancel "${gameName}"?`,
-          description: 'This will hide the listing from public search. You can reactivate or permanently delete it later.',
-          confirmText: 'Cancel Listing',
+          title: t('cancelled.title'),
+          message: t('cancelled.message', { gameName }),
+          description: t('cancelled.description'),
+          confirmText: t('cancelled.confirmText'),
           confirmVariant: 'secondary' as const,
         };
       case 'active':
         return {
           icon: <RotateCcw className="w-12 h-12 text-northern-lights-green" />,
-          title: 'Reactivate Listing',
-          message: `Are you sure you want to reactivate "${gameName}"?`,
+          title: t('active.title'),
+          message: t('active.message', { gameName }),
           description: currentStatus === 'expired'
-            ? 'This will make your wanted listing visible to sellers again and reset the expiration date.'
-            : 'This will make your wanted listing visible to sellers again.',
-          confirmText: 'Reactivate',
+            ? t('active.descriptionExpired')
+            : t('active.description'),
+          confirmText: t('active.confirmText'),
           confirmVariant: 'primary' as const,
         };
       case 'expired':
         return {
           icon: <AlertCircle className="w-12 h-12 text-text-muted" />,
-          title: 'Mark as Expired',
-          message: `Are you sure you want to mark "${gameName}" as expired?`,
-          description: 'This will hide the listing from public search. You can reactivate it later if needed.',
-          confirmText: 'Mark as Expired',
+          title: t('expired.title'),
+          message: t('expired.message', { gameName }),
+          description: t('expired.description'),
+          confirmText: t('expired.confirmText'),
           confirmVariant: 'secondary' as const,
         };
       default:
         return {
           icon: <AlertCircle className="w-12 h-12 text-text-muted" />,
-          title: 'Change Status',
-          message: `Change status of "${gameName}"?`,
+          title: t('default.title'),
+          message: t('default.message', { gameName }),
           description: '',
-          confirmText: 'Confirm',
+          confirmText: t('default.confirmText'),
           confirmVariant: 'primary' as const,
         };
     }
@@ -89,14 +92,14 @@ export function WantedStatusChangeModal({
             onClick={onClose}
             disabled={isLoading}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             variant={config.confirmVariant}
             onClick={onConfirm}
             disabled={isLoading}
           >
-            {isLoading ? 'Processing...' : config.confirmText}
+            {isLoading ? t('processing') : config.confirmText}
           </Button>
         </>
       }

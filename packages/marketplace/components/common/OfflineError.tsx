@@ -2,6 +2,7 @@
 
 import { WifiOff, RefreshCw } from 'griddy-icons';
 import { Button } from '@second-turn/design-system';
+import { useTranslations } from 'next-intl';
 
 interface OfflineErrorProps {
   onRetry?: () => void;
@@ -13,6 +14,8 @@ interface OfflineErrorProps {
  * Use this instead of generic error messages when isOfflineError() returns true.
  */
 export function OfflineError({ onRetry, message }: OfflineErrorProps) {
+  const t = useTranslations('OfflineError');
+
   return (
     <div className="text-center py-16">
       <div className="flex justify-center mb-4">
@@ -21,15 +24,15 @@ export function OfflineError({ onRetry, message }: OfflineErrorProps) {
         </div>
       </div>
       <h3 className="text-xl font-semibold text-polar-night mb-2">
-        You&apos;re offline
+        {t('title')}
       </h3>
       <p className="text-text-secondary mb-6 max-w-md mx-auto">
-        {message || "Check your internet connection and try again."}
+        {message || t('defaultMessage')}
       </p>
       {onRetry && (
         <Button variant="primary" onClick={onRetry}>
           <RefreshCw className="w-4 h-4 mr-2" />
-          Try again
+          {t('tryAgain')}
         </Button>
       )}
     </div>
