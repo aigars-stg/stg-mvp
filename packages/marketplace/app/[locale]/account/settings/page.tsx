@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { getInitials } from '@/lib/auth/utils';
 import { Button, Card } from '@second-turn/design-system';
-import { User, Email as Mail, Phone, CheckCircleAlt01 as CheckCircle2, AlertCircle, Download, Settings, At as AtSign, Globe, Edit as Pencil, Check, X, LinkExternal as ExternalLink } from 'griddy-icons';
-import { useRouter } from 'next/navigation';
+import { User, Phone, CheckCircleAlt01 as CheckCircle2, AlertCircle, Download, Settings, Globe, Edit as Pencil, Check, X, LinkExternal as ExternalLink } from 'griddy-icons';
+import { useTranslations, useLocale } from 'next-intl';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { AvatarUpload } from '@/components/auth/AvatarUpload';
 import { EmailChange } from '@/components/auth/EmailChange';
@@ -15,13 +14,13 @@ import { CountrySelector } from '@/components/auth/CountrySelector';
 import { getCountryFlag, getCountryName, type CountryCode } from '@/lib/country-utils';
 
 export default function AccountSettingsPage() {
+  const t = useTranslations('AccountSettings');
+  const locale = useLocale();
   const { user, profile, updateProfile, refreshProfile, signOut } = useAuth();
-  const router = useRouter();
 
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
   const [country, setCountry] = useState<CountryCode | ''>(profile?.country as CountryCode || '');
-  const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -42,7 +41,7 @@ export default function AccountSettingsPage() {
 
   const handleUpdateName = async () => {
     if (!fullName.trim()) {
-      setError('Full name is required');
+      setError(t('validation.fullNameRequired'));
       return;
     }
 
@@ -57,11 +56,11 @@ export default function AccountSettingsPage() {
 
       if (updateError) throw updateError;
 
-      setSuccess('Name updated successfully');
+      setSuccess(t('success.nameUpdated'));
       setIsChangingName(false);
       await refreshProfile();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to update name');
+      setError(err instanceof Error ? err.message : t('error.updateName'));
     } finally {
       setLoading(false);
     }
@@ -79,11 +78,11 @@ export default function AccountSettingsPage() {
 
       if (updateError) throw updateError;
 
-      setSuccess('Phone number updated successfully');
+      setSuccess(t('success.phoneUpdated'));
       setIsChangingPhone(false);
       await refreshProfile();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to update phone');
+      setError(err instanceof Error ? err.message : t('error.updatePhone'));
     } finally {
       setLoading(false);
     }
@@ -101,11 +100,11 @@ export default function AccountSettingsPage() {
 
       if (updateError) throw updateError;
 
-      setSuccess('Country updated successfully');
+      setSuccess(t('success.countryUpdated'));
       setIsChangingCountry(false);
       await refreshProfile();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to update country');
+      setError(err instanceof Error ? err.message : t('error.updateCountry'));
     } finally {
       setLoading(false);
     }
@@ -117,7 +116,7 @@ export default function AccountSettingsPage() {
       // AuthContext handles the redirect to '/'
     } catch (error) {
       console.error('Failed to sign out:', error);
-      setError('Failed to sign out. Please try again.');
+      setError(t('error.signOut'));
     }
   };
 
@@ -149,11 +148,11 @@ export default function AccountSettingsPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      setSuccess('Your data has been downloaded successfully');
+      setSuccess(t('success.dataDownloaded'));
       setLoading(false);
     } catch (error) {
       console.error('Failed to download data:', error);
-      setError('Failed to download your data. Please try again.');
+      setError(t('error.downloadData'));
       setLoading(false);
     }
   };
@@ -164,10 +163,10 @@ export default function AccountSettingsPage() {
     });
 
     if (!updateError) {
-      setSuccess('Avatar updated successfully');
+      setSuccess(t('success.avatarUpdated'));
       await refreshProfile();
     } else {
-      setError('Failed to update avatar');
+      setError(t('error.updateAvatar'));
     }
   };
 
@@ -176,7 +175,7 @@ export default function AccountSettingsPage() {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center">
         <div className="text-center">
-          <p className="text-text-secondary">Loading...</p>
+          <p className="text-text-secondary">{t('loading')}</p>
         </div>
       </div>
     );
@@ -189,13 +188,13 @@ export default function AccountSettingsPage() {
         <Card padding="lg" className="max-w-md w-full">
           <div className="text-center space-y-4">
             <AlertCircle className="w-12 h-12 text-aurora-red mx-auto" />
-            <h2 className="text-xl font-semibold text-polar-night">Profile Loading Error</h2>
+            <h2 className="text-xl font-semibold text-polar-night">{t('profileError.title')}</h2>
             <p className="text-text-secondary">
-              We couldn't load your profile. This might be due to a network issue or a problem with your account data.
+              {t('profileError.description')}
             </p>
             <div className="text-sm text-text-muted bg-bg-secondary p-3 rounded border border-border">
-              <p className="font-mono">User ID: {user.id.substring(0, 8)}...</p>
-              <p className="font-mono">Email: {user.email}</p>
+              <p className="font-mono">{t('profileError.userId')} {user.id.substring(0, 8)}...</p>
+              <p className="font-mono">{t('profileError.email')} {user.email}</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
@@ -204,7 +203,7 @@ export default function AccountSettingsPage() {
                 fullWidth
                 className="sm:w-auto"
               >
-                Retry
+                {t('profileError.retry')}
               </Button>
               <Button
                 onClick={handleSignOut}
@@ -212,11 +211,11 @@ export default function AccountSettingsPage() {
                 fullWidth
                 className="sm:w-auto"
               >
-                Sign Out
+                {t('profileError.signOut')}
               </Button>
             </div>
             <p className="text-xs text-text-muted pt-2">
-              If this problem persists, please contact{' '}
+              {t('profileError.contactSupport')}{' '}
               <a href="mailto:info@secondturn.games" className="text-frost-ice hover:underline">
                 info@secondturn.games
               </a>
@@ -234,10 +233,10 @@ export default function AccountSettingsPage() {
       <div className="mb-4 sm:mb-8">
         <div className="flex items-center gap-3 mb-2">
           <Settings className="w-8 h-8 text-frost-ice" />
-          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">Account settings</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">{t('title')}</h1>
         </div>
         <p className="text-sm sm:text-base text-text-secondary">
-          Your profile and preferences
+          {t('subtitle')}
         </p>
       </div>
 
@@ -252,7 +251,7 @@ export default function AccountSettingsPage() {
           {/* Profile Information Card */}
           <Card padding="lg" className="mb-6 sm:p-6 p-4">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Profile information</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-polar-night">{t('profileInfo')}</h2>
             </div>
 
             {/* Success/Error Messages */}
@@ -270,269 +269,256 @@ export default function AccountSettingsPage() {
               </div>
             )}
 
-            <div className="space-y-6">
-              {/* Avatar Upload */}
-              <div>
-                <AvatarUpload
-                  currentAvatarUrl={profile.avatar_url}
-                  onUploadComplete={handleAvatarUpload}
-                />
-              </div>
+            {/* Profile Hero Section */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 pb-6 border-b border-border">
+              {/* Large Avatar */}
+              <AvatarUpload
+                currentAvatarUrl={profile.avatar_url}
+                onUploadComplete={handleAvatarUpload}
+                size="large"
+              />
 
-              {/* Full Name */}
-              <div>
+              {/* Name + Member Since */}
+              <div className="flex-1 text-center sm:text-left">
                 {!isChangingName ? (
                   <div
-                    className="group relative flex items-center justify-between p-3 border border-transparent rounded-lg hover:bg-bg transition-colors cursor-pointer"
+                    className="group cursor-pointer inline-flex items-center gap-2"
                     onClick={() => {
                       setFullName(profile.full_name);
                       setIsChangingName(true);
                     }}
                   >
-                    <div className="flex items-center gap-3">
-                      <User className="w-5 h-5 text-text-muted" />
-                      <span className="text-sm font-medium text-polar-night">
-                        {profile.full_name}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-frost-ice/10 hover:text-frost-ice rounded"
-                      aria-label="Edit name"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
+                    <h3 className="text-xl font-semibold text-polar-night">
+                      {profile.full_name}
+                    </h3>
+                    <Pencil className="w-4 h-4 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 ) : (
-                  <div className="p-3 border-2 border-frost-ice/20 rounded-lg bg-snow-white">
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <span id="full-name-label" className="sr-only">Full name</span>
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <User className="h-4 w-4 text-frost-ice" />
-                        </div>
-                        <input
-                          type="text"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-white"
-                          placeholder="John Doe"
-                          aria-labelledby="full-name-label"
-                          required
-                          disabled={loading}
-                          autoFocus
-                          onKeyDown={(e) => {
-                            if (e.key === 'Escape') {
-                              setIsChangingName(false);
-                              setFullName(profile.full_name);
-                            }
-                            if (e.key === 'Enter') {
-                              handleUpdateName();
-                            }
-                          }}
-                        />
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={handleUpdateName}
-                          disabled={loading}
-                          className="p-2 text-aurora-green hover:bg-aurora-green/10 rounded-md transition-colors disabled:opacity-50"
-                          title="Save"
-                        >
-                          {loading ? (
-                            <div className="w-4 h-4 border-2 border-aurora-green border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Check className="w-4 h-4" />
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsChangingName(false);
-                            setFullName(profile.full_name);
-                          }}
-                          disabled={loading}
-                          className="p-2 text-aurora-red hover:bg-aurora-red/10 rounded-md transition-colors disabled:opacity-50"
-                          title="Cancel"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
+                  <div className="inline-flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="text-xl font-semibold text-polar-night bg-transparent border-b-2 border-frost-ice focus:outline-none w-full max-w-xs"
+                      placeholder="Your name"
+                      autoFocus
+                      disabled={loading}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          setIsChangingName(false);
+                          setFullName(profile.full_name);
+                        }
+                        if (e.key === 'Enter') {
+                          handleUpdateName();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleUpdateName}
+                      disabled={loading}
+                      className="p-1 text-aurora-green hover:bg-aurora-green/10 rounded transition-colors disabled:opacity-50"
+                      title="Save"
+                    >
+                      {loading ? (
+                        <div className="w-5 h-5 border-2 border-aurora-green border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Check className="w-5 h-5" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsChangingName(false);
+                        setFullName(profile.full_name);
+                      }}
+                      disabled={loading}
+                      className="p-1 text-aurora-red hover:bg-aurora-red/10 rounded transition-colors disabled:opacity-50"
+                      title="Cancel"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
                   </div>
                 )}
+
+                <p className="text-sm text-text-secondary mt-1">
+                  {t('profileHero.memberSince', {
+                    date: new Date(user.created_at || '').toLocaleDateString(
+                      locale === 'lv' ? 'lv-LV' : 'en-US',
+                      { year: 'numeric', month: 'long', day: 'numeric' }
+                    )
+                  })}
+                </p>
+              </div>
+            </div>
+
+            {/* Profile Details with Completion Indicators */}
+            <div className="pt-6 space-y-1">
+              {/* Email Row - with completion indicator */}
+              <div className="flex items-center gap-3 py-3 px-3 rounded-lg">
+                <CheckCircle2 className="w-5 h-5 text-aurora-green flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-text-secondary">{t('fields.email')}</div>
+                  <EmailChange currentEmail={profile.email} compact />
+                </div>
               </div>
 
-              {/* Phone */}
-              <div>
-                {!isChangingPhone ? (
-                  <div
-                    className="group relative flex items-center justify-between p-3 border border-transparent rounded-lg hover:bg-bg transition-colors cursor-pointer"
-                    onClick={() => {
-                      setPhone(profile.phone || '');
-                      setIsChangingPhone(true);
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Phone className="w-5 h-5 text-text-muted" />
-                      <span className="text-sm font-medium text-polar-night">
-                        {profile.phone || <span className="text-text-secondary italic">Add phone number</span>}
-                      </span>
+              {/* Location Row */}
+              {!isChangingCountry ? (
+                <div
+                  className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-bg-secondary transition-colors cursor-pointer"
+                  onClick={() => {
+                    setCountry(profile.country as CountryCode || '');
+                    setIsChangingCountry(true);
+                  }}
+                >
+                  {profile.country ? (
+                    <CheckCircle2 className="w-5 h-5 text-aurora-green flex-shrink-0" />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full border-2 border-text-muted flex-shrink-0" />
+                  )}
+                  <Globe className="w-5 h-5 text-text-muted flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-text-secondary">{t('fields.location')}</div>
+                    <div className={`text-sm font-medium truncate ${profile.country ? 'text-polar-night' : 'text-text-secondary italic'}`}>
+                      {profile.country ? (
+                        <span className="inline-flex items-center gap-2">
+                          <span className={getCountryFlag(profile.country as CountryCode)} />
+                          {getCountryName(profile.country as CountryCode)}
+                        </span>
+                      ) : (
+                        t('fields.selectCountry')
+                      )}
                     </div>
-                    <button
-                      type="button"
-                      className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-frost-ice/10 hover:text-frost-ice rounded"
-                      aria-label="Edit phone"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
                   </div>
-                ) : (
-                  <div className="p-3 border-2 border-frost-ice/20 rounded-lg bg-snow-white">
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <span id="phone-label" className="sr-only">Phone number</span>
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Phone className="h-4 w-4 text-frost-ice" />
-                        </div>
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-white"
-                          placeholder="+371 12345678"
-                          aria-labelledby="phone-label"
-                          disabled={loading}
-                          maxLength={20}
-                          pattern="[\d\s\+\-\(\)]+"
-                          autoFocus
-                          onKeyDown={(e) => {
-                            if (e.key === 'Escape') {
-                              setIsChangingPhone(false);
-                              setPhone(profile.phone || '');
-                            }
-                            if (e.key === 'Enter') {
-                              handleUpdatePhone();
-                            }
-                          }}
-                        />
+                  <span className="text-sm font-medium text-frost-ice">
+                    {profile.country ? t('fields.edit') : t('fields.add')}
+                  </span>
+                </div>
+              ) : (
+                <div className="p-3 border-2 border-frost-ice/20 rounded-lg bg-snow-white">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <span id="country-label" className="sr-only">Country</span>
+                      <CountrySelector
+                        value={country}
+                        onChange={(newCountry) => setCountry(newCountry)}
+                        disabled={loading}
+                        required
+                        aria-labelledby="country-label"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={handleUpdateCountry}
+                        disabled={loading}
+                        className="p-2 text-aurora-green hover:bg-aurora-green/10 rounded-md transition-colors disabled:opacity-50"
+                        title="Save"
+                      >
+                        {loading ? (
+                          <div className="w-4 h-4 border-2 border-aurora-green border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Check className="w-4 h-4" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsChangingCountry(false);
+                          setCountry(profile.country as CountryCode || '');
+                        }}
+                        disabled={loading}
+                        className="p-2 text-aurora-red hover:bg-aurora-red/10 rounded-md transition-colors disabled:opacity-50"
+                        title="Cancel"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Phone Row - optional field, no completion indicator */}
+              {!isChangingPhone ? (
+                <div
+                  className="flex items-center gap-3 py-3 px-3 pl-11 rounded-lg hover:bg-bg-secondary transition-colors cursor-pointer"
+                  onClick={() => {
+                    setPhone(profile.phone || '');
+                    setIsChangingPhone(true);
+                  }}
+                >
+                  <Phone className="w-5 h-5 text-text-muted flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-text-secondary">{t('fields.phone')}</div>
+                    <div className={`text-sm font-medium truncate ${profile.phone ? 'text-polar-night' : 'text-text-secondary italic'}`}>
+                      {profile.phone || t('fields.addPhone')}
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium text-frost-ice">
+                    {profile.phone ? t('fields.edit') : t('fields.add')}
+                  </span>
+                </div>
+              ) : (
+                <div className="p-3 border-2 border-frost-ice/20 rounded-lg bg-snow-white">
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <span id="phone-label" className="sr-only">Phone number</span>
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Phone className="h-4 w-4 text-frost-ice" />
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={handleUpdatePhone}
-                          disabled={loading}
-                          className="p-2 text-aurora-green hover:bg-aurora-green/10 rounded-md transition-colors disabled:opacity-50"
-                          title="Save"
-                        >
-                          {loading ? (
-                            <div className="w-4 h-4 border-2 border-aurora-green border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Check className="w-4 h-4" />
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-white"
+                        placeholder="+371 12345678"
+                        aria-labelledby="phone-label"
+                        disabled={loading}
+                        maxLength={20}
+                        pattern="[\d\s\+\-\(\)]+"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') {
                             setIsChangingPhone(false);
                             setPhone(profile.phone || '');
-                          }}
-                          disabled={loading}
-                          className="p-2 text-aurora-red hover:bg-aurora-red/10 rounded-md transition-colors disabled:opacity-50"
-                          title="Cancel"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
+                          }
+                          if (e.key === 'Enter') {
+                            handleUpdatePhone();
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={handleUpdatePhone}
+                        disabled={loading}
+                        className="p-2 text-aurora-green hover:bg-aurora-green/10 rounded-md transition-colors disabled:opacity-50"
+                        title="Save"
+                      >
+                        {loading ? (
+                          <div className="w-4 h-4 border-2 border-aurora-green border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Check className="w-4 h-4" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsChangingPhone(false);
+                          setPhone(profile.phone || '');
+                        }}
+                        disabled={loading}
+                        className="p-2 text-aurora-red hover:bg-aurora-red/10 rounded-md transition-colors disabled:opacity-50"
+                        title="Cancel"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
-
-              {/* Country */}
-              <div>
-                {!isChangingCountry ? (
-                  <div
-                    className="group relative flex items-center justify-between p-3 border border-transparent rounded-lg hover:bg-bg transition-colors cursor-pointer"
-                    onClick={() => {
-                      setCountry(profile.country as CountryCode || '');
-                      setIsChangingCountry(true);
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Globe className="w-5 h-5 text-text-muted" />
-                      <span className={`${getCountryFlag(profile.country as CountryCode)} text-2xl`} role="img" aria-label={`${getCountryName(profile.country as CountryCode)} flag`} />
-                      <span className="text-sm font-medium text-polar-night">
-                        {getCountryName(profile.country as CountryCode)}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-frost-ice/10 hover:text-frost-ice rounded"
-                      aria-label="Edit country"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="p-3 border-2 border-frost-ice/20 rounded-lg bg-snow-white">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <span id="country-label" className="sr-only">Country</span>
-                        <CountrySelector
-                          value={country}
-                          onChange={(newCountry) => setCountry(newCountry)}
-                          disabled={loading}
-                          required
-                          aria-labelledby="country-label"
-                        />
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={handleUpdateCountry}
-                          disabled={loading}
-                          className="p-2 text-aurora-green hover:bg-aurora-green/10 rounded-md transition-colors disabled:opacity-50"
-                          title="Save"
-                        >
-                          {loading ? (
-                            <div className="w-4 h-4 border-2 border-aurora-green border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Check className="w-4 h-4" />
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsChangingCountry(false);
-                            setCountry(profile.country as CountryCode || '');
-                          }}
-                          disabled={loading}
-                          className="p-2 text-aurora-red hover:bg-aurora-red/10 rounded-md transition-colors disabled:opacity-50"
-                          title="Cancel"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Email Change */}
-              <div>
-                <EmailChange currentEmail={profile.email} />
-              </div>
-
-              {/* Joined Date */}
-              <div className="pt-2 text-xs text-text-secondary text-right">
-                Joined {new Date(user.created_at || '').toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </div>
+                </div>
+              )}
             </div>
           </Card>
 
@@ -541,9 +527,9 @@ export default function AccountSettingsPage() {
             <div className="flex items-start gap-3">
               <User className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-semibold text-polar-night mb-1">Public profile</h3>
+                <h3 className="font-semibold text-polar-night mb-1">{t('publicProfile.title')}</h3>
                 <p className="text-sm text-text-secondary mb-3">
-                  See how your profile appears to other users on Second Turn Games.
+                  {t('publicProfile.description')}
                 </p>
                 <a
                   href={`/profile/${user.id}`}
@@ -551,7 +537,7 @@ export default function AccountSettingsPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm font-medium text-frost-ice hover:text-frost-deep transition-colors"
                 >
-                  View public profile
+                  {t('publicProfile.viewLink')}
                   <ExternalLink className="w-4 h-4" />
                 </a>
               </div>
@@ -571,9 +557,9 @@ export default function AccountSettingsPage() {
                 <div className="flex items-start gap-3">
                   <Download className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-polar-night mb-1">Your data</h3>
+                    <h3 className="font-semibold text-polar-night mb-1">{t('yourData.title')}</h3>
                     <p className="text-sm text-text-secondary mb-3">
-                      Export all your personal data in JSON format.
+                      {t('yourData.description')}
                     </p>
                     <Button
                       variant="secondary"
@@ -581,14 +567,14 @@ export default function AccountSettingsPage() {
                       onClick={handleDownloadData}
                       disabled={loading}
                     >
-                      {loading ? 'Preparing...' : 'Download'}
+                      {loading ? t('yourData.preparing') : t('yourData.download')}
                     </Button>
                   </div>
                 </div>
               </div>
               <p className="text-xs text-text-secondary">
-                This feature complies with GDPR Article 20. Learn more in our{' '}
-                <a href="/privacy#your-rights" className="text-frost-ice hover:underline">Privacy Policy</a>.
+                {t('yourData.gdprNote')}{' '}
+                <a href="/privacy#your-rights" className="text-frost-ice hover:underline">{t('yourData.privacyPolicy')}</a>.
               </p>
             </div>
           </Card>

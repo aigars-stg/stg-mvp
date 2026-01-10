@@ -8,6 +8,7 @@ import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle a
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
+import { UserInfoCard } from '@/components/user';
 
 interface OrderItem {
   id: string;
@@ -558,16 +559,16 @@ export default function OrderDetailPage() {
             {order.seller_profile && (
               <div className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6">
                 <h3 className="font-semibold text-polar-night mb-4">Seller</h3>
-                <div className="space-y-2">
-                  <p className="font-medium text-polar-night">{order.seller_profile.name}</p>
-                  {order.seller_profile.country && (
-                    <p className="text-sm text-text-secondary">
-                      {getCountryFlag(order.seller_profile.country)}{' '}
-                      {getCountryName(order.seller_profile.country)}
-                    </p>
-                  )}
-                  {/* TODO: Add link to seller profile when available */}
-                </div>
+                <UserInfoCard
+                  user={{
+                    id: order.seller_id,
+                    name: order.seller_profile.name,
+                    avatarUrl: null, // Order API doesn't include avatar
+                    country: order.seller_profile.country || null,
+                  }}
+                  size="md"
+                  countryDisplay="full"
+                />
               </div>
             )}
 

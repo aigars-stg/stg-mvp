@@ -12,11 +12,18 @@ import { useTranslations } from 'next-intl';
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
   onUploadComplete?: (url: string) => void;
+  size?: 'default' | 'large';
 }
 
-export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploadProps) {
+export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'default' }: AvatarUploadProps) {
   const t = useTranslations('AvatarUpload');
   const { user, profile } = useAuth();
+
+  // Size classes based on prop
+  const avatarSizeClasses = size === 'large'
+    ? 'w-28 h-28 sm:w-32 sm:h-32'
+    : 'w-20 h-20 sm:w-24 sm:h-24';
+  const initialsFontSize = size === 'large' ? 'text-4xl' : 'text-3xl';
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState<string | null>(currentAvatarUrl || null);
@@ -201,67 +208,60 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
   };
 
   return (
-    <div className="space-y-4">
-      {/* Avatar Preview */}
-      <div className="flex items-center gap-3 sm:gap-4">
-        <div className="relative">
-          {preview ? (
-            <img
-              src={preview}
-              alt="Avatar"
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover border-2 border-border"
-            />
-          ) : (
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-frost-ice text-snow-white flex items-center justify-center border-2 border-border text-3xl font-bold">
-              {initials}
-            </div>
-          )}
-          {uploading && (
-            <div className="absolute inset-0 bg-polar-night/50 rounded-xl flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-snow-white"></div>
-            </div>
-          )}
-        </div>
-
-        <div className="flex-1 flex flex-col justify-center">
-          <div className="flex items-center gap-2 mb-1">
-            <div {...getRootProps()} className="cursor-pointer">
-              <input {...getInputProps()} />
-              <button
-                type="button"
-                className="text-sm font-medium text-polar-night hover:underline focus:outline-none disabled:opacity-50"
-                disabled={uploading}
-              >
-                {preview ? t('changePhoto') : t('addPhoto')}
-              </button>
-            </div>
-            {preview && (
-              <>
-                <span className="text-text-secondary">•</span>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemove();
-                  }}
-                  disabled={uploading}
-                  className="text-sm font-medium text-aurora-red hover:underline focus:outline-none disabled:opacity-50"
-                >
-                  {t('remove')}
-                </button>
-              </>
-            )}
+    <div className="space-y-2">
+      {/* Avatar with hover overlay */}
+      <div
+        {...getRootProps()}
+        className={`group relative ${avatarSizeClasses} cursor-pointer`}
+      >
+        <input {...getInputProps()} />
+        {preview ? (
+          <img
+            src={preview}
+            alt="Avatar"
+            className={`${avatarSizeClasses} rounded-xl object-cover border-2 border-border`}
+          />
+        ) : (
+          <div className={`${avatarSizeClasses} rounded-xl bg-frost-ice text-snow-white flex items-center justify-center border-2 border-border ${initialsFontSize} font-bold`}>
+            {initials}
           </div>
-          <p className="text-xs text-text-secondary">
-            {t('fileFormats')}
-          </p>
-        </div>
+        )}
+
+        {/* Hover overlay */}
+        {!uploading && (
+          <div className="absolute inset-0 bg-polar-night/60 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-snow-white text-xs font-medium">
+              {preview ? t('changePhoto') : t('addPhoto')}
+            </span>
+          </div>
+        )}
+
+        {/* Uploading overlay */}
+        {uploading && (
+          <div className="absolute inset-0 bg-polar-night/50 rounded-xl flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-snow-white"></div>
+          </div>
+        )}
       </div>
+
+      {/* Remove button - only shown when there's a preview */}
+      {preview && !uploading && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRemove();
+          }}
+          className="text-xs text-text-secondary hover:text-aurora-red transition-colors"
+        >
+          {t('remove')}
+        </button>
+      )}
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-aurora-red/10 border border-aurora-red/20 rounded-lg">
-          <p className="text-sm text-aurora-red">{error}</p>
+        <div className="p-2 bg-aurora-red/10 border border-aurora-red/20 rounded-lg">
+          <p className="text-xs text-aurora-red">{error}</p>
         </div>
       )}
     </div>

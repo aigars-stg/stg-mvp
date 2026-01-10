@@ -6,6 +6,7 @@ import { Button, Card } from '@second-turn/design-system';
 import {  Monitor, Phone as Smartphone, Tablet, LocationPin as MapPin, Calendar, AlertCircle, LogOut, ChevronDown  } from 'griddy-icons';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface LoginRecord {
   id: string;
@@ -19,6 +20,8 @@ interface LoginRecord {
 }
 
 export function LoginActivity() {
+  const t = useTranslations('LoginActivity');
+  const locale = useLocale();
   const { user } = useAuth();
   const router = useRouter();
   const [activities, setActivities] = useState<LoginRecord[]>([]);
@@ -56,7 +59,7 @@ export function LoginActivity() {
         const { data, error: fetchError } = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
         if (fetchError) {
-          setError('Login activity unavailable');
+          setError(t('unavailable'));
           console.log('LoginActivity: Unable to load login history');
           setLoading(false);
           return;
@@ -68,7 +71,7 @@ export function LoginActivity() {
       } catch (err: any) {
         // Silently fail - login activity is optional
         console.log('LoginActivity: Unable to load login history');
-        setError('Login activity unavailable');
+        setError(t('unavailable'));
         setLoading(false);
       }
     }
@@ -121,12 +124,12 @@ export function LoginActivity() {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 5) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minutes ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    if (diffMins < 5) return t('time.justNow');
+    if (diffMins < 60) return t('time.minutesAgo', { count: diffMins });
+    if (diffHours < 24) return diffHours === 1 ? t('time.hourAgo', { count: diffHours }) : t('time.hoursAgo', { count: diffHours });
+    if (diffDays < 7) return diffDays === 1 ? t('time.dayAgo', { count: diffDays }) : t('time.daysAgo', { count: diffDays });
 
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(locale === 'lv' ? 'lv-LV' : 'en-US', {
       month: 'short',
       day: 'numeric',
       year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
@@ -140,7 +143,7 @@ export function LoginActivity() {
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
         >
-          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login activity</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">{t('title')}</h2>
           <ChevronDown
             className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''
               }`}
@@ -162,7 +165,7 @@ export function LoginActivity() {
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
         >
-          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login activity</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">{t('title')}</h2>
           <ChevronDown
             className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''
               }`}
@@ -185,7 +188,7 @@ export function LoginActivity() {
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
         >
-          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login Activity</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-polar-night">{t('title')}</h2>
           <ChevronDown
             className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''
               }`}
@@ -193,7 +196,7 @@ export function LoginActivity() {
         </button>
         {isExpanded && (
           <p className="text-sm text-text-secondary text-center py-8">
-            No login activity recorded yet.
+            {t('noActivity')}
           </p>
         )}
       </Card>
@@ -206,9 +209,9 @@ export function LoginActivity() {
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
       >
-        <h2 className="text-lg sm:text-xl font-semibold text-polar-night">Login Activity</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-polar-night">{t('title')}</h2>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-text-secondary">Last 10 sign-ins</span>
+          <span className="text-xs text-text-secondary">{t('lastSignIns')}</span>
           <ChevronDown
             className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''
               }`}
@@ -242,7 +245,7 @@ export function LoginActivity() {
                         </p>
                         {index === 0 && (
                           <span className="px-2 py-0.5 text-xs font-medium bg-frost-ice/20 text-frost-ice rounded">
-                            Current
+                            {t('current')}
                           </span>
                         )}
                       </div>
@@ -276,8 +279,7 @@ export function LoginActivity() {
           <div className="mt-6 space-y-3">
             <div className="p-3 bg-bg-elevated rounded-lg border border-border">
               <p className="text-xs text-text-secondary mb-3">
-                <strong>Security tip:</strong> If you see any unfamiliar activity, consider changing your
-                password immediately and signing out all devices.
+                <strong>{t('security.tip')}</strong> {t('security.warning')}
               </p>
 
               {!showSignOutAll ? (
@@ -287,15 +289,15 @@ export function LoginActivity() {
                   onClick={() => setShowSignOutAll(true)}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out All Devices
+                  {t('security.signOutAll')}
                 </Button>
               ) : (
                 <div className="mt-3 pt-3 border-t border-border">
                   <h3 className="text-sm font-semibold text-polar-night mb-2">
-                    Sign Out All Devices
+                    {t('security.signOutAllTitle')}
                   </h3>
                   <p className="text-xs text-text-secondary mb-3">
-                    This will sign you out from all devices including this one. You'll need to sign in again.
+                    {t('security.signOutAllDescription')}
                   </p>
 
                   {signOutError && (
@@ -312,7 +314,7 @@ export function LoginActivity() {
                         onClick={handleSignOutAll}
                         disabled={signOutLoading}
                       >
-                        {signOutLoading ? 'Signing out...' : 'Confirm Sign Out'}
+                        {signOutLoading ? t('security.signingOut') : t('security.confirmSignOut')}
                       </Button>
                       <Button
                         variant="secondary"
@@ -323,7 +325,7 @@ export function LoginActivity() {
                         }}
                         disabled={signOutLoading}
                       >
-                        Cancel
+                        {t('security.cancel')}
                       </Button>
                     </div>
                   </div>

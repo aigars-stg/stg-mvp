@@ -172,12 +172,16 @@
   },
   "AvatarUpload": {
     "loginRequired": "You must be logged in to upload an avatar",
+    "mustBeLoggedIn": "You must be logged in to upload an avatar",
     "sizeTooLarge": "Image must be less than 5MB",
+    "fileTooLarge": "Image must be less than 5MB",
     "invalidType": "File must be an image",
+    "mustBeImage": "File must be an image",
     "changePhoto": "Change photo",
     "addPhoto": "Add a photo",
     "remove": "Remove",
-    "hint": "JPG, PNG, or GIF – up to 5MB"
+    "hint": "JPG, PNG, or GIF – up to 5MB",
+    "fileFormats": "JPG, PNG, or GIF – up to 5MB"
   },
   "Navigation": {
     "home": "Home",
@@ -1277,5 +1281,102 @@
       "message": "Change status of \"{gameName}\"?",
       "confirm": "Confirm"
     }
+  },
+  "AccountSettings": {
+    "title": "Account settings",
+    "subtitle": "Your profile and preferences",
+    "profileInfo": "Profile information",
+    "loading": "Loading...",
+    "profileError": {
+      "title": "Profile Loading Error",
+      "description": "We couldn't load your profile. This might be due to a network issue or a problem with your account data.",
+      "userId": "User ID:",
+      "email": "Email:",
+      "retry": "Retry",
+      "signOut": "Sign Out",
+      "contactSupport": "If this problem persists, please contact"
+    },
+    "validation": {
+      "fullNameRequired": "Full name is required"
+    },
+    "success": {
+      "nameUpdated": "Name updated successfully",
+      "phoneUpdated": "Phone number updated successfully",
+      "countryUpdated": "Country updated successfully",
+      "avatarUpdated": "Avatar updated successfully",
+      "dataDownloaded": "Your data has been downloaded successfully"
+    },
+    "error": {
+      "updateName": "Failed to update name",
+      "updatePhone": "Failed to update phone",
+      "updateCountry": "Failed to update country",
+      "updateAvatar": "Failed to update avatar",
+      "signOut": "Failed to sign out. Please try again.",
+      "downloadData": "Failed to download your data. Please try again."
+    },
+    "profileHero": {
+      "memberSince": "Member since {date}"
+    },
+    "fields": {
+      "email": "Email",
+      "phone": "Phone",
+      "location": "Location",
+      "addPhone": "Add phone number",
+      "selectCountry": "Select your country",
+      "add": "Add",
+      "edit": "Edit"
+    },
+    "publicProfile": {
+      "title": "Public profile",
+      "description": "See how your profile appears to other users on Second Turn Games.",
+      "viewLink": "View public profile"
+    },
+    "yourData": {
+      "title": "Your data",
+      "description": "Export all your personal data in JSON format.",
+      "preparing": "Preparing...",
+      "download": "Download",
+      "gdprNote": "This feature complies with GDPR Article 20. Learn more in our",
+      "privacyPolicy": "Privacy Policy"
+    }
+  },
+  "LoginActivity": {
+    "title": "Login Activity",
+    "lastSignIns": "Last 10 sign-ins",
+    "current": "Current",
+    "noActivity": "No login activity recorded yet.",
+    "unavailable": "Login activity unavailable",
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{count} minutes ago",
+      "hourAgo": "{count} hour ago",
+      "hoursAgo": "{count} hours ago",
+      "dayAgo": "{count} day ago",
+      "daysAgo": "{count} days ago"
+    },
+    "security": {
+      "tip": "Security tip:",
+      "warning": "If you see any unfamiliar activity, consider changing your password immediately and signing out all devices.",
+      "signOutAll": "Sign Out All Devices",
+      "signOutAllTitle": "Sign Out All Devices",
+      "signOutAllDescription": "This will sign you out from all devices including this one. You'll need to sign in again.",
+      "signingOut": "Signing out...",
+      "confirmSignOut": "Confirm Sign Out",
+      "cancel": "Cancel"
+    }
+  },
+  "EmailChange": {
+    "verificationSent": "Verification email sent!",
+    "verificationDescription": "We've sent verification links to both {currentEmail} and {newEmail}. Click the link in the new email to complete the change.",
+    "placeholder": "newemail@example.com",
+    "hint": "We'll send a verification link to confirm.",
+    "validation": {
+      "invalidEmail": "Please enter a valid email address",
+      "sameEmail": "New email must be different from current email"
+    }
+  },
+  "UserCard": {
+    "memberSince": "Member since {year}",
+    "notSelling": "Not currently selling"
   }
 }

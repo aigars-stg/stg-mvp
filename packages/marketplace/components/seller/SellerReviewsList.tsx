@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Chat as MessageSquare, ChevronDown, User } from 'griddy-icons';
+import { Star, Chat as MessageSquare, ChevronDown } from 'griddy-icons';
 import { Button, Card } from '@second-turn/design-system';
 import { cn } from '@/lib/utils';
+import { UserInfoCard } from '@/components/user';
 
 interface Review {
   id: string;
@@ -219,37 +220,22 @@ function ReviewCard({
     <Card className="p-4">
       {/* Header: Buyer info and rating */}
       <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          {/* Buyer Avatar */}
-          {review.buyer_avatar ? (
-            <img
-              src={review.buyer_avatar}
-              alt={review.buyer_name}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-frost-ice/20 flex items-center justify-center">
-              <User className="w-5 h-5 text-frost-ice" />
-            </div>
-          )}
-
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-polar-night">
-                {review.buyer_name}
-              </span>
-              {review.buyer_country && (
-                <span className="text-xs text-text-muted">
-                  {getCountryFlag(review.buyer_country)}
-                </span>
-              )}
-            </div>
-            <div className="text-xs text-text-muted">
-              {formatDate(review.created_at)}
-              {review.order_number && (
-                <span> • Order #{review.order_number}</span>
-              )}
-            </div>
+        <div className="flex flex-col gap-1">
+          <UserInfoCard
+            user={{
+              id: review.id, // Using review id as we don't have buyer_id in the Review interface
+              name: review.buyer_name,
+              avatarUrl: review.buyer_avatar,
+              country: review.buyer_country,
+            }}
+            size="lg"
+            linkToProfile={false}
+          />
+          <div className="text-xs text-text-muted ml-14">
+            {formatDate(review.created_at)}
+            {review.order_number && (
+              <span> • Order #{review.order_number}</span>
+            )}
           </div>
         </div>
 
@@ -346,17 +332,6 @@ function ReviewCard({
       )}
     </Card>
   );
-}
-
-/**
- * Get country flag emoji from country code
- */
-function getCountryFlag(countryCode: string): string {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map((char) => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
 }
 
 export { ReviewCard, RatingSummary };

@@ -17,6 +17,8 @@ export const dynamic = 'force-dynamic';
  * - include_listings: boolean - include listing previews for sellers (default: true)
  * - reviews_page: number - page for reviews pagination (default: 1)
  * - reviews_limit: number - reviews per page (default: 10)
+ * - listings_page: number - page for listings pagination (default: 1)
+ * - listings_limit: number - listings per page (default: 12)
  */
 export async function GET(
   request: NextRequest,
@@ -29,6 +31,8 @@ export async function GET(
     const includeListings = searchParams.get('include_listings') !== 'false';
     const reviewsPage = parseInt(searchParams.get('reviews_page') || '1');
     const reviewsLimit = parseInt(searchParams.get('reviews_limit') || '10');
+    const listingsPage = parseInt(searchParams.get('listings_page') || '1');
+    const listingsLimit = parseInt(searchParams.get('listings_limit') || '12');
 
     const supabase = await createServerSupabase();
 
@@ -98,7 +102,15 @@ export async function GET(
           hasMore: boolean;
         };
       };
-      listings?: any[];
+      listings?: {
+        data: any[];
+        pagination: {
+          page: number;
+          limit: number;
+          total: number;
+          hasMore: boolean;
+        };
+      };
     } = {
       user: {
         id: userId,
@@ -137,70 +149,96 @@ export async function GET(
       response.seller.active_listings_count = activeListingsCount ?? 0;
 
       if (includeListings && hasActiveListings) {
+        // Fetch full listing data for OfferCard display with pagination
+        const listingsFrom = (listingsPage - 1) * listingsLimit;
+        const listingsTo = listingsFrom + listingsLimit - 1;
+
         const { data: listings, error: listingsError } = await supabase
           .from('listings')
-          .select(`
-            id,
-            game_name,
-            price,
-            condition,
-            bgg_game_id,
-            bgg_version_id,
-            status
-          `)
+          .select('*')
           .eq('seller_id', userId)
           .eq('status', 'active')
           .order('created_at', { ascending: false })
-          .limit(4);
+          .range(listingsFrom, listingsTo);
 
         if (listingsError) {
           // Continue without listings
         }
 
-        // Fetch game metadata for listing previews
+        // Fetch game metadata for listings
         if (listings && listings.length > 0) {
           const gameIds = [...new Set(listings.map((l: any) => l.bgg_game_id).filter(Boolean))];
 
+          let gamesMap = new Map();
           if (gameIds.length > 0) {
             const { data: games } = await supabase
               .from('games')
-              .select('id, thumbnail, image, versions')
+              .select('id, thumbnail, image, versions, player_count, min_age, playing_time, is_expansion')
               .in('id', gameIds);
 
-            // Attach game data to listings
-            const listingsWithGames = listings.map((listing: any) => {
-              const game = games?.find((g: any) => g.id === listing.bgg_game_id);
-              let thumbnail = game?.thumbnail || null;
-
-              // Check for version-specific thumbnail
-              if (listing.bgg_version_id && game?.versions && Array.isArray(game.versions)) {
-                const version = game.versions.find((v: any) => v.id === listing.bgg_version_id) as { thumbnail?: string } | undefined;
-                if (version?.thumbnail) {
-                  thumbnail = version.thumbnail;
-                }
-              }
-
-              return {
-                id: listing.id,
-                title: listing.game_name,
-                price: listing.price,
-                condition: listing.condition,
-                thumbnail,
-              };
-            });
-
-            response.listings = listingsWithGames;
-          } else {
-            response.listings = listings.map((l: any) => ({
-              id: l.id,
-              title: l.game_name,
-              price: l.price,
-              condition: l.condition,
-              thumbnail: null,
-            }));
+            gamesMap = new Map(games?.map((g: any) => [g.id, g]) || []);
           }
+
+          // Build seller data object (same for all listings since this is the seller's profile)
+          const sellerData = {
+            id: userId,
+            full_name: userProfile.full_name ?? 'Anonymous',
+            email: '', // Not exposed in public profile
+            avatar_url: userProfile.avatar_url,
+            country: userProfile.country,
+            total_reviews: trustData.total_reviews ?? 0,
+            average_rating: trustData.average_rating ?? 0,
+            total_completed_sales: trustData.total_completed_sales ?? 0,
+            member_since: trustData.member_since || userProfile.created_at,
+          };
+
+          // Transform listings to ListingWithSeller format
+          const listingsWithSeller = listings.map((listing: any) => {
+            const game = gamesMap.get(listing.bgg_game_id);
+            let thumbnail = game?.thumbnail || null;
+            let image = game?.image || null;
+
+            // Check for version-specific images
+            if (listing.bgg_version_id && game?.versions && Array.isArray(game.versions)) {
+              const version = game.versions.find((v: any) => v.id === listing.bgg_version_id);
+              if (version?.thumbnail) thumbnail = version.thumbnail;
+              if (version?.image) image = version.image;
+            }
+
+            return {
+              ...listing,
+              game: {
+                thumbnail,
+                image,
+                player_count: game?.player_count || null,
+                min_age: game?.min_age || null,
+                playing_time: game?.playing_time || null,
+                is_expansion: game?.is_expansion || false,
+              },
+              seller: sellerData,
+            };
+          });
+
+          const listingsTotal = activeListingsCount ?? 0;
+          response.listings = {
+            data: listingsWithSeller,
+            pagination: {
+              page: listingsPage,
+              limit: listingsLimit,
+              total: listingsTotal,
+              hasMore: listingsFrom + listingsWithSeller.length < listingsTotal,
+            },
+          };
         } else {
-          response.listings = [];
+          response.listings = {
+            data: [],
+            pagination: {
+              page: listingsPage,
+              limit: listingsLimit,
+              total: 0,
+              hasMore: false,
+            },
+          };
         }
       }
 

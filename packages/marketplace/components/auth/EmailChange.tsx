@@ -6,12 +6,15 @@ import { At as AtSign, AlertCircle, CheckCircleAlt01 as CheckCircle2, Edit as Pe
 import { supabase } from '@/lib/supabase/client';
 import { validateEmail } from '@/lib/auth/utils';
 import { mapAuthError } from '@/lib/auth/errors';
+import { useTranslations } from 'next-intl';
 
 interface EmailChangeProps {
   currentEmail: string;
+  compact?: boolean;
 }
 
-export function EmailChange({ currentEmail }: EmailChangeProps) {
+export function EmailChange({ currentEmail, compact = false }: EmailChangeProps) {
+  const t = useTranslations('EmailChange');
   const [newEmail, setNewEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,12 +26,12 @@ export function EmailChange({ currentEmail }: EmailChangeProps) {
     setError('');
 
     if (!validateEmail(newEmail)) {
-      setError('Please enter a valid email address');
+      setError(t('validation.invalidEmail'));
       return;
     }
 
     if (newEmail.toLowerCase() === currentEmail.toLowerCase()) {
-      setError('New email must be different from current email');
+      setError(t('validation.sameEmail'));
       return;
     }
 
@@ -63,11 +66,10 @@ export function EmailChange({ currentEmail }: EmailChangeProps) {
           <CheckCircle2 className="w-5 h-5 text-aurora-green flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-aurora-green mb-1">
-              Verification email sent!
+              {t('verificationSent')}
             </p>
             <p className="text-xs text-text-secondary">
-              We've sent verification links to both <strong>{currentEmail}</strong> and{' '}
-              <strong>{newEmail}</strong>. Click the link in the new email to complete the change.
+              {t('verificationDescription', { currentEmail, newEmail })}
             </p>
           </div>
         </div>
@@ -79,7 +81,7 @@ export function EmailChange({ currentEmail }: EmailChangeProps) {
   if (!isEditing) {
     return (
       <div
-        className="group relative flex items-center justify-between p-3 border border-transparent rounded-lg hover:bg-bg transition-colors cursor-pointer"
+        className={`group relative flex items-center justify-between ${compact ? '' : 'p-3 border border-transparent'} rounded-lg hover:bg-bg-secondary transition-colors cursor-pointer`}
         onClick={() => setIsEditing(true)}
       >
         <div className="flex items-center gap-3">
@@ -120,7 +122,7 @@ export function EmailChange({ currentEmail }: EmailChangeProps) {
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-white"
-            placeholder="newemail@example.com"
+            placeholder={t('placeholder')}
             required
             disabled={loading}
             autoComplete="email"
@@ -169,7 +171,7 @@ export function EmailChange({ currentEmail }: EmailChangeProps) {
         </div>
       </div>
       <p className="text-xs text-text-secondary">
-        We'll send a verification link to confirm.
+        {t('hint')}
       </p>
     </div>
   );

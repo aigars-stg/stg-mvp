@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card } from '@second-turn/design-system';
-import { ArrowLeft, RefreshCw as Loader2, User, LocationPin as MapPin, Calendar, Star, Package, ShoppingBag, Chat as MessageSquare } from 'griddy-icons';
+import { ArrowLeft, RefreshCw as Loader2, User, Calendar, Star, Package, ShoppingBag, Chat as MessageSquare } from 'griddy-icons';
 import { SellerReviewsList } from '@/components/seller/SellerReviewsList';
 import { BadgeTierPill } from '@/components/seller/SellerTrustBadge';
 import type { SellerBadgeTier } from '@/lib/types/seller';
-import { getCountryFlag, getCountryName } from '@/lib/country-utils';
+import { UserInfoCard } from '@/components/user';
+import { OfferCard } from '@/components/game/OfferCard';
+import type { ListingWithSeller } from '@/lib/types/listing';
 
 interface UserProfile {
   id: string;
@@ -25,14 +27,6 @@ interface SellerData {
   total_completed_sales: number;
   badge_tier: SellerBadgeTier;
   active_listings_count?: number;
-}
-
-interface ListingPreview {
-  id: string;
-  title: string;
-  price: number;
-  condition: string;
-  thumbnail: string | null;
 }
 
 interface Review {
@@ -60,7 +54,15 @@ interface ProfileData {
       hasMore: boolean;
     };
   };
-  listings?: ListingPreview[];
+  listings?: {
+    data: ListingWithSeller[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      hasMore: boolean;
+    };
+  };
 }
 
 export default function ProfilePage() {
@@ -71,8 +73,10 @@ export default function ProfilePage() {
   const [data, setData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadingMoreReviews, setLoadingMoreReviews] = useState(false);
+  const [loadingMoreListings, setLoadingMoreListings] = useState(false);
   const [reviewsPage, setReviewsPage] = useState(1);
+  const [listingsPage, setListingsPage] = useState(1);
 
   // Fetch profile data
   useEffect(() => {
@@ -90,7 +94,8 @@ export default function ProfilePage() {
         const profileData = await res.json();
         console.log('[Profile Page] API response:', {
           hasListings: !!profileData.listings,
-          listingsCount: profileData.listings?.length,
+          listingsCount: profileData.listings?.data?.length,
+          listingsTotal: profileData.listings?.pagination?.total,
           activeListingsCount: profileData.seller?.active_listings_count,
         });
         setData(profileData);
@@ -107,10 +112,10 @@ export default function ProfilePage() {
 
   // Load more reviews (for sellers only)
   const handleLoadMoreReviews = useCallback(async () => {
-    if (!data || loadingMore || !data.seller) return;
+    if (!data || loadingMoreReviews || !data.seller) return;
 
     try {
-      setLoadingMore(true);
+      setLoadingMoreReviews(true);
       const nextPage = reviewsPage + 1;
 
       const res = await fetch(
@@ -137,26 +142,45 @@ export default function ProfilePage() {
     } catch (err) {
       console.error('Error loading more reviews:', err);
     } finally {
-      setLoadingMore(false);
+      setLoadingMoreReviews(false);
     }
-  }, [data, loadingMore, reviewsPage, userId]);
+  }, [data, loadingMoreReviews, reviewsPage, userId]);
 
-  // Format member since date
-  const formatMemberSince = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-      month: 'long',
-      year: 'numeric',
-    });
-  };
+  // Load more listings (for sellers only)
+  const handleLoadMoreListings = useCallback(async () => {
+    if (!data || loadingMoreListings || !data.seller) return;
 
-  // Format price
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(price);
-  };
+    try {
+      setLoadingMoreListings(true);
+      const nextPage = listingsPage + 1;
+
+      const res = await fetch(
+        `/api/profile/${userId}?include_reviews=false&listings_page=${nextPage}&listings_limit=12`
+      );
+
+      if (!res.ok) throw new Error('Failed to load more listings');
+
+      const moreData = await res.json();
+
+      if (moreData.listings) {
+        setData((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            listings: {
+              ...moreData.listings,
+              data: [...(prev.listings?.data || []), ...moreData.listings.data],
+            },
+          };
+        });
+        setListingsPage(nextPage);
+      }
+    } catch (err) {
+      console.error('Error loading more listings:', err);
+    } finally {
+      setLoadingMoreListings(false);
+    }
+  }, [data, loadingMoreListings, listingsPage, userId]);
 
   // Loading state
   if (loading) {
@@ -171,7 +195,7 @@ export default function ProfilePage() {
   if (error || !data) {
     return (
       <div className="min-h-screen bg-bg-secondary py-8 px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <Link
             href="/browse"
             className="inline-flex items-center gap-2 text-text-secondary hover:text-polar-night mb-6"
@@ -200,7 +224,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-bg-secondary py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Back Link */}
         <button
           onClick={() => router.back()}
@@ -213,46 +237,28 @@ export default function ProfilePage() {
         {/* Profile Header Card */}
         <Card className="p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-6">
-            {/* Avatar */}
-            <div className="flex-shrink-0">
-              {user.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt={user.name}
-                  className="w-24 h-24 rounded-xl object-cover border-2 border-border"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-xl bg-frost-ice/20 flex items-center justify-center border-2 border-border">
-                  <User className="w-12 h-12 text-frost-ice" />
-                </div>
-              )}
-            </div>
-
-            {/* Info */}
+            {/* User Info */}
             <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold text-polar-night">{user.name}</h1>
+              <div className="flex flex-wrap items-start gap-3 mb-4">
+                <UserInfoCard
+                  user={{
+                    id: user.id,
+                    name: user.name,
+                    avatarUrl: user.avatar_url,
+                    country: user.country,
+                  }}
+                  size="2xl"
+                  countryDisplay="full"
+                  memberSince={user.member_since}
+                  showMemberSince={true}
+                  linkToProfile={false}
+                />
                 {isSeller && <BadgeTierPill tier={seller.badge_tier} size="md" />}
-              </div>
-
-              {/* Location and Member Since */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary mb-4">
-                {user.country && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    <span className={getCountryFlag(user.country)} role="img" aria-label={getCountryName(user.country)} />
-                    {getCountryName(user.country)}
-                  </span>
-                )}
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  Member since {formatMemberSince(user.member_since)}
-                </span>
               </div>
 
               {/* Seller Stats Row (only for sellers with reviews) */}
               {isSeller && seller.total_reviews > 0 && (
-                <div className="flex flex-wrap gap-6">
+                <div className="flex flex-wrap gap-6 mt-4">
                   {/* Rating */}
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-0.5">
@@ -296,10 +302,10 @@ export default function ProfilePage() {
             {/* Action Buttons (sellers only) */}
             {isSeller && seller.active_listings_count !== undefined && seller.active_listings_count > 0 && (
               <div className="flex flex-col gap-2 sm:items-end">
-                <Link href={`/browse?sellerId=${user.id}`}>
+                <Link href="/browse">
                   <Button variant="primary" className="flex items-center gap-2">
                     <ShoppingBag className="w-4 h-4" />
-                    View All {seller.active_listings_count} Listings
+                    Browse All Listings
                   </Button>
                 </Link>
               </div>
@@ -307,47 +313,40 @@ export default function ProfilePage() {
           </div>
         </Card>
 
-        {/* Listing Previews (sellers only) */}
-        {isSeller && listings && listings.length > 0 && (
+        {/* Active Listings (sellers only) */}
+        {isSeller && listings && listings.data.length > 0 && (
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
               <ShoppingBag className="w-5 h-5" />
               Active Listings
+              <span className="text-sm font-normal text-text-secondary">
+                ({listings.pagination.total})
+              </span>
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {listings.map((listing) => (
-                <Link key={listing.id} href={`/listing/${listing.id}`}>
-                  <Card className="p-3 hover:shadow-md transition-shadow cursor-pointer">
-                    {/* Thumbnail */}
-                    <div className="aspect-square rounded-lg bg-bg-tertiary mb-2 overflow-hidden">
-                      {listing.thumbnail ? (
-                        <img
-                          src={listing.thumbnail}
-                          alt={listing.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Package className="w-8 h-8 text-text-muted opacity-50" />
-                        </div>
-                      )}
-                    </div>
-                    {/* Info */}
-                    <h3 className="text-sm font-medium text-polar-night line-clamp-2 mb-1">
-                      {listing.title}
-                    </h3>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-frost-ice">
-                        {formatPrice(listing.price)}
-                      </span>
-                      <span className="text-text-muted capitalize">
-                        {listing.condition.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </Card>
-                </Link>
+            <div className="space-y-4">
+              {listings.data.map((listing) => (
+                <OfferCard key={listing.id} listing={listing} />
               ))}
             </div>
+            {listings.pagination.hasMore && (
+              <div className="mt-4 text-center">
+                <Button
+                  variant="secondary"
+                  onClick={handleLoadMoreListings}
+                  disabled={loadingMoreListings}
+                  className="min-w-[200px]"
+                >
+                  {loadingMoreListings ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Loading...
+                    </>
+                  ) : (
+                    `Load more (${listings.data.length} of ${listings.pagination.total})`
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
@@ -366,7 +365,7 @@ export default function ProfilePage() {
               positivePercent={seller.positive_rating_percent}
               hasMore={reviews?.pagination.hasMore || false}
               onLoadMore={handleLoadMoreReviews}
-              isLoadingMore={loadingMore}
+              isLoadingMore={loadingMoreReviews}
               showBreakdown={seller.total_reviews > 0}
             />
           </div>

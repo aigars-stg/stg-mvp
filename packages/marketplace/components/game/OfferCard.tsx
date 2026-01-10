@@ -11,7 +11,7 @@ import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { SellerTrustCompact } from '@/components/seller/SellerTrustBadge';
+import { UserInfoCard } from '@/components/user';
 import { getSellerBadgeTier } from '@/lib/types/seller';
 import { ImageLightbox } from '@/components/listing/ImageLightbox';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
@@ -761,52 +761,27 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
         {/* FOOTER: Seller info + actions (desktop and mobile) */}
         <div className={`hidden sm:flex items-center justify-between gap-4 px-3 sm:px-4 py-3 ${listing.listing_type !== 'contact_seller' ? 'border-t border-border-subtle' : ''}`}>
           {/* Left: Seller Info */}
-          <Link
-            href={`/profile/${listing.seller.id}`}
-            className="group flex items-center gap-2.5 hover:bg-frost-ice/5 -ml-1.5 pl-1.5 pr-2.5 py-1.5 rounded-lg transition-colors min-w-0 flex-1"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Avatar */}
-            {listing.seller.avatar_url ? (
-              <Image
-                src={listing.seller.avatar_url}
-                alt={listing.seller.full_name}
-                width={32}
-                height={32}
-                className="rounded-md object-cover border border-border-subtle flex-shrink-0"
-                unoptimized
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-md bg-frost-ice/20 flex items-center justify-center text-sm font-semibold text-frost-ice flex-shrink-0">
-                {listing.seller.full_name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            {/* Name & Stats */}
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm text-polar-night group-hover:text-frost-ice group-hover:underline transition-colors truncate">
-                {listing.seller.full_name}
-                {listing.seller.country && getCountryFlag(listing.seller.country) && (
-                  <span
-                    className={`${getCountryFlag(listing.seller.country)} ml-1`}
-                    role="img"
-                    aria-label={`Country: ${getCountryName(listing.seller.country)}`}
-                    title={getCountryName(listing.seller.country)}
-                  />
-                )}
-              </span>
-              <div className="flex items-center gap-2 text-xs text-text-muted">
-                <SellerTrustCompact
-                  totalSales={listing.seller.total_completed_sales ?? 0}
-                  averageRating={listing.seller.average_rating ?? 0}
-                  totalReviews={listing.seller.total_reviews ?? 0}
-                  badgeTier={getSellerBadgeTier(
-                    listing.seller.total_completed_sales ?? 0,
-                    listing.seller.average_rating ?? 0
-                  )}
-                />
-              </div>
-            </div>
-          </Link>
+          <div className="min-w-0 flex-1">
+            <UserInfoCard
+              user={{
+                id: listing.seller.id,
+                name: listing.seller.full_name,
+                avatarUrl: listing.seller.avatar_url,
+                country: listing.seller.country,
+              }}
+              seller={{
+                totalSales: listing.seller.total_completed_sales ?? 0,
+                averageRating: listing.seller.average_rating ?? 0,
+                totalReviews: listing.seller.total_reviews ?? 0,
+                badgeTier: getSellerBadgeTier(
+                  listing.seller.total_completed_sales ?? 0,
+                  listing.seller.average_rating ?? 0
+                ),
+              }}
+              size="sm"
+              compact
+            />
+          </div>
 
           {/* Middle: Listed date */}
           <span className="text-xs text-text-muted whitespace-nowrap flex-shrink-0">
@@ -903,55 +878,33 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
 
         {/* Mobile Seller Info */}
         <div className="sm:hidden border-t border-border-subtle px-3 py-2.5">
-          <Link
-            href={`/profile/${listing.seller.id}`}
-            className="flex items-center gap-2.5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Avatar */}
-            {listing.seller.avatar_url ? (
-              <Image
-                src={listing.seller.avatar_url}
-                alt={listing.seller.full_name}
-                width={28}
-                height={28}
-                className="rounded-md object-cover border border-border-subtle flex-shrink-0"
-                unoptimized
-              />
-            ) : (
-              <div className="w-7 h-7 rounded-md bg-frost-ice/20 flex items-center justify-center text-xs font-semibold text-frost-ice flex-shrink-0">
-                {listing.seller.full_name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            {/* Name & Stats */}
+          <div className="flex items-center gap-2.5">
             <div className="flex-1 min-w-0">
-              <span className="text-sm text-polar-night truncate">
-                {listing.seller.full_name}
-                {listing.seller.country && getCountryFlag(listing.seller.country) && (
-                  <span
-                    className={`${getCountryFlag(listing.seller.country)} ml-1`}
-                    role="img"
-                    aria-label={getCountryName(listing.seller.country)}
-                  />
-                )}
-              </span>
-              <div className="flex items-center gap-2 text-xs text-text-muted">
-                <SellerTrustCompact
-                  totalSales={listing.seller.total_completed_sales ?? 0}
-                  averageRating={listing.seller.average_rating ?? 0}
-                  totalReviews={listing.seller.total_reviews ?? 0}
-                  badgeTier={getSellerBadgeTier(
+              <UserInfoCard
+                user={{
+                  id: listing.seller.id,
+                  name: listing.seller.full_name,
+                  avatarUrl: listing.seller.avatar_url,
+                  country: listing.seller.country,
+                }}
+                seller={{
+                  totalSales: listing.seller.total_completed_sales ?? 0,
+                  averageRating: listing.seller.average_rating ?? 0,
+                  totalReviews: listing.seller.total_reviews ?? 0,
+                  badgeTier: getSellerBadgeTier(
                     listing.seller.total_completed_sales ?? 0,
                     listing.seller.average_rating ?? 0
-                  )}
-                />
-              </div>
+                  ),
+                }}
+                size="xs"
+                compact
+              />
             </div>
             {/* Listed date */}
             <span className="text-xs text-text-muted whitespace-nowrap flex-shrink-0">
               {formattedListedDate}
             </span>
-          </Link>
+          </div>
         </div>
 
         {/* Contact Seller Warning Banner (Legal Requirement) - Mobile */}

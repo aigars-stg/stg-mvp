@@ -172,12 +172,16 @@
   },
   "AvatarUpload": {
     "loginRequired": "Tev jābūt pieteiktam, lai augšupielādētu avataru",
+    "mustBeLoggedIn": "Tev jābūt pieteiktam, lai augšupielādētu avataru",
     "sizeTooLarge": "Attēlam jābūt mazākam par 5MB",
+    "fileTooLarge": "Attēlam jābūt mazākam par 5MB",
     "invalidType": "Failam jābūt attēlam",
+    "mustBeImage": "Failam jābūt attēlam",
     "changePhoto": "Mainīt bildi",
     "addPhoto": "Pievienot bildi",
     "remove": "Noņemt",
-    "hint": "JPG, PNG vai GIF – līdz 5MB"
+    "hint": "JPG, PNG vai GIF – līdz 5MB",
+    "fileFormats": "JPG, PNG vai GIF – līdz 5MB"
   },
   "Navigation": {
     "home": "Sākums",
@@ -1277,5 +1281,102 @@
       "message": "Mainīt \"{gameName}\" statusu?",
       "confirm": "Apstiprināt"
     }
+  },
+  "AccountSettings": {
+    "title": "Konta iestatījumi",
+    "subtitle": "Tavs profils un preferences",
+    "profileInfo": "Profila informācija",
+    "loading": "Ielādē...",
+    "profileError": {
+      "title": "Profila ielādes kļūda",
+      "description": "Neizdevās ielādēt tavu profilu. Tas var būt tīkla kļūme vai problēma ar konta datiem.",
+      "userId": "Lietotāja ID:",
+      "email": "E-pasts:",
+      "retry": "Mēģināt vēlreiz",
+      "signOut": "Iziet",
+      "contactSupport": "Ja problēma turpinās, sazinies ar"
+    },
+    "validation": {
+      "fullNameRequired": "Vārds ir obligāts"
+    },
+    "success": {
+      "nameUpdated": "Vārds veiksmīgi atjaunināts",
+      "phoneUpdated": "Tālruņa numurs veiksmīgi atjaunināts",
+      "countryUpdated": "Valsts veiksmīgi atjaunināta",
+      "avatarUpdated": "Profila bilde veiksmīgi atjaunināta",
+      "dataDownloaded": "Tavi dati veiksmīgi lejupielādēti"
+    },
+    "error": {
+      "updateName": "Neizdevās atjaunināt vārdu",
+      "updatePhone": "Neizdevās atjaunināt tālruņa numuru",
+      "updateCountry": "Neizdevās atjaunināt valsti",
+      "updateAvatar": "Neizdevās atjaunināt profila bildi",
+      "signOut": "Neizdevās iziet. Mēģini vēlreiz.",
+      "downloadData": "Neizdevās lejupielādēt tavus datus. Mēģini vēlreiz."
+    },
+    "profileHero": {
+      "memberSince": "Pievienojies {date}"
+    },
+    "fields": {
+      "email": "E-pasts",
+      "phone": "Tālrunis",
+      "location": "Atrašanās vieta",
+      "addPhone": "Pievieno tālruņa numuru",
+      "selectCountry": "Izvēlies savu valsti",
+      "add": "Pievienot",
+      "edit": "Mainīt"
+    },
+    "publicProfile": {
+      "title": "Publiskais profils",
+      "description": "Skaties, kā tavs profils izskatās citiem Second Turn Games lietotājiem.",
+      "viewLink": "Skatīt publisko profilu"
+    },
+    "yourData": {
+      "title": "Tavi dati",
+      "description": "Eksportē visus savus personīgos datus JSON formātā.",
+      "preparing": "Sagatavo...",
+      "download": "Lejupielādēt",
+      "gdprNote": "Šī funkcija atbilst GDPR 20. pantam. Uzzini vairāk mūsu",
+      "privacyPolicy": "Privātuma politikā"
+    }
+  },
+  "LoginActivity": {
+    "title": "Pieteikšanās aktivitāte",
+    "lastSignIns": "Pēdējās 10 pieteikšanās",
+    "current": "Pašreizējā",
+    "noActivity": "Vēl nav reģistrēta pieteikšanās aktivitāte.",
+    "unavailable": "Pieteikšanās aktivitāte nav pieejama",
+    "time": {
+      "justNow": "Tikko",
+      "minutesAgo": "pirms {count} minūtēm",
+      "hourAgo": "pirms {count} stundas",
+      "hoursAgo": "pirms {count} stundām",
+      "dayAgo": "pirms {count} dienas",
+      "daysAgo": "pirms {count} dienām"
+    },
+    "security": {
+      "tip": "Drošības padoms:",
+      "warning": "Ja redzi nepazīstamu aktivitāti, apsver paroles maiņu un izrakstīšanos no visām ierīcēm.",
+      "signOutAll": "Iziet no visām ierīcēm",
+      "signOutAllTitle": "Iziet no visām ierīcēm",
+      "signOutAllDescription": "Tas izrakstīs tevi no visām ierīcēm, ieskaitot šo. Tev būs jāpiesakās vēlreiz.",
+      "signingOut": "Izrakstās...",
+      "confirmSignOut": "Apstiprināt izrakstīšanos",
+      "cancel": "Atcelt"
+    }
+  },
+  "EmailChange": {
+    "verificationSent": "Verifikācijas e-pasts nosūtīts!",
+    "verificationDescription": "Mēs nosūtījām verifikācijas saites uz {currentEmail} un {newEmail}. Noklikšķini uz saites jaunajā e-pastā, lai pabeigtu maiņu.",
+    "placeholder": "jaunsepasts@piemers.lv",
+    "hint": "Mēs nosūtīsim verifikācijas saiti apstiprināšanai.",
+    "validation": {
+      "invalidEmail": "Lūdzu, ievadi derīgu e-pasta adresi",
+      "sameEmail": "Jaunajam e-pastam jāatšķiras no pašreizējā"
+    }
+  },
+  "UserCard": {
+    "memberSince": "Dalībnieks kopš {year}. gada",
+    "notSelling": "Pašlaik nepārdod"
   }
 }

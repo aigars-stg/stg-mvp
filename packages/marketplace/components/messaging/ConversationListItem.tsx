@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { Package } from 'griddy-icons';
 import type { ConversationListItem as ConversationListItemType } from '@/lib/types/message';
+import { Avatar } from '@/components/user';
 
 interface ConversationListItemProps {
   conversation: ConversationListItemType;
@@ -45,17 +46,11 @@ export function ConversationListItem({
       <div className="flex items-start gap-3 p-4">
         {/* Other user avatar */}
         <div className="relative flex-shrink-0">
-          <div className="w-12 h-12 rounded-full bg-background-tertiary flex items-center justify-center text-text-primary font-medium overflow-hidden">
-            {other_user.avatar_url ? (
-              <img
-                src={other_user.avatar_url}
-                alt={other_user.full_name || 'User'}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span>{other_user.full_name?.[0]?.toUpperCase() || '?'}</span>
-            )}
-          </div>
+          <Avatar
+            src={other_user.avatar_url}
+            name={other_user.full_name || 'User'}
+            size="lg"
+          />
 
           {/* Unread indicator */}
           {unread_count > 0 && (
