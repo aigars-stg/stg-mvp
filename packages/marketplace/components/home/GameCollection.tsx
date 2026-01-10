@@ -109,8 +109,9 @@ export function GameCollection({
     return null;
   }
 
-  const displayTitle = overrideTitle || collection?.title || 'Games';
-  const displaySubtitle = overrideSubtitle || collection?.subtitle || '';
+  // Use translations for collection titles/subtitles based on type
+  const displayTitle = overrideTitle || t(`${type}.title`);
+  const displaySubtitle = overrideSubtitle || t(`${type}.subtitle`);
 
   return (
     <section className="py-8 sm:py-12">

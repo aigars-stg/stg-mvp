@@ -500,7 +500,27 @@
       "viewAll": "Skatīt visu",
       "scrollLeft": "Ritināt pa kreisi",
       "scrollRight": "Ritināt pa labi",
-      "priceDisclaimer": "Tikai preces cenas. Pilnā cena tiek parādīta pirms apmaksas."
+      "priceDisclaimer": "Tikai preces cenas. Pilnā cena tiek parādīta pirms apmaksas.",
+      "recently_listed": {
+        "title": "Tikko pievienots",
+        "subtitle": "Jaunākie piedāvājumi no Baltijas spēlmaņiem"
+      },
+      "popular": {
+        "title": "Populāri šobrīd",
+        "subtitle": "Spēles, ko visi aplūko"
+      },
+      "price_drops": {
+        "title": "Cenu kritumi",
+        "subtitle": "Nesen samazinātas cenas"
+      },
+      "trusted_sellers": {
+        "title": "No uzticamiem pārdevējiem",
+        "subtitle": "Augsti novērtētu pārdevēju izvēle"
+      },
+      "great_condition": {
+        "title": "Kā jaunas spēles",
+        "subtitle": "Teicamā stāvoklī"
+      }
     },
     "wantedCollection": {
       "title": "Kopiena meklē",

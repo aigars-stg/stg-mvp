@@ -500,7 +500,27 @@
       "viewAll": "View all",
       "scrollLeft": "Scroll left",
       "scrollRight": "Scroll right",
-      "priceDisclaimer": "Item prices only. Full cost shown before checkout."
+      "priceDisclaimer": "Item prices only. Full cost shown before checkout.",
+      "recently_listed": {
+        "title": "Just Listed",
+        "subtitle": "Fresh arrivals from Baltic gamers"
+      },
+      "popular": {
+        "title": "Popular Right Now",
+        "subtitle": "Games everyone is looking at"
+      },
+      "price_drops": {
+        "title": "Price Drops",
+        "subtitle": "Recently reduced prices"
+      },
+      "trusted_sellers": {
+        "title": "From Trusted Sellers",
+        "subtitle": "Top-rated seller picks"
+      },
+      "great_condition": {
+        "title": "Like New Games",
+        "subtitle": "Pristine condition finds"
+      }
     },
     "wantedCollection": {
       "title": "Wanted by Community",
