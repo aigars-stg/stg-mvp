@@ -4,19 +4,21 @@ import { useState } from 'react';
 import { LocationPin as MapPin, RefreshCw as Loader2 } from 'griddy-icons';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useTranslations } from 'next-intl';
 import type { CountryCode } from '@/lib/country-utils';
 
 interface CountryPromptProps {
   onComplete?: (country: CountryCode) => void;
 }
 
-const COUNTRIES: { code: CountryCode; flagClass: string; name: string }[] = [
-  { code: 'LV', flagClass: 'fi fi-lv', name: 'Latvia' },
-  { code: 'EE', flagClass: 'fi fi-ee', name: 'Estonia' },
-  { code: 'LT', flagClass: 'fi fi-lt', name: 'Lithuania' },
+const COUNTRIES: { code: CountryCode; flagClass: string; nameKey: 'latvia' | 'estonia' | 'lithuania' }[] = [
+  { code: 'LV', flagClass: 'fi fi-lv', nameKey: 'latvia' },
+  { code: 'EE', flagClass: 'fi fi-ee', nameKey: 'estonia' },
+  { code: 'LT', flagClass: 'fi fi-lt', nameKey: 'lithuania' },
 ];
 
 export function CountryPrompt({ onComplete }: CountryPromptProps) {
+  const t = useTranslations('CountryPrompt');
   const { user, profile, refreshProfile } = useAuth();
   const [loading, setLoading] = useState<CountryCode | null>(null);
   const [error, setError] = useState('');
@@ -46,7 +48,7 @@ export function CountryPrompt({ onComplete }: CountryPromptProps) {
       onComplete?.(country);
     } catch (err) {
       console.error('Failed to save country:', err);
-      setError('Something went wrong');
+      setError(t('somethingWentWrong'));
       setLoading(null);
     }
   };
@@ -56,7 +58,7 @@ export function CountryPrompt({ onComplete }: CountryPromptProps) {
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 text-sm text-polar-night">
           <MapPin className="w-4 h-4 text-aurora-orange flex-shrink-0" />
-          <span>Pick your country to see games near you</span>
+          <span>{t('pickCountry')}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -72,7 +74,7 @@ export function CountryPrompt({ onComplete }: CountryPromptProps) {
               ) : (
                 <span className={c.flagClass} />
               )}
-              <span>{c.name}</span>
+              <span>{t(c.nameKey)}</span>
             </button>
           ))}
         </div>

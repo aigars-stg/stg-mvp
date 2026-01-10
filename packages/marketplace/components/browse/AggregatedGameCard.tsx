@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Card, Badge } from '@second-turn/design-system';
 import { Package, Users, User as Baby, Time as Clock } from 'griddy-icons';
+import { useTranslations } from 'next-intl';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
 import { saveBrowseContext } from '@/lib/browse-context';
 
@@ -14,6 +15,8 @@ interface AggregatedGameCardProps {
 }
 
 export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCardProps) {
+  const tListings = useTranslations('Listings.card');
+  const tPrice = useTranslations('OfferCard.price');
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleClick = useCallback(() => {
@@ -55,7 +58,7 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
           {game.is_expansion && (
             <div className="absolute top-3 left-3">
               <Badge variant="warning" size="sm">
-                Expansion
+                {tListings('expansion')}
               </Badge>
             </div>
           )}
@@ -95,7 +98,7 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
           {/* Price */}
           <div className="mt-auto">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-sm text-text-secondary">From</span>
+              <span className="text-sm text-text-secondary">{tPrice('from')}</span>
               <span className="text-2xl font-bold text-polar-night">
                 €{game.lowest_price.toFixed(2)}
               </span>

@@ -587,6 +587,13 @@
       "button": "Pievienoties"
     }
   },
+  "CountryPrompt": {
+    "pickCountry": "Izvēlies valsti, lai redzētu spēles tev tuvumā",
+    "somethingWentWrong": "Kaut kas nogāja greizi",
+    "latvia": "Latvija",
+    "estonia": "Igaunija",
+    "lithuania": "Lietuva"
+  },
   "Browse": {
     "tabs": {
       "forSale": "Pārdošanā",

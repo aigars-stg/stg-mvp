@@ -587,6 +587,13 @@
       "button": "Join"
     }
   },
+  "CountryPrompt": {
+    "pickCountry": "Pick your country to see games near you",
+    "somethingWentWrong": "Something went wrong",
+    "latvia": "Latvia",
+    "estonia": "Estonia",
+    "lithuania": "Lithuania"
+  },
   "Browse": {
     "tabs": {
       "forSale": "For Sale",
