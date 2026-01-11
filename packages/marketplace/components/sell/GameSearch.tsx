@@ -7,7 +7,7 @@ import type { BGGGame, BGGVersion } from '@/lib/bgg-types';
 import { BGGError } from '@/lib/bgg-errors';
 import ErrorDisplay from './ErrorDisplay';
 import { GameResultCard } from './GameResultCard';
-import { Search as SearchX, X, RefreshCw, Search } from 'griddy-icons';
+import { Search as SearchX, Close, RefreshCw, Search } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 
 interface GameSearchProps {
@@ -135,7 +135,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
             className="absolute top-2 right-2 p-1.5 bg-white hover:bg-aurora-red/10 rounded-full border border-border hover:border-aurora-red transition-all shadow-sm group"
             title={t('changeGame')}
           >
-            <X className="w-4 h-4 text-text-muted group-hover:text-aurora-red transition-colors" />
+            <Close className="w-4 h-4 text-text-muted group-hover:text-aurora-red transition-colors" />
           </button>
         </div>
 
@@ -182,7 +182,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-bg-secondary rounded-full transition-colors z-10"
             title={t('clearSearch')}
           >
-            <X className="w-5 h-5 text-text-muted hover:text-polar-night" />
+            <Close className="w-5 h-5 text-text-muted hover:text-polar-night" />
           </button>
         )}
       </div>

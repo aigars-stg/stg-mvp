@@ -11,6 +11,7 @@ import type { SellerBadgeTier } from '@/lib/types/seller';
 import { UserInfoCard } from '@/components/user';
 import { OfferCard } from '@/components/game/OfferCard';
 import type { ListingWithSeller } from '@/lib/types/listing';
+import { useTranslations } from 'next-intl';
 
 interface UserProfile {
   id: string;
@@ -66,6 +67,8 @@ interface ProfileData {
 }
 
 export default function ProfilePage() {
+  const t = useTranslations('ProfilePage');
+  const tCommon = useTranslations('Common');
   const params = useParams();
   const router = useRouter();
   const userId = params.id as string;
@@ -201,17 +204,17 @@ export default function ProfilePage() {
             className="inline-flex items-center gap-2 text-text-secondary hover:text-polar-night mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Browse
+            {t('backToBrowse')}
           </Link>
 
           <Card className="p-8 text-center">
             <User className="w-16 h-16 text-text-muted mx-auto mb-4 opacity-50" />
-            <h1 className="text-xl font-bold text-polar-night mb-2">User Not Found</h1>
+            <h1 className="text-xl font-bold text-polar-night mb-2">{t('userNotFound')}</h1>
             <p className="text-text-secondary mb-6">
-              {error || 'This profile could not be found.'}
+              {error || t('profileNotFound')}
             </p>
             <Link href="/browse">
-              <Button variant="primary">Browse Listings</Button>
+              <Button variant="primary">{t('browseListings')}</Button>
             </Link>
           </Card>
         </div>
@@ -231,7 +234,7 @@ export default function ProfilePage() {
           className="inline-flex items-center gap-2 text-text-secondary hover:text-polar-night mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
+          {t('back')}
         </button>
 
         {/* Profile Header Card */}
@@ -277,7 +280,7 @@ export default function ProfilePage() {
                       {seller.average_rating.toFixed(1)}
                     </span>
                     <span className="text-text-secondary">
-                      ({seller.total_reviews} {seller.total_reviews === 1 ? 'review' : 'reviews'})
+                      ({t('reviewCount', { count: seller.total_reviews })})
                     </span>
                   </div>
 
@@ -286,14 +289,14 @@ export default function ProfilePage() {
                     <Package className="w-4 h-4" />
                     <span>
                       <strong className="text-polar-night">{seller.total_completed_sales}</strong>{' '}
-                      completed sales
+                      {t('completedSales')}
                     </span>
                   </div>
 
                   {/* Positive Rating */}
                   <div className="flex items-center gap-1.5 text-aurora-green">
                     <span className="font-medium">{seller.positive_rating_percent}%</span>
-                    <span className="text-text-secondary">positive</span>
+                    <span className="text-text-secondary">{t('positive')}</span>
                   </div>
                 </div>
               )}
@@ -305,7 +308,7 @@ export default function ProfilePage() {
                 <Link href="/browse">
                   <Button variant="primary" className="flex items-center gap-2">
                     <ShoppingBag className="w-4 h-4" />
-                    Browse All Listings
+                    {t('browseAllListings')}
                   </Button>
                 </Link>
               </div>
@@ -318,7 +321,7 @@ export default function ProfilePage() {
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
               <ShoppingBag className="w-5 h-5" />
-              Active Listings
+              {t('activeListings')}
               <span className="text-sm font-normal text-text-secondary">
                 ({listings.pagination.total})
               </span>
@@ -339,10 +342,10 @@ export default function ProfilePage() {
                   {loadingMoreListings ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Loading...
+                      {tCommon('loading')}
                     </>
                   ) : (
-                    `Load more (${listings.data.length} of ${listings.pagination.total})`
+                    t('loadMore', { current: listings.data.length, total: listings.pagination.total })
                   )}
                 </Button>
               </div>
@@ -355,7 +358,7 @@ export default function ProfilePage() {
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
               <MessageSquare className="w-5 h-5" />
-              Reviews
+              {t('reviews')}
             </h2>
 
             <SellerReviewsList
@@ -374,7 +377,7 @@ export default function ProfilePage() {
         {/* Non-seller message */}
         {!isSeller && (
           <Card className="p-6 text-center text-text-secondary">
-            <p>This user is not currently selling any items.</p>
+            <p>{t('notSelling')}</p>
           </Card>
         )}
       </div>

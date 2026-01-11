@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { AlertCircle, Email as Mail, X } from 'griddy-icons';
+import { AlertCircle, Email as Mail, Close } from 'griddy-icons';
 import { Button } from '@second-turn/design-system';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslations } from 'next-intl';
@@ -53,7 +53,7 @@ export function EmailVerificationBanner({ dismissible = false }: EmailVerificati
           className="absolute top-3 right-3 text-text-secondary hover:text-polar-night transition-colors"
           aria-label={t('dismiss')}
         >
-          <X className="w-5 h-5" />
+          <Close className="w-5 h-5" />
         </button>
       )}
 

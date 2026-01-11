@@ -33,16 +33,11 @@ export function LoginActivity() {
   const [signOutError, setSignOutError] = useState('');
 
   useEffect(() => {
-    console.log('LoginActivity: user state:', user ? 'present' : 'null');
-    if (!user) {
-      console.log('LoginActivity: No user, skipping fetch');
-      return;
-    }
+    if (!user) return;
 
     async function fetchActivities() {
       if (!user) return;
 
-      console.log('LoginActivity: Fetching activities for user:', user.id);
       try {
         // Add timeout to prevent hanging
         const fetchPromise = (supabase as any)
@@ -60,17 +55,14 @@ export function LoginActivity() {
 
         if (fetchError) {
           setError(t('unavailable'));
-          console.log('LoginActivity: Unable to load login history');
           setLoading(false);
           return;
         }
 
-        console.log('✅ LoginActivity: Fetched', data?.length || 0, 'activities');
         setActivities(data || []);
         setLoading(false);
       } catch (err: any) {
         // Silently fail - login activity is optional
-        console.log('LoginActivity: Unable to load login history');
         setError(t('unavailable'));
         setLoading(false);
       }
@@ -260,7 +252,10 @@ export function LoginActivity() {
                             </span>
                           </div>
                         )}
-                        <span className="text-text-muted">{activity.ip_address}</span>
+                        {/* Hide localhost IPs - not useful for users */}
+                        {!['::1', '127.0.0.1', 'localhost', 'unknown'].includes(activity.ip_address) && (
+                          <span className="text-text-muted">{activity.ip_address}</span>
+                        )}
                       </div>
                     </div>
                   </div>

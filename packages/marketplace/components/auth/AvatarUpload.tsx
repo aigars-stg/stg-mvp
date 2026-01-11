@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@second-turn/design-system';
-import { Upload, X, User } from 'griddy-icons';
+import { Upload, Close, User } from 'griddy-icons';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getInitials } from '@/lib/auth/utils';

@@ -11,12 +11,20 @@ import { processAllPendingPayouts } from '@/lib/stripe/payout-service';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Verify cron secret to prevent unauthorized access
+    // Verify cron secret to prevent unauthorized access (required in all environments)
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      console.error('❌ [Cron] Unauthorized payout processing attempt');
+    if (!cronSecret) {
+      console.error('[Cron] CRON_SECRET environment variable not set');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      console.error('[Cron] Unauthorized payout processing attempt');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

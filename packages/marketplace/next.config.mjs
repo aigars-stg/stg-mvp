@@ -40,6 +40,58 @@ const nextConfig = {
       },
     ];
   },
+  // Rewrites to handle locale-prefixed manifest requests
+  async rewrites() {
+    return [
+      {
+        source: '/:locale/manifest.json',
+        destination: '/manifest.json',
+      },
+    ];
+  },
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          // Prevent clickjacking
+          { key: 'X-Frame-Options', value: 'DENY' },
+          // Prevent MIME type sniffing
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          // Control referrer information
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          // Restrict browser features
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          // Content Security Policy
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              // Scripts: self + Stripe + Cloudflare Turnstile + Vercel Analytics
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://js.stripe.com https://va.vercel-scripts.com",
+              // Styles: self + inline (for CSS-in-JS)
+              "style-src 'self' 'unsafe-inline'",
+              // Images: self + data URIs + HTTPS sources + blob for image processing
+              "img-src 'self' data: https: blob:",
+              // Fonts: self
+              "font-src 'self'",
+              // Connections: self + Supabase + Stripe + MapBox + Vercel Analytics
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.mapbox.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+              // Frames: Cloudflare Turnstile + Stripe
+              "frame-src https://challenges.cloudflare.com https://js.stripe.com",
+              // Prevent object/embed
+              "object-src 'none'",
+              // Restrict base URI
+              "base-uri 'self'",
+            ].join('; '),
+          },
+          // Enforce HTTPS (1 year)
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+        ],
+      },
+    ];
+  },
 };
 
 // Configure PWA

@@ -17,9 +17,21 @@
       "Bash(git fetch:*)",
       "Bash(npx vercel --prod)",
       "Bash(npx vercel:*)",
-      "Bash(pnpm exec tsc:*)"
+      "Bash(pnpm exec tsc:*)",
+      "Bash(while read file)",
+      "Bash(do if ! grep -q \"useTranslations\" \"$file\")",
+      "Bash(then echo \"$file\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(npm run build:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(node -e:*)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
 }

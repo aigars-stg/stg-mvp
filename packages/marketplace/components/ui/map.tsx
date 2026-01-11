@@ -15,7 +15,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { X, Minus, Plus, LocationMy as Locate, Maximize, RefreshCw as Loader2 } from 'griddy-icons';
+import { Close, Minus, Plus, LocationMy as Locate, Maximize, RefreshCw as Loader2 } from 'griddy-icons';
 
 import { cn } from "@/lib/utils";
 
@@ -401,7 +401,7 @@ function MarkerPopup({
           className="absolute top-1 right-1 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           aria-label="Close popup"
         >
-          <X className="h-4 w-4" />
+          <Close className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </button>
       )}
@@ -837,7 +837,7 @@ function MapPopup({
           className="absolute top-1 right-1 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           aria-label="Close popup"
         >
-          <X className="h-4 w-4" />
+          <Close className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </button>
       )}

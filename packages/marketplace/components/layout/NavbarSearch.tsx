@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, RefreshCw as Loader2 } from 'griddy-icons';
+import { Search, Close, RefreshCw as Loader2 } from 'griddy-icons';
 import { cn } from '@/lib/utils';
 
 interface SearchResult {
@@ -190,7 +190,7 @@ export function NavbarSearch({
             {isLoading ? (
               <Loader2 className={cn('animate-spin', isMobile ? 'w-5 h-5' : 'w-4 h-4')} />
             ) : (
-              <X className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />
+              <Close className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />
             )}
           </button>
         )}

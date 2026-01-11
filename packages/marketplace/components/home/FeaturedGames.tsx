@@ -4,6 +4,7 @@ import { ListingCard } from '@/components/listing/ListingCard';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
 import { Button } from '@second-turn/design-system';
 import type { ListingWithSeller } from '@/lib/types/listing';
+import { getTranslations } from 'next-intl/server';
 
 async function getFeaturedListings() {
   const client = supabase;
@@ -42,6 +43,7 @@ async function getFeaturedListings() {
 }
 
 export async function FeaturedGames() {
+  const t = await getTranslations('Home.FeaturedGames');
   const listings = await getFeaturedListings();
 
   if (listings.length === 0) {
@@ -54,10 +56,10 @@ export async function FeaturedGames() {
         {/* Section header */}
         <div className="text-center mb-10 sm:mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
-            Recently Listed Games
+            {t('title')}
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Fresh arrivals from Baltic board game enthusiasts
+            {t('subtitle')}
           </p>
         </div>
 
@@ -72,7 +74,7 @@ export async function FeaturedGames() {
         <div className="text-center">
           <Link href="/browse">
             <Button size="lg" variant="secondary">
-              Browse All Games
+              {t('browseAll')}
             </Button>
           </Link>
         </div>

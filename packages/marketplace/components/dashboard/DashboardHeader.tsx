@@ -1,6 +1,7 @@
 'use client';
 
 import type { UserProfile } from '@/lib/auth/types';
+import { useTranslations } from 'next-intl';
 
 interface DashboardHeaderProps {
   profile: UserProfile | null;
@@ -21,6 +22,7 @@ export function DashboardHeader({
   profile,
   isProfileComplete,
 }: DashboardHeaderProps) {
+  const t = useTranslations('Dashboard.Header');
   // Use first name only for a warmer, less formal greeting
   const firstName = profile?.full_name?.split(' ')[0] || 'there';
 
@@ -28,12 +30,12 @@ export function DashboardHeader({
     <div className="text-center">
       <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
         {isProfileComplete
-          ? `Welcome back, ${firstName}`
-          : "Let's get you set up"}
+          ? t('welcomeBack', { firstName })
+          : t('letsSetUp')}
       </h1>
       {!isProfileComplete && (
         <p className="text-text-secondary mt-2">
-          Just a few quick steps to get started
+          {t('quickSteps')}
         </p>
       )}
     </div>

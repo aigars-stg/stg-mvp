@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { TrendUp as TrendingUp, ShoppingBag, Calendar, RefreshCw as Loader2, AlertCircle } from 'griddy-icons';
+import { useTranslations } from 'next-intl';
 
 interface EarningsData {
   totalSalesCount: number;
@@ -15,6 +16,7 @@ interface EarningsData {
 }
 
 export function EarningsSummary() {
+  const t = useTranslations('SellerDashboard.EarningsSummary');
   const [data, setData] = useState<EarningsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +60,7 @@ export function EarningsSummary() {
           <div className="w-10 h-10 rounded-full bg-aurora-purple/10 flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-aurora-purple" />
           </div>
-          <h3 className="text-lg font-semibold text-polar-night">Earnings Summary</h3>
+          <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         </div>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-frost-ice" />
@@ -75,7 +77,7 @@ export function EarningsSummary() {
           <div className="w-10 h-10 rounded-full bg-aurora-red/10 flex items-center justify-center">
             <AlertCircle className="w-5 h-5 text-aurora-red" />
           </div>
-          <h3 className="text-lg font-semibold text-polar-night">Earnings Summary</h3>
+          <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         </div>
         <p className="text-sm text-aurora-red">{error}</p>
       </div>
@@ -90,12 +92,12 @@ export function EarningsSummary() {
           <div className="w-10 h-10 rounded-full bg-aurora-purple/10 flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-aurora-purple" />
           </div>
-          <h3 className="text-lg font-semibold text-polar-night">Earnings Summary</h3>
+          <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         </div>
         <div className="text-center py-4">
-          <p className="text-text-secondary">No sales yet</p>
+          <p className="text-text-secondary">{t('noSales')}</p>
           <p className="text-sm text-text-muted">
-            Your earnings will be tracked here
+            {t('noSalesHint')}
           </p>
         </div>
       </div>
@@ -108,7 +110,7 @@ export function EarningsSummary() {
         <div className="w-10 h-10 rounded-full bg-aurora-purple/10 flex items-center justify-center">
           <TrendingUp className="w-5 h-5 text-aurora-purple" />
         </div>
-        <h3 className="text-lg font-semibold text-polar-night">Earnings Summary</h3>
+        <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
       </div>
 
       {/* Stats Grid */}
@@ -117,7 +119,7 @@ export function EarningsSummary() {
         <div className="p-3 bg-bg-elevated rounded-lg">
           <div className="flex items-center gap-2 text-text-muted mb-1">
             <ShoppingBag className="w-4 h-4" />
-            <span className="text-xs">Total Sales</span>
+            <span className="text-xs">{t('totalSales')}</span>
           </div>
           <p className="text-xl font-bold text-polar-night">
             {data.totalSalesCount}
@@ -128,7 +130,7 @@ export function EarningsSummary() {
         <div className="p-3 bg-bg-elevated rounded-lg">
           <div className="flex items-center gap-2 text-text-muted mb-1">
             <TrendingUp className="w-4 h-4" />
-            <span className="text-xs">Total Earned</span>
+            <span className="text-xs">{t('totalEarned')}</span>
           </div>
           <p className="text-xl font-bold text-aurora-green">
             {formatCurrency(data.totalNet)}
@@ -139,11 +141,11 @@ export function EarningsSummary() {
         <div className="p-3 bg-bg-elevated rounded-lg col-span-2">
           <div className="flex items-center gap-2 text-text-muted mb-1">
             <Calendar className="w-4 h-4" />
-            <span className="text-xs">Last 30 Days</span>
+            <span className="text-xs">{t('last30Days')}</span>
           </div>
           <div className="flex justify-between items-center">
             <p className="text-lg font-semibold text-polar-night">
-              {data.salesLast30Days} {data.salesLast30Days === 1 ? 'sale' : 'sales'}
+              {data.salesLast30Days} {data.salesLast30Days === 1 ? t('sale') : t('sales')}
             </p>
             <p className="text-lg font-semibold text-aurora-green">
               {formatCurrency(data.earningsLast30Days)}
@@ -156,12 +158,12 @@ export function EarningsSummary() {
       {(data.pendingPayoutsCount > 0 || data.completedPayoutsCount > 0) && (
         <div className="mt-4 pt-4 border-t border-border">
           <div className="flex justify-between text-sm">
-            <span className="text-text-secondary">Payouts Completed</span>
+            <span className="text-text-secondary">{t('payoutsCompleted')}</span>
             <span className="font-medium text-polar-night">{data.completedPayoutsCount}</span>
           </div>
           {data.pendingPayoutsCount > 0 && (
             <div className="flex justify-between text-sm mt-1">
-              <span className="text-text-secondary">Payouts Pending</span>
+              <span className="text-text-secondary">{t('payoutsPending')}</span>
               <span className="font-medium text-aurora-yellow">{data.pendingPayoutsCount}</span>
             </div>
           )}

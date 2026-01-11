@@ -14,6 +14,7 @@ import { BankAccountCard } from '@/components/seller/BankAccountCard';
 import { BankAccountForm } from '@/components/seller/BankAccountForm';
 import { PayoutConfirmModal } from '@/components/seller/PayoutConfirmModal';
 import { SellerTrustCard } from '@/components/seller/SellerTrustCard';
+import { useTranslations } from 'next-intl';
 
 interface SellerProfile {
   seller_status: string;
@@ -33,6 +34,7 @@ interface BalanceData {
 
 export default function SellerDashboardPage() {
   const router = useRouter();
+  const t = useTranslations('SellerDashboard');
   const [profile, setProfile] = useState<SellerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showBankForm, setShowBankForm] = useState(false);
@@ -155,11 +157,11 @@ export default function SellerDashboardPage() {
               <ArrowLeft className="w-5 h-5 text-text-secondary" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-polar-night">Seller Dashboard</h1>
+              <h1 className="text-2xl font-bold text-polar-night">{t('title')}</h1>
               <p className="text-sm text-text-secondary">
                 {profile?.stripe_connect_payouts_enabled
-                  ? 'Manage your earnings, payouts, and transactions'
-                  : 'Manage your listings and connect with buyers'}
+                  ? t('subtitle.payoutsEnabled')
+                  : t('subtitle.contactOnly')}
               </p>
             </div>
           </div>
@@ -171,12 +173,12 @@ export default function SellerDashboardPage() {
               className="flex items-center gap-2"
             >
               <RefreshCw className="w-4 h-4" />
-              Refresh
+              {t('refresh')}
             </Button>
             <Link href="/seller/settings">
               <Button variant="secondary" size="sm" className="flex items-center gap-2">
                 <Settings className="w-4 h-4" />
-                Settings
+                {t('settings')}
               </Button>
             </Link>
           </div>
@@ -203,7 +205,7 @@ export default function SellerDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {profile?.has_bank_account ? (
                 <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-polar-night mb-4">Bank Account</h3>
+                  <h3 className="text-lg font-semibold text-polar-night mb-4">{t('bankAccount.title')}</h3>
                   <BankAccountCard
                     last4={profile.bank_account_last4 || '****'}
                     bankName={profile.bank_account_bank_name || 'Bank'}
@@ -212,19 +214,19 @@ export default function SellerDashboardPage() {
                     onClick={() => setShowBankForm(true)}
                     className="mt-4 text-sm text-frost-ice hover:text-frost-ice/80 transition-colors"
                   >
-                    Update bank account
+                    {t('bankAccount.updateLink')}
                   </button>
                 </div>
               ) : (
                 <div className="bg-snow-white border-2 border-border rounded-xl p-6">
                   <h3 className="text-lg font-semibold text-polar-night mb-2">
-                    Bank Account
+                    {t('bankAccount.title')}
                   </h3>
                   <p className="text-text-secondary text-sm mb-4">
-                    Add a bank account to withdraw your earnings
+                    {t('bankAccount.addDescription')}
                   </p>
                   <Button onClick={() => setShowBankForm(true)}>
-                    Add Bank Account
+                    {t('bankAccount.addButton')}
                   </Button>
                 </div>
               )}
@@ -250,8 +252,8 @@ export default function SellerDashboardPage() {
                 <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
                   <Package className="w-6 h-6 text-frost-ice" />
                 </div>
-                <h3 className="font-semibold text-polar-night mb-1">Create Listing</h3>
-                <p className="text-sm text-text-secondary">List a game for sale</p>
+                <h3 className="font-semibold text-polar-night mb-1">{t('quickActions.createListing.title')}</h3>
+                <p className="text-sm text-text-secondary">{t('quickActions.createListing.description')}</p>
               </Link>
 
               <Link
@@ -261,8 +263,8 @@ export default function SellerDashboardPage() {
                 <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
                   <ShoppingBag className="w-6 h-6 text-frost-ice" />
                 </div>
-                <h3 className="font-semibold text-polar-night mb-1">My Listings</h3>
-                <p className="text-sm text-text-secondary">Manage your active listings</p>
+                <h3 className="font-semibold text-polar-night mb-1">{t('quickActions.myListings.title')}</h3>
+                <p className="text-sm text-text-secondary">{t('quickActions.myListings.description')}</p>
               </Link>
 
               <Link
@@ -272,8 +274,8 @@ export default function SellerDashboardPage() {
                 <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
                   <MessageSquare className="w-6 h-6 text-frost-ice" />
                 </div>
-                <h3 className="font-semibold text-polar-night mb-1">Messages & Orders</h3>
-                <p className="text-sm text-text-secondary">View buyer inquiries</p>
+                <h3 className="font-semibold text-polar-night mb-1">{t('quickActions.messagesOrders.title')}</h3>
+                <p className="text-sm text-text-secondary">{t('quickActions.messagesOrders.description')}</p>
               </Link>
             </div>
 
@@ -285,15 +287,14 @@ export default function SellerDashboardPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-polar-night mb-1">
-                    Enable Instant Buy
+                    {t('instantBuy.title')}
                   </h3>
                   <p className="text-sm text-text-secondary mb-3">
-                    Accept secure payments and get money directly to your bank account.
-                    Buyers can purchase instantly without messaging first.
+                    {t('instantBuy.description')}
                   </p>
                   <Link href="/seller/onboard">
                     <Button variant="secondary" size="sm">
-                      Set up payments
+                      {t('instantBuy.button')}
                     </Button>
                   </Link>
                 </div>
@@ -304,19 +305,19 @@ export default function SellerDashboardPage() {
 
         {/* Quick Links */}
         <div className="mt-8 pt-6 border-t border-border">
-          <h3 className="text-sm font-medium text-text-secondary mb-3">Quick Links</h3>
+          <h3 className="text-sm font-medium text-text-secondary mb-3">{t('quickLinks.title')}</h3>
           <div className="flex flex-wrap gap-3">
             <Link href="/my-listings">
-              <Button variant="secondary" size="sm">My Listings</Button>
+              <Button variant="secondary" size="sm">{t('quickLinks.myListings')}</Button>
             </Link>
             <Link href="/seller/orders">
-              <Button variant="secondary" size="sm">Manage Orders</Button>
+              <Button variant="secondary" size="sm">{t('quickLinks.manageOrders')}</Button>
             </Link>
             <Link href="/sell">
-              <Button variant="secondary" size="sm">Create Listing</Button>
+              <Button variant="secondary" size="sm">{t('quickLinks.createListing')}</Button>
             </Link>
             <Link href="/seller/transactions">
-              <Button variant="secondary" size="sm">All Transactions</Button>
+              <Button variant="secondary" size="sm">{t('quickLinks.allTransactions')}</Button>
             </Link>
           </div>
         </div>
@@ -331,7 +332,7 @@ export default function SellerDashboardPage() {
           />
           <div className="relative bg-snow-white rounded-xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-semibold text-polar-night mb-4">
-              {profile?.has_bank_account ? 'Update Bank Account' : 'Add Bank Account'}
+              {profile?.has_bank_account ? t('bankAccountModal.updateTitle') : t('bankAccountModal.addTitle')}
             </h2>
             <BankAccountForm
               onSuccess={handleBankAccountAdded}

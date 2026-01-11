@@ -4,12 +4,16 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { logLoginActivity, getClientIP } from '@/lib/auth/activity-logger';
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { locale: string } }
+) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get('token_hash');
   const type = searchParams.get('type');
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/account/dashboard';
+  const locale = params.locale || 'en';
 
   const cookieStore = cookies();
   const supabase = createServerClient(
@@ -69,16 +73,29 @@ export async function GET(request: NextRequest) {
       const city = request.headers.get('cf-ipcity') || null;
 
       await logLoginActivity({
-        supabase,
         userId: user.id,
         ipAddress,
         userAgent,
         country,
-        city
+        city,
+        useServiceRole: true  // Use service role to bypass RLS (session not set yet in current request)
       });
     } catch (logError) {
       console.error('Failed to log login activity:', logError);
       // Non-blocking, continue
+    }
+
+    // For OAuth users: capture locale if not set (OAuth providers don't send auth emails)
+    // This ensures future emails (password reset, email change) use the correct locale
+    if (code && !user.user_metadata?.preferred_locale) {
+      try {
+        await supabase.auth.updateUser({
+          data: { preferred_locale: locale }
+        });
+      } catch (localeError) {
+        console.error('Failed to set preferred_locale:', localeError);
+        // Non-blocking, continue
+      }
     }
   }
 

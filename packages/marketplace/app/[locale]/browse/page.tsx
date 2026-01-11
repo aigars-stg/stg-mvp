@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Input, Select, Checkbox, Button, Badge } from '@second-turn/design-system';
-import {  Package, Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, X, Users, User as Baby, Time as Clock, LocationPin as MapPin, AlertCircle, SettingsAdjustHorizontal as SlidersHorizontal  } from 'griddy-icons';
+import {  Package, Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, Close, Users, User as Baby, Time as Clock, LocationPin as MapPin, AlertCircle, SettingsAdjustHorizontal as SlidersHorizontal  } from 'griddy-icons';
 import { AggregatedGameCard } from '@/components/browse/AggregatedGameCard';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
@@ -1191,7 +1191,7 @@ export default function BrowsePage() {
                     onClick={() => setMobileFiltersOpen(false)}
                     className="p-2 hover:bg-bg-elevated rounded-lg transition-colors"
                   >
-                    <X className="w-5 h-5 text-text-muted" />
+                    <Close className="w-5 h-5 text-text-muted" />
                   </button>
                 </div>
 
@@ -1419,7 +1419,7 @@ export default function BrowsePage() {
                 >
                   <Users className="w-3 h-3" />
                   <span>{count === 1 ? t('playerCount.solo') : count >= 8 ? t('playerCount.eightPlus') : count}</span>
-                  <X className="w-3 h-3" />
+                  <Close className="w-3 h-3" />
                 </Badge>
               ))}
 
@@ -1433,7 +1433,7 @@ export default function BrowsePage() {
                 >
                   <Baby className="w-3 h-3" />
                   <span>{age}+</span>
-                  <X className="w-3 h-3" />
+                  <Close className="w-3 h-3" />
                 </Badge>
               ))}
 
@@ -1447,7 +1447,7 @@ export default function BrowsePage() {
                 >
                   <Clock className="w-3 h-3" />
                   <span>{getPlayingTimeLabel(time)}</span>
-                  <X className="w-3 h-3" />
+                  <Close className="w-3 h-3" />
                 </Badge>
               ))}
 
@@ -1460,7 +1460,7 @@ export default function BrowsePage() {
                   onClick={() => removeLanguageFilter(lang)}
                 >
                   <span>{lang}</span>
-                  <X className="w-3 h-3" />
+                  <Close className="w-3 h-3" />
                 </Badge>
               ))}
 
@@ -1476,7 +1476,7 @@ export default function BrowsePage() {
                   >
                     <Icon className="w-3 h-3" />
                     <span>{label}</span>
-                    <X className="w-3 h-3" />
+                    <Close className="w-3 h-3" />
                   </Badge>
                 );
               })}
@@ -1491,7 +1491,7 @@ export default function BrowsePage() {
                   <span>
                     €{priceMin || availableOptions.priceRange.min} - €{priceMax || availableOptions.priceRange.max}
                   </span>
-                  <X className="w-3 h-3" />
+                  <Close className="w-3 h-3" />
                 </Badge>
               )}
 

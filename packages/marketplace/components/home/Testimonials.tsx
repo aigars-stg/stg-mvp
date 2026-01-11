@@ -2,46 +2,41 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
-interface Testimonial {
+interface TestimonialKey {
+  id: number;
+  key: string;
+  initials: string;
+}
+
+interface TestimonialData {
   id: number;
   name: string;
   role: string;
   location: string;
   content: string;
-  avatar?: string;
   initials: string;
 }
 
-const testimonials: Testimonial[] = [
-  {
-    id: 1,
-    name: 'Marta K.',
-    role: 'Board Game Collector',
-    location: 'Tallinn, Estonia',
-    content: 'Found a rare copy of Twilight Imperium for half the price of new. The seller was transparent about the condition and even offered local pickup. Best marketplace for board games in the Baltics!',
-    initials: 'MK',
-  },
-  {
-    id: 2,
-    name: 'Jānis R.',
-    role: 'Casual Seller',
-    location: 'Riga, Latvia',
-    content: 'Sold 5 games I no longer played within two weeks. The process was simple, and the buyer protection made me feel secure. Great way to declutter and help other gamers.',
-    initials: 'JR',
-  },
-  {
-    id: 3,
-    name: 'Vytautas M.',
-    role: 'Game Café Owner',
-    location: 'Vilnius, Lithuania',
-    content: 'We regularly find games here for our café at amazing prices. The condition grading system is accurate, and the local community aspect makes it easy to coordinate pickups.',
-    initials: 'VM',
-  },
+const testimonialKeys: TestimonialKey[] = [
+  { id: 1, key: 'testimonial1', initials: 'MK' },
+  { id: 2, key: 'testimonial2', initials: 'JR' },
+  { id: 3, key: 'testimonial3', initials: 'VM' },
 ];
 
 export function Testimonials() {
+  const t = useTranslations('Home.Testimonials');
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const testimonials = testimonialKeys.map((item) => ({
+    id: item.id,
+    name: t(`${item.key}.name`),
+    role: t(`${item.key}.role`),
+    location: t(`${item.key}.location`),
+    content: t(`${item.key}.content`),
+    initials: item.initials,
+  }));
 
   return (
     <section className="py-12 sm:py-16 lg:py-20">
@@ -49,10 +44,10 @@ export function Testimonials() {
         {/* Section header */}
         <div className="text-center mb-10 sm:mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
-            Loved by the Baltic Gaming Community
+            {t('title')}
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Join hundreds of happy buyers and sellers
+            {t('subtitle')}
           </p>
         </div>
 
@@ -78,7 +73,7 @@ export function Testimonials() {
                     ? 'bg-frost-ice w-8'
                     : 'bg-border-subtle hover:bg-border-default'
                 }`}
-                aria-label={`Go to testimonial ${index + 1}`}
+                aria-label={t('goToTestimonial', { number: index + 1 })}
               />
             ))}
           </div>
@@ -88,7 +83,7 @@ export function Testimonials() {
   );
 }
 
-function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
+function TestimonialCard({ testimonial }: { testimonial: TestimonialData }) {
   return (
     <div className="bg-bg-elevated rounded-lg p-6 sm:p-8 border border-border-subtle hover:border-border-default transition-colors duration-200">
       {/* Quote icon */}
@@ -111,21 +106,11 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
       <div className="flex items-center gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          {testimonial.avatar ? (
-            <Image
-              src={testimonial.avatar}
-              alt={testimonial.name}
-              width={48}
-              height={48}
-              className="rounded-full"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-frost-ice/10 flex items-center justify-center">
-              <span className="text-frost-ice font-semibold text-sm">
-                {testimonial.initials}
-              </span>
-            </div>
-          )}
+          <div className="w-12 h-12 rounded-full bg-frost-ice/10 flex items-center justify-center">
+            <span className="text-frost-ice font-semibold text-sm">
+              {testimonial.initials}
+            </span>
+          </div>
         </div>
 
         {/* Info */}

@@ -6,6 +6,7 @@ import { ChatBubble as MessageCircle, User } from 'griddy-icons';
 import { formatDistanceToNow } from 'date-fns';
 import type { ListingQuestion } from '@/lib/types/question';
 import { QuestionInput } from './QuestionInput';
+import { useTranslations } from 'next-intl';
 
 interface QuestionThreadProps {
   question: ListingQuestion;
@@ -22,6 +23,7 @@ export function QuestionThread({
   isAuthenticated,
   onLoginRequired,
 }: QuestionThreadProps) {
+  const t = useTranslations('Game.QuestionThread');
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
 
@@ -76,11 +78,11 @@ export function QuestionThread({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm font-medium text-polar-night">
-                {question.author.full_name || 'Anonymous'}
+                {question.author.full_name || t('anonymous')}
               </span>
               {question.is_seller && (
                 <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 bg-frost-ice text-white rounded">
-                  Seller
+                  {t('seller')}
                 </span>
               )}
               <span className="text-xs text-text-muted">
@@ -97,7 +99,7 @@ export function QuestionThread({
               className="mt-2 flex items-center gap-1.5 text-xs text-text-secondary hover:text-frost-ice transition-colors"
             >
               <MessageCircle className="w-3.5 h-3.5" />
-              {showReplyInput ? 'Cancel' : 'Reply'}
+              {showReplyInput ? t('cancel') : t('reply')}
               {question.replies && question.replies.length > 0 && !showReplyInput && (
                 <span className="text-text-muted">({question.replies.length})</span>
               )}
@@ -135,11 +137,11 @@ export function QuestionThread({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-medium text-polar-night">
-                      {reply.author.full_name || 'Anonymous'}
+                      {reply.author.full_name || t('anonymous')}
                     </span>
                     {reply.is_seller && (
                       <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 bg-frost-ice text-white rounded">
-                        Seller
+                        {t('seller')}
                       </span>
                     )}
                     <span className="text-xs text-text-muted">
@@ -162,7 +164,7 @@ export function QuestionThread({
           <QuestionInput
             onSubmit={handleReply}
             disabled={isReplying}
-            placeholder="Write a reply..."
+            placeholder={t('replyPlaceholder')}
             isReply
           />
         </div>

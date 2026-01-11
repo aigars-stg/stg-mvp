@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
 import { Wallet, RefreshCw as Loader2, AlertCircle, ArrowUpRight, Plus, RefreshCw, Time as Clock } from 'griddy-icons';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface BalanceData {
   available: { amount: number; currency: string };
@@ -26,6 +27,7 @@ interface BalanceCardProps {
 }
 
 export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardProps) {
+  const t = useTranslations('SellerDashboard.BalanceCard');
   const [data, setData] = useState<BalanceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -75,7 +77,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           <div className="w-10 h-10 rounded-full bg-frost-ice/10 flex items-center justify-center">
             <Wallet className="w-5 h-5 text-frost-ice" />
           </div>
-          <h3 className="text-lg font-semibold text-polar-night">Your Balance</h3>
+          <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         </div>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-frost-ice" />
@@ -92,11 +94,11 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           <div className="w-10 h-10 rounded-full bg-aurora-red/10 flex items-center justify-center">
             <AlertCircle className="w-5 h-5 text-aurora-red" />
           </div>
-          <h3 className="text-lg font-semibold text-polar-night">Your Balance</h3>
+          <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         </div>
         <p className="text-sm text-aurora-red mb-4">{error}</p>
         <Button variant="secondary" size="sm" onClick={() => fetchBalance()}>
-          Try Again
+          {t('tryAgain')}
         </Button>
       </div>
     );
@@ -110,14 +112,14 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           <div className="w-10 h-10 rounded-full bg-frost-ice/10 flex items-center justify-center">
             <Wallet className="w-5 h-5 text-frost-ice" />
           </div>
-          <h3 className="text-lg font-semibold text-polar-night">Your Balance</h3>
+          <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         </div>
         <p className="text-sm text-text-secondary mb-4">
-          Complete seller onboarding to view your balance and receive payments.
+          {t('noAccount')}
         </p>
         <Link href="/seller/onboard">
           <Button variant="accent" size="sm" fullWidth>
-            Start Selling
+            {t('startSelling')}
           </Button>
         </Link>
       </div>
@@ -132,14 +134,14 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           <div className="w-10 h-10 rounded-full bg-aurora-yellow/10 flex items-center justify-center">
             <Wallet className="w-5 h-5 text-aurora-yellow" />
           </div>
-          <h3 className="text-lg font-semibold text-polar-night">Your Balance</h3>
+          <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         </div>
         <p className="text-sm text-text-secondary mb-4">
-          Complete Stripe verification to enable payouts and view your balance.
+          {t('noPayouts')}
         </p>
         <Link href="/seller/settings/payouts">
           <Button variant="accent" size="sm" fullWidth>
-            Complete Verification
+            {t('completeVerification')}
           </Button>
         </Link>
       </div>
@@ -159,13 +161,13 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
             <div className="w-10 h-10 rounded-full bg-frost-ice/10 flex items-center justify-center">
               <Wallet className="w-5 h-5 text-frost-ice" />
             </div>
-            <h3 className="text-lg font-semibold text-polar-night">Your Balance</h3>
+            <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
           </div>
           <button
             onClick={() => fetchBalance(true)}
             disabled={refreshing}
             className="p-2 text-text-muted hover:text-frost-ice transition-colors"
-            aria-label="Refresh balance"
+            aria-label={t('refreshBalance')}
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           </button>
@@ -173,14 +175,14 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
 
         <div className="text-center py-6">
           <p className="text-text-secondary mb-2">
-            You haven't made any sales yet.
+            {t('noSales')}
           </p>
           <p className="text-sm text-text-muted mb-4">
-            Once you sell a game, your earnings will appear here.
+            {t('noSalesHint')}
           </p>
           <Link href="/my-listings">
             <Button variant="secondary" size="sm">
-              View Your Listings
+              {t('viewListings')}
             </Button>
           </Link>
         </div>
@@ -196,13 +198,13 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           <div className="w-10 h-10 rounded-full bg-aurora-green/10 flex items-center justify-center">
             <Wallet className="w-5 h-5 text-aurora-green" />
           </div>
-          <h3 className="text-lg font-semibold text-polar-night">Your Balance</h3>
+          <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         </div>
         <button
           onClick={() => fetchBalance(true)}
           disabled={refreshing}
           className="p-2 text-text-muted hover:text-frost-ice transition-colors"
-          aria-label="Refresh balance"
+          aria-label={t('refreshBalance')}
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
         </button>
@@ -211,7 +213,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
       {/* Balance Display */}
       <div className="space-y-3 mb-6">
         <div className="flex justify-between items-center">
-          <span className="text-text-secondary">Available</span>
+          <span className="text-text-secondary">{t('available')}</span>
           <span className="text-xl font-semibold text-aurora-green">
             {formatCurrency(balance.available.amount)}
           </span>
@@ -221,7 +223,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           <div className="flex justify-between items-center">
             <span className="text-text-secondary flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              Pending
+              {t('pending')}
             </span>
             <span className="text-lg text-text-muted">
               {formatCurrency(balance.pending.amount)}
@@ -231,7 +233,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
 
         <div className="border-t border-border pt-3">
           <div className="flex justify-between items-center">
-            <span className="font-medium text-polar-night">Total</span>
+            <span className="font-medium text-polar-night">{t('total')}</span>
             <span className="text-xl font-bold text-polar-night">
               {formatCurrency(balance.total.amount)}
             </span>
@@ -243,7 +245,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
       {!data.hasBankAccount ? (
         <div className="p-3 bg-frost-ice/5 rounded-lg mb-4">
           <p className="text-sm text-text-secondary mb-3">
-            Add a bank account to withdraw your earnings.
+            {t('addBankHint')}
           </p>
           <Button
             variant="accent"
@@ -252,7 +254,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
             onClick={onAddBankAccount}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Bank Account
+            {t('addBankAccount')}
           </Button>
         </div>
       ) : (
@@ -264,14 +266,14 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           onClick={onRequestPayout}
         >
           <ArrowUpRight className="w-4 h-4 mr-2" />
-          Request Payout
+          {t('requestPayout')}
         </Button>
       )}
 
       {/* Cache indicator */}
       {data.cachedAt && (
         <p className="text-xs text-text-muted text-center mt-3">
-          Updated {new Date(data.cachedAt).toLocaleTimeString()}
+          {t('updated', { time: new Date(data.cachedAt).toLocaleTimeString() })}
         </p>
       )}
     </div>

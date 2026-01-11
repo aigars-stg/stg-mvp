@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card } from '@second-turn/design-system';
 import {  Package, CurrencyEuro as Euro, Bank as Landmark, ChevronDown, ChevronUp, LinkExternal as ExternalLink, RefreshCw as Loader2  } from 'griddy-icons';
+import { useTranslations } from 'next-intl';
 
 interface SellerCTACardProps {
   sellerStatus: string;
@@ -25,6 +26,7 @@ interface SellerCTACardProps {
  * - Sentence case throughout
  */
 export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
+  const t = useTranslations('Dashboard.SellerCTA');
   const router = useRouter();
 
   // UI state
@@ -44,7 +46,7 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
 
   const handleAcceptTerms = async () => {
     if (!ageConfirmed || !termsAccepted) {
-      setError('Please accept both checkboxes to continue');
+      setError(t('terms.acceptBothError'));
       return;
     }
 
@@ -68,7 +70,7 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
       router.push('/seller/onboard');
     } catch (err) {
       console.error('Failed to accept terms:', err);
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : t('terms.somethingWrong'));
       setAcceptingTerms(false);
     }
   };
@@ -87,21 +89,21 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
           </div>
           <div className="flex-1">
             <h2 className="text-xl font-semibold text-polar-night mb-2">
-              Continue seller setup
+              {t('continueSetup.title')}
             </h2>
             <p className="text-sm text-text-secondary mb-4">
-              Almost there — complete your payment setup to start selling.
+              {t('continueSetup.subtitle')}
             </p>
             <div className="flex items-center gap-2 text-sm text-aurora-orange mb-4">
               <div className="w-2 h-2 bg-aurora-orange rounded-full animate-pulse" />
-              Step 1 of 2 complete
+              {t('continueSetup.stepProgress')}
             </div>
             <Button
               variant="primary"
               size="lg"
               onClick={handleContinueOnboarding}
             >
-              Continue setup
+              {t('continueSetup.button')}
             </Button>
           </div>
         </div>
@@ -118,17 +120,16 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
         </div>
         <div className="flex-1">
           <h2 className="text-xl font-semibold text-polar-night mb-2">
-            Start selling
+            {t('title')}
           </h2>
           <p className="text-sm text-text-secondary mb-4">
-            Turn waiting games into someone&apos;s next adventure. No fees for
-            sellers.
+            {t('subtitle')}
           </p>
 
           {!showTerms ? (
             // Initial CTA
             <Button variant="primary" size="lg" onClick={handleBecomeSeller}>
-              Start selling
+              {t('startSelling')}
             </Button>
           ) : (
             // Inline terms form
@@ -149,8 +150,14 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
                   className="mt-1 w-5 h-5 text-frost-ice border-border rounded focus:ring-frost-ice flex-shrink-0"
                 />
                 <span className="text-sm text-text-secondary">
-                  I&apos;m <strong>18 or older</strong> and selling as a{' '}
-                  <strong>private individual</strong> (not a business)
+                  {t.rich('terms.ageConfirmation', {
+                    strong: (chunks) => <strong>{chunks}</strong>
+                  }) || (
+                    <>
+                      I&apos;m <strong>{t('terms.ageConfirmation18')}</strong> and selling as a{' '}
+                      <strong>{t('terms.ageConfirmationPrivate')}</strong> (not a business)
+                    </>
+                  )}
                 </span>
               </label>
 
@@ -164,13 +171,13 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
                     className="mt-1 w-5 h-5 text-frost-ice border-border rounded focus:ring-frost-ice flex-shrink-0"
                   />
                   <span className="text-sm text-text-secondary">
-                    I accept the{' '}
+                    {t('terms.acceptTerms')}{' '}
                     <Link
                       href="/seller/terms"
                       target="_blank"
                       className="text-frost-ice hover:underline"
                     >
-                      Seller Terms
+                      {t('terms.sellerTerms')}
                     </Link>
                   </span>
                 </label>
@@ -182,10 +189,10 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
                       <Euro className="w-4 h-4 text-aurora-green flex-shrink-0 mt-0.5" />
                       <div>
                         <strong className="text-polar-night">
-                          Zero commission fees
+                          {t('terms.zeroFees')}
                         </strong>
                         <p className="text-xs mt-0.5">
-                          You keep 100% of your sale price
+                          {t('terms.zeroFeesDesc')}
                         </p>
                       </div>
                     </li>
@@ -193,18 +200,16 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
                       <Landmark className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
                       <div>
                         <strong className="text-polar-night">
-                          EU tax reporting (DAC7)
+                          {t('terms.taxReporting')}
                         </strong>
                         <p className="text-xs mt-0.5">
-                          Above 30 sales or €2,000/year, we report to tax
-                          authorities — it&apos;s EU law. Your dashboard
-                          tracks these numbers so there are no surprises.{' '}
+                          {t('terms.taxReportingDesc')}{' '}
                           <Link
                             href="/seller/terms#dac7"
                             target="_blank"
                             className="text-frost-ice hover:underline"
                           >
-                            Learn more
+                            {t('terms.learnMore')}
                           </Link>
                         </p>
                       </div>
@@ -217,7 +222,7 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
                       target="_blank"
                       className="text-xs text-frost-ice hover:underline flex items-center gap-1"
                     >
-                      Full seller terms
+                      {t('terms.fullSellerTerms')}
                       <ExternalLink className="w-3 h-3" />
                     </Link>
                     <Link
@@ -225,7 +230,7 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
                       target="_blank"
                       className="text-xs text-frost-ice hover:underline flex items-center gap-1"
                     >
-                      Privacy policy
+                      {t('terms.privacyPolicy')}
                       <ExternalLink className="w-3 h-3" />
                     </Link>
                   </div>
@@ -244,10 +249,10 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
                   {acceptingTerms ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Processing...
+                      {t('terms.processing')}
                     </>
                   ) : (
-                    'Agree & continue'
+                    t('terms.agreeAndContinue')
                   )}
                 </Button>
                 <Button
@@ -256,7 +261,7 @@ export function SellerCTACard({ sellerStatus }: SellerCTACardProps) {
                   onClick={() => setShowTerms(false)}
                   disabled={acceptingTerms}
                 >
-                  Maybe later
+                  {t('terms.maybeLater')}
                 </Button>
               </div>
             </div>

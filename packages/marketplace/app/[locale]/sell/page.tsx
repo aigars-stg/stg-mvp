@@ -15,7 +15,7 @@ import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
 import { ListingTypeSelector } from '@/components/sell/ListingTypeSelector';
 import { OfferCard } from '@/components/game/OfferCard';
-import { PuzzlePiece as Dices, PhotoCamera as Camera, ClipboardCheck, CurrencyEuro as Euro, InfoCircle as Info, X, CheckCircleAlt01 as CheckCircle2, RefreshCw, AlertCircle, PuzzlePiece as Puzzle, Package, RefreshCw as Loader2 } from 'griddy-icons';
+import { PuzzlePiece as Dices, PhotoCamera as Camera, ClipboardCheck, CurrencyEuro as Euro, InfoCircle as Info, Close, CheckCircleAlt01 as CheckCircle2, RefreshCw, AlertCircle, PuzzlePiece as Puzzle, Package, RefreshCw as Loader2 } from 'griddy-icons';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
@@ -949,7 +949,7 @@ function SellPageContent() {
               className="p-1 hover:bg-bg-secondary rounded transition-colors"
               title={tDraft('dismiss')}
             >
-              <X className="w-4 h-4 text-text-muted" />
+              <Close className="w-4 h-4 text-text-muted" />
             </button>
           </div>
         </Card>

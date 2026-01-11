@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { format, isToday, isYesterday } from 'date-fns';
-import { X } from 'griddy-icons';
+import { Close } from 'griddy-icons';
 import type { Message } from '@/lib/types/message';
 
 interface MessageBubbleProps {
@@ -142,7 +142,7 @@ export function MessageBubble({
             onClick={() => setLightboxIndex(null)}
             className="absolute top-4 right-4 text-snow-white hover:text-frost-ice transition-colors"
           >
-            <X className="w-8 h-8" />
+            <Close className="w-8 h-8" />
           </button>
           <img
             src={photos[lightboxIndex]}

@@ -2,7 +2,7 @@
 
 import { useState, useRef, KeyboardEvent } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Send, RefreshCw as Loader2, ImagePlus, X } from 'griddy-icons';
+import { Send, RefreshCw as Loader2, ImagePlus, Close } from 'griddy-icons';
 import { MESSAGE_CONSTRAINTS } from '@/lib/types/message';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslations } from 'next-intl';
@@ -194,7 +194,7 @@ export function MessageInput({
                 onClick={() => removePhoto(index)}
                 className="absolute -top-2 -right-2 w-5 h-5 bg-aurora-red text-snow-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
-                <X className="w-3 h-3" />
+                <Close className="w-3 h-3" />
               </button>
             </div>
           ))}

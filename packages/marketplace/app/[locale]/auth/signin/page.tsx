@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 /**
  * Legacy signin page - redirects to the new unified /auth page.
@@ -9,6 +10,7 @@ import { useRouter } from 'next/navigation';
  */
 export default function SignInPage() {
   const router = useRouter();
+  const t = useTranslations('Auth');
 
   useEffect(() => {
     // Preserve any redirect parameters
@@ -25,7 +27,7 @@ export default function SignInPage() {
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-12">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-frost-ice border-t-transparent mx-auto mb-4" />
-        <p className="text-text-secondary">Redirecting...</p>
+        <p className="text-text-secondary">{t('redirect.message')}</p>
       </div>
     </div>
   );

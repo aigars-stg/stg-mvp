@@ -11,6 +11,7 @@ import {
   MapClusterLayer,
 } from '@/components/ui/map';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
+import { useTranslations } from 'next-intl';
 
 interface TerminalMapProps {
   terminals: Terminal[];
@@ -62,6 +63,7 @@ export function TerminalMap({
   country,
   className,
 }: TerminalMapProps) {
+  const t = useTranslations('Checkout.TerminalMap');
   const [popupTerminal, setPopupTerminal] = useState<Terminal | null>(null);
   const [userLocation, setUserLocation] = useState<{ lng: number; lat: number } | null>(null);
 
@@ -180,7 +182,7 @@ export function TerminalMap({
                 onClick={handleSelectFromPopup}
                 className="w-full mt-2 px-3 py-2 bg-frost-ice text-white text-sm font-medium rounded-md hover:bg-frost-ice/90 transition-colors"
               >
-                Select This Terminal
+                {t('selectTerminal')}
               </button>
             </div>
           </MapPopup>
@@ -198,7 +200,7 @@ export function TerminalMap({
       {/* Terminal count indicator */}
       <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-sm border border-border">
         <span className="text-xs font-medium text-polar-night">
-          {terminals.length} terminals
+          {t('terminalCount', { count: terminals.length })}
         </span>
       </div>
     </div>

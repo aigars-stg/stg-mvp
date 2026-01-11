@@ -5,6 +5,7 @@ import { SlidePanel, Button, Input, Select, Badge } from '@second-turn/design-sy
 import { Upload, Flash as Zap, AlertTriangle, Check } from 'griddy-icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
+import { useTranslations } from 'next-intl';
 
 interface OfferModalProps {
   open: boolean;
@@ -24,6 +25,8 @@ export function OfferModal({
   wantedListing,
   onSubmit,
 }: OfferModalProps) {
+  const t = useTranslations('Wanted.OfferModal');
+
   // Form state
   const [offeredPrice, setOfferedPrice] = useState(
     wantedListing.max_price ? wantedListing.max_price.toString() : ''
@@ -83,7 +86,7 @@ export function OfferModal({
     <SlidePanel
       open={open}
       onClose={onClose}
-      title="I Have This Game!"
+      title={t('title')}
       size="lg"
     >
       <form onSubmit={handleSubmit}>
@@ -100,7 +103,7 @@ export function OfferModal({
             <div>
               <h3 className="font-bold text-polar-night">{wantedListing.game_name}</h3>
               <p className="text-sm text-text-secondary mt-1">
-                Buyer's budget: €{wantedListing.min_price || 0}–€{wantedListing.max_price}
+                {t('buyerBudget', { min: wantedListing.min_price || 0, max: wantedListing.max_price })}
               </p>
               <div className="flex flex-wrap gap-1 mt-2">
                 {wantedListing.acceptable_conditions.map((condition) => (
@@ -119,10 +122,10 @@ export function OfferModal({
             <Zap className="w-5 h-5 text-aurora-orange" />
             <div className="flex-1">
               <p className="text-sm font-medium text-aurora-orange">
-                Quick Responder Badge Available!
+                {t('quickResponderTitle')}
               </p>
               <p className="text-xs text-aurora-orange/80">
-                Respond now to earn the ⚡ Quick Responder badge (within 2 hours of posting)
+                {t('quickResponderHint')}
               </p>
             </div>
           </div>
@@ -131,17 +134,17 @@ export function OfferModal({
         {/* Condition Selection */}
         <div className="mb-4">
           <Select
-            label="Condition *"
+            label={t('conditionLabel')}
             options={wantedListing.acceptable_conditions.map((condition) => ({
               value: condition,
               label: getConditionLabel(condition),
             }))}
             value={offeredCondition}
             onChange={setOfferedCondition}
-            placeholder="Select condition..."
+            placeholder={t('conditionPlaceholder')}
             error={
               offeredCondition && !isConditionValid
-                ? 'This condition is not acceptable for this wanted listing'
+                ? t('conditionError')
                 : undefined
             }
           />
@@ -150,7 +153,7 @@ export function OfferModal({
         {/* Price Input */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-polar-night mb-2">
-            Your Price <span className="text-aurora-red">*</span>
+            {t('priceLabel')} <span className="text-aurora-red">*</span>
           </label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">
@@ -170,13 +173,13 @@ export function OfferModal({
           {isPriceValid && !isPriceInBudget && (
             <div className="flex items-start gap-2 text-xs text-aurora-yellow mt-1">
               <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <p>Your price (€{priceValue}) is outside the buyer's budget range</p>
+              <p>{t('priceOutsideBudget', { price: priceValue })}</p>
             </div>
           )}
           {isPriceValid && isPriceInBudget && (
             <div className="flex items-center gap-2 text-xs text-aurora-green mt-1">
               <Check className="w-4 h-4 flex-shrink-0" />
-              <p>Within buyer's budget</p>
+              <p>{t('priceWithinBudget')}</p>
             </div>
           )}
         </div>
@@ -184,20 +187,20 @@ export function OfferModal({
         {/* Photos Upload (Optional) */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-polar-night mb-2">
-            Photos (Optional)
+            {t('photosLabel')}
           </label>
           <div className="text-sm text-text-secondary mb-2">
-            Add up to 3 photos of your game to help the buyer decide
+            {t('photosHint')}
           </div>
 
           {/* Photo Upload Placeholder - To be implemented with actual upload logic */}
           <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
             <Upload className="w-8 h-8 text-text-muted mx-auto mb-2" />
             <p className="text-sm text-text-secondary">
-              Photo upload coming soon
+              {t('photosComingSoon')}
             </p>
             <p className="text-xs text-text-disabled mt-1">
-              For now, you can add photos in your message after responding
+              {t('photosWorkaround')}
             </p>
           </div>
         </div>
@@ -205,17 +208,17 @@ export function OfferModal({
         {/* Additional Notes */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-polar-night mb-2">
-            Additional Notes (Optional)
+            {t('notesLabel')}
           </label>
           <textarea
             value={responseNotes}
             onChange={(e) => setResponseNotes(e.target.value)}
             className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice min-h-[100px] resize-none"
-            placeholder="E.g., Available for local pickup in Riga, photos available upon request, etc."
+            placeholder={t('notesPlaceholder')}
             maxLength={500}
           />
           <div className="text-xs text-text-secondary mt-1">
-            {responseNotes.length}/500 characters
+            {t('characterCount', { current: responseNotes.length, max: 500 })}
           </div>
         </div>
 
@@ -234,7 +237,7 @@ export function OfferModal({
             onClick={onClose}
             disabled={submitting}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             type="submit"
@@ -242,7 +245,7 @@ export function OfferModal({
             disabled={!canSubmit}
             loading={submitting}
           >
-            {submitting ? 'Sending...' : 'Send Offer & Start Chat'}
+            {submitting ? t('sending') : t('submitButton')}
           </Button>
         </div>
       </form>

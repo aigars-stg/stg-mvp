@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Phone, AlertCircle, Check } from 'griddy-icons';
 import { PHONE_FORMATS, type TerminalCountry } from '@/lib/unisend/types';
+import { useTranslations } from 'next-intl';
 
 interface PhoneInputProps {
   country: TerminalCountry;
@@ -19,6 +20,7 @@ export function PhoneInput({
   error,
   required = false,
 }: PhoneInputProps) {
+  const t = useTranslations('Checkout.PhoneInput');
   const [isFocused, setIsFocused] = useState(false);
   const [isValid, setIsValid] = useState(false);
 
@@ -74,7 +76,7 @@ export function PhoneInput({
   return (
     <div className="space-y-1.5">
       <label htmlFor="receiver-phone" className="block text-sm font-medium text-polar-night">
-        Phone Number {required && <span className="text-aurora-red">*</span>}
+        {t('label')} {required && <span className="text-aurora-red">*</span>}
       </label>
 
       <div className="relative">
@@ -111,7 +113,7 @@ export function PhoneInput({
       {/* Format hint */}
       {!error && (
         <p id="phone-hint" className="text-xs text-text-muted">
-          Format: {phoneFormat.example}
+          {t('format', { example: phoneFormat.example })}
         </p>
       )}
 
@@ -125,9 +127,7 @@ export function PhoneInput({
 
       {/* Country-specific info */}
       <div className="text-xs text-text-muted mt-1">
-        {country === 'LT' && 'Lithuanian mobile number starting with +3706'}
-        {country === 'LV' && 'Latvian mobile number starting with +371'}
-        {country === 'EE' && 'Estonian mobile number starting with +372'}
+        {t(`countryHint.${country}`)}
       </div>
     </div>
   );

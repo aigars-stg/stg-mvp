@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Button, Card } from '@second-turn/design-system';
-import { User, Phone, CheckCircleAlt01 as CheckCircle2, AlertCircle, Download, Settings, Globe, Edit as Pencil, Check, X, LinkExternal as ExternalLink } from 'griddy-icons';
+import { User, Phone, CheckCircleAlt01 as CheckCircle2, AlertCircle, Download, Settings, Globe, Edit as Pencil, Check, Close, LinkExternal as ExternalLink } from 'griddy-icons';
 import { useTranslations, useLocale } from 'next-intl';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { AvatarUpload } from '@/components/auth/AvatarUpload';
@@ -336,7 +336,7 @@ export default function AccountSettingsPage() {
                       className="p-1 text-aurora-red hover:bg-aurora-red/10 rounded transition-colors disabled:opacity-50"
                       title="Cancel"
                     >
-                      <X className="w-5 h-5" />
+                      <Close className="w-5 h-5" />
                     </button>
                   </div>
                 )}
@@ -432,7 +432,7 @@ export default function AccountSettingsPage() {
                         className="p-2 text-aurora-red hover:bg-aurora-red/10 rounded-md transition-colors disabled:opacity-50"
                         title="Cancel"
                       >
-                        <X className="w-4 h-4" />
+                        <Close className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -513,7 +513,7 @@ export default function AccountSettingsPage() {
                         className="p-2 text-aurora-red hover:bg-aurora-red/10 rounded-md transition-colors disabled:opacity-50"
                         title="Cancel"
                       >
-                        <X className="w-4 h-4" />
+                        <Close className="w-4 h-4" />
                       </button>
                     </div>
                   </div>

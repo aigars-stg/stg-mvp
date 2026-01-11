@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Badge } from '@second-turn/design-system';
 import { ShoppingBag, ArrowDownRight, RefreshCw as Loader2, AlertCircle, CheckCircleAlt01 as CheckCircle2, Time as Clock, ChevronRight } from 'griddy-icons';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface Transaction {
   id: string;
@@ -25,6 +26,7 @@ interface TransactionListProps {
 }
 
 export function TransactionList({ limit = 10, showViewAll = true }: TransactionListProps) {
+  const t = useTranslations('SellerDashboard.TransactionList');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,7 +88,7 @@ export function TransactionList({ limit = 10, showViewAll = true }: TransactionL
   if (loading) {
     return (
       <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-polar-night mb-4">Recent Sales</h3>
+        <h3 className="text-lg font-semibold text-polar-night mb-4">{t('title')}</h3>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-frost-ice" />
         </div>
@@ -98,7 +100,7 @@ export function TransactionList({ limit = 10, showViewAll = true }: TransactionL
   if (error) {
     return (
       <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-polar-night mb-4">Recent Sales</h3>
+        <h3 className="text-lg font-semibold text-polar-night mb-4">{t('title')}</h3>
         <div className="flex items-center gap-2 text-aurora-red">
           <AlertCircle className="w-4 h-4" />
           <span className="text-sm">{error}</span>
@@ -111,11 +113,11 @@ export function TransactionList({ limit = 10, showViewAll = true }: TransactionL
   if (transactions.length === 0) {
     return (
       <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-polar-night mb-4">Recent Sales</h3>
+        <h3 className="text-lg font-semibold text-polar-night mb-4">{t('title')}</h3>
         <div className="text-center py-4">
-          <p className="text-text-secondary">No sales yet</p>
+          <p className="text-text-secondary">{t('noSales')}</p>
           <p className="text-sm text-text-muted">
-            Your sales will appear here
+            {t('noSalesHint')}
           </p>
         </div>
       </div>
@@ -125,13 +127,13 @@ export function TransactionList({ limit = 10, showViewAll = true }: TransactionL
   return (
     <div className="bg-snow-white border-2 border-border rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-polar-night">Recent Sales</h3>
+        <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         {showViewAll && total > limit && (
           <Link
             href="/seller/transactions"
             className="text-sm text-frost-ice hover:text-frost-ice/80 transition-colors flex items-center gap-1"
           >
-            View All
+            {t('viewAll')}
             <ChevronRight className="w-4 h-4" />
           </Link>
         )}
@@ -153,7 +155,7 @@ export function TransactionList({ limit = 10, showViewAll = true }: TransactionL
               </div>
               <div>
                 <p className="text-sm font-medium text-polar-night truncate max-w-[150px] sm:max-w-[200px]">
-                  {tx.description || 'Game sale'}
+                  {tx.description || t('gameSale')}
                 </p>
                 <p className="text-xs text-text-muted">
                   {formatDate(tx.createdAt)}
@@ -166,7 +168,7 @@ export function TransactionList({ limit = 10, showViewAll = true }: TransactionL
                   {formatCurrency(tx.grossAmount)}
                 </p>
                 <p className="text-sm font-semibold text-aurora-green">
-                  {formatCurrency(tx.netAmount)} net
+                  {formatCurrency(tx.netAmount)} {t('net')}
                 </p>
               </div>
               {getStatusIcon(tx.status, tx.payoutStatus)}

@@ -5,8 +5,9 @@ import { Button, Card } from '@second-turn/design-system';
 import clsx from 'clsx';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { COUNTRIES } from '@/lib/country-utils';
-import { User, LocationPin as MapPin, Check, X } from 'griddy-icons';
+import { User, LocationPin as MapPin, Check, Close } from 'griddy-icons';
 import type { UserProfile } from '@/lib/auth/types';
+import { useTranslations } from 'next-intl';
 
 interface ProfileCompletionCardProps {
   profile: UserProfile | null;
@@ -29,6 +30,7 @@ export function ProfileCompletionCard({
   onDismiss,
   onComplete,
 }: ProfileCompletionCardProps) {
+  const t = useTranslations('Dashboard.ProfileCompletion');
   const { user, updateProfile } = useAuth();
 
   // Form state - pre-fill from existing profile
@@ -63,23 +65,23 @@ export function ProfileCompletionCard({
     // Validate display name
     const trimmedName = displayName.trim();
     if (!trimmedName) {
-      setError('Please enter a display name');
+      setError(t('errors.nameRequired'));
       return;
     }
 
     if (trimmedName.length < 2) {
-      setError('Display name must be at least 2 characters');
+      setError(t('errors.nameTooShort'));
       return;
     }
 
     if (trimmedName.length > 50) {
-      setError('Display name must be less than 50 characters');
+      setError(t('errors.nameTooLong'));
       return;
     }
 
     // Validate country
     if (!country) {
-      setError('Please select your country');
+      setError(t('errors.countryRequired'));
       return;
     }
 
@@ -95,7 +97,7 @@ export function ProfileCompletionCard({
 
       if (updateError) {
         console.error('Profile update error:', updateError);
-        setError(updateError.message || 'Something went wrong. Please try again.');
+        setError(updateError.message || t('errors.somethingWrong'));
         setLoading(false);
         return;
       }
@@ -105,7 +107,7 @@ export function ProfileCompletionCard({
       onComplete();
     } catch (err) {
       console.error('Profile update failed:', err);
-      setError('Something went wrong. Please try again.');
+      setError(t('errors.somethingWrong'));
       setLoading(false);
     }
   };
@@ -116,26 +118,26 @@ export function ProfileCompletionCard({
       <button
         onClick={onDismiss}
         className="absolute top-4 right-4 p-1 text-text-muted hover:text-polar-night transition-colors"
-        aria-label="Dismiss"
+        aria-label={t('dismiss')}
       >
-        <X className="w-5 h-5" />
+        <Close className="w-5 h-5" />
       </button>
 
       <div className="space-y-6">
         {/* Header */}
         <div>
           <h2 className="text-xl font-semibold text-polar-night">
-            A bit about you
+            {t('title')}
           </h2>
           <p className="text-sm text-text-secondary mt-1">
-            Help others know who they&apos;re dealing with
+            {t('subtitle')}
           </p>
         </div>
 
         {/* Progress bar */}
         <div>
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-text-secondary">Profile completion</span>
+            <span className="text-text-secondary">{t('profileCompletion')}</span>
             <span className="font-medium text-polar-night">
               {completionPercent}%
             </span>
@@ -161,7 +163,7 @@ export function ProfileCompletionCard({
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-polar-night mb-2">
               <User className="w-4 h-4 text-text-muted" />
-              What should we call you?
+              {t('displayNameLabel')}
               {hasDisplayName && (
                 <Check className="w-4 h-4 text-aurora-green" />
               )}
@@ -171,7 +173,7 @@ export function ProfileCompletionCard({
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className="w-full px-4 py-3 border-2 border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-snow-white"
-              placeholder="BoardGameFan42"
+              placeholder={t('displayNamePlaceholder')}
               disabled={loading}
               maxLength={50}
             />
@@ -179,7 +181,7 @@ export function ProfileCompletionCard({
             {/* Suggestions */}
             {suggestions.length > 0 && !displayName && (
               <div className="mt-2 flex flex-wrap gap-2">
-                <span className="text-xs text-text-muted">Suggestions:</span>
+                <span className="text-xs text-text-muted">{t('suggestions')}</span>
                 {suggestions.slice(0, 3).map((suggestion) => (
                   <button
                     key={suggestion}
@@ -198,7 +200,7 @@ export function ProfileCompletionCard({
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-polar-night mb-2">
               <MapPin className="w-4 h-4 text-text-muted" />
-              Where are you from?
+              {t('countryLabel')}
               {hasCountry && <Check className="w-4 h-4 text-aurora-green" />}
             </label>
             <div className="flex flex-wrap gap-2">
@@ -223,7 +225,7 @@ export function ProfileCompletionCard({
               ))}
             </div>
             <p className="text-xs text-text-muted mt-2">
-              Helps show relevant listings near you
+              {t('countryHint')}
             </p>
           </div>
         </div>
@@ -238,7 +240,7 @@ export function ProfileCompletionCard({
             disabled={loading}
             className="sm:flex-1"
           >
-            {loading ? 'Saving...' : 'Save & continue'}
+            {loading ? t('saving') : t('saveAndContinue')}
           </Button>
           <Button
             variant="ghost"
@@ -246,7 +248,7 @@ export function ProfileCompletionCard({
             onClick={onDismiss}
             disabled={loading}
           >
-            Skip for now
+            {t('skipForNow')}
           </Button>
         </div>
 

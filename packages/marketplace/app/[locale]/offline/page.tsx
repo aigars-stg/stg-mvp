@@ -4,24 +4,26 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { WifiOff, Wifi, RefreshCw, Home, Time as Clock, AlertTriangle } from 'griddy-icons';
 import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
+import { useTranslations } from 'next-intl';
 
 type ConnectionStatus = 'offline' | 'slow' | 'online';
 
 interface CachedRoute {
   path: string;
-  label: string;
+  labelKey: string;
 }
 
 // Routes that are likely cached by the service worker
 const CACHEABLE_ROUTES: CachedRoute[] = [
-  { path: '/', label: 'Home' },
-  { path: '/browse', label: 'Browse games' },
-  { path: '/sell', label: 'Sell a game' },
+  { path: '/', labelKey: 'home' },
+  { path: '/browse', labelKey: 'browse' },
+  { path: '/sell', labelKey: 'sell' },
 ];
 
 const AUTO_RETRY_INTERVAL = 15; // seconds
 
 export default function OfflinePage() {
+  const t = useTranslations('OfflinePage');
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('offline');
   const [countdown, setCountdown] = useState(AUTO_RETRY_INTERVAL);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -205,9 +207,9 @@ export default function OfflinePage() {
           iconBg: 'bg-aurora-green/10',
           iconColor: 'text-aurora-green',
           dotColor: 'bg-aurora-green',
-          title: "You're back online!",
-          subtitle: 'Redirecting you back...',
-          statusText: 'Connected',
+          title: t('status.online.title'),
+          subtitle: t('status.online.subtitle'),
+          statusText: t('status.online.statusText'),
         };
       case 'slow':
         return {
@@ -215,9 +217,9 @@ export default function OfflinePage() {
           iconBg: 'bg-aurora-yellow/10',
           iconColor: 'text-aurora-yellow',
           dotColor: 'bg-aurora-yellow',
-          title: 'Slow connection',
-          subtitle: "Your connection is unstable. Some features may not work properly.",
-          statusText: 'Weak signal',
+          title: t('status.slow.title'),
+          subtitle: t('status.slow.subtitle'),
+          statusText: t('status.slow.statusText'),
         };
       default:
         return {
@@ -225,9 +227,9 @@ export default function OfflinePage() {
           iconBg: 'bg-aurora-orange/10',
           iconColor: 'text-aurora-orange',
           dotColor: 'bg-aurora-red',
-          title: "You're offline",
-          subtitle: "It looks like you've lost your internet connection. We'll keep trying to reconnect.",
-          statusText: 'No connection',
+          title: t('status.offline.title'),
+          subtitle: t('status.offline.subtitle'),
+          statusText: t('status.offline.statusText'),
         };
     }
   };
@@ -270,7 +272,7 @@ export default function OfflinePage() {
           {connectionStatus === 'offline' && (
             <span className="text-text-muted flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              Retrying in {countdown}s
+              {t('retryingIn', { seconds: countdown })}
             </span>
           )}
         </div>
@@ -280,7 +282,7 @@ export default function OfflinePage() {
           {connectionStatus === 'online' ? (
             <div className="flex items-center justify-center gap-2 text-aurora-green">
               <RefreshCw className="w-5 h-5 animate-spin" />
-              <span>Redirecting...</span>
+              <span>{t('redirecting')}</span>
             </div>
           ) : (
             <>
@@ -294,15 +296,15 @@ export default function OfflinePage() {
                 {isRetrying ? (
                   <span className="flex items-center justify-center gap-2">
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    Checking connection...
+                    {t('checkingConnection')}
                   </span>
                 ) : (
-                  'Try again now'
+                  t('tryAgain')
                 )}
               </Button>
               <Button variant="ghost" size="md" fullWidth onClick={handleGoBack}>
                 <Home className="w-4 h-4 mr-2" />
-                {previousPath ? 'Go back' : 'Go to home'}
+                {previousPath ? t('goBack') : t('goHome')}
               </Button>
             </>
           )}
@@ -312,7 +314,7 @@ export default function OfflinePage() {
         {cachedRoutes.length > 0 && connectionStatus !== 'online' && (
           <div className="pt-4 text-left bg-bg-elevated rounded-lg p-4 space-y-3">
             <h3 className="text-sm font-semibold text-polar-night">
-              Available offline:
+              {t('availableOffline')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {cachedRoutes.map((route) => (
@@ -321,7 +323,7 @@ export default function OfflinePage() {
                   href={route.path}
                   className="px-3 py-1.5 text-sm bg-bg rounded-full border border-frost-gray hover:border-aurora-green transition-colors"
                 >
-                  {route.label}
+                  {t(`routes.${route.labelKey}`)}
                 </Link>
               ))}
             </div>
@@ -332,12 +334,12 @@ export default function OfflinePage() {
         {connectionStatus !== 'online' && (
           <div className="pt-2 text-left bg-bg-elevated rounded-lg p-4 space-y-2">
             <h3 className="text-sm font-semibold text-polar-night">
-              While you&apos;re offline:
+              {t('tips.title')}
             </h3>
             <ul className="text-sm text-text-secondary space-y-1 list-disc list-inside">
-              <li>Previously viewed listings are still accessible</li>
-              <li>Your saved games and listings are cached</li>
-              <li>New actions will sync when you&apos;re back online</li>
+              <li>{t('tips.tip1')}</li>
+              <li>{t('tips.tip2')}</li>
+              <li>{t('tips.tip3')}</li>
             </ul>
           </div>
         )}

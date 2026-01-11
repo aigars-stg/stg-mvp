@@ -5,6 +5,7 @@ import { Star, Chat as MessageSquare, ChevronDown } from 'griddy-icons';
 import { Button, Card } from '@second-turn/design-system';
 import { cn } from '@/lib/utils';
 import { UserInfoCard } from '@/components/user';
+import { useTranslations } from 'next-intl';
 
 interface Review {
   id: string;
@@ -49,6 +50,7 @@ export function SellerReviewsList({
   canRespond = false,
   onRespond,
 }: SellerReviewsListProps) {
+  const t = useTranslations('SellerDashboard.SellerReviewsList');
   return (
     <div className="space-y-6">
       {/* Rating Summary */}
@@ -81,7 +83,7 @@ export function SellerReviewsList({
                 onClick={onLoadMore}
                 disabled={isLoadingMore}
               >
-                {isLoadingMore ? 'Loading...' : 'Load More Reviews'}
+                {isLoadingMore ? t('loading') : t('loadMore')}
               </Button>
             </div>
           )}
@@ -89,9 +91,9 @@ export function SellerReviewsList({
       ) : (
         <div className="text-center py-8 text-text-secondary">
           <MessageSquare className="w-12 h-12 mx-auto mb-3 text-text-muted opacity-50" />
-          <p>No reviews yet</p>
+          <p>{t('noReviews')}</p>
           <p className="text-sm text-text-muted mt-1">
-            Reviews will appear here after completed sales
+            {t('noReviewsHint')}
           </p>
         </div>
       )}
@@ -113,6 +115,7 @@ function RatingSummary({
   positivePercent: number;
   reviews: Review[];
 }) {
+  const t = useTranslations('SellerDashboard.SellerReviewsList');
   // Calculate rating distribution
   const distribution = [5, 4, 3, 2, 1].map((rating) => {
     const count = reviews.filter((r) => r.rating === rating).length;
@@ -142,10 +145,10 @@ function RatingSummary({
             ))}
           </div>
           <div className="text-sm text-text-secondary mt-1">
-            {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
+            {totalReviews} {totalReviews === 1 ? t('review') : t('reviews')}
           </div>
           <div className="text-sm text-aurora-green font-medium mt-2">
-            {positivePercent}% positive
+            {positivePercent}% {t('positive')}
           </div>
         </div>
 
@@ -154,7 +157,7 @@ function RatingSummary({
           {distribution.map(({ rating, count, percent }) => (
             <div key={rating} className="flex items-center gap-3">
               <span className="w-12 text-sm text-text-secondary text-right">
-                {rating} star{rating !== 1 ? 's' : ''}
+                {rating} {rating !== 1 ? t('stars') : t('star')}
               </span>
               <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
                 <div
@@ -188,6 +191,7 @@ function ReviewCard({
   canRespond?: boolean;
   onRespond?: (reviewId: string, response: string) => Promise<void>;
 }) {
+  const t = useTranslations('SellerDashboard.SellerReviewsList');
   const [showResponseForm, setShowResponseForm] = useState(false);
   const [responseText, setResponseText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -234,7 +238,7 @@ function ReviewCard({
           <div className="text-xs text-text-muted ml-14">
             {formatDate(review.created_at)}
             {review.order_number && (
-              <span> • Order #{review.order_number}</span>
+              <span> • {t('order')} #{review.order_number}</span>
             )}
           </div>
         </div>
@@ -266,7 +270,7 @@ function ReviewCard({
       {review.seller_response && (
         <div className="mt-4 pl-4 border-l-2 border-frost-ice/30 bg-frost-ice/5 rounded-r-lg p-3">
           <div className="text-xs font-medium text-frost-ice mb-1">
-            Seller Response
+            {t('sellerResponse')}
             {review.seller_responded_at && (
               <span className="font-normal text-text-muted ml-2">
                 {formatDate(review.seller_responded_at)}
@@ -288,21 +292,21 @@ function ReviewCard({
               className="text-sm text-frost-ice hover:text-frost-ice/80 flex items-center gap-1"
             >
               <MessageSquare className="w-4 h-4" />
-              Respond to review
+              {t('respondToReview')}
             </button>
           ) : (
             <div className="space-y-3">
               <textarea
                 value={responseText}
                 onChange={(e) => setResponseText(e.target.value)}
-                placeholder="Write your response..."
+                placeholder={t('responsePlaceholder')}
                 rows={3}
                 maxLength={500}
                 className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice focus:border-transparent resize-none text-sm"
               />
               <div className="flex items-center justify-between">
                 <span className="text-xs text-text-muted">
-                  {responseText.length}/500 characters
+                  {t('characters', { count: responseText.length, max: 500 })}
                 </span>
                 <div className="flex gap-2">
                   <Button
@@ -314,7 +318,7 @@ function ReviewCard({
                     }}
                     disabled={isSubmitting}
                   >
-                    Cancel
+                    {t('cancel')}
                   </Button>
                   <Button
                     variant="primary"
@@ -322,7 +326,7 @@ function ReviewCard({
                     onClick={handleSubmitResponse}
                     disabled={isSubmitting || !responseText.trim()}
                   >
-                    {isSubmitting ? 'Sending...' : 'Send Response'}
+                    {isSubmitting ? t('sending') : t('sendResponse')}
                   </Button>
                 </div>
               </div>

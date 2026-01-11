@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
-import { CheckCircle, AlertCircle, InfoCircle as Info, CloseCircle as XCircle, X } from 'griddy-icons';
+import { CheckCircle, AlertCircle, InfoCircle as Info, CloseCircle as XCircle, Close } from 'griddy-icons';
 import { cn } from '@/lib/utils';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -170,7 +170,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
         className="p-1 -m-1 hover:bg-polar-night/5 rounded transition-colors flex-shrink-0"
         aria-label="Dismiss notification"
       >
-        <X className="w-4 h-4 text-text-muted" />
+        <Close className="w-4 h-4 text-text-muted" />
       </button>
     </div>
   );

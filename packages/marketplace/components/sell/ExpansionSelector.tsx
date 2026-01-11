@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Card, Modal, Input, Button } from '@second-turn/design-system';
-import { Package, RefreshCw, Search, X, LinkExternal as ExternalLink, TextFont as Type, ChevronDown, ChevronUp } from 'griddy-icons';
+import { Package, RefreshCw, Search, Close, LinkExternal as ExternalLink, TextFont as Type, ChevronDown, ChevronUp } from 'griddy-icons';
 import type { VersionSelection } from '@/lib/bgg-types';
 import type { BGGExpansionInfo } from '@/lib/bgg-api';
 import { LanguageVersionSelector } from './LanguageVersionSelector';
@@ -440,7 +440,7 @@ export function ExpansionSelector({
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-polar-night/5 rounded-full transition-colors"
               aria-label={t('clearSearch')}
             >
-              <X className="w-4 h-4 text-text-muted" />
+              <Close className="w-4 h-4 text-text-muted" />
             </button>
           )}
         </div>

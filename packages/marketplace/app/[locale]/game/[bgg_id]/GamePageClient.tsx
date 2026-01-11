@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
-import { Package, Users, User as Baby, Time as Clock, LinkExternal as ExternalLink, ArrowLeft, RefreshCw as Loader2, AlertCircle, SettingsAdjustHorizontal as SlidersHorizontal, X, ChevronDown, ChevronUp, Settings as Cog, PuzzlePiece as Puzzle } from 'griddy-icons';
+import { Package, Users, User as Baby, Time as Clock, LinkExternal as ExternalLink, ArrowLeft, RefreshCw as Loader2, AlertCircle, SettingsAdjustHorizontal as SlidersHorizontal, Close, ChevronDown, ChevronUp, Settings as Cog, PuzzlePiece as Puzzle } from 'griddy-icons';
 import type { GameWithOffers } from '@/lib/types/aggregated-game';
 import type { ListingCondition, ListingType } from '@/lib/types/listing';
 import { OfferCard } from '@/components/game/OfferCard';
@@ -448,7 +448,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                   onClick={clearFilters}
                   className="text-sm text-frost-ice hover:underline flex items-center gap-1"
                 >
-                  <X className="w-3 h-3" />
+                  <Close className="w-3 h-3" />
                   {t('filter.clearAll')}
                 </button>
               )}

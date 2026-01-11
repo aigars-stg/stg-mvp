@@ -5,6 +5,7 @@ import { Modal, Button } from '@second-turn/design-system';
 import { Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, LinkExternal as ExternalLink } from 'griddy-icons';
 import { CONDITION_GRADES } from '../../lib/grading-guide-content';
 import type { ListingCondition } from '../../lib/types/listing';
+import { useTranslations } from 'next-intl';
 
 // Grade icons mapping
 const GRADE_ICONS = {
@@ -33,6 +34,7 @@ export function ConditionInfoModal({
   onClose,
   condition,
 }: ConditionInfoModalProps) {
+  const t = useTranslations('Common.ConditionInfoModal');
   const grade = CONDITION_GRADES[condition];
   const Icon = GRADE_ICONS[condition];
 
@@ -40,7 +42,7 @@ export function ConditionInfoModal({
     <Modal
       open={isOpen}
       onClose={onClose}
-      title="Condition grade"
+      title={t('title')}
       size="sm"
       footer={
         <div className="flex items-center justify-between w-full">
@@ -49,11 +51,11 @@ export function ConditionInfoModal({
             target="_blank"
             className="text-frost-ice hover:text-aurora-blue text-sm flex items-center gap-1 transition-colors"
           >
-            Full grading guide
+            {t('fullGradingGuide')}
             <ExternalLink className="w-3.5 h-3.5" />
           </Link>
           <Button variant="secondary" onClick={onClose}>
-            Close
+            {t('close')}
           </Button>
         </div>
       }
@@ -76,11 +78,11 @@ export function ConditionInfoModal({
         {/* What to Expect */}
         <div>
           <h4 className="font-semibold text-polar-night text-sm mb-2">
-            What to expect
+            {t('whatToExpect')}
           </h4>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h5 className="text-xs font-medium text-text-muted mb-1.5">Box</h5>
+              <h5 className="text-xs font-medium text-text-muted mb-1.5">{t('box')}</h5>
               <ul className="space-y-1">
                 {grade.boxCriteria.slice(0, 3).map((criterion, index) => (
                   <li
@@ -94,7 +96,7 @@ export function ConditionInfoModal({
               </ul>
             </div>
             <div>
-              <h5 className="text-xs font-medium text-text-muted mb-1.5">Components</h5>
+              <h5 className="text-xs font-medium text-text-muted mb-1.5">{t('components')}</h5>
               <ul className="space-y-1">
                 {grade.componentCriteria.slice(0, 3).map((criterion, index) => (
                   <li
@@ -113,8 +115,7 @@ export function ConditionInfoModal({
         {/* Value Guidance */}
         <div className="pt-2 border-t border-border/50">
           <p className="text-xs text-text-muted">
-            Typical value: <span className="font-medium">{grade.valueGuidance}</span> of
-            retail price
+            {t('typicalValue')} <span className="font-medium">{grade.valueGuidance}</span> {t('ofRetailPrice')}
           </p>
         </div>
       </div>

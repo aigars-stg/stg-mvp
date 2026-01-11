@@ -10,6 +10,7 @@ import { QuestionThread } from './QuestionThread';
 import type { ListingQuestion } from '@/lib/types/question';
 import type { ListingCondition } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
+import { useTranslations } from 'next-intl';
 
 interface ListingQuestionsDrawerProps {
   listingId: string;
@@ -38,6 +39,7 @@ export function ListingQuestionsDrawer({
   onQuestionCountChange,
   onLoginRequired,
 }: ListingQuestionsDrawerProps) {
+  const t = useTranslations('Game.QuestionsDrawer');
   const { user } = useAuth();
   const [questions, setQuestions] = useState<ListingQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -150,7 +152,7 @@ export function ListingQuestionsDrawer({
     <SlidePanel
       open={isOpen}
       onClose={onClose}
-      title="Questions"
+      title={t('title')}
       size="md"
     >
       <div className="-mx-4 md:-mx-6 -mt-4 md:-mt-6 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-5rem)] pb-16 md:pb-0">
@@ -188,12 +190,8 @@ export function ListingQuestionsDrawer({
           <div className="mt-2 pt-2 border-t border-border-subtle">
             <span className="text-xs text-text-muted">
               {isLoading
-                ? 'Loading...'
-                : questionCount === 0
-                  ? 'No questions yet'
-                  : questionCount === 1
-                    ? '1 question'
-                    : `${questionCount} questions`}
+                ? t('loading')
+                : t('questionsCount', { count: questionCount })}
             </span>
           </div>
         </div>
@@ -211,17 +209,17 @@ export function ListingQuestionsDrawer({
                 onClick={fetchQuestions}
                 className="text-sm text-frost-ice hover:underline"
               >
-                Try again
+                {t('tryAgain')}
               </button>
             </div>
           ) : questionCount === 0 ? (
             <div className="text-center py-12">
               <MessageSquare className="w-12 h-12 text-text-muted mx-auto mb-3" />
               <p className="text-sm font-medium text-polar-night mb-1">
-                No questions yet
+                {t('noQuestionsTitle')}
               </p>
               <p className="text-xs text-text-secondary max-w-[240px] mx-auto">
-                Ask about condition, shipping, or if they&apos;d consider a trade.
+                {t('noQuestionsHint')}
               </p>
             </div>
           ) : (
@@ -243,7 +241,7 @@ export function ListingQuestionsDrawer({
         {isSeller ? (
           <div className="border-t border-border-subtle bg-snow-white px-4 py-3">
             <p className="text-xs text-text-muted text-center">
-              You can&apos;t ask questions on your own listing, but you can reply to others.
+              {t('sellerCannotAsk')}
             </p>
           </div>
         ) : (
@@ -252,8 +250,8 @@ export function ListingQuestionsDrawer({
             disabled={isPosting}
             placeholder={
               isAuthenticated
-                ? 'Ask a question about this listing...'
-                : 'Sign in to ask a question'
+                ? t('askPlaceholder')
+                : t('signInToAsk')
             }
           />
         )}

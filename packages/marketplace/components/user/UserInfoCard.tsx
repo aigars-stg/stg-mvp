@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Avatar, AvatarSize } from './Avatar';
 import { CountryDisplay, CountryDisplayMode } from './CountryDisplay';
 import { SellerTrustCompact } from '@/components/seller/SellerTrustBadge';
-import { SellerBadgeTier, getSellerBadgeTier, formatMemberSince } from '@/lib/types/seller';
+import { SellerBadgeTier, getSellerBadgeTier } from '@/lib/types/seller';
 import { cn } from '@/lib/utils';
 
 interface UserData {
@@ -62,6 +62,7 @@ export function UserInfoCard({
   className,
 }: UserInfoCardProps) {
   const locale = useLocale();
+  const t = useTranslations('UserCard');
   const profileUrl = `/${locale}/profile/${user.id}`;
 
   // Calculate badge tier if seller data provided but no tier specified
@@ -146,7 +147,7 @@ export function UserInfoCard({
         {/* Member since */}
         {showMemberSince && memberSince && (
           <span className={cn('text-slate-500', textStyle.meta)}>
-            {formatMemberSince(memberSince)}
+            {t('memberSince', { year: new Date(memberSince).getFullYear() })}
           </span>
         )}
       </div>

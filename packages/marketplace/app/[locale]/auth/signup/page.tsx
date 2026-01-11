@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 /**
  * Legacy signup page - redirects to the new unified /auth page.
@@ -13,6 +14,7 @@ import Link from 'next/link';
  */
 export default function SignUpPage() {
   const router = useRouter();
+  const t = useTranslations('Auth');
 
   // Check if site is in "coming soon" mode
   const isComingSoon = false;
@@ -46,24 +48,22 @@ export default function SignUpPage() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-polar-night mb-2">
-              We&apos;re launching soon!
+              {t('comingSoon.title')}
             </h2>
             <p className="text-text-secondary mb-6">
-              Sign up will be available when we officially launch. In the
-              meantime, you can explore what&apos;s coming to the Baltic board
-              game community.
+              {t('comingSoon.subtitle')}
             </p>
           </div>
 
           <div className="space-y-4">
             <Link href="/">
               <Button variant="primary" fullWidth>
-                Explore preview
+                {t('comingSoon.exploreButton')}
               </Button>
             </Link>
             <Link href="/auth">
               <Button variant="secondary" fullWidth>
-                Sign in (if you have an account)
+                {t('comingSoon.signInButton')}
               </Button>
             </Link>
           </div>
@@ -77,7 +77,7 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-12">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-frost-ice border-t-transparent mx-auto mb-4" />
-        <p className="text-text-secondary">Redirecting...</p>
+        <p className="text-text-secondary">{t('redirect.message')}</p>
       </div>
     </div>
   );

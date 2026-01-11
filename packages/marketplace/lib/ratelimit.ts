@@ -13,6 +13,7 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 
   // Create rate limiters for different actions
   rateLimiters = {
+    // Auth limiters
     signIn: new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(5, '15 m'), // 5 requests per 15 minutes
@@ -41,6 +42,22 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
       prefix: '@upstash/ratelimit/email-resend',
     }),
 
+    // Magic link security (critical for passwordless)
+    magicLinkGenerate: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '1 h'), // 5 magic links per email per hour
+      analytics: true,
+      prefix: '@upstash/ratelimit/magic-link-generate',
+    }),
+
+    magicLinkValidate: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(10, '10 m'), // 10 attempts per IP per 10 min
+      analytics: true,
+      prefix: '@upstash/ratelimit/magic-link-validate',
+    }),
+
+    // Messaging limiters
     messageCreate: new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(30, '1 m'), // 30 messages per minute
@@ -54,10 +71,91 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
       analytics: true,
       prefix: '@upstash/ratelimit/conversation-create',
     }),
+
+    // Checkout (same for buyer/seller)
+    checkout: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '1 h'), // 5 checkouts per hour
+      analytics: true,
+      prefix: '@upstash/ratelimit/checkout',
+    }),
+
+    // Listing creation - Buyer limits
+    'listingCreate-buyer': new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(2, '1 d'), // 2 per day for buyers
+      analytics: true,
+      prefix: '@upstash/ratelimit/listing-create-buyer',
+    }),
+
+    // Listing creation - Seller limits
+    'listingCreate-seller': new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(50, '1 d'), // 50 per day for sellers
+      analytics: true,
+      prefix: '@upstash/ratelimit/listing-create-seller',
+    }),
+
+    // Upload - Buyer limits
+    'upload-buyer': new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(10, '1 h'), // 10 per hour for buyers
+      analytics: true,
+      prefix: '@upstash/ratelimit/upload-buyer',
+    }),
+
+    // Upload - Seller limits
+    'upload-seller': new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(100, '1 h'), // 100 per hour for sellers
+      analytics: true,
+      prefix: '@upstash/ratelimit/upload-seller',
+    }),
+
+    // Review creation
+    reviewCreate: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '1 h'), // 5 reviews per hour
+      analytics: true,
+      prefix: '@upstash/ratelimit/review-create',
+    }),
+
+    // Global limit per IP (DoS protection)
+    global: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(1000, '1 m'), // 1000 requests per minute per IP
+      analytics: true,
+      prefix: '@upstash/ratelimit/global',
+    }),
   };
 }
 
-export type RateLimitAction = 'signIn' | 'signUp' | 'passwordReset' | 'emailResend' | 'messageCreate' | 'conversationCreate';
+export type RateLimitAction =
+  | 'signIn'
+  | 'signUp'
+  | 'passwordReset'
+  | 'emailResend'
+  | 'magicLinkGenerate'
+  | 'magicLinkValidate'
+  | 'messageCreate'
+  | 'conversationCreate'
+  | 'checkout'
+  | 'listingCreate-buyer'
+  | 'listingCreate-seller'
+  | 'upload-buyer'
+  | 'upload-seller'
+  | 'reviewCreate'
+  | 'global';
+
+/**
+ * Get rate limit action key with role awareness
+ * @param action - Base action name (e.g., 'listingCreate', 'upload')
+ * @param isSeller - Whether the user is a seller
+ * @returns Role-specific action key
+ */
+export function getRateLimitAction(action: 'listingCreate' | 'upload', isSeller: boolean): RateLimitAction {
+  return `${action}-${isSeller ? 'seller' : 'buyer'}` as RateLimitAction;
+}
 
 export interface RateLimitResult {
   success: boolean;
@@ -77,13 +175,24 @@ export async function checkRateLimit(
   action: RateLimitAction,
   identifier: string
 ): Promise<RateLimitResult> {
-  // If rate limiting is not configured, allow all requests
+  // If rate limiting is not configured, block in production, warn in dev
   if (!redis || !rateLimiters) {
-    console.warn('Rate limiting is not configured. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.');
+    if (process.env.NODE_ENV === 'production') {
+      console.error('CRITICAL: Rate limiting not configured in production! Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.');
+      return {
+        success: false,
+        limit: 0,
+        remaining: 0,
+        reset: Date.now(),
+        error: 'Service temporarily unavailable',
+      };
+    }
+    // Dev mode: allow but with low limits for testing
+    console.warn('Rate limiting not configured - using development fallback');
     return {
       success: true,
-      limit: 999,
-      remaining: 999,
+      limit: 10,
+      remaining: 10,
       reset: Date.now() + 60000,
     };
   }

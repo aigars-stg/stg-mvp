@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Time as Clock, AlertTriangle } from 'griddy-icons';
+import { useTranslations } from 'next-intl';
 
 interface ReservationTimerProps {
   expiresAt: string | Date;
@@ -16,6 +17,7 @@ export function ReservationTimer({
   showLabel = true,
   size = 'md',
 }: ReservationTimerProps) {
+  const t = useTranslations('Checkout.ReservationTimer');
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isExpired, setIsExpired] = useState(false);
 
@@ -81,7 +83,7 @@ export function ReservationTimer({
         className={`inline-flex items-center gap-1.5 rounded-md font-medium ${colorClasses.expired} ${sizeClasses[size]}`}
       >
         <AlertTriangle className={iconSizes[size]} />
-        <span>Expired</span>
+        <span>{t('expired')}</span>
       </div>
     );
   }
@@ -91,10 +93,10 @@ export function ReservationTimer({
       className={`inline-flex items-center gap-1.5 rounded-md font-medium ${colorClasses[urgency]} ${sizeClasses[size]}`}
       role="timer"
       aria-live="polite"
-      aria-label={`${minutes} minutes and ${seconds} seconds remaining`}
+      aria-label={t('ariaLabel', { minutes, seconds })}
     >
       <Clock className={iconSizes[size]} />
-      {showLabel && <span>Reserved:</span>}
+      {showLabel && <span>{t('reserved')}</span>}
       <span className="font-mono tabular-nums">
         {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
       </span>

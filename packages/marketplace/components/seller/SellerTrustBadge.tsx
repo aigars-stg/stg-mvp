@@ -1,14 +1,14 @@
 'use client';
 
-import {  Star, Trophy as Award, Shield, Sparks as Sparkles, User  } from 'griddy-icons';
+import { Star, Trophy as Award, Shield, Sparks as Sparkles, User } from 'griddy-icons';
 import {
   SellerBadgeTier,
   SellerTrustInfo,
   getSellerBadgeTier,
-  getBadgeLabel,
   formatMemberSince,
 } from '@/lib/types/seller';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface SellerTrustBadgeProps {
   /** Seller trust information */
@@ -36,6 +36,7 @@ export function SellerTrustBadge({
   showAvatar = false,
   className,
 }: SellerTrustBadgeProps) {
+  const t = useTranslations('SellerDashboard.SellerTrustBadge');
   const {
     sellerName,
     sellerAvatar,
@@ -97,7 +98,7 @@ export function SellerTrustBadge({
       )}
 
       {sellerCountry && (
-        <span className="text-slate-500" title={`Ships from ${sellerCountry}`}>
+        <span className="text-slate-500" title={t('shipsFrom', { country: sellerCountry })}>
           {getCountryFlag(sellerCountry)}
         </span>
       )}
@@ -112,7 +113,7 @@ export function SellerTrustBadge({
 
       {/* Sales count */}
       <span className="text-slate-500">
-        ({totalSales} {totalSales === 1 ? 'sale' : 'sales'})
+        ({totalSales} {totalSales === 1 ? t('sale') : t('sales')})
       </span>
 
       {/* Badge tier */}
@@ -144,6 +145,7 @@ export function SellerTrustCompact({
   badgeTier?: SellerBadgeTier;
   className?: string;
 }) {
+  const t = useTranslations('SellerDashboard.SellerTrustBadge');
   const tier = badgeTier || getSellerBadgeTier(totalSales, averageRating);
 
   return (
@@ -154,7 +156,7 @@ export function SellerTrustCompact({
           <span className="font-medium text-slate-600">{averageRating.toFixed(1)}</span>
         </>
       )}
-      <span>{totalSales === 0 ? 'New seller' : `(${totalSales} ${totalSales === 1 ? 'sale' : 'sales'})`}</span>
+      <span>{totalSales === 0 ? t('newSeller') : `(${totalSales} ${totalSales === 1 ? t('sale') : t('sales')})`}</span>
       {tier !== 'new_seller' && (
         <BadgeTierPill tier={tier} size="sm" />
       )}
@@ -172,24 +174,28 @@ function BadgeTierPill({
   tier: SellerBadgeTier;
   size?: 'sm' | 'md' | 'lg';
 }) {
+  const t = useTranslations('SellerDashboard.SellerTrustBadge');
   const tierConfig = {
     top_seller: {
       bg: 'bg-amber-100',
       text: 'text-amber-700',
       border: 'border-amber-200',
       icon: Sparkles,
+      label: t('badges.topSeller'),
     },
     trusted_seller: {
       bg: 'bg-frost-100',
       text: 'text-frost-700',
       border: 'border-frost-200',
       icon: Shield,
+      label: t('badges.trustedSeller'),
     },
     new_seller: {
       bg: 'bg-slate-100',
       text: 'text-slate-600',
       border: 'border-slate-200',
       icon: User,
+      label: t('badges.newSeller'),
     },
   };
 
@@ -224,7 +230,7 @@ function BadgeTierPill({
       )}
     >
       <Icon className={iconSizes[size]} />
-      {getBadgeLabel(tier)}
+      {config.label}
     </span>
   );
 }

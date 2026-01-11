@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Heart, Search, Settings, LogOut, X, LogIn, ShoppingBag, Store } from 'griddy-icons';
+import { Package, Heart, Search, Settings, LogOut, Close, LogIn, ShoppingBag, Store } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Button } from '@second-turn/design-system';
 import { getInitials } from '@/lib/auth/utils';
@@ -159,7 +159,7 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
             className="p-2 hover:bg-bg-elevated rounded-lg transition-colors"
             aria-label="Close"
           >
-            <X className="w-5 h-5 text-text-muted" />
+            <Close className="w-5 h-5 text-text-muted" />
           </button>
         </div>
 

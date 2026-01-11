@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {  X, ChevronLeft, ChevronRight, SearchPlus as ZoomIn, SearchMinus as ZoomOut  } from 'griddy-icons';
+import {  Close, ChevronLeft, ChevronRight, SearchPlus as ZoomIn, SearchMinus as ZoomOut  } from 'griddy-icons';
 
 interface ImageLightboxProps {
   images: string[];
@@ -183,7 +183,7 @@ export function ImageLightbox({
         className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-snow-white/10 hover:bg-snow-white/20 flex items-center justify-center text-snow-white transition-colors"
         aria-label="Close lightbox"
       >
-        <X className="w-6 h-6" />
+        <Close className="w-6 h-6" />
       </button>
 
       {/* Image Counter */}

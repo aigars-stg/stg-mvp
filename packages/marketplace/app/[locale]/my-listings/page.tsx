@@ -22,6 +22,7 @@ import { getWantedStatusLabel } from '@/lib/types/wanted-listing';
 import { useSavedListings } from '@/lib/hooks/useSavedListings';
 import { isOfflineError } from '@/lib/utils/offline';
 import { OfflineError } from '@/components/common/OfflineError';
+import { useTranslations } from 'next-intl';
 
 const STATUS_LABELS = {
   draft: 'Draft',
@@ -61,6 +62,8 @@ const WANTED_STATUS_COLORS = {
 function MyListingsContent() {
   const { user } = useAuth();
   const router = useRouter();
+  const t = useTranslations('MyListings');
+  const tListings = useTranslations('Listings');
 
   // Top-level tab: selling vs wanted vs saved (check URL param)
   const searchParams = useSearchParams();
@@ -340,7 +343,7 @@ function MyListingsContent() {
         )
       );
 
-      setWantedSuccessMessage('Wanted listing extended by 30 days');
+      setWantedSuccessMessage(t('wanted.extended'));
       setTimeout(() => setWantedSuccessMessage(''), 3000);
     } catch (err: any) {
       console.error('Error extending wanted listing:', err);
@@ -416,7 +419,7 @@ function MyListingsContent() {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center">
         <div className="text-center">
-          <p className="text-text-secondary">Loading...</p>
+          <p className="text-text-secondary">{t('loading')}</p>
         </div>
       </div>
     );
@@ -430,21 +433,21 @@ function MyListingsContent() {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <LayoutDashboard className="w-8 h-8 text-frost-ice" />
-              <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">My listings</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">{t('title')}</h1>
             </div>
             <p className="text-sm sm:text-base text-text-secondary">
-              Games you're selling, seeking, and saving
+              {t('subtitle')}
             </p>
           </div>
           <div className="hidden sm:flex sm:flex-row gap-2 sm:gap-3">
             <Link href="/wanted/new" className="w-full sm:w-auto">
               <Button variant="secondary" size="lg" fullWidth className="sm:w-auto">
-                Request a game
+                {t('buttons.requestGame')}
               </Button>
             </Link>
             <Link href="/sell" className="w-full sm:w-auto">
               <Button variant="primary" size="lg" fullWidth className="sm:w-auto">
-                Sell a game
+                {t('buttons.sellGame')}
               </Button>
             </Link>
           </div>
@@ -460,7 +463,7 @@ function MyListingsContent() {
               }`}
           >
             <Package className="w-5 h-5 inline mr-2" />
-            Selling ({listings.length})
+            {t('tabs.selling')} ({listings.length})
           </button>
           <button
             onClick={() => setMainTab('wanted')}
@@ -470,7 +473,7 @@ function MyListingsContent() {
               }`}
           >
             <Search className="w-5 h-5 inline mr-2" />
-            Looking For ({wantedListings.length})
+            {t('tabs.lookingFor')} ({wantedListings.length})
           </button>
           <button
             onClick={() => setMainTab('saved')}
@@ -480,7 +483,7 @@ function MyListingsContent() {
               }`}
           >
             <Heart className="w-5 h-5 inline mr-2" />
-            Saved ({savedListings.length})
+            {t('tabs.saved')} ({savedListings.length})
           </button>
         </div>
 
@@ -496,7 +499,7 @@ function MyListingsContent() {
                   : 'bg-bg-elevated text-text-secondary hover:bg-border'
                   }`}
               >
-                {status === 'all' ? 'All' : STATUS_LABELS[status]}{' '}
+                {status === 'all' ? t('statusTabs.all') : tListings(`statuses.${status}`)}{' '}
                 <span
                   className={`${activeTab === status ? 'text-snow-white/80' : 'text-text-muted'
                     }`}
@@ -546,7 +549,7 @@ function MyListingsContent() {
             {isOffline && !loading && (
               <OfflineError
                 onRetry={() => window.location.reload()}
-                message="We couldn't load your listings. Check your connection and try again."
+                message={t('selling.offlineError')}
               />
             )}
 
@@ -560,7 +563,7 @@ function MyListingsContent() {
             {/* Loading State */}
             {loading && (
               <div className="text-center py-12">
-                <p className="text-text-secondary">Loading your listings...</p>
+                <p className="text-text-secondary">{t('selling.loading')}</p>
               </div>
             )}
 
@@ -570,19 +573,19 @@ function MyListingsContent() {
                 <Package className="w-16 h-16 text-text-muted mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
                   {activeTab === 'all'
-                    ? 'No listings yet'
-                    : `No ${STATUS_LABELS[activeTab as ListingStatus].toLowerCase()} listings`}
+                    ? t('selling.emptyAll.title')
+                    : t('selling.emptyFiltered.title', { status: tListings(`statuses.${activeTab}`).toLowerCase() })}
                 </h3>
                 <p className="text-text-secondary mb-6">
                   {activeTab === 'all'
-                    ? 'Start selling your board games to the community'
-                    : `You don't have any ${STATUS_LABELS[activeTab as ListingStatus].toLowerCase()} listings at the moment`}
+                    ? t('selling.emptyAll.description')
+                    : t('selling.emptyFiltered.description', { status: tListings(`statuses.${activeTab}`).toLowerCase() })}
                 </p>
                 {activeTab === 'all' && (
                   <Link href="/sell">
                     <Button variant="primary">
                       <Plus className="w-5 h-5 mr-2" />
-                      Create Your First Listing
+                      {t('selling.emptyAll.button')}
                     </Button>
                   </Link>
                 )}
@@ -629,7 +632,7 @@ function MyListingsContent() {
             {wantedIsOffline && !wantedLoading && (
               <OfflineError
                 onRetry={() => window.location.reload()}
-                message="We couldn't load your wanted listings. Check your connection and try again."
+                message={t('wanted.offlineError')}
               />
             )}
 
@@ -643,7 +646,7 @@ function MyListingsContent() {
             {/* Loading State */}
             {wantedLoading && (
               <div className="text-center py-12">
-                <p className="text-text-secondary">Loading your wanted listings...</p>
+                <p className="text-text-secondary">{t('wanted.loading')}</p>
               </div>
             )}
 
@@ -653,19 +656,19 @@ function MyListingsContent() {
                 <Search className="w-16 h-16 text-text-muted mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
                   {wantedActiveTab === 'all'
-                    ? 'No wanted listings yet'
-                    : `No ${wantedActiveTab} wanted listings`}
+                    ? t('wanted.emptyAll.title')
+                    : t('wanted.emptyFiltered.title', { status: wantedActiveTab })}
                 </h3>
                 <p className="text-text-secondary mb-6">
                   {wantedActiveTab === 'all'
-                    ? 'Start posting games you\'re looking for'
-                    : `You don't have any ${wantedActiveTab} wanted listings at the moment`}
+                    ? t('wanted.emptyAll.description')
+                    : t('wanted.emptyFiltered.description', { status: wantedActiveTab })}
                 </p>
                 {wantedActiveTab === 'all' && (
                   <Link href="/wanted/new">
                     <Button variant="accent">
                       <Search className="w-5 h-5 mr-2" />
-                      Post Your First ISO
+                      {t('wanted.emptyAll.button')}
                     </Button>
                   </Link>
                 )}
@@ -733,7 +736,7 @@ function MyListingsContent() {
             {/* Loading State */}
             {savedLoading && (
               <div className="text-center py-12">
-                <p className="text-text-secondary">Loading your saved listings...</p>
+                <p className="text-text-secondary">{t('saved.loading')}</p>
               </div>
             )}
 
@@ -742,15 +745,15 @@ function MyListingsContent() {
               <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
                 <Heart className="w-16 h-16 text-text-muted mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
-                  No saved listings yet
+                  {t('saved.empty.title')}
                 </h3>
                 <p className="text-text-secondary mb-6">
-                  Start saving listings you're interested in by clicking the heart icon on any listing card or detail page.
+                  {t('saved.empty.description')}
                 </p>
                 <Link href="/browse">
                   <Button variant="primary">
                     <Search className="w-5 h-5 mr-2" />
-                    Browse Listings
+                    {t('saved.empty.button')}
                   </Button>
                 </Link>
               </Card>
@@ -826,7 +829,7 @@ function MyListingsContent() {
         isOpen={showClipboardSuccess}
         onClose={() => setShowClipboardSuccess(false)}
         type="success"
-        message="Link copied to clipboard!"
+        message={t('clipboard.success')}
       />
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '@second-turn/design-system';
 import { Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, ArrowDownRight, RefreshCw as Loader2, AlertCircle } from 'griddy-icons';
+import { useTranslations } from 'next-intl';
 
 interface Payout {
   id: string;
@@ -22,6 +23,7 @@ interface PayoutHistoryProps {
 }
 
 export function PayoutHistory({ limit = 5, showViewAll = true }: PayoutHistoryProps) {
+  const t = useTranslations('SellerDashboard.PayoutHistory');
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,21 +74,21 @@ export function PayoutHistory({ limit = 5, showViewAll = true }: PayoutHistoryPr
         return (
           <Badge variant="success">
             <CheckCircle2 className="w-3 h-3 mr-1" />
-            Completed
+            {t('status.completed')}
           </Badge>
         );
       case 'in_transit':
         return (
           <Badge variant="trust">
             <Clock className="w-3 h-3 mr-1" />
-            In Transit
+            {t('status.inTransit')}
           </Badge>
         );
       case 'pending':
         return (
           <Badge variant="warning">
             <Clock className="w-3 h-3 mr-1" />
-            Pending
+            {t('status.pending')}
           </Badge>
         );
       case 'failed':
@@ -94,7 +96,7 @@ export function PayoutHistory({ limit = 5, showViewAll = true }: PayoutHistoryPr
         return (
           <Badge variant="error">
             <XCircle className="w-3 h-3 mr-1" />
-            {status === 'failed' ? 'Failed' : 'Canceled'}
+            {status === 'failed' ? t('status.failed') : t('status.canceled')}
           </Badge>
         );
       default:
@@ -110,7 +112,7 @@ export function PayoutHistory({ limit = 5, showViewAll = true }: PayoutHistoryPr
   if (loading) {
     return (
       <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-polar-night mb-4">Recent Payouts</h3>
+        <h3 className="text-lg font-semibold text-polar-night mb-4">{t('title')}</h3>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-frost-ice" />
         </div>
@@ -122,7 +124,7 @@ export function PayoutHistory({ limit = 5, showViewAll = true }: PayoutHistoryPr
   if (error) {
     return (
       <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-polar-night mb-4">Recent Payouts</h3>
+        <h3 className="text-lg font-semibold text-polar-night mb-4">{t('title')}</h3>
         <div className="flex items-center gap-2 text-aurora-red">
           <AlertCircle className="w-4 h-4" />
           <span className="text-sm">{error}</span>
@@ -135,11 +137,11 @@ export function PayoutHistory({ limit = 5, showViewAll = true }: PayoutHistoryPr
   if (payouts.length === 0) {
     return (
       <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-polar-night mb-4">Recent Payouts</h3>
+        <h3 className="text-lg font-semibold text-polar-night mb-4">{t('title')}</h3>
         <div className="text-center py-4">
-          <p className="text-text-secondary">No payouts yet</p>
+          <p className="text-text-secondary">{t('noPayouts')}</p>
           <p className="text-sm text-text-muted">
-            Request your first payout when you have balance
+            {t('noPayoutsHint')}
           </p>
         </div>
       </div>
@@ -149,10 +151,10 @@ export function PayoutHistory({ limit = 5, showViewAll = true }: PayoutHistoryPr
   return (
     <div className="bg-snow-white border-2 border-border rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-polar-night">Recent Payouts</h3>
+        <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         {showViewAll && total > limit && (
           <button className="text-sm text-frost-ice hover:text-frost-ice/80 transition-colors">
-            View All ({total})
+            {t('viewAll', { count: total })}
           </button>
         )}
       </div>
@@ -169,7 +171,7 @@ export function PayoutHistory({ limit = 5, showViewAll = true }: PayoutHistoryPr
               </div>
               <div>
                 <p className="text-sm font-medium text-polar-night">
-                  Payout to ****{payout.bankLast4}
+                  {t('payoutTo', { last4: payout.bankLast4 ?? '****' })}
                 </p>
                 <p className="text-xs text-text-muted">
                   {formatDate(payout.createdAt)}

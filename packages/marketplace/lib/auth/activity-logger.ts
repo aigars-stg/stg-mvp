@@ -1,12 +1,14 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import { createServiceClient } from '@/lib/supabase/client';
 
 interface LogActivityParams {
-    supabase: SupabaseClient;
+    supabase?: SupabaseClient;
     userId: string;
     ipAddress: string;
     userAgent: string;
     city?: string | null;
     country?: string | null;
+    useServiceRole?: boolean;
 }
 
 // Helper to parse user agent
@@ -64,12 +66,21 @@ export async function logLoginActivity({
     ipAddress,
     userAgent,
     city = null,
-    country = null
+    country = null,
+    useServiceRole = false
 }: LogActivityParams) {
     try {
         const { deviceType, browser, os } = parseUserAgent(userAgent);
 
-        const { error } = await supabase
+        // Use service role client to bypass RLS when needed (e.g., after verifyOtp where session isn't set yet)
+        const client = useServiceRole ? createServiceClient() : supabase;
+
+        if (!client) {
+            console.error('No Supabase client available for logging activity');
+            return { success: false, error: new Error('No Supabase client') };
+        }
+
+        const { error } = await client
             .from('login_activity')
             .insert({
                 user_id: userId,

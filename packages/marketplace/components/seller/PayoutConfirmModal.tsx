@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@second-turn/design-system';
-import { X, ArrowUpRight, RefreshCw as Loader2, AlertCircle, CheckCircleAlt01 as CheckCircle2, Calendar, CreditCard, InfoCircle as Info } from 'griddy-icons';
+import { Close, ArrowUpRight, RefreshCw as Loader2, AlertCircle, CheckCircleAlt01 as CheckCircle2, Calendar, CreditCard, InfoCircle as Info } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 
 interface PayoutConfirmModalProps {
@@ -123,7 +123,7 @@ export function PayoutConfirmModal({
           className="absolute top-4 right-4 p-1 text-text-muted hover:text-polar-night transition-colors"
           disabled={loading}
         >
-          <X className="w-5 h-5" />
+          <Close className="w-5 h-5" />
         </button>
 
         {/* Success State */}

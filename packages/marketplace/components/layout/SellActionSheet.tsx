@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Search, X } from 'griddy-icons';
+import { Package, Search, Close } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';
 
@@ -77,7 +77,7 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
             className="p-2 hover:bg-bg-elevated rounded-lg transition-colors"
             aria-label="Close"
           >
-            <X className="w-5 h-5 text-text-muted" />
+            <Close className="w-5 h-5 text-text-muted" />
           </button>
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { Button } from '@second-turn/design-system';
-import { At as AtSign, AlertCircle, CheckCircleAlt01 as CheckCircle2, Edit as Pencil, Check, X } from 'griddy-icons';
+import { At as AtSign, AlertCircle, CheckCircleAlt01 as CheckCircle2, Edit as Pencil, Check, Close } from 'griddy-icons';
 import { supabase } from '@/lib/supabase/client';
 import { validateEmail } from '@/lib/auth/utils';
 import { mapAuthError } from '@/lib/auth/errors';
@@ -166,7 +166,7 @@ export function EmailChange({ currentEmail, compact = false }: EmailChangeProps)
             className="p-2 text-aurora-red hover:bg-aurora-red/10 rounded-md transition-colors disabled:opacity-50"
             title="Cancel"
           >
-            <X className="w-4 h-4" />
+            <Close className="w-4 h-4" />
           </button>
         </div>
       </div>

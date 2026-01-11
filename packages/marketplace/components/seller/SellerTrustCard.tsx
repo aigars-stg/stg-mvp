@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 import {
   SellerBadgeTier,
-  getBadgeLabel,
   formatMemberSince,
 } from '@/lib/types/seller';
 import { StarRating, BadgeTierPill } from './SellerTrustBadge';
+import { useTranslations } from 'next-intl';
 
 interface TrustData {
   total_reviews: number;
@@ -26,6 +26,7 @@ interface SellerTrustCardProps {
 }
 
 export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
+  const t = useTranslations('SellerDashboard.SellerTrustCard');
   const [data, setData] = useState<TrustData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +84,7 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
   return (
     <div className="bg-snow-white border-2 border-border rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-polar-night">Your Reputation</h3>
+        <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         <BadgeTierPill tier={data.badge_tier} size="md" />
       </div>
 
@@ -93,7 +94,7 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
         <div className="bg-bg-secondary rounded-lg p-3">
           <div className="flex items-center gap-1 mb-1">
             <Star className="w-4 h-4 text-amber-400" filled />
-            <span className="text-xs text-text-secondary">Rating</span>
+            <span className="text-xs text-text-secondary">{t('rating')}</span>
           </div>
           {data.total_reviews > 0 ? (
             <div className="flex items-baseline gap-1">
@@ -103,7 +104,7 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
               <span className="text-sm text-text-secondary">/ 5</span>
             </div>
           ) : (
-            <span className="text-sm text-text-muted">No reviews yet</span>
+            <span className="text-sm text-text-muted">{t('noReviewsYet')}</span>
           )}
         </div>
 
@@ -111,7 +112,7 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
         <div className="bg-bg-secondary rounded-lg p-3">
           <div className="flex items-center gap-1 mb-1">
             <Users className="w-4 h-4 text-frost-ice" />
-            <span className="text-xs text-text-secondary">Reviews</span>
+            <span className="text-xs text-text-secondary">{t('reviews')}</span>
           </div>
           <span className="text-2xl font-bold text-polar-night">
             {data.total_reviews}
@@ -122,7 +123,7 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
         <div className="bg-bg-secondary rounded-lg p-3">
           <div className="flex items-center gap-1 mb-1">
             <TrendingUp className="w-4 h-4 text-aurora-green" />
-            <span className="text-xs text-text-secondary">Completed Sales</span>
+            <span className="text-xs text-text-secondary">{t('completedSales')}</span>
           </div>
           <span className="text-2xl font-bold text-polar-night">
             {data.total_completed_sales}
@@ -133,7 +134,7 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
         <div className="bg-bg-secondary rounded-lg p-3">
           <div className="flex items-center gap-1 mb-1">
             <Award className="w-4 h-4 text-amber-500" />
-            <span className="text-xs text-text-secondary">Positive</span>
+            <span className="text-xs text-text-secondary">{t('positive')}</span>
           </div>
           <span className="text-2xl font-bold text-polar-night">
             {data.total_reviews > 0 ? `${data.positive_rating_percent}%` : '-'}
@@ -147,7 +148,7 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
           <div className="flex items-center justify-between">
             <StarRating rating={data.average_rating} size="lg" showValue={false} />
             <span className="text-sm text-text-secondary">
-              Based on {data.total_reviews} {data.total_reviews === 1 ? 'review' : 'reviews'}
+              {t('basedOn', { count: data.total_reviews })}
             </span>
           </div>
         </div>
@@ -164,7 +165,7 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
       {data.badge_tier === 'new_seller' && (
         <div className="bg-frost-ice/10 rounded-lg p-3 mb-4">
           <p className="text-sm text-frost-arctic">
-            <strong>Earn &quot;Trusted Seller&quot; badge:</strong> Complete 5+ sales with 4.5+ rating
+            <strong>{t('earnTrusted')}</strong> {t('trustedRequirement')}
           </p>
         </div>
       )}
@@ -172,7 +173,7 @@ export function SellerTrustCard({ refreshKey = 0 }: SellerTrustCardProps) {
       {data.badge_tier === 'trusted_seller' && (
         <div className="bg-amber-50 rounded-lg p-3 mb-4">
           <p className="text-sm text-amber-700">
-            <strong>Earn &quot;Top Seller&quot; badge:</strong> Complete 25+ sales with 4.8+ rating
+            <strong>{t('earnTop')}</strong> {t('topRequirement')}
           </p>
         </div>
       )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, X } from 'griddy-icons';
+import { Search, Close } from 'griddy-icons';
 import { NavbarSearch } from './NavbarSearch';
 
 export function MobileSearchButton() {
@@ -54,7 +54,7 @@ export function MobileSearchButton() {
                   className="p-2 -ml-2 text-text-muted hover:text-text hover:bg-bg-secondary rounded-lg transition-colors"
                   aria-label="Close search"
                 >
-                  <X className="w-5 h-5" />
+                  <Close className="w-5 h-5" />
                 </button>
                 <span className="text-sm font-medium text-text-secondary">Search games</span>
               </div>

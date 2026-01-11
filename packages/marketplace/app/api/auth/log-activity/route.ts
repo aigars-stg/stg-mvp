@@ -58,19 +58,20 @@ export async function POST(request: NextRequest) {
     const country = request.headers.get('cf-ipcountry') || null;
     const city = request.headers.get('cf-ipcity') || null;
 
-    // Log activity using shared helper
-    await logLoginActivity({
-      supabase,
+    // Log activity using shared helper with service role to bypass RLS
+    const result = await logLoginActivity({
       userId: user.id,
       ipAddress,
       userAgent,
       country,
-      city
+      city,
+      useServiceRole: true
     });
 
-    return NextResponse.json({ success: true, logged: true });
+    return NextResponse.json({ success: true, logged: result.success });
   } catch (error: unknown) {
     // Don't fail the request if logging fails
+    console.error('Failed to log activity:', error);
     return NextResponse.json({ success: true, logged: false });
   }
 }

@@ -7,6 +7,7 @@ import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { getBudgetDisplay, getTimeRemaining, getTimeRemainingDisplay } from '@/lib/types/wanted-listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
+import { useTranslations } from 'next-intl';
 
 interface WantedListingCardProps {
   wantedListing: WantedListingWithDetails;
@@ -19,6 +20,7 @@ export function WantedListingCard({
   onIHaveThis,
   showBuyer = true
 }: WantedListingCardProps) {
+  const t = useTranslations('Wanted.ListingCard');
   const { days, isExpiringSoon, isExpired } = getTimeRemaining(wantedListing.expires_at);
   const timeRemainingText = getTimeRemainingDisplay(wantedListing.expires_at);
   const budgetDisplay = getBudgetDisplay(
@@ -35,11 +37,11 @@ export function WantedListingCard({
 
   const postedText = daysSincePosted === 0
     ? hoursSincePosted === 0
-      ? 'Posted just now'
-      : `Posted ${hoursSincePosted}h ago`
+      ? t('postedJustNow')
+      : t('postedHoursAgo', { hours: hoursSincePosted })
     : daysSincePosted === 1
-      ? 'Posted yesterday'
-      : `Posted ${daysSincePosted}d ago`;
+      ? t('postedYesterday')
+      : t('postedDaysAgo', { days: daysSincePosted });
 
   // High interest indicator (>7 responses)
   const hasHighInterest = wantedListing.response_count >= 7;
@@ -74,14 +76,14 @@ export function WantedListingCard({
 
           {/* WANTED Badge */}
           <div className="absolute top-3 left-3 px-3 py-1.5 bg-aurora-orange backdrop-blur-sm rounded-md text-xs text-snow-white font-bold uppercase tracking-wide shadow-lg">
-            Wanted
+            {t('wantedBadge')}
           </div>
 
           {/* High Interest Badge */}
           {hasHighInterest && (
             <div className="absolute top-3 right-3 px-2 py-1 bg-aurora-orange/90 backdrop-blur-sm rounded-md text-xs text-snow-white font-medium flex items-center gap-1">
               <TrendingUp className="w-3 h-3" />
-              Hot
+              {t('hotBadge')}
             </div>
           )}
 
@@ -98,7 +100,7 @@ export function WantedListingCard({
 
           {isExpired && (
             <div className="absolute bottom-3 right-3 px-2 py-1 bg-surface-2 backdrop-blur-sm rounded-md text-xs text-text-disabled font-medium">
-              Expired
+              {t('expired')}
             </div>
           )}
         </div>
@@ -137,7 +139,7 @@ export function WantedListingCard({
                 )}
                 {wantedListing.game?.is_expansion && (
                   <Badge variant="warning" size="sm">
-                    Expansion
+                    {t('expansion')}
                   </Badge>
                 )}
               </div>
@@ -184,7 +186,7 @@ export function WantedListingCard({
             <div className="flex items-center justify-between text-xs text-text-secondary">
               <span>{postedText}</span>
               <span className="font-medium">
-                {wantedListing.response_count}/10 sellers responded
+                {t('sellersResponded', { count: wantedListing.response_count, max: 10 })}
               </span>
             </div>
           </div>
@@ -226,19 +228,19 @@ export function WantedListingCard({
                 fullWidth
                 onClick={handleIHaveThisClick}
               >
-                I Have This
+                {t('iHaveThis')}
               </Button>
             )}
 
             {isAtMaxResponses && !isExpired && (
               <div className="text-center py-2 text-sm text-text-secondary">
-                Maximum responses reached
+                {t('maxResponsesReached')}
               </div>
             )}
 
             {isExpired && (
               <div className="text-center py-2 text-sm text-text-disabled">
-                Listing expired
+                {t('listingExpired')}
               </div>
             )}
           </div>

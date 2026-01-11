@@ -7,6 +7,7 @@ import { Button, Badge, Card } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User, ShoppingBag } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
+import { useTranslations } from 'next-intl';
 
 interface OrderItem {
   id: string;
@@ -53,6 +54,7 @@ const statusConfig = {
 export default function OrdersPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const t = useTranslations('Orders');
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,7 +127,7 @@ export default function OrdersPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
-          <p className="text-text-secondary">Loading your orders...</p>
+          <p className="text-text-secondary">{t('loading')}</p>
         </div>
       </div>
     );
@@ -143,19 +145,19 @@ export default function OrdersPage() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <ShoppingBag className="w-8 h-8 text-frost-ice" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">My orders</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">{t('title')}</h1>
           </div>
-          <p className="text-text-secondary">Games heading your way</p>
+          <p className="text-text-secondary">{t('subtitle')}</p>
         </div>
         {/* Error State */}
         {error && (
           <div className="mb-6 p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-aurora-red font-medium">Error loading orders</p>
+              <p className="text-aurora-red font-medium">{t('error.title')}</p>
               <p className="text-sm text-text-secondary mt-1">{error}</p>
               <Button variant="ghost" size="sm" onClick={fetchOrders} className="mt-2">
-                Try again
+                {t('error.tryAgain')}
               </Button>
             </div>
           </div>
@@ -164,12 +166,12 @@ export default function OrdersPage() {
         {/* Filter Tabs */}
         <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
           {[
-            { key: 'all' as FilterTab, label: 'All Orders' },
-            { key: 'pending' as FilterTab, label: 'Pending' },
-            { key: 'accepted' as FilterTab, label: 'Accepted' },
-            { key: 'shipped' as FilterTab, label: 'Shipped' },
-            { key: 'completed' as FilterTab, label: 'Completed' },
-            { key: 'cancelled' as FilterTab, label: 'Cancelled' },
+            { key: 'all' as FilterTab, labelKey: 'tabs.all' },
+            { key: 'pending' as FilterTab, labelKey: 'tabs.pending' },
+            { key: 'accepted' as FilterTab, labelKey: 'tabs.accepted' },
+            { key: 'shipped' as FilterTab, labelKey: 'tabs.shipped' },
+            { key: 'completed' as FilterTab, labelKey: 'tabs.completed' },
+            { key: 'cancelled' as FilterTab, labelKey: 'tabs.cancelled' },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -182,7 +184,7 @@ export default function OrdersPage() {
                 }
               `}
             >
-              {tab.label} ({counts[tab.key]})
+              {t(tab.labelKey)} ({counts[tab.key]})
             </button>
           ))}
         </div>
@@ -191,15 +193,15 @@ export default function OrdersPage() {
         {filteredOrders.length === 0 ? (
           <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
             <Package className="w-16 h-16 text-text-muted mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-polar-night mb-2">Nothing here yet</h2>
+            <h2 className="text-xl font-semibold text-polar-night mb-2">{t('emptyState.title')}</h2>
             <p className="text-text-secondary mb-6">
               {activeTab === 'all'
-                ? "When you buy a game, it'll show up here so you can follow its journey."
-                : `No ${activeTab} orders`}
+                ? t('emptyState.descriptionAll')
+                : t('emptyState.descriptionFiltered', { status: t(`tabs.${activeTab}`).toLowerCase() })}
             </p>
             {activeTab === 'all' && (
               <Link href="/browse">
-                <Button variant="accent">Find your next game</Button>
+                <Button variant="accent">{t('emptyState.button')}</Button>
               </Link>
             )}
           </Card>
@@ -225,15 +227,15 @@ export default function OrdersPage() {
                           </Badge>
                         </div>
                         <p className="text-sm text-text-secondary">
-                          Seller: {order.seller_name}
+                          {t('orderCard.seller', { name: order.seller_name })}
                         </p>
                         <p className="text-xs text-text-muted mt-1">
-                          Ordered {new Date(order.created_at).toLocaleDateString()}
+                          {t('orderCard.ordered', { date: new Date(order.created_at).toLocaleDateString() })}
                         </p>
                       </div>
 
                       <div className="text-right">
-                        <p className="text-sm text-text-secondary">Total</p>
+                        <p className="text-sm text-text-secondary">{t('orderCard.total')}</p>
                         <p className="text-xl font-bold text-polar-night">
                           €{order.total_amount.toFixed(2)}
                         </p>
@@ -258,10 +260,11 @@ export default function OrdersPage() {
                               }`}
                           >
                             {order.is_expired
-                              ? 'Seller deadline expired - Refund processing'
-                              : `Seller has ${Math.floor(order.time_remaining_ms / 3600000)}h ${Math.floor(
-                                (order.time_remaining_ms % 3600000) / 60000
-                              )}m to respond`}
+                              ? t('orderCard.sellerDeadlineExpired')
+                              : t('orderCard.sellerTimeRemaining', {
+                                  hours: Math.floor(order.time_remaining_ms / 3600000),
+                                  minutes: Math.floor((order.time_remaining_ms % 3600000) / 60000)
+                                })}
                           </p>
                         </div>
                       </div>
@@ -295,7 +298,7 @@ export default function OrdersPage() {
                         )}
                       </div>
                       <p className="text-sm text-text-secondary mt-2">
-                        {order.order_items.length} item{order.order_items.length !== 1 ? 's' : ''}
+                        {t('orderCard.items', { count: order.order_items.length })}
                       </p>
                     </div>
 
@@ -305,12 +308,12 @@ export default function OrdersPage() {
                         {order.shipping_method === 't2t' ? (
                           <>
                             <Truck className="w-4 h-4" />
-                            <span>Terminal Pickup</span>
+                            <span>{t('orderCard.terminalPickup')}</span>
                           </>
                         ) : (
                           <>
                             <User className="w-4 h-4" />
-                            <span>Local Pickup</span>
+                            <span>{t('orderCard.localPickup')}</span>
                           </>
                         )}
                       </div>

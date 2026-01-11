@@ -5,6 +5,7 @@ import { Card, Badge } from '@second-turn/design-system';
 import type { ListingCondition } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import type { BGGGame, VersionSelection } from '@/lib/bgg-types';
+import { useTranslations } from 'next-intl';
 
 interface WantedListingPreviewProps {
   selectedGame: BGGGame | null;
@@ -30,6 +31,7 @@ export function WantedListingPreview({
   location,
   notes,
 }: WantedListingPreviewProps) {
+  const t = useTranslations('Wanted.ListingPreview');
   const isComplete = selectedGame && selectedVersion && maxPrice && parseFloat(maxPrice) > 0 && minimumCondition;
 
   return (
@@ -47,7 +49,7 @@ export function WantedListingPreview({
               />
               {/* WANTED Badge */}
               <div className="absolute top-2 left-2 px-2 py-1 bg-aurora-orange backdrop-blur-sm rounded text-xs text-snow-white font-bold uppercase tracking-wide">
-                Wanted
+                {t('wantedBadge')}
               </div>
             </div>
           ) : (
@@ -74,28 +76,28 @@ export function WantedListingPreview({
               {selectedVersion && (
                 <div className="mt-2 space-y-1 text-xs text-text-secondary">
                   {selectedVersion.language && (
-                    <p><strong>Language:</strong> {selectedVersion.language}</p>
+                    <p><strong>{t('language')}:</strong> {selectedVersion.language}</p>
                   )}
                   {selectedVersion.publisher && (
-                    <p><strong>Publisher:</strong> {selectedVersion.publisher}</p>
+                    <p><strong>{t('publisher')}:</strong> {selectedVersion.publisher}</p>
                   )}
                   {selectedVersion.yearPublished && (
-                    <p><strong>Edition:</strong> {selectedVersion.yearPublished}</p>
+                    <p><strong>{t('edition')}:</strong> {selectedVersion.yearPublished}</p>
                   )}
                 </div>
               )}
             </>
           ) : (
-            <p className="text-sm text-text-muted">Select a game to see preview</p>
+            <p className="text-sm text-text-muted">{t('selectGameHint')}</p>
           )}
         </div>
 
         {/* Budget */}
         {maxPrice && parseFloat(maxPrice) > 0 && (
           <div>
-            <p className="text-xs text-text-secondary mb-1">Buyer's Budget</p>
+            <p className="text-xs text-text-secondary mb-1">{t('buyersBudget')}</p>
             <p className="text-2xl font-bold text-aurora-orange">
-              Up to €{parseFloat(maxPrice).toFixed(2)}
+              {t('upTo', { amount: parseFloat(maxPrice).toFixed(2) })}
             </p>
           </div>
         )}
@@ -103,7 +105,7 @@ export function WantedListingPreview({
         {/* Acceptable Conditions */}
         {minimumCondition && (
           <div>
-            <p className="text-xs text-text-secondary mb-2">Acceptable Conditions</p>
+            <p className="text-xs text-text-secondary mb-2">{t('acceptableConditions')}</p>
             <div className="flex flex-wrap gap-2">
               {getAcceptableConditions(minimumCondition).map((condition) => (
                 <Badge key={condition} variant={condition as any}>
@@ -125,7 +127,7 @@ export function WantedListingPreview({
         {/* Notes Preview */}
         {notes && (
           <div>
-            <p className="text-xs text-text-secondary mb-1">Additional Details</p>
+            <p className="text-xs text-text-secondary mb-1">{t('additionalDetails')}</p>
             <p className="text-sm text-text line-clamp-3">
               {notes}
             </p>
@@ -141,7 +143,7 @@ export function WantedListingPreview({
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
           </div>
-          <span className="text-sm font-medium text-aurora-green">Ready to post</span>
+          <span className="text-sm font-medium text-aurora-green">{t('readyToPost')}</span>
         </div>
       )}
     </div>

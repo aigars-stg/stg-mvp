@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { Card } from '@second-turn/design-system';
-import { PhotoCamera as Camera, X } from 'griddy-icons';
+import { PhotoCamera as Camera, Close } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 
 export interface PhotoFile {
@@ -305,7 +305,7 @@ export function PhotoUpload({
                   "
                   aria-label={tGrid('removePhoto')}
                 >
-                  <X className="w-4 h-4" />
+                  <Close className="w-4 h-4" />
                 </button>
               </div>
             ))}
@@ -348,7 +348,7 @@ export function PhotoUpload({
                   "
                   aria-label={tGrid('removePhoto')}
                 >
-                  <X className="w-4 h-4" />
+                  <Close className="w-4 h-4" />
                 </button>
               </div>
             ))}

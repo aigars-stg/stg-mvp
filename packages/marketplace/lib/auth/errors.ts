@@ -9,11 +9,7 @@ export function mapAuthError(error: any): string {
   const message = error.message?.toLowerCase() || '';
   const code = error.code?.toLowerCase() || '';
 
-  // Email/password errors
-  if (message.includes('invalid login credentials') || message.includes('invalid credentials')) {
-    return AUTH_ERRORS.INVALID_CREDENTIALS;
-  }
-
+  // Email errors
   if (message.includes('email not confirmed') || code === 'email_not_confirmed') {
     return AUTH_ERRORS.EMAIL_NOT_CONFIRMED;
   }
@@ -24,15 +20,6 @@ export function mapAuthError(error: any): string {
 
   if (message.includes('user already registered') || message.includes('email already exists')) {
     return AUTH_ERRORS.EMAIL_ALREADY_EXISTS;
-  }
-
-  // Password errors
-  if (message.includes('password') && message.includes('weak')) {
-    return AUTH_ERRORS.WEAK_PASSWORD;
-  }
-
-  if (message.includes('password') && message.includes('short')) {
-    return 'A bit longer please — at least 8 characters';
   }
 
   // Token errors

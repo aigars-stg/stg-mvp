@@ -159,32 +159,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               updateAuthProviders(session.user.id, session.user.identities);
 
               const userProfile = await fetchProfile(session.user.id);
-
-              // AUTO RECOVERY CHECK
-              if (userProfile?.deleted_at) {
-                try {
-                  const res = await fetch('/api/auth/recover-account', { method: 'POST' });
-                  if (res.ok) {
-                    // Refresh profile one more time to get clean state
-                    const recoveredProfile = await fetchProfile(session.user.id);
-                    setProfile(recoveredProfile);
-
-                    // Refresh user session to get restored email
-                    const { data: { user: refreshedUser } } = await (supabase as any).auth.getUser();
-                    if (refreshedUser) {
-                      setUser(refreshedUser);
-                    }
-
-                    router.refresh();
-                    return; // Exit early using new profile
-                  } else {
-                    console.error('[Auth] Account recovery failed');
-                  }
-                } catch (recError) {
-                  console.error('[Auth] Account recovery exception:', recError);
-                }
-              }
-
               setProfile(userProfile);
 
               // Refresh server components after fresh sign-in
@@ -221,31 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           updateAuthProviders(session.user.id, session.user.identities);
 
           const userProfile = await fetchProfile(session.user.id);
-
-          // AUTO RECOVERY CHECK (Initial Load)
-          if (userProfile?.deleted_at) {
-            console.log('♻️ [Auth] Deleted account detected on init, attempting recovery...');
-            try {
-              const res = await fetch('/api/auth/recover-account', { method: 'POST' });
-              if (res.ok) {
-                console.log('✅ [Auth] Account recovered successfully');
-                const recoveredProfile = await fetchProfile(session.user.id);
-                setProfile(recoveredProfile);
-
-                // Refresh user session to get restored email
-                const { data: { user: refreshedUser } } = await (supabase as any).auth.getUser();
-                if (refreshedUser) {
-                  setUser(refreshedUser);
-                }
-              } else {
-                setProfile(userProfile);
-              }
-            } catch (recError) {
-              setProfile(userProfile);
-            }
-          } else {
-            setProfile(userProfile);
-          }
+          setProfile(userProfile);
         }
 
         setLoading(false);
@@ -267,79 +217,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [fetchProfile, updateAuthProviders, router]);
 
-  // Sign in with email and password
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await (supabase as any).auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        return { error };
-      }
-
-      // Log login activity (don't block on failure)
-      try {
-        const { data: { session } } = await (supabase as any).auth.getSession();
-
-        await fetch('/api/auth/log-activity', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {})
-          },
-        });
-      } catch (logError) {
-        console.error('Failed to log activity:', logError);
-      }
-
-      return { error: null };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  };
-
-  // Sign up with email and password
-  const signUp = async (
-    email: string,
-    password: string,
-    fullName: string,
-    country: string | null
-  ) => {
-    try {
-      // Create auth user
-      const { error } = await (supabase as any).auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
-          data: {
-            full_name: fullName,
-            country: country,
-          },
-        },
-      });
-
-      if (error) {
-        return { error };
-      }
-
-      // Profile will be created automatically by database trigger
-
-      return { error: null };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  };
-
   // Sign in with OAuth provider
-  const signInWithOAuth = async (provider: 'google' | 'github' | 'facebook') => {
+  const signInWithOAuth = async (provider: 'google' | 'github' | 'facebook', locale?: string) => {
     try {
+      // Include locale in redirect path so callback can capture it
+      const redirectLocale = locale || 'en';
       const { error } = await (supabase as any).auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/confirm`,
+          redirectTo: `${window.location.origin}/${redirectLocale}/auth/confirm`,
         },
       });
 
@@ -354,18 +240,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Sign in with magic link (passwordless)
-  const signInWithMagicLink = async (email: string) => {
+  const signInWithMagicLink = async (email: string, locale?: string) => {
     try {
       // Derive a better default name from email (e.g. "alex" from "alex@gmail.com")
       const emailPrefix = email.split('@')[0];
+      const redirectLocale = locale || 'en';
 
       const { error } = await (supabase as any).auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          emailRedirectTo: `${window.location.origin}/${redirectLocale}/auth/confirm`,
           shouldCreateUser: true, // Creates account if doesn't exist
           data: {
             full_name: emailPrefix,
+            preferred_locale: redirectLocale,
           },
         },
       });
@@ -455,8 +343,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     isEmailVerified,
     isProfileComplete,
-    signIn,
-    signUp,
     signInWithMagicLink,
     signInWithOAuth,
     signOut,

@@ -11,6 +11,7 @@ import { CountryPrompt } from '@/components/onboarding';
 import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
+import { useTranslations } from 'next-intl';
 
 interface CartItem {
   item_id: string;
@@ -45,6 +46,7 @@ export default function CartPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
   const { fetchCart: refreshCartContext } = useCart();
+  const t = useTranslations('Cart');
 
   const [baskets, setBaskets] = useState<CartBasket[]>([]);
   const [summary, setSummary] = useState<CartSummary | null>(null);
@@ -170,7 +172,7 @@ export default function CartPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
-          <p className="text-text-secondary">Loading your cart...</p>
+          <p className="text-text-secondary">{t('loading')}</p>
         </div>
       </div>
     );
@@ -187,13 +189,12 @@ export default function CartPage() {
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <ShoppingCart className="w-8 h-8 text-frost-ice" />
-          <h1 className="text-3xl font-bold text-polar-night">Cart</h1>
+          <h1 className="text-3xl font-bold text-polar-night">{t('title')}</h1>
         </div>
 
         {summary && summary.totalItems > 0 && (
           <p className="text-text-secondary mb-8">
-            {summary.totalItems} item{summary.totalItems !== 1 ? 's' : ''} from{' '}
-            {summary.basketCount} seller{summary.basketCount !== 1 ? 's' : ''}
+            {t('summary.itemsFromSellers', { totalItems: summary.totalItems, basketCount: summary.basketCount })}
           </p>
         )}
         {/* Country Prompt - shown if logged in but no country set */}
@@ -204,7 +205,7 @@ export default function CartPage() {
           <div className="mb-6 p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-aurora-red font-medium">Error loading cart</p>
+              <p className="text-aurora-red font-medium">{t('error.title')}</p>
               <p className="text-sm text-text-secondary mt-1">{error}</p>
               <Button
                 variant="ghost"
@@ -212,7 +213,7 @@ export default function CartPage() {
                 onClick={fetchCart}
                 className="mt-2"
               >
-                Try again
+                {t('error.tryAgain')}
               </Button>
             </div>
           </div>
@@ -223,14 +224,14 @@ export default function CartPage() {
           <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
             <ShoppingCart className="w-16 h-16 text-text-muted mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-polar-night mb-2">
-              Your cart is empty
+              {t('emptyCart.title')}
             </h2>
             <p className="text-text-secondary mb-6">
-              Your next favourite game is out there - we'll hold it here when you find it.
+              {t('emptyCart.description')}
             </p>
             <Link href="/browse">
               <Button variant="accent">
-                Browse games
+                {t('emptyCart.browseButton')}
               </Button>
             </Link>
           </Card>
@@ -264,12 +265,12 @@ export default function CartPage() {
                           )}
                         </div>
                         <p className="text-sm text-text-secondary">
-                          {basket.item_count} item{basket.item_count !== 1 ? 's' : ''}
+                          {t('basket.items', { count: basket.item_count })}
                         </p>
                       </div>
                     </div>
                     <Badge variant="default">
-                      Basket {index + 1}/{baskets.length}
+                      {t('basket.number', { index: index + 1, total: baskets.length })}
                     </Badge>
                   </div>
                 </div>
@@ -344,12 +345,12 @@ export default function CartPage() {
                 <div className="px-4 sm:px-6 py-4 bg-bg-elevated border-t border-border-subtle">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-text-secondary">Subtotal</p>
+                      <p className="text-sm text-text-secondary">{t('basket.subtotal')}</p>
                       <p className="text-xl font-bold text-polar-night">
                         €{basket.subtotal.toFixed(2)}
                       </p>
                       <p className="text-xs text-text-muted mt-1">
-                        + shipping (calculated at checkout)
+                        {t('basket.shippingNote')}
                       </p>
                     </div>
                     <Button
@@ -357,7 +358,7 @@ export default function CartPage() {
                       onClick={() => handleCheckout(basket.basket_id)}
                       disabled={basket.items.some((i) => i.is_expired)}
                     >
-                      Checkout
+                      {t('basket.checkout')}
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
@@ -369,21 +370,21 @@ export default function CartPage() {
             {summary && baskets.length > 1 && (
               <div className="bg-frost-ice/5 border-2 border-frost-ice/20 rounded-xl p-6">
                 <h3 className="font-semibold text-polar-night mb-4">
-                  Order Summary
+                  {t('orderSummary.title')}
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-text-secondary">Total items</span>
+                    <span className="text-text-secondary">{t('orderSummary.totalItems')}</span>
                     <span className="font-medium">{summary.totalItems}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-text-secondary">From sellers</span>
+                    <span className="text-text-secondary">{t('orderSummary.fromSellers')}</span>
                     <span className="font-medium">{summary.basketCount}</span>
                   </div>
                   <div className="border-t border-border-subtle pt-2 mt-2">
                     <div className="flex justify-between">
                       <span className="font-medium text-polar-night">
-                        Subtotal (all baskets)
+                        {t('orderSummary.subtotalAll')}
                       </span>
                       <span className="font-bold text-lg text-polar-night">
                         €{summary.totalAmount.toFixed(2)}
@@ -393,7 +394,7 @@ export default function CartPage() {
                 </div>
                 <p className="text-xs text-text-muted mt-4">
                   <AlertCircle className="w-3 h-3 inline mr-1" />
-                  Each basket is checked out and paid separately
+                  {t('orderSummary.separateCheckout')}
                 </p>
               </div>
             )}
@@ -404,11 +405,10 @@ export default function CartPage() {
                 <AlertCircle className="w-5 h-5 text-aurora-yellow flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <p className="font-medium text-polar-night">
-                    Items are reserved for 30 minutes
+                    {t('infoBox.reserved')}
                   </p>
                   <p className="text-text-secondary mt-1">
-                    Complete your checkout before the timer expires to secure your games.
-                    Each seller basket is paid separately.
+                    {t('infoBox.completeCheckout')}
                   </p>
                 </div>
               </div>

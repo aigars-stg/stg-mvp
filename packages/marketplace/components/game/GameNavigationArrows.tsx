@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'griddy-icons';
+import { useTranslations } from 'next-intl';
 
 interface GameNavigationArrowsProps {
   onPrev: () => void;
@@ -15,6 +16,8 @@ export function GameNavigationArrows({
   hasPrev,
   hasNext,
 }: GameNavigationArrowsProps) {
+  const t = useTranslations('Game.NavigationArrows');
+
   return (
     <>
       {/* Left Arrow - Previous game */}
@@ -27,7 +30,7 @@ export function GameNavigationArrows({
                    hover:border-frost-ice hover:bg-frost-ice/5
                    disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:bg-snow-white
                    transition-all shadow-lg z-10"
-        aria-label="Previous game"
+        aria-label={t('previousGame')}
       >
         <ChevronLeft className="w-6 h-6 text-polar-night" />
       </button>
@@ -42,7 +45,7 @@ export function GameNavigationArrows({
                    hover:border-frost-ice hover:bg-frost-ice/5
                    disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:bg-snow-white
                    transition-all shadow-lg z-10"
-        aria-label="Next game"
+        aria-label={t('nextGame')}
       >
         <ChevronRight className="w-6 h-6 text-polar-night" />
       </button>
