@@ -6,8 +6,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
 import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, Calendar, PuzzlePiece as Puzzle, BookOpen, Globe, Building as Building2, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare } from 'griddy-icons';
-import { calculateMarketplacePricing } from '@/lib/stripe-utils';
-import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
+import { type TerminalCountry } from '@/lib/unisend/types';
+import { useDeliveredPricing } from '@/lib/hooks/useDeliveredPricing';
+import { PriceBreakdown } from '@/components/common/PriceBreakdown';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -42,7 +43,6 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [showConditionInfo, setShowConditionInfo] = useState(false);
-  const [showPriceBreakdown, setShowPriceBreakdown] = useState(false);
 
   // Collapsible sections state (collapsed by default, persisted to localStorage)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
@@ -133,32 +133,12 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
   const loading = isAddingToCart || localLoading;
 
   // Calculate total delivered price (item + shipping + service fee)
-  const deliveredPricing = useMemo(() => {
-    const sellerCountry = listing.seller.country as TerminalCountry | undefined;
-
-    // If seller has no country, we can't calculate shipping
-    if (!sellerCountry || !['LT', 'LV', 'EE'].includes(sellerCountry)) {
-      return null;
-    }
-
-    // If buyer country is known, calculate exact price
-    // Otherwise, use same-country estimate (typically cheapest route)
-    const destinationCountry = buyerCountry || sellerCountry;
-    const isEstimate = !buyerCountry;
-
-    const shippingPrice = getShippingPrice(sellerCountry, destinationCountry, 'M');
-    const pricing = calculateMarketplacePricing(listing.price, shippingPrice, 't2t');
-
-    return {
-      itemPrice: listing.price,
-      shippingPrice,
-      serviceFee: pricing.serviceFeeCents / 100,
-      total: pricing.totalChargeCents / 100,
-      isEstimate,
-      sellerCountry,
-      destinationCountry,
-    };
-  }, [listing.price, listing.seller.country, buyerCountry]);
+  const deliveredPricing = useDeliveredPricing({
+    listingType: listing.listing_type,
+    price: listing.price,
+    sellerCountry: listing.seller.country,
+    buyerCountry,
+  });
 
   // All images for main lightbox (BGG image + user photos only)
   // Expansion images are shown separately in their own thumbnails
@@ -180,35 +160,6 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
 
   // Get condition badge variant using shared utility
   const conditionVariant = getConditionBadgeVariant(listing.condition);
-
-  // Price breakdown popover content
-  const PriceBreakdownContent = () => {
-    if (!deliveredPricing) return null;
-
-    const countryName = getCountryName(deliveredPricing.destinationCountry);
-
-    return (
-      <div className="text-xs space-y-1.5">
-        <div className="flex justify-between gap-4">
-          <span className="text-text-secondary">{t('priceBreakdown.shippingTo', { country: countryName })}</span>
-          <span className="text-polar-night font-medium">€{deliveredPricing.shippingPrice.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between gap-4">
-          <span className="text-text-secondary">{t('priceBreakdown.serviceFee')}</span>
-          <span className="text-polar-night font-medium">€{deliveredPricing.serviceFee.toFixed(2)}</span>
-        </div>
-        <div className="border-t border-border pt-1.5 mt-1.5 flex justify-between gap-4">
-          <span className="text-polar-night font-medium">{t('priceBreakdown.total')}</span>
-          <span className="text-polar-night font-bold">€{deliveredPricing.total.toFixed(2)}</span>
-        </div>
-        {deliveredPricing.isEstimate && (
-          <p className="text-text-muted italic pt-1">
-            {t('priceBreakdown.estimateNote')}
-          </p>
-        )}
-      </div>
-    );
-  };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -242,6 +193,48 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
       console.error('Failed to toggle save:', error);
     } finally {
       setSaveLoading(false);
+    }
+  };
+
+  // Handle Contact Seller - initiate conversation and redirect to messages
+  const [isInitiatingConversation, setIsInitiatingConversation] = useState(false);
+  const handleContactSeller = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
+      return;
+    }
+
+    // Don't allow seller to message themselves
+    if (isOwnListing) {
+      return;
+    }
+
+    try {
+      setIsInitiatingConversation(true);
+      const response = await fetch('/api/messages/initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listing_id: listing.id,
+          seller_id: listing.seller_id,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        console.error('Failed to initiate conversation:', data.error);
+        return;
+      }
+
+      const data = await response.json();
+      router.push(`/messages/${data.conversation_id}`);
+    } catch (error) {
+      console.error('Failed to contact seller:', error);
+    } finally {
+      setIsInitiatingConversation(false);
     }
   };
 
@@ -405,35 +398,49 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
               </div>
 
             {/* RIGHT COLUMN: Price */}
-            <div className="flex flex-col items-end gap-2 min-w-[120px]">
+            <div className="flex flex-col items-end gap-2 min-w-[140px]">
               {/* Price */}
               <div className="text-right">
-                <div className="text-2xl font-bold text-polar-night">
-                  €{listing.price.toFixed(2)}
-                </div>
-                {listing.previous_price && listing.previous_price > listing.price && (
-                  <div className="flex items-center justify-end gap-1.5">
-                    <span className="text-sm text-text-muted line-through">
-                      €{listing.previous_price.toFixed(2)}
-                    </span>
-                    <span className="text-xs text-aurora-green font-medium">
-                      {t('price.save', { percentage: Math.round((1 - listing.price / listing.previous_price) * 100) })}
-                    </span>
-                  </div>
-                )}
-                {/* Total delivered price - desktop with hover tooltip */}
-                {deliveredPricing && (
-                  <div className="relative group mt-0.5">
-                    <span className="text-xs text-text-secondary cursor-help inline-flex items-center gap-0.5">
-                      {deliveredPricing.isEstimate ? t('price.from') + ' ' : ''}
-                      €{deliveredPricing.total.toFixed(2)} {t('price.delivered')}
-                      <Info className="w-3 h-3 text-text-muted" />
-                    </span>
-                    {/* Hover tooltip */}
-                    <div className="absolute right-0 top-full mt-1 z-20 w-48 p-2.5 bg-white rounded-lg shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                      <PriceBreakdownContent />
+                {deliveredPricing.canCalculate ? (
+                  <>
+                    {/* Total delivered as primary price */}
+                    <div className="text-2xl font-bold text-polar-night">
+                      €{deliveredPricing.totalDelivered.toFixed(2)}
+                      {deliveredPricing.isEstimate && <span className="text-base font-normal text-text-muted">*</span>}
                     </div>
-                  </div>
+                    {/* Previous price strikethrough */}
+                    {listing.previous_price && listing.previous_price > listing.price && (
+                      <div className="flex items-center justify-end gap-1.5">
+                        <span className="text-sm text-text-muted line-through">
+                          €{listing.previous_price.toFixed(2)}
+                        </span>
+                        <span className="text-xs text-aurora-green font-medium">
+                          {t('price.save', { percentage: Math.round((1 - listing.price / listing.previous_price) * 100) })}
+                        </span>
+                      </div>
+                    )}
+                    {/* Always-visible breakdown */}
+                    <div className="mt-1.5">
+                      <PriceBreakdown pricing={deliveredPricing} variant="full" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Item price only for contact_seller or non-Baltic */}
+                    <div className="text-2xl font-bold text-polar-night">
+                      €{listing.price.toFixed(2)}
+                    </div>
+                    {listing.previous_price && listing.previous_price > listing.price && (
+                      <div className="flex items-center justify-end gap-1.5">
+                        <span className="text-sm text-text-muted line-through">
+                          €{listing.previous_price.toFixed(2)}
+                        </span>
+                        <span className="text-xs text-aurora-green font-medium">
+                          {t('price.save', { percentage: Math.round((1 - listing.price / listing.previous_price) * 100) })}
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -512,43 +519,33 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   </div>
                   {/* Price & Save */}
                   <div className="flex flex-col items-end flex-shrink-0">
-                    <div className="text-xl font-bold text-polar-night">
-                      €{listing.price.toFixed(2)}
-                    </div>
-                    {listing.previous_price && listing.previous_price > listing.price && (
-                      <div className="text-sm text-text-muted line-through">
-                        €{listing.previous_price.toFixed(2)}
-                      </div>
-                    )}
-                    {/* Total delivered price - mobile with tap popover */}
-                    {deliveredPricing && (
-                      <div className="relative">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setShowPriceBreakdown(!showPriceBreakdown);
-                          }}
-                          className="text-xs text-text-secondary inline-flex items-center gap-0.5"
-                        >
-                          {deliveredPricing.isEstimate ? t('price.from') + ' ' : ''}
-                          €{deliveredPricing.total.toFixed(2)} {t('price.delivered')}
-                          <Info className="w-3 h-3 text-text-muted" />
-                        </button>
-                        {/* Tap popover */}
-                        {showPriceBreakdown && (
-                          <>
-                            <div
-                              className="fixed inset-0 z-10"
-                              onClick={() => setShowPriceBreakdown(false)}
-                            />
-                            <div className="absolute right-0 top-full mt-1 z-20 w-48 p-2.5 bg-white rounded-lg shadow-lg border border-border">
-                              <PriceBreakdownContent />
-                            </div>
-                          </>
+                    {deliveredPricing.canCalculate ? (
+                      <>
+                        {/* Total delivered as primary price */}
+                        <div className="text-xl font-bold text-polar-night">
+                          €{deliveredPricing.totalDelivered.toFixed(2)}
+                          {deliveredPricing.isEstimate && <span className="text-sm font-normal text-text-muted">*</span>}
+                        </div>
+                        {listing.previous_price && listing.previous_price > listing.price && (
+                          <div className="text-sm text-text-muted line-through">
+                            €{listing.previous_price.toFixed(2)}
+                          </div>
                         )}
-                      </div>
+                        {/* Compact breakdown */}
+                        <PriceBreakdown pricing={deliveredPricing} variant="compact" />
+                      </>
+                    ) : (
+                      <>
+                        {/* Item price only for contact_seller or non-Baltic */}
+                        <div className="text-xl font-bold text-polar-night">
+                          €{listing.price.toFixed(2)}
+                        </div>
+                        {listing.previous_price && listing.previous_price > listing.price && (
+                          <div className="text-sm text-text-muted line-through">
+                            €{listing.previous_price.toFixed(2)}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -826,14 +823,17 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setIsQADrawerOpen(true);
-                    }}
+                    onClick={handleContactSeller}
+                    disabled={isInitiatingConversation || isOwnListing}
                   >
-                    <MessageSquare className="w-4 h-4 mr-1.5" />
-                    {t('actions.contactSeller')}
+                    {isInitiatingConversation ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <MessageSquare className="w-4 h-4 mr-1.5" />
+                        {t('actions.contactSeller')}
+                      </>
+                    )}
                   </Button>
                 ) : (
                   <Button
@@ -954,14 +954,17 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setIsQADrawerOpen(true);
-                    }}
+                    onClick={handleContactSeller}
+                    disabled={isInitiatingConversation || isOwnListing}
                   >
-                    <MessageSquare className="w-4 h-4 mr-1.5" />
-                    {t('actions.contactSeller')}
+                    {isInitiatingConversation ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <MessageSquare className="w-4 h-4 mr-1.5" />
+                        {t('actions.contactSeller')}
+                      </>
+                    )}
                   </Button>
                 ) : (
                   <Button

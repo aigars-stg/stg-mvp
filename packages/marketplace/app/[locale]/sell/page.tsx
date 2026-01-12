@@ -1280,7 +1280,7 @@ function SellPageContent() {
 
           <div>
             <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3">
-              {t('pricing.title')}
+              {tSections('pricing.title')}
             </h3>
             <Input
               type="number"
@@ -1396,7 +1396,7 @@ function SellPageContent() {
             </div>
             {/* OfferCard Preview - Force mobile layout via CSS overrides */}
             {formData.selectedGame ? (
-              <div className="[&_.sm\:grid]:!hidden [&_.sm\:hidden]:!flex [&_.sm\:hidden]:!flex-col [&_.hidden.sm\:flex]:!hidden">
+              <div className="[&_.sm\:grid]:!hidden [&_.sm\:hidden]:!flex [&_.sm\:hidden]:!flex-col [&_.hidden.sm\:flex]:!hidden [&_.hidden.sm\:block]:!hidden">
                 <OfferCard
                   listing={createPreviewListing(formData, user, profile, existingPhotoUrls)}
                   isAddingToCart={false}

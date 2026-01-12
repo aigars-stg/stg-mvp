@@ -68,6 +68,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Listing ID is required' }, { status: 400 });
     }
 
+    // Check if listing is contact_seller type (cannot be added to cart)
+    const { data: listing, error: listingError } = await (supabase as any)
+      .from('listings')
+      .select('listing_type')
+      .eq('id', listingId)
+      .single();
+
+    if (listingError || !listing) {
+      return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
+    }
+
+    if (listing.listing_type === 'contact_seller') {
+      return NextResponse.json(
+        { error: 'Contact Seller listings cannot be added to cart. Please message the seller directly.' },
+        { status: 400 }
+      );
+    }
+
     // Add to cart using the database function
     const { data: result, error: addError } = await (supabase as any).rpc('add_to_cart', {
       p_buyer_id: user.id,

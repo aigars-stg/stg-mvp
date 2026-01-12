@@ -19,6 +19,13 @@
       "ofRetailPrice": "of retail price"
     }
   },
+  "PriceBreakdown": {
+    "item": "Item:",
+    "shipping": "Shipping ({country}):",
+    "serviceFee": "Service fee:",
+    "fees": "fees",
+    "estimateNote": "*Same-country estimate"
+  },
   "CookieConsent": {
     "title": "We use cookies",
     "description": "We use essential cookies to make our site work. With your consent, we may also use analytics cookies to improve your experience.",
@@ -607,6 +614,13 @@
       "sellerCannotAsk": "You can't ask questions on your own listing, but you can reply to others.",
       "askPlaceholder": "Ask a question about this listing...",
       "signInToAsk": "Sign in to ask a question"
+    },
+    "QuestionThread": {
+      "seller": "Seller",
+      "anonymous": "Anonymous",
+      "reply": "Reply",
+      "cancel": "Cancel",
+      "replyPlaceholder": "Write a reply..."
     }
   },
   "Emails": {
@@ -1243,10 +1257,13 @@
       "expansions": "+ {count} expansion",
       "expansions_other": "+ {count} expansions",
       "priced": "({count} priced)",
+      "pricedCount": "({count} priced)",
       "bundleRetail": "Bundle retail:",
       "fill": "Fill",
+      "fillButton": "Fill",
       "avgSoldHere": "Avg. sold here:",
       "sales": "({count} sales)",
+      "salesCount": "({count} sales)",
       "lowestOnPlatform": "Lowest on Second Turn Games:",
       "suggestedFor": "Suggested for {condition}:",
       "usePrice": "Use price",
@@ -1715,25 +1732,6 @@
         "subtitle": "Almost there — complete your payment setup to start selling.",
         "stepProgress": "Step 1 of 2 complete",
         "button": "Continue setup"
-      },
-      "terms": {
-        "acceptBothError": "Please accept both checkboxes to continue",
-        "somethingWrong": "Something went wrong",
-        "ageConfirmation": "I'm 18 or older and selling as a private individual (not a business)",
-        "ageConfirmation18": "18 or older",
-        "ageConfirmationPrivate": "private individual",
-        "acceptTerms": "I accept the",
-        "sellerTerms": "Seller Terms",
-        "zeroFees": "Zero commission fees",
-        "zeroFeesDesc": "You keep 100% of your sale price",
-        "taxReporting": "EU tax reporting (DAC7)",
-        "taxReportingDesc": "Above 30 sales or €2,000/year, we report to tax authorities — it's EU law. Your dashboard tracks these numbers so there are no surprises.",
-        "learnMore": "Learn more",
-        "fullSellerTerms": "Full seller terms",
-        "privacyPolicy": "Privacy policy",
-        "processing": "Processing...",
-        "agreeAndContinue": "Agree & continue",
-        "maybeLater": "Maybe later"
       }
     },
     "PlatformFeatures": {
@@ -1747,15 +1745,6 @@
       },
       "browseGames": "Browse games",
       "learnMore": "Learn more"
-    }
-  },
-  "Game": {
-    "QuestionThread": {
-      "seller": "Seller",
-      "anonymous": "Anonymous",
-      "reply": "Reply",
-      "cancel": "Cancel",
-      "replyPlaceholder": "Write a reply..."
     }
   },
   "Cart": {

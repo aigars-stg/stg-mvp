@@ -11,13 +11,18 @@ import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { ConditionInfoModal } from '@/components/common/ConditionInfoModal';
+import { PriceBreakdown } from '@/components/common/PriceBreakdown';
 import { getConditionBadgeVariant } from '@/lib/utils/condition-utils';
+import { useDeliveredPricing } from '@/lib/hooks/useDeliveredPricing';
+import type { TerminalCountry } from '@/lib/unisend/types';
 import { useTranslations } from 'next-intl';
 
 interface ListingCardProps {
   listing: ListingWithSeller;
   showSeller?: boolean;
   isOwnListing?: boolean; // Whether this listing belongs to the current user
+  /** Buyer's country for calculating accurate shipping estimate */
+  buyerCountry?: TerminalCountry;
 }
 
 // Priority languages for Baltic region
@@ -55,10 +60,18 @@ function formatLanguages(languageString: string): string {
   return displayLangs.join(' / ');
 }
 
-export function ListingCard({ listing, showSeller = false, isOwnListing = false }: ListingCardProps) {
+export function ListingCard({ listing, showSeller = false, isOwnListing = false, buyerCountry }: ListingCardProps) {
   const t = useTranslations('Listings');
   const router = useRouter();
   const { user } = useAuth();
+
+  // Calculate total delivered price (item + shipping + service fee)
+  const deliveredPricing = useDeliveredPricing({
+    listingType: listing.listing_type,
+    price: listing.price,
+    sellerCountry: listing.seller.country,
+    buyerCountry,
+  });
 
   // Collect all available images (BGG main image + user photos only)
   const allImages = [
@@ -234,20 +247,45 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
           <div className="flex-grow" />
 
           {/* Price - aligned at bottom */}
-          <div className="flex items-center gap-2 pt-2">
-            <span className="text-2xl font-bold text-polar-night">
-              €{listing.price.toFixed(2)}
-            </span>
-            {listing.previous_price && listing.previous_price > listing.price && (
-              <span className="text-base text-text-muted line-through">
-                €{listing.previous_price.toFixed(2)}
-              </span>
+          <div className="pt-2">
+            {deliveredPricing.canCalculate ? (
+              <>
+                {/* Total delivered as primary price */}
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-polar-night">
+                    €{deliveredPricing.totalDelivered.toFixed(2)}
+                    {deliveredPricing.isEstimate && <span className="text-base font-normal text-text-muted">*</span>}
+                  </span>
+                  {listing.previous_price && listing.previous_price > listing.price && (
+                    <span className="text-base text-text-muted line-through">
+                      €{listing.previous_price.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+                {/* Compact breakdown */}
+                <PriceBreakdown pricing={deliveredPricing} variant="compact" />
+              </>
+            ) : (
+              <>
+                {/* Item price only for contact_seller or non-Baltic */}
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-polar-night">
+                    €{listing.price.toFixed(2)}
+                  </span>
+                  {listing.previous_price && listing.previous_price > listing.price && (
+                    <span className="text-base text-text-muted line-through">
+                      €{listing.previous_price.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+              </>
             )}
           </div>
 
           {/* Bottom Section: Location + Shipping + Buy Now Button */}
           <div className="pt-2 space-y-2 border-t border-border-subtle">
             {/* Location + Shipping - answers "Can I get this?" and "How?" */}
+            {/* Contact Seller listings don't show shipping options - arranged directly */}
             {showSeller && listing.seller?.country && (
               <div className="flex items-center gap-1.5 text-sm text-text-secondary">
                 {getCountryFlag(listing.seller.country) && (
@@ -258,18 +296,23 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
                   />
                 )}
                 <span>{getCountryName(listing.seller.country)}</span>
-                <span className="text-text-muted">•</span>
-                {listing.shipping_parcel_locker ? (
-                  <span className="flex items-center gap-1">
-                    <Package className="w-3.5 h-3.5" />
-                    {t('card.parcelLocker')}
-                  </span>
-                ) : listing.shipping_local_pickup ? (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5" />
-                    {t('card.pickupOnly')}
-                  </span>
-                ) : null}
+                {/* Only show shipping options for instant_buy listings */}
+                {listing.listing_type !== 'contact_seller' && (
+                  <>
+                    <span className="text-text-muted">•</span>
+                    {listing.shipping_parcel_locker ? (
+                      <span className="flex items-center gap-1">
+                        <Package className="w-3.5 h-3.5" />
+                        {t('card.parcelLocker')}
+                      </span>
+                    ) : listing.shipping_local_pickup ? (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5" />
+                        {t('card.pickupOnly')}
+                      </span>
+                    ) : null}
+                  </>
+                )}
               </div>
             )}
 

@@ -19,6 +19,13 @@
       "ofRetailPrice": "no jaunas spēles cenas"
     }
   },
+  "PriceBreakdown": {
+    "item": "Prece:",
+    "shipping": "Piegāde ({country}):",
+    "serviceFee": "Servisa maksa:",
+    "fees": "maksas",
+    "estimateNote": "*Aptuveni vienas valsts ietvaros"
+  },
   "CookieConsent": {
     "title": "Mēs izmantojam sīkdatnes",
     "description": "Nepieciešamās sīkdatnes vajadzīgas, lai vietne darbotos. Ar tavu atļauju izmantojam arī analītikas sīkdatnes, lai padarītu pieredzi vēl patīkamāku.",
@@ -607,6 +614,13 @@
       "sellerCannotAsk": "Tu nevari uzdot jautājumus par savu sludinājumu, bet vari atbildēt citiem.",
       "askPlaceholder": "Uzdod jautājumu par šo sludinājumu...",
       "signInToAsk": "Pierakstieties, lai uzdotu jautājumu"
+    },
+    "QuestionThread": {
+      "seller": "Pārdevējs",
+      "anonymous": "Anonīms",
+      "reply": "Atbildēt",
+      "cancel": "Atcelt",
+      "replyPlaceholder": "Raksti atbildi..."
     }
   },
   "Emails": {
@@ -1243,10 +1257,13 @@
       "expansions": "+ {count} papildinājums",
       "expansions_other": "+ {count} papildinājumi",
       "priced": "({count} ar cenu)",
+      "pricedCount": "({count} ar cenu)",
       "bundleRetail": "Komplekta mazumcena:",
       "fill": "Aizpildīt",
+      "fillButton": "Lietot cenu",
       "avgSoldHere": "Vid. pārdots šeit:",
       "sales": "({count} pārdošanas)",
+      "salesCount": "({count} pārdošanas)",
       "lowestOnPlatform": "Zemākā cena Second Turn Games:",
       "suggestedFor": "Ieteicams {condition} stāvoklim:",
       "usePrice": "Lietot cenu",
@@ -1715,25 +1732,6 @@
         "subtitle": "Gandrīz gatavs — pabeidz maksājumu iestatīšanu, lai sāktu pārdot.",
         "stepProgress": "1. solis no 2 pabeigts",
         "button": "Turpināt iestatīšanu"
-      },
-      "terms": {
-        "acceptBothError": "Lūdzu, atzīmē abas izvēles rūtiņas, lai turpinātu",
-        "somethingWrong": "Kaut kas nogāja greizi",
-        "ageConfirmation": "Esmu 18 gadus vecs vai vecāks un pārdodu kā privātpersona (nevis uzņēmums)",
-        "ageConfirmation18": "18 gadus vecs vai vecāks",
-        "ageConfirmationPrivate": "privātpersona",
-        "acceptTerms": "Es piekrītu",
-        "sellerTerms": "Pārdevēja noteikumiem",
-        "zeroFees": "Nulles komisijas maksa",
-        "zeroFeesDesc": "Tu paturi 100% no pārdošanas cenas",
-        "taxReporting": "ES nodokļu ziņošana (DAC7)",
-        "taxReportingDesc": "Virs 30 pārdošanas vai €2000/gadā mēs ziņojam nodokļu iestādēm — tā ir ES likums. Tavs informācijas panelis seko šiem skaitļiem, lai nebūtu pārsteigumu.",
-        "learnMore": "Uzzināt vairāk",
-        "fullSellerTerms": "Pilni pārdevēja noteikumi",
-        "privacyPolicy": "Privātuma politika",
-        "processing": "Apstrādā...",
-        "agreeAndContinue": "Piekrist un turpināt",
-        "maybeLater": "Varbūt vēlāk"
       }
     },
     "PlatformFeatures": {
@@ -1747,15 +1745,6 @@
       },
       "browseGames": "Pārlūkot spēles",
       "learnMore": "Uzzināt vairāk"
-    }
-  },
-  "Game": {
-    "QuestionThread": {
-      "seller": "Pārdevējs",
-      "anonymous": "Anonīms",
-      "reply": "Atbildēt",
-      "cancel": "Atcelt",
-      "replyPlaceholder": "Raksti atbildi..."
     }
   },
   "Cart": {
