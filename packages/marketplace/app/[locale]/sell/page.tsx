@@ -10,7 +10,7 @@ import { GameNameSelector } from '@/components/sell/GameNameSelector';
 import { LanguageVersionSelector } from '@/components/sell/LanguageVersionSelector';
 import { ConditionSelector } from '@/components/sell/ConditionSelector';
 import { PhotoUpload, type PhotoFile } from '@/components/sell/PhotoUpload';
-import { PricingShippingSimple } from '@/components/sell/PricingShippingSimple';
+import { Input } from '@second-turn/design-system';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
 import { ListingTypeSelector } from '@/components/sell/ListingTypeSelector';
@@ -1278,17 +1278,26 @@ function SellPageContent() {
             />
           )}
 
-          <PricingShippingSimple
-            price={formData.price}
-            shippingOptions={{ localPickup: false, parcelLocker: false }}
-            shippingNotes=""
-            onChange={(field, value) => {
-              if (field === 'price') {
-                setFormData((prev) => ({ ...prev, price: value as string }));
-              }
-            }}
-            priceOnly
-          />
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3">
+              {t('pricing.title')}
+            </h3>
+            <Input
+              type="number"
+              value={formData.price || ''}
+              onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+              onBlur={() => {
+                if (formData.price && !isNaN(parseFloat(formData.price))) {
+                  setFormData((prev) => ({ ...prev, price: parseFloat(formData.price).toFixed(2) }));
+                }
+              }}
+              placeholder="25.00"
+              min="0.01"
+              step="0.01"
+              required
+              inputSize="lg"
+            />
+          </div>
         </CollapsibleSection>
 
         {/* Terms & Publish */}

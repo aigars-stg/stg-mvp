@@ -1,5 +1,9 @@
 import { createServiceClient } from '@/lib/supabase/client';
+import { getClientIP } from '@/lib/utils/request-helpers';
 import type { NextRequest } from 'next/server';
+
+// Re-export for backwards compatibility
+export { getClientIP } from '@/lib/utils/request-helpers';
 
 /**
  * Security audit event types
@@ -60,25 +64,6 @@ export interface AuditEventMetadata {
   [key: string]: unknown;
 }
 
-/**
- * Get client IP address from request headers
- * Checks multiple headers in priority order
- */
-export function getClientIP(headers: Headers): string {
-  // Cloudflare's connecting IP (most reliable when using CF)
-  const cfConnectingIP = headers.get('cf-connecting-ip');
-  if (cfConnectingIP) return cfConnectingIP;
-
-  // X-Forwarded-For (standard for proxies, can have multiple IPs)
-  const forwardedFor = headers.get('x-forwarded-for');
-  if (forwardedFor) return forwardedFor.split(',')[0].trim();
-
-  // X-Real-IP (nginx)
-  const realIP = headers.get('x-real-ip');
-  if (realIP) return realIP;
-
-  return 'unknown';
-}
 
 /**
  * Log a security event to the audit log

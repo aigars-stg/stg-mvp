@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Card, Badge } from '@second-turn/design-system';
-import { Package, LocationPin as MapPin, AlertCircle, ChevronLeft, ChevronRight, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Chat as MessageSquare } from 'griddy-icons';
+import { Package, LocationPin as MapPin, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Chat as MessageSquare } from 'griddy-icons';
+import { ImageCarousel } from '@/components/common/ImageCarousel';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { ConditionInfoModal } from '@/components/common/ConditionInfoModal';
+import { getConditionBadgeVariant } from '@/lib/utils/condition-utils';
 import { useTranslations } from 'next-intl';
 
 interface ListingCardProps {
@@ -66,73 +67,15 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
   ].filter(Boolean);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showConditionInfo, setShowConditionInfo] = useState(false);
-  const hasMultipleImages = allImages.length > 1;
-
-  // Minimum swipe distance (in px)
-  const minSwipeDistance = 50;
 
   // Save listing functionality - uses context to avoid per-card API calls
   const { isSaved: checkIsSaved, toggleSave: contextToggleSave } = useSavedListingsContext();
   const isSaved = checkIsSaved(listing.id);
   const [saveLoading, setSaveLoading] = useState(false);
 
-  // Get condition badge variant
-  const getConditionVariant = (): 'likeNew' | 'veryGood' | 'good' | 'acceptable' => {
-    switch (listing.condition) {
-      case 'likeNew':
-        return 'likeNew';
-      case 'veryGood':
-        return 'veryGood';
-      case 'good':
-        return 'good';
-      case 'acceptable':
-        return 'acceptable';
-      default:
-        return 'acceptable';
-    }
-  };
-
-  const handlePrevImage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setCurrentImageIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
-  };
-
-  const handleNextImage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setCurrentImageIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
-  };
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStart || !touchEnd) return;
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
-      e.preventDefault();
-      e.stopPropagation();
-      setCurrentImageIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
-    } else if (isRightSwipe) {
-      e.preventDefault();
-      e.stopPropagation();
-      setCurrentImageIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
-    }
-  };
+  // Get condition badge variant using shared utility
+  const conditionVariant = getConditionBadgeVariant(listing.condition);
 
   const handleSaveToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -153,8 +96,6 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
     }
   };
 
-  const displayImage = allImages[currentImageIndex];
-
   return (
     <>
     <Link href={`/game/${listing.bgg_game_id}`} className="h-full">
@@ -164,25 +105,22 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
         className="overflow-hidden h-full flex flex-col"
       >
         {/* Image Section */}
-        <div
-          className="relative h-48 sm:h-56 lg:h-64 bg-polar-night/5 flex items-center justify-center group overflow-hidden"
-          onTouchStart={hasMultipleImages ? onTouchStart : undefined}
-          onTouchMove={hasMultipleImages ? onTouchMove : undefined}
-          onTouchEnd={hasMultipleImages ? onTouchEnd : undefined}
+        <ImageCarousel
+          images={allImages}
+          alt={listing.game_name}
+          showArrows={true}
+          showDots={true}
+          showCounter={true}
+          enableSwipe={true}
+          currentIndex={currentImageIndex}
+          onIndexChange={setCurrentImageIndex}
+          placeholderIcon={<Package className="w-16 h-16 text-text-muted" />}
+          ariaLabels={{
+            prevImage: t('card.prevImageAria'),
+            nextImage: t('card.nextImageAria'),
+            viewImage: (n) => t('card.viewImageAria', { number: n }),
+          }}
         >
-          {displayImage ? (
-            <Image
-              src={displayImage}
-              alt={listing.game_name}
-              fill
-              className="object-contain p-4"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              unoptimized={displayImage.startsWith('http')}
-            />
-          ) : (
-            <Package className="w-16 h-16 text-text-muted" />
-          )}
-
           {/* Save Button - only show for non-own listings */}
           {!isOwnListing && (
             <button
@@ -201,48 +139,6 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
             </button>
           )}
 
-          {/* Navigation Arrows - show on hover if multiple images */}
-          {hasMultipleImages && (
-            <>
-              <button
-                onClick={handlePrevImage}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-polar-night/60 hover:bg-polar-night/80 backdrop-blur-sm flex items-center justify-center text-snow-white sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                aria-label={t('card.prevImageAria')}
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleNextImage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-polar-night/60 hover:bg-polar-night/80 backdrop-blur-sm flex items-center justify-center text-snow-white sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                aria-label={t('card.nextImageAria')}
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </>
-          )}
-
-          {/* Image Indicators */}
-          {hasMultipleImages && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {allImages.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setCurrentImageIndex(index);
-                  }}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentImageIndex
-                      ? 'bg-snow-white w-6'
-                      : 'bg-snow-white/50 hover:bg-snow-white/75'
-                  }`}
-                  aria-label={t('card.viewImageAria', { number: index + 1 })}
-                />
-              ))}
-            </div>
-          )}
-
           {/* Condition ribbon - top right */}
           <button
             type="button"
@@ -254,17 +150,10 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
             className="absolute top-3 right-3 cursor-pointer hover:opacity-90 transition-opacity"
             aria-label={t('card.learnConditionAria', { condition: t(`conditions.${listing.condition}`) })}
           >
-            <Badge variant={getConditionVariant()} size="sm">
+            <Badge variant={conditionVariant} size="sm">
               {t(`conditions.${listing.condition}`)}
             </Badge>
           </button>
-
-          {/* Image counter - bottom right */}
-          {allImages.length > 1 && (
-            <div className="absolute bottom-3 right-3 px-2 py-1 bg-polar-night/80 backdrop-blur-sm rounded-md text-xs text-snow-white font-medium">
-              {currentImageIndex + 1}/{allImages.length}
-            </div>
-          )}
 
           {/* Contact Seller badge - bottom left */}
           {listing.listing_type === 'contact_seller' && (
@@ -273,7 +162,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
               {t('card.contactSeller')}
             </div>
           )}
-        </div>
+        </ImageCarousel>
 
         {/* Content Section */}
         <div className="p-4 flex flex-col flex-grow">

@@ -1,6 +1,9 @@
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
+// Re-export shared utility for backwards compatibility
+export { getClientIP } from '@/lib/utils/request-helpers';
+
 // Initialize Redis client only if env vars are available
 let redis: Redis | null = null;
 let rateLimiters: Record<string, Ratelimit> | null = null;
@@ -231,30 +234,6 @@ export async function checkRateLimit(
   }
 }
 
-/**
- * Get the client IP address from request headers
- * @param headers - Request headers
- * @returns IP address or 'unknown'
- */
-export function getClientIP(headers: Headers): string {
-  // Try various headers that might contain the real IP
-  const forwardedFor = headers.get('x-forwarded-for');
-  if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim();
-  }
-
-  const realIP = headers.get('x-real-ip');
-  if (realIP) {
-    return realIP;
-  }
-
-  const cfConnectingIP = headers.get('cf-connecting-ip'); // Cloudflare
-  if (cfConnectingIP) {
-    return cfConnectingIP;
-  }
-
-  return 'unknown';
-}
 
 /**
  * Format time remaining until rate limit reset

@@ -39,8 +39,7 @@ export function getBrowseContext(): BrowseContext | null {
     }
 
     return context;
-  } catch (error) {
-    console.error('Error reading browse context:', error);
+  } catch {
     return null;
   }
 }
@@ -59,9 +58,8 @@ export function saveBrowseContext(gameIds: number[], currentIndex: number): void
       timestamp: Date.now(),
     };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(context));
-    console.log('[BrowseContext] Saved:', { gameIdsCount: gameIds.length, currentIndex });
-  } catch (error) {
-    console.error('Error saving browse context:', error);
+  } catch {
+    // Silently fail - browse navigation is non-critical
   }
 }
 
@@ -79,8 +77,8 @@ export function updateBrowseContextIndex(newIndex: number): void {
     context.currentIndex = newIndex;
     context.timestamp = Date.now(); // Refresh timestamp on navigation
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(context));
-  } catch (error) {
-    console.error('Error updating browse context index:', error);
+  } catch {
+    // Silently fail
   }
 }
 
@@ -92,8 +90,8 @@ export function clearBrowseContext(): void {
 
   try {
     sessionStorage.removeItem(STORAGE_KEY);
-  } catch (error) {
-    console.error('Error clearing browse context:', error);
+  } catch {
+    // Silently fail
   }
 }
 

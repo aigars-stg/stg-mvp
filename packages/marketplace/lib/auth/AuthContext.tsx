@@ -4,7 +4,10 @@ import { createContext, useContext, useEffect, useState, useCallback, useMemo, u
 import { useRouter } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
+import { loggers } from '@/lib/logger';
 import type { AuthContextType, UserProfile } from './types';
+
+const log = loggers.auth;
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -23,11 +26,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: { user } } = await (supabase as any).auth.getUser();
 
       if (!user) {
-        console.error('❌ [Auth] Cannot create profile - no user found');
+        log.error('Cannot create profile - no user found');
         return null;
       }
-
-      console.log('🔧 [Auth] Creating missing profile for user:', user.id);
 
       const { data, error } = await (supabase as any)
         .from('user_profiles')
@@ -42,14 +43,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('❌ [Auth] Failed to create profile:', error);
+        log.error({ error: error.message }, 'Failed to create profile');
         return null;
       }
 
-      console.log('✅ [Auth] Profile created successfully');
       return data as UserProfile;
     } catch (error) {
-      console.error('❌ [Auth] Profile creation failed:', error);
+      log.error({ error: String(error) }, 'Profile creation failed');
       return null;
     }
   }, []);
@@ -68,9 +68,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .update({ auth_providers: providers })
         .eq('id', userId)
         .or('auth_providers.is.null,auth_providers.eq.{}');
-    } catch (error) {
-      // Non-critical - log but don't fail
-      console.warn('[Auth] Failed to update auth_providers:', error);
+    } catch {
+      // Non-critical, silently ignore
     }
   }, []);
 
@@ -92,17 +91,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return fetchProfile(userId, retryCount + 1);
           }
 
-          console.warn('[Auth] Profile not found after retries, attempting to create...');
+          log.warn('Profile not found after retries, creating...');
           return await createMissingProfile(userId);
         }
 
-        console.error('[Auth] Profile fetch error:', error.code, error.message);
+        log.error({ code: error.code, message: error.message }, 'Profile fetch error');
         return null;
       }
 
       return data as UserProfile;
-    } catch (error: any) {
-      console.error('[Auth] Profile fetch exception:', error);
+    } catch (error) {
+      log.error({ error: String(error) }, 'Profile fetch exception');
       return null;
     }
   }, [createMissingProfile]);
@@ -200,7 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setLoading(false);
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        log.error({ error: String(error) }, 'Error initializing auth');
         if (mounted) {
           setLoading(false);
         }
@@ -284,7 +283,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // and update state/navigation automatically
       // This prevents race conditions between manual updates and listener updates
     } catch (error) {
-      console.error('[Auth] Sign out error:', error);
+      log.error({ error: String(error) }, 'Sign out error');
       throw error;
     }
   };

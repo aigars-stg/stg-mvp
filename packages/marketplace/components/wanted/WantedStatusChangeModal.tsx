@@ -1,8 +1,8 @@
 'use client';
 
-import { Modal, Button } from '@second-turn/design-system';
 import { AlertCircle, CheckCircle, Undo as RotateCcw, CloseCircle as XCircle } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
+import { BaseStatusChangeModal, type StatusConfig } from '@/components/common/StatusChangeModal';
 
 export interface WantedStatusChangeModalProps {
   isOpen: boolean;
@@ -25,7 +25,7 @@ export function WantedStatusChangeModal({
 }: WantedStatusChangeModalProps) {
   const t = useTranslations('WantedStatusChangeModal');
 
-  const getStatusConfig = () => {
+  const getStatusConfig = (): StatusConfig => {
     switch (newStatus) {
       case 'fulfilled':
         return {
@@ -34,7 +34,7 @@ export function WantedStatusChangeModal({
           message: t('fulfilled.message', { gameName }),
           description: t('fulfilled.description'),
           confirmText: t('fulfilled.confirmText'),
-          confirmVariant: 'primary' as const,
+          confirmVariant: 'primary',
         };
       case 'cancelled':
         return {
@@ -43,7 +43,7 @@ export function WantedStatusChangeModal({
           message: t('cancelled.message', { gameName }),
           description: t('cancelled.description'),
           confirmText: t('cancelled.confirmText'),
-          confirmVariant: 'secondary' as const,
+          confirmVariant: 'secondary',
         };
       case 'active':
         return {
@@ -54,7 +54,7 @@ export function WantedStatusChangeModal({
             ? t('active.descriptionExpired')
             : t('active.description'),
           confirmText: t('active.confirmText'),
-          confirmVariant: 'primary' as const,
+          confirmVariant: 'primary',
         };
       case 'expired':
         return {
@@ -63,7 +63,7 @@ export function WantedStatusChangeModal({
           message: t('expired.message', { gameName }),
           description: t('expired.description'),
           confirmText: t('expired.confirmText'),
-          confirmVariant: 'secondary' as const,
+          confirmVariant: 'secondary',
         };
       default:
         return {
@@ -72,51 +72,20 @@ export function WantedStatusChangeModal({
           message: t('default.message', { gameName }),
           description: '',
           confirmText: t('default.confirmText'),
-          confirmVariant: 'primary' as const,
+          confirmVariant: 'primary',
         };
     }
   };
 
-  const config = getStatusConfig();
-
   return (
-    <Modal
-      open={isOpen}
+    <BaseStatusChangeModal
+      isOpen={isOpen}
       onClose={onClose}
-      title={config.title}
-      size="sm"
-      footer={
-        <>
-          <Button
-            variant="secondary"
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            {t('cancel')}
-          </Button>
-          <Button
-            variant={config.confirmVariant}
-            onClick={onConfirm}
-            disabled={isLoading}
-          >
-            {isLoading ? t('processing') : config.confirmText}
-          </Button>
-        </>
-      }
-    >
-      <div className="flex flex-col items-center text-center">
-        <div className="mb-4">
-          {config.icon}
-        </div>
-        <p className="text-base text-text mb-2">
-          {config.message}
-        </p>
-        {config.description && (
-          <p className="text-sm text-text-secondary">
-            {config.description}
-          </p>
-        )}
-      </div>
-    </Modal>
+      onConfirm={onConfirm}
+      isLoading={isLoading}
+      config={getStatusConfig()}
+      cancelText={t('cancel')}
+      processingText={t('processing')}
+    />
   );
 }

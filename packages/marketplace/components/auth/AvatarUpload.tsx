@@ -33,37 +33,27 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
   const initials = getInitials(displayName);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    console.log('AvatarUpload: onDrop called, user:', user ? 'present' : 'null');
     if (!user) {
       setError(t('mustBeLoggedIn'));
-      console.error('❌ AvatarUpload: No user');
       return;
     }
 
     const file = acceptedFiles[0];
-    if (!file) {
-      console.log('AvatarUpload: No file selected');
-      return;
-    }
-
-    console.log('AvatarUpload: File selected:', file.name, file.size, 'bytes');
+    if (!file) return;
 
     // Validate file
     if (file.size > 5 * 1024 * 1024) {
       setError(t('fileTooLarge'));
-      console.error('❌ AvatarUpload: File too large');
       return;
     }
 
     if (!file.type.startsWith('image/')) {
       setError(t('mustBeImage'));
-      console.error('❌ AvatarUpload: Invalid file type:', file.type);
       return;
     }
 
     setError('');
     setUploading(true);
-    console.log('AvatarUpload: Starting upload...');
 
     // Store the blob URL temporarily for immediate preview
     const objectUrl = URL.createObjectURL(file);
@@ -72,13 +62,11 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
     try {
       // Delete old avatar if exists (with timeout)
       if (currentAvatarUrl) {
-        console.log('AvatarUpload: Deleting old avatar:', currentAvatarUrl);
         try {
           // Extract the file path from the current URL
           const url = new URL(currentAvatarUrl);
           const pathParts = url.pathname.split('/');
           const bucketPath = pathParts.slice(pathParts.indexOf('listing-photos') + 1).join('/');
-          console.log('AvatarUpload: Bucket path:', bucketPath);
 
           // Add timeout to prevent hanging
           const deletePromise = supabase
@@ -91,9 +79,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
           );
 
           await Promise.race([deletePromise, timeoutPromise]);
-          console.log('✅ Deleted old avatar:', bucketPath);
-        } catch (deleteError: any) {
-          console.warn('⚠️ Could not delete old avatar:', deleteError?.message || deleteError);
+        } catch {
           // Continue with upload even if delete fails
         }
       }
@@ -102,10 +88,8 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
       const fileExt = file.name.split('.').pop();
       const timestamp = Date.now();
       const fileName = `${user.id}/avatar-${timestamp}.${fileExt}`;
-      console.log('AvatarUpload: Generated filename:', fileName);
 
       // Upload to Supabase storage
-      console.log('AvatarUpload: Starting Supabase upload...');
       const { error: uploadError } = await supabase
         .storage
         .from('listing-photos')
@@ -115,19 +99,14 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
         });
 
       if (uploadError) {
-        console.error('❌ AvatarUpload: Supabase upload error:', uploadError);
         throw uploadError;
       }
-
-      console.log('✅ AvatarUpload: File uploaded successfully');
 
       // Get public URL
       const { data } = supabase
         .storage
         .from('listing-photos')
         .getPublicUrl(fileName);
-
-      console.log('AvatarUpload: Public URL:', data.publicUrl);
 
       // Update preview to the actual URL, not the blob
       setPreview(data.publicUrl);
@@ -136,14 +115,11 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
       URL.revokeObjectURL(objectUrl);
 
       if (onUploadComplete) {
-        console.log('AvatarUpload: Calling onUploadComplete callback');
         onUploadComplete(data.publicUrl);
       }
 
       setUploading(false);
-      console.log('✅ AvatarUpload: Upload complete!');
     } catch (err: any) {
-      console.error('❌ AvatarUpload: Upload error:', err);
       setError(err.message || 'Failed to upload avatar');
       setUploading(false);
       // Revert preview on error
@@ -177,19 +153,12 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
           const pathParts = url.pathname.split('/');
           const bucketPath = pathParts.slice(pathParts.indexOf('listing-photos') + 1).join('/');
 
-          const { error: deleteError } = await supabase
+          await supabase
             .storage
             .from('listing-photos')
             .remove([bucketPath]);
-
-          if (deleteError) {
-            console.warn('⚠️ Error deleting file:', deleteError);
-            // Continue to clear the URL even if file delete fails
-          } else {
-            console.log('✅ Deleted avatar:', bucketPath);
-          }
-        } catch (parseError) {
-          console.warn('⚠️ Could not parse avatar URL:', parseError);
+        } catch {
+          // Continue to clear the URL even if file delete fails
         }
       }
 
@@ -201,7 +170,6 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
 
       setUploading(false);
     } catch (err: any) {
-      console.error('Remove error:', err);
       setError(err.message || 'Failed to remove avatar');
       setUploading(false);
     }

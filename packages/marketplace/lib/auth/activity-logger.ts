@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createServiceClient } from '@/lib/supabase/client';
+import { parseUserAgent, getClientIP as getClientIPFromHeaders } from '@/lib/utils/request-helpers';
 
 interface LogActivityParams {
     supabase?: SupabaseClient;
@@ -11,53 +12,9 @@ interface LogActivityParams {
     useServiceRole?: boolean;
 }
 
-// Helper to parse user agent
-function parseUserAgent(userAgent: string) {
-    const ua = userAgent.toLowerCase();
-
-    // Detect device type
-    let deviceType = 'desktop';
-    if (/mobile|android|iphone|ipad|ipod/i.test(ua)) {
-        deviceType = /ipad|tablet/i.test(ua) ? 'tablet' : 'mobile';
-    }
-
-    // Detect browser
-    let browser = 'Unknown';
-    if (ua.includes('chrome') && !ua.includes('edg')) browser = 'Chrome';
-    else if (ua.includes('safari') && !ua.includes('chrome')) browser = 'Safari';
-    else if (ua.includes('firefox')) browser = 'Firefox';
-    else if (ua.includes('edg')) browser = 'Edge';
-    else if (ua.includes('opera') || ua.includes('opr')) browser = 'Opera';
-
-    // Detect OS
-    let os = 'Unknown';
-    if (ua.includes('windows')) os = 'Windows';
-    else if (ua.includes('mac')) os = 'macOS';
-    else if (ua.includes('linux')) os = 'Linux';
-    else if (ua.includes('android')) os = 'Android';
-    else if (ua.includes('ios') || ua.includes('iphone') || ua.includes('ipad')) os = 'iOS';
-
-    return { deviceType, browser, os };
-}
-
-// Helper to get IP address
+// Re-export getClientIP with the original signature for backwards compatibility
 export function getClientIP(request: { headers: Headers }): string {
-    const forwardedFor = request.headers.get('x-forwarded-for');
-    if (forwardedFor) {
-        return forwardedFor.split(',')[0].trim();
-    }
-
-    const realIP = request.headers.get('x-real-ip');
-    if (realIP) {
-        return realIP;
-    }
-
-    const cfConnectingIP = request.headers.get('cf-connecting-ip');
-    if (cfConnectingIP) {
-        return cfConnectingIP;
-    }
-
-    return 'unknown';
+    return getClientIPFromHeaders(request.headers);
 }
 
 export async function logLoginActivity({

@@ -32,62 +32,41 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
 
     const fetchCounts = async () => {
       try {
-        // Fetch listings count
-        const listingsRes = await fetch(`/api/listings?sellerId=${user.id}`);
+        // Fetch all counts in parallel
+        const [listingsRes, savedRes, wantedRes, ordersRes, salesRes] = await Promise.all([
+          fetch(`/api/listings?sellerId=${user.id}`),
+          fetch('/api/saved-listings'),
+          fetch('/api/wanted/my-listings'),
+          fetch('/api/orders'),
+          fetch('/api/seller/orders'),
+        ]);
+
         if (listingsRes.ok) {
           const data = await listingsRes.json();
-          const count = data.listings?.length || 0;
-          console.log('[ProfileBottomSheet] My Listings count:', count);
-          setListingsCount(count);
-        } else {
-          console.error('[ProfileBottomSheet] Failed to fetch my listings:', listingsRes.status);
+          setListingsCount(data.listings?.length || 0);
         }
 
-        // Fetch saved listings count
-        const savedRes = await fetch('/api/saved-listings');
         if (savedRes.ok) {
           const data = await savedRes.json();
-          const count = data.savedListings?.length || 0;
-          console.log('[ProfileBottomSheet] Saved Listings count:', count);
-          setSavedCount(count);
-        } else {
-          console.error('[ProfileBottomSheet] Failed to fetch saved listings:', savedRes.status);
+          setSavedCount(data.savedListings?.length || 0);
         }
 
-        // Fetch wanted games count
-        const wantedRes = await fetch('/api/wanted/my-listings');
         if (wantedRes.ok) {
           const data = await wantedRes.json();
-          const count = data.wantedListings?.length || 0;
-          console.log('[ProfileBottomSheet] Wanted Games count:', count);
-          setWantedCount(count);
-        } else {
-          console.error('[ProfileBottomSheet] Failed to fetch wanted games:', wantedRes.status);
+          setWantedCount(data.wantedListings?.length || 0);
         }
 
-        // Fetch buyer orders count
-        const ordersRes = await fetch('/api/orders');
         if (ordersRes.ok) {
           const data = await ordersRes.json();
-          const count = data.orders?.length || 0;
-          console.log('[ProfileBottomSheet] Orders count:', count);
-          setOrdersCount(count);
-        } else {
-          console.error('[ProfileBottomSheet] Failed to fetch orders:', ordersRes.status);
+          setOrdersCount(data.orders?.length || 0);
         }
 
-        // Fetch seller orders count
-        const salesRes = await fetch('/api/seller/orders');
         if (salesRes.ok) {
           const data = await salesRes.json();
-          const count = data.orders?.length || 0;
-          console.log('[ProfileBottomSheet] Sales count:', count);
-          setSalesCount(count);
-        } else {
-          console.error('[ProfileBottomSheet] Failed to fetch sales:', salesRes.status);
+          setSalesCount(data.orders?.length || 0);
         }
-      } catch (error) {
-        console.error('[ProfileBottomSheet] Failed to fetch counts:', error);
+      } catch {
+        // Silently fail - counts are non-critical UI elements
       }
     };
 
@@ -117,8 +96,8 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
       await signOut();
       onClose();
       router.push('/');
-    } catch (error) {
-      console.error('Failed to sign out:', error);
+    } catch {
+      // Sign out error handled by AuthContext
     } finally {
       setSignOutLoading(false);
     }

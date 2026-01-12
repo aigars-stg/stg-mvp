@@ -1,6 +1,9 @@
 import { createServiceClient } from '@/lib/supabase/client';
-import { getClientIP } from './audit-logger';
+import { getClientIP, parseUserAgent, formatLocation } from '@/lib/utils/request-helpers';
 import type { NextRequest } from 'next/server';
+
+// Re-export for backwards compatibility
+export { formatLocation } from '@/lib/utils/request-helpers';
 
 /**
  * Result of unusual login detection
@@ -19,48 +22,6 @@ export interface UnusualLoginResult {
   };
 }
 
-/**
- * Parse user agent to extract device information
- */
-function parseUserAgent(userAgent: string): { device: string; browser: string; os: string } {
-  const ua = userAgent.toLowerCase();
-
-  // Detect device type
-  let deviceType = 'Desktop';
-  if (/mobile|android|iphone|ipod/i.test(ua)) {
-    deviceType = 'Mobile';
-  } else if (/ipad|tablet/i.test(ua)) {
-    deviceType = 'Tablet';
-  }
-
-  // Detect browser
-  let browser = 'Unknown Browser';
-  if (ua.includes('chrome') && !ua.includes('edg') && !ua.includes('opr')) {
-    browser = 'Chrome';
-  } else if (ua.includes('safari') && !ua.includes('chrome')) {
-    browser = 'Safari';
-  } else if (ua.includes('firefox')) {
-    browser = 'Firefox';
-  } else if (ua.includes('edg')) {
-    browser = 'Edge';
-  } else if (ua.includes('opera') || ua.includes('opr')) {
-    browser = 'Opera';
-  }
-
-  // Detect OS
-  let os = 'Unknown OS';
-  if (ua.includes('windows')) os = 'Windows';
-  else if (ua.includes('mac os') || ua.includes('macos')) os = 'macOS';
-  else if (ua.includes('linux') && !ua.includes('android')) os = 'Linux';
-  else if (ua.includes('android')) os = 'Android';
-  else if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ios')) os = 'iOS';
-
-  return {
-    device: `${browser} on ${os}`,
-    browser,
-    os,
-  };
-}
 
 /**
  * Check if a login is unusual based on historical patterns
@@ -88,6 +49,16 @@ export async function checkUnusualLogin(
   const currentCity = headers.get('cf-ipcity') || null;
   const { device, browser, os } = parseUserAgent(userAgent);
 
+  // Build login details once, reuse for all return paths
+  const loginDetails = {
+    country: currentCountry,
+    city: currentCity,
+    device,
+    browser,
+    os,
+    ipAddress,
+  };
+
   const reasons: string[] = [];
 
   // Get user's recent login history (last 30 days, up to 50 entries)
@@ -103,38 +74,13 @@ export async function checkUnusualLogin(
     .limit(50);
 
   if (error) {
-    console.error('[LoginDetector] Failed to fetch login history:', error);
     // On error, assume not unusual to avoid false positives
-    return {
-      isUnusual: false,
-      reasons: [],
-      shouldAlert: false,
-      loginDetails: {
-        country: currentCountry,
-        city: currentCity,
-        device,
-        browser,
-        os,
-        ipAddress,
-      },
-    };
+    return { isUnusual: false, reasons: [], shouldAlert: false, loginDetails };
   }
 
   // If user has no login history, this is their first login - not unusual
   if (!recentLogins || recentLogins.length === 0) {
-    return {
-      isUnusual: false,
-      reasons: [],
-      shouldAlert: false,
-      loginDetails: {
-        country: currentCountry,
-        city: currentCity,
-        device,
-        browser,
-        os,
-        ipAddress,
-      },
-    };
+    return { isUnusual: false, reasons: [], shouldAlert: false, loginDetails };
   }
 
   // Check 1: New country
@@ -170,27 +116,7 @@ export async function checkUnusualLogin(
     isUnusual,
     reasons,
     shouldAlert,
-    loginDetails: {
-      country: currentCountry,
-      city: currentCity,
-      device,
-      browser,
-      os,
-      ipAddress,
-    },
+    loginDetails,
   };
 }
 
-/**
- * Format location string from country and city
- */
-export function formatLocation(country: string | null, city: string | null): string {
-  if (city && country) {
-    return `${city}, ${country}`;
-  } else if (country) {
-    return country;
-  } else if (city) {
-    return city;
-  }
-  return 'Unknown location';
-}

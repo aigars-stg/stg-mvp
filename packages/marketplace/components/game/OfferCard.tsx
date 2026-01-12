@@ -19,6 +19,8 @@ import { ConditionInfoModal } from '@/components/common/ConditionInfoModal';
 import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 import { CollapsibleDetails } from '@/components/game/CollapsibleDetails';
 import { ListingQuestionsDrawer } from '@/components/game/ListingQuestionsDrawer';
+import { getConditionBadgeVariant } from '@/lib/utils/condition-utils';
+import { DotCarousel } from '@/components/common/ImageCarousel';
 import { useTranslations, useLocale } from 'next-intl';
 
 interface OfferCardProps {
@@ -176,21 +178,8 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
   // All images including expansions (for when user clicks expansion thumbnail)
   const allImagesWithExpansions = [...allImages, ...expansionImages];
 
-  // Get condition badge variant
-  const getConditionVariant = (): 'likeNew' | 'veryGood' | 'good' | 'acceptable' => {
-    switch (listing.condition) {
-      case 'likeNew':
-        return 'likeNew';
-      case 'veryGood':
-        return 'veryGood';
-      case 'good':
-        return 'good';
-      case 'acceptable':
-        return 'acceptable';
-      default:
-        return 'acceptable';
-    }
-  };
+  // Get condition badge variant using shared utility
+  const conditionVariant = getConditionBadgeVariant(listing.condition);
 
   // Price breakdown popover content
   const PriceBreakdownContent = () => {
@@ -327,22 +316,13 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
               </button>
 
               {/* Carousel dots - only show if multiple images */}
-              {allImages.length > 1 && (
-                <div className="flex justify-center gap-1.5">
-                  {allImages.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        index === currentImageIndex
-                          ? 'bg-frost-ice scale-110'
-                          : 'bg-border hover:bg-text-muted'
-                      }`}
-                      aria-label={t('listing.viewImageAria', { number: index + 1 })}
-                    />
-                  ))}
-                </div>
-              )}
+              <DotCarousel
+                images={allImages}
+                alt={listing.game_name}
+                currentIndex={currentImageIndex}
+                onIndexChange={setCurrentImageIndex}
+                ariaLabel={(n) => t('listing.viewImageAria', { number: n })}
+              />
             </div>
 
             {/* MIDDLE COLUMN: Game info, condition, version */}
@@ -377,7 +357,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   aria-label={t('listing.learnConditionAria', { condition: tListings(`conditions.${listing.condition}`) })}
                   title={t('listing.conditionGradesTooltip')}
                 >
-                  <Badge variant={getConditionVariant()} size="sm">
+                  <Badge variant={conditionVariant} size="sm">
                     {tListings(`conditions.${listing.condition}`)}
                   </Badge>
                 </button>
@@ -510,7 +490,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                       aria-label={t('listing.learnConditionAria', { condition: tListings(`conditions.${listing.condition}`) })}
                       title={t('listing.conditionGradesTooltip')}
                     >
-                      <Badge variant={getConditionVariant()}>
+                      <Badge variant={conditionVariant}>
                         {tListings(`conditions.${listing.condition}`)}
                       </Badge>
                     </button>

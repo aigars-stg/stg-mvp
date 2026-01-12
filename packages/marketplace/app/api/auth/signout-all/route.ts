@@ -1,28 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { handleApiError } from '@/lib/api/error-handler';
+import { createServerSupabase } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/client';
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set(name, value, options);
-          },
-          remove(name: string, options: any) {
-            cookieStore.delete(name);
-          },
-        },
-      }
-    );
+    const supabase = await createServerSupabase();
 
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -35,23 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use service role to sign out all devices
-    const supabaseAdmin = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set(name, value, options);
-          },
-          remove(name: string, options: any) {
-            cookieStore.delete(name);
-          },
-        },
-      }
-    );
+    const supabaseAdmin = createServiceClient();
 
     // Sign out user from all devices (revokes all refresh tokens)
     const { error: signOutError } = await supabaseAdmin.auth.admin.signOut(user.id, 'global');

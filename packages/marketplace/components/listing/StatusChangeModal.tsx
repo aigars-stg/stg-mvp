@@ -1,9 +1,9 @@
 'use client';
 
-import { Modal, Button } from '@second-turn/design-system';
 import { AlertCircle, Package, Undo as RotateCcw, Eye, EyeOff, Chat as MessageSquare } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import type { ListingType } from '@/lib/types/listing';
+import { BaseStatusChangeModal, type StatusConfig } from '@/components/common/StatusChangeModal';
 
 export interface StatusChangeModalProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export function StatusChangeModal({
   const t = useTranslations('StatusChangeModal');
   const isContactSeller = listingType === 'contact_seller';
 
-  const getStatusConfig = () => {
+  const getStatusConfig = (): StatusConfig => {
     switch (newStatus) {
       case 'sold':
         return {
@@ -42,7 +42,7 @@ export function StatusChangeModal({
             ? t('sold.descriptionContactSeller')
             : t('sold.description'),
           confirmText: t('sold.confirm'),
-          confirmVariant: 'primary' as const,
+          confirmVariant: 'primary',
         };
       case 'removed':
         return {
@@ -51,7 +51,7 @@ export function StatusChangeModal({
           message: t('removed.message', { gameName }),
           description: t('removed.description'),
           confirmText: t('removed.confirm'),
-          confirmVariant: 'secondary' as const,
+          confirmVariant: 'secondary',
         };
       case 'active':
         return {
@@ -64,7 +64,7 @@ export function StatusChangeModal({
             ? t('publish.description')
             : t('reactivate.description'),
           confirmText: currentStatus === 'draft' ? t('publish.confirm') : t('reactivate.confirm'),
-          confirmVariant: 'primary' as const,
+          confirmVariant: 'primary',
         };
       case 'draft':
         return {
@@ -73,7 +73,7 @@ export function StatusChangeModal({
           message: t('unpublish.message', { gameName }),
           description: t('unpublish.description'),
           confirmText: t('unpublish.confirm'),
-          confirmVariant: 'secondary' as const,
+          confirmVariant: 'secondary',
         };
       default:
         return {
@@ -82,51 +82,20 @@ export function StatusChangeModal({
           message: t('default.message', { gameName }),
           description: '',
           confirmText: t('default.confirm'),
-          confirmVariant: 'primary' as const,
+          confirmVariant: 'primary',
         };
     }
   };
 
-  const config = getStatusConfig();
-
   return (
-    <Modal
-      open={isOpen}
+    <BaseStatusChangeModal
+      isOpen={isOpen}
       onClose={onClose}
-      title={config.title}
-      size="sm"
-      footer={
-        <>
-          <Button
-            variant="secondary"
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            {t('cancel')}
-          </Button>
-          <Button
-            variant={config.confirmVariant}
-            onClick={onConfirm}
-            disabled={isLoading}
-          >
-            {isLoading ? t('processing') : config.confirmText}
-          </Button>
-        </>
-      }
-    >
-      <div className="flex flex-col items-center text-center">
-        <div className="mb-4">
-          {config.icon}
-        </div>
-        <p className="text-base text-text mb-2">
-          {config.message}
-        </p>
-        {config.description && (
-          <p className="text-sm text-text-secondary">
-            {config.description}
-          </p>
-        )}
-      </div>
-    </Modal>
+      onConfirm={onConfirm}
+      isLoading={isLoading}
+      config={getStatusConfig()}
+      cancelText={t('cancel')}
+      processingText={t('processing')}
+    />
   );
 }
