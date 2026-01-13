@@ -33,14 +33,14 @@ export async function POST(request: NextRequest, { params }: Params) {
     const ip = request.headers.get('x-forwarded-for') ||
                request.headers.get('x-real-ip') ||
                null;
-    const userAgent = request.headers.get('user-agent') || null;
+    const userAgent = request.headers.get('user-agent') || undefined;
 
     // Call the database function
     const { data, error } = await supabase.rpc('place_bid', {
       p_listing_id: listingId,
       p_bidder_id: user.id,
       p_amount: parseFloat(amount),
-      p_ip_address: ip,
+      p_ip_address: ip ?? undefined,
       p_user_agent: userAgent,
     });
 
