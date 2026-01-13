@@ -112,7 +112,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
 
     // Check payment deadline hasn't expired
-    if (new Date(listing.auction_payment_deadline) < new Date()) {
+    if (!listing.auction_payment_deadline || new Date(listing.auction_payment_deadline) < new Date()) {
       return NextResponse.json(
         { error: 'Payment deadline has expired' },
         { status: 400 }
@@ -141,6 +141,12 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     // Calculate pricing using the winning bid amount
     const winningBid = listing.auction_current_bid;
+    if (!winningBid) {
+      return NextResponse.json(
+        { error: 'No winning bid found' },
+        { status: 400 }
+      );
+    }
     const pricing = calculateMarketplacePricing(winningBid, shippingCostEuros, shippingMethod);
 
     // Get app URL for redirects
