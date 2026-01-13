@@ -44,20 +44,32 @@ export async function POST(request: NextRequest, { params }: Params) {
       p_user_agent: userAgent,
     });
 
-    if (error) {
+    if (error || !data) {
       console.error('place_bid error:', error);
       return NextResponse.json(
-        { error: error.message },
+        { error: error?.message || 'Failed to place bid' },
         { status: 500 }
       );
     }
 
     // The function returns a JSON object with success status
-    if (!data.success) {
+    const result = data as {
+      success: boolean;
+      error?: string;
+      minimum_bid?: number;
+      bid_id?: string;
+      amount?: number;
+      new_end_time?: string;
+      was_extended?: boolean;
+      extension_minutes?: number;
+      previous_bidder_id?: string;
+    };
+
+    if (!result.success) {
       return NextResponse.json(
         {
-          error: data.error,
-          minimum_bid: data.minimum_bid,
+          error: result.error,
+          minimum_bid: result.minimum_bid,
         },
         { status: 400 }
       );
@@ -65,15 +77,15 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     // If there was a previous bidder, we could trigger outbid notification here
     // For now, the cron job or Edge Function will handle notifications
-    const previousBidderId = data.previous_bidder_id;
+    const previousBidderId = result.previous_bidder_id;
 
     return NextResponse.json({
       success: true,
-      bid_id: data.bid_id,
-      amount: data.amount,
-      new_end_time: data.new_end_time,
-      was_extended: data.was_extended,
-      extension_minutes: data.extension_minutes,
+      bid_id: result.bid_id,
+      amount: result.amount,
+      new_end_time: result.new_end_time,
+      was_extended: result.was_extended,
+      extension_minutes: result.extension_minutes,
       previous_bidder_id: previousBidderId,
     });
   } catch (error) {
