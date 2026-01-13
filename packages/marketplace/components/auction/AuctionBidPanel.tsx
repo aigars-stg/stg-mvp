@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Button, Input, Card } from '@second-turn/design-system';
-import { Gavel, Clock, AlertCircle, CheckCircleAlt01 as CheckCircle2, RefreshCw, Zap } from 'griddy-icons';
+import { Tag as Gavel, Time as Clock, AlertCircle, CheckCircleAlt01 as CheckCircle2, RefreshCw, Flash as Zap } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useAuctionRealtime } from '@/lib/hooks/useAuctionRealtime';

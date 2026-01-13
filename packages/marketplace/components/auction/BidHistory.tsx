@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@second-turn/design-system';
 import { useTranslations, useLocale } from 'next-intl';
-import { Clock, Zap, ChevronDownCircle as ChevronDown } from 'griddy-icons';
+import { Time as Clock, Flash as Zap, ChevronDown } from 'griddy-icons';
 import type { BidWithBidder } from '@/lib/types/listing';
 
 interface BidHistoryProps {

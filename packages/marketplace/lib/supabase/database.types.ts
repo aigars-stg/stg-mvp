@@ -90,6 +90,60 @@ export type Database = {
         }
         Relationships: []
       }
+      bids: {
+        Row: {
+          amount: number
+          bidder_id: string
+          created_at: string | null
+          extension_minutes: number | null
+          id: string
+          ip_address: unknown
+          is_winning: boolean | null
+          listing_id: string
+          triggered_extension: boolean | null
+          user_agent: string | null
+        }
+        Insert: {
+          amount: number
+          bidder_id: string
+          created_at?: string | null
+          extension_minutes?: number | null
+          id?: string
+          ip_address?: unknown
+          is_winning?: boolean | null
+          listing_id: string
+          triggered_extension?: boolean | null
+          user_agent?: string | null
+        }
+        Update: {
+          amount?: number
+          bidder_id?: string
+          created_at?: string | null
+          extension_minutes?: number | null
+          id?: string
+          ip_address?: unknown
+          is_winning?: boolean | null
+          listing_id?: string
+          triggered_extension?: boolean | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_with_details"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blocked_users: {
         Row: {
           blocked_id: string
@@ -433,6 +487,15 @@ export type Database = {
       listings: {
         Row: {
           all_components_present: boolean | null
+          auction_anti_snipe_extended: boolean | null
+          auction_bid_count: number | null
+          auction_current_bid: number | null
+          auction_duration_days: number | null
+          auction_ends_at: string | null
+          auction_payment_deadline: string | null
+          auction_start_price: number | null
+          auction_winner_id: string | null
+          auction_winner_notified_at: string | null
           bgg_game_id: number
           bgg_version_id: number | null
           condition: string
@@ -466,6 +529,15 @@ export type Database = {
         }
         Insert: {
           all_components_present?: boolean | null
+          auction_anti_snipe_extended?: boolean | null
+          auction_bid_count?: number | null
+          auction_current_bid?: number | null
+          auction_duration_days?: number | null
+          auction_ends_at?: string | null
+          auction_payment_deadline?: string | null
+          auction_start_price?: number | null
+          auction_winner_id?: string | null
+          auction_winner_notified_at?: string | null
           bgg_game_id: number
           bgg_version_id?: number | null
           condition: string
@@ -499,6 +571,15 @@ export type Database = {
         }
         Update: {
           all_components_present?: boolean | null
+          auction_anti_snipe_extended?: boolean | null
+          auction_bid_count?: number | null
+          auction_current_bid?: number | null
+          auction_duration_days?: number | null
+          auction_ends_at?: string | null
+          auction_payment_deadline?: string | null
+          auction_start_price?: number | null
+          auction_winner_id?: string | null
+          auction_winner_notified_at?: string | null
           bgg_game_id?: number
           bgg_version_id?: number | null
           condition?: string
@@ -713,6 +794,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string | null
+          data: Json | null
+          id: string
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       order_issues: {
         Row: {
@@ -1686,6 +1800,14 @@ export type Database = {
       listings_with_details: {
         Row: {
           all_components_present: boolean | null
+          auction_anti_snipe_extended: boolean | null
+          auction_bid_count: number | null
+          auction_current_bid: number | null
+          auction_duration_days: number | null
+          auction_ends_at: string | null
+          auction_payment_deadline: string | null
+          auction_start_price: number | null
+          auction_winner_id: string | null
           bgg_game_id: number | null
           bgg_version_id: number | null
           condition: string | null
@@ -1984,6 +2106,7 @@ export type Database = {
         Args: { p_buyer_id: string; p_order_id: string }
         Returns: Json
       }
+      can_cancel_auction: { Args: { p_listing_id: string }; Returns: boolean }
       can_respond_to_wanted_listing: {
         Args: { p_seller_id: string; p_wanted_listing_id: string }
         Returns: boolean
@@ -1995,6 +2118,16 @@ export type Database = {
       consume_recovery_code: {
         Args: { code_to_use: string; target_user_id: string }
         Returns: boolean
+      }
+      create_notification: {
+        Args: {
+          p_body?: string
+          p_data?: Json
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
       }
       create_order_from_basket: {
         Args: {
@@ -2066,6 +2199,7 @@ export type Database = {
           unread_count: number
         }[]
       }
+      handle_expired_auction_payments: { Args: never; Returns: Json }
       handle_expired_seller_deadlines: { Args: never; Returns: Json }
       is_listing_available: { Args: { listing_id: string }; Returns: boolean }
       is_quick_response: {
@@ -2077,10 +2211,21 @@ export type Database = {
         Args: { user1_uuid: string; user2_uuid: string }
         Returns: boolean
       }
+      place_bid: {
+        Args: {
+          p_amount: number
+          p_bidder_id: string
+          p_ip_address?: unknown
+          p_listing_id: string
+          p_user_agent?: string
+        }
+        Returns: Json
+      }
       post_transaction_system_message: {
         Args: { p_content: string; p_message_type: string; p_order_id: string }
         Returns: string
       }
+      process_ended_auctions: { Args: never; Returns: Json }
       refresh_game_pricing_stats: { Args: never; Returns: undefined }
       release_expired_reservations: { Args: never; Returns: number }
       release_listing_reservation: {

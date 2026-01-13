@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
-import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, Calendar, PuzzlePiece as Puzzle, BookOpen, Globe, Building as Building2, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Gavel } from 'griddy-icons';
+import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, Calendar, PuzzlePiece as Puzzle, BookOpen, Globe, Building as Building2, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Tag as Gavel } from 'griddy-icons';
 import { type TerminalCountry } from '@/lib/unisend/types';
 import { useDeliveredPricing } from '@/lib/hooks/useDeliveredPricing';
 import { PriceBreakdown } from '@/components/common/PriceBreakdown';

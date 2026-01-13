@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from '@second-turn/design-system';
-import { Chat as MessageSquare, CreditCard, CheckCircleAlt01 as CheckCircle2, ArrowRight, Gavel } from 'griddy-icons';
+import { Chat as MessageSquare, CreditCard, CheckCircleAlt01 as CheckCircle2, ArrowRight, Tag as Gavel } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import type { ListingType } from '@/lib/types/listing';
 
