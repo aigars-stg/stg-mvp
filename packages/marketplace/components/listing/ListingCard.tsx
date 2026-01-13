@@ -181,13 +181,17 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
         <div className="p-4 flex flex-col flex-grow">
           {/* Variable height content */}
           <div className="space-y-2">
-            {/* Game Name - with expansion label if this IS an expansion */}
+            {/* Game Name */}
             <h3 className="font-bold text-lg text-polar-night line-clamp-2 min-h-[2.5rem]">
               {listing.game_name}
-              {listing.game?.is_expansion && (
-                <span className="text-text-muted font-normal text-sm"> ({t('card.expansion')})</span>
-              )}
             </h3>
+
+            {/* Expansion Badge */}
+            {listing.game?.is_expansion && (
+              <Badge variant="default" size="sm" icon={<Puzzle className="w-3 h-3" />}>
+                {t('card.expansion')}
+              </Badge>
+            )}
 
             {/* Game Metadata - tighter spacing */}
             {(listing.game?.player_count || listing.game?.min_age || listing.game?.playing_time || (listing.included_expansions && listing.included_expansions.length > 0)) && (

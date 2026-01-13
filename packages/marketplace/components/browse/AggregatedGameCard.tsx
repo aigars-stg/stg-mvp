@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Card, Badge } from '@second-turn/design-system';
-import { Package, Users, User as Baby, Time as Clock } from 'griddy-icons';
+import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
 import { saveBrowseContext } from '@/lib/browse-context';
@@ -57,7 +57,7 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
           {/* Expansion Badge */}
           {game.is_expansion && (
             <div className="absolute top-3 left-3">
-              <Badge variant="warning" size="sm">
+              <Badge variant="default" size="sm" icon={<Puzzle className="w-3 h-3" />}>
                 {tListings('expansion')}
               </Badge>
             </div>

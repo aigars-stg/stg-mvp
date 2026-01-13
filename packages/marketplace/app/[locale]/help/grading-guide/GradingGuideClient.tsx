@@ -4,16 +4,7 @@ import Link from 'next/link';
 import { Card } from '@second-turn/design-system';
 import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, PhotoCamera as Camera, AlertTriangle, LightbulbOn as Lightbulb, BookOpen, ChevronDown, ChevronUp  } from 'griddy-icons';
 import { useState } from 'react';
-import {
-  CONDITION_GRADES,
-  SPECIAL_CONSIDERATIONS,
-  LISTING_TIPS,
-  PHOTO_TIPS,
-  COMMON_MISTAKES,
-  QUICK_REFERENCE,
-  GUIDE_INTRO,
-  GRADING_PHILOSOPHY,
-} from '../../../../lib/grading-guide-content';
+import { useTranslations } from 'next-intl';
 import type { ListingCondition } from '../../../../lib/types/listing';
 
 // Grade icons mapping
@@ -41,8 +32,18 @@ const GRADE_ICON_COLORS = {
 
 function GradeCard({ gradeKey }: { gradeKey: ListingCondition }) {
   const [expanded, setExpanded] = useState(false);
-  const grade = CONDITION_GRADES[gradeKey];
+  const t = useTranslations('Help.GradingGuide.gradeCard');
+  const tGrades = useTranslations('Sell.GradingGuidePanel.grades');
   const Icon = GRADE_ICONS[gradeKey];
+
+  // Get translated grade content
+  const label = tGrades(`${gradeKey}.label`);
+  const shortDescription = tGrades(`${gradeKey}.shortDescription`);
+  const fullDescription = tGrades(`${gradeKey}.fullDescription`);
+  const valueGuidance = tGrades(`${gradeKey}.valueGuidance`);
+  const boxCriteria = tGrades.raw(`${gradeKey}.boxCriteria`) as string[];
+  const componentCriteria = tGrades.raw(`${gradeKey}.componentCriteria`) as string[];
+  const proTip = tGrades(`${gradeKey}.proTip`);
 
   return (
     <Card
@@ -62,14 +63,14 @@ function GradeCard({ gradeKey }: { gradeKey: ListingCondition }) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-lg sm:text-xl font-bold text-polar-night">
-                  {grade.label}
+                  {label}
                 </h3>
                 <span className="text-sm font-medium text-text-secondary whitespace-nowrap">
-                  {grade.valueGuidance}
+                  {valueGuidance}
                 </span>
               </div>
-              <p className="text-text-secondary mt-1">{grade.shortDescription}</p>
-              <p className="text-sm text-text-muted mt-2">{grade.fullDescription}</p>
+              <p className="text-text-secondary mt-1">{shortDescription}</p>
+              <p className="text-sm text-text-muted mt-2">{fullDescription}</p>
             </div>
             <div className="flex-shrink-0 text-text-muted">
               {expanded ? (
@@ -87,9 +88,9 @@ function GradeCard({ gradeKey }: { gradeKey: ListingCondition }) {
           <div className="grid sm:grid-cols-2 gap-6 pt-4">
             {/* Box Criteria */}
             <div>
-              <h4 className="font-semibold text-polar-night mb-3">Box Condition</h4>
+              <h4 className="font-semibold text-polar-night mb-3">{t('boxCondition')}</h4>
               <ul className="space-y-2">
-                {grade.boxCriteria.map((criterion, index) => (
+                {boxCriteria.map((criterion: string, index: number) => (
                   <li
                     key={index}
                     className="text-sm text-text-secondary flex items-start gap-2"
@@ -104,10 +105,10 @@ function GradeCard({ gradeKey }: { gradeKey: ListingCondition }) {
             {/* Component Criteria */}
             <div>
               <h4 className="font-semibold text-polar-night mb-3">
-                Component Condition
+                {t('componentCondition')}
               </h4>
               <ul className="space-y-2">
-                {grade.componentCriteria.map((criterion, index) => (
+                {componentCriteria.map((criterion: string, index: number) => (
                   <li
                     key={index}
                     className="text-sm text-text-secondary flex items-start gap-2"
@@ -120,29 +121,14 @@ function GradeCard({ gradeKey }: { gradeKey: ListingCondition }) {
             </div>
           </div>
 
-          {/* Typical Scenarios */}
-          <div className="mt-6">
-            <h4 className="font-semibold text-polar-night mb-3">Typical Scenarios</h4>
-            <div className="flex flex-wrap gap-2">
-              {grade.typicalScenarios.map((scenario, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1.5 bg-bg-secondary rounded-full text-sm text-text-secondary"
-                >
-                  {scenario}
-                </span>
-              ))}
-            </div>
-          </div>
-
           {/* Pro Tip */}
-          {grade.proTip && (
+          {proTip && (
             <div className="mt-6 p-3 bg-frost-ice/10 rounded-lg border border-frost-ice/20">
               <div className="flex gap-2 items-start">
                 <Lightbulb className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-text-secondary">
-                  <span className="font-medium text-polar-night">Pro tip:</span>{' '}
-                  {grade.proTip}
+                  <span className="font-medium text-polar-night">{t('proTip')}</span>{' '}
+                  {proTip}
                 </p>
               </div>
             </div>
@@ -154,38 +140,39 @@ function GradeCard({ gradeKey }: { gradeKey: ListingCondition }) {
 }
 
 function TableOfContents() {
+  const t = useTranslations('Help.GradingGuide.toc');
   return (
     <nav className="mb-8 p-4 bg-bg-secondary rounded-lg">
-      <h2 className="font-semibold text-polar-night mb-3">On this page</h2>
+      <h2 className="font-semibold text-polar-night mb-3">{t('title')}</h2>
       <ul className="space-y-2 text-sm">
         <li>
           <a href="#grades" className="text-frost-ice hover:underline">
-            Condition grades
+            {t('grades')}
           </a>
         </li>
         <li>
           <a href="#quick-reference" className="text-frost-ice hover:underline">
-            Quick reference table
+            {t('quickReference')}
           </a>
         </li>
         <li>
           <a href="#special-considerations" className="text-frost-ice hover:underline">
-            Special considerations
+            {t('specialConsiderations')}
           </a>
         </li>
         <li>
           <a href="#listing-tips" className="text-frost-ice hover:underline">
-            Listing description tips
+            {t('listingTips')}
           </a>
         </li>
         <li>
           <a href="#photo-tips" className="text-frost-ice hover:underline">
-            Photo tips
+            {t('photoTips')}
           </a>
         </li>
         <li>
           <a href="#common-mistakes" className="text-frost-ice hover:underline">
-            Common mistakes
+            {t('commonMistakes')}
           </a>
         </li>
       </ul>
@@ -194,16 +181,24 @@ function TableOfContents() {
 }
 
 export default function GradingGuideClient() {
+  const t = useTranslations('Help.GradingGuide');
+  const tSections = useTranslations('Help.GradingGuide.sections');
+  const tTable = useTranslations('Help.GradingGuide.quickReferenceTable');
+  const tGrades = useTranslations('Sell.GradingGuidePanel.grades');
+  const tGradesSummary = useTranslations('Help.GradingGuide.grades');
+
+  const GRADES: ListingCondition[] = ['likeNew', 'veryGood', 'good', 'acceptable'];
+
   return (
     <div className="min-h-screen bg-bg py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-polar-night mb-2">
-            {GUIDE_INTRO.title}
+            {t('intro.title')}
           </h1>
-          <p className="text-lg text-frost-ice italic mb-4">{GUIDE_INTRO.tagline}</p>
-          <p className="text-text-secondary">{GUIDE_INTRO.description}</p>
+          <p className="text-lg text-frost-ice italic mb-4">{t('intro.tagline')}</p>
+          <p className="text-text-secondary">{t('intro.description')}</p>
         </div>
 
         <TableOfContents />
@@ -211,21 +206,19 @@ export default function GradingGuideClient() {
         {/* Condition Grades */}
         <section id="grades" className="mb-12 scroll-mt-8">
           <h2 className="text-2xl font-bold text-polar-night mb-6">
-            Condition grades
+            {tSections('conditionGrades')}
           </h2>
           <div className="space-y-4">
-            {(['likeNew', 'veryGood', 'good', 'acceptable'] as ListingCondition[]).map(
-              (gradeKey) => (
-                <GradeCard key={gradeKey} gradeKey={gradeKey} />
-              )
-            )}
+            {GRADES.map((gradeKey) => (
+              <GradeCard key={gradeKey} gradeKey={gradeKey} />
+            ))}
           </div>
         </section>
 
         {/* Quick Reference Table */}
         <section id="quick-reference" className="mb-12 scroll-mt-8">
           <h2 className="text-2xl font-bold text-polar-night mb-6">
-            Quick reference
+            {tSections('quickReference')}
           </h2>
           <Card padding="none" className="overflow-hidden">
             <div className="overflow-x-auto">
@@ -233,36 +226,36 @@ export default function GradingGuideClient() {
                 <thead>
                   <tr className="bg-bg-secondary border-b border-border">
                     <th className="text-left px-4 py-3 font-semibold text-polar-night">
-                      Grade
+                      {tTable('grade')}
                     </th>
                     <th className="text-left px-4 py-3 font-semibold text-polar-night">
-                      Description
+                      {tTable('description')}
                     </th>
                     <th className="text-right px-4 py-3 font-semibold text-polar-night">
-                      Value
+                      {tTable('value')}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {QUICK_REFERENCE.map((item) => {
-                    const Icon = GRADE_ICONS[item.grade];
+                  {GRADES.map((grade) => {
+                    const Icon = GRADE_ICONS[grade];
                     return (
-                      <tr key={item.grade} className="border-b border-border/50 last:border-0">
+                      <tr key={grade} className="border-b border-border/50 last:border-0">
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <Icon
-                              className={`w-4 h-4 ${GRADE_ICON_COLORS[item.grade]}`}
+                              className={`w-4 h-4 ${GRADE_ICON_COLORS[grade]}`}
                             />
                             <span className="font-medium text-polar-night">
-                              {CONDITION_GRADES[item.grade].label}
+                              {tGrades(`${grade}.label`)}
                             </span>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-text-secondary">
-                          {item.oneLineSummary}
+                          {tGradesSummary(`${grade}.oneLineSummary`)}
                         </td>
                         <td className="px-4 py-3 text-right text-text-secondary whitespace-nowrap">
-                          {item.valueRange}
+                          {tGrades(`${grade}.valueGuidance`)}
                         </td>
                       </tr>
                     );
@@ -272,38 +265,40 @@ export default function GradingGuideClient() {
             </div>
           </Card>
           <p className="text-sm text-text-muted mt-3 italic">
-            Value percentages are rough guidelines. Rare and out-of-print games often
-            sell for more regardless of condition.
+            {tTable('disclaimer')}
           </p>
         </section>
 
         {/* Special Considerations */}
         <section id="special-considerations" className="mb-12 scroll-mt-8">
           <h2 className="text-2xl font-bold text-polar-night mb-6">
-            Special considerations
+            {tSections('specialConsiderations')}
           </h2>
           <div className="grid gap-4">
-            {Object.entries(SPECIAL_CONSIDERATIONS).map(([key, consideration]) => (
-              <Card key={key} padding="md">
-                <h3 className="font-semibold text-polar-night mb-2">
-                  {consideration.title}
-                </h3>
-                <p className="text-text-secondary text-sm mb-3">
-                  {consideration.description}
-                </p>
-                <ul className="space-y-1.5">
-                  {consideration.details.map((detail, index) => (
-                    <li
-                      key={index}
-                      className="text-sm text-text-muted flex items-start gap-2"
-                    >
-                      <span className="text-frost-ice mt-0.5">•</span>
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            ))}
+            {(['punchedTokens', 'sleevedCards', 'paintedMinis', 'promosExtras', 'editionLanguage'] as const).map((key) => {
+              const details = t.raw(`specialConsiderations.${key}.details`) as string[];
+              return (
+                <Card key={key} padding="md">
+                  <h3 className="font-semibold text-polar-night mb-2">
+                    {t(`specialConsiderations.${key}.title`)}
+                  </h3>
+                  <p className="text-text-secondary text-sm mb-3">
+                    {t(`specialConsiderations.${key}.description`)}
+                  </p>
+                  <ul className="space-y-1.5">
+                    {details.map((detail: string, index: number) => (
+                      <li
+                        key={index}
+                        className="text-sm text-text-muted flex items-start gap-2"
+                      >
+                        <span className="text-frost-ice mt-0.5">•</span>
+                        {detail}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              );
+            })}
           </div>
         </section>
 
@@ -311,21 +306,21 @@ export default function GradingGuideClient() {
         <section id="listing-tips" className="mb-12 scroll-mt-8">
           <h2 className="text-2xl font-bold text-polar-night mb-6 flex items-center gap-2">
             <BookOpen className="w-6 h-6" />
-            Listing description examples
+            {tSections('listingTips')}
           </h2>
           <div className="space-y-4">
-            {LISTING_TIPS.map((tip) => {
-              const Icon = GRADE_ICONS[tip.grade];
+            {GRADES.map((grade) => {
+              const Icon = GRADE_ICONS[grade];
               return (
-                <Card key={tip.grade} padding="md" className="border border-border">
+                <Card key={grade} padding="md" className="border border-border">
                   <div className="flex items-center gap-2 mb-3">
-                    <Icon className={`w-5 h-5 ${GRADE_ICON_COLORS[tip.grade]}`} />
+                    <Icon className={`w-5 h-5 ${GRADE_ICON_COLORS[grade]}`} />
                     <span className="font-semibold text-polar-night">
-                      {CONDITION_GRADES[tip.grade].label}
+                      {tGrades(`${grade}.label`)}
                     </span>
                   </div>
                   <blockquote className="text-text-secondary text-sm italic border-l-2 border-frost-ice/30 pl-4">
-                    "{tip.example}"
+                    "{t(`listingTips.${grade}`)}"
                   </blockquote>
                 </Card>
               );
@@ -337,16 +332,16 @@ export default function GradingGuideClient() {
         <section id="photo-tips" className="mb-12 scroll-mt-8">
           <h2 className="text-2xl font-bold text-polar-night mb-6 flex items-center gap-2">
             <Camera className="w-6 h-6" />
-            Photos make the difference
+            {tSections('photoTips')}
           </h2>
           <Card padding="md">
             <p className="text-text-secondary mb-4">
-              Good photos build trust. Here's what to show:
+              {t('photoTips.intro')}
             </p>
             <div className="grid sm:grid-cols-2 gap-4">
-              {PHOTO_TIPS.map((tip, index) => (
+              {(['boxFront', 'boxBack', 'boxCorners', 'componentsSpread', 'anyDamage', 'cards'] as const).map((key, index) => (
                 <div
-                  key={index}
+                  key={key}
                   className="flex items-start gap-3 p-3 bg-bg-secondary/50 rounded-lg"
                 >
                   <span className="w-6 h-6 rounded-full bg-frost-ice/20 text-frost-ice flex items-center justify-center text-sm font-medium flex-shrink-0">
@@ -354,18 +349,17 @@ export default function GradingGuideClient() {
                   </span>
                   <div>
                     <div className="font-medium text-polar-night text-sm">
-                      {tip.subject}
+                      {t(`photoTips.subjects.${key}.title`)}
                     </div>
-                    <div className="text-xs text-text-muted">{tip.description}</div>
+                    <div className="text-xs text-text-muted">{t(`photoTips.subjects.${key}.description`)}</div>
                   </div>
                 </div>
               ))}
             </div>
             <div className="mt-4 p-3 bg-frost-ice/10 rounded-lg">
               <p className="text-sm text-text-secondary">
-                <span className="font-medium text-polar-night">Tip:</span> Natural
-                daylight works best. Photograph on a plain background and show actual
-                condition, not the best angle.
+                <span className="font-medium text-polar-night">{t('photoTips.tipLabel')}</span>{' '}
+                {t('photoTips.tip')}
               </p>
             </div>
           </Card>
@@ -375,10 +369,10 @@ export default function GradingGuideClient() {
         <section id="common-mistakes" className="mb-12 scroll-mt-8">
           <h2 className="text-2xl font-bold text-polar-night mb-6 flex items-center gap-2">
             <AlertTriangle className="w-6 h-6" />
-            Common grading mistakes
+            {tSections('commonMistakes')}
           </h2>
           <div className="space-y-3">
-            {COMMON_MISTAKES.map((item, index) => (
+            {(t.raw('commonMistakes') as Array<{ mistake: string; correction: string }>).map((item, index) => (
               <Card key={index} padding="md" className="border border-aurora-orange/20">
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
@@ -403,26 +397,26 @@ export default function GradingGuideClient() {
         <section className="mb-12">
           <Card padding="lg" className="bg-frost-ice/5 border border-frost-ice/20">
             <h2 className="text-xl font-bold text-polar-night mb-3">
-              {GRADING_PHILOSOPHY.title}
+              {t('philosophy.title')}
             </h2>
-            <p className="text-text-secondary">{GRADING_PHILOSOPHY.content}</p>
+            <p className="text-text-secondary">{t('philosophy.content')}</p>
           </Card>
         </section>
 
         {/* CTA */}
         <div className="text-center space-y-4">
           <p className="text-text-secondary">
-            Ready to list your game with confidence?
+            {t('cta.ready')}
           </p>
           <Link
             href="/sell"
             className="inline-flex items-center px-6 py-3 bg-frost-ice text-snow-white font-semibold rounded-lg hover:bg-aurora-blue transition-colors"
           >
-            Sell a game
+            {t('cta.sellButton')}
           </Link>
           <div className="pt-4">
             <Link href="/" className="text-frost-ice hover:underline text-sm">
-              ← Back to Home
+              {t('cta.backToHome')}
             </Link>
           </div>
         </div>

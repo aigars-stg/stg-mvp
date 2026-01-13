@@ -4,11 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { SlidePanel, Card } from '@second-turn/design-system';
 import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, ChevronDown, ChevronUp, LightbulbOn as Lightbulb, LinkExternal as ExternalLink  } from 'griddy-icons';
-import {
-  CONDITION_GRADES,
-  SPECIAL_CONSIDERATIONS,
-  GRADING_PHILOSOPHY,
-} from '../../lib/grading-guide-content';
 import type { ListingCondition } from '../../lib/types/listing';
 import { useTranslations } from 'next-intl';
 
@@ -49,9 +44,20 @@ function GradeItem({
   isHighlighted: boolean;
 }) {
   const t = useTranslations('Sell.GradingGuidePanel');
+  const tGrades = useTranslations('Sell.GradingGuidePanel.grades');
   const [expanded, setExpanded] = useState(isHighlighted);
-  const grade = CONDITION_GRADES[gradeKey];
   const Icon = GRADE_ICONS[gradeKey];
+
+  // Get translated content
+  const label = tGrades(`${gradeKey}.label`);
+  const shortDescription = tGrades(`${gradeKey}.shortDescription`);
+  const fullDescription = tGrades(`${gradeKey}.fullDescription`);
+  const valueGuidance = tGrades(`${gradeKey}.valueGuidance`);
+  const proTip = tGrades(`${gradeKey}.proTip`);
+
+  // Get arrays - need to use raw to get the array
+  const boxCriteria = tGrades.raw(`${gradeKey}.boxCriteria`) as string[];
+  const componentCriteria = tGrades.raw(`${gradeKey}.componentCriteria`) as string[];
 
   return (
     <div
@@ -72,7 +78,7 @@ function GradeItem({
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="font-semibold text-polar-night">
-                  {grade.label}
+                  {label}
                   {isHighlighted && (
                     <span className="ml-2 text-xs font-normal text-frost-ice">
                       {t('selected')}
@@ -80,11 +86,11 @@ function GradeItem({
                   )}
                 </h3>
                 <span className="text-xs text-text-muted whitespace-nowrap">
-                  {grade.valueGuidance}
+                  {valueGuidance}
                 </span>
               </div>
               <p className="text-sm text-text-secondary mt-0.5">
-                {grade.shortDescription}
+                {shortDescription}
               </p>
             </div>
             <div className="flex-shrink-0 text-text-muted">
@@ -100,14 +106,14 @@ function GradeItem({
 
       {expanded && (
         <div className="px-3 pb-3 sm:px-4 sm:pb-4 border-t border-border/30">
-          <p className="text-xs text-text-muted mt-3 mb-3">{grade.fullDescription}</p>
+          <p className="text-xs text-text-muted mt-3 mb-3">{fullDescription}</p>
 
           <div className="grid grid-cols-2 gap-3">
             {/* Box Criteria */}
             <div>
-              <h4 className="text-xs font-semibold text-polar-night mb-2">Box</h4>
+              <h4 className="text-xs font-semibold text-polar-night mb-2">{t('box')}</h4>
               <ul className="space-y-1">
-                {grade.boxCriteria.slice(0, 3).map((criterion, index) => (
+                {boxCriteria.slice(0, 3).map((criterion, index) => (
                   <li key={index} className="text-xs text-text-muted flex items-start gap-1">
                     <span className="text-frost-ice/60">•</span>
                     {criterion}
@@ -118,9 +124,9 @@ function GradeItem({
 
             {/* Component Criteria */}
             <div>
-              <h4 className="text-xs font-semibold text-polar-night mb-2">Components</h4>
+              <h4 className="text-xs font-semibold text-polar-night mb-2">{t('components')}</h4>
               <ul className="space-y-1">
-                {grade.componentCriteria.slice(0, 3).map((criterion, index) => (
+                {componentCriteria.slice(0, 3).map((criterion, index) => (
                   <li key={index} className="text-xs text-text-muted flex items-start gap-1">
                     <span className="text-frost-ice/60">•</span>
                     {criterion}
@@ -130,10 +136,10 @@ function GradeItem({
             </div>
           </div>
 
-          {grade.proTip && (
+          {proTip && (
             <div className="mt-3 p-2 bg-frost-ice/10 rounded text-xs text-text-secondary flex gap-2 items-start">
               <Lightbulb className="w-3 h-3 text-frost-ice flex-shrink-0 mt-0.5" />
-              <span>{grade.proTip}</span>
+              <span>{proTip}</span>
             </div>
           )}
         </div>
@@ -204,9 +210,9 @@ export function GradingGuidePanel({
             {/* Philosophy */}
             <Card padding="sm" className="bg-frost-ice/5 border border-frost-ice/20">
               <h3 className="font-semibold text-polar-night text-sm mb-1">
-                {GRADING_PHILOSOPHY.title}
+                {t('philosophy.title')}
               </h3>
-              <p className="text-xs text-text-secondary">{GRADING_PHILOSOPHY.content}</p>
+              <p className="text-xs text-text-secondary">{t('philosophy.content')}</p>
             </Card>
           </>
         )}
@@ -219,27 +225,30 @@ export function GradingGuidePanel({
                 {t('specialConsiderations')}
               </h3>
               <div className="space-y-3">
-                {Object.entries(SPECIAL_CONSIDERATIONS).map(([key, consideration]) => (
-                  <Card key={key} padding="sm" className="border border-border/50">
-                    <h4 className="font-medium text-polar-night text-sm mb-1">
-                      {consideration.title}
-                    </h4>
-                    <p className="text-xs text-text-muted mb-2">
-                      {consideration.description}
-                    </p>
-                    <ul className="space-y-1">
-                      {consideration.details.slice(0, 3).map((detail, index) => (
-                        <li
-                          key={index}
-                          className="text-xs text-text-muted flex items-start gap-1"
-                        >
-                          <span className="text-frost-ice/60">•</span>
-                          {detail}
-                        </li>
-                      ))}
-                    </ul>
-                  </Card>
-                ))}
+                {(['punchedTokens', 'sleevedCards', 'paintedMinis'] as const).map((key) => {
+                  const details = t.raw(`specialConsiderationsContent.${key}.details`) as string[];
+                  return (
+                    <Card key={key} padding="sm" className="border border-border/50">
+                      <h4 className="font-medium text-polar-night text-sm mb-1">
+                        {t(`specialConsiderationsContent.${key}.title`)}
+                      </h4>
+                      <p className="text-xs text-text-muted mb-2">
+                        {t(`specialConsiderationsContent.${key}.description`)}
+                      </p>
+                      <ul className="space-y-1">
+                        {details.slice(0, 3).map((detail, index) => (
+                          <li
+                            key={index}
+                            className="text-xs text-text-muted flex items-start gap-1"
+                          >
+                            <span className="text-frost-ice/60">•</span>
+                            {detail}
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
+                  );
+                })}
               </div>
             </div>
 

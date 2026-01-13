@@ -12,6 +12,7 @@ import {
   parseFetchError,
 } from './bgg-errors';
 import { createBGGHeaders } from './bgg-config';
+import { createServiceClient } from './supabase/client';
 
 // Re-export types for convenience
 export type { BGGGame, BGGVersion, BGGGameMetadata, BGGInboundLink };
@@ -827,5 +828,65 @@ export async function fetchGameWithFallback(gameId: number): Promise<{
       reason: 'BGG API error',
     };
   }
+}
+
+/**
+ * Ensures game metadata is populated in the database
+ * Fetches from BGG API if missing and updates the games table
+ *
+ * Called during listing creation to ensure card data is available
+ */
+export async function ensureGameMetadata(gameId: number): Promise<void> {
+  const supabase = createServiceClient();
+
+  // Check if game already has metadata
+  const { data: game, error: fetchError } = await supabase
+    .from('games')
+    .select('player_count, thumbnail, image')
+    .eq('id', gameId)
+    .single();
+
+  if (fetchError) {
+    console.error(`[ensureGameMetadata] Error fetching game ${gameId}:`, fetchError);
+    return;
+  }
+
+  // If metadata already exists, no need to fetch
+  if (game?.player_count && game?.thumbnail) {
+    console.log(`[ensureGameMetadata] Game ${gameId} already has metadata`);
+    return;
+  }
+
+  // Fetch metadata from BGG API
+  console.log(`[ensureGameMetadata] Fetching BGG metadata for game ${gameId}...`);
+  const metadata = await fetchGameMetadata(gameId);
+
+  if (!metadata) {
+    console.warn(`[ensureGameMetadata] No metadata returned from BGG for game ${gameId}`);
+    return;
+  }
+
+  // Update the games table with metadata
+  const { error: updateError } = await supabase
+    .from('games')
+    .update({
+      player_count: metadata.playerCount || null,
+      min_age: metadata.minAge || null,
+      playing_time: metadata.playingTime || null,
+      thumbnail: metadata.thumbnail || null,
+      image: metadata.image || null,
+      description: metadata.description || null,
+      designers: metadata.designers && metadata.designers.length > 0 ? metadata.designers : null,
+      metadata_fetched_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', gameId);
+
+  if (updateError) {
+    console.error(`[ensureGameMetadata] Error updating game ${gameId}:`, updateError);
+    return;
+  }
+
+  console.log(`[ensureGameMetadata] Successfully updated metadata for game ${gameId}`);
 }
 

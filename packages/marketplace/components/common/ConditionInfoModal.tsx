@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { Modal, Button } from '@second-turn/design-system';
 import { Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, LinkExternal as ExternalLink } from 'griddy-icons';
-import { CONDITION_GRADES } from '../../lib/grading-guide-content';
 import type { ListingCondition } from '../../lib/types/listing';
 import { useTranslations } from 'next-intl';
 
@@ -35,8 +34,16 @@ export function ConditionInfoModal({
   condition,
 }: ConditionInfoModalProps) {
   const t = useTranslations('Common.ConditionInfoModal');
-  const grade = CONDITION_GRADES[condition];
+  const tGrades = useTranslations('Sell.GradingGuidePanel.grades');
   const Icon = GRADE_ICONS[condition];
+
+  // Get translated grade content
+  const label = tGrades(`${condition}.label`);
+  const shortDescription = tGrades(`${condition}.shortDescription`);
+  const fullDescription = tGrades(`${condition}.fullDescription`);
+  const valueGuidance = tGrades(`${condition}.valueGuidance`);
+  const boxCriteria = tGrades.raw(`${condition}.boxCriteria`) as string[];
+  const componentCriteria = tGrades.raw(`${condition}.componentCriteria`) as string[];
 
   return (
     <Modal
@@ -67,13 +74,13 @@ export function ConditionInfoModal({
         >
           <Icon className="w-8 h-8" />
           <div>
-            <h3 className="font-bold text-lg text-polar-night">{grade.label}</h3>
-            <p className="text-sm text-text-secondary">{grade.shortDescription}</p>
+            <h3 className="font-bold text-lg text-polar-night">{label}</h3>
+            <p className="text-sm text-text-secondary">{shortDescription}</p>
           </div>
         </div>
 
         {/* Description */}
-        <p className="text-text-secondary text-sm">{grade.fullDescription}</p>
+        <p className="text-text-secondary text-sm">{fullDescription}</p>
 
         {/* What to Expect */}
         <div>
@@ -84,7 +91,7 @@ export function ConditionInfoModal({
             <div>
               <h5 className="text-xs font-medium text-text-muted mb-1.5">{t('box')}</h5>
               <ul className="space-y-1">
-                {grade.boxCriteria.slice(0, 3).map((criterion, index) => (
+                {boxCriteria.slice(0, 3).map((criterion: string, index: number) => (
                   <li
                     key={index}
                     className="text-xs text-text-secondary flex items-start gap-1"
@@ -98,7 +105,7 @@ export function ConditionInfoModal({
             <div>
               <h5 className="text-xs font-medium text-text-muted mb-1.5">{t('components')}</h5>
               <ul className="space-y-1">
-                {grade.componentCriteria.slice(0, 3).map((criterion, index) => (
+                {componentCriteria.slice(0, 3).map((criterion: string, index: number) => (
                   <li
                     key={index}
                     className="text-xs text-text-secondary flex items-start gap-1"
@@ -115,7 +122,7 @@ export function ConditionInfoModal({
         {/* Value Guidance */}
         <div className="pt-2 border-t border-border/50">
           <p className="text-xs text-text-muted">
-            {t('typicalValue')} <span className="font-medium">{grade.valueGuidance}</span> {t('ofRetailPrice')}
+            {t('typicalValue')} <span className="font-medium">{valueGuidance}</span> {t('ofRetailPrice')}
           </p>
         </div>
       </div>
