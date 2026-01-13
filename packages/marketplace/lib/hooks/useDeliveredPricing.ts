@@ -25,7 +25,7 @@ export interface DeliveredPricingResult {
 }
 
 interface UseDeliveredPricingParams {
-  listingType: 'instant_buy' | 'contact_seller';
+  listingType: 'instant_buy' | 'contact_seller' | 'auction';
   price: number;
   sellerCountry: string | null | undefined;
   buyerCountry?: TerminalCountry;
@@ -58,8 +58,8 @@ export function useDeliveredPricing({
   buyerCountry,
 }: UseDeliveredPricingParams): DeliveredPricingResult {
   return useMemo(() => {
-    // Contact seller listings don't have platform shipping/fees
-    if (listingType === 'contact_seller') {
+    // Contact seller and auction listings don't have fixed platform pricing
+    if (listingType === 'contact_seller' || listingType === 'auction') {
       return {
         itemPrice: price,
         shippingCost: 0,

@@ -406,7 +406,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   <>
                     {/* Auction badge and current bid */}
                     <div className="flex items-center gap-2 justify-end mb-1">
-                      <Badge variant="secondary" size="sm" icon={<Gavel className="w-3 h-3" />}>
+                      <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />}>
                         {t('auction.badge')}
                       </Badge>
                     </div>
@@ -543,7 +543,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                     {listing.listing_type === 'auction' ? (
                       <>
                         {/* Auction badge */}
-                        <Badge variant="secondary" size="sm" icon={<Gavel className="w-3 h-3" />}>
+                        <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />}>
                           {t('auction.badge')}
                         </Badge>
                         <div className="text-xs text-text-secondary mt-1">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { Button, Input, Card } from '@second-turn/design-system';
 import { Tag as Gavel, Time as Clock, AlertCircle, CheckCircleAlt01 as CheckCircle2, RefreshCw, Flash as Zap } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
@@ -259,13 +260,14 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
               <p className="text-sm text-text-secondary mb-3">
                 {t('completePayment')}
               </p>
-              <Button
-                variant="primary"
-                href={`/checkout/auction/${listing.id}`}
-                className="bg-aurora-green hover:bg-aurora-green/90"
-              >
-                {t('payNow')}
-              </Button>
+              <Link href={`/checkout/auction/${listing.id}`}>
+                <Button
+                  variant="primary"
+                  className="bg-aurora-green hover:bg-aurora-green/90"
+                >
+                  {t('payNow')}
+                </Button>
+              </Link>
             </div>
           )}
 

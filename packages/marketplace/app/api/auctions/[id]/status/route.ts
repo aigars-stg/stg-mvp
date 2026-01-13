@@ -62,8 +62,8 @@ export async function GET(request: NextRequest, { params }: Params) {
       : startPrice;
 
     // Check if auction has ended
-    const endsAt = new Date(listing.auction_ends_at);
-    const isEnded = endsAt <= new Date();
+    const endsAt = listing.auction_ends_at ? new Date(listing.auction_ends_at) : null;
+    const isEnded = endsAt ? endsAt <= new Date() : false;
 
     return NextResponse.json({
       listing_id: listing.id,

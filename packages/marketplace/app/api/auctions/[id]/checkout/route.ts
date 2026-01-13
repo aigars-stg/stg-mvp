@@ -119,7 +119,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Get seller's Stripe Connect account
+    // Get seller's Stripe Connect account and country
     const { data: sellerProfile, error: sellerError } = await supabase
       .from('seller_profiles')
       .select('stripe_connect_account_id, stripe_connect_payouts_enabled')
@@ -133,10 +133,19 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
+    // Get seller's country for shipping calculation
+    const { data: sellerUserProfile } = await supabase
+      .from('user_profiles')
+      .select('country')
+      .eq('id', listing.seller_id)
+      .single();
+
+    const sellerCountry = (sellerUserProfile?.country as TerminalCountry) || 'LV';
+
     // Calculate shipping cost
     let shippingCostEuros = 0;
     if (shippingMethod === 't2t' && destinationCountry) {
-      shippingCostEuros = getShippingPrice(destinationCountry);
+      shippingCostEuros = getShippingPrice(sellerCountry, destinationCountry);
     }
 
     // Calculate pricing using the winning bid amount
