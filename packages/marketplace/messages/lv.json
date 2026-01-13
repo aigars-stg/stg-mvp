@@ -232,19 +232,32 @@
     "description": "Neatgriezeniski dzēst savu kontu un visus saistītos datus. Šo nevar atsaukt.",
     "confirmTitle": "Vai esi pilnīgi drošs?",
     "immediateEffects": "Dzēšot kontu, nekavējoties notiks:",
-    "effect1": "Visi tavi aktīvie sludinājumi tiks noņemti",
-    "effect2": "Tavas saglabātās spēles un vēlmju saraksts tiks dzēsts",
-    "effect3": "Tavs profils un atsauksmes tiks anonimizētas",
-    "sellerTitle": "Pārdevējiem:",
-    "sellerEffect1": "Visas neizmaksātās summas tiks apstrādātas 7 dienu laikā",
-    "sellerEffect2": "Darījumu vēsture tiks saglabāta juridiskām vajadzībām",
+    "effects": {
+      "profileHidden": "Tavs profils tiks paslēpts no citiem lietotājiem",
+      "listingsRemoved": "Visi tavi aktīvie sludinājumi tiks noņemti",
+      "signedOut": "Tu tiksi izrakstīts no visām ierīcēm",
+      "infoAnonymized": "Tava personīgā informācija tiks anonimizēta",
+      "emailAvailable": "Tava e-pasta adrese kļūs pieejama jaunai reģistrācijai"
+    },
+    "forSellers": "Pārdevējiem:",
+    "sellerRequirements": "Tev nedrīkst būt neizmaksāti līdzekļi vai neatrisināti strīdi. Atlikusī bilance tiks izmaksāta pirms dzēšanas.",
     "recoveryTitle": "Konta atjaunošana (14 dienu periods):",
-    "recoveryMessage": "Tev ir 14 dienas, lai atjaunotu kontu, piesakoties vēlreiz. Pēc šī perioda dzēšana ir galīga.",
+    "recoveryDescription": "Tev ir 14 dienas, lai atjaunotu kontu, piesakoties vēlreiz. Pēc šī perioda dzēšana ir galīga.",
     "dataRetentionTitle": "Datu glabāšana (GDPR atbilstība):",
-    "dataRetentionMessage": "Daži dati var tikt saglabāti līdz 90 dienām juridiskām un krāpšanas novēršanas vajadzībām.",
-    "typeToConfirm": "Ieraksti DELETE, lai apstiprinātu",
+    "dataRetentionDescription": "Juridiskām un krāpšanas novēršanas vajadzībām mēs saglabājam:",
+    "retention": {
+      "transactions": "Darījumu vēsturi (90 dienas)",
+      "listings": "Sludinājumu ierakstus (90 dienas)",
+      "communications": "Ziņojumu vēsturi strīdu risināšanai (90 dienas)"
+    },
+    "dataRetentionAfter": "Pēc 90 dienām visi dati tiek neatgriezeniski dzēsti.",
+    "finalWarning": "Šo darbību nevar atsaukt pēc 14 dienu atjaunošanas perioda.",
+    "typeDeleteLabel": "Ieraksti DELETE, lai apstiprinātu:",
+    "typeDeletePlaceholder": "Ieraksti DELETE šeit",
     "deleting": "Dzēš...",
-    "confirmButton": "Jā, dzēst manu kontu"
+    "confirmDelete": "Jā, dzēst manu kontu",
+    "cancel": "Atcelt",
+    "pleaseTypeDelete": "Lūdzu ieraksti DELETE, lai apstiprinātu"
   },
   "MessagesPage": {
     "title": "Ziņojumi",
@@ -477,7 +490,14 @@
       "reserved": "Rezervēts",
       "reservedTooltip": "Kāds norēķinās — drīzumā pieejams, ja viņi nepabeigs"
     },
-    "contactSellerWarning": "Šis sludinājums netiek apstrādāts caur mūsu maksājumu sistēmu. Vienojies par maksājumu tieši ar pārdevēju. Mēs nevaram nodrošināt pircēja aizsardzību šim darījumam."
+    "contactSellerWarning": "Šis sludinājums netiek apstrādāts caur mūsu maksājumu sistēmu. Vienojies par maksājumu tieši ar pārdevēju. Mēs nevaram nodrošināt pircēja aizsardzību šim darījumam.",
+    "auction": {
+      "badge": "Izsole",
+      "currentBid": "Pašreizējā solījums",
+      "startingPrice": "Sākuma cena",
+      "bid": "solījums",
+      "bids": "solījumi"
+    }
   },
   "Checkout": {
     "loading": "Ielādē norēķināšanos...",
@@ -896,6 +916,42 @@
     "lastUpdated": "Pēdējoreiz atjaunināts: {date}",
     "backToHome": "← Atpakaļ uz sākumlapu"
   },
+  "Auction": {
+    "title": "Izsole",
+    "currentBid": "Pašreizējā likme",
+    "startingPrice": "Sākuma cena",
+    "bid": "likme",
+    "bids": "likmes",
+    "yourBid": "Tava likme",
+    "minimum": "Minimums",
+    "placeBid": "Izdarīt likmi",
+    "ended": "Izsole beigusies",
+    "endingSoon": "Drīz beigsies!",
+    "wasExtended": "Šī izsole tika pagarināta pēdējā brīža likmes dēļ",
+    "youWon": "Tu uzvarēji!",
+    "completePayment": "Pabeidz maksājumu 48 stundu laikā, lai saņemtu šo spēli",
+    "payNow": "Maksāt tagad",
+    "ownAuction": "Tu nevari likt likmi savā izsolē",
+    "errors": {
+      "minimumBid": "Likmei jābūt vismaz EUR {amount}",
+      "failed": "Neizdevās izdarīt likmi. Lūdzu, mēģini vēlreiz.",
+      "loginRequired": "Lūdzu, ielogojies, lai izdarītu likmi"
+    },
+    "success": {
+      "bidPlaced": "EUR {amount} likme veiksmīgi izdarīta!",
+      "bidPlacedExtended": "Likme izdarīta! Izsole pagarināta par {minutes} minūtēm"
+    },
+    "notifications": {
+      "extended": "Izsole pagarināta par {minutes} minūtēm pēdējā brīža likmes dēļ"
+    },
+    "bidHistory": {
+      "title": "Likšu vēsture",
+      "noBidsYet": "Vēl nav likmju - esi pirmais!",
+      "extendedAuction": "Šī likme pagarināja izsoli",
+      "showMore": "Rādīt vēl {count} likmes",
+      "showLess": "Rādīt mazāk"
+    }
+  },
   "Sell": {
     "page": {
       "title": "Pārdot spēli",
@@ -1290,7 +1346,68 @@
         "tip3": "Piemini apvalkotas kārtis kā pozitīvu aspektu",
         "tip4": "Esi konkrēts par jebkādiem bojājumiem"
       },
-      "viewFullGuide": "Skatīt pilnu vērtēšanas rokasgrāmatu"
+      "viewFullGuide": "Skatīt pilnu vērtēšanas rokasgrāmatu",
+      "box": "Kaste",
+      "components": "Komponenti",
+      "grades": {
+        "likeNew": {
+          "label": "Kā jauns",
+          "shortDescription": "Izskatās nespēlēts vai spēlēts vienu reizi",
+          "fullDescription": "Atvērts, bet būtībā neaiztikts. Šī spēle izskatās tā, it kā tikko būtu noņemta aizsargplēve. Daudzas spēles tiek atvērtas, apskatītas un noliktas plauktā - ja tā ir tava spēle, šī droši vien ir pareizā pakāpe.",
+          "valueGuidance": "80–95% no mazumcenas",
+          "boxCriteria": ["Nav redzama nolietojuma, skrāpējumu vai skrambas", "Stūri asi un neskarti", "Nav plaukta nolietojuma vai uzglabāšanas pēdu"],
+          "componentCriteria": ["Visi komponenti klāt un uzskaitīti", "Kārtīm nav nolietojuma - malas asas, nav izliekuma", "Žetoni neizgriezti vai izgriezti bez bojājumiem"],
+          "proTip": "Ja esi spēlējis pat vienu vai divas reizes, apsver Ļoti labu. Kā jauns nozīmē būtībā neaiztikts."
+        },
+        "veryGood": {
+          "label": "Ļoti labs",
+          "shortDescription": "Spēlēts ar rūpību, minimāls nolietojums",
+          "fullDescription": "Spēlēts un izbaudīts, bet apiets ar rūpību. Spēle Ļoti labā stāvoklī ir tāda, ko labprāt uzdāvinātu.",
+          "valueGuidance": "60–75% no mazumcenas",
+          "boxCriteria": ["Neliels plaukta nolietojums vai vieglas skrambiņas", "Stūri var būt nedaudz noapaļoti", "Nav plīsumu, šķelšanās vai strukturālu bojājumu"],
+          "componentCriteria": ["Visi komponenti klāt", "Kārtīm minimāls lietošanas nolietojums", "Žetoni izgriezti tīri, bez lobīšanās vai plīsumiem"],
+          "proTip": "Šī ir optimālā vieta lielākajai daļai lietotu spēļu. Pircēji iegūst lielisku spēli par godīgu cenu."
+        },
+        "good": {
+          "label": "Labs",
+          "shortDescription": "Regulāras spēlēšanas nolietojums, pilnībā funkcionāls",
+          "fullDescription": "Skaidri mīlēta - šī spēle ir regulāri spēlēta, bet paliek pilnībā funkcionāla. Visi piedzīvojumi, nedaudz nolietojuma.",
+          "valueGuidance": "40–55% no mazumcenas",
+          "boxCriteria": ["Pamanāms nolietojums, skrāpējumi vai skrambas", "Stūru nolietojums - mīksti stūri, iespējamas nelielas šķelšanās", "Viegls riņķa nolietojums vai uzlīmju pēdas"],
+          "componentCriteria": ["Visi komponenti klāt (vai trūkstošās daļas skaidri norādītas)", "Kārtīm redzams jaukšanas nolietojums uz malām", "Lauciņiem var būt neliela deformācija vai malu nolietojums"],
+          "proTip": "Daudzi kolekcionāri ir apmierināti ar Labu stāvokli spēlēm, ko vēlas spēlēt, nevis izstādīt."
+        },
+        "acceptable": {
+          "label": "Pieņemams",
+          "shortDescription": "Liels nolietojums, joprojām spēlējama",
+          "fullDescription": "Ļoti mīlēta un tas ir redzams. Šī spēle darbojas, bet ir piedzīvojusi labākas dienas. Vienmēr norādi, kas trūkst vai ir bojāts sludinājuma aprakstā - pircēji ir pelnījuši zināt tieši to, ko viņi iegūst.",
+          "valueGuidance": "20–35% no mazumcenas",
+          "boxCriteria": ["Būtisks nolietojums, krokas vai bojājumi", "Stūru šķelšanās, plīsumi vai līmlentes labojumi", "Kaste var neaizvērties pareizi"],
+          "componentCriteria": ["Visi svarīgākie komponenti klāt (sīkas detaļas var trūkt)", "Kārtis nolietotas - var būt nepieciešami apvalki ērtai spēlēšanai", "Lauciņiem var būt pamanāms nolietojums vai deformācija"],
+          "proTip": "Esi ļoti konkrēts par bojājumiem. 'Pieņemams ar līmētu stūri' ir labāk nekā neskaidri apraksti."
+        }
+      },
+      "specialConsiderationsContent": {
+        "punchedTokens": {
+          "title": "Izgriezti vs neizgriezti žetoni",
+          "description": "Vai kartona žetoni ir izgriezti no loksnēm, dažiem pircējiem ir svarīgi.",
+          "details": ["Neizgriezti: žetoni joprojām oriģinālajās loksnēs", "Izgriezti: žetoni izņemti no loksnēm (standarts)", "Tīri izgriezti: rūpīgi izņemti bez bojājumiem"]
+        },
+        "sleevedCards": {
+          "title": "Apvalkotās kārtis",
+          "description": "Kārtis, kas aizsargātas apvalkos, ir pluss. Norādi to savā sludinājumā.",
+          "details": ["Kārtis apvalkotas kopš iegādes", "Kārtis apvalkotas pēc kādas spēlēšanas", "Norādi, vai apvalki ir iekļauti"]
+        },
+        "paintedMinis": {
+          "title": "Krāsotas miniatūras",
+          "description": "Daži pircēji vēlas krāsotas miniatūras, citi ne. Esi skaidrs par stāvokli.",
+          "details": ["Nekrāsotas (oriģinālas)", "Tikai gruntētas", "Pilnībā krāsotas"]
+        }
+      },
+      "philosophy": {
+        "title": "Kad neesi pārliecināts",
+        "content": "Ja svārsties starp divām pakāpēm, izvēlies zemāko. Pircējs, kurš saņem spēli labākā stāvoklī nekā gaidīts, ir sajūsmā."
+      }
     },
     "listingType": {
       "title": "Kā vēlies pārdot?",
@@ -1305,6 +1422,27 @@
         "title": "Sazināties ar pārdevēju",
         "description": "Pircēji vispirms raksta tev. Maksājumu organizē pats.",
         "note": "Tu tieši vienojies ar pircēju par maksājumu un piegādi. Šiem darījumiem mēs nevaram nodrošināt pircēja aizsardzību."
+      },
+      "auction": {
+        "title": "Izsole",
+        "description": "Pircēji solās, augstākā likme uzvar, kad beidzas laiks.",
+        "note": "Iestati sākuma cenu un ilgumu. Anti-snipe aizsardzība pagarina izsoli, ja likmes tiek izdarītas pēdējās minūtēs."
+      }
+    },
+    "auction": {
+      "startingPrice": {
+        "title": "Sākuma cena",
+        "description": "Solīšana sāksies no šīs summas. Iestati zemu, lai piesaistītu interesi, vai augstāku, ja tev ir minimālā cena prātā."
+      },
+      "duration": {
+        "title": "Izsoles ilgums",
+        "description": "Cik ilgi izsole norisēsies, pirms augstākais solītājs uzvarēs.",
+        "oneDay": "1 diena",
+        "days": "{count} dienas"
+      },
+      "antiSnipe": {
+        "title": "Anti-snipe aizsardzība",
+        "description": "Ja kāds liek likmi pēdējās 5 minūtēs, izsole automātiski pagarinās par 2-5 minūtēm. Tas dod visiem godīgu iespēju reaģēt."
       }
     },
     "ListingReview": {
@@ -2005,6 +2143,178 @@
       "sellerTimeRemaining": "Pārdevējam ir {hours}h {minutes}min, lai atbildētu",
       "terminalPickup": "Saņemšana terminālī",
       "localPickup": "Saņemšana klātienē"
+    }
+  },
+  "Help": {
+    "GradingGuide": {
+      "intro": {
+        "title": "Stāvokļa novērtēšanas ceļvedis",
+        "tagline": "Novērtē godīgi. Pārdod ātrāk. Turi visus apmierinātus.",
+        "description": "Ja precīzi novērtē spēles stāvokli, pircēji precīzi zina, ko saņems. Bez pārsteigumiem, bez strīdiem, bez vilšanās. Labi novērtēts sludinājums pārdodas ātrāk un turi visus apmierinātus."
+      },
+      "toc": {
+        "title": "Šajā lapā",
+        "grades": "Stāvokļa pakāpes",
+        "quickReference": "Ātrā uzziņas tabula",
+        "specialConsiderations": "Īpaši apsvērumi",
+        "listingTips": "Sludinājuma apraksta padomi",
+        "photoTips": "Foto padomi",
+        "commonMistakes": "Biežākās kļūdas"
+      },
+      "sections": {
+        "conditionGrades": "Stāvokļa pakāpes",
+        "quickReference": "Ātrā uzziņa",
+        "specialConsiderations": "Īpaši apsvērumi",
+        "listingTips": "Sludinājuma apraksta piemēri",
+        "photoTips": "Fotogrāfijas rada atšķirību",
+        "commonMistakes": "Biežākās novērtēšanas kļūdas"
+      },
+      "gradeCard": {
+        "boxCondition": "Kastes stāvoklis",
+        "componentCondition": "Komponentu stāvoklis",
+        "typicalScenarios": "Tipiski scenāriji",
+        "proTip": "Padoms:"
+      },
+      "quickReferenceTable": {
+        "grade": "Pakāpe",
+        "description": "Apraksts",
+        "value": "Vērtība",
+        "disclaimer": "Vērtības procenti ir aptuvenas vadlīnijas. Retas un vairs neražotas spēles bieži pārdodas par vairāk neatkarīgi no stāvokļa."
+      },
+      "grades": {
+        "likeNew": {
+          "oneLineSummary": "Atvērta, bet nespēlēta, bez nolietojuma"
+        },
+        "veryGood": {
+          "oneLineSummary": "Spēlēta rūpīgi, minimāls nolietojums"
+        },
+        "good": {
+          "oneLineSummary": "Regulārs spēlēšanas nolietojums, pilnībā funkcionāla"
+        },
+        "acceptable": {
+          "oneLineSummary": "Liels nolietojums, iespējamas nelielas problēmas"
+        }
+      },
+      "specialConsiderations": {
+        "punchedTokens": {
+          "title": "Izstansti vs neizstansti žetoni",
+          "description": "Vai kartona žetoni ir izstansti no to lapām, dažiem pircējiem ir svarīgi.",
+          "details": [
+            "Neizstansti: žetoni joprojām oriģinālajās lapās, nekad nav izņemti",
+            "Izstansti: žetoni izņemti no lapām (standarts jebkurai spēlētai spēlei)",
+            "Tīri izstansti: uzmanīgi izņemti bez plēšanās vai bojājumiem",
+            "Rupji izstansti: redzama plēšanās vai baltas malas"
+          ]
+        },
+        "sleevedCards": {
+          "title": "Kārtis aplīklēs",
+          "description": "Kārtis, kas aizsargātas aplīklēs, ir pluss. Norādi to sludinājumā.",
+          "details": [
+            "Kārtis aplīklēs kopš iegādes (nekad nav maisītas bez aplīklēm)",
+            "Kārtis ievietotas aplīklēs pēc dažām spēlēm (piemini nolietojumu pirms aplīklēm)",
+            "Norādi, vai aplīkles ir iekļautas vai kārtis tiks izņemtas no aplīklēm"
+          ]
+        },
+        "paintedMinis": {
+          "title": "Krāsotas miniatūras",
+          "description": "Daži pircēji vēlas krāsotas miniatūras, citi īpaši nevēlas. Esi skaidrs par stāvokli.",
+          "details": [
+            "Nekrāsotas (oriģinālas)",
+            "Tikai gruntētas",
+            "Daļēji krāsotas",
+            "Pilnībā krāsotas (apraksti kvalitāti: galda standarts, izstādes kvalitāte utt.)",
+            "Pārveidotas vai konvertētas"
+          ]
+        },
+        "promosExtras": {
+          "title": "Promo un papildinājumi",
+          "description": "Reklāmas saturs, Kickstarter papildinājumi vai paplašinājumu materiāli pievieno vērtību - pārliecinies, ka pircēji zina.",
+          "details": [
+            "Uzskaiti konkrētus promo pēc nosaukuma",
+            "Norādi, vai no Kickstarter vai mazumtirdzniecības izdevuma",
+            "Piemini jebkurus bonus komponentus, kas nav mazumtirdzniecības versijā",
+            "Atsevišķa cena vērtīgiem promo ir pieņemama"
+          ]
+        },
+        "editionLanguage": {
+          "title": "Izdevums un valoda",
+          "description": "Izdevums ir ļoti svarīgs. Dažādiem izdevumiem var būt dažādi komponenti, māksla vai noteikumi.",
+          "details": [
+            "Kurš izdevums (1., 2., Pārskatītais, Kolekcionāra utt.)",
+            "Izdevējs (dažādi izdevēji = dažādi komponenti)",
+            "Spēles valoda",
+            "Vai nav atkarīga no valodas (nav teksta uz komponentiem)"
+          ]
+        }
+      },
+      "listingTips": {
+        "likeNew": "Atvērta, lai izlasītu noteikumus, nekad nav spēlēta. Visi komponenti joprojām oriģinālajā iepakojumā. Kārtis nekad nav maisītas. Glabāta horizontāli plauktā nekūpētājmājā.",
+        "veryGood": "Spēlēta varbūt piecas reizes. Kārtis aplīklēs kopš pirmās spēles, bez nolietojuma. Visi komponenti ir. Oriģinālais ieliktnis neskarts. Kaste ar nelielu plaukta nolietojumu.",
+        "good": "Kaste ar plaukta nolietojumu un vienu mīkstu stūri. Iekšpuse ir lieliskā stāvoklī - kārtīm ir viegls malu nolietojums no maisīšanas. Visi komponenti ir.",
+        "acceptable": "Kastei ir ievērojams nolietojums un aplīmēts stūris. Komponenti visi ir un spēlē labi, bet kārtīm ir maisīšanas nolietojums. Noteikumu grāmatai ir dažas krokas. Labs kandidāts aplīklēm."
+      },
+      "photoTips": {
+        "intro": "Labas fotogrāfijas rada uzticību. Lūk, ko parādīt:",
+        "tip": "Dabiskā dienasgaisma darbojas vislabāk. Fotografē uz vienkārša fona un parādi faktisko stāvokli, nevis labāko leņķi.",
+        "tipLabel": "Padoms:",
+        "subjects": {
+          "boxFront": {
+            "title": "Kastes priekšpuse",
+            "description": "Tieši pretī, labs apgaismojums - parāda spēli un jebkuru nolietojumu"
+          },
+          "boxBack": {
+            "title": "Kastes aizmugure",
+            "description": "Parāda izdevuma info un komponentu sarakstu"
+          },
+          "boxCorners": {
+            "title": "Kastes stūri",
+            "description": "Ja ir nolietojums, parādi to godīgi"
+          },
+          "componentsSpread": {
+            "title": "Komponentu izkārtojums",
+            "description": "Parādi, kas ir iekļauts - pilna komponentu fotogrāfija"
+          },
+          "anyDamage": {
+            "title": "Jebkādi bojājumi",
+            "description": "Tuvplāni konkrētām problēmām, par kurām pircējiem jāzina"
+          },
+          "cards": {
+            "title": "Kārtis",
+            "description": "Parādi malu nolietojumu, ja ir - tur nolietojums parādās vispirms"
+          }
+        }
+      },
+      "commonMistakes": [
+        {
+          "mistake": "\"Tā ir veca, tāpēc tai jābūt nolietotai\"",
+          "correction": "Vecums nav vienāds ar stāvokli. 20 gadus veca spēle, kas labi glabāta, var būt Kā Jauna. 2 gadus veca spēle pēc 50 spēļu vakariem var būt Laba."
+        },
+        {
+          "mistake": "\"Kastei nav nozīmes\"",
+          "correction": "Kolekcionāriem tā ir svarīga. Daudzi pircēji rūpējas par kastes stāvokli izstādīšanai. Novērtē to godīgi."
+        },
+        {
+          "mistake": "\"Pilna nozīmē, ka nekas netrūkst\"",
+          "correction": "Pilna arī nozīmē oriģināla. Ja esi nomainījis kauliņus vai izdrukājis jaunus spēlētāju palīgus, norādi to."
+        },
+        {
+          "mistake": "Izdomāt pakāpes kā \"Gandrīz ideāla\" vai \"Lieliska\"",
+          "correction": "Turi pie mūsu četrām pakāpēm: Kā Jauna, Ļoti Laba, Laba, Pieņemama. Pielāgoti termini apgrūtina salīdzināšanu."
+        },
+        {
+          "mistake": "Novērtēšana pēc tā, cik samaksāji",
+          "correction": "€100 spēle sliktā stāvoklī joprojām ir Pieņemama. Novērtē faktisko stāvokli, nevis vērtību."
+        }
+      ],
+      "philosophy": {
+        "title": "Kad neesi pārliecināts",
+        "content": "Ja svārsties starp divām pakāpēm, izvēlies zemāko. Pircējs, kas saņem spēli labākā stāvoklī nekā gaidīts, ir sajūsmināts. Pircējs, kas saņem spēli sliktākā stāvoklī nekā gaidīts, atver strīdu. Soli mazāk, piegādā vairāk."
+      },
+      "cta": {
+        "ready": "Gatavs ar pārliecību publicēt savu spēli?",
+        "sellButton": "Pārdot spēli",
+        "backToHome": "← Atpakaļ uz Sākumu"
+      }
     }
   }
 }

@@ -232,19 +232,32 @@
     "description": "Permanently delete your account and all associated data. This can't be undone.",
     "confirmTitle": "Are you absolutely sure?",
     "immediateEffects": "When you delete your account, the following happens immediately:",
-    "effect1": "All your active listings will be removed",
-    "effect2": "Your saved games and wishlist will be deleted",
-    "effect3": "Your profile and reviews will be anonymized",
-    "sellerTitle": "For Sellers:",
-    "sellerEffect1": "Any pending payouts will be processed within 7 days",
-    "sellerEffect2": "Transaction history is retained for legal compliance",
+    "effects": {
+      "profileHidden": "Your profile will be hidden from other users",
+      "listingsRemoved": "All your active listings will be removed",
+      "signedOut": "You will be signed out from all devices",
+      "infoAnonymized": "Your personal information will be anonymized",
+      "emailAvailable": "Your email address will become available for new registration"
+    },
+    "forSellers": "For Sellers:",
+    "sellerRequirements": "You must have no pending payouts or open disputes. Any remaining balance will be paid out before deletion.",
     "recoveryTitle": "Account Recovery (14-Day Grace Period):",
-    "recoveryMessage": "You have 14 days to recover your account by logging in again. After this period, deletion is permanent.",
+    "recoveryDescription": "You have 14 days to recover your account by logging in again. After this period, deletion is permanent.",
     "dataRetentionTitle": "Data Retention (GDPR Compliance):",
-    "dataRetentionMessage": "Some data may be retained for up to 90 days for legal and fraud prevention purposes.",
-    "typeToConfirm": "Type DELETE to confirm",
+    "dataRetentionDescription": "For legal and fraud prevention purposes, we retain:",
+    "retention": {
+      "transactions": "Transaction history (90 days)",
+      "listings": "Listing records (90 days)",
+      "communications": "Message history for dispute resolution (90 days)"
+    },
+    "dataRetentionAfter": "After 90 days, all data is permanently deleted.",
+    "finalWarning": "This action cannot be undone after the 14-day recovery period.",
+    "typeDeleteLabel": "Type DELETE to confirm:",
+    "typeDeletePlaceholder": "Type DELETE here",
     "deleting": "Deleting...",
-    "confirmButton": "Yes, delete my account"
+    "confirmDelete": "Yes, delete my account",
+    "cancel": "Cancel",
+    "pleaseTypeDelete": "Please type DELETE to confirm"
   },
   "MessagesPage": {
     "title": "Messages",
@@ -477,7 +490,14 @@
       "reserved": "Reserved",
       "reservedTooltip": "Someone is checking out — available soon if they don't complete"
     },
-    "contactSellerWarning": "This listing is not processed through our payment system. Arrange payment directly with the seller. We cannot provide buyer protection for this transaction."
+    "contactSellerWarning": "This listing is not processed through our payment system. Arrange payment directly with the seller. We cannot provide buyer protection for this transaction.",
+    "auction": {
+      "badge": "Auction",
+      "currentBid": "Current bid",
+      "startingPrice": "Starting price",
+      "bid": "bid",
+      "bids": "bids"
+    }
   },
   "Checkout": {
     "loading": "Loading checkout...",
@@ -896,6 +916,42 @@
     "lastUpdated": "Last updated: {date}",
     "backToHome": "← Back to Home"
   },
+  "Auction": {
+    "title": "Auction",
+    "currentBid": "Current Bid",
+    "startingPrice": "Starting Price",
+    "bid": "bid",
+    "bids": "bids",
+    "yourBid": "Your Bid",
+    "minimum": "Minimum",
+    "placeBid": "Place Bid",
+    "ended": "Auction Ended",
+    "endingSoon": "Ending Soon!",
+    "wasExtended": "This auction was extended due to last-minute bidding",
+    "youWon": "You Won!",
+    "completePayment": "Complete your payment within 48 hours to claim this game",
+    "payNow": "Pay Now",
+    "ownAuction": "You cannot bid on your own auction",
+    "errors": {
+      "minimumBid": "Bid must be at least EUR {amount}",
+      "failed": "Failed to place bid. Please try again.",
+      "loginRequired": "Please log in to place a bid"
+    },
+    "success": {
+      "bidPlaced": "Bid of EUR {amount} placed successfully!",
+      "bidPlacedExtended": "Bid placed! Auction extended by {minutes} minutes"
+    },
+    "notifications": {
+      "extended": "Auction extended by {minutes} minutes due to last-minute bid"
+    },
+    "bidHistory": {
+      "title": "Bid History",
+      "noBidsYet": "No bids yet - be the first!",
+      "extendedAuction": "This bid extended the auction",
+      "showMore": "Show {count} more bids",
+      "showLess": "Show less"
+    }
+  },
   "Sell": {
     "page": {
       "title": "Sell a game",
@@ -1290,7 +1346,68 @@
         "tip3": "Mention sleeved cards as a positive",
         "tip4": "Be specific about any damage"
       },
-      "viewFullGuide": "View full grading guide"
+      "viewFullGuide": "View full grading guide",
+      "box": "Box",
+      "components": "Components",
+      "grades": {
+        "likeNew": {
+          "label": "Like New",
+          "shortDescription": "Appears unplayed or played once",
+          "fullDescription": "Opened but essentially untouched. This game looks like you just removed the shrink wrap. Many games get opened, admired, and put on the shelf - if that's your game, this is probably the right grade.",
+          "valueGuidance": "80–95% of retail",
+          "boxCriteria": ["No visible wear, scuffs, or scratches", "Corners sharp and intact", "No shelf wear or storage marks"],
+          "componentCriteria": ["All components present and accounted for", "Cards show no wear - edges crisp, no bowing", "Tokens unpunched, or punched with no damage"],
+          "proTip": "If you've played even once or twice, consider Very Good instead. Like New means essentially untouched."
+        },
+        "veryGood": {
+          "label": "Very Good",
+          "shortDescription": "Played with care, minimal wear",
+          "fullDescription": "Played and enjoyed, but handled with care. A game in Very Good condition is what you'd happily give as a gift.",
+          "valueGuidance": "60–75% of retail",
+          "boxCriteria": ["Minor shelf wear or light scuffing", "Corners may show slight softening", "No tears, splits, or structural damage"],
+          "componentCriteria": ["All components present", "Cards show minimal handling - light edge wear at most", "Tokens punched cleanly, no lifting or tearing"],
+          "proTip": "This is the sweet spot for most second-hand games. Buyers get a great game at a fair price."
+        },
+        "good": {
+          "label": "Good",
+          "shortDescription": "Regular play wear, fully functional",
+          "fullDescription": "Clearly pre-loved - this game has seen regular play but remains fully functional. All the adventures, some of the wear.",
+          "valueGuidance": "40–55% of retail",
+          "boxCriteria": ["Noticeable wear, scuffs, or scratches", "Corner wear - soft corners, possible minor splits", "Light ring wear or sticker residue"],
+          "componentCriteria": ["All components present (or missing pieces clearly noted)", "Cards show shuffling wear on edges", "Boards may have minor warping or edge wear"],
+          "proTip": "Many collectors are happy with Good condition for games they want to play rather than display."
+        },
+        "acceptable": {
+          "label": "Acceptable",
+          "shortDescription": "Heavy wear, still playable",
+          "fullDescription": "Well-loved and showing it. This game works, but it's seen better days. Always note what's missing or damaged in your listing description - buyers deserve to know exactly what they're getting.",
+          "valueGuidance": "20–35% of retail",
+          "boxCriteria": ["Significant wear, creases, or damage", "Corner splits, tears, or tape repairs", "Box may not close properly"],
+          "componentCriteria": ["All crucial components present (minor pieces may be missing)", "Cards worn - may need sleeves to play comfortably", "Boards may have noticeable wear or warping"],
+          "proTip": "Be very specific about damage. 'Acceptable with taped corner' is better than vague descriptions."
+        }
+      },
+      "specialConsiderationsContent": {
+        "punchedTokens": {
+          "title": "Punched vs unpunched tokens",
+          "description": "Whether cardboard tokens have been punched from their sheets matters to some buyers.",
+          "details": ["Unpunched: tokens still in their original sheets", "Punched: tokens removed from sheets (standard)", "Cleanly punched: removed carefully with no damage"]
+        },
+        "sleevedCards": {
+          "title": "Sleeved cards",
+          "description": "Cards protected in sleeves are a plus. Note this in your listing.",
+          "details": ["Cards sleeved since purchase", "Cards sleeved after some play", "Note if sleeves are included"]
+        },
+        "paintedMinis": {
+          "title": "Painted miniatures",
+          "description": "Some buyers want painted minis, others don't. Be clear about the state.",
+          "details": ["Unpainted (original)", "Primed only", "Fully painted"]
+        }
+      },
+      "philosophy": {
+        "title": "When you're unsure",
+        "content": "If you're debating between two grades, go with the lower one. A buyer who receives a game in better condition than expected is delighted."
+      }
     },
     "listingType": {
       "title": "How do you want to sell?",
@@ -1305,6 +1422,27 @@
         "title": "Contact Seller",
         "description": "Buyers message you first. Arrange payment yourselves.",
         "note": "You'll handle payment and delivery directly with the buyer. We cannot provide buyer protection for these transactions."
+      },
+      "auction": {
+        "title": "Auction",
+        "description": "Buyers bid, highest bid wins when time runs out.",
+        "note": "Set a starting price and duration. Anti-snipe protection extends the auction if bids come in the final minutes."
+      }
+    },
+    "auction": {
+      "startingPrice": {
+        "title": "Starting Price",
+        "description": "Bidding will start from this amount. Set it low to attract interest, or higher if you have a minimum in mind."
+      },
+      "duration": {
+        "title": "Auction Duration",
+        "description": "How long the auction will run before the highest bidder wins.",
+        "oneDay": "1 day",
+        "days": "{count} days"
+      },
+      "antiSnipe": {
+        "title": "Anti-snipe protection",
+        "description": "If someone bids in the last 5 minutes, the auction automatically extends by 2-5 minutes. This gives everyone a fair chance to respond."
       }
     },
     "ListingReview": {
@@ -2005,6 +2143,178 @@
       "sellerTimeRemaining": "Seller has {hours}h {minutes}m to respond",
       "terminalPickup": "Terminal Pickup",
       "localPickup": "Local Pickup"
+    }
+  },
+  "Help": {
+    "GradingGuide": {
+      "intro": {
+        "title": "Condition grading guide",
+        "tagline": "Grade honestly. Sell faster. Keep everyone happy.",
+        "description": "When you grade your game accurately, buyers know exactly what they're getting. No surprises, no disputes, no disappointment. A well-graded listing sells faster and keeps everyone happy."
+      },
+      "toc": {
+        "title": "On this page",
+        "grades": "Condition grades",
+        "quickReference": "Quick reference table",
+        "specialConsiderations": "Special considerations",
+        "listingTips": "Listing description tips",
+        "photoTips": "Photo tips",
+        "commonMistakes": "Common mistakes"
+      },
+      "sections": {
+        "conditionGrades": "Condition grades",
+        "quickReference": "Quick reference",
+        "specialConsiderations": "Special considerations",
+        "listingTips": "Listing description examples",
+        "photoTips": "Photos make the difference",
+        "commonMistakes": "Common grading mistakes"
+      },
+      "gradeCard": {
+        "boxCondition": "Box Condition",
+        "componentCondition": "Component Condition",
+        "typicalScenarios": "Typical Scenarios",
+        "proTip": "Pro tip:"
+      },
+      "quickReferenceTable": {
+        "grade": "Grade",
+        "description": "Description",
+        "value": "Value",
+        "disclaimer": "Value percentages are rough guidelines. Rare and out-of-print games often sell for more regardless of condition."
+      },
+      "grades": {
+        "likeNew": {
+          "oneLineSummary": "Opened but unplayed, no wear"
+        },
+        "veryGood": {
+          "oneLineSummary": "Played with care, minimal wear"
+        },
+        "good": {
+          "oneLineSummary": "Regular play wear, fully functional"
+        },
+        "acceptable": {
+          "oneLineSummary": "Heavy wear, possible minor issues"
+        }
+      },
+      "specialConsiderations": {
+        "punchedTokens": {
+          "title": "Punched vs unpunched tokens",
+          "description": "Whether cardboard tokens have been punched from their sheets matters to some buyers.",
+          "details": [
+            "Unpunched: tokens still in their original sheets, never removed",
+            "Punched: tokens removed from sheets (standard for any played game)",
+            "Cleanly punched: removed carefully with no lifting, tearing, or damage",
+            "Roughly punched: some lifting, tearing, or white edges visible"
+          ]
+        },
+        "sleevedCards": {
+          "title": "Sleeved cards",
+          "description": "Cards protected in sleeves are a plus. Note this in your listing.",
+          "details": [
+            "Cards sleeved since purchase (never shuffled unsleeved)",
+            "Cards sleeved after some play (mention any pre-sleeve wear)",
+            "Note if sleeves are included or if cards will be removed from sleeves"
+          ]
+        },
+        "paintedMinis": {
+          "title": "Painted miniatures",
+          "description": "Some buyers want painted minis, others specifically don't. Be clear about the state.",
+          "details": [
+            "Unpainted (original)",
+            "Primed only",
+            "Partially painted",
+            "Fully painted (describe quality: tabletop standard, display quality, etc.)",
+            "Modified or converted"
+          ]
+        },
+        "promosExtras": {
+          "title": "Promos & extras",
+          "description": "Promotional content, Kickstarter extras, or expansion material adds value - make sure buyers know.",
+          "details": [
+            "List specific promos by name",
+            "Note if from Kickstarter or retail edition",
+            "Mention any bonus components not in retail version",
+            "Separate pricing for valuable promos is acceptable"
+          ]
+        },
+        "editionLanguage": {
+          "title": "Edition & language",
+          "description": "Edition matters a lot. Different editions can have different components, art, or rules.",
+          "details": [
+            "Which edition (1st, 2nd, Revised, Collector's, etc.)",
+            "Publisher (different publishers = different components)",
+            "Language of the game",
+            "Whether language-independent (no text on components)"
+          ]
+        }
+      },
+      "listingTips": {
+        "likeNew": "Opened to read the rules, never played. All components still in original packaging. Cards never shuffled. Stored flat on a shelf in a smoke-free home.",
+        "veryGood": "Played maybe five times. Cards sleeved from first play, no wear. All components present. Original insert intact. Box shows minor shelf wear.",
+        "good": "Box shows shelf wear and one soft corner. Inside is in great shape - cards show light edge wear from shuffling. All components present.",
+        "acceptable": "Box has significant wear and a taped corner. Components are all there and play fine, but cards show shuffling wear. Rulebook has some creases. Good candidate for sleeving."
+      },
+      "photoTips": {
+        "intro": "Good photos build trust. Here's what to show:",
+        "tip": "Natural daylight works best. Photograph on a plain background and show actual condition, not the best angle.",
+        "tipLabel": "Tip:",
+        "subjects": {
+          "boxFront": {
+            "title": "Box front",
+            "description": "Straight on, good lighting - shows the game and any wear"
+          },
+          "boxBack": {
+            "title": "Box back",
+            "description": "Shows edition info and component list"
+          },
+          "boxCorners": {
+            "title": "Box corners",
+            "description": "If there's wear, show it honestly"
+          },
+          "componentsSpread": {
+            "title": "Components spread",
+            "description": "Show what's included - full component photo"
+          },
+          "anyDamage": {
+            "title": "Any damage",
+            "description": "Close-ups of specific issues buyers should know about"
+          },
+          "cards": {
+            "title": "Cards",
+            "description": "Show edge wear if present - that's where wear shows first"
+          }
+        }
+      },
+      "commonMistakes": [
+        {
+          "mistake": "\"It's old, so it must be worn\"",
+          "correction": "Age doesn't equal condition. A 20-year-old game stored well can be Like New. A 2-year-old game from 50 game nights might be Good."
+        },
+        {
+          "mistake": "\"The box doesn't matter\"",
+          "correction": "It matters to collectors. Many buyers care about box condition for display. Grade it honestly."
+        },
+        {
+          "mistake": "\"Complete means nothing's missing\"",
+          "correction": "Complete also means original. If you've replaced dice or printed new player aids, note it."
+        },
+        {
+          "mistake": "Inventing grades like \"Near Mint\" or \"Excellent\"",
+          "correction": "Stick to our four grades: Like New, Very Good, Good, Acceptable. Custom terms make comparison harder."
+        },
+        {
+          "mistake": "Grading based on how much you paid",
+          "correction": "A €100 game in rough shape is still Acceptable. Grade the actual condition, not the value."
+        }
+      ],
+      "philosophy": {
+        "title": "When you're unsure",
+        "content": "If you're debating between two grades, go with the lower one. A buyer who receives a game in better condition than expected is delighted. A buyer who receives a game in worse condition than expected opens a dispute. Under-promise, over-deliver."
+      },
+      "cta": {
+        "ready": "Ready to list your game with confidence?",
+        "sellButton": "Sell a game",
+        "backToHome": "← Back to Home"
+      }
     }
   }
 }

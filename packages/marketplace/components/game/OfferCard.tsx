@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
-import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, Calendar, PuzzlePiece as Puzzle, BookOpen, Globe, Building as Building2, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare } from 'griddy-icons';
+import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, Calendar, PuzzlePiece as Puzzle, BookOpen, Globe, Building as Building2, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Gavel } from 'griddy-icons';
 import { type TerminalCountry } from '@/lib/unisend/types';
 import { useDeliveredPricing } from '@/lib/hooks/useDeliveredPricing';
 import { PriceBreakdown } from '@/components/common/PriceBreakdown';
@@ -22,6 +22,7 @@ import { CollapsibleDetails } from '@/components/game/CollapsibleDetails';
 import { ListingQuestionsDrawer } from '@/components/game/ListingQuestionsDrawer';
 import { getConditionBadgeVariant } from '@/lib/utils/condition-utils';
 import { DotCarousel } from '@/components/common/ImageCarousel';
+import { AuctionBidPanel } from '@/components/auction/AuctionBidPanel';
 import { useTranslations, useLocale } from 'next-intl';
 
 interface OfferCardProps {
@@ -401,7 +402,27 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
             <div className="flex flex-col items-end gap-2 min-w-[140px]">
               {/* Price */}
               <div className="text-right">
-                {deliveredPricing.canCalculate ? (
+                {listing.listing_type === 'auction' ? (
+                  <>
+                    {/* Auction badge and current bid */}
+                    <div className="flex items-center gap-2 justify-end mb-1">
+                      <Badge variant="secondary" size="sm" icon={<Gavel className="w-3 h-3" />}>
+                        {t('auction.badge')}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-text-secondary mb-0.5">
+                      {listing.auction_current_bid ? t('auction.currentBid') : t('auction.startingPrice')}
+                    </div>
+                    <div className="text-2xl font-bold text-aurora-purple">
+                      €{(listing.auction_current_bid || listing.auction_start_price || 0).toFixed(2)}
+                    </div>
+                    {listing.auction_bid_count !== undefined && listing.auction_bid_count > 0 && (
+                      <div className="text-xs text-text-muted mt-0.5">
+                        {listing.auction_bid_count} {listing.auction_bid_count === 1 ? t('auction.bid') : t('auction.bids')}
+                      </div>
+                    )}
+                  </>
+                ) : deliveredPricing.canCalculate ? (
                   <>
                     {/* Total delivered as primary price */}
                     <div className="text-2xl font-bold text-polar-night">
@@ -519,7 +540,20 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   </div>
                   {/* Price & Save */}
                   <div className="flex flex-col items-end flex-shrink-0">
-                    {deliveredPricing.canCalculate ? (
+                    {listing.listing_type === 'auction' ? (
+                      <>
+                        {/* Auction badge */}
+                        <Badge variant="secondary" size="sm" icon={<Gavel className="w-3 h-3" />}>
+                          {t('auction.badge')}
+                        </Badge>
+                        <div className="text-xs text-text-secondary mt-1">
+                          {listing.auction_current_bid ? t('auction.currentBid') : t('auction.startingPrice')}
+                        </div>
+                        <div className="text-xl font-bold text-aurora-purple">
+                          €{(listing.auction_current_bid || listing.auction_start_price || 0).toFixed(2)}
+                        </div>
+                      </>
+                    ) : deliveredPricing.canCalculate ? (
                       <>
                         {/* Total delivered as primary price */}
                         <div className="text-xl font-bold text-polar-night">
@@ -721,6 +755,13 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
           )}
         </div>
 
+        {/* Auction Bid Panel - Full bidding interface for auction listings */}
+        {listing.listing_type === 'auction' && !isOwnListing && (
+          <div className="border-t border-border-subtle p-3 sm:p-4">
+            <AuctionBidPanel listing={listing} />
+          </div>
+        )}
+
         {/* Contact Seller Warning Banner (Legal Requirement) - Desktop */}
         {listing.listing_type === 'contact_seller' && (
           <div className="hidden sm:block border-t border-border-subtle">
@@ -801,8 +842,8 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
               </button>
             )}
 
-            {/* Reservation Timer / Add to Cart */}
-            {!isOwnListing && (
+            {/* Reservation Timer / Add to Cart - Not shown for auctions (bid panel is above) */}
+            {!isOwnListing && listing.listing_type !== 'auction' && (
               <>
                 {listingStatus === 'reserved' && listing.reserved_until && (
                   <div
@@ -901,8 +942,8 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
           </div>
         )}
 
-        {/* Mobile Footer: Actions */}
-        {!isOwnListing && (
+        {/* Mobile Footer: Actions - Not shown for auctions (bid panel is above) */}
+        {!isOwnListing && listing.listing_type !== 'auction' && (
           <div className={`sm:hidden sticky bottom-0 left-0 right-0 bg-snow-white ${listing.listing_type !== 'contact_seller' ? 'border-t border-border-subtle' : ''} p-3 shadow-lg`}>
             <div className="flex items-center justify-between gap-2">
               {/* Price */}

@@ -3,6 +3,7 @@ import { isManualVersion, type VersionSelection } from '@/lib/bgg-types';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { ensureGameMetadata } from '@/lib/bgg-api';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
     const listingType = body.listingType || 'instant_buy';
 
     // Validate listing type
-    if (!['instant_buy', 'contact_seller'].includes(listingType)) {
+    if (!['instant_buy', 'contact_seller', 'auction'].includes(listingType)) {
       return NextResponse.json(
         { error: 'Invalid listing type' },
         { status: 400 }
@@ -82,6 +83,9 @@ export async function POST(request: NextRequest) {
       missingComponents,
       price,
       includedExpansions, // Bundled expansions
+      // Auction-specific fields
+      auctionStartPrice,
+      auctionDurationDays,
     } = body;
 
     // Validation
@@ -97,8 +101,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Condition is required' }, { status: 400 });
     }
 
-    if (!price || parseFloat(price) <= 0) {
+    // For non-auction listings, price is required
+    if (listingType !== 'auction' && (!price || parseFloat(price) <= 0)) {
       return NextResponse.json({ error: 'Valid price is required' }, { status: 400 });
+    }
+
+    // Auction-specific validation
+    if (listingType === 'auction') {
+      if (!auctionStartPrice || parseFloat(auctionStartPrice) <= 0) {
+        return NextResponse.json(
+          { error: 'Starting price is required for auctions' },
+          { status: 400 }
+        );
+      }
+
+      if (![1, 3, 5, 7].includes(auctionDurationDays)) {
+        return NextResponse.json(
+          { error: 'Auction duration must be 1, 3, 5, or 7 days' },
+          { status: 400 }
+        );
+      }
     }
 
     // Seller ID comes from authenticated session
@@ -132,8 +154,8 @@ export async function POST(request: NextRequest) {
       all_components_present: allComponentsPresent !== false, // Default to true
       missing_components: missingComponents || null,
 
-      // Pricing
-      price: parseFloat(price),
+      // Pricing (for auctions, use start price as the display price)
+      price: listingType === 'auction' ? parseFloat(auctionStartPrice) : parseFloat(price),
 
       // Shipping - T2T only (terminal-to-terminal via Unisend)
       shipping_local_pickup: false,
@@ -147,8 +169,19 @@ export async function POST(request: NextRequest) {
       seller_id: sellerId,
       status: 'active',
       listing_type: listingType,
+
+      // Auction-specific fields (only set for auction listings)
+      ...(listingType === 'auction' ? {
+        auction_start_price: parseFloat(auctionStartPrice),
+        auction_duration_days: auctionDurationDays,
+        auction_ends_at: new Date(Date.now() + auctionDurationDays * 24 * 60 * 60 * 1000).toISOString(),
+        auction_bid_count: 0,
+        auction_anti_snipe_extended: false,
+      } : {}),
     };
 
+    // Ensure game metadata is populated (for listing cards display)
+    await ensureGameMetadata(selectedGame.id);
 
     // Insert listing into database
     const { data: listing, error: insertError } = await (supabase as any)
@@ -230,8 +263,8 @@ export async function GET(request: NextRequest) {
       query = query.eq('status', status);
     }
 
-    // Filter by listing type (instant_buy or contact_seller)
-    if (listingType && ['instant_buy', 'contact_seller'].includes(listingType)) {
+    // Filter by listing type (instant_buy, contact_seller, or auction)
+    if (listingType && ['instant_buy', 'contact_seller', 'auction'].includes(listingType)) {
       query = query.eq('listing_type', listingType);
     }
 
@@ -288,6 +321,16 @@ export async function GET(request: NextRequest) {
         included_expansions: row.included_expansions,
         created_at: row.created_at,
         updated_at: row.updated_at,
+
+        // Auction-specific fields
+        auction_start_price: row.auction_start_price,
+        auction_current_bid: row.auction_current_bid,
+        auction_bid_count: row.auction_bid_count,
+        auction_ends_at: row.auction_ends_at,
+        auction_duration_days: row.auction_duration_days,
+        auction_winner_id: row.auction_winner_id,
+        auction_payment_deadline: row.auction_payment_deadline,
+        auction_anti_snipe_extended: row.auction_anti_snipe_extended,
 
         // Nested game object
         game: {
