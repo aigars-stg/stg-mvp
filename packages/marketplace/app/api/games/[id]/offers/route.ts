@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import type { GameWithOffers, GameOffersResponse } from '@/lib/types/aggregated-game';
 import type { ListingWithSeller } from '@/lib/types/listing';
+import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { fetchGameMetadata } from '@/lib/bgg-api';
 
 /**
@@ -270,8 +271,49 @@ export async function GET(
 
     console.log(`✅ [Game Offers] Returning ${offersWithGame.length} offers for "${gameName}"`);
 
+    // Fetch active wanted listings for this game
+    let wantedListings: WantedListingWithDetails[] = [];
+    try {
+      const { data: wantedData, error: wantedError } = await (supabase as any)
+        .from('wanted_listings')
+        .select(`
+          *,
+          buyer:user_profiles!wanted_listings_buyer_id_fkey (
+            id,
+            full_name,
+            email,
+            avatar_url,
+            country
+          )
+        `)
+        .eq('bgg_game_id', bggId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (wantedError) {
+        console.error('❌ [Game Offers] Wanted listings fetch error:', wantedError);
+      } else if (wantedData) {
+        // Add game metadata to wanted listings
+        wantedListings = wantedData.map((wl: any) => ({
+          ...wl,
+          game: {
+            thumbnail: enrichedGameData?.thumbnail || null,
+            image: enrichedGameData?.image || null,
+            player_count: enrichedGameData?.player_count || null,
+            min_age: enrichedGameData?.min_age || null,
+            playing_time: enrichedGameData?.playing_time || null,
+            is_expansion: enrichedGameData?.is_expansion || false,
+          },
+        }));
+        console.log(`✅ [Game Offers] Found ${wantedListings.length} wanted listings for "${gameName}"`);
+      }
+    } catch (wantedErr) {
+      console.error('❌ [Game Offers] Failed to fetch wanted listings:', wantedErr);
+    }
+
     const response: GameOffersResponse = {
       game: gameWithOffers,
+      wantedListings,
     };
 
     return NextResponse.json(response, {

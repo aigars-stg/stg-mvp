@@ -47,14 +47,12 @@ const STATUS_COLORS = {
 
 const WANTED_STATUS_ICONS = {
   active: CheckCircle,
-  expired: Clock,
   fulfilled: CheckCircle,
   cancelled: XCircle,
 };
 
 const WANTED_STATUS_COLORS = {
   active: 'text-aurora-green',
-  expired: 'text-text-secondary',
   fulfilled: 'text-frost-ice',
   cancelled: 'text-text-muted',
 };
@@ -88,7 +86,7 @@ function MyListingsContent() {
   const [wantedLoading, setWantedLoading] = useState(true);
   const [wantedError, setWantedError] = useState('');
   const [wantedIsOffline, setWantedIsOffline] = useState(false);
-  const [wantedActiveTab, setWantedActiveTab] = useState<'all' | 'active' | 'fulfilled' | 'expired' | 'cancelled'>('all');
+  const [wantedActiveTab, setWantedActiveTab] = useState<'all' | 'active' | 'fulfilled' | 'cancelled'>('all');
 
   // Saved listings
   const { savedListings, isLoading: savedLoading, error: savedError, refetch: refetchSavedListings } = useSavedListings();
@@ -320,39 +318,6 @@ function MyListingsContent() {
     }
   };
 
-  const handleWantedExtend = async (listing: WantedListingWithDetails) => {
-    try {
-      setWantedActionLoading(true);
-      const response = await fetch(`/api/wanted/${listing.id}/extend`, {
-        method: 'POST',
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to extend wanted listing');
-      }
-
-      const data = await response.json();
-
-      // Update local state with new expiration date
-      setWantedListings((prev) =>
-        prev.map((l) =>
-          l.id === listing.id
-            ? { ...l, expires_at: data.newExpiresAt || data.wantedListing.expires_at, status: 'active' }
-            : l
-        )
-      );
-
-      setWantedSuccessMessage(t('wanted.extended'));
-      setTimeout(() => setWantedSuccessMessage(''), 3000);
-    } catch (err: any) {
-      console.error('Error extending wanted listing:', err);
-      setWantedError(err.message || 'Failed to extend wanted listing');
-    } finally {
-      setWantedActionLoading(false);
-    }
-  };
-
   const handleWantedDeleteRequest = (listing: WantedListingWithDetails) => {
     setWantedDeleteModal({
       isOpen: true,
@@ -411,7 +376,6 @@ function MyListingsContent() {
     all: wantedListings.length,
     active: wantedListings.filter((l) => l.status === 'active').length,
     fulfilled: wantedListings.filter((l) => l.status === 'fulfilled').length,
-    expired: wantedListings.filter((l) => l.status === 'expired').length,
     cancelled: wantedListings.filter((l) => l.status === 'cancelled').length,
   };
 
@@ -514,7 +478,7 @@ function MyListingsContent() {
         {/* Status Tabs - Wanted */}
         {mainTab === 'wanted' && (
           <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
-            {(['all', 'active', 'fulfilled', 'expired', 'cancelled'] as const).map((status) => (
+            {(['all', 'active', 'fulfilled', 'cancelled'] as const).map((status) => (
               <button
                 key={status}
                 onClick={() => setWantedActiveTab(status)}
@@ -704,9 +668,9 @@ function MyListingsContent() {
                     <div className="absolute top-3 right-3 z-10">
                       <WantedListingActionsMenu
                         listingId={listing.id}
+                        bggGameId={listing.bgg_game_id}
                         status={listing.status}
                         onStatusChange={(newStatus) => handleWantedStatusChangeRequest(listing, newStatus)}
-                        onExtend={() => handleWantedExtend(listing)}
                         onDelete={() => handleWantedDeleteRequest(listing)}
                         onLinkCopied={() => setShowClipboardSuccess(true)}
                       />

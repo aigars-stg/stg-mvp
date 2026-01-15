@@ -86,6 +86,8 @@ export async function POST(request: NextRequest) {
       // Auction-specific fields
       auctionStartPrice,
       auctionDurationDays,
+      // Source wanted listing (for "I have this" flow)
+      sourceWantedListingId,
     } = body;
 
     // Validation
@@ -178,6 +180,9 @@ export async function POST(request: NextRequest) {
         auction_bid_count: 0,
         auction_anti_snipe_extended: false,
       } : {}),
+
+      // Source wanted listing (for "I have this" flow - enables buyer notification)
+      ...(sourceWantedListingId ? { source_wanted_listing_id: sourceWantedListingId } : {}),
     };
 
     // Ensure game metadata is populated (for listing cards display)
@@ -200,6 +205,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // If this listing was created from "I have this" flow, notify the buyer
+    if (sourceWantedListingId) {
+      try {
+        // Fetch the wanted listing to get buyer info
+        const { data: wantedListing } = await (supabase as any)
+          .from('wanted_listings')
+          .select('buyer_id, game_name')
+          .eq('id', sourceWantedListingId)
+          .single();
+
+        if (wantedListing?.buyer_id) {
+          // Create notification for the buyer
+          // Copy: "{Game Name} just got listed — matches your request. Act fast!"
+          await (supabase as any).rpc('create_notification', {
+            p_user_id: wantedListing.buyer_id,
+            p_type: 'wanted_match',
+            p_title: `${wantedListing.game_name || selectedGame.name} just got listed`,
+            p_body: 'Matches your request. Act fast!',
+            p_data: {
+              listing_id: listing.id,
+              wanted_listing_id: sourceWantedListingId,
+              game_name: wantedListing.game_name || selectedGame.name,
+              bgg_game_id: selectedGame.id,
+            },
+          });
+        }
+      } catch (notificationError) {
+        // Don't fail the listing creation if notification fails
+        console.error('Failed to send wanted match notification:', notificationError);
+      }
+    }
 
     return NextResponse.json({
       listing,

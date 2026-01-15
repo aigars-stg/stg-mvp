@@ -19,6 +19,14 @@
       "ofRetailPrice": "no jaunas spēles cenas"
     }
   },
+  "NavbarSearch": {
+    "expansion": "Papildinājums",
+    "listing": "piedāvājums",
+    "listings": "piedāvājumi",
+    "sellThisGame": "Pārdot šo spēli",
+    "requestThisGame": "Pieprasīt šo spēli",
+    "noGamesFound": "Nav atrasta neviena spēle vaicājumam \"{query}\""
+  },
   "PriceBreakdown": {
     "item": "Prece:",
     "shipping": "Piegāde ({country}):",
@@ -94,41 +102,119 @@
     "processing": "Apstrādā..."
   },
   "Wanted": {
-    "MinimumConditionSelector": {
+    "BudgetAssistant": {
+      "title": "Budžeta ceļvedis",
+      "loading": "Ielādē cenu datus...",
+      "error": "Neizdevās ielādēt cenu ieteikumus",
+      "newRetail": "Jauna mazumtirdzniecības cena",
+      "avgSoldHere": "Vid. pārdots šeit",
+      "lowestOnSecondTurn": "Zemākā Second Turn",
+      "salesCount": "{count} pārdošanas",
+      "suggestedFor": "Ieteicamais budžets ({condition})",
+      "suggestionTooltip": "Šis ieteikums ir balstīts uz tipiskām tirgus cenām {condition} eksemplāriem.",
+      "fillButton": "Lietot",
+      "useBudget": "Lietot kā budžetu",
+      "disclaimer": "Cenas ir aplēses, balstoties uz tirgus datiem. Faktiskās cenas var atšķirties.",
       "conditions": {
         "likeNew": "Kā jauns",
-        "likeNewDesc": "Izskatās nespēlēts vai spēlēts vienu reizi. Komponentes nevainojamā stāvoklī.",
         "veryGood": "Ļoti labs",
-        "veryGoodDesc": "Minimāls nolietojums. Visas komponentes ir un lieliskā stāvoklī.",
         "good": "Labs",
-        "goodDesc": "Redzams spēlēšanas nolietojums, bet pilnībā funkcionāls. Visas komponentes ir.",
-        "acceptable": "Pieņemams",
-        "acceptableDesc": "Būtisks nolietojums, bet spēlējams. Var būt nelieli bojājumi."
+        "acceptable": "Pieņemams"
+      }
+    },
+    "MinimumConditionSelector": {
+      "conditions": {
+        "likeNew": {
+          "label": "Kā jauns",
+          "description": "Izskatās nespēlēts vai spēlēts vienu reizi. Komponentes nevainojamā stāvoklī."
+        },
+        "veryGood": {
+          "label": "Ļoti labs",
+          "description": "Minimāls nolietojums. Visas komponentes ir un lieliskā stāvoklī."
+        },
+        "good": {
+          "label": "Labs",
+          "description": "Redzams spēlēšanas nolietojums, bet pilnībā funkcionāls. Visas komponentes ir."
+        },
+        "acceptable": {
+          "label": "Pieņemams",
+          "description": "Būtisks nolietojums, bet spēlējams. Var būt nelieli bojājumi."
+        }
       },
       "helpText": "Pārdevēji ar spēlēm <strong>labākā stāvoklī</strong> nekā tavs minimums arī var piedāvāt. Piemēram, ja izvēlies \"Labs\", pārdevēji ar \"Ļoti labs\" vai \"Kā jauns\" var piedāvāt."
     },
-    "OfferModal": {
-      "title": "Man ir šī spēle!",
-      "buyerBudget": "Pircēja budžets: €{min}–€{max}",
-      "quickResponseTitle": "Ātrā atbildētāja nozīmīte pieejama!",
-      "quickResponseDesc": "Atbildi tagad, lai saņemtu ⚡ Ātrā atbildētāja nozīmīti (2 stundu laikā pēc publicēšanas)",
-      "conditionLabel": "Stāvoklis *",
-      "conditionPlaceholder": "Izvēlies stāvokli...",
-      "conditionError": "Šis stāvoklis nav pieņemams šim meklējumam",
-      "priceLabel": "Tava cena",
-      "pricePlaceholder": "0.00",
-      "priceOutsideBudget": "Tava cena (€{price}) ir ārpus pircēja budžeta diapazona",
-      "priceInBudget": "Pircēja budžeta robežās",
-      "photosLabel": "Fotoattēli (neobligāti)",
-      "photosHint": "Pievieno līdz 3 savas spēles fotoattēliem, lai palīdzētu pircējam izlemt",
-      "photosComingSoon": "Fotoattēlu augšupielāde drīzumā",
-      "photosWorkaround": "Pagaidām tu vari pievienot fotoattēlus ziņojumā pēc atbildes nosūtīšanas",
-      "notesLabel": "Papildu piezīmes (neobligāti)",
-      "notesPlaceholder": "Piemēram, pieejams saņemšanai Rīgā, fotoattēli pieejami pēc pieprasījuma utt.",
-      "characters": "{count}/500 rakstzīmes",
-      "cancel": "Atcelt",
-      "sending": "Nosūta...",
-      "submit": "Nosūtīt piedāvājumu un sākt sarunu"
+    "ExpansionPreferenceSelector": {
+      "baseOnly": "Tikai pamata spēle",
+      "baseOnlyDesc": "Es gribu tikai pamata spēli, papildinājumi nav nepieciešami",
+      "expansionsWelcome": "Papildinājumi ir laipni gaidīti",
+      "expansionsWelcomeDesc": "Esmu atvērts komplektiem ar iekļautiem papildinājumiem"
+    },
+    "SuccessModal": {
+      "title": "Spēles meklējums publicēts!",
+      "subtitle": "Tavs meklējums tagad ir aktīvs. Pārdevēji, kuriem ir šī spēle, varēs redzēt tavu pieprasījumu un atbildēt.",
+      "viewListing": "Skatīt spēles lapā",
+      "postAnother": "Meklēt vēl vienu spēli",
+      "browseListings": "Pārlūkot piedāvājumus"
+    },
+    "CreatePage": {
+      "pageTitle": "Publicēt meklējumu",
+      "pageTitleEdit": "Rediģēt meklējumu",
+      "pageSubtitle": "Paziņo pārdevējiem, kādu spēli meklē, un viņi varēs tev piedāvāt to pārdot",
+      "pageSubtitleEdit": "Atjaunini meklējuma preferences",
+      "sections": {
+        "findYourGame": "Atrodi savu spēli",
+        "findYourGameSubtitle": "Sāc rakstīt, lai meklētu tūkstošiem galda spēļu",
+        "yourBudget": "Tavs budžets",
+        "yourBudgetSubtitle": "Nosaki maksimālo summu, ko esi gatavs maksāt",
+        "minimumCondition": "Minimālais stāvoklis",
+        "minimumConditionSubtitle": "Kāds ir minimālais stāvoklis, ko pieņemsi?",
+        "locationDetails": "Atrašanās vieta un detaļas",
+        "locationDetailsSubtitle": "Palīdzi pārdevējiem saprast tavu atrašanās vietu un preferences (neobligāti)",
+        "additionalNotes": "Papildu piezīmes",
+        "additionalNotesSubtitle": "Papildu informācija pārdevējiem (neobligāti)"
+      },
+      "labels": {
+        "maximumPrice": "Maksimālā cena (€) *",
+        "yourLocation": "Tava atrašanās vieta (neobligāti)",
+        "expansionPreference": "Papildinājumu preference",
+        "additionalNotes": "Papildu piezīmes (neobligāti)"
+      },
+      "placeholders": {
+        "price": "50.00",
+        "location": "piem., Rīga, Latvija",
+        "notes": "Jebkuras papildu detaļas par to, ko meklē..."
+      },
+      "helpers": {
+        "budget": "Pārdevēji var piedāvāt spēles par jebkuru cenu, bet skaidrs budžets palīdz viņiem saprast tavas gaidas",
+        "location": "Palīdz pārdevējiem aprēķināt piegādes izmaksas un laiku",
+        "notes": "Piemēri: valodas preference, konkrēts izdevums, vēlams saņemt klātienē utt.",
+        "editWarning": "Spēles un izdevuma detaļas nevar mainīt. Ja nepieciešams mainīt spēli, lūdzu, dzēs šo meklējumu un izveido jaunu."
+      },
+      "buttons": {
+        "changeVersion": "Mainīt versiju",
+        "changeName": "Mainīt nosaukumu",
+        "postWantedGame": "Publicēt meklējumu",
+        "updateWantedListing": "Atjaunināt meklējumu",
+        "posting": "Publicē...",
+        "updating": "Atjaunina...",
+        "backToListings": "Atpakaļ uz maniem sludinājumiem"
+      },
+      "preview": {
+        "title": "Priekšskatījums",
+        "selectGame": "Izvēlies spēli, lai redzētu priekšskatījumu"
+      },
+      "loading": {
+        "listing": "Ielādē meklējumu...",
+        "gameDetails": "Ielādē spēles detaļas...",
+        "fallback": "Ielādē..."
+      },
+      "errors": {
+        "completionRequired": "Lūdzu, aizpildi visus obligātos laukus",
+        "listingNotFound": "Meklējums nav atrasts",
+        "loadingFailed": "Neizdevās ielādēt meklējumu",
+        "permissionDenied": "Tev nav atļaujas rediģēt šo meklējumu",
+        "gameDetailsFailed": "Neizdevās ielādēt spēles detaļas"
+      }
     },
     "DeleteConfirmationModal": {
       "title": "Dzēst meklējumu",
@@ -140,18 +226,25 @@
       "delete": "Dzēst meklējumu"
     },
     "ListingCard": {
-      "wanted": "Meklē",
-      "hot": "Karsts",
+      "wantedBadge": "Meklē",
       "expired": "Beidzies",
       "expansion": "Papildinājums",
-      "postedJustNow": "Publicēts tikko",
-      "postedHoursAgo": "Publicēts pirms {hours}h",
-      "postedYesterday": "Publicēts vakar",
-      "postedDaysAgo": "Publicēts pirms {days}d",
-      "sellersResponded": "{count}/10 pārdevēji atbildēja",
+      "upTo": "Līdz {price}",
       "iHaveThis": "Man ir šī spēle",
+      "listingExpired": "Meklējums beidzies",
+      "acceptableConditions": "Pieņemamie stāvokļi",
+      "budget": "Budžets",
       "maxResponsesReached": "Sasniegts maksimālais atbilžu skaits",
-      "listingExpired": "Meklējums beidzies"
+      "viewOnBGG": "Skatīt BoardGameGeek",
+      "additionalNotes": "Papildu piezīmes"
+    },
+    "ExistingSalesBanner": {
+      "title": "Šī spēle jau ir pārdošanā!",
+      "subtitle": "{count, plural, one {# pārdevējs piedāvā šo spēli} other {# pārdevēji piedāvā šo spēli}}",
+      "priceRangeLabel": "Cenu diapazons",
+      "availableConditions": "Pieejamie stāvokļi",
+      "viewListings": "Skatīt piedāvājumus",
+      "hint": "Pārbaudi esošos piedāvājumus pirms publicēšanas"
     },
     "ListingPreview": {
       "wanted": "Meklē",
@@ -164,6 +257,14 @@
       "acceptableConditions": "Pieņemamie stāvokļi",
       "additionalDetails": "Papildu informācija",
       "readyToPost": "Gatavs publicēšanai"
+    },
+    "OfferCard": {
+      "upTo": "Līdz {price}",
+      "budget": "Budžets",
+      "expansion": "Papildinājums",
+      "viewOnBGG": "Skatīt BoardGameGeek",
+      "additionalNotes": "Papildu piezīmes",
+      "listed": "Publicēts {date}"
     }
   },
   "ConfirmationModal": {
@@ -697,17 +798,17 @@
       }
     },
     "wantedCollection": {
-      "title": "Kopiena meklē",
+      "title": "Spēles, ko cilvēki meklē",
       "subtitle": "Spēles, kuras pircēji aktīvi meklē",
       "empty": {
-        "title": "Esi pirmais, kas publicē meklējuma sludinājumu!",
-        "description": "Meklē konkrētu spēli? Publicē meklējuma sludinājumu un ļauj pārdevējiem zināt, ko meklē.",
-        "button": "Publicēt meklējuma sludinājumu"
+        "title": "Meklē kaut ko konkrētu?",
+        "description": "Paziņo kopienai, ko meklē.",
+        "button": "Meklē spēli"
       },
       "viewAll": "Skatīt visu",
       "viewAllWanted": "Skatīt visus meklējumus",
-      "postWanted": "Publicēt meklējumu",
-      "postWantedListing": "Publicēt meklējuma sludinājumu",
+      "postWanted": "Meklē spēli",
+      "postWantedListing": "Meklē spēli",
       "scrollLeft": "Ritināt pa kreisi",
       "scrollRight": "Ritināt pa labi"
     },
@@ -874,6 +975,9 @@
       "noActiveListings": "Šai spēlei, iespējams, nav aktīvu sludinājumu.",
       "browseGames": "Pārlūkot spēles"
     },
+    "wanted": {
+      "title": "Cilvēki, kas meklē šo spēli ({count})"
+    },
     "metadata": {
       "gameNotFoundTitle": "Spēle nav atrasta",
       "gameNotFoundDescription": "Šī spēle netika atrasta Second Turn Games.",
@@ -1009,7 +1113,9 @@
       },
       "pricing": {
         "title": "Cena",
-        "subtitle": "Iestati savu cenu"
+        "subtitle": "Iestati savu cenu",
+        "auctionTitle": "Izsoles iestatījumi",
+        "auctionSubtitle": "Iestatiet sākuma cenu un izsoles ilgumu"
       }
     },
     "terms": {
@@ -1330,6 +1436,15 @@
         "acceptable": "Pieņemams"
       },
       "tooltip": "Balstīts uz zemākajām ES mazumcenām. Tavs vietējais tirgus var atšķirties - izmanto kā vadlīniju."
+    },
+    "WantedContext": {
+      "title": "Atbilst pieprasījumam",
+      "subtitle": "{buyer} meklē šo spēli",
+      "aBuyer": "Pircējs",
+      "acceptableConditions": "Pieņemami stāvokļi",
+      "preferredEdition": "Vēlamā izdevums",
+      "buyerLocation": "Pircēja atrašanās vieta:",
+      "notificationNotice": "Tavs sludinājums būs publisks. Pircējs tiks nekavējoties informēts, lai var ātri rīkoties."
     },
     "GradingGuidePanel": {
       "title": "Stāvokļa vērtēšanas rokasgrāmata",

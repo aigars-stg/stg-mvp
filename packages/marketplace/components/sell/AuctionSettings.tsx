@@ -27,7 +27,7 @@ export function AuctionSettings({
       {/* Starting Price */}
       <div>
         <h3 className="text-base font-semibold text-polar-night mb-2 flex items-center gap-2">
-          <CurrencyEuro className="w-5 h-5 text-aurora-purple" />
+          <CurrencyEuro className="w-5 h-5 text-aurora-orange" />
           {t('startingPrice.title')}
         </h3>
         <p className="text-sm text-text-secondary mb-3">
@@ -54,7 +54,7 @@ export function AuctionSettings({
       {/* Duration Selection */}
       <div>
         <h3 className="text-base font-semibold text-polar-night mb-2 flex items-center gap-2">
-          <Clock className="w-5 h-5 text-aurora-purple" />
+          <Clock className="w-5 h-5 text-aurora-orange" />
           {t('duration.title')}
         </h3>
         <p className="text-sm text-text-secondary mb-3">
@@ -68,8 +68,8 @@ export function AuctionSettings({
               onClick={() => onDurationChange(days)}
               className={`p-3 rounded-lg border-2 transition-all text-center ${
                 duration === days
-                  ? 'border-aurora-purple bg-aurora-purple/5 text-aurora-purple font-semibold'
-                  : 'border-border hover:border-aurora-purple/50 text-text-secondary bg-white'
+                  ? 'border-aurora-orange bg-aurora-orange/5 text-aurora-orange font-semibold'
+                  : 'border-border hover:border-aurora-orange/50 text-text-secondary bg-white'
               }`}
             >
               {days === 1 ? t('duration.oneDay') : t('duration.days', { count: days })}
@@ -79,11 +79,11 @@ export function AuctionSettings({
       </div>
 
       {/* Anti-snipe Info */}
-      <Card padding="sm" className="bg-aurora-purple/10 border border-aurora-purple/30">
+      <Card padding="sm" className="bg-aurora-orange/10 border border-aurora-orange/30">
         <div className="flex gap-3">
-          <Info className="w-5 h-5 text-aurora-purple flex-shrink-0 mt-0.5" />
+          <Info className="w-5 h-5 text-aurora-orange flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-aurora-purple mb-1">
+            <p className="text-sm font-medium text-aurora-orange mb-1">
               {t('antiSnipe.title')}
             </p>
             <p className="text-xs text-text-secondary">

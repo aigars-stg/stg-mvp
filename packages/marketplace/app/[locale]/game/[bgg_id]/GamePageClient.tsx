@@ -8,7 +8,9 @@ import { Button, Badge } from '@second-turn/design-system';
 import { Package, Users, User as Baby, Time as Clock, LinkExternal as ExternalLink, ArrowLeft, RefreshCw as Loader2, AlertCircle, SettingsAdjustHorizontal as SlidersHorizontal, Close, ChevronDown, ChevronUp, Settings as Cog, PuzzlePiece as Puzzle } from 'griddy-icons';
 import type { GameWithOffers } from '@/lib/types/aggregated-game';
 import type { ListingCondition, ListingType } from '@/lib/types/listing';
+import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { OfferCard } from '@/components/game/OfferCard';
+import { WantedOfferCard } from '@/components/game/WantedOfferCard';
 import { GameNavigationArrows } from '@/components/game/GameNavigationArrows';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useCart } from '@/lib/contexts/CartContext';
@@ -33,6 +35,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   const buyerCountry = profile?.country as 'LT' | 'LV' | 'EE' | undefined;
 
   const [game, setGame] = useState<GameWithOffers | null>(null);
+  const [wantedListings, setWantedListings] = useState<WantedListingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,6 +69,22 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   // Description expansion
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 
+  // Scroll to #wanted hash on page load
+  useEffect(() => {
+    if (!loading && typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      if (hash === '#wanted') {
+        // Small delay to ensure DOM is ready
+        setTimeout(() => {
+          const element = document.getElementById('wanted');
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    }
+  }, [loading]);
+
   // Decode HTML entities in description (BGG returns HTML-encoded text)
   const decodeHTMLEntities = (text: string): string => {
     const textarea = document.createElement('textarea');
@@ -95,6 +114,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
         }
 
         setGame(data.game);
+        setWantedListings(data.wantedListings || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load game');
       } finally {
@@ -507,6 +527,23 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
               {t('filter.clearFilters')}
             </Button>
           </div>
+        )}
+
+        {/* People Looking For This (Wanted Listings) */}
+        {wantedListings.length > 0 && (
+          <section id="wanted" className="mt-12 scroll-mt-8">
+            <h2 className="text-xl font-semibold text-polar-night mb-6">
+              {t('wanted.title', { count: wantedListings.length })}
+            </h2>
+            <div className="space-y-4">
+              {wantedListings.map((wanted) => (
+                <WantedOfferCard
+                  key={wanted.id}
+                  listing={wanted}
+                />
+              ))}
+            </div>
+          </section>
         )}
       </div>
     </div>

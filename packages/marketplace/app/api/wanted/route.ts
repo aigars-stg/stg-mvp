@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
       preferredLanguage,
       locationPreferences,
       notes,
+      expansionPreference,
     } = body;
 
     // Validation
@@ -93,6 +94,7 @@ export async function POST(request: NextRequest) {
       preferred_language: preferredLanguage || null,
       location_preferences: locationPreferences || null,
       notes: notes || null,
+      expansion_preference: expansionPreference || 'base_only',
 
       // Metadata
       buyer_id: buyerId,

@@ -4,6 +4,7 @@
  */
 
 import type { ListingCondition, ListingWithSeller } from './listing';
+import type { WantedListingWithDetails } from './wanted-listing';
 
 /**
  * Aggregated game data for browse page display
@@ -96,6 +97,7 @@ export interface AggregatedGamesResponse {
  */
 export interface GameOffersResponse {
   game: GameWithOffers;
+  wantedListings?: WantedListingWithDetails[];
 }
 
 /**

@@ -8,8 +8,8 @@ export interface WantedStatusChangeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  currentStatus: 'active' | 'expired' | 'fulfilled' | 'cancelled';
-  newStatus: 'active' | 'expired' | 'fulfilled' | 'cancelled';
+  currentStatus: 'active' | 'fulfilled' | 'cancelled';
+  newStatus: 'active' | 'fulfilled' | 'cancelled';
   gameName: string;
   isLoading?: boolean;
 }
@@ -50,20 +50,9 @@ export function WantedStatusChangeModal({
           icon: <RotateCcw className="w-12 h-12 text-northern-lights-green" />,
           title: t('active.title'),
           message: t('active.message', { gameName }),
-          description: currentStatus === 'expired'
-            ? t('active.descriptionExpired')
-            : t('active.description'),
+          description: t('active.description'),
           confirmText: t('active.confirmText'),
           confirmVariant: 'primary',
-        };
-      case 'expired':
-        return {
-          icon: <AlertCircle className="w-12 h-12 text-text-muted" />,
-          title: t('expired.title'),
-          message: t('expired.message', { gameName }),
-          description: t('expired.description'),
-          confirmText: t('expired.confirmText'),
-          confirmVariant: 'secondary',
         };
       default:
         return {

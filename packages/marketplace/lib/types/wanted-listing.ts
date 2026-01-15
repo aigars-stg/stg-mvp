@@ -4,7 +4,9 @@
 
 import { ListingCondition } from './listing';
 
-export type WantedListingStatus = 'active' | 'expired' | 'fulfilled' | 'cancelled';
+export type WantedListingStatus = 'active' | 'fulfilled' | 'cancelled';
+
+export type ExpansionPreference = 'base_only' | 'expansions_welcome';
 
 export interface WantedListing {
   id: string;
@@ -34,6 +36,7 @@ export interface WantedListing {
   preferred_language: string | null; // Deprecated: use language field instead
   location_preferences: string | null;
   notes: string | null;
+  expansion_preference: ExpansionPreference;
 
   // Buyer & Status
   buyer_id: string;
@@ -42,8 +45,8 @@ export interface WantedListing {
   // Response Tracking
   response_count: number;
 
-  // Expiration
-  expires_at: string;
+  // Expiration (nullable - listings no longer expire automatically)
+  expires_at: string | null;
 
   // Metadata
   created_at: string;
@@ -119,7 +122,7 @@ export interface WantedListingCard {
   acceptable_conditions: ListingCondition[];
   location_preferences: string | null;
   response_count: number;
-  expires_at: string;
+  expires_at: string | null;
   created_at: string;
   status: WantedListingStatus;
   game_thumbnail: string | null;
@@ -132,7 +135,6 @@ export interface WantedListingCard {
 export function getWantedStatusLabel(status: WantedListingStatus): string {
   const labels: Record<WantedListingStatus, string> = {
     active: 'Active',
-    expired: 'Expired',
     fulfilled: 'Fulfilled',
     cancelled: 'Cancelled',
   };
@@ -142,7 +144,6 @@ export function getWantedStatusLabel(status: WantedListingStatus): string {
 export function getWantedStatusColor(status: WantedListingStatus): string {
   const colors: Record<WantedListingStatus, string> = {
     active: 'text-aurora-green',
-    expired: 'text-text-secondary',
     fulfilled: 'text-frost-ice',
     cancelled: 'text-aurora-red',
   };
@@ -152,7 +153,6 @@ export function getWantedStatusColor(status: WantedListingStatus): string {
 export function getWantedStatusBadgeColor(status: WantedListingStatus): string {
   const colors: Record<WantedListingStatus, string> = {
     active: 'bg-aurora-green/10 text-aurora-green border-aurora-green/20',
-    expired: 'bg-surface-2 text-text-secondary border-text-disabled',
     fulfilled: 'bg-frost-ice/10 text-frost-ice border-frost-ice/20',
     cancelled: 'bg-aurora-red/10 text-aurora-red border-aurora-red/20',
   };
@@ -171,49 +171,6 @@ export function getBudgetDisplay(
   return `${currencySymbol}${minPrice}–${currencySymbol}${maxPrice}`;
 }
 
-export function getTimeRemaining(expiresAt: string): {
-  days: number;
-  hours: number;
-  isExpiringSoon: boolean; // Less than 5 days
-  isExpired: boolean;
-} {
-  const now = new Date();
-  const expiry = new Date(expiresAt);
-  const diff = expiry.getTime() - now.getTime();
-
-  if (diff <= 0) {
-    return { days: 0, hours: 0, isExpiringSoon: false, isExpired: true };
-  }
-
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-  return {
-    days,
-    hours,
-    isExpiringSoon: days < 5,
-    isExpired: false,
-  };
-}
-
-export function getTimeRemainingDisplay(expiresAt: string): string {
-  const { days, hours, isExpired } = getTimeRemaining(expiresAt);
-
-  if (isExpired) {
-    return 'Expired';
-  }
-
-  if (days === 0) {
-    return `${hours}h remaining`;
-  }
-
-  if (days === 1) {
-    return '1 day remaining';
-  }
-
-  return `${days} days remaining`;
-}
-
 export function getResponseLimitDisplay(responseCount: number): {
   text: string;
   isNearLimit: boolean; // 7 or more
@@ -230,14 +187,10 @@ export function getResponseLimitDisplay(responseCount: number): {
 }
 
 // Validation helpers
-export function canExtendWantedListing(wantedListing: WantedListing): boolean {
-  return wantedListing.status === 'active' || wantedListing.status === 'expired';
-}
-
 export function canCancelWantedListing(wantedListing: WantedListing): boolean {
   return wantedListing.status === 'active';
 }
 
 export function canMarkAsFulfilled(wantedListing: WantedListing): boolean {
-  return wantedListing.status === 'active' && wantedListing.response_count > 0;
+  return wantedListing.status === 'active';
 }

@@ -605,12 +605,13 @@ export default function BrowsePage() {
   };
 
   // Handle "I Have This" click for wanted listings
+  // Redirects to sell page with wanted listing context
   const handleIHaveThis = (wantedListingId: string) => {
     if (!user) {
-      router.push(`/auth/signin?redirect=/wanted/${wantedListingId}`);
+      router.push(`/auth/signin?redirect=/sell?wantedListingId=${wantedListingId}`);
       return;
     }
-    router.push(`/wanted/${wantedListingId}?openModal=true`);
+    router.push(`/sell?wantedListingId=${wantedListingId}`);
   };
 
   // Filter wanted listings

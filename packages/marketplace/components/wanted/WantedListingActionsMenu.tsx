@@ -3,22 +3,22 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { MoreVertical, Edit, CheckCircle, TrashAlt as Trash2, LinkExternal as ExternalLink, Undo as RotateCcw, Time as Clock } from 'griddy-icons';
+import { MoreVertical, Edit, CheckCircle, TrashAlt as Trash2, LinkExternal as ExternalLink, Undo as RotateCcw } from 'griddy-icons';
 
 export interface WantedListingActionsMenuProps {
   listingId: string;
-  status: 'active' | 'expired' | 'fulfilled' | 'cancelled';
-  onStatusChange: (status: 'active' | 'expired' | 'fulfilled' | 'cancelled') => void;
-  onExtend: () => void;
+  bggGameId: number;
+  status: 'active' | 'fulfilled' | 'cancelled';
+  onStatusChange: (status: 'active' | 'fulfilled' | 'cancelled') => void;
   onDelete: () => void;
   onLinkCopied?: () => void;
 }
 
 export function WantedListingActionsMenu({
   listingId,
+  bggGameId,
   status,
   onStatusChange,
-  onExtend,
   onDelete,
   onLinkCopied,
 }: WantedListingActionsMenuProps) {
@@ -48,17 +48,12 @@ export function WantedListingActionsMenu({
 
   const handleView = () => {
     setIsOpen(false);
-    router.push(`/wanted/${listingId}`);
+    router.push(`/game/${bggGameId}#wanted`);
   };
 
-  const handleStatusChange = (newStatus: 'active' | 'expired' | 'fulfilled' | 'cancelled') => {
+  const handleStatusChange = (newStatus: 'active' | 'fulfilled' | 'cancelled') => {
     setIsOpen(false);
     onStatusChange(newStatus);
-  };
-
-  const handleExtend = () => {
-    setIsOpen(false);
-    onExtend();
   };
 
   const handleDelete = () => {
@@ -67,7 +62,7 @@ export function WantedListingActionsMenu({
   };
 
   const handleCopyLink = async () => {
-    const url = `${window.location.origin}/wanted/${listingId}`;
+    const url = `${window.location.origin}/game/${bggGameId}#wanted`;
     try {
       await navigator.clipboard.writeText(url);
       setIsOpen(false);
@@ -111,19 +106,8 @@ export function WantedListingActionsMenu({
 
           <div className="border-t border-border-subtle my-1" />
 
-          {/* Extend Expiration (for active or expired) */}
-          {(status === 'active' || status === 'expired') && (
-            <button
-              onClick={handleExtend}
-              className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
-            >
-              <Clock className="w-4 h-4 text-frost-ice" />
-              {t('extend')}
-            </button>
-          )}
-
-          {/* Reactivate (for expired or cancelled) */}
-          {(status === 'expired' || status === 'cancelled') && (
+          {/* Reactivate (for cancelled) */}
+          {status === 'cancelled' && (
             <button
               onClick={() => handleStatusChange('active')}
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"

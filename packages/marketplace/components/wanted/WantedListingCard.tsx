@@ -1,13 +1,42 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card, Badge, Button } from '@second-turn/design-system';
-import { Package, LocationPin as MapPin, Users, User as Baby, Time as Clock, TrendUp as TrendingUp } from 'griddy-icons';
+import { Package, Users, User as Baby, Time as Clock, BookOpen, PuzzlePiece as Puzzle, Globe, Building } from 'griddy-icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
-import { getBudgetDisplay, getTimeRemaining, getTimeRemainingDisplay } from '@/lib/types/wanted-listing';
-import { getConditionLabel } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useTranslations } from 'next-intl';
+
+// Priority languages for Baltic region (same as ListingCard)
+const PRIORITY_LANGUAGES = ['Latvian', 'Lithuanian', 'Estonian', 'English', 'German'];
+
+/**
+ * Format languages for display - if more than 4, show all priority languages + count of others
+ */
+function formatLanguages(languageString: string): string {
+  const languages = languageString.split(/[,|]\s*/).map(l => l.trim()).filter(Boolean);
+
+  if (languages.length <= 4) {
+    return languages.join(' / ');
+  }
+
+  const priorityPresent = PRIORITY_LANGUAGES.filter(lang => languages.includes(lang));
+  const nonPriorityCount = languages.length - priorityPresent.length;
+
+  if (priorityPresent.length > 0 && nonPriorityCount > 0) {
+    return `${priorityPresent.join(' / ')} +${nonPriorityCount}`;
+  }
+
+  const displayLangs = priorityPresent.length > 0 ? priorityPresent : languages.slice(0, 2);
+  const remaining = languages.length - displayLangs.length;
+
+  if (remaining > 0) {
+    return `${displayLangs.slice(0, 2).join(' / ')} +${languages.length - 2}`;
+  }
+
+  return displayLangs.join(' / ');
+}
 
 interface WantedListingCardProps {
   wantedListing: WantedListingWithDetails;
@@ -20,43 +49,33 @@ export function WantedListingCard({
   onIHaveThis,
   showBuyer = true
 }: WantedListingCardProps) {
+  const router = useRouter();
   const t = useTranslations('Wanted.ListingCard');
-  const { days, isExpiringSoon, isExpired } = getTimeRemaining(wantedListing.expires_at);
-  const timeRemainingText = getTimeRemainingDisplay(wantedListing.expires_at);
-  const budgetDisplay = getBudgetDisplay(
-    wantedListing.min_price,
-    wantedListing.max_price,
-    wantedListing.currency
-  );
 
-  // Calculate time since posted
-  const postedDate = new Date(wantedListing.created_at);
-  const now = new Date();
-  const hoursSincePosted = Math.floor((now.getTime() - postedDate.getTime()) / (1000 * 60 * 60));
-  const daysSincePosted = Math.floor(hoursSincePosted / 24);
+  // Format budget display with translation
+  const currencySymbol = wantedListing.currency === 'EUR' ? '€' : wantedListing.currency;
+  const budgetDisplay = wantedListing.min_price && wantedListing.min_price > 0
+    ? `${currencySymbol}${wantedListing.min_price}–${currencySymbol}${wantedListing.max_price}`
+    : t('upTo', { price: `${currencySymbol}${wantedListing.max_price}` });
 
-  const postedText = daysSincePosted === 0
-    ? hoursSincePosted === 0
-      ? t('postedJustNow')
-      : t('postedHoursAgo', { hours: hoursSincePosted })
-    : daysSincePosted === 1
-      ? t('postedYesterday')
-      : t('postedDaysAgo', { days: daysSincePosted });
-
-  // High interest indicator (>7 responses)
-  const hasHighInterest = wantedListing.response_count >= 7;
-  const isAtMaxResponses = wantedListing.response_count >= 10;
+  // Format edition with year like OfferCard: "Latvian edition, 2024"
+  const formattedEdition = wantedListing.version_name
+    ? wantedListing.edition_year
+      ? `${wantedListing.version_name}, ${wantedListing.edition_year}`
+      : wantedListing.version_name
+    : wantedListing.edition_year
+      ? `${wantedListing.edition_year}`
+      : null;
 
   const handleIHaveThisClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onIHaveThis) {
-      onIHaveThis(wantedListing.id);
-    }
+    // Redirect to sell page with wanted listing context
+    router.push(`/sell?wantedListingId=${wantedListing.id}`);
   };
 
   return (
-    <Link href={`/wanted/${wantedListing.id}`} className="h-full">
+    <Link href={`/game/${wantedListing.bgg_game_id}#wanted`} className="h-full">
       <Card
         variant="interactive"
         padding="none"
@@ -78,121 +97,97 @@ export function WantedListingCard({
           <div className="absolute top-3 left-3 px-3 py-1.5 bg-aurora-orange backdrop-blur-sm rounded-md text-xs text-snow-white font-bold uppercase tracking-wide shadow-lg">
             {t('wantedBadge')}
           </div>
-
-          {/* High Interest Badge */}
-          {hasHighInterest && (
-            <div className="absolute top-3 right-3 px-2 py-1 bg-aurora-orange/90 backdrop-blur-sm rounded-md text-xs text-snow-white font-medium flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" />
-              {t('hotBadge')}
-            </div>
-          )}
-
-          {/* Time Remaining Badge */}
-          {!isExpired && (
-            <div className={`absolute bottom-3 right-3 px-2 py-1 backdrop-blur-sm rounded-md text-xs font-medium ${
-              isExpiringSoon
-                ? 'bg-aurora-red/90 text-snow-white'
-                : 'bg-polar-night/80 text-snow-white'
-            }`}>
-              {timeRemainingText}
-            </div>
-          )}
-
-          {isExpired && (
-            <div className="absolute bottom-3 right-3 px-2 py-1 bg-surface-2 backdrop-blur-sm rounded-md text-xs text-text-disabled font-medium">
-              {t('expired')}
-            </div>
-          )}
         </div>
 
         {/* Content Section */}
         <div className="p-4 flex flex-col flex-grow">
-          <div className="space-y-3 pb-1">
-            {/* Game Name with Year */}
+          {/* Variable height content */}
+          <div className="space-y-2">
+            {/* Game Name */}
             <h3 className="font-bold text-lg text-polar-night line-clamp-2 min-h-[2.5rem]">
               {wantedListing.game_name}
-              {wantedListing.edition_year && (
-                <span className="text-text-muted font-normal"> ({wantedListing.edition_year})</span>
-              )}
             </h3>
 
-            {/* Game Metadata */}
-            {(wantedListing.game?.player_count || wantedListing.game?.min_age || wantedListing.game?.playing_time || wantedListing.game?.is_expansion) && (
-              <div className="flex flex-wrap gap-3 text-xs text-text-secondary items-center">
+            {/* Expansion Badge */}
+            {wantedListing.game?.is_expansion && (
+              <Badge variant="default" size="sm" icon={<Puzzle className="w-3 h-3" />}>
+                {t('expansion')}
+              </Badge>
+            )}
+
+            {/* Game Metadata - tighter spacing */}
+            {(wantedListing.game?.player_count || wantedListing.game?.min_age || wantedListing.game?.playing_time) && (
+              <div className="flex flex-wrap gap-2 text-xs text-text-secondary items-center">
                 {wantedListing.game.player_count && (
-                  <span className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
+                  <span className="flex items-center gap-0.5">
+                    <Users className="w-3.5 h-3.5" />
                     {wantedListing.game.player_count}
                   </span>
                 )}
                 {wantedListing.game.min_age && (
-                  <span className="flex items-center gap-1">
-                    <Baby className="w-4 h-4" />
+                  <span className="flex items-center gap-0.5">
+                    <Baby className="w-3.5 h-3.5" />
                     {wantedListing.game.min_age}+
                   </span>
                 )}
                 {wantedListing.game.playing_time && (
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
+                  <span className="flex items-center gap-0.5">
+                    <Clock className="w-3.5 h-3.5" />
                     {wantedListing.game.playing_time}
                   </span>
                 )}
-                {wantedListing.game?.is_expansion && (
-                  <Badge variant="warning" size="sm">
-                    {t('expansion')}
-                  </Badge>
+              </div>
+            )}
+
+            {/* Version Info - edition, language, publisher (like OfferCard) */}
+            {(formattedEdition || wantedListing.language || wantedListing.publisher) && (
+              <div className="text-sm text-text-secondary space-y-0.5">
+                {formattedEdition && (
+                  <p className="flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                    <span className="line-clamp-1">{formattedEdition}</span>
+                  </p>
+                )}
+                {wantedListing.language && (
+                  <p className="flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                    <span
+                      className="line-clamp-1"
+                      title={wantedListing.language.split(/[,|]\s*/).length > 4 ? wantedListing.language : undefined}
+                    >
+                      {formatLanguages(wantedListing.language)}
+                    </span>
+                  </p>
+                )}
+                {wantedListing.publisher && (
+                  <p className="flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                    <span className="line-clamp-1">{wantedListing.publisher.replace(/ \| /g, ' / ')}</span>
+                  </p>
                 )}
               </div>
             )}
 
-            {/* Version/Publisher Info */}
-            {(wantedListing.language || wantedListing.publisher) && (
-              <p className="text-sm text-text-secondary line-clamp-2">
-                {wantedListing.language?.replace(/ \| /g, ' / ')}
-                {wantedListing.language && wantedListing.publisher && ' • '}
-                {wantedListing.publisher?.replace(/ \| /g, ' / ')}
+            {/* Notes (like condition_notes in sale listings) */}
+            {wantedListing.notes && (
+              <p className="text-sm text-text-secondary line-clamp-2 italic">
+                "{wantedListing.notes}"
               </p>
             )}
+          </div>
 
-            {/* Budget Range */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="text-2xl font-bold text-aurora-orange">
-                {budgetDisplay}
-              </div>
-            </div>
+          {/* Spacer to push price down */}
+          <div className="flex-grow" />
 
-            {/* Acceptable Conditions */}
-            <div className="flex flex-wrap gap-1.5">
-              {wantedListing.acceptable_conditions.map((condition) => (
-                <Badge
-                  key={condition}
-                  variant={condition as any}
-                  size="sm"
-                >
-                  {getConditionLabel(condition)}
-                </Badge>
-              ))}
-            </div>
-
-            {/* Location Preferences */}
-            {wantedListing.location_preferences && (
-              <div className="flex items-center gap-1.5 text-xs text-text-secondary">
-                <MapPin className="w-3 h-3" />
-                <span>{wantedListing.location_preferences}</span>
-              </div>
-            )}
-
-            {/* Posted Time & Response Count */}
-            <div className="flex items-center justify-between text-xs text-text-secondary">
-              <span>{postedText}</span>
-              <span className="font-medium">
-                {t('sellersResponded', { count: wantedListing.response_count, max: 10 })}
-              </span>
-            </div>
+          {/* Budget - aligned at bottom */}
+          <div className="pt-2">
+            <span className="text-2xl font-bold text-aurora-orange">
+              {budgetDisplay}
+            </span>
           </div>
 
           {/* Bottom Section: Buyer Info + I Have This Button */}
-          <div className="mt-auto pt-3 space-y-3 border-t border-border-subtle">
+          <div className="pt-2 space-y-2 border-t border-border-subtle">
             {/* Buyer Info */}
             {showBuyer && wantedListing.buyer && (
               <div className="flex items-center gap-2">
@@ -222,7 +217,7 @@ export function WantedListingCard({
             )}
 
             {/* I Have This Button */}
-            {onIHaveThis && !isExpired && !isAtMaxResponses && (
+            {onIHaveThis && (
               <Button
                 variant="accent"
                 fullWidth
@@ -230,18 +225,6 @@ export function WantedListingCard({
               >
                 {t('iHaveThis')}
               </Button>
-            )}
-
-            {isAtMaxResponses && !isExpired && (
-              <div className="text-center py-2 text-sm text-text-secondary">
-                {t('maxResponsesReached')}
-              </div>
-            )}
-
-            {isExpired && (
-              <div className="text-center py-2 text-sm text-text-disabled">
-                {t('listingExpired')}
-              </div>
             )}
           </div>
         </div>

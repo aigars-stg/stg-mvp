@@ -19,6 +19,14 @@
       "ofRetailPrice": "of retail price"
     }
   },
+  "NavbarSearch": {
+    "expansion": "Expansion",
+    "listing": "listing",
+    "listings": "listings",
+    "sellThisGame": "Sell this game",
+    "requestThisGame": "Request this game",
+    "noGamesFound": "No games found for \"{query}\""
+  },
   "PriceBreakdown": {
     "item": "Item:",
     "shipping": "Shipping ({country}):",
@@ -94,41 +102,119 @@
     "processing": "Processing..."
   },
   "Wanted": {
-    "MinimumConditionSelector": {
+    "BudgetAssistant": {
+      "title": "Budget Guide",
+      "loading": "Loading pricing data...",
+      "error": "Unable to load pricing suggestions",
+      "newRetail": "New retail price",
+      "avgSoldHere": "Avg. sold here",
+      "lowestOnSecondTurn": "Lowest on Second Turn",
+      "salesCount": "{count} sales",
+      "suggestedFor": "Suggested budget ({condition})",
+      "suggestionTooltip": "This suggestion is based on typical market prices for {condition} copies.",
+      "fillButton": "Use",
+      "useBudget": "Use as Budget",
+      "disclaimer": "Prices are estimates based on market data. Actual prices may vary.",
       "conditions": {
         "likeNew": "Like New",
-        "likeNewDesc": "Appears unplayed or played once. Components pristine.",
         "veryGood": "Very Good",
-        "veryGoodDesc": "Minimal wear. All components present and in great shape.",
         "good": "Good",
-        "goodDesc": "Shows play wear but fully functional. All components present.",
-        "acceptable": "Acceptable",
-        "acceptableDesc": "Significant wear but playable. May have minor damage."
+        "acceptable": "Acceptable"
+      }
+    },
+    "MinimumConditionSelector": {
+      "conditions": {
+        "likeNew": {
+          "label": "Like New",
+          "description": "Appears unplayed or played once. Components pristine."
+        },
+        "veryGood": {
+          "label": "Very Good",
+          "description": "Minimal wear. All components present and in great shape."
+        },
+        "good": {
+          "label": "Good",
+          "description": "Shows play wear but fully functional. All components present."
+        },
+        "acceptable": {
+          "label": "Acceptable",
+          "description": "Significant wear but playable. May have minor damage."
+        }
       },
       "helpText": "Sellers with games in <strong>better condition</strong> than your minimum can also respond. For example, if you select \"Good\", sellers with \"Very Good\" or \"Like New\" can offer."
     },
-    "OfferModal": {
-      "title": "I Have This Game!",
-      "buyerBudget": "Buyer's budget: €{min}–€{max}",
-      "quickResponseTitle": "Quick Responder Badge Available!",
-      "quickResponseDesc": "Respond now to earn the ⚡ Quick Responder badge (within 2 hours of posting)",
-      "conditionLabel": "Condition *",
-      "conditionPlaceholder": "Select condition...",
-      "conditionError": "This condition is not acceptable for this wanted listing",
-      "priceLabel": "Your Price",
-      "pricePlaceholder": "0.00",
-      "priceOutsideBudget": "Your price (€{price}) is outside the buyer's budget range",
-      "priceInBudget": "Within buyer's budget",
-      "photosLabel": "Photos (Optional)",
-      "photosHint": "Add up to 3 photos of your game to help the buyer decide",
-      "photosComingSoon": "Photo upload coming soon",
-      "photosWorkaround": "For now, you can add photos in your message after responding",
-      "notesLabel": "Additional Notes (Optional)",
-      "notesPlaceholder": "E.g., Available for local pickup in Riga, photos available upon request, etc.",
-      "characters": "{count}/500 characters",
-      "cancel": "Cancel",
-      "sending": "Sending...",
-      "submit": "Send Offer & Start Chat"
+    "ExpansionPreferenceSelector": {
+      "baseOnly": "Base game only",
+      "baseOnlyDesc": "I just want the base game, no expansions needed",
+      "expansionsWelcome": "Expansions welcome",
+      "expansionsWelcomeDesc": "I'm open to bundles with expansions included"
+    },
+    "SuccessModal": {
+      "title": "Looking for a game posted!",
+      "subtitle": "Your wanted listing is now live. Sellers who have this game will be able to see your request and respond.",
+      "viewListing": "View on Game Page",
+      "postAnother": "Looking for another game",
+      "browseListings": "Browse Listings"
+    },
+    "CreatePage": {
+      "pageTitle": "Post a Wanted Game",
+      "pageTitleEdit": "Edit Wanted Listing",
+      "pageSubtitle": "Let sellers know what game you're looking for and they can offer to sell it to you",
+      "pageSubtitleEdit": "Update your wanted game preferences",
+      "sections": {
+        "findYourGame": "Find Your Game",
+        "findYourGameSubtitle": "Start typing to search thousands of board games",
+        "yourBudget": "Your Budget",
+        "yourBudgetSubtitle": "Set the maximum amount you're willing to pay",
+        "minimumCondition": "Minimum Condition",
+        "minimumConditionSubtitle": "What's the minimum condition you'll accept?",
+        "locationDetails": "Location & Details",
+        "locationDetailsSubtitle": "Help sellers understand your location and preferences (optional)",
+        "additionalNotes": "Additional Notes",
+        "additionalNotesSubtitle": "Optional information for sellers"
+      },
+      "labels": {
+        "maximumPrice": "Maximum Price (€) *",
+        "yourLocation": "Your Location (Optional)",
+        "expansionPreference": "Expansion Preference",
+        "additionalNotes": "Additional Notes (Optional)"
+      },
+      "placeholders": {
+        "price": "50.00",
+        "location": "e.g., Riga, Latvia",
+        "notes": "Any additional details about what you're looking for..."
+      },
+      "helpers": {
+        "budget": "Sellers can offer games at any price, but setting a clear budget helps them understand your expectations",
+        "location": "Helps sellers estimate shipping costs and timing",
+        "notes": "Examples: language preference, specific edition, local pickup preferred, etc.",
+        "editWarning": "Game and edition details cannot be changed. If you need to change the game, please delete this wanted listing and create a new one."
+      },
+      "buttons": {
+        "changeVersion": "Change Version",
+        "changeName": "Change Name",
+        "postWantedGame": "Post Wanted Game",
+        "updateWantedListing": "Update Wanted Listing",
+        "posting": "Posting...",
+        "updating": "Updating...",
+        "backToListings": "Back to My Listings"
+      },
+      "preview": {
+        "title": "Live Preview",
+        "selectGame": "Select a game to see preview"
+      },
+      "loading": {
+        "listing": "Loading wanted listing...",
+        "gameDetails": "Loading game details...",
+        "fallback": "Loading..."
+      },
+      "errors": {
+        "completionRequired": "Please complete all required fields",
+        "listingNotFound": "Wanted listing not found",
+        "loadingFailed": "Failed to load wanted listing",
+        "permissionDenied": "You do not have permission to edit this wanted listing",
+        "gameDetailsFailed": "Failed to load game details"
+      }
     },
     "DeleteConfirmationModal": {
       "title": "Delete Wanted Listing",
@@ -140,18 +226,25 @@
       "delete": "Delete Listing"
     },
     "ListingCard": {
-      "wanted": "Wanted",
-      "hot": "Hot",
+      "wantedBadge": "Wanted",
       "expired": "Expired",
       "expansion": "Expansion",
-      "postedJustNow": "Posted just now",
-      "postedHoursAgo": "Posted {hours}h ago",
-      "postedYesterday": "Posted yesterday",
-      "postedDaysAgo": "Posted {days}d ago",
-      "sellersResponded": "{count}/10 sellers responded",
+      "upTo": "Up to {price}",
       "iHaveThis": "I Have This",
-      "maxResponsesReached": "Maximum responses reached",
-      "listingExpired": "Listing expired"
+      "listingExpired": "Listing expired",
+      "acceptableConditions": "Acceptable conditions",
+      "budget": "Budget",
+      "maxResponsesReached": "Max responses reached",
+      "viewOnBGG": "View on BoardGameGeek",
+      "additionalNotes": "Additional notes"
+    },
+    "ExistingSalesBanner": {
+      "title": "This game is already for sale!",
+      "subtitle": "{count, plural, one {# seller is offering this game} other {# sellers are offering this game}}",
+      "priceRangeLabel": "Price range",
+      "availableConditions": "Available conditions",
+      "viewListings": "View Listings",
+      "hint": "Check existing offers before posting"
     },
     "ListingPreview": {
       "wanted": "Wanted",
@@ -164,6 +257,14 @@
       "acceptableConditions": "Acceptable Conditions",
       "additionalDetails": "Additional Details",
       "readyToPost": "Ready to post"
+    },
+    "OfferCard": {
+      "upTo": "Up to {price}",
+      "budget": "Budget",
+      "expansion": "Expansion",
+      "viewOnBGG": "View on BoardGameGeek",
+      "additionalNotes": "Additional Notes",
+      "listed": "Listed {date}"
     }
   },
   "ConfirmationModal": {
@@ -697,17 +798,17 @@
       }
     },
     "wantedCollection": {
-      "title": "Wanted by Community",
+      "title": "Games people want",
       "subtitle": "Games that buyers are actively looking for",
       "empty": {
-        "title": "Be the first to post a wanted listing!",
-        "description": "Looking for a specific game? Post a wanted listing and let sellers know what you're searching for.",
-        "button": "Post Wanted Listing"
+        "title": "Looking for something specific?",
+        "description": "Let the community know what you're searching for.",
+        "button": "Looking for a game"
       },
       "viewAll": "View all",
       "viewAllWanted": "View all wanted",
-      "postWanted": "Post wanted",
-      "postWantedListing": "Post Wanted Listing",
+      "postWanted": "Looking for a game",
+      "postWantedListing": "Looking for a game",
       "scrollLeft": "Scroll left",
       "scrollRight": "Scroll right"
     },
@@ -874,6 +975,9 @@
       "noActiveListings": "This game might not have any active listings.",
       "browseGames": "Browse Games"
     },
+    "wanted": {
+      "title": "People looking for this ({count})"
+    },
     "metadata": {
       "gameNotFoundTitle": "Game Not Found",
       "gameNotFoundDescription": "This game could not be found on Second Turn Games.",
@@ -1009,7 +1113,9 @@
       },
       "pricing": {
         "title": "Pricing",
-        "subtitle": "Set your asking price"
+        "subtitle": "Set your asking price",
+        "auctionTitle": "Auction Settings",
+        "auctionSubtitle": "Set your starting price and auction duration"
       }
     },
     "terms": {
@@ -1330,6 +1436,15 @@
         "acceptable": "Acceptable"
       },
       "tooltip": "Based on lowest EU retail prices. Your local market may differ - use as a guide."
+    },
+    "WantedContext": {
+      "title": "Matching a request",
+      "subtitle": "{buyer} is looking for this game",
+      "aBuyer": "A buyer",
+      "acceptableConditions": "Acceptable conditions",
+      "preferredEdition": "Preferred edition",
+      "buyerLocation": "Buyer location:",
+      "notificationNotice": "Your listing will go live publicly. The buyer will be notified immediately so they can act fast."
     },
     "GradingGuidePanel": {
       "title": "Condition grading guide",

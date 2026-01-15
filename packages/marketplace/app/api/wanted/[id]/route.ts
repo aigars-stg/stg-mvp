@@ -162,6 +162,16 @@ export async function PATCH(
     }
     if (body.location_preferences !== undefined) updates.location_preferences = body.location_preferences;
     if (body.notes !== undefined) updates.notes = body.notes;
+    if (body.expansion_preference !== undefined) {
+      const validPreferences = ['base_only', 'expansions_welcome'];
+      if (!validPreferences.includes(body.expansion_preference)) {
+        return NextResponse.json(
+          { error: `Invalid expansion preference. Must be one of: ${validPreferences.join(', ')}` },
+          { status: 400 }
+        );
+      }
+      updates.expansion_preference = body.expansion_preference;
+    }
 
     // Check if there are any updates
     if (Object.keys(updates).length === 0) {

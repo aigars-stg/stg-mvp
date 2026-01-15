@@ -36,7 +36,7 @@ export function ListingTypeSelector({
         <button
           type="button"
           onClick={() => onChange('contact_seller')}
-          className={`text-left p-4 rounded-lg border-2 transition-all ${
+          className={`h-full flex items-start text-left p-4 rounded-lg border-2 transition-all ${
             value === 'contact_seller'
               ? 'border-frost-ice bg-frost-ice/5'
               : 'border-border hover:border-frost-ice/50 bg-white'
@@ -71,7 +71,7 @@ export function ListingTypeSelector({
           type="button"
           onClick={() => canUseInstantBuy && onChange('instant_buy')}
           disabled={!canUseInstantBuy}
-          className={`text-left p-4 rounded-lg border-2 transition-all ${
+          className={`h-full flex items-start text-left p-4 rounded-lg border-2 transition-all ${
             value === 'instant_buy'
               ? 'border-aurora-green bg-aurora-green/5'
               : canUseInstantBuy
@@ -124,17 +124,17 @@ export function ListingTypeSelector({
         <button
           type="button"
           onClick={() => onChange('auction')}
-          className={`text-left p-4 rounded-lg border-2 transition-all ${
+          className={`h-full flex items-start text-left p-4 rounded-lg border-2 transition-all ${
             value === 'auction'
-              ? 'border-aurora-purple bg-aurora-purple/5'
-              : 'border-border hover:border-aurora-purple/50 bg-white'
+              ? 'border-aurora-orange bg-aurora-orange/5'
+              : 'border-border hover:border-aurora-orange/50 bg-white'
           }`}
         >
           <div className="flex items-start gap-3">
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
               value === 'auction'
-                ? 'bg-aurora-purple text-white'
-                : 'bg-aurora-purple/10 text-aurora-purple'
+                ? 'bg-aurora-orange text-white'
+                : 'bg-aurora-orange/10 text-aurora-orange'
             }`}>
               <Gavel className="w-5 h-5" />
             </div>
@@ -144,7 +144,7 @@ export function ListingTypeSelector({
                   {t('auction.title')}
                 </span>
                 {value === 'auction' && (
-                  <CheckCircle2 className="w-4 h-4 text-aurora-purple flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-aurora-orange flex-shrink-0" />
                 )}
               </div>
               <p className="text-xs text-text-secondary">
@@ -165,7 +165,7 @@ export function ListingTypeSelector({
       )}
 
       {value === 'auction' && (
-        <Card padding="sm" className="bg-aurora-purple/10 border border-aurora-purple/30">
+        <Card padding="sm" className="bg-aurora-orange/10 border border-aurora-orange/30">
           <p className="text-xs text-text-secondary">
             {t('auction.note')}
           </p>

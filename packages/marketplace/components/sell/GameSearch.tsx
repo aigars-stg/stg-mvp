@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Input, Card } from '@second-turn/design-system';
 import { debounce } from '@/lib/bgg-utils';
 import type { BGGGame, BGGVersion } from '@/lib/bgg-types';
@@ -17,17 +17,19 @@ interface GameSearchProps {
   selectedDisplayName?: string | null; // Localized display name
   onChangeVersion?: () => void;
   hideChangeVersionButton?: boolean; // Hide button to render it externally
+  initialQuery?: string; // Pre-fill search query (e.g., from navbar search)
 }
 
-export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDisplayName, onChangeVersion, hideChangeVersionButton }: GameSearchProps) {
+export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDisplayName, onChangeVersion, hideChangeVersionButton, initialQuery }: GameSearchProps) {
   const t = useTranslations('Sell.GameSearch');
   const tNoResults = useTranslations('Sell.GameSearch.noResults');
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialQuery || '');
   const [searchResults, setSearchResults] = useState<BGGGame[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<BGGError | null>(null);
+  const initialSearchDone = useRef(false);
 
   // Debounced search function using database
   const performSearch = useCallback(
@@ -94,6 +96,14 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
     setSearchQuery(value);
     performSearch(value);
   };
+
+  // Trigger search on mount if initialQuery is provided
+  useEffect(() => {
+    if (initialQuery && !initialSearchDone.current && !selectedGame) {
+      initialSearchDone.current = true;
+      performSearch(initialQuery);
+    }
+  }, [initialQuery, selectedGame, performSearch]);
 
   const handleRetry = () => {
     performSearch(searchQuery);

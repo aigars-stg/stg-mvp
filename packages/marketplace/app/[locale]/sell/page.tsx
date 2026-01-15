@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Modal } from '@second-turn/design-system';
 import type { BGGGame, BGGExpansionInfo } from '@/lib/bgg-api';
@@ -19,9 +19,12 @@ import { PuzzlePiece as Dices, PhotoCamera as Camera, ClipboardCheck, CurrencyEu
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
-import type { ListingWithSeller, ListingType } from '@/lib/types/listing';
+import type { ListingWithSeller, ListingType, AuctionDuration } from '@/lib/types/listing';
+import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
+import { AuctionSettings } from '@/components/sell/AuctionSettings';
 import { NotificationModal } from '@/components/common/NotificationModal';
 import { PricingAssistant } from '@/components/sell/PricingAssistant';
+import { WantedListingContextBanner } from '@/components/sell/WantedListingContextBanner';
 import { useTranslations } from 'next-intl';
 
 export const dynamic = 'force-dynamic';
@@ -40,6 +43,9 @@ interface ListingFormData {
   missingComponents: string;
   price: string;
   termsAccepted: boolean;
+  // Auction fields (only used when listingType === 'auction')
+  auctionStartPrice: string;
+  auctionDurationDays: AuctionDuration;
 }
 
 const INITIAL_FORM_DATA: ListingFormData = {
@@ -55,6 +61,8 @@ const INITIAL_FORM_DATA: ListingFormData = {
   missingComponents: '',
   price: '',
   termsAccepted: false,
+  auctionStartPrice: '',
+  auctionDurationDays: 3, // Default to 3 days
 };
 
 // Helper function to convert form data to listing preview format
@@ -169,6 +177,14 @@ function SellPageContent() {
   const [isLoadingListing, setIsLoadingListing] = useState(false);
   const [loadError, setLoadError] = useState('');
 
+  // Pre-fill search query (from navbar search)
+  const initialSearchQuery = searchParams.get('q');
+
+  // Wanted listing context state (when creating from "I have this" flow)
+  const wantedListingId = searchParams.get('wantedListingId');
+  const [wantedListing, setWantedListing] = useState<WantedListingWithDetails | null>(null);
+  const [isLoadingWantedListing, setIsLoadingWantedListing] = useState(false);
+
   // Onboarding check state (prevents flash of form for non-onboarded users)
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(!isEditMode);
 
@@ -189,6 +205,9 @@ function SellPageContent() {
     canCreateInstantBuy: false,
     isLoading: true,
   });
+
+  // Track whether we've set the initial listing type default (to avoid reset on tab focus)
+  const hasSetInitialListingType = useRef(false);
 
   // Section expansion states
   const [expandedSections, setExpandedSections] = useState({
@@ -385,11 +404,14 @@ function SellPageContent() {
             isLoading: false,
           });
 
-          // Default to instant_buy if available, otherwise contact_seller
-          setFormData((prev) => ({
-            ...prev,
-            listingType: canCreateInstantBuy ? 'instant_buy' : 'contact_seller',
-          }));
+          // Default to instant_buy if available, otherwise contact_seller (only on first load)
+          if (!hasSetInitialListingType.current) {
+            hasSetInitialListingType.current = true;
+            setFormData((prev) => ({
+              ...prev,
+              listingType: canCreateInstantBuy ? 'instant_buy' : 'contact_seller',
+            }));
+          }
         } else {
           setSellerCapabilities({
             canCreateContactSeller: false,
@@ -474,6 +496,9 @@ function SellPageContent() {
           missingComponents: listing.missing_components || '',
           price: listing.price.toString(),
           termsAccepted: true, // Already accepted when originally published
+          // Auction fields (populated from existing listing if it's an auction)
+          auctionStartPrice: listing.auction_start_price?.toString() || '',
+          auctionDurationDays: listing.auction_duration_days || 3,
         });
 
         setExistingPhotoUrls(listing.photo_urls || []);
@@ -487,6 +512,49 @@ function SellPageContent() {
 
     fetchListingForEdit();
   }, [isEditMode, editListingId, user]);
+
+  // Fetch wanted listing data when coming from "I have this" flow
+  useEffect(() => {
+    async function fetchWantedListing() {
+      if (!wantedListingId || isEditMode) return;
+
+      try {
+        setIsLoadingWantedListing(true);
+        console.log(`📥 [Sell Page] Fetching wanted listing ${wantedListingId}...`);
+
+        const response = await fetch(`/api/wanted/${wantedListingId}`);
+        if (!response.ok) {
+          console.error('Failed to fetch wanted listing');
+          return;
+        }
+
+        const data = await response.json();
+        const wanted = data.wantedListing;
+        setWantedListing(wanted);
+
+        console.log(`✅ [Sell Page] Loaded wanted listing for "${wanted.game_name}"`);
+
+        // Auto-select the game from the wanted listing
+        const gameData: BGGGame = {
+          id: wanted.bgg_game_id,
+          name: wanted.game_name,
+          yearPublished: wanted.game_year,
+          thumbnail: wanted.game?.thumbnail || null,
+          image: wanted.game?.image || null,
+        };
+
+        // Set the game selection
+        handleGameSelect(gameData);
+      } catch (err) {
+        console.error('Error fetching wanted listing:', err);
+      } finally {
+        setIsLoadingWantedListing(false);
+      }
+    }
+
+    fetchWantedListing();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wantedListingId, isEditMode]);
 
   // Check seller onboarding status (only for non-edit mode)
   useEffect(() => {
@@ -643,7 +711,12 @@ function SellPageContent() {
   const isConditionSectionComplete = !!formData.condition;
   // Photos required only for Acceptable condition - check both new and existing photos
   const isPhotosSectionComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1 || existingPhotoUrls.length >= 1;
-  const isPriceSectionComplete = !!formData.price && parseFloat(formData.price) > 0;
+  // Pricing validation depends on listing type
+  const isPriceSectionComplete = formData.listingType === 'auction'
+    ? (!!formData.auctionStartPrice && parseFloat(formData.auctionStartPrice) >= 1.00 && !!formData.auctionDurationDays)
+    : formData.listingType === 'instant_buy'
+      ? (!!formData.price && parseFloat(formData.price) > 0)
+      : true; // contact_seller doesn't need price
   // Shipping is now always T2T, no user selection needed
   const isPricingSectionComplete = isPriceSectionComplete;
 
@@ -786,6 +859,11 @@ function SellPageContent() {
           missingComponents: formData.missingComponents,
           price: formData.price,
           listingType: formData.listingType, // Dual-listing model support
+          // Auction fields (only included when listing type is auction)
+          ...(formData.listingType === 'auction' ? {
+            auctionStartPrice: formData.auctionStartPrice,
+            auctionDurationDays: formData.auctionDurationDays,
+          } : {}),
           // Convert selected expansions to API format
           includedExpansions: formData.selectedExpansions.map((exp) => ({
             bgg_id: exp.bgg_id,
@@ -799,6 +877,8 @@ function SellPageContent() {
             thumbnail: exp.thumbnail,
             image: exp.image,
           })),
+          // Source wanted listing (for "I have this" flow)
+          ...(wantedListingId ? { sourceWantedListingId: wantedListingId } : {}),
         };
 
         const listingResponse = await fetch('/api/listings', {
@@ -917,6 +997,14 @@ function SellPageContent() {
       {/* Email Verification Banner (only in create mode) */}
       {!isEditMode && <EmailVerificationBanner />}
 
+      {/* Wanted Listing Context Banner (for "I have this" flow) */}
+      {wantedListing && !isEditMode && (
+        <WantedListingContextBanner
+          wantedListing={wantedListing}
+          isLoading={isLoadingWantedListing}
+        />
+      )}
+
       {/* Draft Banner */}
       {showDraftBanner && hasDraft && (
         <Card padding="md" className="mb-6 bg-frost-ice/10 border border-frost-ice/30">
@@ -964,7 +1052,13 @@ function SellPageContent() {
           <Card padding="lg">
             <ListingTypeSelector
               value={formData.listingType}
-              onChange={(type) => setFormData((prev) => ({ ...prev, listingType: type }))}
+              onChange={(type) => setFormData((prev) => ({
+                ...prev,
+                listingType: type,
+                // Carry price between fields when switching listing types
+                auctionStartPrice: type === 'auction' ? (prev.auctionStartPrice || prev.price) : prev.auctionStartPrice,
+                price: type !== 'auction' ? (prev.price || prev.auctionStartPrice) : prev.price,
+              }))}
               canUseInstantBuy={sellerCapabilities.canCreateInstantBuy}
               onUpgradeClick={() => router.push('/seller/settings/payouts')}
             />
@@ -1034,6 +1128,7 @@ function SellPageContent() {
                 selectedDisplayName={formData.selectedGameDisplayName}
                 onSelect={handleGameSelect}
                 onChangeVersion={handleChangeVersion}
+                initialQuery={initialSearchQuery || undefined}
                 hideChangeVersionButton={true}
               />
 
@@ -1258,47 +1353,62 @@ function SellPageContent() {
           />
         </CollapsibleSection>
 
-        {/* Section 4: Pricing */}
-        <CollapsibleSection
-          title={tSections('pricing.title')}
-          icon={<Euro className="w-6 h-6 text-frost-ice" />}
-          isComplete={isPriceSectionComplete}
-          isExpanded={expandedSections.pricing}
-          onToggle={() => toggleSection('pricing')}
-          required
-          subtitle={tSections('pricing.subtitle')}
-        >
-          {/* Pricing Assistant - shows market data after game selection */}
-          {formData.selectedGame && (
-            <PricingAssistant
-              bggGameId={formData.selectedGame.id}
-              condition={formData.condition}
-              onFillPrice={(price) => setFormData((prev) => ({ ...prev, price: price.toFixed(2) }))}
-              expansionIds={formData.selectedExpansions.map(e => e.bgg_id)}
-            />
-          )}
+        {/* Section 4: Pricing (only for instant_buy and auction) */}
+        {formData.listingType !== 'contact_seller' && (
+          <CollapsibleSection
+            title={formData.listingType === 'auction' ? tSections('pricing.auctionTitle') : tSections('pricing.title')}
+            icon={<Euro className="w-6 h-6 text-frost-ice" />}
+            isComplete={isPriceSectionComplete}
+            isExpanded={expandedSections.pricing}
+            onToggle={() => toggleSection('pricing')}
+            required
+            subtitle={formData.listingType === 'auction' ? tSections('pricing.auctionSubtitle') : tSections('pricing.subtitle')}
+          >
+            {formData.listingType === 'auction' ? (
+              /* Auction Settings */
+              <AuctionSettings
+                startPrice={formData.auctionStartPrice}
+                duration={formData.auctionDurationDays}
+                onStartPriceChange={(price) => setFormData((prev) => ({ ...prev, auctionStartPrice: price }))}
+                onDurationChange={(duration) => setFormData((prev) => ({ ...prev, auctionDurationDays: duration }))}
+              />
+            ) : (
+              /* Instant Buy Pricing */
+              <>
+                {/* Pricing Assistant - shows market data after game selection */}
+                {formData.selectedGame && (
+                  <PricingAssistant
+                    bggGameId={formData.selectedGame.id}
+                    condition={formData.condition}
+                    onFillPrice={(price) => setFormData((prev) => ({ ...prev, price: price.toFixed(2) }))}
+                    expansionIds={formData.selectedExpansions.map(e => e.bgg_id)}
+                  />
+                )}
 
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3">
-              {tSections('pricing.title')}
-            </h3>
-            <Input
-              type="number"
-              value={formData.price || ''}
-              onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
-              onBlur={() => {
-                if (formData.price && !isNaN(parseFloat(formData.price))) {
-                  setFormData((prev) => ({ ...prev, price: parseFloat(formData.price).toFixed(2) }));
-                }
-              }}
-              placeholder="25.00"
-              min="0.01"
-              step="0.01"
-              required
-              inputSize="lg"
-            />
-          </div>
-        </CollapsibleSection>
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3">
+                    {tSections('pricing.title')}
+                  </h3>
+                  <Input
+                    type="number"
+                    value={formData.price || ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+                    onBlur={() => {
+                      if (formData.price && !isNaN(parseFloat(formData.price))) {
+                        setFormData((prev) => ({ ...prev, price: parseFloat(formData.price).toFixed(2) }));
+                      }
+                    }}
+                    placeholder="25.00"
+                    min="0.01"
+                    step="0.01"
+                    required
+                    inputSize="lg"
+                  />
+                </div>
+              </>
+            )}
+          </CollapsibleSection>
+        )}
 
         {/* Terms & Publish */}
         <div className="mt-8 space-y-6">

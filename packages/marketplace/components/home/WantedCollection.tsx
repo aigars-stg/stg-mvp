@@ -47,7 +47,7 @@ export function WantedCollection({
         const res = await fetch(`/api/wanted?status=active&limit=${limit}`);
         if (!res.ok) throw new Error('Failed to fetch wanted listings');
         const data = await res.json();
-        setListings(data.listings || []);
+        setListings(data.wantedListings || []);
       } catch (err) {
         console.error('Error fetching wanted listings:', err);
         setError(err instanceof Error ? err.message : 'Failed to load');

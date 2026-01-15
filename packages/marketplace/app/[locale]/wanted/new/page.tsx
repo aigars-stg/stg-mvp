@@ -1,24 +1,28 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { Button, Card } from '@second-turn/design-system';
+import { Button, Card, Modal } from '@second-turn/design-system';
+import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { GameSearch } from '@/components/sell/GameSearch';
 import { LanguageVersionSelector } from '@/components/sell/LanguageVersionSelector';
 import { GameNameSelector } from '@/components/sell/GameNameSelector';
-import { MinimumConditionSelector } from '@/components/wanted/MinimumConditionSelector';
-import { WantedListingCard } from '@/components/wanted/WantedListingCard';
+import { WantedOfferCard } from '@/components/wanted/WantedOfferCard';
+import { BudgetAssistant } from '@/components/wanted/BudgetAssistant';
+import { ExistingSalesBanner } from '@/components/wanted/ExistingSalesBanner';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import type { BGGGame, VersionSelection } from '@/lib/bgg-types';
 import type { ListingCondition } from '@/lib/types/listing';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
-import {  PuzzlePiece as Dices, CurrencyEuro as Euro, ClipboardCheck, LocationPin as MapPin, LightbulbOn as Lightbulb, RefreshCw, AlertCircle  } from 'griddy-icons';
+import { PuzzlePiece as Dices, CurrencyEuro as Euro, FileText as NotesIcon, LightbulbOn as Lightbulb, RefreshCw, AlertCircle, Check, Package } from 'griddy-icons';
 
 function CreateWantedListingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile } = useAuth();
+  const tSuccess = useTranslations('Wanted.SuccessModal');
+  const t = useTranslations('Wanted.CreatePage');
 
   // Edit mode state
   const editListingId = searchParams.get('edit');
@@ -26,14 +30,22 @@ function CreateWantedListingPageContent() {
   const [isLoadingListing, setIsLoadingListing] = useState(false);
   const [loadError, setLoadError] = useState('');
 
+  // Pre-fill search query (from navbar search)
+  const initialSearchQuery = searchParams.get('q');
+
   // Form state
   const [selectedGame, setSelectedGame] = useState<BGGGame | null>(null);
   const [selectedGameDisplayName, setSelectedGameDisplayName] = useState<string | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<VersionSelection | null>(null);
   const [maxPrice, setMaxPrice] = useState('');
-  const [minimumCondition, setMinimumCondition] = useState<ListingCondition | null>(null);
-  const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
+
+  // Existing sales banner state
+  const [existingSaleListings, setExistingSaleListings] = useState<any[]>([]);
+  const [salesBannerDismissed, setSalesBannerDismissed] = useState(false);
+
+  // Default acceptable conditions (all conditions)
+  const defaultAcceptableConditions: ListingCondition[] = ['likeNew', 'veryGood', 'good', 'acceptable'];
 
   // UI state
   const [submitting, setSubmitting] = useState(false);
@@ -41,21 +53,14 @@ function CreateWantedListingPageContent() {
   const [isLoadingGameDetails, setIsLoadingGameDetails] = useState(false);
   const [fallbackMode, setFallbackMode] = useState(false);
   const [fallbackReason, setFallbackReason] = useState<string | undefined>();
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Section expansion states
   const [expandedSections, setExpandedSections] = useState({
     game: true,      // Always start with game section open
     budget: false,
-    condition: false,
-    location: false,
+    notes: false,
   });
-
-  // Helper to convert minimum condition to acceptable conditions array
-  const getAcceptableConditions = (minimum: ListingCondition): ListingCondition[] => {
-    const conditionHierarchy: ListingCondition[] = ['likeNew', 'veryGood', 'good', 'acceptable'];
-    const minIndex = conditionHierarchy.indexOf(minimum);
-    return conditionHierarchy.slice(0, minIndex + 1);
-  };
 
   // Helper function to convert form data to wanted listing preview format
   const createPreviewWantedListing = (): WantedListingWithDetails => {
@@ -81,10 +86,11 @@ function CreateWantedListingPageContent() {
       currency: 'EUR',
 
       // Preferences
-      acceptable_conditions: minimumCondition ? getAcceptableConditions(minimumCondition) : [],
+      acceptable_conditions: defaultAcceptableConditions,
       preferred_language: null,
-      location_preferences: location || null,
+      location_preferences: null,
       notes: notes || null,
+      expansion_preference: 'base_only',
 
       // Buyer & Status
       buyer_id: user?.id || 'preview-buyer',
@@ -155,30 +161,26 @@ function CreateWantedListingPageContent() {
   })();
 
   const isBudgetSectionComplete = !!maxPrice && parseFloat(maxPrice) > 0;
-  const isConditionSectionComplete = !!minimumCondition;
-  const isLocationSectionComplete = true; // Optional section, always "complete"
 
   const canPublish = (): boolean => {
-    return isGameSectionComplete && isBudgetSectionComplete && isConditionSectionComplete;
+    return isGameSectionComplete && isBudgetSectionComplete;
   };
 
   // Progressive disclosure: Auto-expand next incomplete section
+  // Order: Game → Budget → Notes
   useEffect(() => {
     const gameComplete = isGameSectionComplete;
     const budgetComplete = isBudgetSectionComplete;
-    const conditionComplete = isConditionSectionComplete;
 
     setExpandedSections((prev) => ({
       ...prev,
       game: true, // Always keep game section visible
       budget: gameComplete || prev.budget,
-      condition: (gameComplete && budgetComplete) || prev.condition,
-      location: (gameComplete && budgetComplete && conditionComplete) || prev.location,
+      notes: (gameComplete && budgetComplete) || prev.notes,
     }));
   }, [
     isGameSectionComplete,
     isBudgetSectionComplete,
-    isConditionSectionComplete,
   ]);
 
   // Fetch wanted listing data for edit mode
@@ -194,9 +196,9 @@ function CreateWantedListingPageContent() {
 
         if (!response.ok) {
           if (response.status === 404) {
-            setLoadError('Wanted listing not found');
+            setLoadError(t('errors.listingNotFound'));
           } else {
-            setLoadError('Failed to load wanted listing');
+            setLoadError(t('errors.loadingFailed'));
           }
           return;
         }
@@ -206,7 +208,7 @@ function CreateWantedListingPageContent() {
 
         // Check if user owns this wanted listing
         if (listing.buyer_id !== user.id) {
-          setLoadError('You do not have permission to edit this wanted listing');
+          setLoadError(t('errors.permissionDenied'));
           return;
         }
 
@@ -239,27 +241,13 @@ function CreateWantedListingPageContent() {
         });
 
         setMaxPrice(listing.max_price?.toString() || '');
-
-        // Find the minimum acceptable condition (highest in hierarchy)
-        if (listing.acceptable_conditions && listing.acceptable_conditions.length > 0) {
-          const conditionHierarchy: ListingCondition[] = ['likeNew', 'veryGood', 'good', 'acceptable'];
-          const acceptableSet = new Set(listing.acceptable_conditions);
-          // Find the best (first in hierarchy) that's included
-          const minCondition = conditionHierarchy.find(c => acceptableSet.has(c));
-          if (minCondition) {
-            setMinimumCondition(minCondition);
-          }
-        }
-
-        setLocation(listing.location_preferences || '');
         setNotes(listing.notes || '');
 
         // Expand all sections since we have data
         setExpandedSections({
           game: true,
           budget: true,
-          condition: true,
-          location: true,
+          notes: true,
         });
       } catch (err: any) {
         console.error('Error fetching wanted listing for edit:', err);
@@ -279,9 +267,10 @@ function CreateWantedListingPageContent() {
     setFallbackMode(false);
     setFallbackReason(undefined);
 
-    // If game is null (clearing selection), just return
+    // If game is null (clearing selection), clear everything and return
     if (!game) {
       setIsLoadingGameDetails(false);
+      setExistingSaleListings([]);
       return;
     }
 
@@ -312,14 +301,26 @@ function CreateWantedListingPageContent() {
         setFallbackMode(true);
         setFallbackReason(data.reason);
       }
+
+      // Check for existing sale listings
+      try {
+        const listingsRes = await fetch(`/api/games/${game.id}/listings`);
+        if (listingsRes.ok) {
+          const listingsData = await listingsRes.json();
+          setExistingSaleListings(listingsData.listings || []);
+          setSalesBannerDismissed(false);
+        }
+      } catch {
+        // Silently fail - banner is optional
+      }
     } catch (error) {
       console.error('Error fetching game details:', error);
       setFallbackMode(true);
-      setFallbackReason('Failed to load game details');
+      setFallbackReason(t('errors.gameDetailsFailed'));
     } finally {
       setIsLoadingGameDetails(false);
     }
-  }, []);
+  }, [t]);
 
   const handleVersionSelect = useCallback((version: VersionSelection) => {
     setSelectedVersion(version);
@@ -337,8 +338,8 @@ function CreateWantedListingPageContent() {
 
   const handlePublish = async () => {
     // Final validation
-    if (!selectedGame || !selectedVersion || !maxPrice || parseFloat(maxPrice) <= 0 || !minimumCondition) {
-      setError('Please complete all required fields');
+    if (!selectedGame || !selectedVersion || !maxPrice || parseFloat(maxPrice) <= 0) {
+      setError(t('errors.completionRequired'));
       return;
     }
 
@@ -353,9 +354,10 @@ function CreateWantedListingPageContent() {
         const updates = {
           min_price: null,
           max_price: parseFloat(maxPrice),
-          acceptable_conditions: getAcceptableConditions(minimumCondition),
-          location_preferences: location || null,
+          acceptable_conditions: defaultAcceptableConditions,
+          location_preferences: null,
           notes: notes || null,
+          expansion_preference: 'base_only',
         };
 
         const response = await fetch(`/api/wanted/${editListingId}`, {
@@ -371,8 +373,8 @@ function CreateWantedListingPageContent() {
 
         console.log(`✅ [Wanted New Page] Updated wanted listing ${editListingId}`);
 
-        // Redirect to wanted listing detail page
-        router.push(`/wanted/${editListingId}`);
+        // Redirect to game page with wanted section
+        router.push(`/game/${selectedGame.id}#wanted`);
       } else {
         // Create mode: Create new wanted listing
         console.log('📝 [Wanted New Page] Creating wanted listing...');
@@ -389,9 +391,10 @@ function CreateWantedListingPageContent() {
             selectedVersion: selectedVersion,
             minPrice: null,
             maxPrice: parseFloat(maxPrice),
-            acceptableConditions: getAcceptableConditions(minimumCondition),
-            locationPreferences: location || null,
+            acceptableConditions: defaultAcceptableConditions,
+            locationPreferences: null,
             notes: notes || null,
+            expansionPreference: 'base_only',
           }),
         });
 
@@ -403,8 +406,8 @@ function CreateWantedListingPageContent() {
 
         console.log('✅ [Wanted New Page] Created wanted listing');
 
-        // Success! Redirect to my listings page with wanted tab active
-        router.push('/my-listings?tab=wanted');
+        // Show success modal
+        setShowSuccessModal(true);
       }
     } catch (err: any) {
       console.error('Error saving wanted listing:', err);
@@ -421,12 +424,12 @@ function CreateWantedListingPageContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Loading State for Edit Mode */}
       {isLoadingListing && (
         <div className="text-center py-12">
           <RefreshCw className="w-8 h-8 text-frost-ice mx-auto mb-4 animate-spin" />
-          <p className="text-text-secondary">Loading wanted listing...</p>
+          <p className="text-text-secondary">{t('loading.listing')}</p>
         </div>
       )}
 
@@ -436,7 +439,7 @@ function CreateWantedListingPageContent() {
           <p className="text-aurora-red text-center">{loadError}</p>
           <div className="mt-4 text-center">
             <Button variant="secondary" onClick={() => router.push('/my-listings?tab=wanted')}>
-              Back to My Listings
+              {t('buttons.backToListings')}
             </Button>
           </div>
         </Card>
@@ -446,12 +449,12 @@ function CreateWantedListingPageContent() {
       {!isLoadingListing && !loadError && (
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-text">
-            {isEditMode ? 'Edit Wanted Listing' : 'Post a Wanted Game'}
+            {isEditMode ? t('pageTitleEdit') : t('pageTitle')}
           </h1>
           <p className="text-text-secondary mt-2">
             {isEditMode
-              ? 'Update your wanted game preferences'
-              : 'Let sellers know what game you\'re looking for and they can offer to sell it to you'}
+              ? t('pageSubtitleEdit')
+              : t('pageSubtitle')}
           </p>
         </div>
       )}
@@ -459,8 +462,8 @@ function CreateWantedListingPageContent() {
       {/* Two-Column Layout: Form + Preview */}
       {!isLoadingListing && !loadError && (
       <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-        {/* Left Column: Form Sections (7 cols on desktop) */}
-        <div className="lg:col-span-7 space-y-4">
+        {/* Left Column: Form Sections (8 cols on desktop) */}
+        <div className="lg:col-span-8 space-y-4">
           {/* Section 1: Game Selection (or locked game info in edit mode) */}
           {isEditMode ? (
             // Locked read-only game info in edit mode
@@ -497,14 +500,14 @@ function CreateWantedListingPageContent() {
                 <p className="text-xs text-aurora-orange flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span>
-                    Game and edition details cannot be changed. If you need to change the game, please delete this wanted listing and create a new one.
+                    {t('helpers.editWarning')}
                   </span>
                 </p>
               </div>
             </Card>
           ) : (
             <CollapsibleSection
-            title="Find Your Game"
+            title={t('sections.findYourGame')}
             icon={<Dices className="w-6 h-6 text-aurora-orange" />}
             isComplete={isGameSectionComplete}
             isExpanded={expandedSections.game}
@@ -513,7 +516,7 @@ function CreateWantedListingPageContent() {
             subtitle={
               selectedGame
                 ? selectedGameDisplayName || selectedGame.name
-                : "Start typing to search thousands of board games"
+                : t('sections.findYourGameSubtitle')
             }
           >
             <div className="[&_input:focus]:!ring-aurora-orange/30 [&_input:focus]:!border-aurora-orange space-y-6">
@@ -523,6 +526,7 @@ function CreateWantedListingPageContent() {
                 onSelect={handleGameSelect}
                 onChangeVersion={handleChangeVersion}
                 hideChangeVersionButton={true}
+                initialQuery={initialSearchQuery || undefined}
               />
 
               {/* Only show version selector when game is selected but version is not */}
@@ -531,7 +535,7 @@ function CreateWantedListingPageContent() {
                   {isLoadingGameDetails ? (
                     <div className="text-center py-8">
                       <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-aurora-orange" />
-                      <p className="mt-4 text-text-secondary">Loading game details...</p>
+                      <p className="mt-4 text-text-secondary">{t('loading.gameDetails')}</p>
                     </div>
                   ) : (
                     <LanguageVersionSelector
@@ -583,7 +587,7 @@ function CreateWantedListingPageContent() {
                       className="px-4 py-2 text-sm font-medium text-aurora-orange hover:text-aurora-orange/80 border-2 border-aurora-orange/30 hover:border-aurora-orange rounded-lg hover:bg-aurora-orange/5 transition-all flex items-center justify-center gap-2"
                     >
                       <RefreshCw className="w-4 h-4" />
-                      Change Version
+                      {t('buttons.changeVersion')}
                     </button>
                     {showChangeName && (
                       <button
@@ -591,7 +595,7 @@ function CreateWantedListingPageContent() {
                         className="px-4 py-2 text-sm font-medium text-aurora-orange hover:text-aurora-orange/80 border-2 border-aurora-orange/30 hover:border-aurora-orange rounded-lg hover:bg-aurora-orange/5 transition-all flex items-center justify-center gap-2"
                       >
                         <RefreshCw className="w-4 h-4" />
-                        Change Name
+                        {t('buttons.changeName')}
                       </button>
                     )}
                   </div>
@@ -601,96 +605,77 @@ function CreateWantedListingPageContent() {
           </CollapsibleSection>
           )}
 
+          {/* Existing Sales Banner - shown when game has active listings */}
+          {existingSaleListings.length > 0 && !salesBannerDismissed && selectedGame && !isEditMode && (
+            <ExistingSalesBanner
+              gameId={selectedGame.id}
+              gameName={selectedGame.name}
+              listings={existingSaleListings}
+              onDismiss={() => setSalesBannerDismissed(true)}
+            />
+          )}
+
           {/* Section 2: Budget */}
           <CollapsibleSection
-            title="Your Budget"
+            title={t('sections.yourBudget')}
             icon={<Euro className="w-6 h-6 text-aurora-orange" />}
             isComplete={isBudgetSectionComplete}
             isExpanded={expandedSections.budget}
             onToggle={() => toggleSection('budget')}
             required
-            subtitle="Set the maximum amount you're willing to pay"
+            subtitle={t('sections.yourBudgetSubtitle')}
           >
-            <div>
-              <label className="block text-sm font-medium text-text mb-2">
-                Maximum Price (€) *
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                placeholder="50.00"
-                className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-orange/30 focus:border-aurora-orange text-text bg-surface-0"
-                required
-              />
-              <div className="flex items-start gap-2 mt-2 text-xs text-text-secondary">
-                <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5 text-aurora-orange" />
-                <p>Sellers can offer games at any price, but setting a clear budget helps them understand your expectations</p>
+            <div className="space-y-4">
+              {/* Budget Assistant - shows pricing guidance when game is selected */}
+              {selectedGame && (
+                <BudgetAssistant
+                  bggGameId={selectedGame.id}
+                  minimumCondition="likeNew"
+                  onFillBudget={(price) => setMaxPrice(price.toFixed(2))}
+                />
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-text mb-2">
+                  {t('labels.maximumPrice')}
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  placeholder={t('placeholders.price')}
+                  className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-orange/30 focus:border-aurora-orange text-text bg-surface-0"
+                  required
+                />
+                <div className="flex items-start gap-2 mt-2 text-xs text-text-secondary">
+                  <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5 text-aurora-orange" />
+                  <p>{t('helpers.budget')}</p>
+                </div>
               </div>
             </div>
           </CollapsibleSection>
 
-          {/* Section 3: Minimum Condition */}
+          {/* Section 3: Additional Notes */}
           <CollapsibleSection
-            title="Minimum Condition"
-            icon={<ClipboardCheck className="w-6 h-6 text-aurora-orange" />}
-            isComplete={isConditionSectionComplete}
-            isExpanded={expandedSections.condition}
-            onToggle={() => toggleSection('condition')}
-            required
-            subtitle="What's the minimum condition you'll accept?"
+            title={t('sections.additionalNotes')}
+            icon={<NotesIcon className="w-6 h-6 text-aurora-orange" />}
+            isExpanded={expandedSections.notes}
+            onToggle={() => toggleSection('notes')}
+            subtitle={t('sections.additionalNotesSubtitle')}
           >
-            <MinimumConditionSelector
-              value={minimumCondition}
-              onChange={setMinimumCondition}
-            />
-          </CollapsibleSection>
-
-          {/* Section 4: Location & Details */}
-          <CollapsibleSection
-            title="Location & Details"
-            icon={<MapPin className="w-6 h-6 text-aurora-orange" />}
-            isExpanded={expandedSections.location}
-            onToggle={() => toggleSection('location')}
-            subtitle="Help sellers understand your location and preferences (optional)"
-          >
-            <div className="space-y-6">
-              {/* Location */}
-              <div>
-                <label className="block text-sm font-medium text-text mb-2">
-                  Your Location (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="e.g., Riga, Latvia"
-                  className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-orange/30 focus:border-aurora-orange text-text bg-surface-0"
-                />
-                <div className="flex items-start gap-2 mt-1 text-xs text-text-secondary">
-                  <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5 text-aurora-orange" />
-                  <p>Helps sellers estimate shipping costs and timing</p>
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="block text-sm font-medium text-text mb-2">
-                  Additional Notes (Optional)
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-orange/30 focus:border-aurora-orange text-text bg-surface-0 resize-none"
-                  rows={4}
-                  placeholder="Any additional details about what you're looking for..."
-                />
-                <p className="text-xs text-text-secondary mt-1">
-                  Examples: language preference, specific edition, local pickup preferred, etc.
-                </p>
-              </div>
+            <div>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-aurora-orange/30 focus:border-aurora-orange text-text bg-surface-0 resize-none"
+                rows={4}
+                placeholder={t('placeholders.notes')}
+              />
+              <p className="text-xs text-text-secondary mt-1">
+                {t('helpers.notes')}
+              </p>
             </div>
           </CollapsibleSection>
 
@@ -713,8 +698,8 @@ function CreateWantedListingPageContent() {
                 fullWidth
               >
                 {submitting
-                  ? (isEditMode ? 'Updating...' : 'Posting...')
-                  : (isEditMode ? 'Update Wanted Listing' : 'Post Wanted Game')}
+                  ? (isEditMode ? t('buttons.updating') : t('buttons.posting'))
+                  : (isEditMode ? t('buttons.updateWantedListing') : t('buttons.postWantedGame'))}
               </Button>
             </div>
 
@@ -727,33 +712,107 @@ function CreateWantedListingPageContent() {
                 size="lg"
               >
                 {submitting
-                  ? (isEditMode ? 'Updating...' : 'Posting...')
-                  : (isEditMode ? 'Update Wanted Listing' : 'Post Wanted Game')}
+                  ? (isEditMode ? t('buttons.updating') : t('buttons.posting'))
+                  : (isEditMode ? t('buttons.updateWantedListing') : t('buttons.postWantedGame'))}
               </Button>
             </div>
           </div>
         </div>
         {/* End Left Column */}
 
-        {/* Right Column: Live Preview (5 cols on desktop, hidden on mobile/tablet) */}
-        <div className="hidden lg:block lg:col-span-5">
-          <div className="sticky top-8">
-            {/* Live Preview with Card */}
-            <div className="border-2 border-border rounded-lg overflow-hidden [&>a>div]:border-0 [&>a>div]:rounded-none">
-              <div className="px-4 py-2 bg-bg-elevated border-b-2 border-border">
-                <span className="text-sm font-semibold text-polar-night">Live Preview</span>
-              </div>
-              <WantedListingCard
-                wantedListing={createPreviewWantedListing()}
-                showBuyer={false}
-              />
+        {/* Right Column: Live Preview (4 cols on desktop, hidden on mobile/tablet) */}
+        <div className="hidden lg:block lg:col-span-4">
+          <div className="sticky top-8 space-y-3">
+            {/* Live Preview Header - Orange themed */}
+            <div className="px-3 py-2 bg-aurora-orange/10 border border-aurora-orange/30 rounded-lg">
+              <span className="text-sm font-semibold text-aurora-orange">{t('preview.title')}</span>
             </div>
+            {/* WantedOfferCard Preview - Force mobile layout via CSS overrides like sell page */}
+            {selectedGame ? (
+              <div className="[&_.sm\:grid]:!hidden [&_.sm\:hidden]:!flex [&_.sm\:hidden]:!flex-col [&_.hidden.sm\:flex]:!hidden [&_.hidden.sm\:block]:!hidden">
+                <WantedOfferCard
+                  wantedListing={createPreviewWantedListing()}
+                  isPreview={true}
+                />
+              </div>
+            ) : (
+              <Card className="p-8 text-center border-2 border-dashed border-border">
+                <Package className="w-12 h-12 text-text-muted mx-auto mb-3" />
+                <p className="text-text-muted">{t('preview.selectGame')}</p>
+              </Card>
+            )}
           </div>
         </div>
         {/* End Right Column */}
       </div>
       )}
       {/* End Two-Column Grid */}
+
+      {/* Success Modal */}
+      <Modal
+        open={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false);
+          router.push('/browse?type=wanted');
+        }}
+        size="md"
+      >
+        <div className="text-center py-6">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-aurora-green/10 rounded-full flex items-center justify-center">
+              <Check className="w-8 h-8 text-aurora-green" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-polar-night mb-3">
+            {tSuccess('title')}
+          </h2>
+          <p className="text-text-secondary mb-8">
+            {tSuccess('subtitle')}
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <Button
+              variant="primary"
+              onClick={() => router.push(`/game/${selectedGame?.id}#wanted`)}
+              fullWidth
+            >
+              {tSuccess('viewListing')}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setShowSuccessModal(false);
+                // Reset form for another listing
+                setSelectedGame(null);
+                setSelectedVersion(null);
+                setSelectedGameDisplayName(null);
+                setMaxPrice('');
+                setNotes('');
+                setExistingSaleListings([]);
+                setSalesBannerDismissed(false);
+                setExpandedSections({
+                  game: true,
+                  budget: false,
+                  notes: false,
+                });
+              }}
+              fullWidth
+            >
+              {tSuccess('postAnother')}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setShowSuccessModal(false);
+                router.push('/browse');
+              }}
+              fullWidth
+            >
+              {tSuccess('browseListings')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -773,3 +832,4 @@ export default function CreateWantedListingPage() {
     </Suspense>
   );
 }
+
