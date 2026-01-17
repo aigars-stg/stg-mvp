@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Heart, Search, Settings, LogOut, Close, LogIn, ShoppingBag, Store, ChatBubble, Globe } from 'griddy-icons';
+import { Package, Heart, Search, Settings, LogOut, Close, LogIn, ShoppingBag, Store, ChatBubble, Globe, Shield } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
 import { Button } from '@second-turn/design-system';
@@ -29,6 +29,9 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
 
   // Check if user is an active seller
   const isActiveSeller = profile?.seller_status === 'active';
+
+  // Check if user is staff
+  const isStaff = profile?.is_staff === true;
 
   // Fetch counts for authenticated users
   useEffect(() => {
@@ -183,6 +186,27 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                 </div>
               </div>
 
+              {/* Account & Settings Section - Prominent position */}
+              <div className="py-2 border-b border-border-subtle dark:border-polar-nightDark">
+                <button
+                  onClick={() => handleNavigate('/account/settings')}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium transition-colors"
+                >
+                  <Settings className="w-5 h-5 text-frost-ice" />
+                  <span className="text-polar-night dark:text-snow-stormLightest font-medium">Account Settings</span>
+                </button>
+
+                {isStaff && (
+                  <button
+                    onClick={() => handleNavigate('/staff/transactions')}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium transition-colors"
+                  >
+                    <Shield className="w-5 h-5 text-aurora-purple" />
+                    <span className="text-polar-night dark:text-snow-stormLightest font-medium">Staff Dashboard</span>
+                  </button>
+                )}
+              </div>
+
               {/* Menu Items - My Activity Section */}
               <div className="py-2">
                 <div className="px-4 py-2 text-xs font-semibold text-text-muted dark:text-snow-storm uppercase tracking-wide">
@@ -299,17 +323,6 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
               {/* Theme Toggle */}
               <div className="border-t border-border-subtle dark:border-polar-nightDark">
                 <ThemeToggle variant="dropdown" />
-              </div>
-
-              {/* Settings Section */}
-              <div className="py-2 border-t border-border-subtle dark:border-polar-nightDark">
-                <button
-                  onClick={() => handleNavigate('/account')}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium transition-colors"
-                >
-                  <Settings className="w-5 h-5 text-text-muted dark:text-snow-storm" />
-                  <span className="text-polar-night dark:text-snow-stormLightest font-medium">Account Settings</span>
-                </button>
               </div>
 
               {/* Sign Out Section */}
