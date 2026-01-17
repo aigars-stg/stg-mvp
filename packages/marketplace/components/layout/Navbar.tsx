@@ -78,7 +78,7 @@ export function Navbar() {
         {/* Mobile Icons - visible below lg */}
         <div className="flex items-center gap-2 lg:hidden">
           <MobileSearchButton />
-          <CartIcon />
+          <SavedGamesIcon />
         </div>
 
         {/* Desktop Navigation - visible on lg and up */}

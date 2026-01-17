@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Heart, Search, Settings, LogOut, Close, LogIn, ShoppingBag, Store } from 'griddy-icons';
+import { Package, Heart, Search, Settings, LogOut, Close, LogIn, ShoppingBag, Store, ChatBubble, Globe } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
 import { Button } from '@second-turn/design-system';
 import { getInitials } from '@/lib/auth/utils';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
+import { LocaleSwitcher } from './LocaleSwitcher';
 
 interface ProfileBottomSheetProps {
   isOpen: boolean;
@@ -16,6 +18,7 @@ interface ProfileBottomSheetProps {
 export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps) {
   const router = useRouter();
   const { user, profile, signOut } = useAuth();
+  const { unreadCount } = useUnreadMessages();
   const [listingsCount, setListingsCount] = useState(0);
   const [savedCount, setSavedCount] = useState(0);
   const [wantedCount, setWantedCount] = useState(0);
@@ -179,11 +182,27 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                 </div>
               </div>
 
-              {/* Menu Items - My Listings Section */}
+              {/* Menu Items - My Activity Section */}
               <div className="py-2">
                 <div className="px-4 py-2 text-xs font-semibold text-text-muted uppercase tracking-wide">
                   My Activity
                 </div>
+
+                {/* Messages - First item with unread badge */}
+                <button
+                  onClick={() => handleNavigate('/messages')}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <ChatBubble className="w-5 h-5 text-frost-ice" />
+                    <span className="text-polar-night font-medium">Messages</span>
+                  </div>
+                  {unreadCount > 0 && (
+                    <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
 
                 <button
                   onClick={() => handleNavigate('/orders')}
@@ -261,6 +280,19 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                     </span>
                   )}
                 </button>
+              </div>
+
+              {/* Language Section */}
+              <div className="py-2 border-t border-border-subtle">
+                <div className="px-4 py-2 text-xs font-semibold text-text-muted uppercase tracking-wide">
+                  Language
+                </div>
+                <div className="px-4 py-2">
+                  <div className="flex items-center gap-3">
+                    <Globe className="w-5 h-5 text-text-muted" />
+                    <LocaleSwitcher variant="buttons" className="flex-1" />
+                  </div>
+                </div>
               </div>
 
               {/* Settings Section */}

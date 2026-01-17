@@ -4,10 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Home, Grid, Plus, ChatBubble as MessageCircle, User } from 'griddy-icons';
+import { Home, Grid, Plus, ShoppingBasket as ShoppingCart, User } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
+import { useCart } from '@/lib/contexts/CartContext';
 import { useTranslations } from 'next-intl';
+import { getInitials } from '@/lib/auth/utils';
 
 // Lazy load action sheets - they're only shown on user interaction
 const SellActionSheet = dynamic(() => import('./SellActionSheet').then(mod => ({ default: mod.SellActionSheet })), {
@@ -20,8 +22,9 @@ const ProfileBottomSheet = dynamic(() => import('./ProfileBottomSheet').then(mod
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { unreadCount } = useUnreadMessages();
+  const { itemCount: cartCount } = useCart();
   const [sellSheetOpen, setSellSheetOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const t = useTranslations('Navigation');
@@ -53,7 +56,7 @@ export function BottomNav() {
       label: t('browse'),
       icon: Grid,
       path: '/browse',
-      active: isActive('/browse') || isActive('/listing') || isActive('/games') || isActive('/wanted'),
+      active: isActive('/browse') || isActive('/listing') || isActive('/games'),
     },
     {
       label: t('sellShort'),
@@ -63,18 +66,18 @@ export function BottomNav() {
       isCenter: true, // Special styling for center button
     },
     {
-      label: t('messages'),
-      icon: MessageCircle,
-      path: '/messages',
-      active: isActive('/messages'),
-      badge: unreadCount > 0 ? unreadCount : null,
-      requiresAuth: true,
+      label: t('cart'),
+      icon: ShoppingCart,
+      path: '/cart',
+      active: isActive('/cart'),
+      badge: cartCount > 0 ? cartCount : null,
     },
     {
       label: t('profile'),
       icon: User,
       path: null, // Opens bottom sheet instead
       active: isActive('/account') || isActive('/my-listings'),
+      hasNotification: unreadCount > 0, // Dot indicator for unread messages
     },
   ];
 
@@ -106,7 +109,9 @@ export function BottomNav() {
         <div className="flex items-center justify-around h-16 px-2">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isDisabled = item.requiresAuth && !user;
+            const isProfileItem = item.label === t('profile');
+            const displayName = profile?.full_name || user?.email?.split('@')[0] || 'User';
+            const initials = user ? getInitials(displayName) : '';
 
             // Center SELL button with special styling
             if (item.isCenter) {
@@ -130,20 +135,38 @@ export function BottomNav() {
             // Regular nav items
             const NavContent = (
               <div
-                className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg transition-colors relative ${isDisabled
-                    ? 'opacity-40 cursor-not-allowed'
-                    : item.active
-                      ? 'text-frost-ice'
-                      : 'text-text-muted hover:text-text'
-                  }`}
+                className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg transition-colors relative ${
+                  item.active
+                    ? 'text-frost-ice'
+                    : 'text-text-muted hover:text-text'
+                }`}
               >
                 <div className="relative">
-                  <Icon className="w-6 h-6" />
-                  {/* Badge for unread messages */}
+                  {/* Profile icon: show avatar when logged in, generic icon when not */}
+                  {isProfileItem && user ? (
+                    profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt={displayName}
+                        className="w-6 h-6 rounded-full object-cover border border-border"
+                      />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-frost-ice text-snow-white flex items-center justify-center text-[10px] font-semibold">
+                        {initials}
+                      </div>
+                    )
+                  ) : (
+                    <Icon className="w-6 h-6" />
+                  )}
+                  {/* Badge for cart count */}
                   {item.badge && (
-                    <span className="absolute -top-1 -right-1 bg-aurora-red text-snow-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 shadow-sm">
+                    <span className="absolute -top-1 -right-1 bg-aurora-orange text-snow-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 shadow-sm">
                       {item.badge > 99 ? '99+' : item.badge}
                     </span>
+                  )}
+                  {/* Notification dot for profile when there are unread messages */}
+                  {item.hasNotification && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-aurora-red rounded-full" />
                   )}
                 </div>
                 <span className="text-[10px] font-medium">{item.label}</span>
@@ -159,12 +182,7 @@ export function BottomNav() {
               return (
                 <Link
                   key={item.label}
-                  href={isDisabled ? '#' : item.path}
-                  onClick={(e) => {
-                    if (isDisabled) {
-                      e.preventDefault();
-                    }
-                  }}
+                  href={item.path}
                   className="flex-1 flex justify-center"
                 >
                   {NavContent}
@@ -175,8 +193,7 @@ export function BottomNav() {
             return (
               <button
                 key={item.label}
-                onClick={() => !isDisabled && handleNavClick(item)}
-                disabled={isDisabled}
+                onClick={() => handleNavClick(item)}
                 className="flex-1 flex justify-center"
               >
                 {NavContent}
