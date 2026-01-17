@@ -271,7 +271,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
 
   return (
     <>
-      <div className="bg-snow-white border-2 rounded-xl overflow-hidden transition-all border-border hover:border-frost-ice/50">
+      <div className="bg-snow-white dark:bg-polar-nightLight border-2 rounded-xl overflow-hidden transition-all border-border dark:border-polar-nightDark hover:border-frost-ice/50">
         {/* Collapsed View */}
         <div className="p-3 sm:p-4">
           {/* Desktop: 3-column grid layout */}
@@ -326,7 +326,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
             <div className="flex flex-col min-w-0">
               {/* Game Name with BGG link */}
               <div className="flex items-start gap-2 mb-1">
-                <h3 className="text-base font-semibold text-polar-night">
+                <h3 className="text-base font-semibold text-polar-night dark:text-snow-stormLightest">
                   {listing.game_name}
                 </h3>
                 <a
@@ -377,22 +377,22 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
 
               {/* Version Info - edition, language, publisher each on own line */}
               {(formattedEdition || listing.language || listing.publisher) && (
-                <div className="text-sm text-text-secondary mb-2 space-y-0.5">
+                <div className="text-sm text-text-secondary dark:text-snow-stormLight mb-2 space-y-0.5">
                   {formattedEdition && (
                     <p className="flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                      <Globe className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
                       {formattedEdition}
                     </p>
                   )}
                   {listing.language && (
                     <p className="flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                      <BookOpen className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
                       <span>{listing.language.replace(/, /g, ' / ')}</span>
                     </p>
                   )}
                   {listing.publisher && (
                     <p className="flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                      <Building2 className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
                       <span>{listing.publisher.replace(/, /g, ' / ')}</span>
                     </p>
                   )}
@@ -428,14 +428,14 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                 ) : deliveredPricing.canCalculate ? (
                   <>
                     {/* Total delivered as primary price */}
-                    <div className="text-2xl font-bold text-polar-night">
+                    <div className="text-2xl font-bold text-polar-night dark:text-snow-stormLightest">
                       €{deliveredPricing.totalDelivered.toFixed(2)}
-                      {deliveredPricing.isEstimate && <span className="text-base font-normal text-text-muted">*</span>}
+                      {deliveredPricing.isEstimate && <span className="text-base font-normal text-text-muted dark:text-snow-stormMedium">*</span>}
                     </div>
                     {/* Previous price strikethrough */}
                     {listing.previous_price && listing.previous_price > listing.price && (
                       <div className="flex items-center justify-end gap-1.5">
-                        <span className="text-sm text-text-muted line-through">
+                        <span className="text-sm text-text-muted dark:text-snow-stormMedium line-through">
                           €{listing.previous_price.toFixed(2)}
                         </span>
                         <span className="text-xs text-aurora-green font-medium">
@@ -451,12 +451,12 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                 ) : (
                   <>
                     {/* Item price only for contact_seller or non-Baltic */}
-                    <div className="text-2xl font-bold text-polar-night">
+                    <div className="text-2xl font-bold text-polar-night dark:text-snow-stormLightest">
                       €{listing.price.toFixed(2)}
                     </div>
                     {listing.previous_price && listing.previous_price > listing.price && (
                       <div className="flex items-center justify-end gap-1.5">
-                        <span className="text-sm text-text-muted line-through">
+                        <span className="text-sm text-text-muted dark:text-snow-stormMedium line-through">
                           €{listing.previous_price.toFixed(2)}
                         </span>
                         <span className="text-xs text-aurora-green font-medium">
@@ -559,12 +559,12 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                     ) : deliveredPricing.canCalculate ? (
                       <>
                         {/* Total delivered as primary price */}
-                        <div className="text-xl font-bold text-polar-night">
+                        <div className="text-xl font-bold text-polar-night dark:text-snow-stormLightest">
                           €{deliveredPricing.totalDelivered.toFixed(2)}
-                          {deliveredPricing.isEstimate && <span className="text-sm font-normal text-text-muted">*</span>}
+                          {deliveredPricing.isEstimate && <span className="text-sm font-normal text-text-muted dark:text-snow-stormMedium">*</span>}
                         </div>
                         {listing.previous_price && listing.previous_price > listing.price && (
-                          <div className="text-sm text-text-muted line-through">
+                          <div className="text-sm text-text-muted dark:text-snow-stormMedium line-through">
                             €{listing.previous_price.toFixed(2)}
                           </div>
                         )}
@@ -574,11 +574,11 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                     ) : (
                       <>
                         {/* Item price only for contact_seller or non-Baltic */}
-                        <div className="text-xl font-bold text-polar-night">
+                        <div className="text-xl font-bold text-polar-night dark:text-snow-stormLightest">
                           €{listing.price.toFixed(2)}
                         </div>
                         {listing.previous_price && listing.previous_price > listing.price && (
-                          <div className="text-sm text-text-muted line-through">
+                          <div className="text-sm text-text-muted dark:text-snow-stormMedium line-through">
                             €{listing.previous_price.toFixed(2)}
                           </div>
                         )}
@@ -591,7 +591,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
 
             {/* Game Name with BGG link */}
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-semibold text-polar-night line-clamp-1">
+              <h3 className="text-base font-semibold text-polar-night dark:text-snow-stormLightest line-clamp-1">
                 {listing.game_name}
               </h3>
               <a
@@ -608,22 +608,22 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
 
             {/* Version Info - edition, language, publisher each on own line */}
             {(formattedEdition || listing.language || listing.publisher) && (
-              <div className="text-sm text-text-secondary space-y-0.5">
+              <div className="text-sm text-text-secondary dark:text-snow-stormLight space-y-0.5">
                 {formattedEdition && (
                   <p className="flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                    <Globe className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
                     {formattedEdition}
                   </p>
                 )}
                 {listing.language && (
                   <p className="flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                    <BookOpen className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
                     <span>{listing.language.replace(/, /g, ' / ')}</span>
                   </p>
                 )}
                 {listing.publisher && (
                   <p className="flex items-center gap-1.5">
-                    <Building2 className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                    <Building2 className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
                     <span>{listing.publisher.replace(/, /g, ' / ')}</span>
                   </p>
                 )}
@@ -634,7 +634,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
         </div>
 
         {/* Collapsible Sections */}
-        <div className="border-t border-border-subtle">
+        <div className="border-t border-border-subtle dark:border-polar-nightDark">
           {/* Included Expansions - Collapsible */}
             {listing.included_expansions && listing.included_expansions.length > 0 && (
               <CollapsibleDetails
@@ -694,11 +694,11 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                         {/* Expansion Info */}
                         <div className="flex-grow min-w-0 flex items-center">
                           <div className="flex-grow min-w-0">
-                            <p className="text-sm font-medium text-polar-night line-clamp-1">
+                            <p className="text-sm font-medium text-polar-night dark:text-snow-stormLightest line-clamp-1">
                               {expansion.name}
                             </p>
                             {expansionSubtitle && (
-                              <p className="text-xs text-text-secondary line-clamp-1 mt-0.5">
+                              <p className="text-xs text-text-secondary dark:text-snow-stormLight line-clamp-1 mt-0.5">
                                 {expansionSubtitle}
                               </p>
                             )}
@@ -739,10 +739,10 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
               >
                 <div className="space-y-2 text-sm">
                   {!listing.all_components_present && listing.missing_components && (
-                    <p className="text-text-secondary">{listing.missing_components}</p>
+                    <p className="text-text-secondary dark:text-snow-stormLight">{listing.missing_components}</p>
                   )}
                   {listing.condition_notes && (
-                    <p className={`text-text-secondary leading-relaxed ${!listing.all_components_present && listing.missing_components ? 'pt-2 border-t border-border-subtle' : ''}`}>
+                    <p className={`text-text-secondary dark:text-snow-stormLight leading-relaxed ${!listing.all_components_present && listing.missing_components ? 'pt-2 border-t border-border-subtle dark:border-polar-nightDark' : ''}`}>
                       {listing.condition_notes}
                     </p>
                   )}
@@ -780,7 +780,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
         )}
 
         {/* FOOTER: Seller info + actions (desktop and mobile) */}
-        <div className={`hidden sm:flex items-center justify-between gap-4 px-3 sm:px-4 py-3 ${!isContactSellerListing(listing) ? 'border-t border-border-subtle' : ''}`}>
+        <div className={`hidden sm:flex items-center justify-between gap-4 px-3 sm:px-4 py-3 ${!isContactSellerListing(listing) ? 'border-t border-border-subtle dark:border-polar-nightDark' : ''}`}>
           {/* Left: Seller Info */}
           <div className="min-w-0 flex-1">
             <UserInfoCard
@@ -901,7 +901,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
         </div>
 
         {/* Mobile Seller Info */}
-        <div className="sm:hidden border-t border-border-subtle px-3 py-2.5">
+        <div className="sm:hidden border-t border-border-subtle dark:border-polar-nightDark px-3 py-2.5">
           <div className="flex items-center gap-2.5">
             <div className="flex-1 min-w-0">
               <UserInfoCard
@@ -947,11 +947,11 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
 
         {/* Mobile Footer: Actions - Not shown for auctions (bid panel is above) */}
         {!isOwnListing && !isAuctionListing(listing) && (
-          <div className={`sm:hidden sticky bottom-0 left-0 right-0 bg-snow-white ${!isContactSellerListing(listing) ? 'border-t border-border-subtle' : ''} p-3 shadow-lg`}>
+          <div className={`sm:hidden sticky bottom-0 left-0 right-0 bg-snow-white dark:bg-polar-nightLight ${!isContactSellerListing(listing) ? 'border-t border-border-subtle dark:border-polar-nightDark' : ''} p-3 shadow-lg`}>
             <div className="flex items-center justify-between gap-2">
               {/* Price */}
               <div className="flex-shrink-0">
-                <div className="text-lg font-bold text-polar-night">€{listing.price.toFixed(2)}</div>
+                <div className="text-lg font-bold text-polar-night dark:text-snow-stormLightest">€{listing.price.toFixed(2)}</div>
               </div>
 
               {/* Actions */}
