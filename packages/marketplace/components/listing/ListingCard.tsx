@@ -185,7 +185,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
           {/* Variable height content */}
           <div className="space-y-2">
             {/* Game Name */}
-            <h3 className="font-bold text-lg text-polar-night line-clamp-2 min-h-[2.5rem]">
+            <h3 className="font-bold text-lg text-polar-night dark:text-snow-stormLightest line-clamp-2 min-h-[2.5rem]">
               {listing.game_name}
             </h3>
 
@@ -198,7 +198,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
 
             {/* Game Metadata - tighter spacing */}
             {(listing.game?.player_count || listing.game?.min_age || listing.game?.playing_time || (listing.included_expansions && listing.included_expansions.length > 0)) && (
-              <div className="flex flex-wrap gap-2 text-xs text-text-secondary items-center">
+              <div className="flex flex-wrap gap-2 text-xs text-text-secondary dark:text-snow-stormLight items-center">
                 {listing.game?.player_count && (
                   <span className="flex items-center gap-0.5">
                     <Users className="w-3.5 h-3.5" />
@@ -231,7 +231,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
 
             {/* Language + Missing Components Warning */}
             {(listing.language || !listing.all_components_present) && (
-              <div className="flex items-center gap-1.5 text-sm text-text-secondary">
+              <div className="flex items-center gap-1.5 text-sm text-text-secondary dark:text-snow-stormLight">
                 {listing.language && (
                   <span
                     className="flex items-center gap-1 line-clamp-1"
@@ -259,12 +259,12 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
               <>
                 {/* Total delivered as primary price */}
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-polar-night">
+                  <span className="text-2xl font-bold text-polar-night dark:text-snow-stormLightest">
                     €{deliveredPricing.totalDelivered.toFixed(2)}
-                    {deliveredPricing.isEstimate && <span className="text-base font-normal text-text-muted">*</span>}
+                    {deliveredPricing.isEstimate && <span className="text-base font-normal text-text-muted dark:text-snow-stormMedium">*</span>}
                   </span>
                   {listing.previous_price && listing.previous_price > listing.price && (
-                    <span className="text-base text-text-muted line-through">
+                    <span className="text-base text-text-muted dark:text-snow-stormMedium line-through">
                       €{listing.previous_price.toFixed(2)}
                     </span>
                   )}
@@ -276,11 +276,11 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
               <>
                 {/* Item price only for contact_seller or non-Baltic */}
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-polar-night">
+                  <span className="text-2xl font-bold text-polar-night dark:text-snow-stormLightest">
                     €{listing.price.toFixed(2)}
                   </span>
                   {listing.previous_price && listing.previous_price > listing.price && (
-                    <span className="text-base text-text-muted line-through">
+                    <span className="text-base text-text-muted dark:text-snow-stormMedium line-through">
                       €{listing.previous_price.toFixed(2)}
                     </span>
                   )}
@@ -294,7 +294,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
             {/* Location + Shipping - answers "Can I get this?" and "How?" */}
             {/* Contact Seller listings don't show shipping options - arranged directly */}
             {showSeller && listing.seller?.country && (
-              <div className="flex items-center gap-1.5 text-sm text-text-secondary">
+              <div className="flex items-center gap-1.5 text-sm text-text-secondary dark:text-snow-stormLight">
                 {getCountryFlag(listing.seller.country) && (
                   <span
                     className={getCountryFlag(listing.seller.country)}
@@ -306,7 +306,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
                 {/* Only show shipping options for instant_buy listings */}
                 {!isContactSellerListing(listing) && (
                   <>
-                    <span className="text-text-muted">•</span>
+                    <span className="text-text-muted dark:text-snow-stormMedium">•</span>
                     {listing.shipping_parcel_locker ? (
                       <span className="flex items-center gap-1">
                         <Package className="w-3.5 h-3.5" />

@@ -1536,10 +1536,10 @@ export default function BrowsePage() {
         {error && !loading && !isOffline && (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">⚠️</div>
-            <h3 className="text-xl font-semibold text-polar-night mb-2">
+            <h3 className="text-xl font-semibold text-polar-night dark:text-snow-stormLightest mb-2">
               {t('messages.genericError')}
             </h3>
-            <p className="text-text-secondary mb-6">{error}</p>
+            <p className="text-text-secondary dark:text-snow-stormLight mb-6">{error}</p>
             <Button variant="primary" onClick={() => window.location.reload()}>
               {t('messages.tryAgain')}
             </Button>
@@ -1579,14 +1579,14 @@ export default function BrowsePage() {
             {listingType === 'sell' && loadingMore && (
               <div className="text-center py-8">
                 <div className="w-8 h-8 border-4 border-frost-ice border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                <p className="text-sm text-text-secondary">{t('messages.loadingMore')}</p>
+                <p className="text-sm text-text-secondary dark:text-snow-stormLight">{t('messages.loadingMore')}</p>
               </div>
             )}
 
             {/* No More Results - Only for sell listings */}
             {listingType === 'sell' && !hasMore && !loadingMore && filteredGames.length > 0 && (
-              <div className="text-center py-8 border-t border-border-subtle space-y-4">
-                <p className="text-sm text-text-secondary">
+              <div className="text-center py-8 border-t border-border-subtle dark:border-polar-nightDark space-y-4">
+                <p className="text-sm text-text-secondary dark:text-snow-stormLight">
                   {t('messages.reachedEnd', { totalCount })}
                 </p>
                 {/* BGG Attribution */}
@@ -1611,12 +1611,12 @@ export default function BrowsePage() {
         {!loading && !error && !isOffline && (listingType === 'sell' ? filteredGames.length === 0 : filteredWantedListings.length === 0) && (
           <div className="text-center py-16">
             <div className="flex justify-center mb-4">
-              <Package className="w-16 h-16 text-text-muted" />
+              <Package className="w-16 h-16 text-text-muted dark:text-snow-stormMedium" />
             </div>
-            <h3 className="text-xl font-semibold text-polar-night mb-2">
+            <h3 className="text-xl font-semibold text-polar-night dark:text-snow-stormLightest mb-2">
               {listingType === 'sell' ? t('emptyState.noGamesFound') : t('emptyState.noWantedListings')}
             </h3>
-            <p className="text-text-secondary mb-6">
+            <p className="text-text-secondary dark:text-snow-stormLight mb-6">
               {activeFiltersCount > 0
                 ? t('emptyState.tryAdjustingFilters')
                 : listingType === 'sell'

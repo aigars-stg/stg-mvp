@@ -39,7 +39,7 @@ export function PriceBreakdown({ pricing, variant }: PriceBreakdownProps) {
     // Single line: "€38.50 + €4.71 fees"
     const fees = pricing.shippingCost + pricing.serviceFee;
     return (
-      <div className="text-xs text-text-muted">
+      <div className="text-xs text-text-muted dark:text-snow-stormMedium">
         <span>€{pricing.itemPrice.toFixed(2)}</span>
         <span className="mx-1">+</span>
         <span>
@@ -54,21 +54,21 @@ export function PriceBreakdown({ pricing, variant }: PriceBreakdownProps) {
   return (
     <div className="text-xs space-y-0.5 text-right">
       <div className="flex justify-end gap-2">
-        <span className="text-text-muted">{t('item')}</span>
-        <span className="text-text-secondary">€{pricing.itemPrice.toFixed(2)}</span>
+        <span className="text-text-muted dark:text-snow-stormMedium">{t('item')}</span>
+        <span className="text-text-secondary dark:text-snow-stormLight">€{pricing.itemPrice.toFixed(2)}</span>
       </div>
       <div className="flex justify-end gap-2">
-        <span className="text-text-muted">
+        <span className="text-text-muted dark:text-snow-stormMedium">
           {t('shipping', { country: countryName })}
         </span>
-        <span className="text-text-secondary">€{pricing.shippingCost.toFixed(2)}</span>
+        <span className="text-text-secondary dark:text-snow-stormLight">€{pricing.shippingCost.toFixed(2)}</span>
       </div>
       <div className="flex justify-end gap-2">
-        <span className="text-text-muted">{t('serviceFee')}</span>
-        <span className="text-text-secondary">€{pricing.serviceFee.toFixed(2)}</span>
+        <span className="text-text-muted dark:text-snow-stormMedium">{t('serviceFee')}</span>
+        <span className="text-text-secondary dark:text-snow-stormLight">€{pricing.serviceFee.toFixed(2)}</span>
       </div>
       {pricing.isEstimate && (
-        <p className="text-text-muted italic pt-0.5 text-[10px]">{t('estimateNote')}</p>
+        <p className="text-text-muted dark:text-snow-stormMedium italic pt-0.5 text-[10px]">{t('estimateNote')}</p>
       )}
     </div>
   );
