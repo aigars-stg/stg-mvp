@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useCallback, ReactNode } from 'react';
+import { useEffect, useCallback, ReactNode } from 'react';
 import { clsx } from 'clsx';
 
 // ============================================================================

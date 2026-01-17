@@ -14,10 +14,22 @@ export default defineConfig({
       name: 'preserve-use-client',
       enforce: 'post',
       generateBundle(_, bundle) {
+        // List of client-side components that need 'use client' directive
+        const clientComponents = [
+          'Modal',
+          'Select',
+          'SlidePanel',
+          'Toast',
+          'Tabs',
+          'ActionSheet',
+          'Dropdown',
+          'ImageCarousel',
+          'Avatar',
+        ];
         for (const chunk of Object.values(bundle)) {
           if (chunk.type === 'chunk') {
             // Add 'use client' to client-side components
-            if (chunk.fileName.includes('Modal') || chunk.fileName.includes('Select') || chunk.fileName.includes('SlidePanel')) {
+            if (clientComponents.some(name => chunk.fileName.includes(name))) {
               if (!chunk.code.startsWith("'use client'")) {
                 chunk.code = `'use client';\n${chunk.code}`;
               }

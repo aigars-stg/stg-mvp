@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useId } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { createContext, useContext, useState, useCallback, useId } from 'react';
+import { cva } from 'class-variance-authority';
 import { clsx } from 'clsx';
 
 // ============================================================================
