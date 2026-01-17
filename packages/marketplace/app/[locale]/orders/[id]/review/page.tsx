@@ -318,7 +318,7 @@ export default function ReviewOrderPage() {
                       className={`w-10 h-10 transition-colors ${
                         value <= (hoveredRating || rating)
                           ? 'text-amber-400 fill-amber-400'
-                          : 'text-slate-200'
+                          : 'text-snow-storm'
                       }`}
                     />
                   </button>

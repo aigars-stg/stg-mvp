@@ -139,7 +139,7 @@ function RatingSummary({
                   'w-5 h-5',
                   i <= Math.round(averageRating)
                     ? 'text-amber-400 fill-amber-400'
-                    : 'text-slate-200'
+                    : 'text-snow-storm'
                 )}
               />
             ))}
@@ -159,7 +159,7 @@ function RatingSummary({
               <span className="w-12 text-sm text-text-secondary text-right">
                 {rating} {rating !== 1 ? t('stars') : t('star')}
               </span>
-              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="flex-1 h-2 bg-bg-secondary rounded-full overflow-hidden">
                 <div
                   className={cn(
                     'h-full rounded-full transition-all',
@@ -252,7 +252,7 @@ function ReviewCard({
                 'w-4 h-4',
                 i <= review.rating
                   ? 'text-amber-400 fill-amber-400'
-                  : 'text-slate-200'
+                  : 'text-snow-storm'
               )}
             />
           ))}

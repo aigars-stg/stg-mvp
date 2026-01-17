@@ -62,7 +62,7 @@ const nextConfig = {
           // Control referrer information
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           // Restrict browser features
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
           // Content Security Policy
           {
             key: 'Content-Security-Policy',
@@ -70,14 +70,16 @@ const nextConfig = {
               "default-src 'self'",
               // Scripts: self + Stripe + Cloudflare Turnstile + Vercel Analytics
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://js.stripe.com https://va.vercel-scripts.com",
+              // Workers: self + blob (for MapLibre GL web workers)
+              "worker-src 'self' blob:",
               // Styles: self + inline (for CSS-in-JS)
               "style-src 'self' 'unsafe-inline'",
               // Images: self + data URIs + HTTPS sources + blob for image processing
               "img-src 'self' data: https: blob:",
               // Fonts: self
               "font-src 'self'",
-              // Connections: self + Supabase + Stripe + MapBox + Vercel Analytics
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.mapbox.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+              // Connections: self + Supabase + Stripe + MapBox + Carto (map tiles) + Vercel Analytics
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.mapbox.com https://*.cartocdn.com https://*.carto.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
               // Frames: Cloudflare Turnstile + Stripe
               "frame-src https://challenges.cloudflare.com https://js.stripe.com",
               // Prevent object/embed

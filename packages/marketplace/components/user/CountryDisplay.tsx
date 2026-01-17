@@ -38,7 +38,7 @@ export function CountryDisplay({
 
   return (
     <span
-      className={cn('inline-flex items-center gap-1 text-slate-600', className)}
+      className={cn('inline-flex items-center gap-1 text-text-secondary', className)}
       title={countryName}
     >
       <span className={cn(flagClass, 'fis')} aria-hidden="true" />

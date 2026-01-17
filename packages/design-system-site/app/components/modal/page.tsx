@@ -10,6 +10,9 @@ export default function ModalPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [sizeSmOpen, setSizeSmOpen] = useState(false);
   const [sizeLgOpen, setSizeLgOpen] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
     <div className="space-y-12">
@@ -205,24 +208,95 @@ export default function ModalPage() {
         </ComponentDemo>
       </section>
 
-      {/* Real Marketplace Examples */}
+      {/* Modal Patterns */}
       <section>
-        <h2 className="text-2xl font-semibold text-polar-night mb-6">Real Marketplace Examples</h2>
+        <h2 className="text-2xl font-semibold text-polar-night mb-6">Modal Patterns</h2>
 
         <ComponentDemo
-          title="Delete Listing Confirmation"
-          description="Destructive action requiring explicit confirmation."
+          title="Success Notification Modal"
+          description="Celebrate successful actions with clear feedback."
         >
-          <Button variant="danger">Delete Listing</Button>
+          <Button variant="primary" onClick={() => setSuccessOpen(true)}>
+            Show Success
+          </Button>
           <Modal
-            open={false}
-            onClose={() => {}}
+            open={successOpen}
+            onClose={() => setSuccessOpen(false)}
+            size="sm"
+          >
+            <div className="text-center py-4">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-aurora-green/10 flex items-center justify-center">
+                <svg className="w-8 h-8 text-aurora-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="m9 11 3 3L22 4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-polar-night mb-2">Purchase Complete!</h3>
+              <p className="text-polar-nightMedium mb-6">
+                Your order for Settlers of Catan has been confirmed. The seller will ship it within 3 business days.
+              </p>
+              <Button variant="primary" onClick={() => setSuccessOpen(false)} fullWidth>
+                View Order Details
+              </Button>
+            </div>
+          </Modal>
+        </ComponentDemo>
+
+        <ComponentDemo
+          title="Error Notification Modal"
+          description="Inform users when something goes wrong with clear actions."
+        >
+          <Button variant="secondary" onClick={() => setErrorOpen(true)}>
+            Show Error
+          </Button>
+          <Modal
+            open={errorOpen}
+            onClose={() => setErrorOpen(false)}
+            size="sm"
+          >
+            <div className="text-center py-4">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-aurora-red/10 flex items-center justify-center">
+                <svg className="w-8 h-8 text-aurora-red" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="m15 9-6 6M9 9l6 6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-polar-night mb-2">Payment Failed</h3>
+              <p className="text-polar-nightMedium mb-6">
+                Your card was declined. Please check your payment details or try a different payment method.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="secondary" onClick={() => setErrorOpen(false)} fullWidth>
+                  Cancel
+                </Button>
+                <Button variant="primary" onClick={() => setErrorOpen(false)} fullWidth>
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        </ComponentDemo>
+
+        <ComponentDemo
+          title="Destructive Confirmation Modal"
+          description="Require explicit confirmation for dangerous actions."
+        >
+          <Button variant="danger" onClick={() => setDeleteOpen(true)}>
+            Delete Listing
+          </Button>
+          <Modal
+            open={deleteOpen}
+            onClose={() => setDeleteOpen(false)}
             title="Delete Game Listing?"
             size="sm"
             footer={
               <>
-                <Button variant="secondary">Cancel</Button>
-                <Button variant="danger">Yes, Delete Listing</Button>
+                <Button variant="secondary" onClick={() => setDeleteOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="danger" onClick={() => setDeleteOpen(false)}>
+                  Yes, Delete Listing
+                </Button>
               </>
             }
           >

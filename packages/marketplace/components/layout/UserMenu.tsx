@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import {  LogOut, Package, ShoppingBag, Store, Settings, ChevronRight, Layout as LayoutDashboard, Shield, Globe  } from 'griddy-icons';
 import { getInitials } from '@/lib/auth/utils';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { ThemeToggle } from '@/components/theme';
 import { useTranslations } from 'next-intl';
 
 
@@ -46,7 +47,7 @@ export function UserMenu() {
 
   if (loading) {
     return (
-      <div className="w-8 h-8 rounded-md bg-bg-secondary animate-pulse" />
+      <div className="w-8 h-8 rounded-md bg-bg-secondary dark:bg-polar-nightMedium animate-pulse" />
     );
   }
 
@@ -82,7 +83,7 @@ export function UserMenu() {
           <img
             src={profile.avatar_url}
             alt={displayName}
-            className="w-8 h-8 rounded-md object-cover border border-border"
+            className="w-8 h-8 rounded-md object-cover border border-border dark:border-polar-nightDark"
             key={profile.avatar_url}
           />
         ) : (
@@ -90,7 +91,7 @@ export function UserMenu() {
             {initials}
           </div>
         )}
-        <span className="hidden sm:inline text-text-muted hover:text-text transition-colors">
+        <span className="hidden sm:inline text-text-muted dark:text-snow-storm hover:text-text dark:hover:text-snow-stormLightest transition-colors">
           <svg
             className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
             viewBox="0 0 24 24"
@@ -103,23 +104,23 @@ export function UserMenu() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-snow-white rounded-lg shadow-lg border border-border py-2 z-50">
+        <div className="absolute right-0 mt-2 w-64 bg-snow-white dark:bg-polar-nightLight rounded-lg shadow-lg border border-border dark:border-polar-nightDark py-2 z-50">
           {/* User Info Header - Clickable */}
           <Link
             href="/account/dashboard"
             onClick={() => setIsOpen(false)}
-            className="block px-4 py-3 border-b border-border-subtle hover:bg-bg-secondary transition-colors group relative"
+            className="block px-4 py-3 border-b border-border-subtle dark:border-polar-nightDark hover:bg-bg-secondary dark:hover:bg-polar-nightMedium transition-colors group relative"
           >
             <div className="pr-6">
-              <p className="text-sm font-medium text-polar-night group-hover:text-frost-ice transition-colors">
+              <p className="text-sm font-medium text-polar-night dark:text-snow-stormLightest group-hover:text-frost-ice transition-colors">
                 {profile?.full_name || 'User'}
               </p>
-              <p className="text-xs text-text-secondary truncate">
+              <p className="text-xs text-text-secondary dark:text-snow-storm truncate">
                 {user.email}
               </p>
             </div>
             {/* Hover arrow indicator */}
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted group-hover:text-frost-ice transition-colors">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted dark:text-snow-storm group-hover:text-frost-ice transition-colors">
               <ChevronRight className="w-4 h-4" />
             </div>
           </Link>
@@ -130,7 +131,7 @@ export function UserMenu() {
             {isActiveSeller && (
               <Link
                 href="/seller/dashboard"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-text dark:text-snow-stormLightest hover:bg-bg-secondary dark:hover:bg-polar-nightMedium transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <Store className="w-4 h-4 text-frost-ice" />
@@ -141,7 +142,7 @@ export function UserMenu() {
             {/* 2. My Orders */}
             <Link
               href="/orders"
-              className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-text dark:text-snow-stormLightest hover:bg-bg-secondary dark:hover:bg-polar-nightMedium transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <ShoppingBag className="w-4 h-4 text-frost-ice" />
@@ -151,7 +152,7 @@ export function UserMenu() {
             {/* 3. My Listings */}
             <Link
               href="/my-listings"
-              className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-text dark:text-snow-stormLightest hover:bg-bg-secondary dark:hover:bg-polar-nightMedium transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <LayoutDashboard className="w-4 h-4 text-frost-ice" />
@@ -161,7 +162,7 @@ export function UserMenu() {
             {/* 4. Account Settings */}
             <Link
               href="/account/settings"
-              className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-text dark:text-snow-stormLightest hover:bg-bg-secondary dark:hover:bg-polar-nightMedium transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <Settings className="w-4 h-4 text-frost-ice" />
@@ -172,7 +173,7 @@ export function UserMenu() {
             {isStaff && (
               <Link
                 href="/staff/transactions"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-text dark:text-snow-stormLightest hover:bg-bg-secondary dark:hover:bg-polar-nightMedium transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <Shield className="w-4 h-4 text-aurora-purple" />
@@ -182,16 +183,21 @@ export function UserMenu() {
           </div>
 
           {/* Language Selection */}
-          <div className="border-t border-border-subtle py-2 px-4">
+          <div className="border-t border-border-subtle dark:border-polar-nightDark py-2 px-4">
             <div className="flex items-center gap-2 mb-2">
-              <Globe className="w-4 h-4 text-text-secondary" />
-              <span className="text-xs text-text-secondary font-medium">{t('language')}</span>
+              <Globe className="w-4 h-4 text-text-secondary dark:text-snow-storm" />
+              <span className="text-xs text-text-secondary dark:text-snow-storm font-medium">{t('language')}</span>
             </div>
             <LocaleSwitcher variant="buttons" />
           </div>
 
+          {/* Theme Toggle */}
+          <div className="border-t border-border-subtle dark:border-polar-nightDark">
+            <ThemeToggle variant="dropdown" />
+          </div>
+
           {/* Sign Out */}
-          <div className="border-t border-border-subtle pt-1 mt-1">
+          <div className="border-t border-border-subtle dark:border-polar-nightDark pt-1 mt-1">
             <button
               onClick={handleSignOut}
               className="flex items-center gap-3 px-4 py-2 text-sm text-aurora-red hover:bg-aurora-red/10 transition-colors w-full text-left"
@@ -203,7 +209,7 @@ export function UserMenu() {
 
           {/* Error Message */}
           {signOutError && (
-            <div className="px-4 py-2 text-xs text-aurora-red bg-aurora-red/10 border-t border-border-subtle">
+            <div className="px-4 py-2 text-xs text-aurora-red bg-aurora-red/10 border-t border-border-subtle dark:border-polar-nightDark">
               {signOutError}
             </div>
           )}

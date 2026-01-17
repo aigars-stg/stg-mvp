@@ -77,7 +77,7 @@ export function ListingActionsMenu({
       {/* Menu Button - More visible with white background */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-lg bg-snow-white shadow-md hover:shadow-lg hover:bg-gray-50 transition-all border border-border"
+        className="p-2 rounded-lg bg-snow-white shadow-md hover:shadow-lg hover:bg-bg-secondary transition-all border border-border"
         aria-label={t('ariaLabel')}
       >
         <MoreVertical className="w-5 h-5 text-polar-night" />

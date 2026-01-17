@@ -317,9 +317,9 @@ export function TerminalSelectorWithMap({
       </div>
 
       {/* Desktop: Hybrid View (Map + List side by side) */}
-      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-4">
-        {/* Map */}
-        <div>
+      <div className="hidden lg:grid lg:grid-cols-5 lg:gap-4">
+        {/* Map - 60% width */}
+        <div className="lg:col-span-3">
           <TerminalMap
             terminals={terminals}
             selectedTerminal={selectedTerminal}
@@ -328,8 +328,8 @@ export function TerminalSelectorWithMap({
           />
         </div>
 
-        {/* List */}
-        <div className="space-y-3">
+        {/* List - 40% width */}
+        <div className="lg:col-span-2 space-y-3">
           {/* Search Input */}
           {isListExpanded && (
             <div>
@@ -350,7 +350,7 @@ export function TerminalSelectorWithMap({
               </div>
             </div>
           )}
-          <TerminalList maxHeight="390px" />
+          <TerminalList maxHeight="440px" />
         </div>
       </div>
 

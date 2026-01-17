@@ -76,7 +76,7 @@ export function SellerTrustBadge({
     <div className={cn('flex items-center flex-wrap', styles.container, className)}>
       {/* Avatar and Name */}
       {showAvatar && (
-        <div className={cn('rounded-full overflow-hidden bg-slate-200 flex-shrink-0', styles.avatar)}>
+        <div className={cn('rounded-full overflow-hidden bg-bg-secondary flex-shrink-0', styles.avatar)}>
           {sellerAvatar ? (
             <img
               src={sellerAvatar}
@@ -84,7 +84,7 @@ export function SellerTrustBadge({
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-slate-400">
+            <div className="w-full h-full flex items-center justify-center text-text-muted">
               <User className={cn(styles.star)} />
             </div>
           )}
@@ -92,27 +92,27 @@ export function SellerTrustBadge({
       )}
 
       {showName && sellerName && (
-        <span className="font-medium text-slate-700 truncate max-w-[120px]">
+        <span className="font-medium text-text truncate max-w-[120px]">
           {sellerName}
         </span>
       )}
 
       {sellerCountry && (
-        <span className="text-slate-500" title={t('shipsFrom', { country: sellerCountry })}>
+        <span className="text-text-muted" title={t('shipsFrom', { country: sellerCountry })}>
           {getCountryFlag(sellerCountry)}
         </span>
       )}
 
       {/* Rating */}
       {totalReviews > 0 ? (
-        <div className="flex items-center gap-0.5 text-slate-600">
+        <div className="flex items-center gap-0.5 text-text-secondary">
           <Star className={cn(styles.star, 'text-amber-400')} filled />
           <span className="font-medium">{averageRating.toFixed(1)}</span>
         </div>
       ) : null}
 
       {/* Sales count */}
-      <span className="text-slate-500">
+      <span className="text-text-muted">
         ({totalSales} {totalSales === 1 ? t('sale') : t('sales')})
       </span>
 
@@ -121,7 +121,7 @@ export function SellerTrustBadge({
 
       {/* Member since */}
       {showMemberSince && memberSince && (
-        <span className="text-slate-400">
+        <span className="text-text-muted">
           {formatMemberSince(memberSince)}
         </span>
       )}
@@ -149,11 +149,11 @@ export function SellerTrustCompact({
   const tier = badgeTier || getSellerBadgeTier(totalSales, averageRating);
 
   return (
-    <div className={cn('flex items-center gap-1 text-xs text-slate-500', className)}>
+    <div className={cn('flex items-center gap-1 text-xs text-text-muted', className)}>
       {totalReviews > 0 && (
         <>
           <Star className="w-3 h-3 text-amber-400" filled />
-          <span className="font-medium text-slate-600">{averageRating.toFixed(1)}</span>
+          <span className="font-medium text-text-secondary">{averageRating.toFixed(1)}</span>
         </>
       )}
       <span>{totalSales === 0 ? t('newSeller') : `(${totalSales} ${totalSales === 1 ? t('sale') : t('sales')})`}</span>
@@ -191,9 +191,9 @@ function BadgeTierPill({
       label: t('badges.trustedSeller'),
     },
     new_seller: {
-      bg: 'bg-slate-100',
-      text: 'text-slate-600',
-      border: 'border-slate-200',
+      bg: 'bg-bg-secondary',
+      text: 'text-text-secondary',
+      border: 'border-border-subtle',
       icon: User,
       label: t('badges.newSeller'),
     },
@@ -275,7 +275,7 @@ export function StarRating({
               key={i}
               className={cn(
                 starSizes[size],
-                filled || partial ? 'text-amber-400' : 'text-slate-200',
+                filled || partial ? 'text-amber-400' : 'text-snow-storm',
                 filled ? 'fill-amber-400' : partial ? 'fill-amber-400/50' : ''
               )}
             />
@@ -283,7 +283,7 @@ export function StarRating({
         })}
       </div>
       {showValue && (
-        <span className={cn('font-medium text-slate-600', textSizes[size])}>
+        <span className={cn('font-medium text-text-secondary', textSizes[size])}>
           {rating.toFixed(1)}
         </span>
       )}

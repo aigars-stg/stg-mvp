@@ -106,7 +106,7 @@ export function TerminalMap({
   }, []);
 
   return (
-    <div className={`relative w-full h-[450px] rounded-lg overflow-hidden border border-border ${className || ''}`}>
+    <div className={`relative w-full h-[500px] rounded-lg overflow-hidden border border-border ${className || ''}`}>
       <Map
         center={[center.lng, center.lat]}
         zoom={center.zoom}

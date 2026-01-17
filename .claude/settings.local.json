@@ -25,7 +25,19 @@
       "Bash(done)",
       "Bash(npm run build:*)",
       "Bash(pnpm tsc:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(wc -l \"c:\\\\Users\\\\aigar\\\\Documents\\\\Claude\\\\stg-mvp\\\\packages\\\\marketplace\\\\components\"/**/*.tsx)",
+      "Bash(npx supabase gen types:*)",
+      "Bash(sort:*)",
+      "Bash(npx eslint:*)",
+      "Bash(python3:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfix: convert null to undefined for optional RPC params\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(grep:*)",
+      "Bash(git commit:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(xargs ls:*)"
     ],
     "deny": [],
     "ask": []
@@ -33,5 +45,8 @@
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "supabase"
-  ]
+  ],
+  "enabledPlugins": {
+    "pr-review-toolkit@claude-plugins-official": true
+  }
 }

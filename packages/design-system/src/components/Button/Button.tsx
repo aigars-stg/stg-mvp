@@ -22,13 +22,13 @@ const buttonVariants = cva(
         primary: 'bg-frost-ice text-polar-night hover:bg-frost-polar active:bg-frost-arctic shadow-sm hover:shadow-md',
 
         // Secondary: alternative actions (cancel, back, filters)
-        secondary: 'bg-snow-white text-polar-night border-2 border-border hover:bg-snow-stormLight hover:border-border-strong shadow-sm hover:shadow-md',
+        secondary: 'bg-snow-white dark:bg-polar-nightMedium text-polar-night dark:text-snow-stormLightest border-2 border-border dark:border-polar-nightDark hover:bg-snow-stormLight dark:hover:bg-polar-nightDark hover:border-border-strong shadow-sm hover:shadow-md',
 
         // Accent: urgency (buy now, limited time)
         accent: 'bg-aurora-orange text-snow-white hover:bg-[#C97862] active:bg-[#B86954] shadow-sm hover:shadow-md',
 
         // Ghost: subtle actions (show more, expand)
-        ghost: 'text-polar-night hover:bg-snow-stormLight active:bg-snow-storm',
+        ghost: 'text-polar-night dark:text-snow-stormLightest hover:bg-snow-stormLight dark:hover:bg-polar-nightMedium active:bg-snow-storm dark:active:bg-polar-nightDark',
 
         // Danger: destructive actions (delete, remove)
         danger: 'bg-aurora-red text-snow-white hover:bg-[#B5525B] active:bg-[#AB4E4C] shadow-sm hover:shadow-md',

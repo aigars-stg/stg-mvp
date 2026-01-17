@@ -13,12 +13,12 @@ export function GameImageWithBackdrop({
   isLoading,
   hasError
 }: GameImageWithBackdropProps) {
-  // Using a subtle gray backdrop - color extraction would require CORS from BGG
-  const backdropColor = '#e5e7eb'; // gray-200
+  // Using a subtle backdrop from design system - color extraction would require CORS from BGG
+  const backdropColor = '#E5E9F0'; // snow.stormLight
 
   return (
     <div
-      className="w-14 h-14 sm:w-24 sm:h-24 flex-shrink-0 rounded border border-gray-200 flex items-center justify-center overflow-hidden relative"
+      className="w-14 h-14 sm:w-24 sm:h-24 flex-shrink-0 rounded border border-snow-storm flex items-center justify-center overflow-hidden relative"
       style={{
         backgroundColor: backdropColor,
         aspectRatio: '1 / 1'
@@ -42,10 +42,10 @@ export function GameImageWithBackdrop({
           />
         ) : isLoading ? (
           <div className="flex items-center justify-center w-full h-full">
-            <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+            <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-snow-storm border-t-polar-nightDark rounded-full animate-spin" />
           </div>
         ) : hasError ? (
-          <div className="text-xs text-gray-500 text-center px-1">No image</div>
+          <div className="text-xs text-text-muted text-center px-1">No image</div>
         ) : null}
       </div>
     </div>

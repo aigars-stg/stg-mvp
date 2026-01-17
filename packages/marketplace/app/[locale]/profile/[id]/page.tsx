@@ -271,7 +271,7 @@ export default function ProfilePage() {
                           className={`w-5 h-5 ${
                             i <= Math.round(seller.average_rating)
                               ? 'text-amber-400 fill-amber-400'
-                              : 'text-slate-200'
+                              : 'text-snow-storm'
                           }`}
                         />
                       ))}

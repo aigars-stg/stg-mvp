@@ -423,7 +423,7 @@ function MyListingsContent() {
             onClick={() => setMainTab('selling')}
             className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${mainTab === 'selling'
               ? 'bg-frost-ice text-snow-white shadow-md'
-              : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
+              : 'bg-snow-white text-polar-night hover:bg-bg-secondary border border-border'
               }`}
           >
             <Package className="w-5 h-5 inline mr-2" />
@@ -433,7 +433,7 @@ function MyListingsContent() {
             onClick={() => setMainTab('wanted')}
             className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${mainTab === 'wanted'
               ? 'bg-aurora-orange text-snow-white shadow-md'
-              : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
+              : 'bg-snow-white text-polar-night hover:bg-bg-secondary border border-border'
               }`}
           >
             <Search className="w-5 h-5 inline mr-2" />
@@ -443,7 +443,7 @@ function MyListingsContent() {
             onClick={() => setMainTab('saved')}
             className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${mainTab === 'saved'
               ? 'bg-aurora-red text-snow-white shadow-md'
-              : 'bg-snow-white text-polar-night hover:bg-gray-50 border border-border'
+              : 'bg-snow-white text-polar-night hover:bg-bg-secondary border border-border'
               }`}
           >
             <Heart className="w-5 h-5 inline mr-2" />

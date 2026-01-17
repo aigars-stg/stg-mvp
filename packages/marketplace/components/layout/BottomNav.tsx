@@ -101,7 +101,7 @@ export function BottomNav() {
     <>
       {/* Bottom Navigation Bar */}
       <nav
-        className="fixed bottom-0 inset-x-0 z-50 lg:hidden bg-snow-white border-t border-border-subtle shadow-lg"
+        className="fixed bottom-0 inset-x-0 z-50 lg:hidden bg-snow-white dark:bg-polar-nightLight border-t border-border-subtle dark:border-polar-nightDark shadow-lg"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
@@ -138,7 +138,7 @@ export function BottomNav() {
                 className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg transition-colors relative ${
                   item.active
                     ? 'text-frost-ice'
-                    : 'text-text-muted hover:text-text'
+                    : 'text-text-muted dark:text-snow-storm hover:text-text dark:hover:text-snow-stormLightest'
                 }`}
               >
                 <div className="relative">

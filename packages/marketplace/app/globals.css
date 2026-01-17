@@ -41,58 +41,84 @@
 }
 
 @layer base {
+  /* Light mode - Nordic Snow Storm palette */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* Backgrounds */
+    --background: 220 27% 94%; /* snow.stormLightest #ECEFF4 */
+    --foreground: 220 16% 22%; /* polar.night #2E3440 */
+    --card: 0 0% 100%; /* snow.white #FEFEFE */
+    --card-foreground: 220 16% 22%; /* polar.night */
+    --popover: 0 0% 100%; /* snow.white */
+    --popover-foreground: 220 16% 22%; /* polar.night */
+
+    /* Actions */
+    --primary: 193 43% 67%; /* frost.ice #88C0D0 */
+    --primary-foreground: 0 0% 100%; /* white text on frost */
+    --secondary: 218 27% 92%; /* snow.stormLight #E5E9F0 */
+    --secondary-foreground: 220 16% 22%; /* polar.night */
+
+    /* Muted/Subtle */
+    --muted: 218 27% 92%; /* snow.stormLight */
+    --muted-foreground: 220 16% 36%; /* polar.nightDark #4C566A */
+    --accent: 218 27% 92%; /* snow.stormLight */
+    --accent-foreground: 220 16% 22%; /* polar.night */
+
+    /* State colors */
+    --destructive: 354 42% 56%; /* aurora.red #BF616A */
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders and inputs */
+    --border: 219 28% 88%; /* snow.storm #D8DEE9 */
+    --input: 219 28% 88%; /* snow.storm */
+    --ring: 193 43% 67%; /* frost.ice for focus rings */
+
+    /* Chart colors - Aurora palette */
+    --chart-1: 14 51% 63%; /* aurora.orange #D08770 */
+    --chart-2: 92 28% 65%; /* aurora.green #A3BE8C */
+    --chart-3: 193 43% 67%; /* frost.ice #88C0D0 */
+    --chart-4: 40 77% 73%; /* aurora.yellow #EBCB8B */
+    --chart-5: 354 42% 56%; /* aurora.red #BF616A */
+
     --radius: 0.5rem;
   }
+
+  /* Dark mode - Nordic Polar Night palette */
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Backgrounds */
+    --background: 220 16% 22%; /* polar.night #2E3440 */
+    --foreground: 220 27% 94%; /* snow.stormLightest #ECEFF4 */
+    --card: 222 16% 28%; /* polar.nightLight #3B4252 */
+    --card-foreground: 220 27% 94%; /* snow.stormLightest */
+    --popover: 222 16% 28%; /* polar.nightLight */
+    --popover-foreground: 220 27% 94%; /* snow.stormLightest */
+
+    /* Actions */
+    --primary: 193 43% 67%; /* frost.ice stays the same */
+    --primary-foreground: 220 16% 22%; /* polar.night */
+    --secondary: 220 17% 31%; /* polar.nightMedium #434C5E */
+    --secondary-foreground: 220 27% 94%; /* snow.stormLightest */
+
+    /* Muted/Subtle */
+    --muted: 220 17% 31%; /* polar.nightMedium */
+    --muted-foreground: 219 28% 88%; /* snow.storm - lighter for readability */
+    --accent: 220 17% 31%; /* polar.nightMedium */
+    --accent-foreground: 220 27% 94%; /* snow.stormLightest */
+
+    /* State colors */
+    --destructive: 354 42% 56%; /* aurora.red stays the same */
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders and inputs */
+    --border: 220 16% 36%; /* polar.nightDark #4C566A */
+    --input: 220 16% 36%; /* polar.nightDark */
+    --ring: 193 43% 67%; /* frost.ice */
+
+    /* Chart colors - slightly adjusted for dark mode */
+    --chart-1: 14 51% 63%; /* aurora.orange */
+    --chart-2: 92 28% 65%; /* aurora.green */
+    --chart-3: 193 43% 67%; /* frost.ice */
+    --chart-4: 40 77% 73%; /* aurora.yellow */
+    --chart-5: 354 42% 56%; /* aurora.red */
   }
   .maplibregl-popup-content {
     @apply bg-transparent! shadow-none! p-0! rounded-none!;

@@ -37,10 +37,10 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
           {/* Specific Guidance */}
           {error.code === 'NETWORK_ERROR' && (
             <div className="bg-white border border-red-200 rounded p-3 mb-4">
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-text-secondary">
                 <strong>{tNetwork('title')}</strong>
               </p>
-              <ul className="text-sm text-gray-600 mt-2 space-y-1 list-disc list-inside">
+              <ul className="text-sm text-text-muted mt-2 space-y-1 list-disc list-inside">
                 <li>{tNetwork('step1')}</li>
                 <li>{tNetwork('step2')}</li>
                 <li>{tNetwork('step3')}</li>
@@ -50,7 +50,7 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
 
           {error.code === 'RATE_LIMIT' && (
             <div className="bg-white border border-red-200 rounded p-3 mb-4">
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-text-secondary">
                 {t('rateLimit')}
               </p>
             </div>
@@ -58,7 +58,7 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
 
           {error.code === 'API_UNAVAILABLE' && (
             <div className="bg-white border border-red-200 rounded p-3 mb-4">
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-text-secondary">
                 {t('apiUnavailable')}
               </p>
             </div>
@@ -66,7 +66,7 @@ export default function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
 
           {error.code === 'TIMEOUT' && (
             <div className="bg-white border border-red-200 rounded p-3 mb-4">
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-text-secondary">
                 {t('timeout')}
               </p>
             </div>

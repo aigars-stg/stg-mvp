@@ -10,32 +10,32 @@ import { useTranslations } from 'next-intl';
 // Lazy load non-critical navbar components to reduce TBT
 const UserMenu = dynamic(() => import('./UserMenu').then(mod => ({ default: mod.UserMenu })), {
   ssr: false,
-  loading: () => <div className="w-8 h-8 rounded-full bg-bg-secondary animate-pulse" />,
+  loading: () => <div className="w-8 h-8 rounded-full bg-bg-secondary dark:bg-polar-nightMedium animate-pulse" />,
 });
 
 const CartIcon = dynamic(() => import('./CartIcon').then(mod => ({ default: mod.CartIcon })), {
   ssr: false,
-  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
+  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary dark:bg-polar-nightMedium animate-pulse" />,
 });
 
 const SavedGamesIcon = dynamic(() => import('./SavedGamesIcon').then(mod => ({ default: mod.SavedGamesIcon })), {
   ssr: false,
-  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
+  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary dark:bg-polar-nightMedium animate-pulse" />,
 });
 
 const MessagesIcon = dynamic(() => import('./MessagesIcon').then(mod => ({ default: mod.MessagesIcon })), {
   ssr: false,
-  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
+  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary dark:bg-polar-nightMedium animate-pulse" />,
 });
 
 const NavbarSearch = dynamic(() => import('./NavbarSearch').then(mod => ({ default: mod.NavbarSearch })), {
   ssr: false,
-  loading: () => <div className="w-64 lg:w-80 h-9 rounded-lg bg-bg-secondary animate-pulse" />,
+  loading: () => <div className="w-64 lg:w-80 h-9 rounded-lg bg-bg-secondary dark:bg-polar-nightMedium animate-pulse" />,
 });
 
 const MobileSearchButton = dynamic(() => import('./MobileSearchButton').then(mod => ({ default: mod.MobileSearchButton })), {
   ssr: false,
-  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
+  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary dark:bg-polar-nightMedium animate-pulse" />,
 });
 
 export function Navbar() {
@@ -54,12 +54,12 @@ export function Navbar() {
     const active = isActive(href);
     return `px-3 py-1.5 rounded-md text-sm transition-colors ${active
       ? 'bg-frost-ice/15 text-frost-ice font-medium'
-      : 'text-text-secondary hover:text-text hover:bg-bg-secondary'
+      : 'text-text-secondary dark:text-snow-storm hover:text-text dark:hover:text-snow-stormLightest hover:bg-bg-secondary dark:hover:bg-polar-nightMedium'
       }`;
   };
 
   return (
-    <header className="bg-bg-elevated border-b border-border-subtle sticky top-0 z-50">
+    <header className="bg-bg-elevated dark:bg-polar-nightLight border-b border-border-subtle dark:border-polar-nightDark sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center flex-shrink-0" aria-label="Second Turn Games home">
@@ -94,7 +94,7 @@ export function Navbar() {
           </Link>
 
           {/* Icons Group with Divider */}
-          <div className="flex items-center ml-2 border-l border-border-subtle pl-2 border-r border-border-subtle pr-2 mr-2 gap-1">
+          <div className="flex items-center ml-2 border-l border-border-subtle dark:border-polar-nightDark pl-2 border-r pr-2 mr-2 gap-1">
             <CartIcon />
             <SavedGamesIcon />
             <MessagesIcon />

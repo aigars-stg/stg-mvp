@@ -88,8 +88,8 @@ export function UserInfoCard({
     : layout === 'vertical' ? 'gap-2' : 'gap-2.5';
 
   const nameClassName = cn(
-    'font-medium text-slate-800',
-    linkToProfile && 'hover:text-frost-600 transition-colors focus:outline-none focus:ring-2 focus:ring-frost-500 focus:ring-offset-1 rounded',
+    'font-medium text-polar-night',
+    linkToProfile && 'hover:text-frost-polar transition-colors focus:outline-none focus:ring-2 focus:ring-frost-ice focus:ring-offset-1 rounded',
     textStyle.name
   );
 
@@ -146,7 +146,7 @@ export function UserInfoCard({
 
         {/* Member since */}
         {showMemberSince && memberSince && (
-          <span className={cn('text-slate-500', textStyle.meta)}>
+          <span className={cn('text-text-muted', textStyle.meta)}>
             {t('memberSince', { year: new Date(memberSince).getFullYear() })}
           </span>
         )}

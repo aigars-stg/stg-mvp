@@ -291,7 +291,7 @@ export function NavbarSearch({
                       className="max-w-full max-h-full object-contain"
                     />
                   ) : isLoadingThumbnail ? (
-                    <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                    <div className="w-3 h-3 border-2 border-snow-storm border-t-polar-nightDark rounded-full animate-spin" />
                   ) : (
                     <Search className="w-4 h-4 text-text-muted" />
                   )}

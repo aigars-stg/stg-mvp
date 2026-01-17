@@ -9,6 +9,7 @@ import { Button } from '@second-turn/design-system';
 import { getInitials } from '@/lib/auth/utils';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { ThemeToggle } from '@/components/theme';
 
 interface ProfileBottomSheetProps {
   isOpen: boolean;
@@ -126,22 +127,22 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
 
       {/* Bottom Sheet */}
       <div
-        className="fixed inset-x-0 bottom-0 z-50 lg:hidden bg-snow-white rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-in slide-in-from-bottom-full duration-300"
+        className="fixed inset-x-0 bottom-0 z-50 lg:hidden bg-snow-white dark:bg-polar-nightLight rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-in slide-in-from-bottom-full duration-300"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border-subtle flex-shrink-0">
-          <h2 className="text-lg font-semibold text-polar-night">
+        <div className="flex items-center justify-between p-4 border-b border-border-subtle dark:border-polar-nightDark flex-shrink-0">
+          <h2 className="text-lg font-semibold text-polar-night dark:text-snow-stormLightest">
             {user ? 'Profile' : 'Account'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-bg-elevated rounded-lg transition-colors"
+            className="p-2 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium rounded-lg transition-colors"
             aria-label="Close"
           >
-            <Close className="w-5 h-5 text-text-muted" />
+            <Close className="w-5 h-5 text-text-muted dark:text-snow-storm" />
           </button>
         </div>
 
@@ -150,13 +151,13 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
           {user ? (
             <>
               {/* User Info */}
-              <div className="p-4 border-b border-border-subtle bg-bg-elevated">
+              <div className="p-4 border-b border-border-subtle dark:border-polar-nightDark bg-bg-elevated dark:bg-polar-nightMedium">
                 <div className="flex items-center gap-3">
                   {profile?.avatar_url ? (
                     <img
                       src={profile.avatar_url}
                       alt={displayName}
-                      className="w-12 h-12 rounded-lg object-cover border-2 border-border"
+                      className="w-12 h-12 rounded-lg object-cover border-2 border-border dark:border-polar-nightDark"
                     />
                   ) : (
                     <div className="w-12 h-12 rounded-lg bg-frost-ice text-snow-white flex items-center justify-center text-lg font-semibold">
@@ -164,7 +165,7 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-polar-night flex items-center gap-2">
+                    <div className="font-semibold text-polar-night dark:text-snow-stormLightest flex items-center gap-2">
                       <span className="truncate">{displayName}</span>
                       {profile?.country && getCountryFlag(profile.country) && (
                         <span
@@ -175,7 +176,7 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                         />
                       )}
                     </div>
-                    <div className="text-sm text-text-secondary truncate">
+                    <div className="text-sm text-text-secondary dark:text-snow-storm truncate">
                       {user.email}
                     </div>
                   </div>
@@ -184,18 +185,18 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
 
               {/* Menu Items - My Activity Section */}
               <div className="py-2">
-                <div className="px-4 py-2 text-xs font-semibold text-text-muted uppercase tracking-wide">
+                <div className="px-4 py-2 text-xs font-semibold text-text-muted dark:text-snow-storm uppercase tracking-wide">
                   My Activity
                 </div>
 
                 {/* Messages - First item with unread badge */}
                 <button
                   onClick={() => handleNavigate('/messages')}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <ChatBubble className="w-5 h-5 text-frost-ice" />
-                    <span className="text-polar-night font-medium">Messages</span>
+                    <span className="text-polar-night dark:text-snow-stormLightest font-medium">Messages</span>
                   </div>
                   {unreadCount > 0 && (
                     <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
@@ -206,11 +207,11 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
 
                 <button
                   onClick={() => handleNavigate('/orders')}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <ShoppingBag className="w-5 h-5 text-frost-ice" />
-                    <span className="text-polar-night font-medium">My Orders</span>
+                    <span className="text-polar-night dark:text-snow-stormLightest font-medium">My Orders</span>
                   </div>
                   {ordersCount > 0 && (
                     <span className="bg-frost-ice/10 text-frost-ice text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
@@ -222,11 +223,11 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                 {isActiveSeller && (
                   <button
                     onClick={() => handleNavigate('/seller/orders')}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <Store className="w-5 h-5 text-aurora-green" />
-                      <span className="text-polar-night font-medium">Sales Dashboard</span>
+                      <span className="text-polar-night dark:text-snow-stormLightest font-medium">Sales Dashboard</span>
                     </div>
                     {salesCount > 0 && (
                       <span className="bg-aurora-green/10 text-aurora-green text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
@@ -238,11 +239,11 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
 
                 <button
                   onClick={() => handleNavigate('/my-listings')}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <Package className="w-5 h-5 text-frost-ice" />
-                    <span className="text-polar-night font-medium">My Listings</span>
+                    <span className="text-polar-night dark:text-snow-stormLightest font-medium">My Listings</span>
                   </div>
                   {listingsCount > 0 && (
                     <span className="bg-frost-ice/10 text-frost-ice text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
@@ -253,11 +254,11 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
 
                 <button
                   onClick={() => handleNavigate('/my-listings?tab=saved')}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <Heart className="w-5 h-5 text-aurora-red" />
-                    <span className="text-polar-night font-medium">Saved Listings</span>
+                    <span className="text-polar-night dark:text-snow-stormLightest font-medium">Saved Listings</span>
                   </div>
                   {savedCount > 0 && (
                     <span className="bg-aurora-red/10 text-aurora-red text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
@@ -268,11 +269,11 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
 
                 <button
                   onClick={() => handleNavigate('/my-listings?tab=wanted')}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <Search className="w-5 h-5 text-aurora-orange" />
-                    <span className="text-polar-night font-medium">Wanted Games</span>
+                    <span className="text-polar-night dark:text-snow-stormLightest font-medium">Wanted Games</span>
                   </div>
                   {wantedCount > 0 && (
                     <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
@@ -283,31 +284,36 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
               </div>
 
               {/* Language Section */}
-              <div className="py-2 border-t border-border-subtle">
-                <div className="px-4 py-2 text-xs font-semibold text-text-muted uppercase tracking-wide">
+              <div className="py-2 border-t border-border-subtle dark:border-polar-nightDark">
+                <div className="px-4 py-2 text-xs font-semibold text-text-muted dark:text-snow-storm uppercase tracking-wide">
                   Language
                 </div>
                 <div className="px-4 py-2">
                   <div className="flex items-center gap-3">
-                    <Globe className="w-5 h-5 text-text-muted" />
+                    <Globe className="w-5 h-5 text-text-muted dark:text-snow-storm" />
                     <LocaleSwitcher variant="buttons" className="flex-1" />
                   </div>
                 </div>
               </div>
 
+              {/* Theme Toggle */}
+              <div className="border-t border-border-subtle dark:border-polar-nightDark">
+                <ThemeToggle variant="dropdown" />
+              </div>
+
               {/* Settings Section */}
-              <div className="py-2 border-t border-border-subtle">
+              <div className="py-2 border-t border-border-subtle dark:border-polar-nightDark">
                 <button
                   onClick={() => handleNavigate('/account')}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium transition-colors"
                 >
-                  <Settings className="w-5 h-5 text-text-muted" />
-                  <span className="text-polar-night font-medium">Account Settings</span>
+                  <Settings className="w-5 h-5 text-text-muted dark:text-snow-storm" />
+                  <span className="text-polar-night dark:text-snow-stormLightest font-medium">Account Settings</span>
                 </button>
               </div>
 
               {/* Sign Out Section */}
-              <div className="py-2 border-t border-border-subtle">
+              <div className="py-2 border-t border-border-subtle dark:border-polar-nightDark">
                 <button
                   onClick={handleSignOut}
                   disabled={signOutLoading}
@@ -327,10 +333,10 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                 <LogIn className="w-8 h-8 text-frost-ice" />
               </div>
               <div>
-                <h3 className="font-semibold text-polar-night text-lg mb-2">
+                <h3 className="font-semibold text-polar-night dark:text-snow-stormLightest text-lg mb-2">
                   Sign In to Continue
                 </h3>
-                <p className="text-sm text-text-secondary">
+                <p className="text-sm text-text-secondary dark:text-snow-storm">
                   Access your listings, saved games, and messages
                 </p>
               </div>

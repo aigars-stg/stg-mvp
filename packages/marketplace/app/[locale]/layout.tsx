@@ -130,7 +130,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
         <meta name="theme-color" content="#D08770" />
@@ -156,12 +156,12 @@ export default async function LocaleLayout({ children, params }: Props) {
             <Navbar />
 
           {/* Main Content */}
-          <main id="main-content" className="min-h-screen bg-bg pb-20 lg:pb-0">
+          <main id="main-content" className="min-h-screen bg-bg dark:bg-polar-night pb-20 lg:pb-0">
             {children}
           </main>
 
           {/* Footer */}
-          <footer className="bg-bg-elevated border-t border-border-subtle mt-12 sm:mt-24 pb-20 lg:pb-0">
+          <footer className="bg-bg-elevated dark:bg-polar-nightLight border-t border-border-subtle dark:border-polar-nightDark mt-12 sm:mt-24 pb-20 lg:pb-0">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
                 <div className="md:col-span-2">
@@ -173,7 +173,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.marketplace')}</h4>
+                  <h4 className="font-medium text-polar-night dark:text-snow-stormLightest mb-2 sm:mb-3">{tFooter('sections.marketplace')}</h4>
                   <ul className="space-y-2 text-sm text-text-secondary">
                     <li><Link href="/browse" className="hover:text-text">{tFooter('links.browseGames')}</Link></li>
                     <li><Link href="/sell" className="hover:text-text">{tFooter('links.sellGame')}</Link></li>
@@ -182,7 +182,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.legal')}</h4>
+                  <h4 className="font-medium text-polar-night dark:text-snow-stormLightest mb-2 sm:mb-3">{tFooter('sections.legal')}</h4>
                   <ul className="space-y-2 text-sm text-text-secondary">
                     <li><Link href="/privacy" className="hover:text-text">{tFooter('links.privacyPolicy')}</Link></li>
                     <li><Link href="/terms" className="hover:text-text">{tFooter('links.termsOfService')}</Link></li>
@@ -190,7 +190,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.contact')}</h4>
+                  <h4 className="font-medium text-polar-night dark:text-snow-stormLightest mb-2 sm:mb-3">{tFooter('sections.contact')}</h4>
                   <ul className="space-y-2 text-sm text-text-secondary">
                     <li><a href="mailto:info@secondturn.games" className="hover:text-text">info@secondturn.games</a></li>
                     <li>{tFooter('company.name')}</li>

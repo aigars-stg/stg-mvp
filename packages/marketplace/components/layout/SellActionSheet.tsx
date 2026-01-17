@@ -64,20 +64,20 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
 
       {/* Bottom Sheet */}
       <div
-        className="fixed inset-x-0 bottom-0 z-50 lg:hidden bg-snow-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom-full duration-300"
+        className="fixed inset-x-0 bottom-0 z-50 lg:hidden bg-snow-white dark:bg-polar-nightLight rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom-full duration-300"
         style={{
           paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border-subtle">
-          <h2 className="text-lg font-semibold text-polar-night">{t('title')}</h2>
+        <div className="flex items-center justify-between p-4 border-b border-border-subtle dark:border-polar-nightDark">
+          <h2 className="text-lg font-semibold text-polar-night dark:text-snow-stormLightest">{t('title')}</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-bg-elevated rounded-lg transition-colors"
+            className="p-2 hover:bg-bg-elevated dark:hover:bg-polar-nightMedium rounded-lg transition-colors"
             aria-label="Close"
           >
-            <Close className="w-5 h-5 text-text-muted" />
+            <Close className="w-5 h-5 text-text-muted dark:text-snow-storm" />
           </button>
         </div>
 
@@ -86,21 +86,21 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
           {/* Sell a Game */}
           <button
             onClick={handleSellGame}
-            className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-border hover:border-frost-ice hover:bg-frost-ice/5 transition-all group"
+            className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-border dark:border-polar-nightDark hover:border-frost-ice hover:bg-frost-ice/5 transition-all group"
           >
             <div className="w-12 h-12 rounded-full bg-frost-ice/10 group-hover:bg-frost-ice/20 flex items-center justify-center flex-shrink-0 transition-colors">
               <Package className="w-6 h-6 text-frost-ice" />
             </div>
             <div className="text-left flex-1">
-              <div className="font-semibold text-polar-night group-hover:text-frost-ice transition-colors">
+              <div className="font-semibold text-polar-night dark:text-snow-stormLightest group-hover:text-frost-ice transition-colors">
                 {t('sellGame')}
               </div>
-              <div className="text-sm text-text-secondary">
+              <div className="text-sm text-text-secondary dark:text-snow-storm">
                 {t('sellGameDescription')}
               </div>
             </div>
             <svg
-              className="w-5 h-5 text-text-muted group-hover:text-frost-ice transition-colors"
+              className="w-5 h-5 text-text-muted dark:text-snow-storm group-hover:text-frost-ice transition-colors"
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
@@ -111,21 +111,21 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
           {/* Post Wanted Game */}
           <button
             onClick={handlePostWanted}
-            className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-border hover:border-aurora-orange hover:bg-aurora-orange/5 transition-all group"
+            className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-border dark:border-polar-nightDark hover:border-aurora-orange hover:bg-aurora-orange/5 transition-all group"
           >
             <div className="w-12 h-12 rounded-full bg-aurora-orange/10 group-hover:bg-aurora-orange/20 flex items-center justify-center flex-shrink-0 transition-colors">
               <Search className="w-6 h-6 text-aurora-orange" />
             </div>
             <div className="text-left flex-1">
-              <div className="font-semibold text-polar-night group-hover:text-aurora-orange transition-colors">
+              <div className="font-semibold text-polar-night dark:text-snow-stormLightest group-hover:text-aurora-orange transition-colors">
                 {t('postWantedGame')}
               </div>
-              <div className="text-sm text-text-secondary">
+              <div className="text-sm text-text-secondary dark:text-snow-storm">
                 {t('postWantedGameDescription')}
               </div>
             </div>
             <svg
-              className="w-5 h-5 text-text-muted group-hover:text-aurora-orange transition-colors"
+              className="w-5 h-5 text-text-muted dark:text-snow-storm group-hover:text-aurora-orange transition-colors"
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
