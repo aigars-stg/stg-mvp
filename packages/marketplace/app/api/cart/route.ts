@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     // Check if listing is contact_seller type (cannot be added to cart)
     const { data: listing, error: listingError } = await (supabase as any)
       .from('listings')
-      .select('listing_type')
+      .select('listing_type, transaction_method')
       .eq('id', listingId)
       .single();
 
@@ -79,7 +79,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
     }
 
-    if (listing.listing_type === 'contact_seller') {
+    // Check both new model (transaction_method) and old model (listing_type) for backwards compatibility
+    const isContactSeller = listing.transaction_method === 'contact_seller' || listing.listing_type === 'contact_seller';
+    if (isContactSeller) {
       return NextResponse.json(
         { error: 'Contact Seller listings cannot be added to cart. Please message the seller directly.' },
         { status: 400 }

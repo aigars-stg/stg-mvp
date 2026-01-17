@@ -1524,6 +1524,36 @@
         "content": "If you're debating between two grades, go with the lower one. A buyer who receives a game in better condition than expected is delighted."
       }
     },
+    "transactionMethod": {
+      "title": "How would you like to sell?",
+      "subtitle": "Choose how you'll connect with the buyer.",
+      "contactSeller": {
+        "label": "Contact Seller",
+        "description": "Chat with the buyer to arrange payment and shipping"
+      },
+      "instantBuy": {
+        "label": "Instant Buy",
+        "description": "Buyers pay instantly through the platform",
+        "unavailable": "Available for Latvian sellers with connected payment account",
+        "upgrade": "Set up payments"
+      }
+    },
+    "pricingFormat": {
+      "title": "Pricing",
+      "fixedPrice": {
+        "label": "Fixed Price",
+        "description": "Set your price"
+      },
+      "auction": {
+        "label": "Auction",
+        "description": "Let buyers bid — highest offer wins"
+      }
+    },
+    "price": {
+      "label": "Price",
+      "labelAuction": "Starting bid",
+      "helperAuction": "The minimum amount you'll accept"
+    },
     "listingType": {
       "title": "How do you want to sell?",
       "subtitle": "Choose how you want to connect with buyers.",

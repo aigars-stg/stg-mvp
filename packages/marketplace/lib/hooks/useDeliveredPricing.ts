@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { calculateMarketplacePricing } from '@/lib/stripe-utils';
 import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
+import type { TransactionMethod, PricingFormat, ListingType } from '@/lib/types/listing';
 
 /**
  * Result from delivered pricing calculation
@@ -25,7 +26,12 @@ export interface DeliveredPricingResult {
 }
 
 interface UseDeliveredPricingParams {
-  listingType: 'instant_buy' | 'contact_seller' | 'auction';
+  /** Legacy listing type (for backwards compatibility) */
+  listingType?: ListingType;
+  /** New model: transaction method */
+  transactionMethod?: TransactionMethod;
+  /** New model: pricing format */
+  pricingFormat?: PricingFormat;
   price: number;
   sellerCountry: string | null | undefined;
   buyerCountry?: TerminalCountry;
@@ -53,13 +59,29 @@ const VALID_COUNTRIES = ['LT', 'LV', 'EE'];
  */
 export function useDeliveredPricing({
   listingType,
+  transactionMethod,
+  pricingFormat,
   price,
   sellerCountry,
   buyerCountry,
 }: UseDeliveredPricingParams): DeliveredPricingResult {
   return useMemo(() => {
-    // Contact seller and auction listings don't have fixed platform pricing
-    if (listingType === 'contact_seller' || listingType === 'auction') {
+    // Determine if we can calculate pricing based on new or old model
+    // New model: Check transaction_method and pricing_format
+    // Old model: Check listing_type
+
+    // Contact seller listings don't have platform pricing (payment arranged via messages)
+    const isContactSeller = transactionMethod
+      ? transactionMethod === 'contact_seller'
+      : listingType === 'contact_seller';
+
+    // Auction listings can't show delivered price (final bid unknown until auction ends)
+    const isAuction = pricingFormat
+      ? pricingFormat === 'auction'
+      : listingType === 'auction';
+
+    // Can't calculate delivered price for contact seller or auctions
+    if (isContactSeller || isAuction) {
       return {
         itemPrice: price,
         shippingCost: 0,
@@ -100,5 +122,5 @@ export function useDeliveredPricing({
       isEstimate,
       destinationCountry,
     };
-  }, [listingType, price, sellerCountry, buyerCountry]);
+  }, [listingType, transactionMethod, pricingFormat, price, sellerCountry, buyerCountry]);
 }

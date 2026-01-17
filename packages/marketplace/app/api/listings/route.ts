@@ -4,6 +4,7 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { ensureGameMetadata } from '@/lib/bgg-api';
+import type { TransactionMethod, PricingFormat } from '@/lib/types/listing';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,16 +13,51 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Extract listingType from body (default to instant_buy for backwards compatibility)
-    const listingType = body.listingType || 'instant_buy';
+    // New 2-dimensional model: transactionMethod + pricingFormat
+    // Also support legacy listingType for backwards compatibility
+    let transactionMethod: TransactionMethod;
+    let pricingFormat: PricingFormat;
 
-    // Validate listing type
-    if (!['instant_buy', 'contact_seller', 'auction'].includes(listingType)) {
+    if (body.transactionMethod && body.pricingFormat) {
+      // New model
+      transactionMethod = body.transactionMethod;
+      pricingFormat = body.pricingFormat;
+    } else if (body.listingType) {
+      // Legacy model - convert to new format
+      if (body.listingType === 'auction') {
+        transactionMethod = 'contact_seller';
+        pricingFormat = 'auction';
+      } else if (body.listingType === 'instant_buy') {
+        transactionMethod = 'instant_buy';
+        pricingFormat = 'fixed_price';
+      } else {
+        transactionMethod = 'contact_seller';
+        pricingFormat = 'fixed_price';
+      }
+    } else {
+      // Default
+      transactionMethod = 'contact_seller';
+      pricingFormat = 'fixed_price';
+    }
+
+    // Validate transaction method
+    if (!['contact_seller', 'instant_buy'].includes(transactionMethod)) {
       return NextResponse.json(
-        { error: 'Invalid listing type' },
+        { error: 'Invalid transaction method' },
         { status: 400 }
       );
     }
+
+    // Validate pricing format
+    if (!['fixed_price', 'auction'].includes(pricingFormat)) {
+      return NextResponse.json(
+        { error: 'Invalid pricing format' },
+        { status: 400 }
+      );
+    }
+
+    // Derive listing_type for backwards compatibility
+    const listingType = pricingFormat === 'auction' ? 'auction' : transactionMethod;
 
     // Check if seller has completed onboarding
     const { data: profile, error: profileError } = await supabase
@@ -60,8 +96,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For instant_buy listings, also require Stripe to be connected
-    if (listingType === 'instant_buy' && !profile?.stripe_connect_payouts_enabled) {
+    // For instant_buy transaction method, also require Stripe to be connected
+    if (transactionMethod === 'instant_buy' && !profile?.stripe_connect_payouts_enabled) {
       return NextResponse.json(
         {
           error: 'Payment setup required for instant buy listings',
@@ -81,10 +117,9 @@ export async function POST(request: NextRequest) {
       conditionNotes,
       allComponentsPresent,
       missingComponents,
-      price,
+      price, // Used for both fixed price and auction starting bid
       includedExpansions, // Bundled expansions
       // Auction-specific fields
-      auctionStartPrice,
       auctionDurationDays,
       // Source wanted listing (for "I have this" flow)
       sourceWantedListingId,
@@ -103,20 +138,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Condition is required' }, { status: 400 });
     }
 
-    // For non-auction listings, price is required
-    if (listingType !== 'auction' && (!price || parseFloat(price) <= 0)) {
+    // Price is now required for ALL listings (fixed price or auction starting bid)
+    if (!price || parseFloat(price) <= 0) {
       return NextResponse.json({ error: 'Valid price is required' }, { status: 400 });
     }
 
     // Auction-specific validation
-    if (listingType === 'auction') {
-      if (!auctionStartPrice || parseFloat(auctionStartPrice) <= 0) {
-        return NextResponse.json(
-          { error: 'Starting price is required for auctions' },
-          { status: 400 }
-        );
-      }
-
+    if (pricingFormat === 'auction') {
       if (![1, 3, 5, 7].includes(auctionDurationDays)) {
         return NextResponse.json(
           { error: 'Auction duration must be 1, 3, 5, or 7 days' },
@@ -156,8 +184,8 @@ export async function POST(request: NextRequest) {
       all_components_present: allComponentsPresent !== false, // Default to true
       missing_components: missingComponents || null,
 
-      // Pricing (for auctions, use start price as the display price)
-      price: listingType === 'auction' ? parseFloat(auctionStartPrice) : parseFloat(price),
+      // Pricing - price is now used for both fixed price and auction starting bid
+      price: parseFloat(price),
 
       // Shipping - T2T only (terminal-to-terminal via Unisend)
       shipping_local_pickup: false,
@@ -170,11 +198,17 @@ export async function POST(request: NextRequest) {
       // Metadata
       seller_id: sellerId,
       status: 'active',
+
+      // New 2-dimensional model columns
+      transaction_method: transactionMethod,
+      pricing_format: pricingFormat,
+
+      // Keep listing_type for backwards compatibility (derived from new columns)
       listing_type: listingType,
 
-      // Auction-specific fields (only set for auction listings)
-      ...(listingType === 'auction' ? {
-        auction_start_price: parseFloat(auctionStartPrice),
+      // Auction-specific fields (only set for auction pricing format)
+      ...(pricingFormat === 'auction' ? {
+        auction_start_price: parseFloat(price), // price IS the starting bid for auctions
         auction_duration_days: auctionDurationDays,
         auction_ends_at: new Date(Date.now() + auctionDurationDays * 24 * 60 * 60 * 1000).toISOString(),
         auction_bid_count: 0,
@@ -253,7 +287,9 @@ export async function POST(request: NextRequest) {
  * - ?gameId=123 - Get listings for a specific game
  * - ?sellerId=xyz - Get listings by a specific seller
  * - ?status=active - Filter by status (default: active for public browse, all for seller's own listings)
- * - ?listingType=instant_buy|contact_seller - Filter by listing type
+ * - ?listingType=instant_buy|contact_seller|auction - Filter by legacy listing type (backwards compat)
+ * - ?transactionMethod=instant_buy|contact_seller - Filter by transaction method (new model)
+ * - ?pricingFormat=fixed_price|auction - Filter by pricing format (new model)
  * - ?page=1 - Page number (default: 1)
  * - ?limit=20 - Items per page (default: 20)
  *
@@ -266,6 +302,8 @@ export async function GET(request: NextRequest) {
     const sellerId = searchParams.get('sellerId');
     const status = searchParams.get('status');
     const listingType = searchParams.get('listingType');
+    const transactionMethod = searchParams.get('transactionMethod');
+    const pricingFormat = searchParams.get('pricingFormat');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
 
@@ -299,9 +337,19 @@ export async function GET(request: NextRequest) {
       query = query.eq('status', status);
     }
 
-    // Filter by listing type (instant_buy, contact_seller, or auction)
+    // Filter by legacy listing type (backwards compat)
     if (listingType && ['instant_buy', 'contact_seller', 'auction'].includes(listingType)) {
       query = query.eq('listing_type', listingType);
+    }
+
+    // Filter by new transaction method
+    if (transactionMethod && ['instant_buy', 'contact_seller'].includes(transactionMethod)) {
+      query = query.eq('transaction_method', transactionMethod);
+    }
+
+    // Filter by pricing format
+    if (pricingFormat && ['fixed_price', 'auction'].includes(pricingFormat)) {
+      query = query.eq('pricing_format', pricingFormat);
     }
 
     const { data: rawListings, error, count } = await query;
@@ -352,6 +400,9 @@ export async function GET(request: NextRequest) {
         seller_id: row.seller_id,
         status: row.status,
         listing_type: row.listing_type || 'instant_buy', // Default for backwards compatibility
+        // New 2-dimensional model columns
+        transaction_method: row.transaction_method || (row.listing_type === 'instant_buy' ? 'instant_buy' : 'contact_seller'),
+        pricing_format: row.pricing_format || (row.listing_type === 'auction' ? 'auction' : 'fixed_price'),
         reserved_by: row.reserved_by,
         reserved_until: row.reserved_until,
         included_expansions: row.included_expansions,

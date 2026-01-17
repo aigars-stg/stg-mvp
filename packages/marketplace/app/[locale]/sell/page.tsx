@@ -13,13 +13,14 @@ import { PhotoUpload, type PhotoFile } from '@/components/sell/PhotoUpload';
 import { Input } from '@second-turn/design-system';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
-import { ListingTypeSelector } from '@/components/sell/ListingTypeSelector';
+import { TransactionMethodSelector } from '@/components/sell/TransactionMethodSelector';
+import { PricingFormatSelector } from '@/components/sell/PricingFormatSelector';
 import { OfferCard } from '@/components/game/OfferCard';
 import { PuzzlePiece as Dices, PhotoCamera as Camera, ClipboardCheck, CurrencyEuro as Euro, InfoCircle as Info, Close, CheckCircleAlt01 as CheckCircle2, RefreshCw, AlertCircle, PuzzlePiece as Puzzle, Package, RefreshCw as Loader2 } from 'griddy-icons';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
-import type { ListingWithSeller, ListingType, AuctionDuration } from '@/lib/types/listing';
+import type { ListingWithSeller, TransactionMethod, PricingFormat, AuctionDuration } from '@/lib/types/listing';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { AuctionSettings } from '@/components/sell/AuctionSettings';
 import { NotificationModal } from '@/components/common/NotificationModal';
@@ -31,7 +32,10 @@ export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
 interface ListingFormData {
-  listingType: ListingType;
+  // New 2-dimensional model
+  transactionMethod: TransactionMethod;
+  pricingFormat: PricingFormat;
+
   selectedGame: BGGGame | null;
   selectedGameDisplayName: string | null; // Chosen display name (primary or alternate)
   selectedVersion: VersionSelection | null;
@@ -41,15 +45,15 @@ interface ListingFormData {
   conditionNotes: string;
   allComponentsPresent: boolean;
   missingComponents: string;
-  price: string;
+  price: string; // Used for both fixed price and auction starting bid
   termsAccepted: boolean;
-  // Auction fields (only used when listingType === 'auction')
-  auctionStartPrice: string;
+  // Auction-specific (only used when pricingFormat === 'auction')
   auctionDurationDays: AuctionDuration;
 }
 
 const INITIAL_FORM_DATA: ListingFormData = {
-  listingType: 'contact_seller', // Default to contact_seller (no Stripe required)
+  transactionMethod: 'contact_seller', // Default (no Stripe required)
+  pricingFormat: 'fixed_price', // Default
   selectedGame: null,
   selectedGameDisplayName: null,
   selectedVersion: null,
@@ -59,9 +63,8 @@ const INITIAL_FORM_DATA: ListingFormData = {
   conditionNotes: '',
   allComponentsPresent: true,
   missingComponents: '',
-  price: '',
+  price: '', // Required for all listing types
   termsAccepted: false,
-  auctionStartPrice: '',
   auctionDurationDays: 3, // Default to 3 days
 };
 
@@ -112,7 +115,13 @@ function createPreviewListing(
     })),
     seller_id: user?.id || 'preview-seller',
     status: 'active',
-    listing_type: formData.listingType,
+    // New 2-dimensional model
+    transaction_method: formData.transactionMethod,
+    pricing_format: formData.pricingFormat,
+    // Keep listing_type for backwards compatibility during transition
+    listing_type: formData.pricingFormat === 'auction'
+      ? 'auction'
+      : formData.transactionMethod,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     sold_at: null,
@@ -155,6 +164,7 @@ function SellPageContent() {
   const tSuccess = useTranslations('Sell.successModal');
   const tValidation = useTranslations('Sell.validation');
   const tErrors = useTranslations('Sell.errors');
+  const tPrice = useTranslations('Sell.price');
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -409,7 +419,7 @@ function SellPageContent() {
             hasSetInitialListingType.current = true;
             setFormData((prev) => ({
               ...prev,
-              listingType: canCreateInstantBuy ? 'instant_buy' : 'contact_seller',
+              transactionMethod: canCreateInstantBuy ? 'instant_buy' : 'contact_seller',
             }));
           }
         } else {
@@ -461,9 +471,17 @@ function SellPageContent() {
           return;
         }
 
+        // Derive transaction method and pricing format from listing data
+        // Support both old (listing_type) and new (transaction_method, pricing_format) models
+        const transactionMethod: TransactionMethod = listing.transaction_method
+          || (listing.listing_type === 'contact_seller' ? 'contact_seller' : 'instant_buy');
+        const pricingFormat: PricingFormat = listing.pricing_format
+          || (listing.listing_type === 'auction' ? 'auction' : 'fixed_price');
+
         // Pre-populate form with listing data
         setFormData({
-          listingType: listing.listing_type || 'contact_seller',
+          transactionMethod,
+          pricingFormat,
           selectedGame: {
             id: listing.bgg_game_id,
             name: listing.game_name,
@@ -496,8 +514,6 @@ function SellPageContent() {
           missingComponents: listing.missing_components || '',
           price: listing.price.toString(),
           termsAccepted: true, // Already accepted when originally published
-          // Auction fields (populated from existing listing if it's an auction)
-          auctionStartPrice: listing.auction_start_price?.toString() || '',
           auctionDurationDays: listing.auction_duration_days || 3,
         });
 
@@ -711,12 +727,11 @@ function SellPageContent() {
   const isConditionSectionComplete = !!formData.condition;
   // Photos required only for Acceptable condition - check both new and existing photos
   const isPhotosSectionComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1 || existingPhotoUrls.length >= 1;
-  // Pricing validation depends on listing type
-  const isPriceSectionComplete = formData.listingType === 'auction'
-    ? (!!formData.auctionStartPrice && parseFloat(formData.auctionStartPrice) >= 1.00 && !!formData.auctionDurationDays)
-    : formData.listingType === 'instant_buy'
-      ? (!!formData.price && parseFloat(formData.price) > 0)
-      : true; // contact_seller doesn't need price
+  // Pricing validation - all listings now require a price
+  // For auctions, also require valid duration
+  const isPriceSectionComplete = formData.pricingFormat === 'auction'
+    ? (!!formData.price && parseFloat(formData.price) >= 1.00 && !!formData.auctionDurationDays)
+    : (!!formData.price && parseFloat(formData.price) > 0);
   // Shipping is now always T2T, no user selection needed
   const isPricingSectionComplete = isPriceSectionComplete;
 
@@ -857,11 +872,12 @@ function SellPageContent() {
           conditionNotes: formData.conditionNotes,
           allComponentsPresent: formData.allComponentsPresent,
           missingComponents: formData.missingComponents,
-          price: formData.price,
-          listingType: formData.listingType, // Dual-listing model support
-          // Auction fields (only included when listing type is auction)
-          ...(formData.listingType === 'auction' ? {
-            auctionStartPrice: formData.auctionStartPrice,
+          price: formData.price, // Used for both fixed price and auction starting bid
+          // New 2-dimensional model
+          transactionMethod: formData.transactionMethod,
+          pricingFormat: formData.pricingFormat,
+          // Auction fields (only included when pricing format is auction)
+          ...(formData.pricingFormat === 'auction' ? {
             auctionDurationDays: formData.auctionDurationDays,
           } : {}),
           // Convert selected expansions to API format
@@ -1047,17 +1063,14 @@ function SellPageContent() {
       <div className="lg:grid lg:grid-cols-12 lg:gap-8">
         {/* Left Column: Form Sections (8 cols on desktop) */}
         <div className="lg:col-span-8 space-y-4">
-        {/* Listing Type Selection (only in create mode) */}
+        {/* Transaction Method Selection (only in create mode) */}
         {!isEditMode && !sellerCapabilities.isLoading && (
           <Card padding="lg">
-            <ListingTypeSelector
-              value={formData.listingType}
-              onChange={(type) => setFormData((prev) => ({
+            <TransactionMethodSelector
+              value={formData.transactionMethod}
+              onChange={(method) => setFormData((prev) => ({
                 ...prev,
-                listingType: type,
-                // Carry price between fields when switching listing types
-                auctionStartPrice: type === 'auction' ? (prev.auctionStartPrice || prev.price) : prev.auctionStartPrice,
-                price: type !== 'auction' ? (prev.price || prev.auctionStartPrice) : prev.price,
+                transactionMethod: method,
               }))}
               canUseInstantBuy={sellerCapabilities.canCreateInstantBuy}
               onUpgradeClick={() => router.push('/seller/settings/payouts')}
@@ -1353,62 +1366,72 @@ function SellPageContent() {
           />
         </CollapsibleSection>
 
-        {/* Section 4: Pricing (only for instant_buy and auction) */}
-        {formData.listingType !== 'contact_seller' && (
-          <CollapsibleSection
-            title={formData.listingType === 'auction' ? tSections('pricing.auctionTitle') : tSections('pricing.title')}
-            icon={<Euro className="w-6 h-6 text-frost-ice" />}
-            isComplete={isPriceSectionComplete}
-            isExpanded={expandedSections.pricing}
-            onToggle={() => toggleSection('pricing')}
-            required
-            subtitle={formData.listingType === 'auction' ? tSections('pricing.auctionSubtitle') : tSections('pricing.subtitle')}
-          >
-            {formData.listingType === 'auction' ? (
-              /* Auction Settings */
-              <AuctionSettings
-                startPrice={formData.auctionStartPrice}
-                duration={formData.auctionDurationDays}
-                onStartPriceChange={(price) => setFormData((prev) => ({ ...prev, auctionStartPrice: price }))}
-                onDurationChange={(duration) => setFormData((prev) => ({ ...prev, auctionDurationDays: duration }))}
-              />
-            ) : (
-              /* Instant Buy Pricing */
-              <>
-                {/* Pricing Assistant - shows market data after game selection */}
-                {formData.selectedGame && (
-                  <PricingAssistant
-                    bggGameId={formData.selectedGame.id}
-                    condition={formData.condition}
-                    onFillPrice={(price) => setFormData((prev) => ({ ...prev, price: price.toFixed(2) }))}
-                    expansionIds={formData.selectedExpansions.map(e => e.bgg_id)}
-                  />
-                )}
+        {/* Section 4: Pricing (always shown - all listings require price) */}
+        <CollapsibleSection
+          title={tSections('pricing.title')}
+          icon={<Euro className="w-6 h-6 text-frost-ice" />}
+          isComplete={isPriceSectionComplete}
+          isExpanded={expandedSections.pricing}
+          onToggle={() => toggleSection('pricing')}
+          required
+          subtitle={tSections('pricing.subtitle')}
+        >
+          <div className="space-y-6">
+            {/* Pricing Format Selector */}
+            <PricingFormatSelector
+              value={formData.pricingFormat}
+              onChange={(format) => setFormData((prev) => ({ ...prev, pricingFormat: format }))}
+              auctionDuration={formData.auctionDurationDays}
+              onAuctionDurationChange={(duration) => setFormData((prev) => ({ ...prev, auctionDurationDays: duration }))}
+            />
 
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-3">
-                    {tSections('pricing.title')}
-                  </h3>
-                  <Input
-                    type="number"
-                    value={formData.price || ''}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
-                    onBlur={() => {
-                      if (formData.price && !isNaN(parseFloat(formData.price))) {
-                        setFormData((prev) => ({ ...prev, price: parseFloat(formData.price).toFixed(2) }));
-                      }
-                    }}
-                    placeholder="25.00"
-                    min="0.01"
-                    step="0.01"
-                    required
-                    inputSize="lg"
-                  />
-                </div>
-              </>
+            {/* Pricing Assistant - shows market data after game selection (for all listing types) */}
+            {formData.selectedGame && (
+              <PricingAssistant
+                bggGameId={formData.selectedGame.id}
+                condition={formData.condition}
+                onFillPrice={(price) => setFormData((prev) => ({ ...prev, price: price.toFixed(2) }))}
+                expansionIds={formData.selectedExpansions.map(e => e.bgg_id)}
+              />
             )}
-          </CollapsibleSection>
-        )}
+
+            {/* Price Input */}
+            <div>
+              <label className="block text-sm font-medium text-polar-night mb-2">
+                {formData.pricingFormat === 'auction'
+                  ? tPrice('labelAuction')
+                  : tPrice('label')
+                } *
+              </label>
+              {formData.pricingFormat === 'auction' && (
+                <p className="text-xs text-text-secondary mb-2">
+                  {tPrice('helperAuction')}
+                </p>
+              )}
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary font-medium">
+                  EUR
+                </span>
+                <Input
+                  type="number"
+                  value={formData.price || ''}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+                  onBlur={() => {
+                    if (formData.price && !isNaN(parseFloat(formData.price))) {
+                      setFormData((prev) => ({ ...prev, price: parseFloat(formData.price).toFixed(2) }));
+                    }
+                  }}
+                  placeholder={formData.pricingFormat === 'auction' ? '5.00' : '25.00'}
+                  min={formData.pricingFormat === 'auction' ? '1' : '0.01'}
+                  step="0.01"
+                  required
+                  inputSize="lg"
+                  className="pl-14"
+                />
+              </div>
+            </div>
+          </div>
+        </CollapsibleSection>
 
         {/* Terms & Publish */}
         <div className="mt-8 space-y-6">

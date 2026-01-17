@@ -4,8 +4,20 @@
 
 export type ListingStatus = 'draft' | 'active' | 'sold' | 'removed';
 export type ListingCondition = 'likeNew' | 'veryGood' | 'good' | 'acceptable';
-export type ListingType = 'instant_buy' | 'contact_seller' | 'auction';
 export type AuctionDuration = 1 | 3 | 5 | 7;
+
+// New 2-dimensional model
+export type TransactionMethod = 'contact_seller' | 'instant_buy';
+export type PricingFormat = 'fixed_price' | 'auction';
+
+// DEPRECATED: Old compound type - kept for backwards compatibility during transition
+export type ListingType = 'instant_buy' | 'contact_seller' | 'auction';
+
+// Type guards for new model
+export const isInstantBuy = (method: TransactionMethod): boolean => method === 'instant_buy';
+export const isContactSeller = (method: TransactionMethod): boolean => method === 'contact_seller';
+export const isAuction = (format: PricingFormat): boolean => format === 'auction';
+export const isFixedPrice = (format: PricingFormat): boolean => format === 'fixed_price';
 
 // Expansion included with a listing (bundled with base game)
 export interface IncludedExpansion {
@@ -63,7 +75,14 @@ export interface Listing {
   // Metadata
   seller_id: string;
   status: ListingStatus;
+
+  // New 2-dimensional model
+  transaction_method: TransactionMethod;
+  pricing_format: PricingFormat;
+
+  // DEPRECATED: Old compound field - kept for backwards compatibility during transition
   listing_type: ListingType;
+
   created_at: string;
   updated_at: string;
   sold_at: string | null;
@@ -166,6 +185,7 @@ export function getStatusLabel(status: ListingStatus): string {
   return labels[status];
 }
 
+// DEPRECATED: Use getTransactionMethodLabel or getPricingFormatLabel instead
 export function getListingTypeLabel(type: ListingType): string {
   const labels: Record<ListingType, string> = {
     instant_buy: 'Instant Buy',
@@ -175,12 +195,60 @@ export function getListingTypeLabel(type: ListingType): string {
   return labels[type];
 }
 
-export function isContactSellerListing(listing: { listing_type?: ListingType }): boolean {
+export function getTransactionMethodLabel(method: TransactionMethod): string {
+  const labels: Record<TransactionMethod, string> = {
+    contact_seller: 'Contact Seller',
+    instant_buy: 'Instant Buy',
+  };
+  return labels[method];
+}
+
+export function getPricingFormatLabel(format: PricingFormat): string {
+  const labels: Record<PricingFormat, string> = {
+    fixed_price: 'Fixed Price',
+    auction: 'Auction',
+  };
+  return labels[format];
+}
+
+// Check if listing uses contact seller transaction method
+// Works with both new model (transaction_method) and legacy (listing_type)
+export function isContactSellerListing(listing: { transaction_method?: TransactionMethod; listing_type?: ListingType }): boolean {
+  if (listing.transaction_method) {
+    return listing.transaction_method === 'contact_seller';
+  }
+  // Legacy fallback
   return listing.listing_type === 'contact_seller';
 }
 
-export function isAuctionListing(listing: { listing_type?: ListingType }): boolean {
+// Check if listing uses instant buy transaction method
+// Works with both new model (transaction_method) and legacy (listing_type)
+export function isInstantBuyListing(listing: { transaction_method?: TransactionMethod; listing_type?: ListingType }): boolean {
+  if (listing.transaction_method) {
+    return listing.transaction_method === 'instant_buy';
+  }
+  // Legacy fallback - 'auction' was always instant_buy in old model
+  return listing.listing_type === 'instant_buy' || listing.listing_type === 'auction';
+}
+
+// Check if listing uses auction pricing format
+// Works with both new model (pricing_format) and legacy (listing_type)
+export function isAuctionListing(listing: { pricing_format?: PricingFormat; listing_type?: ListingType }): boolean {
+  if (listing.pricing_format) {
+    return listing.pricing_format === 'auction';
+  }
+  // Legacy fallback
   return listing.listing_type === 'auction';
+}
+
+// Check if listing uses fixed price format
+// Works with both new model (pricing_format) and legacy (listing_type)
+export function isFixedPriceListing(listing: { pricing_format?: PricingFormat; listing_type?: ListingType }): boolean {
+  if (listing.pricing_format) {
+    return listing.pricing_format === 'fixed_price';
+  }
+  // Legacy fallback
+  return listing.listing_type === 'instant_buy' || listing.listing_type === 'contact_seller';
 }
 
 // Bid interface
@@ -249,7 +317,7 @@ export function getAuctionTimeRemaining(endsAt: string): {
   };
 }
 
-export function getMinimumBid(listing: Listing): number {
+export function getMinimumBid(listing: { pricing_format?: PricingFormat; listing_type?: ListingType; price: number; auction_current_bid?: number | null; auction_start_price?: number }): number {
   if (!isAuctionListing(listing)) return listing.price;
 
   if (listing.auction_current_bid && listing.auction_current_bid > 0) {

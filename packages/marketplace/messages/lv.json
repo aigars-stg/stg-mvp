@@ -1524,6 +1524,36 @@
         "content": "Ja svārsties starp divām pakāpēm, izvēlies zemāko. Pircējs, kurš saņem spēli labākā stāvoklī nekā gaidīts, ir sajūsmā."
       }
     },
+    "transactionMethod": {
+      "title": "Kā vēlies pārdot?",
+      "subtitle": "Izvēlies, kā sazināsies ar pircēju.",
+      "contactSeller": {
+        "label": "Sazināties ar pārdevēju",
+        "description": "Sarakstieties ar pircēju, lai vienotos par maksājumu un piegādi"
+      },
+      "instantBuy": {
+        "label": "Pirkt uzreiz",
+        "description": "Pircēji maksā uzreiz caur platformu",
+        "unavailable": "Pieejams Latvijas pārdevējiem ar pievienotu maksājumu kontu",
+        "upgrade": "Iestatīt maksājumus"
+      }
+    },
+    "pricingFormat": {
+      "title": "Cenas formāts",
+      "fixedPrice": {
+        "label": "Fiksēta cena",
+        "description": "Iestati savu cenu"
+      },
+      "auction": {
+        "label": "Izsole",
+        "description": "Ļauj pircējiem solīties — augstākā likme uzvar"
+      }
+    },
+    "price": {
+      "label": "Cena",
+      "labelAuction": "Sākuma likme",
+      "helperAuction": "Minimālā summa, ko pieņemsi"
+    },
     "listingType": {
       "title": "Kā vēlies pārdot?",
       "subtitle": "Izvēlies, kā vēlies sazināties ar pircējiem.",

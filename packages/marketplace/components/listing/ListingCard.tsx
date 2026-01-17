@@ -6,6 +6,7 @@ import { Card, Badge } from '@second-turn/design-system';
 import { Package, LocationPin as MapPin, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Chat as MessageSquare } from 'griddy-icons';
 import { ImageCarousel } from '@/components/common/ImageCarousel';
 import type { ListingWithSeller } from '@/lib/types/listing';
+import { isContactSellerListing } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 import { useRouter } from 'next/navigation';
@@ -68,6 +69,8 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
   // Calculate total delivered price (item + shipping + service fee)
   const deliveredPricing = useDeliveredPricing({
     listingType: listing.listing_type,
+    transactionMethod: listing.transaction_method,
+    pricingFormat: listing.pricing_format,
     price: listing.price,
     sellerCountry: listing.seller.country,
     buyerCountry,
@@ -169,7 +172,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
           </button>
 
           {/* Contact Seller badge - bottom left */}
-          {listing.listing_type === 'contact_seller' && (
+          {isContactSellerListing(listing) && (
             <div className="absolute bottom-3 left-3 px-2 py-1 bg-polar-night/80 backdrop-blur-sm rounded-md text-xs text-snow-white font-medium flex items-center gap-1">
               <MessageSquare className="w-3 h-3" />
               {t('card.contactSeller')}
@@ -301,7 +304,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
                 )}
                 <span>{getCountryName(listing.seller.country)}</span>
                 {/* Only show shipping options for instant_buy listings */}
-                {listing.listing_type !== 'contact_seller' && (
+                {!isContactSellerListing(listing) && (
                   <>
                     <span className="text-text-muted">•</span>
                     {listing.shipping_parcel_locker ? (
