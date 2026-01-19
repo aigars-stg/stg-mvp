@@ -18,7 +18,8 @@ interface ShippingLabelSellerEmailProps {
   buyerName: string;
   destinationTerminalName: string;
   destinationTerminalAddress: string;
-  barcode: string;
+  parcelId: string;
+  barcode?: string;
   trackingUrl?: string;
   orderUrl: string;
 }
@@ -29,11 +30,12 @@ export const ShippingLabelSellerEmail = ({
   buyerName = 'Buyer',
   destinationTerminalName = 'Vilnius Akropolis',
   destinationTerminalAddress = 'Ozo g. 25, LT-07150 Vilnius',
-  barcode = '1234567890',
+  parcelId = '4703389',
+  barcode,
   trackingUrl = 'https://tracking.example.com',
   orderUrl = 'https://secondturn.games/seller/orders/123',
 }: ShippingLabelSellerEmailProps) => {
-  const previewText = `Shipping label ready for order #${orderNumber}`;
+  const previewText = `Ready to ship - Order #${orderNumber}`;
 
   return (
     <Html>
@@ -41,13 +43,13 @@ export const ShippingLabelSellerEmail = ({
       <Preview>{previewText}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>📦 Shipping Label Ready!</Heading>
+          <Heading style={h1}>📦 Ready to Ship!</Heading>
 
           <Text style={text}>Hi {sellerName},</Text>
 
           <Text style={text}>
-            Your shipping label has been generated and is attached to this email. Print it and
-            attach it to your package.
+            Your parcel has been registered with Unisend. Visit any Unisend terminal to print your
+            label and ship the package.
           </Text>
 
           <Section style={orderBox}>
@@ -67,27 +69,28 @@ export const ShippingLabelSellerEmail = ({
                   <span style={addressText}>{destinationTerminalAddress}</span>
                 </td>
               </tr>
-              <tr>
-                <td style={label}>Tracking Number:</td>
-                <td style={trackingNumber}>{barcode}</td>
-              </tr>
             </table>
+
+            <Hr style={hr} />
+
+            <Text style={parcelIdLabel}>Your Parcel ID</Text>
+            <Text style={parcelIdStyle}>{parcelId}</Text>
           </Section>
 
           <Section style={instructionsBox}>
-            <Text style={instructionsTitle}>📋 Next Steps</Text>
+            <Text style={instructionsTitle}>📋 How to Ship</Text>
             <div style={instructionsList}>
               <Text style={instructionItem}>
-                <strong>1.</strong> Print the attached shipping label
+                <strong>1.</strong> Go to your nearest <strong>Unisend terminal</strong>
               </Text>
               <Text style={instructionItem}>
-                <strong>2.</strong> Attach the label securely to your package
+                <strong>2.</strong> Enter the <strong>Parcel ID</strong> shown above at the terminal screen
               </Text>
               <Text style={instructionItem}>
-                <strong>3.</strong> Drop off the package at any Omniva/DPD terminal
+                <strong>3.</strong> Print the label at the terminal and attach it to your parcel
               </Text>
               <Text style={instructionItem}>
-                <strong>4.</strong> The buyer will be notified when the package arrives
+                <strong>4.</strong> Place the parcel in the locker opened by the terminal
               </Text>
             </div>
           </Section>
@@ -208,6 +211,23 @@ const trackingNumber = {
   fontWeight: '600',
   fontFamily: 'monospace',
   paddingBottom: '12px',
+};
+
+const parcelIdLabel = {
+  color: '#6b7c93',
+  fontSize: '12px',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.5px',
+  margin: '0 0 4px 0',
+};
+
+const parcelIdStyle = {
+  color: '#8fbcbb',
+  fontSize: '32px',
+  fontWeight: '700',
+  fontFamily: 'monospace',
+  margin: '0',
+  padding: '8px 0',
 };
 
 const instructionsBox = {

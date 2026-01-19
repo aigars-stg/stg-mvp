@@ -4,8 +4,21 @@
  */
 
 import { getUnisendClient } from './client';
-import type { CreateParcelRequest } from './types';
+import type { CreateParcelRequest, TerminalCountry } from './types';
+import { PHONE_FORMATS } from './types';
 import { createClient } from '@supabase/supabase-js';
+
+/**
+ * Construct the public tracking URL for a given barcode
+ * Format: https://www.post.lt/siuntu-sekimas/?parcels={barcode}
+ * Only works with valid barcodes (13 chars: 2 letters + 9 digits + LT)
+ */
+export function getTrackingUrl(barcode: string | undefined): string | undefined {
+  if (!barcode || barcode.trim() === '') {
+    return undefined;
+  }
+  return `https://www.post.lt/siuntu-sekimas/?parcels=${encodeURIComponent(barcode)}`;
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,9 +54,38 @@ export async function generateShippingLabel(
 ): Promise<GenerateLabelResult> {
   const unisend = getUnisendClient();
 
-  console.log(`📦 [Unisend] Generating label for order ${params.orderNumber}...`);
+  // Pre-validate required fields to provide clear error messages
+  const validationErrors: string[] = [];
 
-  // Step 1: Create parcel
+  if (!params.senderPhone || params.senderPhone.trim() === '') {
+    validationErrors.push('Seller phone number is missing. Please add your phone number in your profile.');
+  } else {
+    // Validate phone format for sender country
+    const senderFormat = PHONE_FORMATS[params.senderCountry as TerminalCountry];
+    if (senderFormat && !senderFormat.regex.test(params.senderPhone)) {
+      validationErrors.push(`Seller phone number format is invalid. Expected format: ${senderFormat.example}`);
+    }
+  }
+
+  if (!params.receiverPhone || params.receiverPhone.trim() === '') {
+    validationErrors.push('Buyer phone number is missing. The buyer needs to add their phone number to their profile.');
+  } else {
+    // Validate phone format for receiver country
+    const receiverFormat = PHONE_FORMATS[params.receiverCountry as TerminalCountry];
+    if (receiverFormat && !receiverFormat.regex.test(params.receiverPhone)) {
+      validationErrors.push(`Buyer phone number format is invalid. Expected format: ${receiverFormat.example}`);
+    }
+  }
+
+  if (!params.destinationTerminalId || params.destinationTerminalId.trim() === '') {
+    validationErrors.push('Destination terminal is not set. Please contact support.');
+  }
+
+  if (validationErrors.length > 0) {
+    throw new Error(validationErrors.join(' '));
+  }
+
+  // Create parcel
   const parcelRequest: CreateParcelRequest = {
     plan: {
       code: 'TERMINAL',
@@ -69,53 +111,79 @@ export async function generateShippingLabel(
     },
     parcel: {
       type: 'T2T',
-      reference: params.orderNumber,
       size: params.parcelSize,
       weight: params.parcelWeight || 2, // Default 2kg if not specified
     },
   };
 
-  console.log(`📦 [Unisend] Creating parcel...`);
   const { parcelId, barcode, trackingUrl } = await unisend.createAndShipParcel(parcelRequest);
 
-  console.log(`✅ [Unisend] Parcel created: ${parcelId}, Barcode: ${barcode}`);
+  // Note: We no longer generate/store the label PDF here
+  // The seller will print the label at their nearest Unisend terminal using the parcelId
+  // This is the standard Unisend T2T workflow
 
-  // Step 2: Generate label PDF
-  console.log(`📄 [Unisend] Generating label PDF...`);
-  const labelBlob = await unisend.generateLabel([parcelId], 'LAYOUT_10x15', 'LANDSCAPE');
+  // We'll use the parcelId as a "label URL" placeholder - the seller doesn't need an actual PDF
+  // They'll go to a terminal, enter parcelId, and print from there
+  const labelUrl = `unisend://terminal/${parcelId}`;
 
-  // Step 3: Upload label to Supabase Storage
-  console.log(`☁️ [Unisend] Uploading label to storage...`);
-  const fileName = `${params.orderId}_${Date.now()}.pdf`;
-  const filePath = `shipping-labels/${fileName}`;
-
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from('order-documents')
-    .upload(filePath, labelBlob, {
-      contentType: 'application/pdf',
-      upsert: false,
-    });
-
-  if (uploadError) {
-    console.error('❌ [Unisend] Failed to upload label:', uploadError);
-    throw new Error(`Failed to upload label: ${uploadError.message}`);
-  }
-
-  // Get public URL
-  const { data: urlData } = supabase.storage
-    .from('order-documents')
-    .getPublicUrl(filePath);
-
-  const labelUrl = urlData.publicUrl;
-
-  console.log(`✅ [Unisend] Label generated and stored: ${labelUrl}`);
+  // Construct tracking URL from barcode if available
+  // For T2T parcels, the barcode is assigned when seller prints at terminal
+  // Format: https://www.post.lt/siuntu-sekimas/?parcels={barcode}
+  const finalTrackingUrl = trackingUrl || getTrackingUrl(barcode);
 
   return {
     parcelId,
     barcode,
-    trackingUrl,
+    trackingUrl: finalTrackingUrl,
     labelUrl,
   };
+}
+
+/**
+ * Update order with shipping label data
+ * Uses service role client to bypass RLS
+ */
+export async function updateOrderWithShippingData(
+  orderId: string,
+  data: {
+    parcelId: number;
+    barcode?: string;
+    trackingUrl?: string;
+    labelUrl: string;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      unisend_parcel_id: data.parcelId,
+      barcode: data.barcode,
+      tracking_url: data.trackingUrl,
+      label_url: data.labelUrl,
+      label_generated_at: new Date().toISOString(),
+      label_error: null,
+    })
+    .eq('id', orderId);
+
+  if (error) {
+    console.error('[Unisend] Failed to update order:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Store label error in database
+ * Uses service role client to bypass RLS
+ */
+export async function updateOrderLabelError(
+  orderId: string,
+  labelError: string
+): Promise<void> {
+  await supabase
+    .from('orders')
+    .update({ label_error: labelError })
+    .eq('id', orderId);
 }
 
 /**
@@ -130,7 +198,7 @@ export async function getLabelPdfBuffer(labelUrl: string): Promise<Buffer> {
     const arrayBuffer = await response.arrayBuffer();
     return Buffer.from(arrayBuffer);
   } catch (error) {
-    console.error('❌ [Unisend] Failed to get label PDF:', error);
+    console.error('[Unisend] Failed to get label PDF:', error);
     throw error;
   }
 }
@@ -147,7 +215,6 @@ export async function downloadLabelFromStorage(orderId: string): Promise<Blob | 
     });
 
   if (listError || !files || files.length === 0) {
-    console.error('❌ [Unisend] Label not found in storage');
     return null;
   }
 
@@ -160,7 +227,7 @@ export async function downloadLabelFromStorage(orderId: string): Promise<Blob | 
     .download(filePath);
 
   if (error) {
-    console.error('❌ [Unisend] Failed to download label:', error);
+    console.error('[Unisend] Failed to download label:', error);
     return null;
   }
 

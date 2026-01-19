@@ -159,7 +159,8 @@ export async function sendOrderCancelledToBuyer(params: {
 }
 
 /**
- * Send shipping label to seller with PDF attachment
+ * Send shipping notification to seller with parcel ID
+ * Seller will print the label at the Unisend terminal
  */
 export async function sendShippingLabelToSeller(params: {
   sellerName: string;
@@ -169,9 +170,9 @@ export async function sendShippingLabelToSeller(params: {
   buyerName: string;
   destinationTerminalName: string;
   destinationTerminalAddress: string;
-  barcode: string;
+  parcelId: string;
+  barcode?: string;
   trackingUrl?: string;
-  labelPdfBuffer: Buffer;
 }) {
   const {
     sellerName,
@@ -181,39 +182,32 @@ export async function sendShippingLabelToSeller(params: {
     buyerName,
     destinationTerminalName,
     destinationTerminalAddress,
+    parcelId,
     barcode,
     trackingUrl,
-    labelPdfBuffer,
   } = params;
 
   try {
-    // Use Resend directly for attachment support
-    await resend.emails.send({
-      from: FROM_EMAIL,
+    await sendEmail({
       to: sellerEmail,
-      subject: `Shipping Label Ready - Order #${orderNumber}`,
+      subject: `Ready to Ship - Order #${orderNumber}`,
       react: ShippingLabelSellerEmail({
         sellerName,
         orderNumber,
         buyerName,
         destinationTerminalName,
         destinationTerminalAddress,
+        parcelId,
         barcode,
         trackingUrl,
         orderUrl: `${APP_URL}/seller/orders/${orderId}`,
       }),
-      attachments: [
-        {
-          filename: `shipping-label-${orderNumber}.pdf`,
-          content: labelPdfBuffer,
-        },
-      ],
     });
 
-    console.log(`✅ [Email] Shipping label sent to seller: ${sellerEmail}`);
+    console.log(`✅ [Email] Shipping notification sent to seller: ${sellerEmail}`);
     return { success: true };
   } catch (error) {
-    console.error('❌ [Email] Failed to send shipping label to seller:', error);
+    console.error('❌ [Email] Failed to send shipping notification to seller:', error);
     return { success: false, error };
   }
 }

@@ -1,0 +1,110 @@
+'use client';
+
+import { Truck, User, LocationPin as MapPin, Phone, Email as Mail } from 'griddy-icons';
+import type { ShippingDestination, ParcelSize } from './types';
+
+interface ShippingInfoCardProps {
+  destination: ShippingDestination;
+  parcelSize?: ParcelSize;
+  title?: string;
+  showReceiverInfo?: boolean;
+  className?: string;
+}
+
+// Helper function to get country flag and name
+function getCountryDisplay(countryCode?: string): { flag: string; name: string } | null {
+  if (!countryCode) return null;
+
+  const countries: Record<string, { flag: string; name: string }> = {
+    LV: { flag: '\ud83c\uddf1\ud83c\uddfb', name: 'Latvia' },
+    LT: { flag: '\ud83c\uddf1\ud83c\uddf9', name: 'Lithuania' },
+    EE: { flag: '\ud83c\uddea\ud83c\uddea', name: 'Estonia' },
+  };
+
+  return countries[countryCode.toUpperCase()] || null;
+}
+
+export function ShippingInfoCard({
+  destination,
+  parcelSize,
+  title = 'Delivery',
+  showReceiverInfo = true,
+  className = '',
+}: ShippingInfoCardProps) {
+  const countryDisplay = getCountryDisplay(destination.country);
+
+  return (
+    <div className={className}>
+      {title && (
+        <h3 className="text-sm font-semibold text-polar-night dark:text-snow-white mb-3">
+          {title}
+        </h3>
+      )}
+
+      <div className="space-y-3">
+        {/* Terminal location */}
+        {destination.terminal_name && (
+          <div className="flex items-start gap-3 p-3 bg-bg-elevated dark:bg-polar-night-light rounded-lg">
+            <MapPin className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-polar-night dark:text-snow-white">
+                {destination.terminal_name}
+              </p>
+              {destination.terminal_address && (
+                <p className="text-sm text-text-secondary mt-1">
+                  {destination.terminal_address}
+                </p>
+              )}
+              {countryDisplay && (
+                <p className="text-sm text-text-muted mt-1">
+                  {countryDisplay.flag} {countryDisplay.name}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Parcel size */}
+        {parcelSize && (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-text-secondary">Parcel Size:</span>
+            <span className="font-medium text-polar-night dark:text-snow-white">
+              {parcelSize}
+            </span>
+          </div>
+        )}
+
+        {/* Receiver information */}
+        {showReceiverInfo && destination.receiver_name && (
+          <div className="space-y-2 text-sm pt-2">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-text-muted" />
+              <span className="text-text-secondary">Recipient:</span>
+              <span className="font-medium text-polar-night dark:text-snow-white">
+                {destination.receiver_name}
+              </span>
+            </div>
+            {destination.receiver_phone && (
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-text-muted" />
+                <span className="text-text-secondary">Phone:</span>
+                <span className="font-medium text-polar-night dark:text-snow-white">
+                  {destination.receiver_phone}
+                </span>
+              </div>
+            )}
+            {destination.receiver_email && (
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-text-muted" />
+                <span className="text-text-secondary">Email:</span>
+                <span className="font-medium text-polar-night dark:text-snow-white">
+                  {destination.receiver_email}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

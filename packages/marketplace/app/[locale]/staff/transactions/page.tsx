@@ -1,11 +1,23 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge } from '@second-turn/design-system';
-import { Search, RefreshCw as Loader2, AlertCircle, Shield, ChevronLeft, ChevronRight, AlertTriangle, Package } from 'griddy-icons';
+import { Search, RefreshCw as Loader2, AlertCircle, Shield, ChevronLeft, ChevronRight, AlertTriangle, Package, Download, TrendUp, CurrencyDollar, FileText, Receipt, Truck } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
+import {
+  extractVatFromGross,
+  calculateBookkeepingSummary,
+  generateBookkeepingCSV,
+  downloadCSV,
+  formatEuros,
+  formatDateForAPI,
+  DATE_RANGE_PRESETS,
+  EXCLUDED_FROM_TOTALS,
+  type OrderBookkeepingData,
+  type BookkeepingSummary,
+} from '@/lib/bookkeeping-utils';
 
 interface OrderSummary {
   id: string;
@@ -16,12 +28,16 @@ interface OrderSummary {
   shipping_method: string;
   total_amount: number;
   created_at: string;
+  paid_at: string | null;
   buyer_name: string;
   seller_name: string;
   issue_count: {
     total: number;
     open: number;
   };
+  items_total: number;
+  shipping_cost: number;
+  service_fee: number;
 }
 
 interface TransactionListResponse {
@@ -94,6 +110,51 @@ function StaffTransactionsContent() {
   const [hasIssues, setHasIssues] = useState(searchParams.get('has_issues') === 'true');
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
 
+  // Bookkeeping state
+  const [viewMode, setViewMode] = useState<'operations' | 'bookkeeping'>('operations');
+  const [dateRange, setDateRange] = useState('this_month');
+
+  // Calculate bookkeeping summary from loaded data
+  const bookkeepingSummary = useMemo<BookkeepingSummary | null>(() => {
+    if (!data?.orders || viewMode !== 'bookkeeping') return null;
+    const ordersWithBookkeeping: OrderBookkeepingData[] = data.orders.map((o) => ({
+      id: o.id,
+      order_number: o.order_number,
+      status: o.status,
+      created_at: o.created_at,
+      paid_at: o.paid_at,
+      items_total: o.items_total,
+      service_fee: o.service_fee,
+      shipping_cost: o.shipping_cost,
+      total_amount: o.total_amount,
+      buyer_name: o.buyer_name,
+      seller_name: o.seller_name,
+    }));
+    return calculateBookkeepingSummary(ordersWithBookkeeping);
+  }, [data?.orders, viewMode]);
+
+  // Handle CSV export
+  const handleExportCSV = () => {
+    if (!data?.orders) return;
+    const ordersWithBookkeeping: OrderBookkeepingData[] = data.orders.map((o) => ({
+      id: o.id,
+      order_number: o.order_number,
+      status: o.status,
+      created_at: o.created_at,
+      paid_at: o.paid_at,
+      items_total: o.items_total,
+      service_fee: o.service_fee,
+      shipping_cost: o.shipping_cost,
+      total_amount: o.total_amount,
+      buyer_name: o.buyer_name,
+      seller_name: o.seller_name,
+    }));
+    const csv = generateBookkeepingCSV(ordersWithBookkeeping);
+    const preset = DATE_RANGE_PRESETS.find((p) => p.key === dateRange);
+    const filename = `stg-bookkeeping-${preset?.label.toLowerCase().replace(/\s+/g, '-') || 'export'}-${new Date().toISOString().split('T')[0]}.csv`;
+    downloadCSV(csv, filename);
+  };
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
@@ -113,6 +174,16 @@ function StaffTransactionsContent() {
       if (hasIssues) params.set('has_issues', 'true');
       params.set('page', currentPage.toString());
       params.set('limit', '20');
+
+      // Add date range params when in bookkeeping mode
+      if (viewMode === 'bookkeeping') {
+        const preset = DATE_RANGE_PRESETS.find((p) => p.key === dateRange);
+        if (preset) {
+          const { start, end } = preset.getRange();
+          params.set('date_from', formatDateForAPI(start));
+          params.set('date_to', formatDateForAPI(end));
+        }
+      }
 
       const response = await fetch(`/api/staff/transactions?${params}`);
       const result = await response.json();
@@ -140,7 +211,7 @@ function StaffTransactionsContent() {
     if (user) {
       fetchTransactions();
     }
-  }, [user, statusFilter, hasIssues, currentPage]);
+  }, [user, statusFilter, hasIssues, currentPage, viewMode, dateRange]);
 
   // Handle search
   const handleSearch = (e: React.FormEvent) => {
@@ -201,13 +272,48 @@ function StaffTransactionsContent() {
       {/* Header */}
       <div className="bg-frost-ice/5 border-b border-frost-ice/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-          <div className="flex items-center gap-3 mb-2">
-            <Shield className="w-6 h-6 text-frost-ice" />
-            <h1 className="text-2xl font-bold text-polar-night">Staff Dashboard</h1>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <Shield className="w-6 h-6 text-frost-ice" />
+                <h1 className="text-2xl font-bold text-polar-night dark:text-snow-white">Staff Dashboard</h1>
+              </div>
+              <p className="text-text-secondary">
+                {viewMode === 'operations'
+                  ? 'Manage transactions, view conversations, and resolve issues.'
+                  : 'Financial overview with VAT breakdown for bookkeeping.'}
+              </p>
+            </div>
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-frost-ice/10 rounded-lg p-1">
+              <button
+                onClick={() => {
+                  setViewMode('operations');
+                  setCurrentPage(1);
+                }}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  viewMode === 'operations'
+                    ? 'bg-frost-ice text-white'
+                    : 'text-frost-ice hover:bg-frost-ice/20'
+                }`}
+              >
+                Operations
+              </button>
+              <button
+                onClick={() => {
+                  setViewMode('bookkeeping');
+                  setCurrentPage(1);
+                }}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  viewMode === 'bookkeeping'
+                    ? 'bg-frost-ice text-white'
+                    : 'text-frost-ice hover:bg-frost-ice/20'
+                }`}
+              >
+                Bookkeeping
+              </button>
+            </div>
           </div>
-          <p className="text-text-secondary">
-            Manage transactions, view conversations, and resolve issues.
-          </p>
         </div>
       </div>
 
@@ -223,7 +329,7 @@ function StaffTransactionsContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by order number..."
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
               />
             </div>
           </form>
@@ -235,7 +341,7 @@ function StaffTransactionsContent() {
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+            className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
           >
             {statusOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -244,21 +350,115 @@ function StaffTransactionsContent() {
             ))}
           </select>
 
-          {/* Has issues filter */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={hasIssues}
-              onChange={(e) => {
-                setHasIssues(e.target.checked);
-                setCurrentPage(1);
-              }}
-              className="w-4 h-4 rounded border-border text-frost-ice focus:ring-frost-ice/50"
-            />
-            <span className="text-sm text-text-secondary">Has open issues</span>
-          </label>
+          {/* Has issues filter (operations mode only) */}
+          {viewMode === 'operations' && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hasIssues}
+                onChange={(e) => {
+                  setHasIssues(e.target.checked);
+                  setCurrentPage(1);
+                }}
+                className="w-4 h-4 rounded border-border text-frost-ice focus:ring-frost-ice/50"
+              />
+              <span className="text-sm text-text-secondary">Has open issues</span>
+            </label>
+          )}
+
+          {/* Date range filter (bookkeeping mode only) */}
+          {viewMode === 'bookkeeping' && (
+            <>
+              <select
+                value={dateRange}
+                onChange={(e) => {
+                  setDateRange(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+              >
+                {DATE_RANGE_PRESETS.map((preset) => (
+                  <option key={preset.key} value={preset.key}>
+                    {preset.label}
+                  </option>
+                ))}
+              </select>
+
+              <Button variant="secondary" size="sm" onClick={handleExportCSV} disabled={!data?.orders?.length}>
+                <Download className="w-4 h-4 mr-2" />
+                Export CSV
+              </Button>
+            </>
+          )}
         </div>
       </div>
+
+      {/* Summary Cards (bookkeeping mode only) */}
+      {viewMode === 'bookkeeping' && bookkeepingSummary && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {/* Orders */}
+            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="w-8 h-8 rounded-full bg-frost-ice/10 flex items-center justify-center mb-2">
+                <Package className="w-4 h-4 text-frost-ice" />
+              </div>
+              <p className="text-xs text-text-muted uppercase tracking-wide">Orders</p>
+              <p className="text-xl font-bold text-polar-night dark:text-snow-white">{bookkeepingSummary.orderCount}</p>
+              <p className="text-xs text-text-secondary">in selected period</p>
+            </div>
+
+            {/* GMV */}
+            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="w-8 h-8 rounded-full bg-frost-ice/10 flex items-center justify-center mb-2">
+                <TrendUp className="w-4 h-4 text-frost-ice" />
+              </div>
+              <p className="text-xs text-text-muted uppercase tracking-wide">GMV</p>
+              <p className="text-xl font-bold text-polar-night dark:text-snow-white">{formatEuros(bookkeepingSummary.gmv)}</p>
+              <p className="text-xs text-text-secondary">game prices total</p>
+            </div>
+
+            {/* Platform Revenue */}
+            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="w-8 h-8 rounded-full bg-aurora-green/10 flex items-center justify-center mb-2">
+                <CurrencyDollar className="w-4 h-4 text-aurora-green" />
+              </div>
+              <p className="text-xs text-text-muted uppercase tracking-wide">Platform Revenue</p>
+              <p className="text-xl font-bold text-aurora-green">{formatEuros(bookkeepingSummary.platformRevenue.gross + bookkeepingSummary.shippingRevenue.gross)}</p>
+              <p className="text-xs text-aurora-yellow">Net: {formatEuros(bookkeepingSummary.platformRevenue.net + bookkeepingSummary.shippingRevenue.net)}</p>
+            </div>
+
+            {/* Total VAT */}
+            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="w-8 h-8 rounded-full bg-aurora-yellow/10 flex items-center justify-center mb-2">
+                <FileText className="w-4 h-4 text-aurora-yellow" />
+              </div>
+              <p className="text-xs text-text-muted uppercase tracking-wide">VAT Collected</p>
+              <p className="text-xl font-bold text-aurora-yellow">{formatEuros(bookkeepingSummary.totalVatCollected)}</p>
+              <p className="text-xs text-text-secondary">21% rate</p>
+            </div>
+
+            {/* Platform Fee VAT */}
+            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="w-8 h-8 rounded-full bg-aurora-yellow/10 flex items-center justify-center mb-2">
+                <Receipt className="w-4 h-4 text-aurora-yellow" />
+              </div>
+              <p className="text-xs text-text-muted uppercase tracking-wide">Fee VAT</p>
+              <p className="text-xl font-bold text-aurora-yellow">{formatEuros(bookkeepingSummary.platformRevenue.vat)}</p>
+              <p className="text-xs text-text-secondary">Gross: {formatEuros(bookkeepingSummary.platformRevenue.gross)}</p>
+            </div>
+
+            {/* Shipping VAT */}
+            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="w-8 h-8 rounded-full bg-aurora-yellow/10 flex items-center justify-center mb-2">
+                <Truck className="w-4 h-4 text-aurora-yellow" />
+              </div>
+              <p className="text-xs text-text-muted uppercase tracking-wide">Shipping VAT</p>
+              <p className="text-xl font-bold text-aurora-yellow">{formatEuros(bookkeepingSummary.shippingRevenue.vat)}</p>
+              <p className="text-xs text-text-secondary">Gross: {formatEuros(bookkeepingSummary.shippingRevenue.gross)}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Transactions list */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -271,11 +471,15 @@ function StaffTransactionsContent() {
         {data && data.orders.length === 0 ? (
           <div className="text-center py-12">
             <Package className="w-12 h-12 text-text-muted mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-polar-night mb-2">No transactions found</h3>
-            <p className="text-text-secondary">Try adjusting your filters.</p>
+            <h3 className="text-lg font-medium text-polar-night dark:text-snow-white mb-2">No transactions found</h3>
+            <p className="text-text-secondary">
+              {viewMode === 'bookkeeping'
+                ? 'No transactions in the selected period.'
+                : 'Try adjusting your filters.'}
+            </p>
           </div>
-        ) : (
-          <div className="bg-snow-white border border-border rounded-lg overflow-hidden">
+        ) : viewMode === 'operations' ? (
+          <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-background-secondary border-b border-divider-subtle">
                 <tr>
@@ -353,6 +557,111 @@ function StaffTransactionsContent() {
                 })}
               </tbody>
             </table>
+          </div>
+        ) : (
+          /* Bookkeeping Table */
+          <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full" style={{ minWidth: '1000px' }}>
+                <thead className="bg-background-secondary border-b border-divider-subtle">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Order</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Date</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Game Price</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Fee Net</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-aurora-yellow uppercase tracking-wider">Fee VAT</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Ship Net</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-aurora-yellow uppercase tracking-wider">Ship VAT</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-aurora-yellow uppercase tracking-wider">Total VAT</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Buyer Paid</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-divider-subtle">
+                  {data?.orders.map((order) => {
+                    const statusInfo = statusConfig[order.status] || { label: order.status, variant: 'default' as const };
+                    const platformFee = extractVatFromGross(order.service_fee);
+                    const shipping = extractVatFromGross(order.shipping_cost);
+                    const totalVat = platformFee.vat + shipping.vat;
+                    const isCancelled = EXCLUDED_FROM_TOTALS.includes(order.status);
+
+                    return (
+                      <tr
+                        key={order.id}
+                        className={`hover:bg-frost-ice/5 cursor-pointer transition-colors ${isCancelled ? 'opacity-50' : ''}`}
+                        onClick={() => router.push(`/staff/transactions/${order.id}`)}
+                      >
+                        <td className="px-4 py-3">
+                          <span className="font-mono text-sm font-semibold text-frost-ice">
+                            {order.order_number}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-text-secondary">
+                          {new Date(order.paid_at || order.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge variant={statusInfo.variant} size="sm">
+                            {statusInfo.label}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                          {formatEuros(order.items_total)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                          {formatEuros(platformFee.net)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-aurora-yellow text-right">
+                          {formatEuros(platformFee.vat)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                          {formatEuros(shipping.net)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-aurora-yellow text-right">
+                          {formatEuros(shipping.vat)}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-semibold text-aurora-yellow text-right">
+                          {formatEuros(totalVat)}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-semibold text-polar-night dark:text-snow-white text-right">
+                          {formatEuros(order.total_amount)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                {/* Period Totals Footer */}
+                {bookkeepingSummary && (
+                  <tfoot className="bg-frost-ice/5 border-t-2 border-frost-ice/30">
+                    <tr className="font-semibold">
+                      <td colSpan={3} className="px-4 py-3 text-sm text-polar-night dark:text-snow-white">
+                        Period Totals ({bookkeepingSummary.orderCount} orders)
+                      </td>
+                      <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                        {formatEuros(bookkeepingSummary.gmv)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                        {formatEuros(bookkeepingSummary.platformRevenue.net)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-aurora-yellow text-right">
+                        {formatEuros(bookkeepingSummary.platformRevenue.vat)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                        {formatEuros(bookkeepingSummary.shippingRevenue.net)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-aurora-yellow text-right">
+                        {formatEuros(bookkeepingSummary.shippingRevenue.vat)}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-bold text-aurora-yellow text-right">
+                        {formatEuros(bookkeepingSummary.totalVatCollected)}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-bold text-polar-night dark:text-snow-white text-right">
+                        {formatEuros(bookkeepingSummary.totalBuyerPaid)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+            </div>
           </div>
         )}
 

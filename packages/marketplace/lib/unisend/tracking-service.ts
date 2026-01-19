@@ -28,19 +28,14 @@ export async function syncTrackingForOrder(
   barcode: string
 ): Promise<SyncResult> {
   try {
-    console.log(`📦 [Tracking] Syncing tracking for order ${orderId}, barcode ${barcode}`);
-
     const unisend = getUnisendClient();
 
     // Fetch tracking events from Unisend
     const trackingEvents = await unisend.getTrackingEvents(barcode);
 
     if (!trackingEvents || trackingEvents.length === 0) {
-      console.log(`📦 [Tracking] No tracking events found for ${barcode}`);
       return { success: true, newEventsCount: 0, statusChanged: false };
     }
-
-    console.log(`📦 [Tracking] Found ${trackingEvents.length} events for ${barcode}`);
 
     // Get current order status
     const { data: order } = await supabase
@@ -70,13 +65,11 @@ export async function syncTrackingForOrder(
       });
 
       if (error) {
-        console.error(`❌ [Tracking] Error inserting event:`, error);
+        console.error('[Tracking] Error inserting event:', error);
       } else if (wasInserted) {
         newEventsCount++;
       }
     }
-
-    console.log(`📦 [Tracking] Inserted ${newEventsCount} new events`);
 
     // Check if status changed
     const { data: updatedOrder } = await supabase
@@ -88,10 +81,6 @@ export async function syncTrackingForOrder(
     const statusChanged = !!updatedOrder && updatedOrder.status !== oldStatus;
     const newStatus = updatedOrder?.status || oldStatus;
 
-    if (statusChanged) {
-      console.log(`✅ [Tracking] Order status updated: ${oldStatus} -> ${newStatus}`);
-    }
-
     return {
       success: true,
       newEventsCount,
@@ -100,7 +89,7 @@ export async function syncTrackingForOrder(
       newStatus: statusChanged ? newStatus : undefined,
     };
   } catch (error: any) {
-    console.error(`❌ [Tracking] Error syncing tracking:`, error);
+    console.error('[Tracking] Error syncing tracking:', error);
     return {
       success: false,
       error: error.message,
@@ -120,8 +109,6 @@ export async function syncAllActiveOrders(): Promise<{
   errorCount: number;
   statusChanges: Array<{ orderId: string; orderNumber: string; oldStatus: string; newStatus: string }>;
 }> {
-  console.log(`📦 [Tracking] Starting batch tracking sync...`);
-
   // Get all T2T orders that have tracking but aren't completed/cancelled/disputed
   const { data: orders, error } = await supabase
     .from('orders')
@@ -131,11 +118,9 @@ export async function syncAllActiveOrders(): Promise<{
     .in('status', ['accepted', 'shipped', 'in_transit']);
 
   if (error || !orders) {
-    console.error(`❌ [Tracking] Error fetching orders:`, error);
+    console.error('[Tracking] Error fetching orders:', error);
     return { totalProcessed: 0, successCount: 0, errorCount: 0, statusChanges: [] };
   }
-
-  console.log(`📦 [Tracking] Found ${orders.length} orders to sync`);
 
   let successCount = 0;
   let errorCount = 0;
@@ -162,8 +147,6 @@ export async function syncAllActiveOrders(): Promise<{
     // Small delay to avoid rate limiting (Unisend API)
     await new Promise(resolve => setTimeout(resolve, 200));
   }
-
-  console.log(`✅ [Tracking] Sync complete: ${successCount} success, ${errorCount} errors, ${statusChanges.length} status changes`);
 
   return {
     totalProcessed: orders.length,

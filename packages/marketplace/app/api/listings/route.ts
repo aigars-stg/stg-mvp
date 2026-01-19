@@ -108,6 +108,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // For instant_buy, also require phone number (needed for Unisend shipping labels)
+    if (transactionMethod === 'instant_buy') {
+      const { data: userProfile } = await supabase
+        .from('user_profiles')
+        .select('phone')
+        .eq('id', user.id)
+        .single();
+
+      if (!userProfile?.phone || userProfile.phone.trim() === '') {
+        return NextResponse.json(
+          {
+            error: 'Phone number required for instant buy listings. Please add your phone number in your profile settings.',
+            requiresPhone: true,
+            settingsUrl: '/profile/settings'
+          },
+          { status: 403 }
+        );
+      }
+    }
+
 
     const {
       selectedGame,

@@ -27,7 +27,7 @@ export const NewMessageEmail = ({
   orderNumber = 'ORD-2025-001234',
   messagePreview = 'Hi! I have a question about the order...',
   hasPhotos = false,
-  transactionUrl = 'https://secondturn.games/transactions/123',
+  transactionUrl = 'https://secondturn.games/orders/123',
 }: NewMessageEmailProps) => {
   const previewText = `New message from ${senderName} about order #${orderNumber}`;
 
@@ -69,7 +69,7 @@ export const NewMessageEmail = ({
 
           <Section style={infoBox}>
             <Text style={infoText}>
-              Reply directly from the transaction page to continue the conversation.
+              Reply directly from the order page to continue the conversation.
             </Text>
           </Section>
 

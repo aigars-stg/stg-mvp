@@ -64,9 +64,9 @@ export async function sendNewMessageEmail(
       return false;
     }
 
-    // Build transaction URL
+    // Build order URL
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://secondturn.games';
-    const transactionUrl = `${baseUrl}/transactions/${orderId}`;
+    const transactionUrl = `${baseUrl}/orders/${orderId}`;
 
     // Send email
     await sendEmail({

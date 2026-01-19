@@ -14,6 +14,9 @@ interface OrderRow {
   total_amount: number;
   created_at: string | null;
   paid_at: string | null;
+  items_total: number;
+  shipping_cost: number;
+  service_fee: number;
 }
 
 interface OrderWithIssueCount extends OrderRow {
@@ -69,6 +72,8 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const offset = (page - 1) * limit;
+    const dateFrom = searchParams.get('date_from');
+    const dateTo = searchParams.get('date_to');
 
     // Build query using serviceClient (staff already verified, bypass RLS)
     let query = serviceClient
@@ -82,7 +87,10 @@ export async function GET(request: NextRequest) {
         shipping_method,
         total_amount,
         created_at,
-        paid_at
+        paid_at,
+        items_total,
+        shipping_cost,
+        service_fee
       `, { count: 'exact' });
 
     // Apply filters
@@ -92,6 +100,14 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       query = query.ilike('order_number', `%${search}%`);
+    }
+
+    // Date range filtering for bookkeeping
+    if (dateFrom) {
+      query = query.gte('created_at', dateFrom);
+    }
+    if (dateTo) {
+      query = query.lte('created_at', dateTo);
     }
 
     // Order by most recent first

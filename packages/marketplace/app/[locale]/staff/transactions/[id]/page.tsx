@@ -1,14 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge } from '@second-turn/design-system';
-import { RefreshCw as Loader2, AlertCircle, Shield, ArrowLeft, User, Package, LocationPin as MapPin, LinkExternal as ExternalLink, Chat as MessageSquare, AlertTriangle, CheckCircleAlt01 as CheckCircle2, Time as Clock, Phone, Email as Mail } from 'griddy-icons';
+import { RefreshCw as Loader2, AlertCircle, Shield, ArrowLeft, User, Package, LocationPin as MapPin, LinkExternal as ExternalLink, Chat as MessageSquare, AlertTriangle, CheckCircleAlt01 as CheckCircle2, Time as Clock, Phone, Email as Mail, Beaker as Flask } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { MessageBubble } from '@/components/messaging/MessageBubble';
 import type { Message } from '@/lib/types/message';
+import {
+  TrackingEventsTimeline,
+  type TrackingEvent,
+  type OrderIssue,
+  issueTypeLabels,
+  issueStatusConfig,
+} from '@/components/shipping';
+
+// Simulation types
+type SimulationAction = 'label_printed' | 'set_barcode' | 'shipped' | 'in_transit' | 'delivered';
+
+interface SimulationOption {
+  action: SimulationAction;
+  description: string;
+}
 
 interface OrderItem {
   id: string;
@@ -18,29 +33,6 @@ interface OrderItem {
   price: number;
   condition: string;
   photo_url: string | null;
-}
-
-interface TrackingEvent {
-  id: string;
-  event_type: string;
-  state_type: string;
-  state_text: string;
-  location?: string;
-  description?: string;
-  event_timestamp: string;
-}
-
-interface Issue {
-  id: string;
-  issue_type: string;
-  description: string;
-  photo_urls: string[];
-  status: string;
-  resolution_notes: string | null;
-  resolved_at: string | null;
-  created_at: string;
-  reporter_id: string;
-  reporter_role: string;
 }
 
 interface UserProfile {
@@ -104,7 +96,7 @@ interface StaffTransactionData {
   order: OrderData;
   order_items: OrderItem[];
   tracking_events: TrackingEvent[];
-  issues: Issue[];
+  issues: OrderIssue[];
   buyer: UserProfile | null;
   seller: UserProfile | null;
 }
@@ -122,25 +114,6 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'succes
   disputed: { label: 'Disputed', variant: 'error' },
 };
 
-const issueTypeLabels: Record<string, string> = {
-  not_received: 'Package Not Received',
-  damaged: 'Item Damaged',
-  wrong_item: 'Wrong Item',
-  not_as_described: 'Not As Described',
-  shipping_delay: 'Shipping Delay',
-  seller_unresponsive: 'Seller Unresponsive',
-  buyer_unresponsive: 'Buyer Unresponsive',
-  payment_issue: 'Payment Issue',
-  other: 'Other',
-};
-
-const issueStatusConfig: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'error' }> = {
-  open: { label: 'Open', variant: 'error' },
-  investigating: { label: 'Investigating', variant: 'warning' },
-  resolved: { label: 'Resolved', variant: 'success' },
-  closed: { label: 'Closed', variant: 'default' },
-};
-
 export default function StaffTransactionPage() {
   const router = useRouter();
   const params = useParams();
@@ -151,6 +124,11 @@ export default function StaffTransactionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isStaff, setIsStaff] = useState<boolean | null>(null);
+
+  // Simulation state
+  const [simulationOptions, setSimulationOptions] = useState<SimulationOption[]>([]);
+  const [simulationLoading, setSimulationLoading] = useState(false);
+  const [simulationMessage, setSimulationMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -187,11 +165,60 @@ export default function StaffTransactionPage() {
     }
   };
 
+  // Fetch simulation options
+  const fetchSimulationOptions = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/staff/orders/${orderId}/simulate-shipping`);
+      if (response.ok) {
+        const result = await response.json();
+        setSimulationOptions(result.availableActions || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch simulation options:', err);
+    }
+  }, [orderId]);
+
+  // Execute simulation action
+  const executeSimulation = async (action: SimulationAction) => {
+    setSimulationLoading(true);
+    setSimulationMessage(null);
+
+    try {
+      const response = await fetch(`/api/staff/orders/${orderId}/simulate-shipping`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSimulationMessage({ type: 'success', text: result.message });
+        // Refresh data
+        await fetchTransaction();
+        await fetchSimulationOptions();
+      } else {
+        setSimulationMessage({ type: 'error', text: result.error || 'Simulation failed' });
+      }
+    } catch (err) {
+      setSimulationMessage({ type: 'error', text: 'Failed to execute simulation' });
+    } finally {
+      setSimulationLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (user && orderId) {
       fetchTransaction();
     }
   }, [user, orderId]);
+
+  // Fetch simulation options when data loads
+  useEffect(() => {
+    if (data?.order?.shipping_method === 't2t' && isStaff) {
+      fetchSimulationOptions();
+    }
+  }, [data?.order?.shipping_method, isStaff, fetchSimulationOptions]);
 
   // Not staff check
   if (isStaff === false) {
@@ -421,24 +448,12 @@ export default function StaffTransactionPage() {
 
                   {/* Tracking Events */}
                   {tracking_events.length > 0 && (
-                    <div className="pt-2">
-                      <p className="text-xs font-medium text-text-secondary mb-2">Tracking History</p>
-                      <div className="space-y-2 max-h-40 overflow-y-auto">
-                        {tracking_events.slice().reverse().map((event) => (
-                          <div key={event.id} className="flex gap-2 text-xs">
-                            <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${
-                              event.state_type === 'PARCEL_DELIVERED' ? 'bg-aurora-green' : 'bg-frost-ice'
-                            }`} />
-                            <div>
-                              <p className="text-text-primary">{event.state_text}</p>
-                              <p className="text-text-muted">
-                                {new Date(event.event_timestamp).toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    <TrackingEventsTimeline
+                      events={tracking_events}
+                      title="Tracking History"
+                      maxHeight="max-h-40"
+                      className="pt-2"
+                    />
                   )}
                 </div>
               ) : (
@@ -455,6 +470,60 @@ export default function StaffTransactionPage() {
                 </div>
               )}
             </div>
+
+            {/* Shipping Simulation (Test Environment Only) */}
+            {order.shipping_method === 't2t' && simulationOptions.length > 0 && (
+              <div className="bg-aurora-purple/5 border border-aurora-purple/30 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-polar-night mb-3 flex items-center gap-2">
+                  <Flask className="w-4 h-4 text-aurora-purple" />
+                  Shipping Simulation
+                  <Badge variant="warning" size="sm">Test Only</Badge>
+                </h3>
+                <p className="text-xs text-text-secondary mb-4">
+                  Simulate shipping events for testing. This feature is only available in the test environment.
+                </p>
+
+                {simulationMessage && (
+                  <div className={`p-3 rounded-lg mb-4 text-sm ${
+                    simulationMessage.type === 'success'
+                      ? 'bg-aurora-green/10 text-aurora-green border border-aurora-green/30'
+                      : 'bg-aurora-red/10 text-aurora-red border border-aurora-red/30'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      {simulationMessage.type === 'success' ? (
+                        <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      )}
+                      {simulationMessage.text}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  {simulationOptions.map((option) => (
+                    <button
+                      key={option.action}
+                      onClick={() => executeSimulation(option.action)}
+                      disabled={simulationLoading}
+                      className="w-full flex items-center justify-between p-3 bg-snow-white border border-border rounded-lg hover:border-aurora-purple/50 hover:bg-aurora-purple/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div className="text-left">
+                        <p className="text-sm font-medium text-polar-night capitalize">
+                          {option.action.replace(/_/g, ' ')}
+                        </p>
+                        <p className="text-xs text-text-secondary">{option.description}</p>
+                      </div>
+                      {simulationLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-aurora-purple" />
+                      ) : (
+                        <ArrowLeft className="w-4 h-4 text-aurora-purple rotate-180" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Stripe Info */}
             {order.stripe && (order.stripe.payment_intent_id || order.stripe.transfer_id) && (

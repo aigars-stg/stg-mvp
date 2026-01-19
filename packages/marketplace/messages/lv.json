@@ -278,7 +278,12 @@
     "error": "Kļūda",
     "warning": "Brīdinājums",
     "info": "Informācija",
-    "ok": "Labi"
+    "ok": "Labi",
+    "cancel": "Atcelt",
+    "successTitle": "Izdevās",
+    "errorTitle": "Kļūda",
+    "warningTitle": "Brīdinājums",
+    "infoTitle": "Informācija"
   },
   "OfflineError": {
     "title": "Tu esi bezsaistē",
@@ -655,11 +660,28 @@
       "paymentFailed": "Neizdevās apstrādāt maksājumu. Lūdzu, mēģini vēlreiz."
     },
     "success": {
-      "loading": "Apstrādā tavu pasūtījumu...",
-      "errorTitle": "Nederīga sesija",
+      "loading": "Ielādē pasūtījuma detaļas...",
+      "processing": {
+        "title": "Apstrādā tavu pasūtījumu",
+        "description": "Mēs apstiprinām tavu maksājumu un veidojam pasūtījumu. Tas parasti aizņem tikai dažas sekundes.",
+        "wait": "Lūdzu, uzgaidi..."
+      },
+      "errorTitle": "Pasūtījuma apstrādes problēma",
       "errorDescription": "Mēs nevarējām ielādēt tava pasūtījuma detaļas. Lūdzu, pārbaudi savu e-pastu apstiprinājumam.",
+      "processingTimeout": "Pasūtījuma apstrāde aizņem ilgāku laiku nekā paredzēts. Lūdzu, pārbaudi savu pasūtījumu lapu vai sazinies ar atbalsta dienestu.",
       "title": "Maksājums veiksmīgs!",
       "subtitle": "Tavs pasūtījums ir veikts un maksājums apstiprināts",
+      "orderNumber": "Pasūtījums",
+      "orderSummary": {
+        "title": "Pasūtījuma kopsavilkums",
+        "soldBy": "Pārdod {seller}",
+        "items": "Preces",
+        "shipping": "Piegāde",
+        "serviceFee": "Pakalpojuma maksa",
+        "total": "Kopā",
+        "deliveryTo": "Piegāde uz",
+        "pickupAt": "Saņemšana"
+      },
       "nextSteps": {
         "title": "Kas notiks tālāk",
         "step1Title": "Pārdevējs pārskata tavu pasūtījumu",
@@ -2288,6 +2310,78 @@
       "sellerTimeRemaining": "Pārdevējam ir {hours}h {minutes}min, lai atbildētu",
       "terminalPickup": "Saņemšana terminālī",
       "localPickup": "Saņemšana klātienē"
+    },
+    "detail": {
+      "loading": "Ielādē pasūtījuma detaļas...",
+      "notFound": "Pasūtījums nav atrasts",
+      "backToOrders": "Atpakaļ uz pasūtījumiem",
+      "orderTitle": "Pasūtījums {orderNumber}",
+      "placedAt": "Veikts {date} plkst. {time}",
+      "viewTransaction": "Skatīt darījumu un ziņas",
+      "orderStatus": "Pasūtījuma statuss",
+      "status": {
+        "pending_payment": "GAIDA MAKSĀJUMU",
+        "pending_seller": "GAIDA PĀRDEVĒJU",
+        "accepted": "PIEŅEMTS",
+        "shipped": "NOSŪTĪTS",
+        "in_transit": "CEĻĀ",
+        "delivered": "PIEGĀDĀTS",
+        "completed": "PABEIGTS",
+        "cancelled": "ATCELTS"
+      },
+      "steps": {
+        "placed": "Pasūtījums veikts",
+        "pending": "Gaida pārdevēju",
+        "accepted": "Pārdevējs pieņēma",
+        "shipped": "Nosūtīts",
+        "delivered": "Piegādāts"
+      },
+      "sellerTimeRemaining": "Pārdevējam ir {hours}h {minutes}min, lai atbildētu",
+      "cancelled": {
+        "title": "Pasūtījums atcelts",
+        "defaultReason": "Šis pasūtījums ir atcelts",
+        "refundProcessed": "Atmaksa veikta: €{amount}",
+        "refundedOn": "Atmaksāts {date}"
+      },
+      "pending": {
+        "expiredTitle": "Pārdevēja termiņš beidzies",
+        "waitingTitle": "Gaida pārdevēja atbildi",
+        "expiredDescription": "Pārdevējs neatbildēja 24 stundu laikā. Tava atmaksa tiek apstrādāta automātiski.",
+        "waitingDescription": "Pārdevējam ir {hours} stundas un {minutes} minūtes, lai pieņemtu tavu pasūtījumu. Ja viņš neatbildēs, tu saņemsi automātisku pilnu atmaksu."
+      },
+      "items": {
+        "title": "Preces ({count})"
+      },
+      "shipping": {
+        "deliveryTitle": "Piegādes informācija",
+        "pickupTitle": "Saņemšanas informācija",
+        "recipient": "Saņēmējs",
+        "phone": "Tālrunis",
+        "email": "E-pasts",
+        "trackingNumber": "Izsekošanas numurs",
+        "trackPackage": "Izsekot sūtījumu",
+        "pickupIn": "Saņemšana {city}",
+        "pickupCoordinate": "Sazinies ar pārdevēju, izmantojot ziņapmaiņu, lai vienotos par tikšanās vietu.",
+        "note": "Piezīme"
+      },
+      "tracking": {
+        "title": "Izsekošanas laika līnija"
+      },
+      "summary": {
+        "title": "Pasūtījuma kopsavilkums",
+        "items": "Preces",
+        "shipping": "Piegāde",
+        "serviceFee": "Servisa maksa",
+        "totalPaid": "Kopā samaksāts",
+        "free": "Bezmaksas"
+      },
+      "seller": {
+        "title": "Pārdevējs"
+      },
+      "help": {
+        "title": "Vajadzīga palīdzība?",
+        "description": "Sazinies ar atbalsta dienestu, ja tev ir kādas problēmas ar pasūtījumu."
+      }
     }
   },
   "Help": {

@@ -278,7 +278,12 @@
     "error": "Error",
     "warning": "Warning",
     "info": "Information",
-    "ok": "OK"
+    "ok": "OK",
+    "cancel": "Cancel",
+    "successTitle": "Success",
+    "errorTitle": "Error",
+    "warningTitle": "Warning",
+    "infoTitle": "Information"
   },
   "OfflineError": {
     "title": "You're offline",
@@ -655,11 +660,28 @@
       "paymentFailed": "Failed to process payment. Please try again."
     },
     "success": {
-      "loading": "Processing your order...",
-      "errorTitle": "Invalid session",
+      "loading": "Loading order details...",
+      "processing": {
+        "title": "Processing Your Order",
+        "description": "We're confirming your payment and creating your order. This usually takes just a few seconds.",
+        "wait": "Please wait..."
+      },
+      "errorTitle": "Order Processing Issue",
       "errorDescription": "We couldn't load your order details. Please check your email for confirmation.",
+      "processingTimeout": "Order processing is taking longer than expected. Please check your orders page or contact support.",
       "title": "Payment Successful!",
       "subtitle": "Your order has been placed and payment confirmed",
+      "orderNumber": "Order",
+      "orderSummary": {
+        "title": "Order Summary",
+        "soldBy": "Sold by {seller}",
+        "items": "Items",
+        "shipping": "Shipping",
+        "serviceFee": "Service fee",
+        "total": "Total",
+        "deliveryTo": "Delivery to",
+        "pickupAt": "Pickup at"
+      },
       "nextSteps": {
         "title": "What Happens Next",
         "step1Title": "Seller Reviews Your Order",
@@ -2288,6 +2310,78 @@
       "sellerTimeRemaining": "Seller has {hours}h {minutes}m to respond",
       "terminalPickup": "Terminal Pickup",
       "localPickup": "Local Pickup"
+    },
+    "detail": {
+      "loading": "Loading order details...",
+      "notFound": "Order not found",
+      "backToOrders": "Back to Orders",
+      "orderTitle": "Order {orderNumber}",
+      "placedAt": "Placed {date} at {time}",
+      "viewTransaction": "View Transaction & Messages",
+      "orderStatus": "Order Status",
+      "status": {
+        "pending_payment": "PENDING PAYMENT",
+        "pending_seller": "PENDING SELLER",
+        "accepted": "ACCEPTED",
+        "shipped": "SHIPPED",
+        "in_transit": "IN TRANSIT",
+        "delivered": "DELIVERED",
+        "completed": "COMPLETED",
+        "cancelled": "CANCELLED"
+      },
+      "steps": {
+        "placed": "Order Placed",
+        "pending": "Waiting for Seller",
+        "accepted": "Seller Accepted",
+        "shipped": "Shipped",
+        "delivered": "Delivered"
+      },
+      "sellerTimeRemaining": "Seller has {hours}h {minutes}m to respond",
+      "cancelled": {
+        "title": "Order Cancelled",
+        "defaultReason": "This order has been cancelled",
+        "refundProcessed": "Refund Processed: €{amount}",
+        "refundedOn": "Refunded on {date}"
+      },
+      "pending": {
+        "expiredTitle": "Seller Deadline Expired",
+        "waitingTitle": "Waiting for Seller Response",
+        "expiredDescription": "The seller did not respond within 24 hours. Your refund is being processed automatically.",
+        "waitingDescription": "The seller has {hours} hours and {minutes} minutes to accept your order. If they don't respond, you'll receive an automatic full refund."
+      },
+      "items": {
+        "title": "Items ({count})"
+      },
+      "shipping": {
+        "deliveryTitle": "Delivery Information",
+        "pickupTitle": "Pickup Information",
+        "recipient": "Recipient",
+        "phone": "Phone",
+        "email": "Email",
+        "trackingNumber": "Tracking Number",
+        "trackPackage": "Track Package",
+        "pickupIn": "Pickup in {city}",
+        "pickupCoordinate": "Coordinate with the seller via messaging to arrange the exact meeting location.",
+        "note": "Note"
+      },
+      "tracking": {
+        "title": "Tracking Timeline"
+      },
+      "summary": {
+        "title": "Order Summary",
+        "items": "Items",
+        "shipping": "Shipping",
+        "serviceFee": "Service Fee",
+        "totalPaid": "Total Paid",
+        "free": "Free"
+      },
+      "seller": {
+        "title": "Seller"
+      },
+      "help": {
+        "title": "Need Help?",
+        "description": "Contact support if you have any issues with your order."
+      }
     }
   },
   "Help": {

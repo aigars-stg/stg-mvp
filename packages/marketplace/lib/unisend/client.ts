@@ -300,13 +300,41 @@ export async function initiateShipping(
 }
 
 /**
- * Get barcode and tracking URL for parcels
+ * Get barcode and tracking info for parcels
+ * Uses /api/v2/shipping/barcode/list endpoint
+ * Note: For T2T parcels, barcode is assigned when seller prints at terminal
  */
 export async function getBarcodes(parcelIds: number[]): Promise<BarcodeInfo[]> {
-  const params = new URLSearchParams();
-  parcelIds.forEach((id) => params.append('parcelIds', String(id)));
+  if (parcelIds.length === 0) {
+    return [];
+  }
 
-  return apiRequest<BarcodeInfo[]>(`/api/v2/shipping/barcode?${params}`);
+  try {
+    // Build query string with parcelIds
+    const params = new URLSearchParams();
+    parcelIds.forEach((id) => params.append('parcelIds', String(id)));
+
+    const response = await apiRequest<Array<{
+      parcelId: number;
+      barcode: string;
+      trackable: boolean;
+      status: string;
+    }>>(`/api/v2/shipping/barcode/list?${params.toString()}`);
+
+    return response.map((item) => ({
+      parcelId: String(item.parcelId),
+      barcode: item.barcode || '',
+      trackingUrl: undefined, // API doesn't return tracking URLs, we construct them from barcode
+    }));
+  } catch (error) {
+    console.error('[Unisend] Failed to get barcodes:', error);
+    // Return empty barcodes if we can't fetch
+    return parcelIds.map((id) => ({
+      parcelId: String(id),
+      barcode: '',
+      trackingUrl: undefined,
+    }));
+  }
 }
 
 /**
@@ -368,9 +396,19 @@ export async function createAndShipParcel(
   const parcelResponse = await createParcel(data);
 
   // Initiate shipping
-  await initiateShipping({ parcelIds: [parcelResponse.parcelId] });
+  const shippingResponse = await initiateShipping({ parcelIds: [parcelResponse.parcelId] });
 
-  // Get barcode
+  // Check if barcode is in shipping response
+  const parcelFromShipping = shippingResponse.parcels?.find(p => p.parcelId === parcelResponse.parcelId);
+  if (parcelFromShipping?.barcode || parcelFromShipping?.trackingNumber) {
+    return {
+      parcelId: parcelResponse.parcelId,
+      barcode: parcelFromShipping.barcode || parcelFromShipping.trackingNumber || '',
+      trackingUrl: parcelFromShipping.trackingUrl,
+    };
+  }
+
+  // Try to get barcode from parcel details
   const barcodes = await getBarcodes([parcelResponse.parcelId]);
 
   return {

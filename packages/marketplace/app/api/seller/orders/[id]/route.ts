@@ -17,6 +17,39 @@ export async function GET(
 
     const orderId = params.id;
 
+    // Define the expected order shape (some columns may not be in Supabase types yet)
+    interface OrderRow {
+      id: string;
+      order_number: string;
+      buyer_id: string;
+      seller_id: string;
+      status: string;
+      shipping_method: string;
+      destination_terminal_name: string | null;
+      destination_terminal_address: string | null;
+      destination_country: string | null;
+      pickup_city: string | null;
+      pickup_notes: string | null;
+      receiver_name: string | null;
+      receiver_phone: string | null;
+      receiver_email: string | null;
+      items_total: number;
+      shipping_cost: number;
+      service_fee: number;
+      total_amount: number;
+      created_at: string;
+      paid_at: string | null;
+      seller_response_deadline: string | null;
+      seller_responded_at: string | null;
+      parcel_size: string | null;
+      unisend_parcel_id: number | null;
+      barcode: string | null;
+      tracking_url: string | null;
+      label_url: string | null;
+      label_generated_at: string | null;
+      label_error: string | null;
+    }
+
     // Fetch order with all details
     const { data: order, error: orderError } = await supabase
       .from('orders')
@@ -44,10 +77,12 @@ export async function GET(
         seller_response_deadline,
         seller_responded_at,
         parcel_size,
+        unisend_parcel_id,
         barcode,
         tracking_url,
         label_url,
-        label_generated_at
+        label_generated_at,
+        label_error
       `)
       .eq('id', orderId)
       .eq('seller_id', user.id)
@@ -60,11 +95,14 @@ export async function GET(
       );
     }
 
+    // Cast to expected type (label_error column may not be in generated types yet)
+    const orderData = order as unknown as OrderRow;
+
     // Fetch buyer profile
     const { data: buyerProfile } = await supabase
       .from('user_profiles')
       .select('full_name, email, phone')
-      .eq('id', order.buyer_id)
+      .eq('id', orderData.buyer_id)
       .single();
 
     // Fetch order items
@@ -73,12 +111,24 @@ export async function GET(
       .select('id, game_name, price, condition, photo_url')
       .eq('order_id', orderId);
 
+    // Fetch tracking events for T2T orders
+    let trackingEvents = null;
+    if (orderData.shipping_method === 't2t' && orderData.barcode) {
+      const { data: events } = await supabase
+        .from('tracking_events')
+        .select('id, event_type, state_type, state_text, location, description, event_timestamp')
+        .eq('order_id', orderId)
+        .order('event_timestamp', { ascending: true });
+
+      trackingEvents = events || [];
+    }
+
     // Calculate time remaining for pending orders
     let timeRemainingMs: number | null = null;
     let isExpired = false;
 
-    if (order.status === 'pending_seller' && order.seller_response_deadline) {
-      const deadline = new Date(order.seller_response_deadline).getTime();
+    if (orderData.status === 'pending_seller' && orderData.seller_response_deadline) {
+      const deadline = new Date(orderData.seller_response_deadline).getTime();
       const now = Date.now();
       timeRemainingMs = deadline - now;
       isExpired = timeRemainingMs <= 0;
@@ -86,11 +136,12 @@ export async function GET(
 
     // Combine data
     const orderWithDetails = {
-      ...order,
+      ...orderData,
       buyer_name: buyerProfile?.full_name || 'Unknown',
       buyer_email: buyerProfile?.email || '',
       buyer_phone: buyerProfile?.phone || '',
       order_items: orderItems || [],
+      tracking_events: trackingEvents,
       time_remaining_ms: timeRemainingMs,
       is_expired: isExpired,
     };

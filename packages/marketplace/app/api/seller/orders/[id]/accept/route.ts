@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendOrderAcceptedToBuyer, sendShippingLabelToSeller } from '@/lib/email/send-order-emails';
-import { generateShippingLabel, getLabelPdfBuffer } from '@/lib/unisend/label-service';
+import { generateShippingLabel, updateOrderWithShippingData, updateOrderLabelError } from '@/lib/unisend/label-service';
 import { postOrderAcceptedMessage } from '@/lib/transactions';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { UnisendValidationError, getUserFriendlyFieldName } from '@/lib/unisend/types';
 
 interface AcceptOrderBody {
   parcelSize?: 'XS' | 'S' | 'M' | 'L'; // Required for T2T orders
@@ -51,7 +52,7 @@ export async function POST(
     // Post system message to transaction conversation (non-blocking)
     postOrderAcceptedMessage(orderId, result.shipping_method || 't2t');
 
-    // Fetch complete order details for email and label generation
+    // Fetch complete order details for email and label generation (including receiver info from checkout)
     const { data: order } = await supabase
       .from('orders')
       .select(`
@@ -63,7 +64,10 @@ export async function POST(
         destination_terminal_address,
         destination_country,
         pickup_city,
-        parcel_size
+        parcel_size,
+        receiver_name,
+        receiver_phone,
+        receiver_email
       `)
       .eq('id', orderId)
       .single();
@@ -85,18 +89,29 @@ export async function POST(
       if (buyerProfile && sellerProfile) {
         let trackingNumber: string | undefined;
         let trackingUrl: string | undefined;
+        let labelGenerated = false;
+        let labelError: string | null = null;
 
         // For T2T orders, generate Unisend shipping label
         if (order.shipping_method === 't2t') {
+          // Use receiver info from order (provided during checkout) with fallback to buyer profile
+          const receiverName = order.receiver_name || buyerProfile.full_name;
+          const receiverPhone = order.receiver_phone || buyerProfile.phone || '';
+
           try {
+            console.log(`📦 [Accept Order] Generating shipping label for order ${orderId}...`);
+            console.log(`📦 [Accept Order] Sender: ${sellerProfile.full_name}, Phone: ${sellerProfile.phone || '(empty)'}, Country: ${sellerProfile.country || 'LT'}`);
+            console.log(`📦 [Accept Order] Receiver: ${receiverName}, Phone: ${receiverPhone || '(empty)'}, Country: ${order.destination_country || 'LT'}`);
+            console.log(`📦 [Accept Order] Terminal: ${order.destination_terminal_id || '(empty)'}, Parcel Size: ${order.parcel_size || 'M'}`);
+
             const labelResult = await generateShippingLabel({
               orderId,
               orderNumber: order.order_number,
               senderName: sellerProfile.full_name,
               senderPhone: sellerProfile.phone || '',
               senderCountry: (sellerProfile.country || 'LT') as 'LT' | 'LV' | 'EE',
-              receiverName: buyerProfile.full_name,
-              receiverPhone: buyerProfile.phone || '',
+              receiverName,
+              receiverPhone,
               receiverCountry: (order.destination_country || 'LT') as 'LT' | 'LV' | 'EE',
               destinationTerminalId: order.destination_terminal_id || '',
               parcelSize: (order.parcel_size || 'M') as 'XS' | 'S' | 'M' | 'L',
@@ -104,23 +119,25 @@ export async function POST(
 
             trackingNumber = labelResult.barcode;
             trackingUrl = labelResult.trackingUrl;
+            labelGenerated = true;
 
-            // Update order with Unisend tracking data
-            await supabase
-              .from('orders')
-              .update({
-                unisend_parcel_id: labelResult.parcelId,
-                barcode: labelResult.barcode,
-                tracking_url: labelResult.trackingUrl,
-                label_url: labelResult.labelUrl,
-                label_generated_at: new Date().toISOString(),
-              })
-              .eq('id', orderId);
+            console.log(`✅ [Accept Order] Label generated successfully: ParcelId ${labelResult.parcelId}`);
 
-            // Get label PDF for email attachment
-            const labelPdfBuffer = await getLabelPdfBuffer(labelResult.labelUrl);
+            // Update order with Unisend tracking data (uses service role to bypass RLS)
+            const updateResult = await updateOrderWithShippingData(orderId, {
+              parcelId: labelResult.parcelId,
+              barcode: labelResult.barcode,
+              trackingUrl: labelResult.trackingUrl,
+              labelUrl: labelResult.labelUrl,
+            });
 
-            // Send label email to seller
+            if (!updateResult.success) {
+              console.error(`❌ [Accept Order] Failed to save shipping data:`, updateResult.error);
+              labelError = `Label generated but failed to save: ${updateResult.error}`;
+            }
+
+            // Send shipping notification email to seller with parcelId
+            // Seller will print the label at the Unisend terminal
             sendShippingLabelToSeller({
               sellerName: sellerProfile.full_name,
               sellerEmail: sellerProfile.email,
@@ -129,12 +146,31 @@ export async function POST(
               buyerName: buyerProfile.full_name,
               destinationTerminalName: order.destination_terminal_name || '',
               destinationTerminalAddress: order.destination_terminal_address || '',
+              parcelId: String(labelResult.parcelId),
               barcode: labelResult.barcode,
               trackingUrl: labelResult.trackingUrl,
-              labelPdfBuffer,
-            }).catch(() => {});
-          } catch {
-            // Don't fail the entire request - order is already accepted
+            }).catch((err) => {
+              console.error('❌ [Accept Order] Failed to send shipping email:', err);
+            });
+          } catch (error) {
+            console.error('❌ [Accept Order] Label generation failed:', error);
+
+            // Extract detailed validation errors
+            if (error instanceof UnisendValidationError) {
+              const fieldErrors = error.validationErrors.map((e) => {
+                const fieldName = getUserFriendlyFieldName(e.field);
+                return `${fieldName}: ${e.error_description || e.error}`;
+              });
+              labelError = fieldErrors.length > 0
+                ? `Validation failed: ${fieldErrors.join('; ')}`
+                : 'Validation failed - please check all shipping details';
+              console.error('❌ [Accept Order] Validation errors:', error.validationErrors);
+            } else {
+              labelError = error instanceof Error ? error.message : 'Unknown error generating shipping label';
+            }
+
+            // Store the detailed error in the database (uses service role to bypass RLS)
+            await updateOrderLabelError(orderId, labelError);
           }
         }
 
@@ -158,11 +194,31 @@ export async function POST(
       }
     }
 
+    // Check label generation status for T2T orders
+    let labelGenerated = false;
+    let labelErrorResult: string | null = null;
+
+    if (order?.shipping_method === 't2t') {
+      const { data: updatedOrder } = await supabase
+        .from('orders')
+        .select('label_url, label_error')
+        .eq('id', orderId)
+        .single();
+
+      const orderData = updatedOrder as { label_url: string | null; label_error: string | null } | null;
+      labelGenerated = !!orderData?.label_url;
+      labelErrorResult = orderData?.label_error || null;
+    }
+
     return NextResponse.json({
       success: true,
       orderId,
       shippingMethod: result.shipping_method,
-      message: 'Order accepted successfully',
+      labelGenerated,
+      labelError: labelErrorResult,
+      message: labelGenerated || order?.shipping_method !== 't2t'
+        ? 'Order accepted successfully'
+        : 'Order accepted, but label generation failed. You can retry from the order details page.',
     });
   } catch (error) {
     return handleApiError(error, 'Accept order');

@@ -144,10 +144,14 @@ export async function POST(request: NextRequest) {
       }
 
       // Create order in database
+      console.log(`🔄 [Webhook] Calling create_order_from_basket with params:`, JSON.stringify(orderParams, null, 2));
+
       const { data: orderResult, error: orderError } = await (supabase as any).rpc(
         'create_order_from_basket',
         orderParams
       );
+
+      console.log(`📝 [Webhook] RPC result:`, { orderResult, orderError });
 
       if (orderError) {
         console.error('❌ [Webhook] Error creating order:', orderError);

@@ -31,9 +31,9 @@ export function ConversationListItem({
     return text.slice(0, maxLength) + '...';
   };
 
-  // Link to transaction page for order-based conversations, otherwise messages
+  // Link to order page for order-based conversations, otherwise messages
   const href = conversation.order_id
-    ? `/transactions/${conversation.order_id}`
+    ? `/orders/${conversation.order_id}`
     : `/messages/${conversation.id}`;
 
   return (

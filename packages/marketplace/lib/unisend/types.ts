@@ -56,7 +56,6 @@ export interface CreateParcelRequest {
   parcel: {
     type: ParcelType;
     size?: ParcelSize;
-    reference?: string;
     weight?: number;
   };
   services?: Array<{
@@ -102,6 +101,13 @@ export interface ShippingInitiateRequest {
 export interface ShippingInitiateResponse {
   requestId: string;
   status?: 'IN_PROGRESS' | 'SUCCESSFUL' | 'PARTIALLY_SUCCESSFUL' | 'ERROR';
+  // Response may include parcel details with barcodes
+  parcels?: Array<{
+    parcelId: number;
+    barcode?: string;
+    trackingNumber?: string;
+    trackingUrl?: string;
+  }>;
 }
 
 export interface BarcodeInfo {
@@ -296,11 +302,19 @@ export const TRACKING_STATE_COLORS: Record<TrackingStateType, string> = {
 
 // User-friendly field names for validation errors
 export const FIELD_NAME_MAP: Record<string, string> = {
-  'receiver.contacts.phone': 'Phone number',
-  'receiver.contacts.email': 'Email address',
-  'receiver.name': 'Recipient name',
-  'receiver.address.terminalId': 'Terminal',
+  'receiver.contacts.phone': 'Buyer phone number',
+  'receiver.contacts.email': 'Buyer email',
+  'receiver.name': 'Buyer name',
+  'receiver.address.terminalId': 'Destination terminal',
+  'receiver.address.countryCode': 'Destination country',
+  'sender.contacts.phone': 'Seller phone number',
+  'sender.contacts.email': 'Seller email',
+  'sender.name': 'Seller name',
+  'sender.address.countryCode': 'Sender country',
   'parcel.size': 'Parcel size',
+  'parcel.type': 'Parcel type',
+  'parcel.weight': 'Parcel weight',
+  'plan.code': 'Shipping plan',
 };
 
 // User-friendly error messages

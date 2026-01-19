@@ -1,12 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge } from '@second-turn/design-system';
-import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ArrowLeft, Truck, User, Download, FileText, LinkExternal as ExternalLink, Chat as MessageSquare } from 'griddy-icons';
+import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ArrowLeft, Truck, User, FileText, LinkExternal as ExternalLink, Chat as MessageSquare } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
+import { TrackingEventsTimeline, type TrackingEvent } from '@/components/shipping';
+
+type ParcelSize = 'XS' | 'S' | 'M' | 'L';
+
+const PARCEL_SIZES: { value: ParcelSize; label: string; dimensions: string }[] = [
+  { value: 'XS', label: 'XS', dimensions: 'up to 10×7×38 cm' },
+  { value: 'S', label: 'S', dimensions: 'up to 38×64×12 cm' },
+  { value: 'M', label: 'M', dimensions: 'up to 38×64×39 cm' },
+  { value: 'L', label: 'L', dimensions: 'up to 38×64×64 cm' },
+];
 
 interface OrderItem {
   id: string;
@@ -42,11 +52,14 @@ interface Order {
   seller_response_deadline?: string;
   seller_responded_at?: string;
   parcel_size?: 'XS' | 'S' | 'M' | 'L';
+  unisend_parcel_id?: number;
   barcode?: string;
   tracking_url?: string;
   label_url?: string;
   label_generated_at?: string;
+  label_error?: string;
   order_items: OrderItem[];
+  tracking_events?: TrackingEvent[];
   time_remaining_ms: number | null;
   is_expired: boolean;
 }
@@ -70,7 +83,17 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [downloadingLabel, setDownloadingLabel] = useState(false);
+
+  // Accept/Decline state
+  const [showAcceptModal, setShowAcceptModal] = useState(false);
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
+  const [selectedParcelSize, setSelectedParcelSize] = useState<ParcelSize>('M');
+  const [declineReason, setDeclineReason] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
+  const [retryingLabel, setRetryingLabel] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -106,34 +129,125 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
     }
   }, [user, params.id]);
 
-  // Download shipping label
-  const handleDownloadLabel = async () => {
-    if (!order?.label_url) return;
+  // Update countdown timer for response deadline
+  useEffect(() => {
+    if (!order?.seller_response_deadline || order.status !== 'pending_seller') {
+      setTimeRemaining(null);
+      return;
+    }
 
-    try {
-      setDownloadingLabel(true);
+    const updateTimer = () => {
+      const deadline = new Date(order.seller_response_deadline!).getTime();
+      const now = Date.now();
+      const diff = deadline - now;
 
-      // Fetch the label PDF
-      const response = await fetch(order.label_url);
-      if (!response.ok) {
-        throw new Error('Failed to download label');
+      if (diff <= 0) {
+        setTimeRemaining('Expired');
+        return;
       }
 
-      // Create blob and download
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `shipping-label-${order.order_number}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (hours > 0) {
+        setTimeRemaining(`${hours}h ${minutes}m remaining`);
+      } else {
+        setTimeRemaining(`${minutes}m remaining`);
+      }
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [order?.seller_response_deadline, order?.status]);
+
+  // Handle accept order
+  const handleAcceptOrder = async () => {
+    if (order?.shipping_method === 't2t' && !selectedParcelSize) {
+      setActionError('Please select a parcel size');
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      setActionError(null);
+
+      const response = await fetch(`/api/seller/orders/${params.id}/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parcelSize: order?.shipping_method === 't2t' ? selectedParcelSize : undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to accept order');
+      }
+
+      // Refresh order data
+      await fetchOrder();
+      setShowAcceptModal(false);
     } catch (err) {
-      console.error('Error downloading label:', err);
-      alert('Failed to download label. Please try again.');
+      setActionError(err instanceof Error ? err.message : 'Failed to accept order');
     } finally {
-      setDownloadingLabel(false);
+      setActionLoading(false);
+    }
+  };
+
+  // Handle decline order
+  const handleDeclineOrder = async () => {
+    try {
+      setActionLoading(true);
+      setActionError(null);
+
+      const response = await fetch(`/api/seller/orders/${params.id}/decline`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reason: declineReason || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to decline order');
+      }
+
+      // Redirect to orders list after declining
+      router.push('/seller/orders');
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to decline order');
+      setActionLoading(false);
+    }
+  };
+
+  // Handle retry label generation
+  const handleRetryLabel = async () => {
+    try {
+      setRetryingLabel(true);
+      setRetryError(null);
+
+      const response = await fetch(`/api/seller/orders/${params.id}/retry-label`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.details || data.error || 'Failed to generate label');
+      }
+
+      // Refresh order data to show the new label
+      await fetchOrder();
+    } catch (err) {
+      setRetryError(err instanceof Error ? err.message : 'Failed to generate label');
+    } finally {
+      setRetryingLabel(false);
     }
   };
 
@@ -194,7 +308,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
             </Button>
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
+            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night dark:text-snow-white">
               {order.order_number}
             </h1>
             <Badge variant={statusInfo.color as any}>
@@ -203,64 +317,199 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
             </Badge>
           </div>
           <p className="text-text-secondary">Buyer: {order.buyer_name}</p>
-          <Link href={`/transactions/${order.id}`} className="mt-3 inline-block">
+          <Link href={`/orders/${order.id}`} className="mt-3 inline-block">
             <Button variant="secondary" size="sm">
               <MessageSquare className="w-4 h-4 mr-2" />
-              View Transaction & Messages
+              View Order & Messages
             </Button>
           </Link>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-        {/* Shipping Label Card - For T2T Orders */}
-        {order.shipping_method === 't2t' && order.status === 'accepted' && order.label_url && (
-          <div className="bg-frost-ice/10 border-2 border-frost-ice/30 rounded-xl p-6">
+        {/* Action Required Card - For pending_seller orders */}
+        {order.status === 'pending_seller' && (
+          <div className="bg-aurora-yellow/10 border-2 border-aurora-yellow/30 rounded-xl p-6">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-lg bg-frost-ice/20 flex items-center justify-center flex-shrink-0">
-                <FileText className="w-6 h-6 text-frost-ice" />
+              <div className="w-12 h-12 rounded-lg bg-aurora-yellow/20 flex items-center justify-center flex-shrink-0">
+                <Clock className="w-6 h-6 text-aurora-yellow" />
               </div>
               <div className="flex-grow">
-                <h3 className="text-lg font-semibold text-polar-night mb-1">
-                  Shipping Label Ready
-                </h3>
-                <p className="text-sm text-text-secondary mb-4">
-                  Your shipping label has been generated. Download it, print it, and attach it to
-                  your parcel before dropping it off at a Unisend terminal.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button
-                    variant="accent"
-                    onClick={handleDownloadLabel}
-                    disabled={downloadingLabel}
-                  >
-                    {downloadingLabel ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Downloading...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-4 h-4 mr-2" />
-                        Download Label PDF
-                      </>
-                    )}
-                  </Button>
-                  {order.tracking_url && (
-                    <a href={order.tracking_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="secondary">
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Track Package
-                      </Button>
-                    </a>
+                <div className="flex items-center gap-3 mb-1">
+                  <h3 className="text-lg font-semibold text-polar-night dark:text-snow-white">
+                    Action Required
+                  </h3>
+                  {timeRemaining && (
+                    <Badge variant={timeRemaining === 'Expired' ? 'error' : 'warning'}>
+                      {timeRemaining}
+                    </Badge>
                   )}
                 </div>
-                {order.barcode && (
-                  <div className="mt-4 p-3 bg-snow-white rounded-lg">
-                    <p className="text-xs text-text-secondary mb-1">Tracking Number</p>
-                    <p className="font-mono text-lg font-bold text-polar-night">
-                      {order.barcode}
+                <p className="text-sm text-text-secondary mb-4">
+                  Please accept or decline this order. You have 24 hours from when the order was placed to respond.
+                  If you don&apos;t respond in time, the order will be automatically cancelled and the buyer will be refunded.
+                </p>
+
+                {actionError && (
+                  <div className="mb-4 p-3 bg-aurora-red/10 border border-aurora-red/20 rounded-lg">
+                    <p className="text-sm text-aurora-red">{actionError}</p>
+                  </div>
+                )}
+
+                {!showAcceptModal && !showDeclineModal && (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                      variant="accent"
+                      onClick={() => {
+                        setShowAcceptModal(true);
+                        setShowDeclineModal(false);
+                        setActionError(null);
+                      }}
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Accept Order
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setShowDeclineModal(true);
+                        setShowAcceptModal(false);
+                        setActionError(null);
+                      }}
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Decline Order
+                    </Button>
+                  </div>
+                )}
+
+                {/* Accept Modal Inline */}
+                {showAcceptModal && (
+                  <div className="p-4 bg-snow-white dark:bg-polar-night border border-border rounded-lg">
+                    <h4 className="font-semibold text-polar-night dark:text-snow-white mb-3">
+                      Confirm Accept Order
+                    </h4>
+
+                    {order.shipping_method === 't2t' && (
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-text-secondary mb-2">
+                          Select Parcel Size *
+                        </label>
+                        <p className="text-xs text-text-muted mb-3">
+                          Choose the size that fits your packaged game(s). This is required for generating the shipping label.
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          {PARCEL_SIZES.map((size) => (
+                            <button
+                              key={size.value}
+                              type="button"
+                              onClick={() => setSelectedParcelSize(size.value)}
+                              className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                selectedParcelSize === size.value
+                                  ? 'border-frost-ice bg-frost-ice/10'
+                                  : 'border-border hover:border-frost-ice/50'
+                              }`}
+                            >
+                              <span className="block font-semibold text-polar-night dark:text-snow-white">
+                                {size.label}
+                              </span>
+                              <span className="block text-xs text-text-muted">{size.dimensions}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {order.shipping_method === 'local_pickup' && (
+                      <p className="text-sm text-text-secondary mb-4">
+                        By accepting, you agree to coordinate pickup with the buyer in {order.pickup_city}.
+                        Please use the chat feature to arrange a meeting time and location.
+                      </p>
+                    )}
+
+                    <div className="flex gap-3">
+                      <Button
+                        variant="accent"
+                        onClick={handleAcceptOrder}
+                        disabled={actionLoading}
+                      >
+                        {actionLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-4 h-4 mr-2" />
+                            Confirm Accept
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setShowAcceptModal(false);
+                          setActionError(null);
+                        }}
+                        disabled={actionLoading}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Decline Modal Inline */}
+                {showDeclineModal && (
+                  <div className="p-4 bg-snow-white dark:bg-polar-night border border-border rounded-lg">
+                    <h4 className="font-semibold text-polar-night dark:text-snow-white mb-3">
+                      Decline Order
+                    </h4>
+                    <p className="text-sm text-text-secondary mb-4">
+                      Are you sure you want to decline this order? The buyer will be automatically refunded.
                     </p>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-text-secondary mb-2">
+                        Reason (optional)
+                      </label>
+                      <textarea
+                        value={declineReason}
+                        onChange={(e) => setDeclineReason(e.target.value)}
+                        placeholder="e.g., Item is no longer available, damaged, etc."
+                        className="w-full p-3 border border-border rounded-lg text-sm resize-none dark:bg-polar-night-light dark:text-snow-white"
+                        rows={2}
+                      />
+                    </div>
+                    <div className="flex gap-3">
+                      <Button
+                        variant="danger"
+                        onClick={handleDeclineOrder}
+                        disabled={actionLoading}
+                      >
+                        {actionLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="w-4 h-4 mr-2" />
+                            Decline & Refund
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setShowDeclineModal(false);
+                          setActionError(null);
+                          setDeclineReason('');
+                        }}
+                        disabled={actionLoading}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -268,16 +517,127 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
           </div>
         )}
 
+        {/* Label Generation Failed Card - For T2T Orders without label */}
+        {order.shipping_method === 't2t' && order.status === 'accepted' && !order.label_url && (
+          <div className="bg-aurora-red/10 border-2 border-aurora-red/30 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-lg bg-aurora-red/20 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-6 h-6 text-aurora-red" />
+              </div>
+              <div className="flex-grow">
+                <h3 className="text-lg font-semibold text-polar-night dark:text-snow-white mb-1">
+                  Shipping Label Not Generated
+                </h3>
+                <p className="text-sm text-text-secondary mb-2">
+                  There was an error generating your shipping label. Please try again.
+                </p>
+                {order.label_error && (
+                  <p className="text-sm text-aurora-red mb-4 p-2 bg-aurora-red/10 rounded">
+                    Error: {order.label_error}
+                  </p>
+                )}
+                {retryError && (
+                  <p className="text-sm text-aurora-red mb-4 p-2 bg-aurora-red/10 rounded">
+                    Retry failed: {retryError}
+                  </p>
+                )}
+                <Button
+                  variant="accent"
+                  onClick={handleRetryLabel}
+                  disabled={retryingLabel}
+                >
+                  {retryingLabel ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating Label...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Retry Label Generation
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Shipping Label Card - For T2T Orders */}
+        {order.shipping_method === 't2t' && order.status === 'accepted' && order.label_url && (
+          <div className="bg-frost-ice/10 border-2 border-frost-ice/30 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-lg bg-frost-ice/20 flex items-center justify-center flex-shrink-0">
+                <Truck className="w-6 h-6 text-frost-ice" />
+              </div>
+              <div className="flex-grow">
+                <h3 className="text-lg font-semibold text-polar-night dark:text-snow-white mb-1">
+                  Ready to Ship
+                </h3>
+                <p className="text-sm text-text-secondary mb-4">
+                  Your parcel has been registered with Unisend. Follow these steps to ship:
+                </p>
+
+                {/* Parcel ID - Main focus */}
+                <div className="mb-4 p-4 bg-snow-white dark:bg-polar-night rounded-lg border-2 border-frost-ice">
+                  <p className="text-xs text-text-secondary mb-1">Your Parcel ID</p>
+                  <p className="font-mono text-2xl font-bold text-frost-ice">
+                    {order.unisend_parcel_id || order.label_url?.replace('unisend://terminal/', '') || order.barcode}
+                  </p>
+                </div>
+
+                {/* Instructions */}
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-frost-ice/20 flex items-center justify-center flex-shrink-0 text-xs font-bold text-frost-ice">1</div>
+                    <p className="text-sm text-text-secondary">
+                      Go to your nearest <strong className="text-polar-night dark:text-snow-white">Unisend terminal</strong>
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-frost-ice/20 flex items-center justify-center flex-shrink-0 text-xs font-bold text-frost-ice">2</div>
+                    <p className="text-sm text-text-secondary">
+                      Enter the <strong className="text-polar-night dark:text-snow-white">Parcel ID</strong> above at the terminal screen
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-frost-ice/20 flex items-center justify-center flex-shrink-0 text-xs font-bold text-frost-ice">3</div>
+                    <p className="text-sm text-text-secondary">
+                      <strong className="text-polar-night dark:text-snow-white">Print the label</strong> at the terminal and attach it to your parcel
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-frost-ice/20 flex items-center justify-center flex-shrink-0 text-xs font-bold text-frost-ice">4</div>
+                    <p className="text-sm text-text-secondary">
+                      <strong className="text-polar-night dark:text-snow-white">Place the parcel</strong> in the locker opened by the terminal
+                    </p>
+                  </div>
+                </div>
+
+                {/* Only show tracking button when barcode is assigned (after printing at terminal) */}
+                {order.barcode && order.tracking_url && (
+                  <a href={order.tracking_url} target="_blank" rel="noopener noreferrer">
+                    <Button variant="secondary">
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Track Package
+                    </Button>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Shipping Information */}
-        <div className="bg-snow-white border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-polar-night mb-4">Shipping Information</h2>
+        <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-polar-night dark:text-snow-white mb-4">Shipping Information</h2>
           <div className="space-y-3">
             {order.shipping_method === 't2t' ? (
               <>
                 <div className="flex items-start gap-3">
                   <Truck className="w-5 h-5 text-frost-ice mt-0.5" />
                   <div>
-                    <p className="font-medium text-polar-night">Terminal-to-Terminal Shipping</p>
+                    <p className="font-medium text-polar-night dark:text-snow-white">Terminal-to-Terminal Shipping</p>
                     <p className="text-sm text-text-secondary mt-1">
                       {order.destination_terminal_name}
                     </p>
@@ -302,7 +662,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
                 <div className="flex items-start gap-3">
                   <User className="w-5 h-5 text-frost-ice mt-0.5" />
                   <div>
-                    <p className="font-medium text-polar-night">Local Pickup</p>
+                    <p className="font-medium text-polar-night dark:text-snow-white">Local Pickup</p>
                     <p className="text-sm text-text-secondary mt-1">{order.pickup_city}</p>
                     {order.pickup_notes && (
                       <p className="text-sm text-text-muted mt-2">{order.pickup_notes}</p>
@@ -321,9 +681,19 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
           </div>
         </div>
 
+        {/* Tracking Events - For T2T Orders with tracking */}
+        {order.shipping_method === 't2t' && order.tracking_events && order.tracking_events.length > 0 && (
+          <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl p-6">
+            <TrackingEventsTimeline
+              events={order.tracking_events}
+              title="Tracking History"
+            />
+          </div>
+        )}
+
         {/* Order Items */}
-        <div className="bg-snow-white border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-polar-night mb-4">
+        <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-polar-night dark:text-snow-white mb-4">
             Order Items ({order.order_items.length})
           </h2>
           <div className="space-y-4">
@@ -341,12 +711,12 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
                   )}
                 </div>
                 <div className="flex-grow">
-                  <h3 className="font-medium text-polar-night mb-2">{item.game_name}</h3>
+                  <h3 className="font-medium text-polar-night dark:text-snow-white mb-2">{item.game_name}</h3>
                   <div className="flex items-center gap-3">
                     <Badge variant={item.condition as any} size="sm">
                       {getConditionLabel(item.condition as ListingCondition)}
                     </Badge>
-                    <span className="text-lg font-semibold text-polar-night">
+                    <span className="text-lg font-semibold text-polar-night dark:text-snow-white">
                       €{item.price.toFixed(2)}
                     </span>
                   </div>
@@ -357,8 +727,8 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
         </div>
 
         {/* Pricing Summary */}
-        <div className="bg-snow-white border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-polar-night mb-4">Pricing Summary</h2>
+        <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-polar-night dark:text-snow-white mb-4">Pricing Summary</h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-text-secondary">Items Total:</span>
@@ -373,7 +743,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
               <span className="font-medium text-aurora-red">-€{order.service_fee.toFixed(2)}</span>
             </div>
             <div className="flex justify-between pt-3 border-t border-border-subtle">
-              <span className="font-semibold text-polar-night">You Receive:</span>
+              <span className="font-semibold text-polar-night dark:text-snow-white">You Receive:</span>
               <span className="text-xl font-bold text-aurora-green">
                 €{(order.items_total + order.shipping_cost).toFixed(2)}
               </span>
@@ -382,13 +752,13 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
         </div>
 
         {/* Timeline */}
-        <div className="bg-snow-white border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-polar-night mb-4">Order Timeline</h2>
+        <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-polar-night dark:text-snow-white mb-4">Order Timeline</h2>
           <div className="space-y-4">
             <div className="flex gap-3">
               <div className="w-2 h-2 rounded-full bg-frost-ice mt-2" />
               <div>
-                <p className="font-medium text-polar-night">Order Placed</p>
+                <p className="font-medium text-polar-night dark:text-snow-white">Order Placed</p>
                 <p className="text-sm text-text-secondary">
                   {new Date(order.created_at).toLocaleString()}
                 </p>
@@ -398,7 +768,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
               <div className="flex gap-3">
                 <div className="w-2 h-2 rounded-full bg-frost-ice mt-2" />
                 <div>
-                  <p className="font-medium text-polar-night">Payment Received</p>
+                  <p className="font-medium text-polar-night dark:text-snow-white">Payment Received</p>
                   <p className="text-sm text-text-secondary">
                     {new Date(order.paid_at).toLocaleString()}
                   </p>
@@ -409,7 +779,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
               <div className="flex gap-3">
                 <div className="w-2 h-2 rounded-full bg-aurora-green mt-2" />
                 <div>
-                  <p className="font-medium text-polar-night">Order Accepted</p>
+                  <p className="font-medium text-polar-night dark:text-snow-white">Order Accepted</p>
                   <p className="text-sm text-text-secondary">
                     {new Date(order.seller_responded_at).toLocaleString()}
                   </p>
@@ -420,7 +790,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
               <div className="flex gap-3">
                 <div className="w-2 h-2 rounded-full bg-aurora-green mt-2" />
                 <div>
-                  <p className="font-medium text-polar-night">Shipping Label Generated</p>
+                  <p className="font-medium text-polar-night dark:text-snow-white">Shipping Label Generated</p>
                   <p className="text-sm text-text-secondary">
                     {new Date(order.label_generated_at).toLocaleString()}
                   </p>

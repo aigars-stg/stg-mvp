@@ -235,6 +235,8 @@ function SellPageContent() {
   const [errorModal, setErrorModal] = useState<{
     isOpen: boolean;
     message: string;
+    actionUrl?: string;
+    actionLabel?: string;
   }>({ isOpen: false, message: '' });
   const [draftSavedModal, setDraftSavedModal] = useState(false);
 
@@ -907,7 +909,34 @@ function SellPageContent() {
 
         if (!listingResponse.ok) {
           const errorData = await listingResponse.json();
-          throw new Error(errorData.details || 'Failed to create listing');
+
+          // Handle special error cases with redirects
+          if (errorData.requiresPhone) {
+            setErrorModal({
+              isOpen: true,
+              message: errorData.error,
+              actionUrl: errorData.settingsUrl || '/profile/settings',
+              actionLabel: 'Go to Settings',
+            });
+            return;
+          }
+
+          if (errorData.requiresStripe) {
+            setErrorModal({
+              isOpen: true,
+              message: errorData.error,
+              actionUrl: errorData.upgradeUrl || '/seller/settings/payouts',
+              actionLabel: 'Setup Payouts',
+            });
+            return;
+          }
+
+          if (errorData.requiresOnboarding) {
+            router.push(errorData.onboardingUrl || '/seller/onboard');
+            return;
+          }
+
+          throw new Error(errorData.error || errorData.details || 'Failed to create listing');
         }
 
         const { listing } = await listingResponse.json();
@@ -1632,6 +1661,8 @@ function SellPageContent() {
         onClose={() => setErrorModal({ isOpen: false, message: '' })}
         type="error"
         message={errorModal.message}
+        actionUrl={errorModal.actionUrl}
+        actionLabel={errorModal.actionLabel}
       />
 
       {/* Draft Saved Modal */}

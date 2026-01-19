@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { Modal, Button } from '@second-turn/design-system';
 import { CheckCircle, AlertCircle, InfoCircle as Info, CloseCircle as XCircle } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
@@ -12,6 +13,8 @@ export interface NotificationModalProps {
   title?: string;
   message: string;
   type?: NotificationType;
+  actionUrl?: string;
+  actionLabel?: string;
 }
 
 export function NotificationModal({
@@ -20,8 +23,11 @@ export function NotificationModal({
   title,
   message,
   type = 'info',
+  actionUrl,
+  actionLabel,
 }: NotificationModalProps) {
   const t = useTranslations('NotificationModal');
+  const router = useRouter();
 
   const getTypeConfig = () => {
     switch (type) {
@@ -63,6 +69,13 @@ export function NotificationModal({
 
   const config = getTypeConfig();
 
+  const handleAction = () => {
+    onClose();
+    if (actionUrl) {
+      router.push(actionUrl);
+    }
+  };
+
   return (
     <Modal
       open={isOpen}
@@ -70,12 +83,22 @@ export function NotificationModal({
       title={title || config.defaultTitle}
       size="sm"
       footer={
-        <Button
-          variant="primary"
-          onClick={onClose}
-        >
-          {t('ok')}
-        </Button>
+        <div className="flex gap-3 justify-center">
+          {actionUrl && actionLabel && (
+            <Button
+              variant="primary"
+              onClick={handleAction}
+            >
+              {actionLabel}
+            </Button>
+          )}
+          <Button
+            variant={actionUrl ? 'secondary' : 'primary'}
+            onClick={onClose}
+          >
+            {actionUrl ? t('cancel') : t('ok')}
+          </Button>
+        </div>
       }
     >
       <div className="flex flex-col items-center text-center">
