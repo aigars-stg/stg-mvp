@@ -6,6 +6,7 @@ import { Button, Card } from '@second-turn/design-system';
 import { cn } from '@/lib/utils';
 import { UserInfoCard } from '@/components/user';
 import { useTranslations } from 'next-intl';
+import { formatDate } from '@/lib/date-utils';
 
 interface Review {
   id: string;
@@ -211,14 +212,6 @@ function ReviewCard({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
 
   return (
     <Card className="p-4">

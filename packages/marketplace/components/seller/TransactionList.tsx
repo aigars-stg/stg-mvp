@@ -5,6 +5,7 @@ import { Badge } from '@second-turn/design-system';
 import { ShoppingBag, ArrowDownRight, RefreshCw as Loader2, AlertCircle, CheckCircleAlt01 as CheckCircle2, Time as Clock, ChevronRight } from 'griddy-icons';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { formatDateShort } from '@/lib/date-utils';
 
 interface Transaction {
   id: string;
@@ -64,12 +65,6 @@ export function TransactionList({ limit = 10, showViewAll = true }: TransactionL
     }).format(amount);
   };
 
-  const formatDate = (dateStr: string): string => {
-    return new Date(dateStr).toLocaleDateString('en-EU', {
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   const getStatusIcon = (status: string, payoutStatus?: string) => {
     if (status === 'completed' && payoutStatus === 'completed') {
@@ -158,7 +153,7 @@ export function TransactionList({ limit = 10, showViewAll = true }: TransactionL
                   {tx.description || t('gameSale')}
                 </p>
                 <p className="text-xs text-text-muted">
-                  {formatDate(tx.createdAt)}
+                  {formatDateShort(tx.createdAt)}
                 </p>
               </div>
             </div>

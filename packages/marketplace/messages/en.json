@@ -449,6 +449,7 @@
       "myListings": "My listings",
       "accountSettings": "Account settings",
       "staffDashboard": "Staff dashboard",
+      "dac7Compliance": "DAC7 Compliance",
       "signOut": "Sign out",
       "signOutError": "Failed to sign out. Please try again.",
       "join": "Join"
@@ -526,8 +527,15 @@
     }
   },
   "Listings": {
+    "bid": "bid",
+    "bids": "bids",
+    "auction": {
+      "badge": "Auction",
+      "startingAt": "Starting at"
+    },
     "card": {
       "expansion": "Expansion",
+      "auction": "Auction",
       "parcelLocker": "Parcel Locker",
       "pickupOnly": "Pickup only",
       "missingComponents": "Missing components",
@@ -601,6 +609,7 @@
       "badge": "Auction",
       "currentBid": "Current bid",
       "startingPrice": "Starting price",
+      "startingAt": "Starting at €{price}",
       "bid": "bid",
       "bids": "bids"
     }
@@ -988,9 +997,14 @@
       "addedToCart": "Added to cart!",
       "viewCart": "View Cart"
     },
+    "actions": {
+      "sellThisGame": "Sell This Game"
+    },
     "emptyState": {
       "noOffersMatch": "No offers match your filters",
-      "tryAdjusting": "Try adjusting your filters to see more results."
+      "tryAdjusting": "Try adjusting your filters to see more results.",
+      "noOffersYet": "No offers available yet",
+      "beFirstToSell": "Be the first to list your copy of this game"
     },
     "errors": {
       "gameNotFound": "Game not found",
@@ -1044,6 +1058,8 @@
   },
   "Auction": {
     "title": "Auction",
+    "badge": "Auction",
+    "won": "Won",
     "currentBid": "Current Bid",
     "startingPrice": "Starting Price",
     "bid": "bid",
@@ -1058,6 +1074,10 @@
     "completePayment": "Complete your payment within 48 hours to claim this game",
     "payNow": "Pay Now",
     "ownAuction": "You cannot bid on your own auction",
+    "status": {
+      "highBidder": "You're the high bidder",
+      "outbid": "You've been outbid – bid again?"
+    },
     "errors": {
       "minimumBid": "Bid must be at least EUR {amount}",
       "failed": "Failed to place bid. Please try again.",
@@ -1073,6 +1093,7 @@
     "bidHistory": {
       "title": "Bid History",
       "noBidsYet": "No bids yet - be the first!",
+      "winning": "Winning",
       "extendedAuction": "This bid extended the auction",
       "showMore": "Show {count} more bids",
       "showLess": "Show less"
@@ -1448,8 +1469,10 @@
       "avgSoldHere": "Avg. sold here:",
       "sales": "({count} sales)",
       "salesCount": "({count} sales)",
-      "lowestOnPlatform": "Lowest on Second Turn Games:",
+      "lowestOnSecondTurn": "Lowest on Second Turn:",
+      "lowestIsAuction": "(current bid)",
       "suggestedFor": "Suggested for {condition}:",
+      "suggestedStartingBid": "Suggested starting bid:",
       "usePrice": "Use price",
       "conditions": {
         "likeNew": "Like New",
@@ -2266,6 +2289,28 @@
       "noReviewsHint": "Buyer reviews will appear here after completed orders",
       "respond": "Respond to review",
       "response": "Your response"
+    },
+    "Dac7": {
+      "cardTitle": "Tax Compliance",
+      "cardSubtitle": "DAC7 EU reporting",
+      "transactions": "Transactions",
+      "sales": "Sales",
+      "taxInfoSubmitted": "Tax info submitted",
+      "noActionRequired": "No action required",
+      "clickToProvide": "Click to provide tax info",
+      "provideTaxInfo": "Provide tax info",
+      "approaching": {
+        "title": "Tax information needed soon",
+        "description": "You're approaching EU DAC7 reporting thresholds ({percent}%). Please provide your tax information."
+      },
+      "required": {
+        "title": "Tax information required",
+        "description": "You've exceeded DAC7 thresholds. Please provide your tax information to continue selling."
+      },
+      "blocked": {
+        "title": "Selling suspended",
+        "description": "New listings are blocked until you provide tax information. Existing listings are hidden."
+      }
     }
   },
   "Orders": {

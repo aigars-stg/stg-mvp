@@ -1,17 +1,26 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Button, Input, Card } from '@second-turn/design-system';
-import { Tag as Gavel, Time as Clock, AlertCircle, CheckCircleAlt01 as CheckCircle2, RefreshCw, Flash as Zap } from 'griddy-icons';
+import { Button, Input, Card, Badge } from '@second-turn/design-system';
+import {
+  Tag as Gavel,
+  Time as Clock,
+  AlertCircle,
+  CheckCircleAlt01 as CheckCircle2,
+  RefreshCw,
+  Flash as Zap,
+  ChevronDown,
+} from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useAuctionRealtime } from '@/lib/hooks/useAuctionRealtime';
+import { useUserBidStatus } from '@/lib/hooks/useUserBidStatus';
 import {
   type Listing,
   getAuctionTimeRemaining,
   getMinimumBid,
-  formatAuctionTimeRemaining,
+  formatCompactTimeRemaining,
 } from '@/lib/types/listing';
 import { BidHistory } from './BidHistory';
 
@@ -24,6 +33,7 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
   const { user } = useAuth();
   const t = useTranslations('Auction');
 
+  const [isExpanded, setIsExpanded] = useState(false);
   const [bidAmount, setBidAmount] = useState('');
   const [isPlacingBid, setIsPlacingBid] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +60,16 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
     },
   });
 
+  // User's bid status (winning/outbid)
+  const {
+    hasBid: userHasBid,
+    isWinning: userIsWinning,
+    refetch: refetchBidStatus,
+  } = useUserBidStatus({
+    listingId: listing.id,
+    currentBid,
+  });
+
   // Countdown timer state
   const [timeRemaining, setTimeRemaining] = useState(getAuctionTimeRemaining(endsAt));
 
@@ -69,7 +89,6 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
 
   const handlePlaceBid = async () => {
     if (!user) {
-      // Could redirect to login
       setError(t('errors.loginRequired'));
       return;
     }
@@ -122,10 +141,11 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
 
       setBidAmount('');
       onBidPlaced?.();
+      refetchBidStatus();
 
       // Clear success after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
-    } catch (err) {
+    } catch {
       setError(t('errors.failed'));
     } finally {
       setIsPlacingBid(false);
@@ -135,118 +155,181 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
   const isOwnAuction = user?.id === listing.seller_id;
   const isEnded = timeRemaining.isEnded;
   const isWinner = listing.auction_winner_id === user?.id;
+  const displayPrice = currentBid || listing.auction_start_price || 0;
+
+  // Auto-expand for winner
+  useEffect(() => {
+    if (isEnded && isWinner) {
+      setIsExpanded(true);
+    }
+  }, [isEnded, isWinner]);
 
   return (
-    <div className="space-y-4">
-      {/* Main Bid Panel */}
-      <Card className="border-2 border-aurora-purple/30">
-        <div className="p-4 space-y-4">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Gavel className="w-5 h-5 text-aurora-purple" />
-              <span className="font-semibold text-polar-night">{t('title')}</span>
-            </div>
-            <span className="text-sm text-text-muted">
-              {bidCount} {bidCount === 1 ? t('bid') : t('bids')}
-            </span>
-          </div>
-
-          {/* Current Bid / Starting Price */}
-          <div className="text-center py-4 bg-aurora-purple/5 rounded-lg">
-            <div className="text-sm text-text-secondary mb-1">
-              {currentBid ? t('currentBid') : t('startingPrice')}
-            </div>
-            <div className="text-3xl font-bold text-aurora-purple">
-              EUR {(currentBid || listing.auction_start_price || 0).toFixed(2)}
+    <Card className="border-2 border-aurora-purple/30 overflow-hidden">
+      {/* Collapsed Summary Row - always visible */}
+      <button
+        type="button"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full p-3 sm:p-4 text-left hover:bg-bg-secondary/50 transition-colors"
+      >
+        <div className="flex items-center justify-between gap-2 sm:gap-3">
+          {/* Left: Badge + Price */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />}>
+              {t('badge')}
+            </Badge>
+            <div className="flex items-baseline gap-1.5 min-w-0">
+              <span className="font-bold text-aurora-purple text-lg">
+                €{displayPrice.toFixed(2)}
+              </span>
+              <span className="text-xs text-text-muted whitespace-nowrap">
+                ({bidCount} {bidCount === 1 ? t('bid') : t('bids')})
+              </span>
             </div>
           </div>
 
-          {/* Countdown Timer */}
+          {/* Center: Timer */}
           <div
-            className={`flex items-center justify-center gap-2 py-3 rounded-lg ${
+            className={`hidden sm:flex items-center gap-1.5 text-sm px-2 py-1 rounded ${
               timeRemaining.isEndingSoon
                 ? 'bg-aurora-red/10 text-aurora-red'
-                : 'bg-bg-secondary text-text-secondary'
+                : isEnded
+                  ? 'bg-bg-secondary text-text-muted'
+                  : 'text-text-secondary'
             }`}
           >
             <Clock className="w-4 h-4" />
-            {isEnded ? (
-              <span className="font-semibold">{t('ended')}</span>
-            ) : (
-              <>
-                <span className="font-mono text-lg">
-                  {formatAuctionTimeRemaining(timeRemaining)}
-                </span>
-                {timeRemaining.isEndingSoon && (
-                  <span className="text-xs font-medium ml-2 flex items-center gap-1">
-                    <Zap className="w-3 h-3" />
-                    {t('endingSoon')}
-                  </span>
-                )}
-              </>
+            <span className="font-mono">
+              {isEnded ? t('ended') : formatCompactTimeRemaining(timeRemaining)}
+            </span>
+            {wasExtended && !isEnded && (
+              <span title={t('wasExtended')}>
+                <Zap className="w-3 h-3 text-aurora-purple" />
+              </span>
             )}
           </div>
 
-          {/* Extended Notice */}
+          {/* Right: Status + Toggle */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {!isEnded && userHasBid && !isOwnAuction && (
+              <Badge
+                variant={userIsWinning ? 'success' : 'warning'}
+                size="sm"
+              >
+                {userIsWinning ? '✓' : '⚠'}
+              </Badge>
+            )}
+            {isEnded && isWinner && (
+              <Badge variant="success" size="sm">
+                {t('won')}
+              </Badge>
+            )}
+            <ChevronDown
+              className={`w-5 h-5 text-text-muted transition-transform ${
+                isExpanded ? 'rotate-180' : ''
+              }`}
+            />
+          </div>
+        </div>
+
+        {/* Mobile: Timer on second row */}
+        <div
+          className={`sm:hidden flex items-center gap-1.5 text-sm mt-2 ${
+            timeRemaining.isEndingSoon
+              ? 'text-aurora-red'
+              : isEnded
+                ? 'text-text-muted'
+                : 'text-text-secondary'
+          }`}
+        >
+          <Clock className="w-4 h-4" />
+          <span className="font-mono">
+            {isEnded ? t('ended') : formatCompactTimeRemaining(timeRemaining)}
+          </span>
           {wasExtended && !isEnded && (
-            <div className="flex items-center gap-2 text-xs text-aurora-purple bg-aurora-purple/10 p-2 rounded">
-              <Zap className="w-3 h-3" />
-              {t('wasExtended')}
+            <span title={t('wasExtended')}>
+              <Zap className="w-3 h-3 text-aurora-purple" />
+            </span>
+          )}
+        </div>
+      </button>
+
+      {/* Expanded Content */}
+      {isExpanded && (
+        <div className="border-t border-border-subtle p-3 sm:p-4 space-y-3">
+          {/* User Bid Status Banner */}
+          {!isEnded && userHasBid && !isOwnAuction && (
+            <div
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm ${
+                userIsWinning
+                  ? 'bg-aurora-green/10 text-aurora-green border border-aurora-green/30'
+                  : 'bg-aurora-yellow/10 text-aurora-yellow border border-aurora-yellow/30'
+              }`}
+            >
+              {userIsWinning ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span className="font-medium">{t('status.highBidder')}</span>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-4 h-4" />
+                  <span className="font-medium">{t('status.outbid')}</span>
+                </>
+              )}
             </div>
           )}
 
           {/* Bid Input */}
           {!isEnded && !isOwnAuction && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div>
-                <label className="text-sm text-text-secondary mb-1 block">
-                  {t('yourBid')} ({t('minimum')}: EUR {minimumBid.toFixed(2)})
+                <label className="text-xs text-text-muted mb-1 block">
+                  {t('minimum')}: €{minimumBid.toFixed(2)}
                 </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary font-medium">
-                    EUR
-                  </span>
-                  <Input
-                    type="number"
-                    value={bidAmount}
-                    onChange={(e) => setBidAmount(e.target.value)}
-                    placeholder={minimumBid.toFixed(2)}
-                    min={minimumBid}
-                    step="1"
-                    inputSize="lg"
-                    className="pl-14"
-                  />
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-sm">
+                      €
+                    </span>
+                    <Input
+                      type="number"
+                      value={bidAmount}
+                      onChange={(e) => setBidAmount(e.target.value)}
+                      placeholder={minimumBid.toFixed(2)}
+                      min={minimumBid}
+                      step="1"
+                      inputSize="md"
+                      className="pl-8"
+                    />
+                  </div>
+                  <Button
+                    variant="primary"
+                    onClick={handlePlaceBid}
+                    disabled={isPlacingBid || !bidAmount}
+                    className="bg-aurora-purple hover:bg-aurora-purple/90 px-4"
+                  >
+                    {isPlacingBid ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Gavel className="w-4 h-4" />
+                    )}
+                  </Button>
                 </div>
               </div>
-
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={handlePlaceBid}
-                disabled={isPlacingBid || !bidAmount}
-                className="bg-aurora-purple hover:bg-aurora-purple/90"
-              >
-                {isPlacingBid ? (
-                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <Gavel className="w-4 h-4 mr-2" />
-                )}
-                {t('placeBid')}
-              </Button>
             </div>
           )}
 
           {/* Messages */}
           {error && (
-            <div className="flex items-center gap-2 text-sm text-aurora-red bg-aurora-red/10 p-3 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-aurora-red bg-aurora-red/10 p-2.5 rounded-lg">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               {error}
             </div>
           )}
 
           {success && (
-            <div className="flex items-center gap-2 text-sm text-aurora-green bg-aurora-green/10 p-3 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-aurora-green bg-aurora-green/10 p-2.5 rounded-lg">
               <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
               {success}
             </div>
@@ -254,15 +337,16 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
 
           {/* Winner Message */}
           {isEnded && isWinner && (
-            <div className="text-center p-4 bg-aurora-green/10 border border-aurora-green/30 rounded-lg">
-              <CheckCircle2 className="w-8 h-8 text-aurora-green mx-auto mb-2" />
-              <h3 className="font-semibold text-aurora-green mb-1">{t('youWon')}</h3>
-              <p className="text-sm text-text-secondary mb-3">
+            <div className="text-center p-3 bg-aurora-green/10 border border-aurora-green/30 rounded-lg">
+              <CheckCircle2 className="w-6 h-6 text-aurora-green mx-auto mb-1.5" />
+              <h3 className="font-semibold text-aurora-green text-sm mb-1">{t('youWon')}</h3>
+              <p className="text-xs text-text-secondary mb-2">
                 {t('completePayment')}
               </p>
               <Link href={`/checkout/auction/${listing.id}`}>
                 <Button
                   variant="primary"
+                  size="sm"
                   className="bg-aurora-green hover:bg-aurora-green/90"
                 >
                   {t('payNow')}
@@ -273,15 +357,15 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
 
           {/* Own Auction Message */}
           {isOwnAuction && (
-            <div className="text-sm text-text-muted text-center py-2">
+            <div className="text-xs text-text-muted text-center py-1">
               {t('ownAuction')}
             </div>
           )}
-        </div>
-      </Card>
 
-      {/* Bid History */}
-      <BidHistory listingId={listing.id} />
-    </div>
+          {/* Bid History - integrated inline */}
+          <BidHistory listingId={listing.id} />
+        </div>
+      )}
+    </Card>
   );
 }

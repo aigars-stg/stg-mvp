@@ -54,6 +54,9 @@ export async function GET(request: NextRequest) {
         game_name,
         game_year,
         price,
+        pricing_format,
+        auction_current_bid,
+        auction_start_price,
         condition,
         language,
         shipping_local_pickup,
@@ -189,11 +192,23 @@ export async function GET(request: NextRequest) {
       let highestPrice = -Infinity;
       let hasLocalPickup = false;
       let hasParcelShipping = false;
+      let hasAuction = false;
       let cheapest: any = null;
 
       for (const listing of gameListings) {
-        // Track cheapest listing
-        if (cheapest === null || listing.price < cheapest.price) {
+        // For auctions, use current bid or starting price; for fixed price, use price
+        const isAuction = listing.pricing_format === 'auction';
+        const effectivePrice = isAuction
+          ? (listing.auction_current_bid || listing.auction_start_price || listing.price)
+          : listing.price;
+
+        // Track cheapest listing (by effective price)
+        const cheapestEffectivePrice = cheapest
+          ? (cheapest.pricing_format === 'auction'
+              ? (cheapest.auction_current_bid || cheapest.auction_start_price || cheapest.price)
+              : cheapest.price)
+          : Infinity;
+        if (cheapest === null || effectivePrice < cheapestEffectivePrice) {
           cheapest = listing;
         }
 
@@ -209,13 +224,14 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        // Track price range
-        if (listing.price < lowestPrice) lowestPrice = listing.price;
-        if (listing.price > highestPrice) highestPrice = listing.price;
+        // Track price range (using effective price for auctions)
+        if (effectivePrice < lowestPrice) lowestPrice = effectivePrice;
+        if (effectivePrice > highestPrice) highestPrice = effectivePrice;
 
-        // Track shipping options
+        // Track shipping options and listing types
         if (listing.shipping_local_pickup) hasLocalPickup = true;
         if (listing.shipping_parcel_locker) hasParcelShipping = true;
+        if (isAuction) hasAuction = true;
       }
 
       // Filter by language: skip game if it doesn't have any matching language
@@ -242,6 +258,7 @@ export async function GET(request: NextRequest) {
         seller_countries: [...sellerCountries],
         has_local_pickup: hasLocalPickup,
         has_parcel_shipping: hasParcelShipping,
+        has_auction: hasAuction,
         featured_listing_id: cheapest.id,
         featured_seller: {
           id: cheapest.seller?.id || '',

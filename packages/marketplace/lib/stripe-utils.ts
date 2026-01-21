@@ -50,10 +50,12 @@ export interface MarketplacePricing {
  * // Returns: {
  * //   itemsTotalCents: 2500,
  * //   shippingCostCents: 250,
- * //   serviceFeeCents: 138, // 3.5% of €25 + €0.50
- * //   totalChargeCents: 2888,
- * //   applicationFeeAmount: 138
+ * //   serviceFeeCents: 200, // 6% of €25 + €0.50
+ * //   totalChargeCents: 2950,
+ * //   applicationFeeAmount: 450 // service fee + shipping (platform revenue)
  * // }
+ * // Seller receives: €25.00 (items only)
+ * // Platform keeps: €4.50 (service fee €2.00 + shipping €2.50)
  * ```
  */
 export function calculateMarketplacePricing(
@@ -80,7 +82,8 @@ export function calculateMarketplacePricing(
     shippingCostCents,
     serviceFeeCents,
     totalChargeCents,
-    applicationFeeAmount: serviceFeeCents, // This comes back to platform
+    // Platform keeps service fee + shipping (seller only receives items_total)
+    applicationFeeAmount: serviceFeeCents + shippingCostCents,
   };
 }
 

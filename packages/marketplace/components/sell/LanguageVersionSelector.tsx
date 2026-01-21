@@ -34,13 +34,13 @@ export function LanguageVersionSelector({
   );
   const [showOtherLanguages, setShowOtherLanguages] = useState(false);
 
-  // Render manual input immediately if in fallback mode
-  if (fallbackMode) {
-    return <ManualVersionInput gameName={game.name} gameYear={game.yearPublished} onSubmit={onSelect} />;
-  }
+  // Priority languages for Baltic region (in specific order)
+  const PRIMARY_LANGUAGES = ['Latvian', 'Lithuanian', 'Estonian', 'English', 'German'];
 
-  // Fetch versions when game changes
+  // Fetch versions when game changes (skip if in fallback mode)
   useEffect(() => {
+    if (fallbackMode) return;
+
     async function fetchVersions() {
       setIsLoading(true);
       setSelectedLanguage(''); // Reset language selection when game changes
@@ -100,10 +100,7 @@ export function LanguageVersionSelector({
       fetchVersions();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game.id]); // Only re-run when game changes, not when onSelect changes
-
-  // Priority languages for Baltic region (in specific order)
-  const PRIMARY_LANGUAGES = ['Latvian', 'Lithuanian', 'Estonian', 'English', 'German'];
+  }, [game.id, fallbackMode]); // Only re-run when game changes, not when onSelect changes
 
   // Extract and sort languages from all versions
   const { primaryLanguages, otherLanguages } = useMemo(() => {
@@ -127,7 +124,7 @@ export function LanguageVersionSelector({
       .sort();
 
     return { primaryLanguages: primary, otherLanguages: other };
-  }, [versions]);
+  }, [versions, PRIMARY_LANGUAGES]);
 
   // Filter versions by selected language (includes multilingual versions)
   const filteredVersions = useMemo(() => {
@@ -159,6 +156,11 @@ export function LanguageVersionSelector({
       onSelect(versionsForLanguage[0]);
     }
   };
+
+  // Render manual input immediately if in fallback mode (placed after all hooks)
+  if (fallbackMode) {
+    return <ManualVersionInput gameName={game.name} gameYear={game.yearPublished} onSubmit={onSelect} />;
+  }
 
   if (isLoading) {
     return (

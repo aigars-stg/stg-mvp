@@ -37,7 +37,9 @@
       "Bash(git commit:*)",
       "Bash(git log:*)",
       "Bash(git show:*)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(claude plugin install:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

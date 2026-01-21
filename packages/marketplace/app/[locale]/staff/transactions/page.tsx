@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge } from '@second-turn/design-system';
-import { Search, RefreshCw as Loader2, AlertCircle, Shield, ChevronLeft, ChevronRight, AlertTriangle, Package, Download, TrendUp, CurrencyDollar, FileText, Receipt, Truck } from 'griddy-icons';
+import { Search, RefreshCw as Loader2, AlertCircle, Shield, ChevronLeft, ChevronRight, AlertTriangle, Package, Download, TrendUp, CurrencyDollar, FileText, Receipt, Truck, User, CheckCircleAlt01 as CheckCircle2 } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {
   extractVatFromGross,
@@ -18,6 +18,8 @@ import {
   type OrderBookkeepingData,
   type BookkeepingSummary,
 } from '@/lib/bookkeeping-utils';
+import { getDac7StatusLabel, type Dac7ComplianceStatus } from '@/lib/types/seller';
+import { formatDate } from '@/lib/date-utils';
 
 interface OrderSummary {
   id: string;
@@ -49,6 +51,64 @@ interface TransactionListResponse {
     total_pages: number;
   };
 }
+
+// DAC7 types
+interface SellerDac7Item {
+  userId: string;
+  email: string;
+  fullName: string;
+  country: string;
+  sellerStatus: string;
+  complianceStatus: Dac7ComplianceStatus;
+  annualTransactionCount: number;
+  annualSalesTotal: number;
+  reportingYear: number | null;
+  taxId: string | null;
+  taxIdType: string | null;
+  legalName: string | null;
+  infoSubmittedAt: string | null;
+  isVerified: boolean;
+}
+
+interface Dac7Summary {
+  total: number;
+  exempt: number;
+  approaching: number;
+  required: number;
+  compliant: number;
+  blocked: number;
+}
+
+interface Dac7Response {
+  sellers: SellerDac7Item[];
+  summary: Dac7Summary;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+const dac7StatusConfig: Record<
+  Dac7ComplianceStatus,
+  { label: string; variant: 'default' | 'success' | 'warning' | 'error' | 'trust' }
+> = {
+  exempt: { label: 'Exempt', variant: 'default' },
+  approaching: { label: 'Approaching', variant: 'warning' },
+  required: { label: 'Required', variant: 'error' },
+  compliant: { label: 'Compliant', variant: 'success' },
+  blocked: { label: 'Blocked', variant: 'error' },
+};
+
+const dac7StatusOptions = [
+  { value: 'all', label: 'All Statuses' },
+  { value: 'approaching', label: 'Approaching Threshold' },
+  { value: 'required', label: 'Tax Info Required' },
+  { value: 'compliant', label: 'Compliant' },
+  { value: 'blocked', label: 'Blocked' },
+  { value: 'exempt', label: 'Exempt' },
+];
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'error' | 'trust' }> = {
   pending_payment: { label: 'Pending Payment', variant: 'warning' },
@@ -111,8 +171,14 @@ function StaffTransactionsContent() {
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
 
   // Bookkeeping state
-  const [viewMode, setViewMode] = useState<'operations' | 'bookkeeping'>('operations');
+  const [viewMode, setViewMode] = useState<'operations' | 'bookkeeping' | 'dac7'>('operations');
   const [dateRange, setDateRange] = useState('this_month');
+
+  // DAC7 state
+  const [dac7Data, setDac7Data] = useState<Dac7Response | null>(null);
+  const [dac7StatusFilter, setDac7StatusFilter] = useState('all');
+  const [dac7SearchQuery, setDac7SearchQuery] = useState('');
+  const [dac7CurrentPage, setDac7CurrentPage] = useState(1);
 
   // Calculate bookkeeping summary from loaded data
   const bookkeepingSummary = useMemo<BookkeepingSummary | null>(() => {
@@ -207,11 +273,62 @@ function StaffTransactionsContent() {
     }
   };
 
+  // Fetch DAC7 sellers
+  const fetchDac7Sellers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams();
+      if (dac7StatusFilter !== 'all') params.set('status', dac7StatusFilter);
+      if (dac7SearchQuery) params.set('search', dac7SearchQuery);
+      params.set('page', dac7CurrentPage.toString());
+      params.set('limit', '20');
+
+      const response = await fetch(`/api/staff/dac7/sellers?${params}`);
+      const result = await response.json();
+
+      if (response.status === 403) {
+        setIsStaff(false);
+        setError('Staff access required');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch sellers');
+      }
+
+      setIsStaff(true);
+      setDac7Data(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load sellers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle DAC7 export
+  const handleDac7Export = () => {
+    const year = new Date().getFullYear();
+    window.open(`/api/staff/dac7/export?year=${year}`, '_blank');
+  };
+
+  // Handle DAC7 search
+  const handleDac7Search = (e: React.FormEvent) => {
+    e.preventDefault();
+    setDac7CurrentPage(1);
+    fetchDac7Sellers();
+  };
+
   useEffect(() => {
     if (user) {
-      fetchTransactions();
+      if (viewMode === 'dac7') {
+        fetchDac7Sellers();
+      } else {
+        fetchTransactions();
+      }
     }
-  }, [user, statusFilter, hasIssues, currentPage, viewMode, dateRange]);
+  }, [user, statusFilter, hasIssues, currentPage, viewMode, dateRange, dac7StatusFilter, dac7CurrentPage]);
 
   // Handle search
   const handleSearch = (e: React.FormEvent) => {
@@ -281,7 +398,9 @@ function StaffTransactionsContent() {
               <p className="text-text-secondary">
                 {viewMode === 'operations'
                   ? 'Manage transactions, view conversations, and resolve issues.'
-                  : 'Financial overview with VAT breakdown for bookkeeping.'}
+                  : viewMode === 'bookkeeping'
+                    ? 'Financial overview with VAT breakdown for bookkeeping.'
+                    : 'Monitor seller tax reporting status and export compliance data.'}
               </p>
             </div>
             {/* View Mode Toggle */}
@@ -312,6 +431,19 @@ function StaffTransactionsContent() {
               >
                 Bookkeeping
               </button>
+              <button
+                onClick={() => {
+                  setViewMode('dac7');
+                  setDac7CurrentPage(1);
+                }}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  viewMode === 'dac7'
+                    ? 'bg-frost-ice text-white'
+                    : 'text-frost-ice hover:bg-frost-ice/20'
+                }`}
+              >
+                DAC7
+              </button>
             </div>
           </div>
         </div>
@@ -320,35 +452,67 @@ function StaffTransactionsContent() {
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 border-b border-divider-subtle">
         <div className="flex flex-wrap items-center gap-4">
-          {/* Search */}
-          <form onSubmit={handleSearch} className="flex-1 min-w-[200px] max-w-md">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by order number..."
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
-              />
-            </div>
-          </form>
+          {/* Search - different for DAC7 mode */}
+          {viewMode === 'dac7' ? (
+            <form onSubmit={handleDac7Search} className="flex-1 min-w-[200px] max-w-md">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <input
+                  type="text"
+                  value={dac7SearchQuery}
+                  onChange={(e) => setDac7SearchQuery(e.target.value)}
+                  placeholder="Search by name or email..."
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+                />
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleSearch} className="flex-1 min-w-[200px] max-w-md">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by order number..."
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+                />
+              </div>
+            </form>
+          )}
 
-          {/* Status filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
-          >
-            {statusOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+          {/* Status filter - different options for DAC7 */}
+          {viewMode === 'dac7' ? (
+            <select
+              value={dac7StatusFilter}
+              onChange={(e) => {
+                setDac7StatusFilter(e.target.value);
+                setDac7CurrentPage(1);
+              }}
+              className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+            >
+              {dac7StatusOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+            >
+              {statusOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          )}
 
           {/* Has issues filter (operations mode only) */}
           {viewMode === 'operations' && (
@@ -364,6 +528,19 @@ function StaffTransactionsContent() {
               />
               <span className="text-sm text-text-secondary">Has open issues</span>
             </label>
+          )}
+
+          {/* DAC7 export button */}
+          {viewMode === 'dac7' && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleDac7Export}
+              disabled={!dac7Data?.sellers?.length}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
+            </Button>
           )}
 
           {/* Date range filter (bookkeeping mode only) */}
@@ -460,15 +637,189 @@ function StaffTransactionsContent() {
         </div>
       )}
 
-      {/* Transactions list */}
+      {/* DAC7 Summary Cards */}
+      {viewMode === 'dac7' && dac7Data?.summary && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <Dac7SummaryCard
+              label="Total Sellers"
+              value={dac7Data.summary.total}
+              icon={<User className="w-4 h-4 text-frost-ice" />}
+              bgColor="bg-frost-ice/10"
+            />
+            <Dac7SummaryCard
+              label="Exempt"
+              value={dac7Data.summary.exempt}
+              icon={<CheckCircle2 className="w-4 h-4 text-text-muted" />}
+              bgColor="bg-gray-100"
+            />
+            <Dac7SummaryCard
+              label="Approaching"
+              value={dac7Data.summary.approaching}
+              icon={<AlertTriangle className="w-4 h-4 text-aurora-yellow" />}
+              bgColor="bg-aurora-yellow/10"
+              highlight={dac7Data.summary.approaching > 0}
+            />
+            <Dac7SummaryCard
+              label="Required"
+              value={dac7Data.summary.required}
+              icon={<AlertCircle className="w-4 h-4 text-aurora-red" />}
+              bgColor="bg-aurora-red/10"
+              highlight={dac7Data.summary.required > 0}
+            />
+            <Dac7SummaryCard
+              label="Compliant"
+              value={dac7Data.summary.compliant}
+              icon={<CheckCircle2 className="w-4 h-4 text-aurora-green" />}
+              bgColor="bg-aurora-green/10"
+            />
+            <Dac7SummaryCard
+              label="Blocked"
+              value={dac7Data.summary.blocked}
+              icon={<AlertCircle className="w-4 h-4 text-aurora-red" />}
+              bgColor="bg-aurora-red/10"
+              highlight={dac7Data.summary.blocked > 0}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {loading && data && (
+        {loading && (data || dac7Data) && (
           <div className="text-center py-4">
             <Loader2 className="w-5 h-5 animate-spin text-frost-ice mx-auto" />
           </div>
         )}
 
-        {data && data.orders.length === 0 ? (
+        {/* DAC7 Sellers Table */}
+        {viewMode === 'dac7' && (
+          <>
+            {dac7Data && dac7Data.sellers.length === 0 ? (
+              <div className="text-center py-12">
+                <User className="w-12 h-12 text-text-muted mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-polar-night dark:text-snow-white mb-2">
+                  No sellers found
+                </h3>
+                <p className="text-text-secondary">Try adjusting your filters.</p>
+              </div>
+            ) : (
+              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-background-secondary border-b border-divider-subtle">
+                      <tr>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Seller
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Country
+                        </th>
+                        <th className="text-right px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Sales
+                        </th>
+                        <th className="text-right px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Transactions
+                        </th>
+                        <th className="text-center px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Tax ID
+                        </th>
+                        <th className="text-center px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-divider-subtle">
+                      {dac7Data?.sellers.map((seller) => {
+                        const statusInfo =
+                          dac7StatusConfig[seller.complianceStatus] || dac7StatusConfig.exempt;
+
+                        return (
+                          <tr
+                            key={seller.userId}
+                            className="hover:bg-frost-ice/5 transition-colors"
+                          >
+                            <td className="px-4 py-3">
+                              <div>
+                                <p className="font-medium text-polar-night dark:text-snow-white">
+                                  {seller.legalName || seller.fullName || 'Unknown'}
+                                </p>
+                                <p className="text-sm text-text-muted">{seller.email}</p>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white">
+                              {seller.country || '—'}
+                            </td>
+                            <td className="px-4 py-3 text-sm font-semibold text-polar-night dark:text-snow-white text-right">
+                              €{seller.annualSalesTotal.toFixed(2)}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                              {seller.annualTransactionCount}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              {seller.taxId ? (
+                                <span className="font-mono text-sm text-aurora-green">
+                                  {seller.taxId}
+                                </span>
+                              ) : (
+                                <span className="text-sm text-text-muted">—</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <Badge variant={statusInfo.variant} size="sm">
+                                {getDac7StatusLabel(seller.complianceStatus)}
+                              </Badge>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* DAC7 Pagination */}
+            {dac7Data && dac7Data.pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between mt-4">
+                <p className="text-sm text-text-secondary">
+                  Showing {(dac7Data.pagination.page - 1) * dac7Data.pagination.limit + 1} to{' '}
+                  {Math.min(
+                    dac7Data.pagination.page * dac7Data.pagination.limit,
+                    dac7Data.pagination.total
+                  )}{' '}
+                  of {dac7Data.pagination.total} sellers
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={dac7CurrentPage === 1}
+                    onClick={() => setDac7CurrentPage((p) => p - 1)}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    Previous
+                  </Button>
+                  <span className="text-sm text-text-secondary">
+                    Page {dac7CurrentPage} of {dac7Data.pagination.totalPages}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={dac7CurrentPage === dac7Data.pagination.totalPages}
+                    onClick={() => setDac7CurrentPage((p) => p + 1)}
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Transactions Tables (Operations & Bookkeeping) - only show when NOT in dac7 mode */}
+        {viewMode !== 'dac7' && data && data.orders.length === 0 && (
           <div className="text-center py-12">
             <Package className="w-12 h-12 text-text-muted mx-auto mb-4" />
             <h3 className="text-lg font-medium text-polar-night dark:text-snow-white mb-2">No transactions found</h3>
@@ -478,7 +829,9 @@ function StaffTransactionsContent() {
                 : 'Try adjusting your filters.'}
             </p>
           </div>
-        ) : viewMode === 'operations' ? (
+        )}
+
+        {viewMode === 'operations' && data && data.orders.length > 0 && (
           <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-background-secondary border-b border-divider-subtle">
@@ -550,7 +903,7 @@ function StaffTransactionsContent() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-sm text-text-secondary">
-                        {new Date(order.created_at).toLocaleDateString()}
+                        {formatDate(order.created_at)}
                       </td>
                     </tr>
                   );
@@ -558,8 +911,9 @@ function StaffTransactionsContent() {
               </tbody>
             </table>
           </div>
-        ) : (
-          /* Bookkeeping Table */
+        )}
+
+        {viewMode === 'bookkeeping' && data && data.orders.length > 0 && (
           <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full" style={{ minWidth: '1000px' }}>
@@ -597,7 +951,7 @@ function StaffTransactionsContent() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-sm text-text-secondary">
-                          {new Date(order.paid_at || order.created_at).toLocaleDateString()}
+                          {formatDate(order.paid_at || order.created_at)}
                         </td>
                         <td className="px-4 py-3">
                           <Badge variant={statusInfo.variant} size="sm">
@@ -665,8 +1019,8 @@ function StaffTransactionsContent() {
           </div>
         )}
 
-        {/* Pagination */}
-        {data && data.pagination.total_pages > 1 && (
+        {/* Pagination for Operations/Bookkeeping */}
+        {viewMode !== 'dac7' && data && data.pagination.total_pages > 1 && (
           <div className="flex items-center justify-between mt-4">
             <p className="text-sm text-text-secondary">
               Showing {((data.pagination.page - 1) * data.pagination.limit) + 1} to{' '}
@@ -699,6 +1053,43 @@ function StaffTransactionsContent() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// DAC7 Summary Card Component
+function Dac7SummaryCard({
+  label,
+  value,
+  icon,
+  bgColor,
+  highlight = false,
+}: {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+  bgColor: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={`bg-snow-white dark:bg-polar-nightLight border rounded-lg p-4 ${
+        highlight ? 'border-aurora-yellow' : 'border-border'
+      }`}
+    >
+      <div
+        className={`w-8 h-8 rounded-full ${bgColor} flex items-center justify-center mb-2`}
+      >
+        {icon}
+      </div>
+      <p className="text-xs text-text-muted uppercase tracking-wide">{label}</p>
+      <p
+        className={`text-xl font-bold ${
+          highlight ? 'text-aurora-yellow' : 'text-polar-night dark:text-snow-white'
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }

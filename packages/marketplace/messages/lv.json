@@ -449,6 +449,7 @@
       "myListings": "Mani sludinājumi",
       "accountSettings": "Konta iestatījumi",
       "staffDashboard": "Darbinieku panelis",
+      "dac7Compliance": "DAC7 atbilstība",
       "signOut": "Iziet",
       "signOutError": "Neizdevās iziet. Mēģini vēlreiz.",
       "join": "Pievienoties"
@@ -526,8 +527,15 @@
     }
   },
   "Listings": {
+    "bid": "likme",
+    "bids": "likmes",
+    "auction": {
+      "badge": "Izsole",
+      "startingAt": "Sākot no"
+    },
     "card": {
       "expansion": "Papildinājums",
+      "auction": "Izsole",
       "parcelLocker": "Paku termināls",
       "pickupOnly": "Tikai saņemšana klātienē",
       "missingComponents": "Trūkst komponentes",
@@ -601,6 +609,7 @@
       "badge": "Izsole",
       "currentBid": "Pašreizējā solījums",
       "startingPrice": "Sākuma cena",
+      "startingAt": "Sākot no €{price}",
       "bid": "solījums",
       "bids": "solījumi"
     }
@@ -988,9 +997,14 @@
       "addedToCart": "Pievienots grozam!",
       "viewCart": "Skatīt grozu"
     },
+    "actions": {
+      "sellThisGame": "Pārdot šo spēli"
+    },
     "emptyState": {
       "noOffersMatch": "Neviens piedāvājums neatbilst filtriem",
-      "tryAdjusting": "Mēģini pielāgot filtrus, lai redzētu vairāk rezultātu."
+      "tryAdjusting": "Mēģini pielāgot filtrus, lai redzētu vairāk rezultātu.",
+      "noOffersYet": "Piedāvājumu pagaidām nav",
+      "beFirstToSell": "Esi pirmais, kas piedāvā šo spēli"
     },
     "errors": {
       "gameNotFound": "Spēle nav atrasta",
@@ -1044,6 +1058,8 @@
   },
   "Auction": {
     "title": "Izsole",
+    "badge": "Izsole",
+    "won": "Uzvarēji",
     "currentBid": "Pašreizējā likme",
     "startingPrice": "Sākuma cena",
     "bid": "likme",
@@ -1058,6 +1074,10 @@
     "completePayment": "Pabeidz maksājumu 48 stundu laikā, lai saņemtu šo spēli",
     "payNow": "Maksāt tagad",
     "ownAuction": "Tu nevari likt likmi savā izsolē",
+    "status": {
+      "highBidder": "Tu esi augstākais solītājs",
+      "outbid": "Tevi pārsolīja – likmi vēlreiz?"
+    },
     "errors": {
       "minimumBid": "Likmei jābūt vismaz EUR {amount}",
       "failed": "Neizdevās izdarīt likmi. Lūdzu, mēģini vēlreiz.",
@@ -1073,6 +1093,7 @@
     "bidHistory": {
       "title": "Likšu vēsture",
       "noBidsYet": "Vēl nav likmju - esi pirmais!",
+      "winning": "Uzvarošā",
       "extendedAuction": "Šī likme pagarināja izsoli",
       "showMore": "Rādīt vēl {count} likmes",
       "showLess": "Rādīt mazāk"
@@ -1448,8 +1469,10 @@
       "avgSoldHere": "Vid. pārdots šeit:",
       "sales": "({count} pārdošanas)",
       "salesCount": "({count} pārdošanas)",
-      "lowestOnPlatform": "Zemākā cena Second Turn Games:",
+      "lowestOnSecondTurn": "Zemākā cena Second Turn:",
+      "lowestIsAuction": "(pašreizējā likme)",
       "suggestedFor": "Ieteicams {condition} stāvoklim:",
+      "suggestedStartingBid": "Ieteicamā sākuma likme:",
       "usePrice": "Lietot cenu",
       "conditions": {
         "likeNew": "Kā jauns",
@@ -2266,6 +2289,28 @@
       "noReviewsHint": "Pircēju atsauksmes parādīsies šeit pēc pabeigtiem pasūtījumiem",
       "respond": "Atbildēt uz atsauksmi",
       "response": "Tava atbilde"
+    },
+    "Dac7": {
+      "cardTitle": "Nodokļu atbilstība",
+      "cardSubtitle": "DAC7 ES ziņošana",
+      "transactions": "Transakcijas",
+      "sales": "Pārdošanas",
+      "taxInfoSubmitted": "Nodokļu info iesniegta",
+      "noActionRequired": "Darbības nav nepieciešamas",
+      "clickToProvide": "Noklikšķini, lai sniegtu nodokļu info",
+      "provideTaxInfo": "Sniegt nodokļu info",
+      "approaching": {
+        "title": "Drīz būs nepieciešama nodokļu informācija",
+        "description": "Tu tuvojies ES DAC7 ziņošanas sliekšņiem ({percent}%). Lūdzu sniedz savu nodokļu informāciju."
+      },
+      "required": {
+        "title": "Nepieciešama nodokļu informācija",
+        "description": "Tu esi pārsniedzis DAC7 sliekšņus. Lūdzu sniedz savu nodokļu informāciju, lai turpinātu pārdot."
+      },
+      "blocked": {
+        "title": "Pārdošana apturēta",
+        "description": "Jauni sludinājumi ir bloķēti, līdz sniegsi nodokļu informāciju. Esošie sludinājumi ir paslēpti."
+      }
     }
   },
   "Orders": {

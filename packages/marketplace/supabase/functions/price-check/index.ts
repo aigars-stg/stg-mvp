@@ -70,6 +70,7 @@ interface PriceCheckResponse {
   } | null
   internal: {
     lowestActivePrice: number | null
+    lowestIsAuction: boolean
     activeListingCount: number
     medianSoldPrice: number | null
     avgSoldPrice: number | null
@@ -129,7 +130,8 @@ Deno.serve(async (req) => {
     }
 
     // 2. Fetch internal pricing stats from materialized view (parallel with cache check)
-    const [internalStatsResult, cachedPricingResult] = await Promise.all([
+    // Also fetch active listings to calculate correct lowest price (considering auction current bids)
+    const [internalStatsResult, cachedPricingResult, activeListingsResult] = await Promise.all([
       supabase
         .from('stats_game_pricing')
         .select('*')
@@ -141,10 +143,33 @@ Deno.serve(async (req) => {
         .eq('bgg_game_id', gameId)
         .gt('expires_at', new Date().toISOString())
         .single(),
+      // Query to find all active listings to calculate true lowest price
+      supabase
+        .from('listings')
+        .select('pricing_format, price, auction_current_bid, auction_start_price')
+        .eq('bgg_game_id', gameId)
+        .eq('status', 'active'),
     ])
 
     const internalStats = internalStatsResult.data
     const cachedPricing = cachedPricingResult.data
+    const activeListings = activeListingsResult.data || []
+
+    // Calculate the true lowest price considering auction current bids
+    let lowestActivePrice: number | null = null
+    let lowestIsAuction = false
+
+    for (const listing of activeListings) {
+      const isAuction = listing.pricing_format === 'auction'
+      const effectivePrice = isAuction
+        ? (listing.auction_current_bid || listing.auction_start_price || listing.price)
+        : listing.price
+
+      if (lowestActivePrice === null || effectivePrice < lowestActivePrice) {
+        lowestActivePrice = effectivePrice
+        lowestIsAuction = isAuction
+      }
+    }
 
     let externalData: PriceCheckResponse['external'] = null
 
@@ -259,17 +284,19 @@ Deno.serve(async (req) => {
     }
 
     // 4. Build response
+    // Use calculated lowestActivePrice (considers auction current bids) instead of materialized view
     const response: PriceCheckResponse = {
       bggGameId: gameId,
       gameName: game.name,
       external: externalData,
-      internal: internalStats
+      internal: internalStats || activeListings.length > 0
         ? {
-            lowestActivePrice: internalStats.lowest_active_price,
-            activeListingCount: internalStats.active_listing_count || 0,
-            medianSoldPrice: internalStats.median_sold_price,
-            avgSoldPrice: internalStats.avg_sold_price,
-            completedSalesCount: internalStats.completed_sales_count || 0,
+            lowestActivePrice: lowestActivePrice,
+            lowestIsAuction: lowestIsAuction,
+            activeListingCount: internalStats?.active_listing_count || activeListings.length,
+            medianSoldPrice: internalStats?.median_sold_price || null,
+            avgSoldPrice: internalStats?.avg_sold_price || null,
+            completedSalesCount: internalStats?.completed_sales_count || 0,
           }
         : null,
       expansions: expansionPricing.length > 0 ? expansionPricing : undefined,

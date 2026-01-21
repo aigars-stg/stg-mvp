@@ -2,6 +2,7 @@
 
 import type { TrackingEvent } from './types';
 import { getTrackingEventColor } from './ShippingStatusConfig';
+import { formatDateTime } from '@/lib/date-utils';
 
 interface TrackingEventsTimelineProps {
   events: TrackingEvent[];
@@ -29,14 +30,7 @@ export function TrackingEventsTimeline({
   );
 
   const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    if (showFullTimestamps) {
-      return date.toLocaleString();
-    }
-    return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`;
+    return formatDateTime(timestamp);
   };
 
   return (

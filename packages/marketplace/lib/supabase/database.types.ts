@@ -512,6 +512,7 @@ export type Database = {
           photo_urls: string[]
           previous_price: number | null
           price: number
+          pricing_format: string
           publisher: string | null
           removed_at: string | null
           reserved_by: string | null
@@ -522,7 +523,9 @@ export type Database = {
           shipping_notes: string | null
           shipping_parcel_locker: boolean | null
           sold_at: string | null
+          source_wanted_listing_id: string | null
           status: string
+          transaction_method: string
           updated_at: string | null
           version_name: string | null
           version_source: string
@@ -554,6 +557,7 @@ export type Database = {
           photo_urls?: string[]
           previous_price?: number | null
           price: number
+          pricing_format?: string
           publisher?: string | null
           removed_at?: string | null
           reserved_by?: string | null
@@ -564,7 +568,9 @@ export type Database = {
           shipping_notes?: string | null
           shipping_parcel_locker?: boolean | null
           sold_at?: string | null
+          source_wanted_listing_id?: string | null
           status?: string
+          transaction_method?: string
           updated_at?: string | null
           version_name?: string | null
           version_source: string
@@ -596,6 +602,7 @@ export type Database = {
           photo_urls?: string[]
           previous_price?: number | null
           price?: number
+          pricing_format?: string
           publisher?: string | null
           removed_at?: string | null
           reserved_by?: string | null
@@ -606,7 +613,9 @@ export type Database = {
           shipping_notes?: string | null
           shipping_parcel_locker?: boolean | null
           sold_at?: string | null
+          source_wanted_listing_id?: string | null
           status?: string
+          transaction_method?: string
           updated_at?: string | null
           version_name?: string | null
           version_source?: string
@@ -645,6 +654,13 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "user_profiles_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_source_wanted_listing_id_fkey"
+            columns: ["source_wanted_listing_id"]
+            isOneToOne: false
+            referencedRelation: "wanted_listings"
             referencedColumns: ["id"]
           },
         ]
@@ -736,7 +752,7 @@ export type Database = {
           id: string
           is_system_message: boolean | null
           photo_urls: string[] | null
-          sender_id: string
+          sender_id: string | null
           system_message_type: string | null
           updated_at: string | null
         }
@@ -748,7 +764,7 @@ export type Database = {
           id?: string
           is_system_message?: boolean | null
           photo_urls?: string[] | null
-          sender_id: string
+          sender_id?: string | null
           system_message_type?: string | null
           updated_at?: string | null
         }
@@ -760,7 +776,7 @@ export type Database = {
           id?: string
           is_system_message?: boolean | null
           photo_urls?: string[] | null
-          sender_id?: string
+          sender_id?: string | null
           system_message_type?: string | null
           updated_at?: string | null
         }
@@ -956,6 +972,7 @@ export type Database = {
           destination_terminal_name: string | null
           id: string
           items_total: number
+          label_error: string | null
           label_generated_at: string | null
           label_url: string | null
           locale: string | null
@@ -1002,6 +1019,7 @@ export type Database = {
           destination_terminal_name?: string | null
           id?: string
           items_total: number
+          label_error?: string | null
           label_generated_at?: string | null
           label_url?: string | null
           locale?: string | null
@@ -1048,6 +1066,7 @@ export type Database = {
           destination_terminal_name?: string | null
           id?: string
           items_total?: number
+          label_error?: string | null
           label_generated_at?: string | null
           label_url?: string | null
           locale?: string | null
@@ -1280,11 +1299,21 @@ export type Database = {
           bank_account_bank_name: string | null
           bank_account_last4: string | null
           created_at: string | null
+          dac7_address_city: string | null
+          dac7_address_country: string | null
+          dac7_address_postal_code: string | null
+          dac7_address_street: string | null
           dac7_annual_sales_total: number | null
           dac7_annual_transaction_count: number | null
+          dac7_compliance_status: string | null
+          dac7_date_of_birth: string | null
+          dac7_full_legal_name: string | null
+          dac7_info_submitted_at: string | null
+          dac7_info_verified: boolean | null
           dac7_reporting_year: number | null
           dac7_tax_id: string | null
           dac7_tax_id_type: string | null
+          dac7_tax_residency_country: string | null
           has_bank_account: boolean | null
           member_since: string | null
           positive_rating_percent: number | null
@@ -1309,11 +1338,21 @@ export type Database = {
           bank_account_bank_name?: string | null
           bank_account_last4?: string | null
           created_at?: string | null
+          dac7_address_city?: string | null
+          dac7_address_country?: string | null
+          dac7_address_postal_code?: string | null
+          dac7_address_street?: string | null
           dac7_annual_sales_total?: number | null
           dac7_annual_transaction_count?: number | null
+          dac7_compliance_status?: string | null
+          dac7_date_of_birth?: string | null
+          dac7_full_legal_name?: string | null
+          dac7_info_submitted_at?: string | null
+          dac7_info_verified?: boolean | null
           dac7_reporting_year?: number | null
           dac7_tax_id?: string | null
           dac7_tax_id_type?: string | null
+          dac7_tax_residency_country?: string | null
           has_bank_account?: boolean | null
           member_since?: string | null
           positive_rating_percent?: number | null
@@ -1338,11 +1377,21 @@ export type Database = {
           bank_account_bank_name?: string | null
           bank_account_last4?: string | null
           created_at?: string | null
+          dac7_address_city?: string | null
+          dac7_address_country?: string | null
+          dac7_address_postal_code?: string | null
+          dac7_address_street?: string | null
           dac7_annual_sales_total?: number | null
           dac7_annual_transaction_count?: number | null
+          dac7_compliance_status?: string | null
+          dac7_date_of_birth?: string | null
+          dac7_full_legal_name?: string | null
+          dac7_info_submitted_at?: string | null
+          dac7_info_verified?: boolean | null
           dac7_reporting_year?: number | null
           dac7_tax_id?: string | null
           dac7_tax_id_type?: string | null
+          dac7_tax_residency_country?: string | null
           has_bank_account?: boolean | null
           member_since?: string | null
           positive_rating_percent?: number | null
@@ -1639,7 +1688,8 @@ export type Database = {
           created_at: string | null
           currency: string
           edition_year: number | null
-          expires_at: string
+          expansion_preference: string | null
+          expires_at: string | null
           game_name: string
           game_year: number | null
           id: string
@@ -1666,7 +1716,8 @@ export type Database = {
           created_at?: string | null
           currency?: string
           edition_year?: number | null
-          expires_at?: string
+          expansion_preference?: string | null
+          expires_at?: string | null
           game_name: string
           game_year?: number | null
           id?: string
@@ -1693,7 +1744,8 @@ export type Database = {
           created_at?: string | null
           currency?: string
           edition_year?: number | null
-          expires_at?: string
+          expansion_preference?: string | null
+          expires_at?: string | null
           game_name?: string
           game_year?: number | null
           id?: string
@@ -1831,6 +1883,7 @@ export type Database = {
           photo_urls: string[] | null
           previous_price: number | null
           price: number | null
+          pricing_format: string | null
           publisher: string | null
           reserved_by: string | null
           reserved_until: string | null
@@ -1848,6 +1901,7 @@ export type Database = {
           shipping_notes: string | null
           shipping_parcel_locker: boolean | null
           status: string | null
+          transaction_method: string | null
           updated_at: string | null
           version_name: string | null
           version_source: string | null

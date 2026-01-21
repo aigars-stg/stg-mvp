@@ -6,6 +6,7 @@ import { ArrowLeft, ShoppingBag, ArrowDownRight, RefreshCw as Loader2, AlertCirc
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
+import { formatDate } from '@/lib/date-utils';
 
 interface Transaction {
   id: string;
@@ -110,13 +111,6 @@ export default function TransactionsPage() {
     }).format(amount);
   };
 
-  const formatDate = (dateStr: string): string => {
-    return new Date(dateStr).toLocaleDateString('en-EU', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   const getStatusBadge = (status: string, payoutStatus?: string) => {
     if (status === 'completed' && payoutStatus === 'completed') {

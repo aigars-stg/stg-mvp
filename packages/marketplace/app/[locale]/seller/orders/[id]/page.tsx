@@ -19,6 +19,7 @@ import {
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { TrackingEventsTimeline } from '@/components/shipping';
 import { useSellerOrderDetail, PARCEL_SIZES } from '@/lib/hooks/useSellerOrderDetail';
+import { formatDateTime } from '@/lib/date-utils';
 
 export default function SellerOrderDetailPage({ params }: { params: { id: string } }) {
   const {
@@ -555,7 +556,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
               <div>
                 <p className="font-medium text-polar-night dark:text-snow-white">Order Placed</p>
                 <p className="text-sm text-text-secondary">
-                  {new Date(order.created_at).toLocaleString()}
+                  {formatDateTime(order.created_at)}
                 </p>
               </div>
             </div>
@@ -565,7 +566,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
                 <div>
                   <p className="font-medium text-polar-night dark:text-snow-white">Payment Received</p>
                   <p className="text-sm text-text-secondary">
-                    {new Date(order.paid_at).toLocaleString()}
+                    {formatDateTime(order.paid_at)}
                   </p>
                 </div>
               </div>
@@ -576,7 +577,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
                 <div>
                   <p className="font-medium text-polar-night dark:text-snow-white">Order Accepted</p>
                   <p className="text-sm text-text-secondary">
-                    {new Date(order.seller_responded_at).toLocaleString()}
+                    {formatDateTime(order.seller_responded_at)}
                   </p>
                 </div>
               </div>
@@ -587,7 +588,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
                 <div>
                   <p className="font-medium text-polar-night dark:text-snow-white">Shipping Label Generated</p>
                   <p className="text-sm text-text-secondary">
-                    {new Date(order.label_generated_at).toLocaleString()}
+                    {formatDateTime(order.label_generated_at)}
                   </p>
                 </div>
               </div>

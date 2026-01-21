@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Badge } from '@second-turn/design-system';
 import { Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, ArrowDownRight, RefreshCw as Loader2, AlertCircle } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
+import { formatDateShort } from '@/lib/date-utils';
 
 interface Payout {
   id: string;
@@ -61,12 +62,6 @@ export function PayoutHistory({ limit = 5, showViewAll = true }: PayoutHistoryPr
     }).format(amount);
   };
 
-  const formatDate = (dateStr: string): string => {
-    return new Date(dateStr).toLocaleDateString('en-EU', {
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -174,7 +169,7 @@ export function PayoutHistory({ limit = 5, showViewAll = true }: PayoutHistoryPr
                   {t('payoutTo', { last4: payout.bankLast4 ?? '****' })}
                 </p>
                 <p className="text-xs text-text-muted">
-                  {formatDate(payout.createdAt)}
+                  {formatDateShort(payout.createdAt)}
                 </p>
               </div>
             </div>

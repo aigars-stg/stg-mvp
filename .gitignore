@@ -47,3 +47,4 @@ coverage/
 .claude/mcp.json
 
 .vercel
+.env*.local

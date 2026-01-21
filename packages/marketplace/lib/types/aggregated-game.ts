@@ -35,6 +35,7 @@ export interface AggregatedGame {
   seller_countries: string[];
   has_local_pickup: boolean;
   has_parcel_shipping: boolean;
+  has_auction: boolean;  // Whether any offers are auctions
 
   // Featured offer (lowest price)
   featured_listing_id: string;

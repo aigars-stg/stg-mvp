@@ -64,13 +64,14 @@ export async function GET(request: NextRequest) {
 
     if (orders) {
       for (const order of orders) {
-        const gross = Number(order.items_total) + Number(order.shipping_cost);
+        // Seller earns items_total only (shipping goes to platform via Unisend)
+        const sellerEarnings = Number(order.items_total);
         const fee = Number(order.service_fee);
         if (!order.updated_at) continue;
         const orderDate = new Date(order.updated_at);
 
         totalSalesCount++;
-        totalGross += gross;
+        totalGross += sellerEarnings;
         totalPlatformFees += fee;
 
         if (order.payout_status === 'completed') {
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
 
         if (orderDate >= thirtyDaysAgo) {
           salesLast30Days++;
-          earningsLast30Days += gross;
+          earningsLast30Days += sellerEarnings;
         }
       }
     }

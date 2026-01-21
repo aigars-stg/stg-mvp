@@ -6,7 +6,8 @@ import { Button, Card } from '@second-turn/design-system';
 import {  Monitor, Phone as Smartphone, Tablet, LocationPin as MapPin, Calendar, AlertCircle, LogOut, ChevronDown  } from 'griddy-icons';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { formatDate } from '@/lib/date-utils';
 
 interface LoginRecord {
   id: string;
@@ -21,7 +22,6 @@ interface LoginRecord {
 
 export function LoginActivity() {
   const t = useTranslations('LoginActivity');
-  const locale = useLocale();
   const { user } = useAuth();
   const router = useRouter();
   const [activities, setActivities] = useState<LoginRecord[]>([]);
@@ -108,7 +108,7 @@ export function LoginActivity() {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatActivityDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -121,11 +121,7 @@ export function LoginActivity() {
     if (diffHours < 24) return diffHours === 1 ? t('time.hourAgo', { count: diffHours }) : t('time.hoursAgo', { count: diffHours });
     if (diffDays < 7) return diffDays === 1 ? t('time.dayAgo', { count: diffDays }) : t('time.daysAgo', { count: diffDays });
 
-    return date.toLocaleDateString(locale === 'lv' ? 'lv-LV' : 'en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
-    });
+    return formatDate(date);
   };
 
   if (loading) {
@@ -263,7 +259,7 @@ export function LoginActivity() {
                   {/* Time */}
                   <div className="flex items-center gap-1 text-xs text-text-secondary whitespace-nowrap">
                     <Calendar className="w-3 h-3" />
-                    <span>{formatDate(activity.created_at)}</span>
+                    <span>{formatActivityDate(activity.created_at)}</span>
                   </div>
                 </div>
               </div>

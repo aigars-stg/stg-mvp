@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
-import { Package, Users, User as Baby, Time as Clock, LinkExternal as ExternalLink, ArrowLeft, RefreshCw as Loader2, AlertCircle, SettingsAdjustHorizontal as SlidersHorizontal, Close, ChevronDown, ChevronUp, Settings as Cog, PuzzlePiece as Puzzle } from 'griddy-icons';
+import { Package, Users, User as Baby, Time as Clock, LinkExternal as ExternalLink, ArrowLeft, RefreshCw as Loader2, AlertCircle, SettingsAdjustHorizontal as SlidersHorizontal, Close, ChevronDown, ChevronUp, Settings as Cog, PuzzlePiece as Puzzle, Plus } from 'griddy-icons';
 import type { GameWithOffers } from '@/lib/types/aggregated-game';
 import type { ListingCondition, ListingType } from '@/lib/types/listing';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
@@ -408,16 +408,26 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
           </div>
         )}
 
-        {/* Filters Bar - only show sort/filter controls when there are multiple offers */}
+        {/* Filters Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <h2 className="text-xl font-semibold text-polar-night dark:text-snow-stormLightest">
             {t('offers.availableOffers', { count: game.offers.length })}
           </h2>
 
-          {game.offers.length > 1 && (
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              {/* Listing Type Dropdown */}
-              <select
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {/* Sell This Game Button - always visible */}
+            <Link href={`/sell?q=${encodeURIComponent(game.game_name)}`}>
+              <Button variant="accent" size="sm" className="flex-shrink-0">
+                <Plus className="w-4 h-4 mr-1.5" />
+                {t('actions.sellThisGame')}
+              </Button>
+            </Link>
+
+            {/* Filter controls - only when multiple offers */}
+            {game.offers.length > 1 && (
+              <>
+                {/* Listing Type Dropdown */}
+                <select
                 value={listingTypeFilter}
                 onChange={(e) => setListingTypeFilter(e.target.value as ListingType | 'all')}
                 className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-border dark:border-polar-nightDark bg-snow-white dark:bg-polar-nightLight text-sm text-polar-night dark:text-snow-stormLightest focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
@@ -454,8 +464,9 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                   </span>
                 )}
               </Button>
-            </div>
-          )}
+              </>
+            )}
+          </div>
         </div>
 
         {/* Filter Panel */}
@@ -517,15 +528,34 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
         ) : (
           <div className="text-center py-12 bg-snow-white dark:bg-polar-nightLight border-2 border-border dark:border-polar-nightDark rounded-xl">
             <Package className="w-12 h-12 text-text-muted dark:text-snow-stormMedium mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-polar-night dark:text-snow-stormLightest mb-2">
-              {t('emptyState.noOffersMatch')}
-            </h3>
-            <p className="text-text-secondary dark:text-snow-stormLight mb-4">
-              {t('emptyState.tryAdjusting')}
-            </p>
-            <Button variant="secondary" onClick={clearFilters}>
-              {t('filter.clearFilters')}
-            </Button>
+            {filterConditions.length > 0 || listingTypeFilter !== 'all' ? (
+              <>
+                <h3 className="text-lg font-semibold text-polar-night dark:text-snow-stormLightest mb-2">
+                  {t('emptyState.noOffersMatch')}
+                </h3>
+                <p className="text-text-secondary dark:text-snow-stormLight mb-4">
+                  {t('emptyState.tryAdjusting')}
+                </p>
+                <Button variant="secondary" onClick={clearFilters}>
+                  {t('filter.clearFilters')}
+                </Button>
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-semibold text-polar-night dark:text-snow-stormLightest mb-2">
+                  {t('emptyState.noOffersYet')}
+                </h3>
+                <p className="text-text-secondary dark:text-snow-stormLight mb-4">
+                  {t('emptyState.beFirstToSell')}
+                </p>
+                <Link href={`/sell?q=${encodeURIComponent(game.game_name)}`}>
+                  <Button variant="accent">
+                    <Plus className="w-4 h-4 mr-1.5" />
+                    {t('actions.sellThisGame')}
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         )}
 

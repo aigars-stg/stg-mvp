@@ -1,21 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card } from '@second-turn/design-system';
-import { useTranslations, useLocale } from 'next-intl';
-import { Time as Clock, Flash as Zap, ChevronDown } from 'griddy-icons';
+import { Badge } from '@second-turn/design-system';
+import { useTranslations } from 'next-intl';
+import { formatDistanceToNow } from 'date-fns';
+import { Time as Clock, Flash as Zap, ChevronDown, Trophy } from 'griddy-icons';
 import type { BidWithBidder } from '@/lib/types/listing';
 
 interface BidHistoryProps {
   listingId: string;
 }
 
+function formatRelativeTime(timestamp: string): string {
+  try {
+    return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+  } catch {
+    return '';
+  }
+}
+
 export function BidHistory({ listingId }: BidHistoryProps) {
   const t = useTranslations('Auction.bidHistory');
-  const locale = useLocale();
   const [bids, setBids] = useState<BidWithBidder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
 
   useEffect(() => {
     const fetchBids = async () => {
@@ -41,104 +49,128 @@ export function BidHistory({ listingId }: BidHistoryProps) {
 
   if (isLoading) {
     return (
-      <Card>
-        <div className="p-4">
-          <div className="animate-pulse space-y-2">
-            <div className="h-4 bg-bg-secondary rounded w-1/3"></div>
-            <div className="h-8 bg-bg-secondary rounded"></div>
-            <div className="h-8 bg-bg-secondary rounded"></div>
-          </div>
+      <div className="pt-2 border-t border-border-subtle">
+        <div className="animate-pulse space-y-2">
+          <div className="h-3 bg-bg-secondary rounded w-1/4"></div>
+          <div className="h-6 bg-bg-secondary rounded"></div>
         </div>
-      </Card>
+      </div>
     );
   }
 
   if (bids.length === 0) {
     return (
-      <Card>
-        <div className="p-4 text-center text-text-muted">
+      <div className="pt-2 border-t border-border-subtle">
+        <p className="text-xs text-text-muted text-center py-2">
           {t('noBidsYet')}
-        </div>
-      </Card>
+        </p>
+      </div>
     );
   }
 
-  // Show only top 3 bids unless expanded
-  const visibleBids = isExpanded ? bids : bids.slice(0, 3);
+  // Show only top 3 bids unless history is expanded
+  const visibleBids = isHistoryExpanded ? bids : bids.slice(0, 3);
   const hasMoreBids = bids.length > 3;
 
   return (
-    <Card>
-      <div className="p-4">
-        <h4 className="text-sm font-semibold text-polar-night mb-3">
-          {t('title')}
-        </h4>
+    <div className="pt-2 border-t border-border-subtle">
+      {/* Collapsible header */}
+      <button
+        type="button"
+        onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+        className="w-full flex items-center justify-between text-left py-1 group"
+      >
+        <span className="text-xs font-medium text-text-secondary group-hover:text-text-primary">
+          {t('title')} ({bids.length})
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 text-text-muted transition-transform ${
+            isHistoryExpanded ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
 
-        <div className="space-y-2">
-          {visibleBids.map((bid, index) => (
-            <div
-              key={bid.id}
-              className={`flex items-center justify-between p-2 rounded-lg transition-colors ${
-                bid.is_winning
-                  ? 'bg-aurora-green/10 border border-aurora-green/30'
-                  : 'bg-bg-secondary'
-              }`}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span
-                  className={`text-sm font-medium truncate ${
-                    bid.is_winning ? 'text-aurora-green' : 'text-text-primary'
-                  }`}
-                >
-                  {bid.bidder.display_name}
-                </span>
-                {bid.triggered_extension && (
-                  <span
-                    title={t('extendedAuction')}
-                    className="flex-shrink-0"
-                  >
-                    <Zap className="w-3 h-3 text-aurora-yellow" />
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <span
-                  className={`font-semibold ${
-                    bid.is_winning ? 'text-aurora-green' : 'text-text-primary'
-                  }`}
-                >
-                  EUR {bid.amount.toFixed(2)}
-                </span>
-                <span className="text-xs text-text-muted flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {new Date(bid.created_at).toLocaleTimeString(locale, {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Expand/Collapse Button */}
-        {hasMoreBids && (
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full mt-3 py-2 text-sm text-text-secondary hover:text-text-primary flex items-center justify-center gap-1 transition-colors"
+      {/* Bid list - always show at least first bid, expand for more */}
+      <div className="space-y-1.5 mt-2">
+        {visibleBids.map((bid) => (
+          <div
+            key={bid.id}
+            className={`rounded transition-colors ${
+              bid.is_winning
+                ? 'bg-aurora-green/10 border border-aurora-green/30 p-2'
+                : 'bg-bg-secondary p-1.5'
+            }`}
           >
-            <ChevronDown
-              className={`w-4 h-4 transition-transform ${
-                isExpanded ? 'rotate-180' : ''
-              }`}
-            />
-            {isExpanded
-              ? t('showLess')
-              : t('showMore', { count: bids.length - 3 })}
-          </button>
-        )}
+            {/* Winning bid row - enhanced but compact */}
+            {bid.is_winning ? (
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Badge
+                    variant="success"
+                    size="sm"
+                    icon={<Trophy className="w-2.5 h-2.5" />}
+                  >
+                    {t('winning')}
+                  </Badge>
+                  <span className="text-xs font-medium text-aurora-green truncate">
+                    {bid.bidder.display_name}
+                  </span>
+                  {bid.triggered_extension && (
+                    <span title={t('extendedAuction')}>
+                      <Zap className="w-3 h-3 text-aurora-yellow flex-shrink-0" />
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-sm font-bold text-aurora-green">
+                    €{bid.amount.toFixed(2)}
+                  </span>
+                  <span className="text-xs text-text-muted hidden sm:flex items-center gap-0.5">
+                    <Clock className="w-2.5 h-2.5" />
+                    {formatRelativeTime(bid.created_at)}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              /* Non-winning bids - de-emphasized */
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-xs text-text-secondary truncate">
+                    {bid.bidder.display_name}
+                  </span>
+                  {bid.triggered_extension && (
+                    <span title={t('extendedAuction')}>
+                      <Zap className="w-2.5 h-2.5 text-aurora-yellow flex-shrink-0" />
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-xs font-medium text-text-secondary">
+                    €{bid.amount.toFixed(2)}
+                  </span>
+                  <span className="text-xs text-text-muted hidden sm:flex items-center gap-0.5">
+                    <Clock className="w-2.5 h-2.5" />
+                    {formatRelativeTime(bid.created_at)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
-    </Card>
+
+      {/* Show more/less for bid history */}
+      {hasMoreBids && (
+        <button
+          type="button"
+          onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+          className="w-full mt-2 py-1 text-xs text-text-muted hover:text-text-secondary flex items-center justify-center gap-1 transition-colors"
+        >
+          {isHistoryExpanded
+            ? t('showLess')
+            : t('showMore', { count: bids.length - 3 })}
+        </button>
+      )}
+    </div>
   );
 }

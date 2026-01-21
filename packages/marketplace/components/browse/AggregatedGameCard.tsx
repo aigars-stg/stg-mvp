@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Card, Badge } from '@second-turn/design-system';
-import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle } from 'griddy-icons';
+import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle, Tag as Gavel } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
 import { saveBrowseContext } from '@/lib/browse-context';
@@ -95,13 +95,20 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
             </div>
           )}
 
-          {/* Price */}
+          {/* Price + Auction Badge */}
           <div className="mt-auto">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-sm text-text-secondary">{tPrice('from')}</span>
-              <span className="text-2xl font-bold text-polar-night">
-                €{game.lowest_price.toFixed(2)}
-              </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-sm text-text-secondary">{tPrice('from')}</span>
+                <span className={`text-2xl font-bold ${game.has_auction ? 'text-aurora-purple' : 'text-polar-night'}`}>
+                  €{game.lowest_price.toFixed(2)}
+                </span>
+              </div>
+              {game.has_auction && (
+                <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />} className="border-aurora-purple/50 text-aurora-purple">
+                  {tListings('auction')}
+                </Badge>
+              )}
             </div>
           </div>
         </div>

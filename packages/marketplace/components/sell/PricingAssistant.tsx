@@ -27,6 +27,7 @@ interface PricingData {
   } | null;
   internal: {
     lowestActivePrice: number | null;
+    lowestIsAuction?: boolean;
     activeListingCount: number;
     medianSoldPrice: number | null;
     avgSoldPrice: number | null;
@@ -40,6 +41,7 @@ interface PricingAssistantProps {
   condition?: string | null;
   onFillPrice: (price: number) => void;
   expansionIds?: number[];
+  pricingFormat?: 'fixed_price' | 'auction';
 }
 
 /**
@@ -59,6 +61,7 @@ export function PricingAssistant({
   condition,
   onFillPrice,
   expansionIds = [],
+  pricingFormat = 'fixed_price',
 }: PricingAssistantProps) {
   const t = useTranslations('Sell.PricingAssistant');
   const tConditions = useTranslations('Sell.PricingAssistant.conditions');
@@ -106,6 +109,7 @@ export function PricingAssistant({
   }, [bggGameId, expansionKey]); // expansionKey derived from expansionIds, triggers re-fetch when expansions change
 
   // Calculate suggested price based on condition (includes expansions)
+  // For auctions, suggest ~50% of the fixed price as starting bid
   const getSuggestedPrice = (): number | null => {
     if (!pricingData) return null;
 
@@ -137,7 +141,17 @@ export function PricingAssistant({
     };
 
     const multiplier = condition ? conditionMultipliers[condition] || 0.7 : 0.7;
-    return Math.round(totalRetailValue * multiplier * 100) / 100;
+    let suggestedPrice = Math.round(totalRetailValue * multiplier * 100) / 100;
+
+    // For auctions, suggest ~50% of the fixed price as a starting bid
+    // This encourages bidding activity
+    if (pricingFormat === 'auction') {
+      suggestedPrice = Math.round(suggestedPrice * 0.5 * 100) / 100;
+      // Ensure minimum of €1 for auctions
+      suggestedPrice = Math.max(suggestedPrice, 1);
+    }
+
+    return suggestedPrice;
   };
 
   // Get bundle info for display
@@ -337,6 +351,9 @@ export function PricingAssistant({
             </span>
             <span className="text-text-secondary tabular-nums">
               €{internal.lowestActivePrice.toFixed(2)}
+              {internal.lowestIsAuction && (
+                <span className="text-text-muted ml-1">{t('lowestIsAuction')}</span>
+              )}
             </span>
           </div>
         )}
@@ -346,7 +363,9 @@ export function PricingAssistant({
           <div className="pt-3 mt-3 border-t border-frost-ice/20">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-frost-ice">
-                {t('suggestedFor', { condition: formatCondition(condition) })}
+                {pricingFormat === 'auction'
+                  ? t('suggestedStartingBid')
+                  : t('suggestedFor', { condition: formatCondition(condition) })}
               </span>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-frost-ice text-lg tabular-nums">

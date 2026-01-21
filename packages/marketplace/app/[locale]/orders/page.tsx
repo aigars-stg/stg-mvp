@@ -8,6 +8,7 @@ import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle a
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { useTranslations } from 'next-intl';
+import { formatDate } from '@/lib/date-utils';
 
 interface OrderItem {
   id: string;
@@ -230,7 +231,7 @@ export default function OrdersPage() {
                           {t('orderCard.seller', { name: order.seller_name })}
                         </p>
                         <p className="text-xs text-text-muted mt-1">
-                          {t('orderCard.ordered', { date: new Date(order.created_at).toLocaleDateString() })}
+                          {t('orderCard.ordered', { date: formatDate(order.created_at) })}
                         </p>
                       </div>
 

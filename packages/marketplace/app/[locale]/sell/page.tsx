@@ -28,6 +28,7 @@ import { PricingAssistant } from '@/components/sell/PricingAssistant';
 import { WantedListingContextBanner } from '@/components/sell/WantedListingContextBanner';
 import { useTranslations } from 'next-intl';
 import { useListingForm, INITIAL_FORM_DATA, type ListingFormData } from '@/lib/hooks/useListingForm';
+import { formatDate } from '@/lib/date-utils';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
@@ -1249,7 +1250,7 @@ function SellPageContent() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-snow-white border border-border rounded-lg text-sm text-frost-ice hover:text-aurora-blue hover:border-frost-ice transition-colors"
                     >
-                      €{listing.price.toFixed(2)} • {new Date(listing.created_at).toLocaleDateString('en-GB')}
+                      €{listing.price.toFixed(2)} • {formatDate(listing.created_at)}
                       <span className="text-xs">↗</span>
                     </a>
                   ))}
@@ -1386,6 +1387,7 @@ function SellPageContent() {
                 condition={formData.condition}
                 onFillPrice={(price) => setFormData((prev) => ({ ...prev, price: price.toFixed(2) }))}
                 expansionIds={formData.selectedExpansions.map(e => e.bgg_id)}
+                pricingFormat={formData.pricingFormat}
               />
             )}
 
@@ -1415,9 +1417,9 @@ function SellPageContent() {
                       setFormData((prev) => ({ ...prev, price: parseFloat(formData.price).toFixed(2) }));
                     }
                   }}
-                  placeholder={formData.pricingFormat === 'auction' ? '5.00' : '25.00'}
+                  placeholder={formData.pricingFormat === 'auction' ? 'e.g. 5' : 'e.g. 25'}
                   min={formData.pricingFormat === 'auction' ? '1' : '0.01'}
-                  step="0.01"
+                  step="1"
                   required
                   inputSize="lg"
                   className="pl-14"

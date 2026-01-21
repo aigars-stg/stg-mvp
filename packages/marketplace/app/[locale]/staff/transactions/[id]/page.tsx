@@ -16,6 +16,7 @@ import {
   issueTypeLabels,
   issueStatusConfig,
 } from '@/components/shipping';
+import { formatDateTime } from '@/lib/date-utils';
 
 // Simulation types
 type SimulationAction = 'label_printed' | 'set_barcode' | 'shipped' | 'in_transit' | 'delivered';
@@ -301,7 +302,7 @@ export default function StaffTransactionPage() {
                 )}
               </div>
               <p className="text-sm text-text-secondary mt-1">
-                Staff view • Created {new Date(order.timestamps.created_at).toLocaleString()}
+                Staff view • Created {formatDateTime(order.timestamps.created_at)}
               </p>
             </div>
           </div>
@@ -582,7 +583,7 @@ export default function StaffTransactionPage() {
                             </div>
                             <p className="text-xs text-text-muted mt-1">
                               Reported by {issue.reporter_role} •{' '}
-                              {new Date(issue.created_at).toLocaleString()}
+                              {formatDateTime(issue.created_at)}
                             </p>
                           </div>
                         </div>
@@ -664,36 +665,36 @@ export default function StaffTransactionPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Created</span>
-                  <span className="text-polar-night">{new Date(order.timestamps.created_at).toLocaleString()}</span>
+                  <span className="text-polar-night">{formatDateTime(order.timestamps.created_at)}</span>
                 </div>
                 {order.timestamps.paid_at && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">Paid</span>
-                    <span className="text-polar-night">{new Date(order.timestamps.paid_at).toLocaleString()}</span>
+                    <span className="text-polar-night">{formatDateTime(order.timestamps.paid_at)}</span>
                   </div>
                 )}
                 {order.timestamps.seller_responded_at && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">Seller Responded</span>
-                    <span className="text-polar-night">{new Date(order.timestamps.seller_responded_at).toLocaleString()}</span>
+                    <span className="text-polar-night">{formatDateTime(order.timestamps.seller_responded_at)}</span>
                   </div>
                 )}
                 {order.timestamps.label_generated_at && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">Label Generated</span>
-                    <span className="text-polar-night">{new Date(order.timestamps.label_generated_at).toLocaleString()}</span>
+                    <span className="text-polar-night">{formatDateTime(order.timestamps.label_generated_at)}</span>
                   </div>
                 )}
                 {order.timestamps.cancelled_at && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">Cancelled</span>
-                    <span className="text-aurora-red">{new Date(order.timestamps.cancelled_at).toLocaleString()}</span>
+                    <span className="text-aurora-red">{formatDateTime(order.timestamps.cancelled_at)}</span>
                   </div>
                 )}
                 {order.timestamps.refunded_at && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">Refunded</span>
-                    <span className="text-aurora-red">{new Date(order.timestamps.refunded_at).toLocaleString()}</span>
+                    <span className="text-aurora-red">{formatDateTime(order.timestamps.refunded_at)}</span>
                   </div>
                 )}
               </div>

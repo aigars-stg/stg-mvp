@@ -94,11 +94,12 @@ export async function transferPayoutToSeller(orderId: string): Promise<PayoutRes
     }
 
     // Calculate payout amount
-    const grossAmount = order.items_total + order.shipping_cost;
-    const platformFee = order.service_fee;
-    const netAmount = grossAmount; // Seller receives full amount, we already took platform fee
+    // Seller receives items_total only (platform keeps shipping + service fee via Stripe application_fee)
+    const grossAmount = order.items_total;
+    const platformFee = order.service_fee + order.shipping_cost;
+    const netAmount = grossAmount;
 
-    console.log(`💸 [Payout] Gross: €${grossAmount}, Platform Fee: €${platformFee}, Net: €${netAmount}`);
+    console.log(`💸 [Payout] Seller receives: €${grossAmount}, Platform keeps: €${platformFee} (fee + shipping)`);
 
     // Mark as processing
     await supabase

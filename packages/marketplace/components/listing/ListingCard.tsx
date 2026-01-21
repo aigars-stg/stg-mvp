@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Card, Badge } from '@second-turn/design-system';
-import { Package, LocationPin as MapPin, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Chat as MessageSquare } from 'griddy-icons';
+import { Package, LocationPin as MapPin, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Chat as MessageSquare, Tag as Gavel } from 'griddy-icons';
 import { ImageCarousel } from '@/components/common/ImageCarousel';
 import type { ListingWithSeller } from '@/lib/types/listing';
-import { isContactSellerListing } from '@/lib/types/listing';
+import { isContactSellerListing, isAuctionListing, getAuctionTimeRemaining, formatCompactTimeRemaining } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 import { useRouter } from 'next/navigation';
@@ -66,12 +66,25 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
   const router = useRouter();
   const { user } = useAuth();
 
+  // For auctions, use current bid (or starting price if no bids)
+  const isAuction = isAuctionListing(listing);
+  const displayPrice = isAuction
+    ? (listing.auction_current_bid || listing.auction_start_price || listing.price)
+    : listing.price;
+  const hasBids = isAuction && listing.auction_bid_count !== undefined && listing.auction_bid_count > 0;
+
+  // Calculate auction time remaining for timer display
+  const auctionTimeRemaining = isAuction && listing.auction_ends_at
+    ? getAuctionTimeRemaining(listing.auction_ends_at)
+    : null;
+  const showAuctionTimer = auctionTimeRemaining && auctionTimeRemaining.days === 0 && !auctionTimeRemaining.isEnded;
+
   // Calculate total delivered price (item + shipping + service fee)
   const deliveredPricing = useDeliveredPricing({
     listingType: listing.listing_type,
     transactionMethod: listing.transaction_method,
     pricingFormat: listing.pricing_format,
-    price: listing.price,
+    price: displayPrice,
     sellerCountry: listing.seller.country,
     buyerCountry,
   });
@@ -196,6 +209,23 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
               </Badge>
             )}
 
+            {/* Auction Badge + Timer */}
+            {isAuction && (
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />} className="border-aurora-purple/50 text-aurora-purple">
+                  {t('auction.badge')}
+                </Badge>
+                {showAuctionTimer && auctionTimeRemaining && (
+                  <span className={`text-xs flex items-center gap-1 ${
+                    auctionTimeRemaining.isEndingSoon ? 'text-aurora-red font-medium' : 'text-text-muted'
+                  }`}>
+                    <Clock className="w-3 h-3" />
+                    {formatCompactTimeRemaining(auctionTimeRemaining)}
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Game Metadata - tighter spacing */}
             {(listing.game?.player_count || listing.game?.min_age || listing.game?.playing_time || (listing.included_expansions && listing.included_expansions.length > 0)) && (
               <div className="flex flex-wrap gap-2 text-xs text-text-secondary dark:text-snow-stormLight items-center">
@@ -274,12 +304,20 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
               </>
             ) : (
               <>
-                {/* Item price only for contact_seller or non-Baltic */}
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-polar-night dark:text-snow-stormLightest">
-                    €{listing.price.toFixed(2)}
+                {/* Item price only for contact_seller, auctions, or non-Baltic */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-2xl font-bold ${isAuction ? 'text-aurora-purple' : 'text-polar-night dark:text-snow-stormLightest'}`}>
+                    {isAuction && !hasBids && (
+                      <span className="text-sm font-normal text-text-muted mr-1">{t('auction.startingAt')}</span>
+                    )}
+                    €{displayPrice.toFixed(2)}
                   </span>
-                  {listing.previous_price && listing.previous_price > listing.price && (
+                  {isAuction && hasBids && (
+                    <span className="text-sm text-text-muted dark:text-snow-stormMedium">
+                      ({listing.auction_bid_count} {listing.auction_bid_count === 1 ? t('bid') : t('bids')})
+                    </span>
+                  )}
+                  {!isAuction && listing.previous_price && listing.previous_price > listing.price && (
                     <span className="text-base text-text-muted dark:text-snow-stormMedium line-through">
                       €{listing.previous_price.toFixed(2)}
                     </span>

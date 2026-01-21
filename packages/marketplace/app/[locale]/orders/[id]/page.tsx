@@ -26,6 +26,7 @@ import {
   getStatusConfig,
   isCancelledStatus,
 } from '@/components/shipping';
+import { formatDate, formatTime } from '@/lib/date-utils';
 
 export default function OrderDetailPage() {
   const t = useTranslations('Orders.detail');
@@ -132,8 +133,8 @@ export default function OrderDetailPage() {
               </div>
               <p className="text-text-secondary">
                 {t('placedAt', {
-                  date: new Date(order.timestamps.created_at).toLocaleDateString(),
-                  time: new Date(order.timestamps.created_at).toLocaleTimeString(),
+                  date: formatDate(order.timestamps.created_at),
+                  time: formatTime(order.timestamps.created_at),
                 })}
               </p>
             </div>
@@ -177,9 +178,7 @@ export default function OrderDetailPage() {
                         </p>
                         <p className="text-xs text-text-muted mt-1">
                           {t('cancelled.refundedOn', {
-                            date: new Date(
-                              order.timestamps.refunded_at
-                            ).toLocaleDateString(),
+                            date: formatDate(order.timestamps.refunded_at),
                           })}
                         </p>
                       </div>

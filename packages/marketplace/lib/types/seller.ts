@@ -1,4 +1,34 @@
 /**
+ * DAC7 compliance status values
+ * - exempt: Below 80% of thresholds
+ * - approaching: 80-99% of thresholds
+ * - required: At/above thresholds, no tax info submitted
+ * - compliant: At/above thresholds, tax info submitted
+ * - blocked: At/above thresholds, no tax info, selling blocked
+ */
+export type Dac7ComplianceStatus =
+  | 'exempt'
+  | 'approaching'
+  | 'required'
+  | 'compliant'
+  | 'blocked';
+
+/**
+ * DAC7 tax information submitted by seller
+ */
+export interface Dac7TaxInfo {
+  fullLegalName: string;
+  dateOfBirth: string;
+  addressStreet: string;
+  addressCity: string;
+  addressPostalCode: string;
+  addressCountry: string;
+  taxResidencyCountry: string;
+  taxId: string;
+  taxIdType: string;
+}
+
+/**
  * Seller profile data stored in the seller_profiles table
  * This is separate from the core user_profiles table for:
  * - Better performance (only ~20% of users are sellers)
@@ -36,6 +66,18 @@ export interface SellerProfile {
   dac7_reporting_year: number | null;
   dac7_tax_id: string | null;
   dac7_tax_id_type: string | null;
+
+  // DAC7 Tax Information (collected when approaching thresholds)
+  dac7_full_legal_name: string | null;
+  dac7_date_of_birth: string | null;
+  dac7_address_street: string | null;
+  dac7_address_city: string | null;
+  dac7_address_postal_code: string | null;
+  dac7_address_country: string | null;
+  dac7_tax_residency_country: string | null;
+  dac7_info_submitted_at: string | null;
+  dac7_info_verified: boolean;
+  dac7_compliance_status: Dac7ComplianceStatus;
 
   // Banking
   has_bank_account: boolean;
@@ -193,4 +235,86 @@ export function formatMemberSince(memberSince: string | null): string {
   if (!memberSince) return '';
   const year = new Date(memberSince).getFullYear();
   return `Member since ${year}`;
+}
+
+// ============================================================================
+// DAC7 Compliance Helpers
+// ============================================================================
+
+/**
+ * DAC7 threshold constants
+ */
+export const DAC7_THRESHOLDS = {
+  TRANSACTION_COUNT: 30,
+  SALES_TOTAL: 2000,
+  WARNING_TRANSACTION_COUNT: 24, // 80% of 30
+  WARNING_SALES_TOTAL: 1600, // 80% of 2000
+} as const;
+
+/**
+ * Check if seller needs to provide DAC7 tax information
+ */
+export function needsDac7TaxInfo(seller: SellerProfile | null): boolean {
+  if (!seller) return false;
+  return (
+    seller.dac7_compliance_status === 'approaching' ||
+    seller.dac7_compliance_status === 'required' ||
+    seller.dac7_compliance_status === 'blocked'
+  );
+}
+
+/**
+ * Check if seller is blocked from creating new listings due to DAC7
+ */
+export function isBlockedByDac7(seller: SellerProfile | null): boolean {
+  if (!seller) return false;
+  return seller.dac7_compliance_status === 'blocked';
+}
+
+/**
+ * Check if seller has submitted DAC7 tax information
+ */
+export function hasDac7TaxInfo(seller: SellerProfile | null): boolean {
+  if (!seller) return false;
+  return seller.dac7_info_submitted_at !== null;
+}
+
+/**
+ * Get DAC7 threshold progress as percentages
+ */
+export function getDac7Progress(seller: SellerProfile | null): {
+  transactionPercent: number;
+  salesPercent: number;
+} {
+  if (!seller) {
+    return { transactionPercent: 0, salesPercent: 0 };
+  }
+  return {
+    transactionPercent: Math.min(
+      100,
+      (seller.dac7_annual_transaction_count / DAC7_THRESHOLDS.TRANSACTION_COUNT) * 100
+    ),
+    salesPercent: Math.min(
+      100,
+      (seller.dac7_annual_sales_total / DAC7_THRESHOLDS.SALES_TOTAL) * 100
+    ),
+  };
+}
+
+/**
+ * Get human-readable DAC7 compliance status label
+ */
+export function getDac7StatusLabel(status: Dac7ComplianceStatus): string {
+  switch (status) {
+    case 'exempt':
+      return 'Not required';
+    case 'approaching':
+      return 'Action needed soon';
+    case 'required':
+      return 'Tax info required';
+    case 'compliant':
+      return 'Compliant';
+    case 'blocked':
+      return 'Selling blocked';
+  }
 }

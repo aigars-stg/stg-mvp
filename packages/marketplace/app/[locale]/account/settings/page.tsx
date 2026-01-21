@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Button, Card } from '@second-turn/design-system';
 import { User, Phone, CheckCircleAlt01 as CheckCircle2, AlertCircle, Download, Settings, Globe, Edit as Pencil, Check, Close, LinkExternal as ExternalLink } from 'griddy-icons';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { AvatarUpload } from '@/components/auth/AvatarUpload';
 import { EmailChange } from '@/components/auth/EmailChange';
@@ -12,10 +12,10 @@ import { AccountDeletion } from '@/components/auth/AccountDeletion';
 import { LoginActivity } from '@/components/auth/LoginActivity';
 import { CountrySelector } from '@/components/auth/CountrySelector';
 import { getCountryFlag, getCountryName, type CountryCode } from '@/lib/country-utils';
+import { formatDate } from '@/lib/date-utils';
 
 export default function AccountSettingsPage() {
   const t = useTranslations('AccountSettings');
-  const locale = useLocale();
   const { user, profile, updateProfile, refreshProfile, signOut } = useAuth();
 
   const [fullName, setFullName] = useState(profile?.full_name || '');
@@ -343,10 +343,7 @@ export default function AccountSettingsPage() {
 
                 <p className="text-sm text-text-secondary mt-1">
                   {t('profileHero.memberSince', {
-                    date: new Date(user.created_at || '').toLocaleDateString(
-                      locale === 'lv' ? 'lv-LV' : 'en-US',
-                      { year: 'numeric', month: 'long', day: 'numeric' }
-                    )
+                    date: formatDate(user.created_at || '')
                   })}
                 </p>
               </div>

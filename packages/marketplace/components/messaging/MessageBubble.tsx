@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { format, isToday, isYesterday } from 'date-fns';
 import { Close } from 'griddy-icons';
 import type { Message } from '@/lib/types/message';
+import { formatMessageTime } from '@/lib/date-utils';
 
 interface MessageBubbleProps {
   message: Message;
@@ -18,25 +18,6 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const photos = message.photo_urls || [];
-
-  const formatMessageTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-
-    if (isToday(date)) {
-      return format(date, 'h:mm a');
-    }
-
-    if (isYesterday(date)) {
-      return `Yesterday, ${format(date, 'h:mm a')}`;
-    }
-
-    // Less than 7 days ago
-    if (Date.now() - date.getTime() < 7 * 24 * 60 * 60 * 1000) {
-      return format(date, 'EEE, h:mm a');
-    }
-
-    return format(date, 'MMM d, h:mm a');
-  };
 
   if (message.is_system_message) {
     return (

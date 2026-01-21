@@ -347,3 +347,25 @@ export function formatAuctionTimeRemaining(time: ReturnType<typeof getAuctionTim
 
   return parts.join(' ');
 }
+
+/**
+ * Compact time format showing only the two most significant units.
+ * Examples: "2d 23h", "5h 32m", "< 5m"
+ */
+export function formatCompactTimeRemaining(time: ReturnType<typeof getAuctionTimeRemaining>): string {
+  if (time.isEnded) return 'Ended';
+
+  if (time.isEndingSoon) {
+    return '< 5m';
+  }
+
+  if (time.days > 0) {
+    return `${time.days}d ${time.hours}h`;
+  }
+
+  if (time.hours > 0) {
+    return `${time.hours}h ${time.minutes}m`;
+  }
+
+  return `${time.minutes}m ${time.seconds}s`;
+}

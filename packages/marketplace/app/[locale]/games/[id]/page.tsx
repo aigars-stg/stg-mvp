@@ -9,6 +9,7 @@ import { mockGames } from '../../../../lib/mock-data';
 import { conditionConfig } from '../../../../lib/condition-config';
 import { getLanguageFlag } from '../../../../lib/bgg-api';
 import { NotificationModal } from '@/components/common/NotificationModal';
+import { formatDate } from '@/lib/date-utils';
 
 interface GameDetailPageProps {
   params: {
@@ -407,7 +408,7 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
                     </div>
                     <p className="text-xs sm:text-sm text-text-secondary mb-1">{review.comment}</p>
                     <p className="text-xs text-text-muted">
-                      Purchased: {review.gamePurchased} • {new Date(review.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      Purchased: {review.gamePurchased} • {formatDate(review.date)}
                     </p>
                   </div>
                 ))}

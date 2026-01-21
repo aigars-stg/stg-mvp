@@ -20,9 +20,12 @@ export function OfferCardPricing({ listing, deliveredPricing, variant = 'desktop
   const priceClasses = variant === 'mobile' ? 'text-xl' : 'text-2xl';
 
   if (isAuctionListing(listing)) {
+    const hasBids = listing.auction_bid_count !== undefined && listing.auction_bid_count > 0;
+    const displayPrice = listing.auction_current_bid || listing.auction_start_price || 0;
+
     return (
       <div className={variant === 'mobile' ? '' : 'text-right'}>
-        {/* Auction badge and current bid */}
+        {/* Auction badge */}
         {variant === 'desktop' && (
           <div className="flex items-center gap-2 justify-end mb-1">
             <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />}>
@@ -35,15 +38,19 @@ export function OfferCardPricing({ listing, deliveredPricing, variant = 'desktop
             {t('auction.badge')}
           </Badge>
         )}
-        <div className={`text-xs text-text-secondary ${variant === 'mobile' ? 'mt-1' : 'mb-0.5'}`}>
-          {listing.auction_current_bid ? t('auction.currentBid') : t('auction.startingPrice')}
-        </div>
-        <div className={`${priceClasses} font-bold text-aurora-purple`}>
-          €{(listing.auction_current_bid || listing.auction_start_price || 0).toFixed(2)}
-        </div>
-        {variant === 'desktop' && listing.auction_bid_count !== undefined && listing.auction_bid_count > 0 && (
-          <div className="text-xs text-text-muted mt-0.5">
-            {listing.auction_bid_count} {listing.auction_bid_count === 1 ? t('auction.bid') : t('auction.bids')}
+        {/* Price display */}
+        {hasBids ? (
+          <>
+            <div className={`${priceClasses} font-bold text-aurora-purple ${variant === 'mobile' ? 'mt-1' : ''}`}>
+              €{displayPrice.toFixed(2)}
+            </div>
+            <div className="text-xs text-text-muted mt-0.5">
+              {listing.auction_bid_count} {listing.auction_bid_count === 1 ? t('auction.bid') : t('auction.bids')}
+            </div>
+          </>
+        ) : (
+          <div className={`${priceClasses} font-bold text-aurora-purple ${variant === 'mobile' ? 'mt-1' : ''}`}>
+            {t('auction.startingAt', { price: displayPrice.toFixed(2) })}
           </div>
         )}
       </div>

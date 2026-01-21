@@ -5,6 +5,7 @@ import { Button } from '@second-turn/design-system';
 import { Wallet, RefreshCw as Loader2, AlertCircle, ArrowUpRight, Plus, RefreshCw, Time as Clock } from 'griddy-icons';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { formatTime } from '@/lib/date-utils';
 
 interface BalanceData {
   available: { amount: number; currency: string };
@@ -273,7 +274,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
       {/* Cache indicator */}
       {data.cachedAt && (
         <p className="text-xs text-text-muted text-center mt-3">
-          {t('updated', { time: new Date(data.cachedAt).toLocaleTimeString() })}
+          {t('updated', { time: formatTime(data.cachedAt) })}
         </p>
       )}
     </div>

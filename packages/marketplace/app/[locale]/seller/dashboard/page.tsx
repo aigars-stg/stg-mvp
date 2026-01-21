@@ -14,7 +14,9 @@ import { BankAccountCard } from '@/components/seller/BankAccountCard';
 import { BankAccountForm } from '@/components/seller/BankAccountForm';
 import { PayoutConfirmModal } from '@/components/seller/PayoutConfirmModal';
 import { SellerTrustCard } from '@/components/seller/SellerTrustCard';
+import { Dac7WarningBanner } from '@/components/seller/Dac7WarningBanner';
 import { useTranslations } from 'next-intl';
+import type { Dac7ComplianceStatus } from '@/lib/types/seller';
 
 interface SellerProfile {
   seller_status: string;
@@ -24,6 +26,10 @@ interface SellerProfile {
   has_bank_account: boolean;
   bank_account_last4: string | null;
   bank_account_bank_name: string | null;
+  // DAC7 fields
+  dac7_compliance_status: Dac7ComplianceStatus | null;
+  dac7_annual_transaction_count: number;
+  dac7_annual_sales_total: number;
 }
 
 interface BalanceData {
@@ -66,7 +72,10 @@ export default function SellerDashboardPage() {
           stripe_connect_payouts_enabled,
           has_bank_account,
           bank_account_last4,
-          bank_account_bank_name
+          bank_account_bank_name,
+          dac7_compliance_status,
+          dac7_annual_transaction_count,
+          dac7_annual_sales_total
         `)
         .eq('user_id', user.id)
         .single();
@@ -183,6 +192,17 @@ export default function SellerDashboardPage() {
             </Link>
           </div>
         </div>
+
+        {/* DAC7 Warning Banner - show when tax info is needed */}
+        {profile?.dac7_compliance_status &&
+          profile.dac7_compliance_status !== 'exempt' &&
+          profile.dac7_compliance_status !== 'compliant' && (
+            <Dac7WarningBanner
+              complianceStatus={profile.dac7_compliance_status}
+              annualTransactionCount={profile.dac7_annual_transaction_count || 0}
+              annualSalesTotal={profile.dac7_annual_sales_total || 0}
+            />
+          )}
 
         {/* Main Content */}
         {profile?.stripe_connect_payouts_enabled ? (
