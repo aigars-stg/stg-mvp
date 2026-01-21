@@ -170,7 +170,7 @@ export async function transferPayoutToSeller(orderId: string): Promise<PayoutRes
         transferId: transfer.id,
         amount: netAmount,
       };
-    } catch (stripeError: any) {
+    } catch (stripeError: unknown) {
       console.error('❌ [Payout] Stripe transfer failed:', stripeError);
 
       // Update order
@@ -179,26 +179,31 @@ export async function transferPayoutToSeller(orderId: string): Promise<PayoutRes
         .update({ payout_status: 'failed' })
         .eq('id', orderId);
 
+      // Extract error details from Stripe error
+      const isStripeError = stripeError && typeof stripeError === 'object' && 'type' in stripeError;
+      const errorCode = isStripeError && 'code' in stripeError ? String(stripeError.code) : undefined;
+      const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown error';
+
       // Update transaction record
       await supabase
         .from('payout_transactions')
         .update({
           status: 'failed',
-          error_code: stripeError.code,
-          error_message: stripeError.message,
+          error_code: errorCode,
+          error_message: errorMessage,
         })
         .eq('id', payoutTx.id);
 
       return {
         success: false,
-        error: stripeError.message,
+        error: errorMessage,
       };
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Payout] Unexpected error:', error);
     return {
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -390,19 +395,20 @@ export async function requestBankPayout(
       amount: payoutAmount,
       arrivalDate: arrivalDate || undefined,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Bank Payout] Error:', error);
 
     // Handle specific Stripe errors
-    if (error.type === 'StripeInvalidRequestError') {
-      if (error.code === 'balance_insufficient') {
+    const isStripeError = error && typeof error === 'object' && 'type' in error;
+    if (isStripeError && error.type === 'StripeInvalidRequestError') {
+      if ('code' in error && error.code === 'balance_insufficient') {
         return { success: false, error: 'Insufficient balance for payout' };
       }
     }
 
     return {
       success: false,
-      error: error.message || 'Failed to create payout',
+      error: error instanceof Error ? error.message : 'Failed to create payout',
     };
   }
 }

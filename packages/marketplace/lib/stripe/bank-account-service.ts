@@ -135,14 +135,16 @@ export async function addBankAccount(
         bankName,
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Bank Account] Error adding bank account:', error);
 
     // Handle Stripe errors
-    if (error.type === 'StripeInvalidRequestError') {
+    const isStripeError = error && typeof error === 'object' && 'type' in error;
+    if (isStripeError && error.type === 'StripeInvalidRequestError') {
+      const errorMessage = error instanceof Error ? error.message : 'Invalid bank account details';
       return {
         success: false,
-        error: error.message || 'Invalid bank account details',
+        error: errorMessage,
       };
     }
 

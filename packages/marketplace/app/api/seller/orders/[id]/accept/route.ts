@@ -10,6 +10,13 @@ interface AcceptOrderBody {
   parcelSize?: 'XS' | 'S' | 'M' | 'L'; // Required for T2T orders
 }
 
+// Type for the seller_accept_order RPC result
+interface AcceptOrderResult {
+  success: boolean;
+  error?: string;
+  shipping_method?: string;
+}
+
 /**
  * POST /api/seller/orders/[id]/accept
  *
@@ -29,12 +36,12 @@ export async function POST(
     const { parcelSize } = body;
 
     // Call database function to accept order
-    const { data: result, error: acceptError } = await (supabase as any).rpc(
+    const { data: rpcResult, error: acceptError } = await supabase.rpc(
       'seller_accept_order',
       {
         p_order_id: orderId,
         p_seller_id: user.id,
-        p_parcel_size: parcelSize || null,
+        p_parcel_size: parcelSize ?? undefined,
       }
     );
 
@@ -45,12 +52,14 @@ export async function POST(
       );
     }
 
+    const result = rpcResult as unknown as AcceptOrderResult;
+
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
     // Post system message to transaction conversation (non-blocking)
-    postOrderAcceptedMessage(orderId, result.shipping_method || 't2t');
+    postOrderAcceptedMessage(orderId, (result.shipping_method || 't2t') as 't2t' | 'local_pickup');
 
     // Fetch complete order details for email and label generation (including receiver info from checkout)
     const { data: order } = await supabase

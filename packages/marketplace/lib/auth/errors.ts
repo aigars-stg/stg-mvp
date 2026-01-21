@@ -1,13 +1,23 @@
 import { AUTH_ERRORS } from './constants';
 
 /**
+ * Represents an auth error from Supabase or similar sources
+ */
+interface AuthErrorLike {
+  message?: string;
+  code?: string;
+}
+
+/**
  * Maps Supabase auth error codes/messages to user-friendly messages
  */
-export function mapAuthError(error: any): string {
+export function mapAuthError(error: unknown): string {
   if (!error) return AUTH_ERRORS.UNKNOWN_ERROR;
 
-  const message = error.message?.toLowerCase() || '';
-  const code = error.code?.toLowerCase() || '';
+  // Type guard to check if error has message/code properties
+  const authError = error as AuthErrorLike;
+  const message = authError.message?.toLowerCase() || '';
+  const code = authError.code?.toLowerCase() || '';
 
   // Email errors
   if (message.includes('email not confirmed') || code === 'email_not_confirmed') {
@@ -47,22 +57,24 @@ export function mapAuthError(error: any): string {
   }
 
   // Generic error
-  return error.message || AUTH_ERRORS.UNKNOWN_ERROR;
+  return authError.message || AUTH_ERRORS.UNKNOWN_ERROR;
 }
 
 /**
  * Check if error is a network/connection error
  */
-export function isNetworkError(error: any): boolean {
-  const message = error.message?.toLowerCase() || '';
+export function isNetworkError(error: unknown): boolean {
+  const authError = error as AuthErrorLike;
+  const message = authError.message?.toLowerCase() || '';
   return message.includes('network') || message.includes('fetch') || message.includes('connection');
 }
 
 /**
  * Check if error requires email verification
  */
-export function requiresEmailVerification(error: any): boolean {
-  const message = error.message?.toLowerCase() || '';
-  const code = error.code?.toLowerCase() || '';
+export function requiresEmailVerification(error: unknown): boolean {
+  const authError = error as AuthErrorLike;
+  const message = authError.message?.toLowerCase() || '';
+  const code = authError.code?.toLowerCase() || '';
   return message.includes('email not confirmed') || code === 'email_not_confirmed';
 }

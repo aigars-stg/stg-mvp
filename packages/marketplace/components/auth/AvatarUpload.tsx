@@ -119,8 +119,8 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
       }
 
       setUploading(false);
-    } catch (err: any) {
-      setError(err.message || 'Failed to upload avatar');
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Failed to upload avatar');
       setUploading(false);
       // Revert preview on error
       setPreview(currentAvatarUrl || null);
@@ -169,8 +169,8 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
       }
 
       setUploading(false);
-    } catch (err: any) {
-      setError(err.message || 'Failed to remove avatar');
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Failed to remove avatar');
       setUploading(false);
     }
   };

@@ -46,7 +46,7 @@ export function MessageInput({
       const file = files[i];
 
       // Validate file type
-      if (!MESSAGE_CONSTRAINTS.ALLOWED_PHOTO_TYPES.includes(file.type as any)) {
+      if (!(MESSAGE_CONSTRAINTS.ALLOWED_PHOTO_TYPES as readonly string[]).includes(file.type)) {
         continue;
       }
 

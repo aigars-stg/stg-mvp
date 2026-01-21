@@ -2,6 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import type { EmailOtpType } from '@supabase/supabase-js';
 import { logLoginActivity, getClientIP } from '@/lib/auth/activity-logger';
 
 export async function GET(
@@ -41,7 +42,7 @@ export async function GET(
   if (token_hash && type) {
     // Email Link / Magic Link Flow
     const { data: { user: otpUser }, error: otpError } = await supabase.auth.verifyOtp({
-      type: type as any,
+      type: type as EmailOtpType,
       token_hash,
     });
     if (otpError) error = otpError;

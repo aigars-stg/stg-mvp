@@ -38,8 +38,8 @@ export function EmailVerificationBanner({ dismissible = false }: EmailVerificati
       } else {
         setResendMessage(t('successMessage'));
       }
-    } catch (err: any) {
-      setResendMessage(t('errorPrefix', { message: err.message || t('failedToResend') }));
+    } catch (error: unknown) {
+      setResendMessage(t('errorPrefix', { message: error instanceof Error ? error.message : t('failedToResend') }));
     } finally {
       setIsResending(false);
     }

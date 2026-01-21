@@ -4,6 +4,79 @@ import type { GameWithOffers, GameOffersResponse } from '@/lib/types/aggregated-
 import type { ListingWithSeller } from '@/lib/types/listing';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { fetchGameMetadata } from '@/lib/bgg-api';
+import type { BGGVersion } from '@/lib/bgg-types';
+import type { Json } from '@/lib/supabase/database.types';
+
+// Type for game data from database with versions (standalone, not extending GameRow)
+interface GameDataWithVersions {
+  id: number;
+  name: string;
+  thumbnail: string | null;
+  image: string | null;
+  player_count: string | null;
+  min_age: number | null;
+  playing_time: string | null;
+  is_expansion: boolean | null;
+  yearpublished: number | null;
+  versions: Json | null;
+  description: string | null;
+  designers: Json | null;
+  bayesaverage: number | null;
+}
+
+// Type for seller trust data
+interface SellerTrust {
+  user_id: string;
+  total_reviews: number;
+  average_rating: number;
+  total_completed_sales: number;
+  member_since: string | null;
+}
+
+// Type for seller identity data
+interface SellerIdentity {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  country: string | null;
+}
+
+// Type for wanted listing from database
+interface WantedListingData {
+  id: string;
+  bgg_game_id: number;
+  game_name: string;
+  game_year: number | null;
+  version_source: string;
+  bgg_version_id: number | null;
+  version_name: string | null;
+  publisher: string | null;
+  language: string | null;
+  edition_year: number | null;
+  version_thumbnail: string | null;
+  version_image: string | null;
+  min_price: number | null;
+  max_price: number;
+  currency: string;
+  acceptable_conditions: string[];
+  preferred_language: string | null;
+  location_preferences: string | null;
+  notes: string | null;
+  expansion_preference: string;
+  buyer_id: string;
+  status: string;
+  response_count: number;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+  buyer: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url: string | null;
+    country: string | null;
+  } | null;
+}
 
 /**
  * GET /api/games/[id]/offers
@@ -37,7 +110,7 @@ export async function GET(
     const supabase = await createServerSupabase();
 
     // Fetch game metadata including versions for version-specific images
-    const { data: gameData, error: gameError } = await (supabase as any)
+    const { data: gameData, error: gameError } = await supabase
       .from('games')
       .select('id, name, thumbnail, image, player_count, min_age, playing_time, is_expansion, yearpublished, versions, description, designers, bayesaverage')
       .eq('id', bggId)
@@ -48,27 +121,32 @@ export async function GET(
     }
 
     // On-demand metadata refresh: If description or designers are missing, fetch from BGG
-    let enrichedGameData = gameData;
+    let enrichedGameData = gameData as GameDataWithVersions | null;
     if (gameData && (!gameData.description || !gameData.designers)) {
       console.log(`📡 [Game Offers] Missing metadata for ${gameData.name}, fetching from BGG...`);
       try {
         const bggMetadata = await fetchGameMetadata(bggId);
         if (bggMetadata) {
           // Update database with fresh metadata (fire and forget - don't block response)
-          (supabase as any)
-            .from('games')
-            .update({
-              description: bggMetadata.description || null,
-              designers: bggMetadata.designers?.length ? bggMetadata.designers : null,
-              bayesaverage: bggMetadata.bayesaverage || gameData.bayesaverage || null,
-              player_count: bggMetadata.playerCount || gameData.player_count || null,
-              min_age: bggMetadata.minAge || gameData.min_age || null,
-              playing_time: bggMetadata.playingTime || gameData.playing_time || null,
-              metadata_fetched_at: new Date().toISOString(),
-            })
-            .eq('id', bggId)
-            .then(() => console.log(`✅ [Game Offers] Updated metadata for ${gameData.name}`))
-            .catch((err: any) => console.error(`❌ [Game Offers] Failed to update metadata:`, err));
+          (async () => {
+            try {
+              await supabase
+                .from('games')
+                .update({
+                  description: bggMetadata.description || null,
+                  designers: bggMetadata.designers?.length ? bggMetadata.designers : null,
+                  bayesaverage: bggMetadata.bayesaverage || gameData.bayesaverage || null,
+                  player_count: bggMetadata.playerCount || gameData.player_count || null,
+                  min_age: bggMetadata.minAge || gameData.min_age || null,
+                  playing_time: bggMetadata.playingTime || gameData.playing_time || null,
+                  metadata_fetched_at: new Date().toISOString(),
+                })
+                .eq('id', bggId);
+              console.log(`✅ [Game Offers] Updated metadata for ${gameData.name}`);
+            } catch (err) {
+              console.error(`❌ [Game Offers] Failed to update metadata:`, err);
+            }
+          })();
 
           // Use fresh data for this response
           enrichedGameData = {
@@ -79,7 +157,7 @@ export async function GET(
             player_count: bggMetadata.playerCount || gameData.player_count,
             min_age: bggMetadata.minAge || gameData.min_age,
             playing_time: bggMetadata.playingTime || gameData.playing_time,
-          };
+          } as GameDataWithVersions;
         }
       } catch (err) {
         console.error(`❌ [Game Offers] BGG fetch failed:`, err);
@@ -89,7 +167,7 @@ export async function GET(
 
     // Build query for listings (seller trust fetched separately - no FK exists)
     // Note: We include reserved listings so they can be shown with "Reserved" indicator
-    let query = (supabase as any)
+    let query = supabase
       .from('listings')
       .select(`
         *
@@ -137,24 +215,24 @@ export async function GET(
 
     // Fetch seller trust data AND profile data separately
     // We fetch public_seller_profiles (trust) and public_profiles (identity)
-    let sellerTrustMap = new Map<string, any>();
-    let sellerProfileMap = new Map<string, any>();
+    let sellerTrustMap = new Map<string, SellerTrust>();
+    let sellerProfileMap = new Map<string, SellerIdentity>();
 
     if (listings && listings.length > 0) {
-      const sellerIds = [...new Set(listings.map((l: any) => l.seller_id))];
+      const sellerIds = [...new Set(listings.map((l) => l.seller_id))] as string[];
 
       // 1. Fetch Trust Stats
-      const { data: sellerTrust } = await (supabase as any)
+      const { data: sellerTrust } = await supabase
         .from('public_seller_profiles')
         .select('*')
         .in('user_id', sellerIds);
 
       if (sellerTrust) {
-        sellerTrustMap = new Map(sellerTrust.map((p: any) => [p.user_id, p]));
+        sellerTrustMap = new Map(sellerTrust.map((p) => [p.user_id as string, p as unknown as SellerTrust]));
       }
 
       // 2. Fetch Identity (Name, Avatar, Country)
-      const { data: sellerIdentity, error: identityError } = await (supabase as any)
+      const { data: sellerIdentity, error: identityError } = await supabase
         .from('public_profiles')
         .select('id, full_name, avatar_url, country')
         .in('id', sellerIds);
@@ -166,11 +244,11 @@ export async function GET(
       }
 
       if (sellerIdentity) {
-        sellerProfileMap = new Map(sellerIdentity.map((p: any) => [p.id, p]));
+        sellerProfileMap = new Map(sellerIdentity.map((p) => [p.id as string, p as SellerIdentity]));
         console.log(`✅ [Game Offers] Fetched ${sellerIdentity.length} seller profiles for ${sellerIds.length} sellers`);
 
         // Log any missing profiles
-        const missingProfiles = (sellerIds as string[]).filter((id) => !sellerProfileMap.has(id));
+        const missingProfiles = sellerIds.filter((id) => !sellerProfileMap.has(id));
         if (missingProfiles.length > 0) {
           console.warn('⚠️ [Game Offers] Missing profiles for seller IDs:', missingProfiles);
         }
@@ -185,16 +263,17 @@ export async function GET(
     const gameYear = enrichedGameData?.yearpublished || firstListing?.game_year || null;
 
     // Add game metadata to each listing with version-specific images
-    const offersWithGame: ListingWithSeller[] = (listings || []).map((listing: any) => {
+    const offersWithGame = (listings || []).map((listing) => {
       // Look up version-specific images if bgg_version_id exists
-      let versionThumbnail = null;
-      let versionImage = null;
+      let versionThumbnail: string | null = null;
+      let versionImage: string | null = null;
 
       if (listing.bgg_version_id && enrichedGameData?.versions) {
-        const version = enrichedGameData.versions.find((v: any) => v.id === listing.bgg_version_id);
+        const versions = enrichedGameData.versions as unknown as BGGVersion[];
+        const version = versions.find((v) => v.id === listing.bgg_version_id);
         if (version) {
-          versionThumbnail = version.thumbnail;
-          versionImage = version.image;
+          versionThumbnail = version.thumbnail || null;
+          versionImage = version.image || null;
         }
       }
 
@@ -204,6 +283,8 @@ export async function GET(
 
       return {
         ...listing,
+        // Cast included_expansions from Json to proper type
+        included_expansions: listing.included_expansions as unknown as ListingWithSeller['included_expansions'],
         seller: {
           id: listing.seller_id,
           full_name: sellerIdentity?.full_name || 'Unknown Seller',
@@ -227,7 +308,7 @@ export async function GET(
           is_expansion: enrichedGameData?.is_expansion || false,
         },
       };
-    });
+    }) as ListingWithSeller[];
 
     // Sort by condition if requested (manual sort since DB can't do custom order)
     if (sort === 'condition') {
@@ -261,8 +342,8 @@ export async function GET(
       playing_time: enrichedGameData?.playing_time || null,
       is_expansion: enrichedGameData?.is_expansion || false,
       description: enrichedGameData?.description || null,
-      designers: enrichedGameData?.designers || null,
-      rating: enrichedGameData?.bayesaverage ? parseFloat(enrichedGameData.bayesaverage) : null,
+      designers: (enrichedGameData?.designers as string[] | null) || null,
+      rating: enrichedGameData?.bayesaverage ?? null,
       offers: offersWithGame,
       offer_count: offersWithGame.length,
       lowest_price: lowestPrice,
@@ -274,7 +355,7 @@ export async function GET(
     // Fetch active wanted listings for this game
     let wantedListings: WantedListingWithDetails[] = [];
     try {
-      const { data: wantedData, error: wantedError } = await (supabase as any)
+      const { data: wantedData, error: wantedError } = await supabase
         .from('wanted_listings')
         .select(`
           *,
@@ -294,8 +375,9 @@ export async function GET(
         console.error('❌ [Game Offers] Wanted listings fetch error:', wantedError);
       } else if (wantedData) {
         // Add game metadata to wanted listings
-        wantedListings = wantedData.map((wl: any) => ({
+        wantedListings = (wantedData as unknown as WantedListingData[]).map((wl) => ({
           ...wl,
+          buyer: wl.buyer || { id: '', full_name: '', email: '', avatar_url: null, country: null },
           game: {
             thumbnail: enrichedGameData?.thumbnail || null,
             image: enrichedGameData?.image || null,
@@ -304,7 +386,7 @@ export async function GET(
             playing_time: enrichedGameData?.playing_time || null,
             is_expansion: enrichedGameData?.is_expansion || false,
           },
-        }));
+        })) as WantedListingWithDetails[];
         console.log(`✅ [Game Offers] Found ${wantedListings.length} wanted listings for "${gameName}"`);
       }
     } catch (wantedErr) {
@@ -321,10 +403,11 @@ export async function GET(
         'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Game Offers] Unexpected error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch game offers', details: error.message },
+      { error: 'Failed to fetch game offers', details: message },
       { status: 500 }
     );
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import type { TypedSupabase } from '@/lib/supabase/query-types';
 
 /**
  * POST /api/wanted/[id]/extend
@@ -17,7 +18,7 @@ export async function POST(
     const { id } = params;
 
     // Fetch current wanted listing to verify ownership and get current expiration
-    const { data: currentListing, error: fetchError } = await (supabase as any)
+    const { data: currentListing, error: fetchError } = await (supabase as TypedSupabase)
       .from('wanted_listings')
       .select('buyer_id, status, expires_at')
       .eq('id', id)
@@ -47,13 +48,13 @@ export async function POST(
     }
 
     // Calculate new expiration date (current expiration + 30 days, or NOW + 30 days if already expired)
-    const currentExpiration = new Date(currentListing.expires_at);
+    const currentExpiration = new Date(currentListing.expires_at || new Date());
     const now = new Date();
     const baseDate = currentExpiration > now ? currentExpiration : now;
     const newExpiration = new Date(baseDate.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     // Update wanted listing
-    const { data: wantedListing, error: updateError } = await (supabase as any)
+    const { data: wantedListing, error: updateError } = await (supabase as TypedSupabase)
       .from('wanted_listings')
       .update({
         expires_at: newExpiration.toISOString(),

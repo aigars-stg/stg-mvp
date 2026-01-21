@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import type { TypedSupabase, WantedListingRow, TablesUpdate, GameRow, WantedListingResponseRow, UserProfileRow } from '@/lib/supabase/query-types';
+
+// Extended types for API responses with joined data
+interface GameMetadata {
+  thumbnail: string | null;
+  image: string | null;
+  player_count: string | null;
+  min_age: number | null;
+  playing_time: string | null;
+  is_expansion: boolean | null;
+}
+
+interface ResponseWithSeller extends WantedListingResponseRow {
+  seller?: Pick<UserProfileRow, 'id' | 'full_name' | 'avatar_url' | 'country'> | null;
+}
+
+interface WantedListingWithExtras extends WantedListingRow {
+  buyer?: Pick<UserProfileRow, 'id' | 'full_name' | 'email' | 'avatar_url' | 'country'> | null;
+  game?: GameMetadata;
+  responses?: ResponseWithSeller[];
+}
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +33,7 @@ export async function GET(
     const supabase = await createServerSupabase();
 
     // Fetch wanted listing with buyer profile
-    const { data: wantedListing, error } = await (supabase as any)
+    const { data: wantedListing, error } = await (supabase as TypedSupabase)
       .from('wanted_listings')
       .select(`
         *,
@@ -41,16 +62,19 @@ export async function GET(
       );
     }
 
+    // Cast to extended type for adding dynamic properties
+    const listingWithExtras = wantedListing as WantedListingWithExtras;
+
     // Fetch game images and metadata
-    if (wantedListing) {
-      const { data: game } = await (supabase as any)
+    if (listingWithExtras) {
+      const { data: game } = await (supabase as TypedSupabase)
         .from('games')
         .select('thumbnail, image, player_count, min_age, playing_time, is_expansion')
-        .eq('id', wantedListing.bgg_game_id)
+        .eq('id', listingWithExtras.bgg_game_id)
         .single();
 
       if (game) {
-        wantedListing.game = {
+        listingWithExtras.game = {
           thumbnail: game.thumbnail,
           image: game.image,
           player_count: game.player_count,
@@ -59,7 +83,7 @@ export async function GET(
           is_expansion: game.is_expansion
         };
       } else {
-        wantedListing.game = {
+        listingWithExtras.game = {
           thumbnail: null,
           image: null,
           player_count: null,
@@ -72,9 +96,9 @@ export async function GET(
       // Fetch responses to this wanted listing (only visible to buyer)
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (user && user.id === wantedListing.buyer_id) {
+      if (user && user.id === listingWithExtras.buyer_id) {
         // Buyer can see all responses
-        const { data: responses } = await (supabase as any)
+        const { data: responses } = await (supabase as TypedSupabase)
           .from('wanted_listing_responses')
           .select(`
             *,
@@ -88,11 +112,11 @@ export async function GET(
           .eq('wanted_listing_id', id)
           .order('responded_at', { ascending: false });
 
-        wantedListing.responses = responses || [];
+        listingWithExtras.responses = (responses || []) as ResponseWithSeller[];
       }
     }
 
-    return NextResponse.json({ wantedListing });
+    return NextResponse.json({ wantedListing: listingWithExtras });
   } catch (error) {
     return handleApiError(error, 'Fetch wanted listing');
   }
@@ -114,7 +138,7 @@ export async function PATCH(
     const body = await request.json();
 
     // Build updates object from allowed fields
-    const updates: any = {};
+    const updates: TablesUpdate<'wanted_listings'> = {};
 
     // Status field
     if (body.status !== undefined) {
@@ -182,7 +206,7 @@ export async function PATCH(
     }
 
     // Update wanted listing (RLS policy ensures only buyer can update)
-    const { data: wantedListing, error: updateError } = await (supabase as any)
+    const { data: wantedListing, error: updateError } = await (supabase as TypedSupabase)
       .from('wanted_listings')
       .update(updates)
       .eq('id', id)
@@ -232,7 +256,7 @@ export async function DELETE(
 
     if (hardDelete) {
       // Hard delete - permanently remove from database
-      const { error: deleteError } = await (supabase as any)
+      const { error: deleteError } = await (supabase as TypedSupabase)
         .from('wanted_listings')
         .delete()
         .eq('id', id)
@@ -257,7 +281,7 @@ export async function DELETE(
       });
     } else {
       // Soft delete - set status to 'cancelled'
-      const { data: wantedListing, error: updateError } = await (supabase as any)
+      const { data: wantedListing, error: updateError } = await (supabase as TypedSupabase)
         .from('wanted_listings')
         .update({ status: 'cancelled' })
         .eq('id', id)

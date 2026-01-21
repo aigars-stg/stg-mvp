@@ -1,5 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
+import type { BGGVersion } from '@/lib/bgg-types';
+import type { Json } from '@/lib/supabase/database.types';
+
+// Type for listing with seller from the join query (standalone)
+interface ListingWithSellerData {
+  id: string;
+  bgg_game_id: number;
+  seller_id: string;
+  bgg_version_id: number | null;
+  price: number;
+  condition: string;
+  status: string;
+  game_name: string;
+  game_year: number | null;
+  seller: {
+    id: string;
+    full_name: string | null;
+    email: string;
+    avatar_url: string | null;
+  } | null;
+  game?: {
+    thumbnail: string | null;
+    image: string | null;
+    player_count: string | null;
+    min_age: number | null;
+    playing_time: string | null;
+    is_expansion: boolean | null;
+  };
+  [key: string]: unknown; // Allow other properties from the listing
+}
+
+// Type for game with versions (standalone)
+interface GameWithVersions {
+  id: number;
+  name: string;
+  thumbnail: string | null;
+  image: string | null;
+  player_count: string | null;
+  min_age: number | null;
+  playing_time: string | null;
+  is_expansion: boolean | null;
+  versions: Json | null;
+}
 
 export async function GET(
   request: NextRequest,
@@ -14,7 +57,7 @@ export async function GET(
     const supabase = await createServerSupabase();
 
     // Build query
-    let query = (supabase as any)
+    let query = supabase
       .from('listings')
       .select(`
         *,
@@ -25,7 +68,7 @@ export async function GET(
           avatar_url
         )
       `)
-      .eq('bgg_game_id', gameId)
+      .eq('bgg_game_id', parseInt(gameId))
       .eq('status', 'active')
       .order('price', { ascending: true }) // Sort by price for comparison
       .limit(10);
@@ -49,41 +92,46 @@ export async function GET(
       );
     }
 
+    // Cast listings to typed array
+    const typedListings = listings as unknown as ListingWithSellerData[];
+
     // Fetch game metadata for each listing
-    if (listings && listings.length > 0) {
-      const { data: game } = await (supabase as any)
+    if (typedListings && typedListings.length > 0) {
+      const { data: game } = await supabase
         .from('games')
         .select('id, thumbnail, image, player_count, min_age, playing_time, versions, is_expansion')
-        .eq('id', gameId)
+        .eq('id', parseInt(gameId))
         .single();
 
       if (game) {
-        listings.forEach((listing: any) => {
+        const gameWithVersions = game as GameWithVersions;
+        typedListings.forEach((listing) => {
           // Check for version-specific images
-          let versionThumbnail = null;
-          let versionImage = null;
+          let versionThumbnail: string | null = null;
+          let versionImage: string | null = null;
 
-          if (listing.bgg_version_id && game.versions) {
-            const version = game.versions.find((v: any) => v.id === listing.bgg_version_id);
+          if (listing.bgg_version_id && gameWithVersions.versions) {
+            const versions = gameWithVersions.versions as unknown as BGGVersion[];
+            const version = versions.find((v) => v.id === listing.bgg_version_id);
             if (version) {
-              versionThumbnail = version.thumbnail;
-              versionImage = version.image;
+              versionThumbnail = version.thumbnail || null;
+              versionImage = version.image || null;
             }
           }
 
           listing.game = {
-            thumbnail: versionThumbnail || game.thumbnail,
-            image: versionImage || game.image,
-            player_count: game.player_count,
-            min_age: game.min_age,
-            playing_time: game.playing_time,
-            is_expansion: game.is_expansion
+            thumbnail: versionThumbnail || gameWithVersions.thumbnail,
+            image: versionImage || gameWithVersions.image,
+            player_count: gameWithVersions.player_count,
+            min_age: gameWithVersions.min_age,
+            playing_time: gameWithVersions.playing_time,
+            is_expansion: gameWithVersions.is_expansion
           };
         });
       }
     }
 
-    return NextResponse.json({ listings: listings || [] });
+    return NextResponse.json({ listings: typedListings || [] });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(

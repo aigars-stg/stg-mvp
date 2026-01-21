@@ -16,7 +16,7 @@ export async function GET(
     const { id } = params;
     const supabase = await createServerSupabase();
 
-    const { data: listing, error } = await (supabase as any)
+    const { data: listing, error } = await supabase
       .from('listings')
       .select('id, status, reserved_by, reserved_until')
       .eq('id', id)
@@ -86,7 +86,7 @@ export async function PATCH(
     }
 
     // Update listing status (RLS policy ensures only seller can update)
-    const { data: listing, error: updateError } = await (supabase as any)
+    const { data: listing, error: updateError } = await supabase
       .from('listings')
       .update({ status })
       .eq('id', id)

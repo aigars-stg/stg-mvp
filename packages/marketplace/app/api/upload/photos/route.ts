@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { processImageForUpload } from '@/lib/image-processing';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import type { TypedSupabase } from '@/lib/supabase/query-types';
 
 const BUCKET_NAME = 'listing-photos';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Upload to Supabase Storage
-      const { error } = await (supabase as any).storage
+      const { error } = await (supabase as TypedSupabase).storage
         .from(BUCKET_NAME)
         .upload(filePath, processedBuffer, {
           contentType,
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
             const urlParts = url.split('/');
             return urlParts[urlParts.length - 1];
           });
-          await (supabase as any).storage.from(BUCKET_NAME).remove(uploadedPaths);
+          await (supabase as TypedSupabase).storage.from(BUCKET_NAME).remove(uploadedPaths);
         }
 
         return NextResponse.json(
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Get public URL
-      const { data: urlData } = (supabase as any).storage
+      const { data: urlData } = (supabase as TypedSupabase).storage
         .from(BUCKET_NAME)
         .getPublicUrl(filePath);
 

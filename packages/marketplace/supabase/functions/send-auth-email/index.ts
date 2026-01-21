@@ -73,10 +73,10 @@ Deno.serve(async (req: Request) => {
       const wh = new Webhook(secret)
       data = wh.verify(payload, headers) as AuthEmailPayload
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[send-auth-email] Webhook verification failed:', error)
     return new Response(
-      JSON.stringify({ error: { message: error.message || 'Webhook verification failed' } }),
+      JSON.stringify({ error: { message: error instanceof Error ? error.message : 'Webhook verification failed' } }),
       { status: 401, headers: { 'Content-Type': 'application/json' } }
     )
   }
@@ -142,10 +142,10 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({}),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[send-auth-email] Error:', error)
     return new Response(
-      JSON.stringify({ error: { message: error.message || 'Unknown error' } }),
+      JSON.stringify({ error: { message: error instanceof Error ? error.message : 'Unknown error' } }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }

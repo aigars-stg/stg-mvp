@@ -31,10 +31,11 @@ export async function POST(request: NextRequest) {
         signature,
         process.env.STRIPE_WEBHOOK_SECRET!
       );
-    } catch (err: any) {
-      console.error('❌ [Webhook] Signature verification failed:', err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error('❌ [Webhook] Signature verification failed:', errorMessage);
       return NextResponse.json(
-        { error: `Webhook signature verification failed: ${err.message}` },
+        { error: `Webhook signature verification failed: ${errorMessage}` },
         { status: 400 }
       );
     }
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       const serviceFee = parseInt(service_fee_cents) / 100;
 
       // Prepare order creation parameters
-      const orderParams: any = {
+      const orderParams: Record<string, string | number | null | undefined> = {
         p_basket_id: basket_id,
         p_shipping_method: shipping_method,
         p_shipping_cost: shippingCost,
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest) {
       // Create order in database
       console.log(`🔄 [Webhook] Calling create_order_from_basket with params:`, JSON.stringify(orderParams, null, 2));
 
-      const { data: orderResult, error: orderError } = await (supabase as any).rpc(
+      const { data: orderResult, error: orderError } = await supabase.rpc(
         'create_order_from_basket',
         orderParams
       );
@@ -308,10 +309,11 @@ export async function POST(request: NextRequest) {
     // Handle other event types if needed
     console.log(`ℹ️ [Webhook] Unhandled event type: ${event.type}`);
     return NextResponse.json({ received: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Webhook] Unexpected error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Webhook processing failed', details: error.message },
+      { error: 'Webhook processing failed', details: errorMessage },
       { status: 500 }
     );
   }

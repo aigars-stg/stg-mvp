@@ -108,7 +108,7 @@ export function WantedListingPreview({
             <p className="text-xs text-text-secondary mb-2">{t('acceptableConditions')}</p>
             <div className="flex flex-wrap gap-2">
               {getAcceptableConditions(minimumCondition).map((condition) => (
-                <Badge key={condition} variant={condition as any}>
+                <Badge key={condition} variant={condition}>
                   {getConditionLabel(condition)}
                 </Badge>
               ))}

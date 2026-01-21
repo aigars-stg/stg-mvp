@@ -26,8 +26,9 @@ export async function GET(
     let session;
     try {
       session = await stripe.checkout.sessions.retrieve(sessionId);
-    } catch (stripeError: any) {
-      if (stripeError.code === 'resource_missing') {
+    } catch (stripeError: unknown) {
+      // Stripe errors have a 'code' property
+      if (stripeError && typeof stripeError === 'object' && 'code' in stripeError && stripeError.code === 'resource_missing') {
         return NextResponse.json(
           { error: 'Session not found' },
           { status: 404 }

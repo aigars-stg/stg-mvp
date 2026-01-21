@@ -18,7 +18,7 @@ export async function POST(
     const { id } = params;
 
     // Check if listing exists and is active
-    const { data: listing, error: listingError } = await (supabase as any)
+    const { data: listing, error: listingError } = await supabase
       .from('listings')
       .select('id, status')
       .eq('id', id)
@@ -32,7 +32,7 @@ export async function POST(
     }
 
     // Check if already saved
-    const { data: existingSave } = await (supabase as any)
+    const { data: existingSave } = await supabase
       .from('saved_listings')
       .select('id')
       .eq('user_id', user.id)
@@ -41,7 +41,7 @@ export async function POST(
 
     if (existingSave) {
       // Already saved - unsave it
-      const { error: deleteError } = await (supabase as any)
+      const { error: deleteError } = await supabase
         .from('saved_listings')
         .delete()
         .eq('id', existingSave.id)
@@ -60,7 +60,7 @@ export async function POST(
       });
     } else {
       // Not saved - save it
-      const { data: savedListing, error: saveError } = await (supabase as any)
+      const { data: savedListing, error: saveError } = await supabase
         .from('saved_listings')
         .insert({
           user_id: user.id,
@@ -107,7 +107,7 @@ export async function GET(
     }
 
     // Check if saved
-    const { data: existingSave } = await (supabase as any)
+    const { data: existingSave } = await supabase
       .from('saved_listings')
       .select('id')
       .eq('user_id', user.id)

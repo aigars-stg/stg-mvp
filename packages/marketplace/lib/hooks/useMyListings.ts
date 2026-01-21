@@ -239,9 +239,9 @@ export function useMyListings(): UseMyListingsReturn {
       setTimeout(() => setSuccessMessage(''), 3000);
 
       setStatusChangeModal({ isOpen: false, listing: null, newStatus: null });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating status:', err);
-      setError(err.message || 'Failed to update listing status');
+      setError(err instanceof Error ? err.message : 'Failed to update listing status');
     } finally {
       setActionLoading(false);
     }
@@ -275,9 +275,9 @@ export function useMyListings(): UseMyListingsReturn {
       setTimeout(() => setSuccessMessage(''), 3000);
 
       setDeleteModal({ isOpen: false, listing: null });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting listing:', err);
-      setError(err.message || 'Failed to delete listing');
+      setError(err instanceof Error ? err.message : 'Failed to delete listing');
     } finally {
       setActionLoading(false);
     }
@@ -329,9 +329,9 @@ export function useMyListings(): UseMyListingsReturn {
       setTimeout(() => setWantedSuccessMessage(''), 3000);
 
       setWantedStatusChangeModal({ isOpen: false, listing: null, newStatus: null });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating wanted listing status:', err);
-      setWantedError(err.message || 'Failed to update wanted listing status');
+      setWantedError(err instanceof Error ? err.message : 'Failed to update wanted listing status');
     } finally {
       setWantedActionLoading(false);
     }
@@ -365,9 +365,9 @@ export function useMyListings(): UseMyListingsReturn {
       setTimeout(() => setWantedSuccessMessage(''), 3000);
 
       setWantedDeleteModal({ isOpen: false, listing: null });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting wanted listing:', err);
-      setWantedError(err.message || 'Failed to delete wanted listing');
+      setWantedError(err instanceof Error ? err.message : 'Failed to delete wanted listing');
     } finally {
       setWantedActionLoading(false);
     }

@@ -125,12 +125,12 @@ export async function GET(request: NextRequest) {
       deliveryEmailsSent: deliveryEmailResults.length,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Cron] Tracking sync job failed:', error);
     return NextResponse.json(
       {
         error: 'Tracking sync failed',
-        details: error.message,
+        details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

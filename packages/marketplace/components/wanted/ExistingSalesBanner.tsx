@@ -77,7 +77,7 @@ export function ExistingSalesBanner({ gameId, gameName, listings, onDismiss }: E
               </span>
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {conditions.map((condition) => (
-                  <Badge key={condition} variant={condition as any} size="sm">
+                  <Badge key={condition} variant={condition as ListingCondition} size="sm">
                     {getConditionLabel(condition as ListingCondition)}
                   </Badge>
                 ))}

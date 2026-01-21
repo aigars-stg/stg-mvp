@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 import type { Message } from '@/lib/types/message';
 import type { TrackingEvent, ShippingDestination, TrackingData } from '@/components/shipping';
 
@@ -80,7 +81,7 @@ export interface UseOrderDetailReturn {
   authLoading: boolean;
 
   // User
-  user: any;
+  user: User | null;
   orderId: string;
 
   // Message handling

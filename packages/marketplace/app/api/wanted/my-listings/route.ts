@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import type { TypedSupabase, WantedListingRow, GameRow } from '@/lib/supabase/query-types';
 
 /**
  * GET /api/wanted/my-listings
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
     if (response) return response;
 
     // Fetch user's wanted listings (all statuses)
-    const { data: wantedListings, error } = await (supabase as any)
+    const { data: wantedListings, error } = await (supabase as TypedSupabase)
       .from('wanted_listings')
       .select(`
         *,
@@ -38,19 +39,31 @@ export async function GET(request: NextRequest) {
 
     // Fetch game images and metadata for all wanted listings
     if (wantedListings && wantedListings.length > 0) {
-      const gameIds = [...new Set(wantedListings.map((wl: any) => wl.bgg_game_id))];
-      const { data: games } = await (supabase as any)
+      const gameIds = [...new Set(wantedListings.map((wl) => wl.bgg_game_id))];
+      const { data: games } = await (supabase as TypedSupabase)
         .from('games')
         .select('id, thumbnail, image, player_count, min_age, playing_time, is_expansion')
         .in('id', gameIds);
 
       if (games) {
-        const gamesMap = new Map(games.map((g: any) => [g.id, g]));
-        wantedListings.forEach((wantedListing: any) => {
-          const game: any = gamesMap.get(wantedListing.bgg_game_id);
+        type GameInfo = Pick<GameRow, 'id' | 'thumbnail' | 'image' | 'player_count' | 'min_age' | 'playing_time' | 'is_expansion'>;
+        type WantedListingWithGame = typeof wantedListings[number] & {
+          game?: {
+            thumbnail: string | null;
+            image: string | null;
+            player_count: string | null;
+            min_age: number | null;
+            playing_time: string | null;
+            is_expansion: boolean | null;
+          };
+        };
+        const gamesMap = new Map(games.map((g) => [g.id, g]));
+        wantedListings.forEach((wantedListing) => {
+          const game: GameInfo | undefined = gamesMap.get(wantedListing.bgg_game_id);
+          const wl = wantedListing as WantedListingWithGame;
 
           if (game) {
-            wantedListing.game = {
+            wl.game = {
               thumbnail: game.thumbnail,
               image: game.image,
               player_count: game.player_count,
@@ -59,7 +72,7 @@ export async function GET(request: NextRequest) {
               is_expansion: game.is_expansion
             };
           } else {
-            wantedListing.game = {
+            wl.game = {
               thumbnail: null,
               image: null,
               player_count: null,
@@ -74,7 +87,7 @@ export async function GET(request: NextRequest) {
       // Fetch response counts are already in the wanted_listings data
       // But we can also fetch full responses for each listing if needed
       for (const wantedListing of wantedListings) {
-        const { data: responses } = await (supabase as any)
+        const { data: responses } = await (supabase as TypedSupabase)
           .from('wanted_listing_responses')
           .select(`
             *,
@@ -88,16 +101,16 @@ export async function GET(request: NextRequest) {
           .eq('wanted_listing_id', wantedListing.id)
           .order('responded_at', { ascending: false });
 
-        wantedListing.responses = responses || [];
+        (wantedListing as unknown as { responses: typeof responses }).responses = responses || [];
       }
     }
 
     // Group by status for easier UI consumption
     const grouped = {
-      active: wantedListings?.filter((wl: any) => wl.status === 'active') || [],
-      expired: wantedListings?.filter((wl: any) => wl.status === 'expired') || [],
-      fulfilled: wantedListings?.filter((wl: any) => wl.status === 'fulfilled') || [],
-      cancelled: wantedListings?.filter((wl: any) => wl.status === 'cancelled') || [],
+      active: wantedListings?.filter((wl) => wl.status === 'active') || [],
+      expired: wantedListings?.filter((wl) => wl.status === 'expired') || [],
+      fulfilled: wantedListings?.filter((wl) => wl.status === 'fulfilled') || [],
+      cancelled: wantedListings?.filter((wl) => wl.status === 'cancelled') || [],
     };
 
     return NextResponse.json({

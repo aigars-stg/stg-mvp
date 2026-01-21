@@ -40,10 +40,11 @@ export async function POST(request: NextRequest) {
         signature,
         process.env.STRIPE_CONNECT_WEBHOOK_SECRET!
       );
-    } catch (err: any) {
-      console.error('❌ [Connect Webhook] Signature verification failed:', err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error('❌ [Connect Webhook] Signature verification failed:', errorMessage);
       return NextResponse.json(
-        { error: `Webhook signature verification failed: ${err.message}` },
+        { error: `Webhook signature verification failed: ${errorMessage}` },
         { status: 400 }
       );
     }
@@ -78,10 +79,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ received: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Connect Webhook] Unexpected error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Webhook processing failed', details: error.message },
+      { error: 'Webhook processing failed', details: errorMessage },
       { status: 500 }
     );
   }
@@ -94,7 +96,7 @@ export async function POST(request: NextRequest) {
 async function handleAccountUpdated(account: Stripe.Account) {
   console.log(`🔄 [Connect Webhook] Account updated: ${account.id}`);
 
-  const updates: Record<string, any> = {
+  const updates: Record<string, Stripe.Account.Requirements | Stripe.Account.Capabilities | boolean | string | null | undefined> = {
     stripe_requirements: account.requirements || {},
     stripe_capabilities: account.capabilities || {},
     stripe_connect_charges_enabled: account.charges_enabled,
@@ -191,7 +193,7 @@ async function handleBankAccountDeleted(stripeAccountId: string) {
 async function handlePayoutUpdate(payout: Stripe.Payout, eventType: string) {
   console.log(`💸 [Connect Webhook] Payout ${payout.id} - ${eventType}`);
 
-  const updates: Record<string, any> = {
+  const updates: Record<string, string | null> = {
     status: payout.status,
     updated_at: new Date().toISOString(),
   };

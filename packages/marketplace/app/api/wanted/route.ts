@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import type { TypedSupabase, WantedListingRow, GameRow } from '@/lib/supabase/query-types';
 
 /**
  * POST /api/wanted
@@ -103,7 +104,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Insert wanted listing into database
-    const { data: wantedListing, error: insertError } = await (supabase as any)
+    const { data: wantedListing, error: insertError } = await (supabase as TypedSupabase)
       .from('wanted_listings')
       .insert(wantedListingData)
       .select()
@@ -153,7 +154,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createServerSupabase();
 
     // Build query with buyer profile join
-    let query = (supabase as any)
+    let query = (supabase as TypedSupabase)
       .from('wanted_listings')
       .select(`
         *,
@@ -196,19 +197,19 @@ export async function GET(request: NextRequest) {
 
     // Fetch game images and metadata for all wanted listings
     if (wantedListings && wantedListings.length > 0) {
-      const gameIds = [...new Set(wantedListings.map((wl: any) => wl.bgg_game_id))];
-      const { data: games } = await (supabase as any)
+      const gameIds = [...new Set(wantedListings.map((wl) => wl.bgg_game_id))];
+      const { data: games } = await (supabase as TypedSupabase)
         .from('games')
         .select('id, thumbnail, image, player_count, min_age, playing_time, is_expansion')
         .in('id', gameIds);
 
       if (games) {
-        const gamesMap = new Map(games.map((g: any) => [g.id, g]));
-        wantedListings.forEach((wantedListing: any) => {
-          const game: any = gamesMap.get(wantedListing.bgg_game_id);
+        const gamesMap = new Map(games.map((g) => [g.id, g]));
+        wantedListings.forEach((wantedListing) => {
+          const game = gamesMap.get(wantedListing.bgg_game_id);
 
           if (game) {
-            wantedListing.game = {
+            (wantedListing as WantedListingRow & { game?: Partial<GameRow> }).game = {
               thumbnail: game.thumbnail,
               image: game.image,
               player_count: game.player_count,
@@ -217,7 +218,7 @@ export async function GET(request: NextRequest) {
               is_expansion: game.is_expansion
             };
           } else {
-            wantedListing.game = {
+            (wantedListing as WantedListingRow & { game?: Partial<GameRow> }).game = {
               thumbnail: null,
               image: null,
               player_count: null,

@@ -115,11 +115,12 @@ export async function checkSellerAccountStatus(accountId: string): Promise<Accou
             canDelete: true,
         };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error(`Error checking Stripe account ${accountId}:`, error);
 
         // If account doesn't exist, it's safe to delete local user
-        if (error.code === 'account_invalid') {
+        const isStripeError = error && typeof error === 'object' && 'code' in error;
+        if (isStripeError && error.code === 'account_invalid') {
             return { canDelete: true };
         }
 

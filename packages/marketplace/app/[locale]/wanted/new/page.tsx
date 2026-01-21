@@ -130,9 +130,9 @@ function CreateWantedListingPageContent() {
           budget: true,
           notes: true,
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching wanted listing for edit:', err);
-        setLoadError(err.message || 'Failed to load wanted listing');
+        setLoadError(err instanceof Error ? err.message : 'Failed to load wanted listing');
       } finally {
         setIsLoadingListing(false);
       }
@@ -290,9 +290,9 @@ function CreateWantedListingPageContent() {
         // Show success modal
         setShowSuccessModal(true);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error saving wanted listing:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setSubmitting(false);
     }

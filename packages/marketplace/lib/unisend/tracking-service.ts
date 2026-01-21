@@ -88,11 +88,11 @@ export async function syncTrackingForOrder(
       oldStatus: statusChanged ? oldStatus : undefined,
       newStatus: statusChanged ? newStatus : undefined,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Tracking] Error syncing tracking:', error);
     return {
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       newEventsCount: 0,
       statusChanged: false,
     };

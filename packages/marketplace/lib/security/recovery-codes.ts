@@ -1,5 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/client';
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { TypedSupabase } from '@/lib/supabase/query-types';
 import crypto from 'crypto';
 
 /**
@@ -59,14 +59,12 @@ export function normalizeCode(code: string): string {
 export async function saveRecoveryCodes(
   userId: string,
   codes: string[],
-  supabase?: SupabaseClient
+  supabase?: TypedSupabase
 ): Promise<{ success: boolean; error?: Error }> {
   try {
     const client = supabase || createServiceClient();
 
-    // Note: recovery_codes columns added in migration 076
-    // Type assertion needed until database types are regenerated after migration
-    const { error } = await (client as any)
+    const { error } = await client
       .from('user_profiles')
       .update({
         recovery_codes: codes,
@@ -108,9 +106,7 @@ export async function validateAndConsumeRecoveryCode(
     const normalizedCode = normalizeCode(code);
 
     // Use the database function to atomically validate and consume
-    // Note: consume_recovery_code function added in migration 076
-    // Type assertion needed until database types are regenerated after migration
-    const { data, error } = await (supabase as any).rpc('consume_recovery_code', {
+    const { data, error } = await supabase.rpc('consume_recovery_code', {
       target_user_id: userId,
       code_to_use: normalizedCode,
     });
@@ -125,13 +121,13 @@ export async function validateAndConsumeRecoveryCode(
     }
 
     // Get remaining codes count
-    const { data: profile } = await (supabase as any)
+    const { data: profile } = await supabase
       .from('user_profiles')
       .select('recovery_codes')
       .eq('id', userId)
       .single();
 
-    const remainingCodes = (profile as any)?.recovery_codes?.length ?? 0;
+    const remainingCodes = profile?.recovery_codes?.length ?? 0;
 
     return { valid: true, remainingCodes };
   } catch (error) {
@@ -153,8 +149,7 @@ export async function getRemainingCodesCount(userId: string): Promise<number | n
   try {
     const supabase = createServiceClient();
 
-    // Type assertion needed until database types are regenerated after migration
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('user_profiles')
       .select('recovery_codes')
       .eq('id', userId)
@@ -165,7 +160,7 @@ export async function getRemainingCodesCount(userId: string): Promise<number | n
       return null;
     }
 
-    return (data as any)?.recovery_codes?.length ?? 0;
+    return data?.recovery_codes?.length ?? 0;
   } catch (error) {
     console.error('[RecoveryCodes] Exception getting codes count:', error);
     return null;

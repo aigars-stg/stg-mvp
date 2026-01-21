@@ -9,7 +9,7 @@
  * Schedule: Daily at 4:00 AM UTC via pg_cron
  */
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@14'
 
 const corsHeaders = {
@@ -115,9 +115,9 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify(summary), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Cron] Unexpected error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
  * Process payout for a single order
  */
 async function processOrderPayout(
-  supabase: any,
+  supabase: SupabaseClient,
   stripe: Stripe,
   order: {
     id: string
@@ -275,8 +275,10 @@ async function processOrderPayout(
         amount: netAmount,
         transferId: transfer.id,
       }
-    } catch (stripeError: any) {
-      console.error(`[Cron] Stripe transfer failed:`, stripeError.message)
+    } catch (stripeError: unknown) {
+      const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown Stripe error'
+      const errorCode = stripeError instanceof Error && 'code' in stripeError ? (stripeError as Error & { code?: string }).code : undefined
+      console.error(`[Cron] Stripe transfer failed:`, errorMessage)
 
       // Update order
       await supabase
@@ -289,8 +291,8 @@ async function processOrderPayout(
         .from('payout_transactions')
         .update({
           status: 'failed',
-          error_code: stripeError.code,
-          error_message: stripeError.message,
+          error_code: errorCode,
+          error_message: errorMessage,
         })
         .eq('id', payoutTx.id)
 
@@ -298,16 +300,16 @@ async function processOrderPayout(
         orderId: order.id,
         orderNumber: order.order_number,
         success: false,
-        error: stripeError.message,
+        error: errorMessage,
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[Cron] Error processing payout for order ${order.order_number}:`, error)
     return {
       orderId: order.id,
       orderNumber: order.order_number,
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
     }
   }
 }

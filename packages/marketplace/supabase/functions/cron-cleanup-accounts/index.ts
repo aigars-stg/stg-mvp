@@ -117,8 +117,8 @@ Deno.serve(async (req) => {
               console.log(`[Cron] Deleted ${files.length} storage files for ${profile.id}`)
             }
           }
-        } catch (storageError: any) {
-          console.error(`[Cron] Storage deletion error for ${profile.id}:`, storageError.message)
+        } catch (storageError: unknown) {
+          console.error(`[Cron] Storage deletion error for ${profile.id}:`, storageError instanceof Error ? storageError.message : 'Unknown error')
           // Continue anyway - storage deletion shouldn't block user deletion
         }
 
@@ -136,10 +136,10 @@ Deno.serve(async (req) => {
 
         // Small delay to avoid rate limits
         await new Promise(resolve => setTimeout(resolve, 100))
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(`[Cron] Error processing ${profile.id}:`, error)
         results.failed++
-        results.errors.push(`${profile.id}: ${error.message}`)
+        results.errors.push(`${profile.id}: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }
 
@@ -158,9 +158,9 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify(summary), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Cron] Unexpected error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

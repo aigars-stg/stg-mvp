@@ -1,6 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { createServerSupabase } from '@/lib/supabase/server';
+import type { TypedSupabase, ListingRow, GameRow, PublicProfileRow, PublicSellerProfileRow } from '@/lib/supabase/query-types';
+
+// Collection listing type with enrichment
+interface CollectionListing extends ListingRow {
+  game?: {
+    thumbnail: string | null;
+    image: string | null;
+    player_count: string | null;
+    min_age: number | null;
+    playing_time: string | null;
+    is_expansion: boolean | null;
+  };
+  seller_trust?: PublicSellerProfileRow | null;
+  seller_identity?: PublicProfileRow | null;
+  seller?: {
+    id: string;
+    full_name: string;
+    avatar_url: string | null;
+    country: string | null;
+    email: string;
+    total_reviews: number;
+    average_rating: number;
+    total_completed_sales: number;
+  };
+}
+
+interface GameVersion {
+  id: string | number;
+  thumbnail?: string;
+  image?: string;
+}
 
 /**
  * GET /api/collections
@@ -18,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createServerSupabase();
 
-    let listings: any[] = [];
+    let listings: CollectionListing[] = [];
     let title = '';
     let subtitle = '';
 
@@ -78,7 +109,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Recently listed - newest first
-async function getRecentlyListed(supabase: any, limit: number) {
+async function getRecentlyListed(supabase: TypedSupabase, limit: number): Promise<{ listings: CollectionListing[] }> {
   const { data: listings, error } = await supabase
     .from('listings')
     .select(`
@@ -99,7 +130,7 @@ async function getRecentlyListed(supabase: any, limit: number) {
 }
 
 // Popular games - games with multiple listings or high BGG ratings
-async function getPopularGames(supabase: any, limit: number) {
+async function getPopularGames(supabase: TypedSupabase, limit: number): Promise<{ listings: CollectionListing[] }> {
   // Get games with most active listings
   const { data: popularGameIds } = await supabase
     .from('listings')
@@ -108,7 +139,7 @@ async function getPopularGames(supabase: any, limit: number) {
 
   // Count listings per game
   const gameCounts = new Map<number, number>();
-  popularGameIds?.forEach((l: { bgg_game_id: number }) => {
+  popularGameIds?.forEach((l) => {
     gameCounts.set(l.bgg_game_id, (gameCounts.get(l.bgg_game_id) || 0) + 1);
   });
 
@@ -145,11 +176,11 @@ async function getPopularGames(supabase: any, limit: number) {
 
   // Dedupe by game - keep lowest price per game
   const seenGames = new Set<number>();
-  const uniqueListings = (listings || []).filter((l: any) => {
+  const uniqueListings = (listings || []).filter((l) => {
     if (seenGames.has(l.bgg_game_id)) return false;
     seenGames.add(l.bgg_game_id);
     return true;
-  }).slice(0, limit);
+  }).slice(0, limit) as CollectionListing[];
 
   const enrichedListings = await enrichListingsWithGames(supabase, uniqueListings);
   const withTrust = await enrichListingsWithSellerTrust(supabase, enrichedListings);
@@ -157,7 +188,7 @@ async function getPopularGames(supabase: any, limit: number) {
 }
 
 // Price drops - listings with previous_price > current price
-async function getPriceDrops(supabase: any, limit: number) {
+async function getPriceDrops(supabase: TypedSupabase, limit: number): Promise<{ listings: CollectionListing[] }> {
   const { data: listings, error } = await supabase
     .from('listings')
     .select(`
@@ -180,13 +211,13 @@ async function getPriceDrops(supabase: any, limit: number) {
 
   // Filter to only actual price drops and sort by discount %
   const priceDrops = (listings || [])
-    .filter((l: any) => l.previous_price && l.previous_price > l.price)
-    .sort((a: any, b: any) => {
-      const discountA = (a.previous_price - a.price) / a.previous_price;
-      const discountB = (b.previous_price - b.price) / b.previous_price;
+    .filter((l) => l.previous_price && l.previous_price > l.price)
+    .sort((a, b) => {
+      const discountA = ((a.previous_price || 0) - a.price) / (a.previous_price || 1);
+      const discountB = ((b.previous_price || 0) - b.price) / (b.previous_price || 1);
       return discountB - discountA;
     })
-    .slice(0, limit);
+    .slice(0, limit) as CollectionListing[];
 
   const enrichedListings = await enrichListingsWithGames(supabase, priceDrops);
   const withTrust = await enrichListingsWithSellerTrust(supabase, enrichedListings);
@@ -194,7 +225,7 @@ async function getPriceDrops(supabase: any, limit: number) {
 }
 
 // Listings from trusted sellers (high ratings)
-async function getTrustedSellerListings(supabase: any, limit: number) {
+async function getTrustedSellerListings(supabase: TypedSupabase, limit: number): Promise<{ listings: CollectionListing[] }> {
   // Get sellers with good ratings
   const { data: trustedSellers } = await supabase
     .from('seller_profiles')
@@ -217,7 +248,7 @@ async function getTrustedSellerListings(supabase: any, limit: number) {
       return { listings: [] };
     }
 
-    const sellerIds = anySellers.map((s: { user_id: string }) => s.user_id);
+    const sellerIds = anySellers.map((s) => s.user_id);
 
     const { data: listings } = await supabase
       .from('listings')
@@ -234,7 +265,7 @@ async function getTrustedSellerListings(supabase: any, limit: number) {
     return { listings: transformListings(withTrust) };
   }
 
-  const sellerIds = trustedSellers.map((s: { user_id: string }) => s.user_id);
+  const sellerIds = trustedSellers.map((s) => s.user_id);
 
   const { data: listings, error } = await supabase
     .from('listings')
@@ -256,7 +287,7 @@ async function getTrustedSellerListings(supabase: any, limit: number) {
 }
 
 // Great condition listings (likeNew)
-async function getGreatCondition(supabase: any, limit: number) {
+async function getGreatCondition(supabase: TypedSupabase, limit: number): Promise<{ listings: CollectionListing[] }> {
   const { data: listings, error } = await supabase
     .from('listings')
     .select(`
@@ -278,29 +309,30 @@ async function getGreatCondition(supabase: any, limit: number) {
 }
 
 // Fetch game data separately and merge into listings
-async function enrichListingsWithGames(supabase: any, listings: any[]) {
+async function enrichListingsWithGames(supabase: TypedSupabase, listings: CollectionListing[]): Promise<CollectionListing[]> {
   if (!listings || listings.length === 0) return [];
 
-  const gameIds = [...new Set(listings.map((l: any) => l.bgg_game_id))];
+  const gameIds = [...new Set(listings.map((l) => l.bgg_game_id))];
   const { data: games } = await supabase
     .from('games')
     .select('id, thumbnail, image, player_count, min_age, playing_time, versions, is_expansion')
     .in('id', gameIds);
 
   if (games) {
-    const gamesMap = new Map(games.map((g: any) => [g.id, g]));
-    listings.forEach((listing: any) => {
-      const game: any = gamesMap.get(listing.bgg_game_id);
+    const gamesMap = new Map(games.map((g) => [g.id, g]));
+    listings.forEach((listing) => {
+      const game = gamesMap.get(listing.bgg_game_id);
       if (game) {
         // Check if listing has a version-specific image
-        let versionThumbnail = null;
-        let versionImage = null;
+        let versionThumbnail: string | null = null;
+        let versionImage: string | null = null;
 
         if (listing.bgg_version_id && game.versions) {
-          const version = game.versions.find((v: any) => v.id === listing.bgg_version_id);
+          const versions = game.versions as unknown as GameVersion[];
+          const version = versions.find((v) => String(v.id) === String(listing.bgg_version_id));
           if (version) {
-            versionThumbnail = version.thumbnail;
-            versionImage = version.image;
+            versionThumbnail = version.thumbnail || null;
+            versionImage = version.image || null;
           }
         }
 
@@ -329,10 +361,10 @@ async function enrichListingsWithGames(supabase: any, listings: any[]) {
 }
 
 // Fetch seller trust data AND profile data separately
-async function enrichListingsWithSellerTrust(supabase: any, listings: any[]) {
+async function enrichListingsWithSellerTrust(supabase: TypedSupabase, listings: CollectionListing[]): Promise<CollectionListing[]> {
   if (!listings || listings.length === 0) return listings;
 
-  const sellerIds = [...new Set(listings.map((l: any) => l.seller_id))];
+  const sellerIds = [...new Set(listings.map((l) => l.seller_id))];
 
   // 1. Fetch Trust Stats
   const { data: sellerProfiles } = await supabase
@@ -347,23 +379,23 @@ async function enrichListingsWithSellerTrust(supabase: any, listings: any[]) {
     .in('id', sellerIds);
 
   const trustMap = sellerProfiles
-    ? new Map(sellerProfiles.map((p: any) => [p.user_id, p]))
+    ? new Map(sellerProfiles.map((p) => [p.user_id, p]))
     : new Map();
 
   const identityMap = sellerIdentity
-    ? new Map(sellerIdentity.map((p: any) => [p.id, p]))
+    ? new Map(sellerIdentity.map((p) => [p.id, p]))
     : new Map();
 
-  listings.forEach((listing: any) => {
-    listing.seller_trust = trustMap.get(listing.seller_id) || null;
-    listing.seller_identity = identityMap.get(listing.seller_id) || null;
+  listings.forEach((listing) => {
+    listing.seller_trust = trustMap.get(listing.seller_id) as PublicSellerProfileRow | undefined;
+    listing.seller_identity = identityMap.get(listing.seller_id) as PublicProfileRow | undefined;
   });
 
   return listings;
 }
 
 // Transform listings to merge seller trust data
-function transformListings(listings: any[]) {
+function transformListings(listings: CollectionListing[]): CollectionListing[] {
   return listings.map((listing) => {
     const { seller_trust, seller_identity, ...rest } = listing;
     return {

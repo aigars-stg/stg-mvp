@@ -96,7 +96,7 @@ export function PricingAssistant({
 
         const data = await response.json();
         setPricingData(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('[PricingAssistant] Fetch error:', err);
         setError('Unable to load pricing suggestions');
       } finally {
@@ -179,8 +179,8 @@ export function PricingAssistant({
       good: 'good',
       acceptable: 'acceptable',
     };
-    const key = conditionKeys[cond];
-    return key ? tConditions(key as any) : cond;
+    const key = conditionKeys[cond] as keyof typeof conditionKeys | undefined;
+    return key ? tConditions(key) : cond;
   };
 
   if (!bggGameId) {

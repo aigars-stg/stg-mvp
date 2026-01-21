@@ -9,6 +9,20 @@ import {
   QUESTION_CONSTRAINTS,
 } from '@/lib/types/question';
 
+// Type for the listing_questions_with_author view row
+interface QuestionWithAuthorRow {
+  id: string;
+  listing_id: string;
+  user_id: string;
+  content: string;
+  parent_id: string | null;
+  created_at: string;
+  updated_at: string;
+  author_name: string | null;
+  author_avatar: string | null;
+  is_seller: boolean;
+}
+
 /**
  * GET /api/listings/[id]/questions
  * Fetches all questions for a listing (public, no auth required)
@@ -45,12 +59,15 @@ export async function GET(
     }
 
     // Full query: fetch questions with author info
-    const { data: questions, error: questionsError } = await (supabase as any)
+    const questionsResult = await supabase
       .from('listing_questions_with_author')
       .select('*')
       .eq('listing_id', listingId)
       .is('parent_id', null) // Top-level questions only
       .order('created_at', { ascending: false });
+
+    const questions = questionsResult.data as QuestionWithAuthorRow[] | null;
+    const questionsError = questionsResult.error;
 
     if (questionsError) {
       // If view doesn't exist yet (pre-migration), return empty
@@ -64,16 +81,19 @@ export async function GET(
     }
 
     // Fetch replies for each question
-    const questionIds = questions?.map((q: any) => q.id) || [];
+    const questionIds = questions?.map((q) => q.id) || [];
 
     const repliesByParent: Record<string, ListingQuestion[]> = {};
 
     if (questionIds.length > 0) {
-      const { data: replies, error: repliesError } = await (supabase as any)
+      const repliesResult = await supabase
         .from('listing_questions_with_author')
         .select('*')
         .in('parent_id', questionIds)
         .order('created_at', { ascending: true });
+
+      const replies = repliesResult.data as QuestionWithAuthorRow[] | null;
+      const repliesError = repliesResult.error;
 
       if (repliesError && !repliesError.message.includes('relation')) {
         throw repliesError;
@@ -81,10 +101,10 @@ export async function GET(
 
       // Group replies by parent_id
       for (const reply of replies || []) {
-        if (!repliesByParent[reply.parent_id]) {
+        if (reply.parent_id && !repliesByParent[reply.parent_id]) {
           repliesByParent[reply.parent_id] = [];
         }
-        repliesByParent[reply.parent_id].push({
+        if (reply.parent_id) repliesByParent[reply.parent_id].push({
           id: reply.id,
           listing_id: reply.listing_id,
           user_id: reply.user_id,
@@ -103,7 +123,7 @@ export async function GET(
     }
 
     // Transform questions to response format
-    const formattedQuestions: ListingQuestion[] = (questions || []).map((q: any) => ({
+    const formattedQuestions: ListingQuestion[] = (questions || []).map((q) => ({
       id: q.id,
       listing_id: q.listing_id,
       user_id: q.user_id,
@@ -162,7 +182,7 @@ export async function POST(
     }
 
     // Verify listing exists and user is not the seller
-    const { data: listing, error: listingError } = await (supabase as any)
+    const { data: listing, error: listingError } = await supabase
       .from('listings')
       .select('id, seller_id, status')
       .eq('id', listingId)
@@ -182,7 +202,7 @@ export async function POST(
       );
     }
 
-    if (listing.seller_id === user.id) {
+    if (listing.seller_id === user!.id) {
       return NextResponse.json(
         { error: 'You cannot post questions on your own listing' },
         { status: 403 }
@@ -190,11 +210,11 @@ export async function POST(
     }
 
     // Create the question
-    const { data: question, error: insertError } = await (supabase as any)
+    const { data: question, error: insertError } = await supabase
       .from('listing_questions')
       .insert({
         listing_id: listingId,
-        user_id: user.id,
+        user_id: user!.id,
         content,
         parent_id: null, // Top-level question
       })
@@ -206,11 +226,17 @@ export async function POST(
     }
 
     // Fetch the question with author info
-    const { data: questionWithAuthor } = await (supabase as any)
+    const questionWithAuthorResult = await supabase
       .from('listing_questions_with_author')
       .select('*')
       .eq('id', question.id)
       .single();
+
+    const questionWithAuthor = questionWithAuthorResult.data as QuestionWithAuthorRow | null;
+
+    if (!questionWithAuthor) {
+      throw new Error('Failed to fetch question with author info');
+    }
 
     const formattedQuestion: ListingQuestion = {
       id: questionWithAuthor.id,

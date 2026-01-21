@@ -117,17 +117,17 @@ Deno.serve(async (req) => {
         }),
       })
       console.log(`[Outbid] Email sent to ${userProfile.email}`)
-    } catch (emailError: any) {
-      console.error(`[Outbid] Email failed:`, emailError.message)
+    } catch (emailError: unknown) {
+      console.error(`[Outbid] Email failed:`, emailError instanceof Error ? emailError.message : 'Unknown error')
       // Don't fail the function if email fails - in-app notification was created
     }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Outbid] Unexpected error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

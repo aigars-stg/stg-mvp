@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 
+interface CartBasket {
+  item_count?: number;
+  subtotal?: string;
+}
+
+interface AddToCartResult {
+  success: boolean;
+  error?: string;
+  basket_id?: string;
+  item_id?: string;
+  expires_at?: string;
+}
+
+interface RemoveFromCartResult {
+  success: boolean;
+  error?: string;
+}
+
 /**
  * GET /api/cart
  *
@@ -14,7 +32,7 @@ export async function GET(_request: NextRequest) {
     if (response) return response;
 
     // Get cart using the database function
-    const { data: cart, error: cartError } = await (supabase as any).rpc('get_cart', {
+    const { data: cart, error: cartError } = await supabase.rpc('get_cart', {
       p_buyer_id: user.id,
     });
 
@@ -26,13 +44,13 @@ export async function GET(_request: NextRequest) {
     }
 
     // Calculate totals
-    const baskets = cart || [];
+    const baskets = (cart || []) as unknown as CartBasket[];
     const totalItems = baskets.reduce(
-      (sum: number, b: any) => sum + (b.item_count || 0),
+      (sum, b) => sum + (b.item_count || 0),
       0
     );
     const totalAmount = baskets.reduce(
-      (sum: number, b: any) => sum + (parseFloat(b.subtotal) || 0),
+      (sum, b) => sum + (parseFloat(b.subtotal || '0') || 0),
       0
     );
 
@@ -69,7 +87,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if listing is contact_seller type (cannot be added to cart)
-    const { data: listing, error: listingError } = await (supabase as any)
+    const { data: listing, error: listingError } = await supabase
       .from('listings')
       .select('listing_type, transaction_method')
       .eq('id', listingId)
@@ -89,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Add to cart using the database function
-    const { data: result, error: addError } = await (supabase as any).rpc('add_to_cart', {
+    const { data: result, error: addError } = await supabase.rpc('add_to_cart', {
       p_buyer_id: user.id,
       p_listing_id: listingId,
     });
@@ -101,15 +119,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+    const addResult = result as unknown as AddToCartResult;
+    if (!addResult.success) {
+      return NextResponse.json({ error: addResult.error }, { status: 400 });
     }
 
     return NextResponse.json({
       success: true,
-      basketId: result.basket_id,
-      itemId: result.item_id,
-      expiresAt: result.expires_at,
+      basketId: addResult.basket_id,
+      itemId: addResult.item_id,
+      expiresAt: addResult.expires_at,
       message: 'Item added to cart. Reserved for 30 minutes.',
     });
   } catch (error) {
@@ -136,7 +155,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Remove from cart using the database function
-    const { data: result, error: removeError } = await (supabase as any).rpc(
+    const { data: result, error: removeError } = await supabase.rpc(
       'remove_from_cart',
       {
         p_buyer_id: user.id,
@@ -151,8 +170,9 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+    const removeResult = result as unknown as RemoveFromCartResult;
+    if (!removeResult.success) {
+      return NextResponse.json({ error: removeResult.error }, { status: 400 });
     }
 
     return NextResponse.json({

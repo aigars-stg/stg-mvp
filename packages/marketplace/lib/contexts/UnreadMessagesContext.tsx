@@ -31,7 +31,7 @@ export function UnreadMessagesProvider({ children }: { children: React.ReactNode
             if (response.ok) {
                 const data = await response.json();
                 const total = data.conversations?.reduce(
-                    (sum: number, conv: any) => sum + (conv.unread_count || 0),
+                    (sum: number, conv: { unread_count?: number }) => sum + (conv.unread_count || 0),
                     0
                 ) || 0;
                 setUnreadCount(total);

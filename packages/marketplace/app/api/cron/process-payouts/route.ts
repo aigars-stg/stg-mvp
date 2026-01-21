@@ -44,12 +44,12 @@ export async function GET(request: NextRequest) {
       results: result.results,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Cron] Payout processing job failed:', error);
     return NextResponse.json(
       {
         error: 'Payout processing failed',
-        details: error.message,
+        details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

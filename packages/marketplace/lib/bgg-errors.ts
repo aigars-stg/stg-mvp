@@ -14,7 +14,7 @@ export interface BGGErrorContext {
   query?: string;
   gameId?: string;
   statusCode?: number;
-  originalError?: any;
+  originalError?: string;
 }
 
 export class BGGError extends Error {
@@ -79,11 +79,12 @@ export function createAPIUnavailableError(statusCode: number, query?: string): B
   );
 }
 
-export function createParseError(query: string, error: any): BGGError {
+export function createParseError(query: string, error: unknown): BGGError {
+  const errorMessage = error instanceof Error ? error.message : String(error);
   return new BGGError(
     'PARSE_ERROR',
     'Received invalid data from BoardGameGeek. This usually resolves itself.',
-    { query, originalError: error.message }
+    { query, originalError: errorMessage }
   );
 }
 
@@ -98,21 +99,22 @@ export function createTimeoutError(query: string): BGGError {
 /**
  * Helper to convert fetch/network errors to BGGError
  */
-export function parseFetchError(error: any, query?: string): BGGError {
+export function parseFetchError(error: unknown, query?: string): BGGError {
   // Network errors (no response)
-  if (error.name === 'TypeError' && error.message.includes('fetch')) {
+  if (error instanceof TypeError && error.message.includes('fetch')) {
     return createNetworkError(query || 'unknown');
   }
 
   // Timeout errors
-  if (error.name === 'AbortError' || error.message.includes('timeout')) {
+  if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('timeout'))) {
     return createTimeoutError(query || 'unknown');
   }
 
   // Unknown errors
+  const errorMessage = error instanceof Error ? error.message : String(error);
   return new BGGError(
     'UNKNOWN',
     'An unexpected error occurred while contacting BoardGameGeek.',
-    { originalError: error.message, query }
+    { originalError: errorMessage, query }
   );
 }

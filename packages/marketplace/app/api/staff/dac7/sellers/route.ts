@@ -16,6 +16,11 @@ interface SellerDac7Data {
   dac7_info_submitted_at: string | null;
   dac7_info_verified: boolean | null;
   seller_status: string | null;
+  user_profiles: {
+    email: string | null;
+    full_name: string | null;
+    country: string | null;
+  } | null;
 }
 
 /**
@@ -124,8 +129,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform data to flatten user_profiles
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const transformedSellers = (sellers || []).map((seller: any) => ({
+    const transformedSellers = ((sellers || []) as SellerDac7Data[]).map((seller) => ({
       userId: seller.user_id,
       email: seller.user_profiles?.email,
       fullName: seller.user_profiles?.full_name,

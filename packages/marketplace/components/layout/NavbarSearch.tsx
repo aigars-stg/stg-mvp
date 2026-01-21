@@ -69,7 +69,15 @@ export function NavbarSearch({
         if (res.ok) {
           const data = await res.json();
           // Map API response fields to component interface
-          const mappedResults: SearchResult[] = (data.games || []).map((game: any) => ({
+          interface GameApiResponse {
+            id: number;
+            name: string;
+            yearpublished: number | null;
+            thumbnail: string | null;
+            listingCount?: number;
+            is_expansion?: boolean;
+          }
+          const mappedResults: SearchResult[] = (data.games || []).map((game: GameApiResponse) => ({
             id: game.id,
             name: game.name,
             yearPublished: game.yearpublished,

@@ -17,6 +17,9 @@ import {
   Chat as MessageSquare,
 } from 'griddy-icons';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
+
+// Badge variant type for proper typing
+type BadgeVariant = 'trust' | 'likeNew' | 'veryGood' | 'good' | 'acceptable' | 'forParts' | 'success' | 'warning' | 'error' | 'default' | 'outline';
 import { TrackingEventsTimeline } from '@/components/shipping';
 import { useSellerOrderDetail, PARCEL_SIZES } from '@/lib/hooks/useSellerOrderDetail';
 import { formatDateTime } from '@/lib/date-utils';
@@ -107,7 +110,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
             <h1 className="text-2xl sm:text-3xl font-bold text-polar-night dark:text-snow-white">
               {order.order_number}
             </h1>
-            <Badge variant={statusInfo.color as any}>
+            <Badge variant={statusInfo.color as BadgeVariant}>
               <StatusIcon className="w-3 h-3 mr-1" />
               {statusInfo.label}
             </Badge>
@@ -509,7 +512,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
                 <div className="flex-grow">
                   <h3 className="font-medium text-polar-night dark:text-snow-white mb-2">{item.game_name}</h3>
                   <div className="flex items-center gap-3">
-                    <Badge variant={item.condition as any} size="sm">
+                    <Badge variant={item.condition as ListingCondition} size="sm">
                       {getConditionLabel(item.condition as ListingCondition)}
                     </Badge>
                     <span className="text-lg font-semibold text-polar-night dark:text-snow-white">

@@ -136,8 +136,8 @@ export default function AuthPage() {
 
       setAuthState('magic_link_sent');
       setLoading(false);
-    } catch (err: any) {
-      setError(mapAuthError(err));
+    } catch (err: unknown) {
+      setError(mapAuthError(err instanceof Error ? err : new Error('Unknown error')));
       setLoading(false);
     }
   };
@@ -157,8 +157,8 @@ export default function AuthPage() {
       }
 
       // OAuth will redirect to provider
-    } catch (err: any) {
-      setError(mapAuthError(err));
+    } catch (err: unknown) {
+      setError(mapAuthError(err instanceof Error ? err : new Error('Unknown error')));
       setOauthLoading(false);
     }
   };
@@ -181,8 +181,8 @@ export default function AuthPage() {
       } else {
         setResendCount((prev) => prev + 1);
       }
-    } catch (err: any) {
-      setError(mapAuthError(err));
+    } catch (err: unknown) {
+      setError(mapAuthError(err instanceof Error ? err : new Error('Unknown error')));
     }
 
     setLoading(false);

@@ -26,7 +26,8 @@ export function ExpansionPreferenceSelector({
 }: ExpansionPreferenceSelectorProps) {
   const t = useTranslations('Wanted.ExpansionPreferenceSelector');
 
-  const options: { value: ExpansionPreference; labelKey: string; descKey: string }[] = [
+  type TranslationKey = 'baseOnly' | 'baseOnlyDesc' | 'expansionsWelcome' | 'expansionsWelcomeDesc';
+  const options: { value: ExpansionPreference; labelKey: TranslationKey; descKey: TranslationKey }[] = [
     { value: 'base_only', labelKey: 'baseOnly', descKey: 'baseOnlyDesc' },
     { value: 'expansions_welcome', labelKey: 'expansionsWelcome', descKey: 'expansionsWelcomeDesc' },
   ];
@@ -64,11 +65,11 @@ export function ExpansionPreferenceSelector({
                 <div className="flex items-center gap-2">
                   <Puzzle className={`w-4 h-4 ${isSelected ? 'text-aurora-orange' : 'text-text-muted'}`} />
                   <span className={`font-medium ${isSelected ? 'text-polar-night' : 'text-text'}`}>
-                    {t(option.labelKey as any)}
+                    {t(option.labelKey)}
                   </span>
                 </div>
                 <p className="text-sm text-text-secondary mt-1 ml-6">
-                  {t(option.descKey as any)}
+                  {t(option.descKey)}
                 </p>
               </div>
             </div>

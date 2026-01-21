@@ -38,7 +38,7 @@ export async function POST(
     }
 
     // Verify parent question exists and is a top-level question (not a reply)
-    const { data: parentQuestion, error: parentError } = await (supabase as any)
+    const { data: parentQuestion, error: parentError } = await supabase
       .from('listing_questions')
       .select('id, listing_id, parent_id, deleted_at')
       .eq('id', parentId)
@@ -74,7 +74,7 @@ export async function POST(
     }
 
     // Verify listing exists and is active
-    const { data: listing, error: listingError } = await (supabase as any)
+    const { data: listing, error: listingError } = await supabase
       .from('listings')
       .select('id, status')
       .eq('id', listingId)
@@ -95,7 +95,7 @@ export async function POST(
     }
 
     // Create the reply
-    const { data: reply, error: insertError } = await (supabase as any)
+    const { data: reply, error: insertError } = await supabase
       .from('listing_questions')
       .insert({
         listing_id: listingId,
@@ -111,26 +111,26 @@ export async function POST(
     }
 
     // Fetch the reply with author info
-    const { data: replyWithAuthor } = await (supabase as any)
+    const { data: replyWithAuthor } = await supabase
       .from('listing_questions_with_author')
       .select('*')
       .eq('id', reply.id)
       .single();
 
     const formattedReply: ListingQuestion = {
-      id: replyWithAuthor.id,
-      listing_id: replyWithAuthor.listing_id,
-      user_id: replyWithAuthor.user_id,
-      content: replyWithAuthor.content,
-      parent_id: replyWithAuthor.parent_id,
-      created_at: replyWithAuthor.created_at,
-      updated_at: replyWithAuthor.updated_at,
+      id: replyWithAuthor?.id ?? reply.id,
+      listing_id: replyWithAuthor?.listing_id ?? listingId,
+      user_id: replyWithAuthor?.user_id ?? user.id,
+      content: replyWithAuthor?.content ?? content,
+      parent_id: replyWithAuthor?.parent_id ?? parentId,
+      created_at: replyWithAuthor?.created_at ?? new Date().toISOString(),
+      updated_at: replyWithAuthor?.updated_at ?? new Date().toISOString(),
       author: {
-        id: replyWithAuthor.user_id,
-        full_name: replyWithAuthor.author_name,
-        avatar_url: replyWithAuthor.author_avatar,
+        id: replyWithAuthor?.user_id ?? user.id,
+        full_name: replyWithAuthor?.author_name ?? 'Unknown',
+        avatar_url: replyWithAuthor?.author_avatar ?? null,
       },
-      is_seller: replyWithAuthor.is_seller,
+      is_seller: replyWithAuthor?.is_seller ?? false,
     };
 
     // TODO: Send email notification to question author (if not the seller replying)

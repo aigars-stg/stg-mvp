@@ -60,8 +60,19 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
 
         console.log(`✅ [GameSearch] Found ${data.count} results in ${data.durationMs}ms`);
 
+        // Define the shape of database results
+        interface DatabaseGame {
+          id: number;
+          name: string;
+          yearpublished?: number;
+          thumbnail?: string;
+          bayesaverage?: number;
+          is_expansion?: boolean;
+          matchedAlternateName?: string;
+        }
+
         // Convert database results to BGGGame format
-        const games: BGGGame[] = data.games.map((game: any) => ({
+        const games: BGGGame[] = data.games.map((game: DatabaseGame) => ({
           id: game.id,
           name: game.name,
           yearPublished: game.yearpublished,
@@ -75,13 +86,13 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
         setSearchResults(games);
         setError(null);
 
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('❌ [GameSearch] Search error:', err);
 
         setError(new BGGError(
           'UNKNOWN',
           'Search failed. Please try again.',
-          { originalError: err.message, query }
+          { originalError: err instanceof Error ? err.message : 'Unknown error', query }
         ));
         setSearchResults([]);
 
@@ -228,15 +239,14 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
             {t(searchResults.length === 1 ? 'resultsFound' : 'resultsFound_other', { count: searchResults.length })}
           </p>
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {searchResults.map((game: any) => (
+            {searchResults.map((game) => (
               <GameResultCard
                 key={game.id}
                 id={game.id}
                 name={game.name}
                 yearpublished={game.yearPublished}
-                bayesaverage={game.bayesaverage}
                 isExpansion={game.isExpansion}
-                onClick={onSelect}
+                onClick={() => onSelect(game)}
                 matchedAlternateName={game.matchedAlternateName}
               />
             ))}

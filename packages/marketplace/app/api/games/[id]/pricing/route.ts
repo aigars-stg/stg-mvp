@@ -74,7 +74,7 @@ export async function GET(
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600',
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Pricing API] Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch pricing data' },

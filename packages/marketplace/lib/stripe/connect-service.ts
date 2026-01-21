@@ -54,7 +54,7 @@ export async function createConnectAccount(
     console.log(`💳 [Stripe Connect] Creating account for user ${userId}`);
 
     // Prepare individual data (pre-fill from profile)
-    const individualData: any = {
+    const individualData: Stripe.AccountCreateParams.Individual = {
       email,
     };
 
@@ -69,7 +69,7 @@ export async function createConnectAccount(
     }
 
     // Prepare business profile (only for production URLs)
-    const businessProfile: any = {
+    const businessProfile: Stripe.AccountCreateParams.BusinessProfile = {
       mcc: '5945', // Hobby, Toy, and Game Shops
       product_description: 'Private seller of pre-owned board games on Second Turn Games marketplace',
     };
@@ -132,7 +132,7 @@ export async function createConnectAccount(
       accountId: account.id,
       onboardingUrl: accountLink.url,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Stripe Connect] Error creating account:', error);
     throw error;
   }
@@ -148,10 +148,10 @@ export async function createOnboardingLink(
   try {
     // Update account with business profile only (individual data can't be updated for Express accounts)
     // Individual information is managed by the account holder through Stripe's onboarding UI
-    const updateData: any = {};
+    const updateData: Stripe.AccountUpdateParams = {};
 
     // Prepare business profile (only for production URLs)
-    const businessProfile: any = {
+    const businessProfile: Stripe.AccountUpdateParams.BusinessProfile = {
       mcc: '5945', // Hobby, Toy, and Game Shops
       product_description: 'Private seller of pre-owned board games on Second Turn Games marketplace',
     };
@@ -174,7 +174,7 @@ export async function createOnboardingLink(
     });
 
     return accountLink.url;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Stripe Connect] Error creating onboarding link:', error);
     throw error;
   }
@@ -206,7 +206,14 @@ export async function syncConnectAccountStatus(
     };
 
     // Prepare update data for seller_profiles
-    const updateData: any = {
+    const updateData: {
+      stripe_connect_onboarding_completed: boolean;
+      stripe_connect_charges_enabled: boolean;
+      stripe_connect_payouts_enabled: boolean;
+      stripe_connect_details_submitted: boolean;
+      stripe_connect_updated_at: string;
+      seller_status?: string;
+    } = {
       stripe_connect_onboarding_completed: status.onboardingComplete,
       stripe_connect_charges_enabled: status.chargesEnabled,
       stripe_connect_payouts_enabled: status.payoutsEnabled,
@@ -232,7 +239,7 @@ export async function syncConnectAccountStatus(
     }
 
     return status;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Stripe Connect] Error syncing status:', error);
     throw error;
   }
@@ -245,7 +252,7 @@ export async function createDashboardLink(accountId: string): Promise<string> {
   try {
     const loginLink = await stripe.accounts.createLoginLink(accountId);
     return loginLink.url;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Stripe Connect] Error creating dashboard link:', error);
     throw error;
   }
@@ -269,7 +276,7 @@ export async function getConnectAccountDetails(accountId: string) {
       currentlyDue: account.requirements?.currently_due || [],
       pastDue: account.requirements?.past_due || [],
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Stripe Connect] Error getting account details:', error);
     throw error;
   }

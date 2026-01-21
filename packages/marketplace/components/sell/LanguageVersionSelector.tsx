@@ -27,7 +27,7 @@ export function LanguageVersionSelector({
   const tNoVersions = useTranslations('Sell.LanguageVersionSelector.noVersions');
   const tAutoSelected = useTranslations('Sell.LanguageVersionSelector.autoSelected');
 
-  const [versions, setVersions] = useState<any[]>([]);
+  const [versions, setVersions] = useState<BGGVersion[]>([]);
   const [isLoading, setIsLoading] = useState(!fallbackMode);
   const [selectedLanguage, setSelectedLanguage] = useState<string>(
     selectedVersion?.language || ''
@@ -105,10 +105,10 @@ export function LanguageVersionSelector({
   // Extract and sort languages from all versions
   const { primaryLanguages, otherLanguages } = useMemo(() => {
     const languages = new Set<string>();
-    versions.forEach((version: any) => {
+    versions.forEach((version) => {
       // Add all languages from multilingual versions
       if (version.languages && version.languages.length > 0) {
-        version.languages.forEach((lang: string) => languages.add(lang));
+        version.languages.forEach((lang) => languages.add(lang));
       } else if (version.language) {
         // Fallback to single language for backward compatibility
         languages.add(version.language);
@@ -129,7 +129,7 @@ export function LanguageVersionSelector({
   // Filter versions by selected language (includes multilingual versions)
   const filteredVersions = useMemo(() => {
     if (!selectedLanguage) return [];
-    return versions.filter((version: any) => {
+    return versions.filter((version) => {
       // Check if version includes the selected language
       if (version.languages && version.languages.length > 0) {
         return version.languages.includes(selectedLanguage);
@@ -143,7 +143,7 @@ export function LanguageVersionSelector({
     setSelectedLanguage(language);
 
     // Filter versions for this language
-    const versionsForLanguage = versions.filter((version: any) => {
+    const versionsForLanguage = versions.filter((version) => {
       if (version.languages && version.languages.length > 0) {
         return version.languages.includes(language);
       }

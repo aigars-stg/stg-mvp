@@ -103,7 +103,7 @@ export async function getSellerBalance(
     );
 
     return sellerBalance;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Balance] Error fetching balance:', error);
     throw error;
   }

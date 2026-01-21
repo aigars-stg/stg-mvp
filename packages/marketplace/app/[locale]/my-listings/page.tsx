@@ -13,7 +13,7 @@ import { WantedListingActionsMenu } from '@/components/wanted/WantedListingActio
 import { WantedStatusChangeModal } from '@/components/wanted/WantedStatusChangeModal';
 import { WantedDeleteConfirmationModal } from '@/components/wanted/WantedDeleteConfirmationModal';
 import { NotificationModal } from '@/components/common/NotificationModal';
-import { getStatusLabel } from '@/lib/types/listing';
+import { getStatusLabel, type ListingWithSeller } from '@/lib/types/listing';
 import { getWantedStatusLabel } from '@/lib/types/wanted-listing';
 import { OfflineError } from '@/components/common/OfflineError';
 import { useTranslations } from 'next-intl';
@@ -299,7 +299,7 @@ function MyListingsContent() {
                         onLinkCopied={() => setShowClipboardSuccess(true)}
                       />
                     </div>
-                    <OfferCard listing={listing as any} />
+                    <OfferCard listing={listing as ListingWithSeller} />
                   </div>
                 ))}
               </div>

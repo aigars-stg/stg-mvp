@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import type { SellerBadgeTier } from '@/lib/types/seller';
 
+// Type for transformed review data returned in the API response
+interface TransformedReview {
+  id: string;
+  rating: number;
+  review_text: string | null;
+  seller_response: string | null;
+  seller_responded_at: string | null;
+  created_at: string | null;
+  buyer_name: string;
+  buyer_avatar: string | null;
+  buyer_country: string | null;
+  order_number: string | null;
+}
+
 /**
  * GET /api/sellers/[id]
  *
@@ -86,7 +100,7 @@ export async function GET(
         active_listings_count?: number;
       };
       reviews?: {
-        data: any[];
+        data: TransformedReview[];
         pagination: {
           page: number;
           limit: number;
@@ -155,8 +169,20 @@ export async function GET(
 
         const buyersMap = new Map(buyers?.map(b => [b.id, b]) || []);
 
+        // Type for the raw review data from the database query
+        type ReviewQueryResult = {
+          id: string;
+          rating: number;
+          review_text: string | null;
+          seller_response: string | null;
+          seller_responded_at: string | null;
+          created_at: string | null;
+          buyer_id: string;
+          order: { order_number: string } | null;
+        };
+
         // Transform reviews to flatten buyer info
-        const transformedReviews = (reviews || []).map((review: any) => {
+        const transformedReviews: TransformedReview[] = (reviews || []).map((review: ReviewQueryResult) => {
           const buyer = buyersMap.get(review.buyer_id);
           return {
             id: review.id,

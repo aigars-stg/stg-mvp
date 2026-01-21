@@ -58,9 +58,9 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
           const lastMessage = data.messages[data.messages.length - 1];
           markAsRead(lastMessage.id);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching conversation:', err);
-        setError(err.message || 'Failed to load conversation');
+        setError(err instanceof Error ? err.message : 'Failed to load conversation');
       } finally {
         setLoading(false);
       }

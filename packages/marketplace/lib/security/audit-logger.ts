@@ -1,4 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/client';
+import type { Json } from '@/lib/supabase/database.types';
 import { getClientIP } from '@/lib/utils/request-helpers';
 import type { NextRequest } from 'next/server';
 
@@ -34,6 +35,7 @@ export type AuditEventType =
 
 /**
  * Metadata structure for different event types
+ * Uses Json type to ensure compatibility with Supabase's jsonb column
  */
 export interface AuditEventMetadata {
   // Common fields
@@ -55,13 +57,13 @@ export interface AuditEventMetadata {
   browser?: string;
   os?: string;
   // Change context (for admin_action)
-  oldValue?: unknown;
-  newValue?: unknown;
+  oldValue?: Json;
+  newValue?: Json;
   // Error context
   errorCode?: string;
   errorMessage?: string;
-  // Additional context
-  [key: string]: unknown;
+  // Additional context - uses Json for Supabase compatibility
+  [key: string]: Json | undefined;
 }
 
 
@@ -103,9 +105,7 @@ export async function logSecurityEvent(
       }
     }
 
-    // Note: security_audit_log table created in migration 075
-    // Type assertion needed until database types are regenerated after migration
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('security_audit_log')
       .insert({
         event_type: eventType,
@@ -180,7 +180,7 @@ export async function logAdminAction(
   action: string,
   resource: string,
   resourceId: string,
-  changes?: { oldValue?: unknown; newValue?: unknown },
+  changes?: { oldValue?: Json; newValue?: Json },
   request?: NextRequest | Request
 ): Promise<void> {
   await logSecurityEvent('admin_action', userId, {

@@ -98,12 +98,12 @@ export async function GET(request: NextRequest) {
       completedOrders: orders.map((o) => o.order_number),
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Cron] Order completion job failed:', error);
     return NextResponse.json(
       {
         error: 'Order completion failed',
-        details: error.message,
+        details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

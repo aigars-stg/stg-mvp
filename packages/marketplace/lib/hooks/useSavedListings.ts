@@ -39,9 +39,9 @@ export function useSavedListings(): UseSavedListingsReturn {
       }
 
       setSavedListings(data.savedListings || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching saved listings:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Failed to fetch saved listings');
       setSavedListings([]);
     } finally {
       setIsLoading(false);
@@ -92,9 +92,9 @@ export function useSavedListings(): UseSavedListingsReturn {
         }
 
         return data.saved;
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error toggling save status:', err);
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Failed to toggle save status');
         throw err;
       }
     },
@@ -117,9 +117,9 @@ export function useSavedListings(): UseSavedListingsReturn {
         setSavedListings((prev) =>
           prev.filter((saved) => saved.id !== savedListingId)
         );
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error removing saved listing:', err);
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Failed to remove saved listing');
         throw err;
       }
     },
@@ -189,7 +189,7 @@ export function useIsListingSaved(listingId: string | null) {
 
       setIsSaved(data.saved);
       return data.saved;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error toggling save status:', err);
       throw err;
     }

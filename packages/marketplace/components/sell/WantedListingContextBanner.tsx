@@ -66,7 +66,7 @@ export function WantedListingContextBanner({
                 {wantedListing.acceptable_conditions.map((condition) => (
                   <Badge
                     key={condition}
-                    variant={condition as any}
+                    variant={condition as 'likeNew' | 'veryGood' | 'good' | 'acceptable' | 'forParts'}
                     size="sm"
                   >
                     {getConditionLabel(condition)}

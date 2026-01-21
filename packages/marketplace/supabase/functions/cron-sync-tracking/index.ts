@@ -168,8 +168,8 @@ Deno.serve(async (req) => {
         }
 
         successCount++
-      } catch (err: any) {
-        console.error(`[Cron] Error syncing order ${order.id}:`, err.message)
+      } catch (err: unknown) {
+        console.error(`[Cron] Error syncing order ${order.id}:`, err instanceof Error ? err.message : 'Unknown error')
         errorCount++
       }
 
@@ -219,8 +219,8 @@ Deno.serve(async (req) => {
 
             console.log(`[Cron] Delivery email sent for order ${order.id}`)
             deliveryEmailsSent++
-          } catch (emailError: any) {
-            console.error(`[Cron] Email failed for order ${order.id}:`, emailError.message)
+          } catch (emailError: unknown) {
+            console.error(`[Cron] Email failed for order ${order.id}:`, emailError instanceof Error ? emailError.message : 'Unknown error')
           }
         }
       }
@@ -241,9 +241,9 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Cron] Unexpected error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

@@ -49,8 +49,8 @@ export function AccountDeletion() {
       // Note: signOut() triggers a redirect to '/', so we push this after to ensure the message is shown
       router.push('/?deleted=true');
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete account');
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Failed to delete account');
       setLoading(false);
     }
   };

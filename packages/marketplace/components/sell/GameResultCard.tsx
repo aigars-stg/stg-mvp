@@ -10,7 +10,7 @@ interface GameResultCardProps {
   yearpublished?: number;
   bayesaverage?: number;
   isExpansion?: boolean;
-  onClick: (game: any) => void;
+  onClick: (game: { id: number; name: string; yearPublished?: number; thumbnail: string | null; matchedAlternateName?: string }) => void;
   hideChevron?: boolean;
   // Version details (shown when game is selected)
   versionPublisher?: string;

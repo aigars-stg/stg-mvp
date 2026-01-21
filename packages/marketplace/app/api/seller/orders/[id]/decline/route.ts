@@ -9,6 +9,15 @@ interface DeclineOrderBody {
   reason?: string;
 }
 
+// Type for the seller_decline_order RPC result
+interface DeclineOrderResult {
+  success: boolean;
+  error?: string;
+  requires_refund?: boolean;
+  payment_intent_id?: string;
+  refund_amount?: number;
+}
+
 /**
  * POST /api/seller/orders/[id]/decline
  *
@@ -28,7 +37,7 @@ export async function POST(
     const { reason } = body;
 
     // Call database function to decline order
-    const { data: result, error: declineError } = await (supabase as any).rpc(
+    const { data: rpcResult, error: declineError } = await supabase.rpc(
       'seller_decline_order',
       {
         p_order_id: orderId,
@@ -44,6 +53,8 @@ export async function POST(
       );
     }
 
+    const result = rpcResult as unknown as DeclineOrderResult;
+
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
@@ -54,7 +65,7 @@ export async function POST(
     // Process refund if required
     if (result.requires_refund && result.payment_intent_id) {
       try {
-        const refund = await stripe.refunds.create({
+        await stripe.refunds.create({
           payment_intent: result.payment_intent_id,
           reason: 'requested_by_customer',
         });

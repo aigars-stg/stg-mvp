@@ -21,6 +21,15 @@ import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import type { ListingWithSeller, TransactionMethod, PricingFormat } from '@/lib/types/listing';
+import type { User } from '@supabase/supabase-js';
+import type { UserProfile } from '@/lib/auth/types';
+
+// Profile type for preview that includes optional seller stats fields
+interface PreviewProfile extends UserProfile {
+  total_completed_sales?: number;
+  average_rating?: number;
+  total_reviews?: number;
+}
 import { AuctionSettings as _AuctionSettings } from '@/components/sell/AuctionSettings';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { NotificationModal } from '@/components/common/NotificationModal';
@@ -36,8 +45,8 @@ export const dynamicParams = true;
 // Helper function to convert form data to listing preview format
 function createPreviewListing(
   formData: ListingFormData,
-  user: any,
-  profile: any,
+  user: User | null,
+  profile: PreviewProfile | null,
   existingPhotoUrls: string[] = []
 ): ListingWithSeller {
   // Convert new photos to blob URLs
@@ -237,7 +246,7 @@ function SellPageContent() {
         if (existingRes.ok) {
           const existingData = await existingRes.json();
           if (existingData.listings && existingData.listings.length > 0) {
-            setExistingActiveListings(existingData.listings.map((l: any) => ({
+            setExistingActiveListings(existingData.listings.map((l: { id: string; bgg_game_id: number; price: number; created_at: string }) => ({
               id: l.id,
               bgg_game_id: l.bgg_game_id,
               price: l.price,
@@ -916,13 +925,14 @@ function SellPageContent() {
         setPublishedListingId(listing.id);
         setShowSuccessModal(true);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`❌ [Sell Page] Error ${isEditMode ? 'updating' : 'publishing'} listing:`, error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setErrorModal({
         isOpen: true,
         message: isEditMode
-          ? tErrors('updateFailed', { message: error.message || '' })
-          : tErrors('publishFailed', { message: error.message || '' }),
+          ? tErrors('updateFailed', { message: errorMessage })
+          : tErrors('publishFailed', { message: errorMessage }),
       });
     } finally {
       setIsPublishing(false);

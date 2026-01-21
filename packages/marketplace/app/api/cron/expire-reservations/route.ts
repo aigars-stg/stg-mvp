@@ -68,10 +68,10 @@ export async function GET(request: NextRequest) {
       cleanedCount: cleanedCount || 0,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Cron] Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Cron job failed', details: error.message },
+      { error: 'Cron job failed', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

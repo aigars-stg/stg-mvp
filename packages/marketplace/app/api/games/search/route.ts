@@ -188,10 +188,10 @@ export async function GET(request: NextRequest) {
       query,
       durationMs: duration,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Search API] Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

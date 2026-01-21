@@ -218,8 +218,8 @@ Deno.serve(async (req) => {
             console.log(`[PriceCheck] Cached pricing for game ${gameId}`)
           }
         }
-      } catch (apiError: any) {
-        console.error('[PriceCheck] Failed to fetch external prices:', apiError.message)
+      } catch (apiError: unknown) {
+        console.error('[PriceCheck] Failed to fetch external prices:', apiError instanceof Error ? apiError.message : 'Unknown error')
         // Continue without external data - graceful degradation
       }
     }
@@ -269,8 +269,8 @@ Deno.serve(async (req) => {
 
             cachedMap.set(expId, expPricing.lowestPrice)
           }
-        } catch (err: any) {
-          console.error(`[PriceCheck] Failed to fetch expansion ${expId}:`, err.message)
+        } catch (err: unknown) {
+          console.error(`[PriceCheck] Failed to fetch expansion ${expId}:`, err instanceof Error ? err.message : 'Unknown error')
           // Continue with next expansion
         }
       }
@@ -305,10 +305,10 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PriceCheck] Unexpected error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
@@ -408,12 +408,12 @@ async function fetchBoardGamePrices(
         url: itemUrl,
       },
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     clearTimeout(timeoutId)
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       console.error('[PriceCheck] BGP API timeout')
     } else {
-      console.error('[PriceCheck] BGP API fetch error:', error.message)
+      console.error('[PriceCheck] BGP API fetch error:', error instanceof Error ? error.message : 'Unknown error')
     }
     return null
   }

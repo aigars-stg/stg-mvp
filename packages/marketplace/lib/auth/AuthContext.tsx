@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import type { User } from '@supabase/supabase-js';
+import type { User, Session, AuthChangeEvent, Subscription, UserIdentity } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
 import { loggers } from '@/lib/logger';
 import type { AuthContextType, UserProfile } from './types';
@@ -23,21 +23,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Create missing profile (in case trigger didn't fire during signup)
   const createMissingProfile = useCallback(async (userId: string) => {
     try {
-      const { data: { user } } = await (supabase as any).auth.getUser();
+      const { data: { user: authUser } } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (!authUser) {
         log.error('Cannot create profile - no user found');
         return null;
       }
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('user_profiles')
         .insert({
           id: userId,
-          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-          email: user.email!,
-          phone: user.user_metadata?.phone || null,
-          country: user.user_metadata?.country || null,
+          full_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+          email: authUser.email!,
+          phone: authUser.user_metadata?.phone || null,
+          country: authUser.user_metadata?.country || null,
         })
         .select()
         .single();
@@ -47,23 +47,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
 
-      return data as UserProfile;
-    } catch (error) {
-      log.error({ error: String(error) }, 'Profile creation failed');
+      return data as unknown as UserProfile;
+    } catch (error: unknown) {
+      log.error({ error: error instanceof Error ? error.message : 'Unknown error' }, 'Profile creation failed');
       return null;
     }
   }, []);
 
   // Update auth_providers column if needed (for performance optimization of check-email endpoint)
-  const updateAuthProviders = useCallback(async (userId: string, userIdentities: any[] | undefined) => {
+  const updateAuthProviders = useCallback(async (userId: string, userIdentities: UserIdentity[] | undefined) => {
     if (!userIdentities || userIdentities.length === 0) return;
 
     try {
-      const providers = [...new Set(userIdentities.map((identity: any) => identity.provider))];
+      const providers = [...new Set(userIdentities.map((identity) => identity.provider))];
       if (providers.length === 0) return;
 
       // Update only if auth_providers is empty (avoid unnecessary writes)
-      await (supabase as any)
+      await supabase
         .from('user_profiles')
         .update({ auth_providers: providers })
         .eq('id', userId)
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch user profile from database (uses view that includes seller data)
   const fetchProfile = useCallback(async (userId: string, retryCount = 0): Promise<UserProfile | null> => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('user_profiles_full')
         .select('*')
         .eq('id', userId)
@@ -99,9 +99,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
 
-      return data as UserProfile;
-    } catch (error) {
-      log.error({ error: String(error) }, 'Profile fetch exception');
+      return data as unknown as UserProfile;
+    } catch (error: unknown) {
+      log.error({ error: error instanceof Error ? error.message : 'Unknown error' }, 'Profile fetch exception');
       return null;
     }
   }, [createMissingProfile]);
@@ -109,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize auth state
   useEffect(() => {
     let mounted = true;
-    let subscription: any = null;
+    let subscription: Subscription | null = null;
 
     async function initAuth() {
       try {
@@ -117,8 +117,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // This ensures we don't miss any auth events during initialization
         const {
           data: { subscription: sub },
-        } = (supabase as any).auth.onAuthStateChange(
-          async (event: string, session: any) => {
+        } = supabase.auth.onAuthStateChange(
+          async (event: AuthChangeEvent, session: Session | null) => {
             if (!mounted) return;
 
             // Handle SIGNED_IN specially - but only for FRESH OAuth sign-ins
@@ -181,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         subscription = sub;
 
         // Now check for existing session (faster than getUser())
-        const { data: { session } } = await (supabase as any).auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
 
         if (!mounted) return;
 
@@ -198,8 +198,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         setLoading(false);
-      } catch (error) {
-        log.error({ error: String(error) }, 'Error initializing auth');
+      } catch (error: unknown) {
+        log.error({ error: error instanceof Error ? error.message : 'Unknown error' }, 'Error initializing auth');
         if (mounted) {
           setLoading(false);
         }
@@ -221,7 +221,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Include locale in redirect path so callback can capture it
       const redirectLocale = locale || 'en';
-      const { error } = await (supabase as any).auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/${redirectLocale}/auth/confirm`,
@@ -233,8 +233,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return { error: null };
-    } catch (error) {
-      return { error: error as Error };
+    } catch (error: unknown) {
+      return { error: error instanceof Error ? error : new Error('Unknown error') };
     }
   };
 
@@ -245,7 +245,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const emailPrefix = email.split('@')[0];
       const redirectLocale = locale || 'en';
 
-      const { error } = await (supabase as any).auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: `${window.location.origin}/${redirectLocale}/auth/confirm`,
@@ -267,23 +267,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return { error: null };
-    } catch (error) {
-      return { error: error as Error };
+    } catch (error: unknown) {
+      return { error: error instanceof Error ? error : new Error('Unknown error') };
     }
   };
 
   // Sign out
   const signOut = async () => {
     try {
-      const { error } = await (supabase as any).auth.signOut();
+      const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
       // Don't manually update state or navigate here
       // The auth listener will handle the SIGNED_OUT event
       // and update state/navigation automatically
       // This prevents race conditions between manual updates and listener updates
-    } catch (error) {
-      log.error({ error: String(error) }, 'Sign out error');
+    } catch (error: unknown) {
+      log.error({ error: error instanceof Error ? error.message : 'Unknown error' }, 'Sign out error');
       throw error;
     }
   };
@@ -295,7 +295,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('user_profiles')
         .update({
           ...updates,
@@ -312,8 +312,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(updatedProfile);
 
       return { error: null };
-    } catch (error) {
-      return { error: error as Error };
+    } catch (error: unknown) {
+      return { error: error instanceof Error ? error : new Error('Unknown error') };
     }
   };
 

@@ -2,6 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 
+interface GameVersion {
+  id: string | number;
+  thumbnail?: string | null;
+  image?: string | null;
+}
+
+interface GameData {
+  thumbnail: string | null;
+  image: string | null;
+  player_count: string | null;
+  min_age: number | null;
+  playing_time: string | null;
+  is_expansion: boolean | null;
+}
+
+interface ListingWithGame {
+  game?: GameData;
+  [key: string]: unknown;
+}
+
 /**
  * GET /api/saved-listings
  * Fetches all saved listings for the authenticated user
@@ -12,7 +32,7 @@ export async function GET(request: NextRequest) {
     if (response) return response;
 
     // Fetch saved listings with full listing details
-    const { data: savedListings, error } = await (supabase as any)
+    const { data: savedListings, error } = await supabase
       .from('saved_listings')
       .select(`
         *,
@@ -41,7 +61,7 @@ export async function GET(request: NextRequest) {
     if (savedListings && savedListings.length > 0) {
       for (const savedListing of savedListings) {
         if (savedListing.listing) {
-          const { data: game } = await (supabase as any)
+          const { data: game } = await supabase
             .from('games')
             .select('thumbnail, image, player_count, min_age, playing_time, versions, is_expansion')
             .eq('id', savedListing.listing.bgg_game_id)
@@ -53,14 +73,15 @@ export async function GET(request: NextRequest) {
             let versionImage = null;
 
             if (savedListing.listing.bgg_version_id && game.versions) {
-              const version = game.versions.find((v: any) => v.id === savedListing.listing.bgg_version_id);
+              const versions = game.versions as unknown as GameVersion[];
+              const version = versions.find((v) => String(v.id) === String(savedListing.listing.bgg_version_id));
               if (version) {
                 versionThumbnail = version.thumbnail;
                 versionImage = version.image;
               }
             }
 
-            savedListing.listing.game = {
+            (savedListing.listing as ListingWithGame).game = {
               thumbnail: versionThumbnail || game.thumbnail,
               image: versionImage || game.image,
               player_count: game.player_count,
@@ -69,7 +90,7 @@ export async function GET(request: NextRequest) {
               is_expansion: game.is_expansion
             };
           } else {
-            savedListing.listing.game = {
+            (savedListing.listing as ListingWithGame).game = {
               thumbnail: null,
               image: null,
               player_count: null,
@@ -109,7 +130,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if listing exists
-    const { data: listing, error: listingError } = await (supabase as any)
+    const { data: listing, error: listingError } = await supabase
       .from('listings')
       .select('id, status')
       .eq('id', listing_id)
@@ -123,7 +144,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create saved listing
-    const { data: savedListing, error: saveError } = await (supabase as any)
+    const { data: savedListing, error: saveError } = await supabase
       .from('saved_listings')
       .insert({
         user_id: user.id,

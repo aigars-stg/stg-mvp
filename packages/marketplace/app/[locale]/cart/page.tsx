@@ -305,7 +305,7 @@ export default function CartPage() {
                             {item.game_name}
                           </Link>
                           <div className="flex items-center gap-2 mt-1">
-                            <Badge variant={item.condition as any} size="sm">
+                            <Badge variant={item.condition as 'likeNew' | 'veryGood' | 'good' | 'acceptable'} size="sm">
                               {getConditionLabel(item.condition as ListingCondition)}
                             </Badge>
                           </div>

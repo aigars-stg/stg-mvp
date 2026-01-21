@@ -35,7 +35,7 @@ export async function PATCH(
     }
 
     // Verify question exists and belongs to user
-    const { data: existingQuestion, error: fetchError } = await (supabase as any)
+    const { data: existingQuestion, error: fetchError } = await supabase
       .from('listing_questions')
       .select('id, user_id, deleted_at')
       .eq('id', questionId)
@@ -63,7 +63,7 @@ export async function PATCH(
     }
 
     // Update the question
-    const { data: question, error: updateError } = await (supabase as any)
+    const { data: question, error: updateError } = await supabase
       .from('listing_questions')
       .update({ content })
       .eq('id', questionId)
@@ -75,26 +75,26 @@ export async function PATCH(
     }
 
     // Fetch the updated question with author info
-    const { data: questionWithAuthor } = await (supabase as any)
+    const { data: questionWithAuthor } = await supabase
       .from('listing_questions_with_author')
       .select('*')
       .eq('id', question.id)
       .single();
 
     const formattedQuestion: ListingQuestion = {
-      id: questionWithAuthor.id,
-      listing_id: questionWithAuthor.listing_id,
-      user_id: questionWithAuthor.user_id,
-      content: questionWithAuthor.content,
-      parent_id: questionWithAuthor.parent_id,
-      created_at: questionWithAuthor.created_at,
-      updated_at: questionWithAuthor.updated_at,
+      id: questionWithAuthor?.id ?? question.id,
+      listing_id: questionWithAuthor?.listing_id ?? params.id,
+      user_id: questionWithAuthor?.user_id ?? user.id,
+      content: questionWithAuthor?.content ?? content,
+      parent_id: questionWithAuthor?.parent_id ?? null,
+      created_at: questionWithAuthor?.created_at ?? new Date().toISOString(),
+      updated_at: questionWithAuthor?.updated_at ?? new Date().toISOString(),
       author: {
-        id: questionWithAuthor.user_id,
-        full_name: questionWithAuthor.author_name,
-        avatar_url: questionWithAuthor.author_avatar,
+        id: questionWithAuthor?.user_id ?? user.id,
+        full_name: questionWithAuthor?.author_name ?? 'Unknown',
+        avatar_url: questionWithAuthor?.author_avatar ?? null,
       },
-      is_seller: questionWithAuthor.is_seller,
+      is_seller: questionWithAuthor?.is_seller ?? false,
     };
 
     return NextResponse.json({
@@ -121,7 +121,7 @@ export async function DELETE(
     const { questionId } = params;
 
     // Verify question exists and belongs to user
-    const { data: existingQuestion, error: fetchError } = await (supabase as any)
+    const { data: existingQuestion, error: fetchError } = await supabase
       .from('listing_questions')
       .select('id, user_id, deleted_at')
       .eq('id', questionId)
@@ -149,7 +149,7 @@ export async function DELETE(
     }
 
     // Soft delete the question
-    const { error: deleteError } = await (supabase as any)
+    const { error: deleteError } = await supabase
       .from('listing_questions')
       .update({ deleted_at: new Date().toISOString() })
       .eq('id', questionId);

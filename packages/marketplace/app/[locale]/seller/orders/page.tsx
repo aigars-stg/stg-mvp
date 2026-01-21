@@ -353,7 +353,7 @@ export default function SellerOrdersPage() {
                             {item.game_name}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
-                            <Badge variant={item.condition as any} size="sm">
+                            <Badge variant={item.condition as ListingCondition} size="sm">
                               {getConditionLabel(item.condition as ListingCondition)}
                             </Badge>
                             <span className="text-sm font-medium text-polar-night">

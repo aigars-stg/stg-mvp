@@ -2,8 +2,51 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import type { SellerBadgeTier } from '@/lib/types/seller';
 import { handleApiError } from '@/lib/api/error-handler';
+import type { ListingRow, GameRow } from '@/lib/supabase/query-types';
 
 export const dynamic = 'force-dynamic';
+
+// Types for the API response
+interface TransformedReview {
+  id: string;
+  rating: number;
+  review_text: string | null;
+  seller_response: string | null;
+  seller_responded_at: string | null;
+  created_at: string | null;
+  buyer_name: string;
+  buyer_avatar: string | null;
+  buyer_country: string | null;
+  order_number: string | null;
+}
+
+interface ListingWithSellerAndGame extends ListingRow {
+  game: {
+    thumbnail: string | null;
+    image: string | null;
+    player_count: string | null;
+    min_age: number | null;
+    playing_time: string | null;
+    is_expansion: boolean;
+  };
+  seller: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url: string | null;
+    country: string | null;
+    total_reviews: number;
+    average_rating: number;
+    total_completed_sales: number;
+    member_since: string | null;
+  };
+}
+
+interface GameVersion {
+  id: number;
+  thumbnail?: string;
+  image?: string;
+}
 
 /**
  * GET /api/profile/[id]
@@ -94,7 +137,7 @@ export async function GET(
         active_listings_count?: number;
       };
       reviews?: {
-        data: any[];
+        data: TransformedReview[];
         pagination: {
           page: number;
           limit: number;
@@ -103,7 +146,7 @@ export async function GET(
         };
       };
       listings?: {
-        data: any[];
+        data: ListingWithSellerAndGame[];
         pagination: {
           page: number;
           limit: number;
@@ -167,7 +210,7 @@ export async function GET(
 
         // Fetch game metadata for listings
         if (listings && listings.length > 0) {
-          const gameIds = [...new Set(listings.map((l: any) => l.bgg_game_id).filter(Boolean))];
+          const gameIds = [...new Set(listings.map((l) => l.bgg_game_id).filter(Boolean))];
 
           let gamesMap = new Map();
           if (gameIds.length > 0) {
@@ -176,7 +219,7 @@ export async function GET(
               .select('id, thumbnail, image, versions, player_count, min_age, playing_time, is_expansion')
               .in('id', gameIds);
 
-            gamesMap = new Map(games?.map((g: any) => [g.id, g]) || []);
+            gamesMap = new Map(games?.map((g) => [g.id, g]) || []);
           }
 
           // Build seller data object (same for all listings since this is the seller's profile)
@@ -193,14 +236,14 @@ export async function GET(
           };
 
           // Transform listings to ListingWithSeller format
-          const listingsWithSeller = listings.map((listing: any) => {
+          const listingsWithSeller = listings.map((listing) => {
             const game = gamesMap.get(listing.bgg_game_id);
             let thumbnail = game?.thumbnail || null;
             let image = game?.image || null;
 
             // Check for version-specific images
             if (listing.bgg_version_id && game?.versions && Array.isArray(game.versions)) {
-              const version = game.versions.find((v: any) => v.id === listing.bgg_version_id);
+              const version = (game.versions as GameVersion[]).find((v) => v.id === listing.bgg_version_id);
               if (version?.thumbnail) thumbnail = version.thumbnail;
               if (version?.image) image = version.image;
             }
@@ -276,8 +319,10 @@ export async function GET(
           const buyersMap = new Map(buyers?.map(b => [b.id, b]) || []);
 
           // Transform reviews to flatten buyer info
-          const transformedReviews = reviews.map((review: any) => {
+          const transformedReviews = reviews.map((review) => {
             const buyer = buyersMap.get(review.buyer_id);
+            // Handle the order field which may be an array or object due to Supabase join
+            const orderData = Array.isArray(review.order) ? review.order[0] : review.order;
             return {
               id: review.id,
               rating: review.rating,
@@ -288,7 +333,7 @@ export async function GET(
               buyer_name: buyer?.full_name || 'Anonymous',
               buyer_avatar: buyer?.avatar_url || null,
               buyer_country: buyer?.country || null,
-              order_number: review.order?.order_number || null,
+              order_number: orderData?.order_number || null,
             };
           });
 

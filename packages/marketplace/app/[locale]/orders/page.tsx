@@ -222,7 +222,7 @@ export default function OrdersPage() {
                           <h3 className="text-lg font-semibold text-polar-night">
                             {order.order_number}
                           </h3>
-                          <Badge variant={statusInfo.color as any}>
+                          <Badge variant={statusInfo.color as 'default' | 'warning' | 'trust' | 'success' | 'error'}>
                             <StatusIcon className="w-3 h-3 mr-1" />
                             {statusInfo.label}
                           </Badge>

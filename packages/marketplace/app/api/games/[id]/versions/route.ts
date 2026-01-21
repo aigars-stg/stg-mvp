@@ -33,13 +33,13 @@ export async function GET(
       count: versions.length,
       gameId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`❌ [Versions API] Error fetching versions for game ${gameId}:`, error);
 
     return NextResponse.json(
       {
         error: 'Failed to fetch game versions',
-        details: error.message,
+        details: error instanceof Error ? error.message : 'Unknown error',
         gameId,
       },
       { status: 500 }

@@ -37,6 +37,11 @@ interface CartData {
     summary: CartSummary;
 }
 
+interface CartOperationResult {
+    success: boolean;
+    message?: string;
+}
+
 interface CartContextType {
     cart: CartData | null;
     baskets: CartBasket[];
@@ -45,8 +50,8 @@ interface CartContextType {
     isLoading: boolean;
     error: string | null;
     fetchCart: () => Promise<void>;
-    addToCart: (listingId: string) => Promise<any>;
-    removeFromCart: (listingId: string) => Promise<any>;
+    addToCart: (listingId: string) => Promise<CartOperationResult>;
+    removeFromCart: (listingId: string) => Promise<CartOperationResult>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -80,9 +85,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
             const data = await response.json();
             setCart(data);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error fetching cart:', err);
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Failed to fetch cart');
         } finally {
             setIsLoading(false);
         }

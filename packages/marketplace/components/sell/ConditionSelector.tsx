@@ -18,7 +18,7 @@ interface ConditionSelectorProps {
   conditionNotes: string;
   allComponentsPresent: boolean;
   missingComponents: string;
-  onChange: (field: string, value: any) => void;
+  onChange: (field: string, value: string | boolean | null) => void;
 }
 
 export function ConditionSelector({

@@ -1,6 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
 import { fetchGameWithFallback, fetchExpansionsForGame, getExpansionCount, type BGGExpansionInfo } from '@/lib/bgg-api';
+import type { BGGVersion } from '@/lib/bgg-types';
+import type { Json } from '@/lib/supabase/database.types';
+
+// Extended game type with metadata fields (standalone type)
+interface GameWithMetadata {
+  id: number;
+  name: string;
+  thumbnail: string | null;
+  image: string | null;
+  player_count: string | null;
+  min_age: number | null;
+  playing_time: string | null;
+  is_expansion: boolean | null;
+  yearpublished: number | null;
+  versions: Json | null;
+  description: string | null;
+  designers: Json | null;
+  bayesaverage: number | null;
+  alternate_names: Json | null;
+  metadata_fetched_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const gameId = params.id;
@@ -15,7 +38,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     console.log(`📡 [Game Details] Fetching game ${gameId}${includeExpansions ? ' with expansions' : ''}`);
 
     // 1. Get basic info from database
-    const { data: game, error: dbError } = await (supabase as any)
+    const { data: game, error: dbError } = await supabase
       .from('games')
       .select('*')
       .eq('id', parseInt(gameId))
@@ -26,25 +49,28 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Game not found' }, { status: 404 });
     }
 
+    // Cast to our extended type with metadata fields
+    const gameWithMeta = game as GameWithMetadata;
+
     // 2. Check if we have fresh metadata (< 30 days old)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const hasFreshMetadata =
-      (game as any).metadata_fetched_at && new Date((game as any).metadata_fetched_at) > thirtyDaysAgo;
+      gameWithMeta.metadata_fetched_at && new Date(gameWithMeta.metadata_fetched_at) > thirtyDaysAgo;
 
-    if (hasFreshMetadata && (game as any).versions) {
-      console.log(`💾 [Game Details] Using cached metadata for ${(game as any).name}`);
+    if (hasFreshMetadata && gameWithMeta.versions) {
+      console.log(`💾 [Game Details] Using cached metadata for ${gameWithMeta.name}`);
 
       // Check if cached data would trigger fallback mode
-      const cachedVersions = (game as any).versions || [];
-      const hasImages = (game as any).image || (game as any).thumbnail;
+      const cachedVersions = (gameWithMeta.versions as unknown as BGGVersion[] | null) || [];
+      const hasImages = gameWithMeta.image || gameWithMeta.thumbnail;
       const fallbackMode = !hasImages || cachedVersions.length === 0;
 
       // Fetch expansions if requested and game is not an expansion itself
       let expansions: BGGExpansionInfo[] = [];
       let expansionCount = 0;
-      if (!(game as any).is_expansion) {
+      if (!gameWithMeta.is_expansion) {
         if (includeExpansions) {
           expansions = await fetchExpansionsForGame(parseInt(gameId));
           expansionCount = expansions.length;
@@ -80,13 +106,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // 4. Update database with fresh metadata (including alternate_names, versions, bayesaverage, description, designers)
-    const { data: updatedGame, error: updateError } = await (supabase as any)
+    const { data: updatedGame, error: updateError } = await supabase
       .from('games')
       .update({
         thumbnail: bggData.thumbnail,
         image: bggData.image,
         alternate_names: bggData.alternateNames || null,
-        versions: versions.length > 0 ? versions : null,
+        versions: versions.length > 0 ? (versions as unknown as Json) : null,
         bayesaverage: bggData.bayesaverage || null,
         player_count: bggData.playerCount || null,
         min_age: bggData.minAge || null,
@@ -111,12 +137,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       });
     }
 
-    console.log(`✅ [Game Details] Cached metadata for ${(updatedGame as any).name}`);
+    // Cast updated game to our extended type
+    const updatedGameWithMeta = updatedGame as GameWithMetadata;
+    console.log(`✅ [Game Details] Cached metadata for ${updatedGameWithMeta.name}`);
 
     // Fetch expansions if requested and game is not an expansion itself
     let expansions: BGGExpansionInfo[] = [];
     let expansionCount = 0;
-    if (!(updatedGame as any).is_expansion) {
+    if (!updatedGameWithMeta.is_expansion) {
       if (includeExpansions) {
         expansions = await fetchExpansionsForGame(parseInt(gameId));
         expansionCount = expansions.length;
@@ -134,10 +162,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       expansions: includeExpansions ? expansions : undefined,
       expansionCount,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Game Details] Error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch game details', details: error.message },
+      { error: 'Failed to fetch game details', details: message },
       { status: 500 }
     );
   }

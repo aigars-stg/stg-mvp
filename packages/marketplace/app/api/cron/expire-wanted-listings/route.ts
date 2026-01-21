@@ -66,11 +66,11 @@ export async function GET(request: Request) {
       timestamp: new Date().toISOString(),
       message: `Expired ${expiredCount} wanted listing(s)`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Cron] Fatal error:', error);
     return NextResponse.json(
       {
-        error: error.message || 'Failed to expire wanted listings',
+        error: error instanceof Error ? error.message : 'Failed to expire wanted listings',
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

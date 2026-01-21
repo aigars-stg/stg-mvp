@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
               .eq('id', order_id);
 
             refundsProcessed++;
-          } catch (refundError: any) {
+          } catch (refundError: unknown) {
             console.error(`❌ [Cron] Refund failed for order ${order_id}:`, refundError);
             refundsFailed++;
             continue;
@@ -169,10 +169,10 @@ export async function GET(request: NextRequest) {
     console.log('✅ [Cron] Summary:', summary);
 
     return NextResponse.json(summary);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [Cron] Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Cron job failed', details: error.message },
+      { error: 'Cron job failed', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

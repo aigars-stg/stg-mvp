@@ -4,6 +4,32 @@ import { createServiceClient } from '@/lib/supabase/client';
 
 export const dynamic = 'force-dynamic';
 
+// Type for DAC7 seller data with joined user profile
+interface Dac7SellerExportData {
+  user_id: string;
+  dac7_compliance_status: string | null;
+  dac7_annual_transaction_count: number | null;
+  dac7_annual_sales_total: number | null;
+  dac7_reporting_year: number | null;
+  dac7_tax_id: string | null;
+  dac7_tax_id_type: string | null;
+  dac7_full_legal_name: string | null;
+  dac7_date_of_birth: string | null;
+  dac7_address_street: string | null;
+  dac7_address_city: string | null;
+  dac7_address_postal_code: string | null;
+  dac7_address_country: string | null;
+  dac7_tax_residency_country: string | null;
+  dac7_info_submitted_at: string | null;
+  dac7_info_verified: boolean | null;
+  seller_status: string | null;
+  user_profiles: {
+    email: string | null;
+    full_name: string | null;
+    country: string | null;
+  } | null;
+}
+
 /**
  * GET /api/staff/dac7/export
  *
@@ -108,8 +134,7 @@ export async function GET(request: NextRequest) {
       'Verified',
     ];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = (sellers || []).map((seller: any) => [
+    const rows = ((sellers || []) as Dac7SellerExportData[]).map((seller) => [
       seller.user_id,
       seller.user_profiles?.email || '',
       seller.dac7_full_legal_name || seller.user_profiles?.full_name || '',

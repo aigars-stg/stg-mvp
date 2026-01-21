@@ -76,9 +76,9 @@ export function BudgetAssistant({
 
         const data = await response.json();
         setPricingData(data);
-      } catch (err: any) {
-        console.error('[BudgetAssistant] Fetch error:', err);
-        setError('Unable to load pricing suggestions');
+      } catch (error: unknown) {
+        console.error('[BudgetAssistant] Fetch error:', error);
+        setError(error instanceof Error ? error.message : 'Unable to load pricing suggestions');
       } finally {
         setLoading(false);
       }
@@ -116,14 +116,14 @@ export function BudgetAssistant({
   };
 
   const formatCondition = (cond: string): string => {
-    const conditionKeys: Record<string, string> = {
+    const conditionKeys: Record<string, 'likeNew' | 'veryGood' | 'good' | 'acceptable'> = {
       likeNew: 'likeNew',
       veryGood: 'veryGood',
       good: 'good',
       acceptable: 'acceptable',
     };
     const key = conditionKeys[cond];
-    return key ? tConditions(key as any) : cond;
+    return key ? tConditions(key) : cond;
   };
 
   if (!bggGameId) {

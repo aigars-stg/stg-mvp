@@ -3,6 +3,40 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 
+interface GameVersion {
+  id: number;
+  thumbnail?: string | null;
+  image?: string | null;
+}
+
+interface GameMetadata {
+  thumbnail: string | null;
+  image: string | null;
+  player_count: string | null;
+  min_age: number | null;
+  playing_time: string | null;
+  is_expansion: boolean | null;
+}
+
+// Extended listing update type that includes fields that may not be in the generated types yet
+interface ListingUpdateFields {
+  condition?: string | null;
+  condition_notes?: string | null;
+  all_components_present?: boolean | null;
+  missing_components?: string | null;
+  price?: number;
+  previous_price?: number | null;
+  accept_offers?: boolean;
+  minimum_offer?: number | null;
+  photo_urls?: string[];
+  shipping_local_pickup?: boolean;
+  shipping_parcel_locker?: boolean;
+  shipping_notes?: string | null;
+  pickup_city?: string | null;
+  status?: string;
+  why_selling?: string | null;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -12,7 +46,7 @@ export async function GET(
     const supabase = await createServerSupabase();
 
     // Fetch listing with seller profile
-    const { data: listing, error } = await (supabase as any)
+    const { data: listing, error } = await supabase
       .from('listings')
       .select(`
         *,
@@ -40,9 +74,19 @@ export async function GET(
       );
     }
 
+    // Build response with game metadata
+    let gameMetadata: GameMetadata = {
+      thumbnail: null,
+      image: null,
+      player_count: null,
+      min_age: null,
+      playing_time: null,
+      is_expansion: null
+    };
+
     // Fetch game images and metadata (including versions for version-specific images)
     if (listing) {
-      const { data: game } = await (supabase as any)
+      const { data: game } = await supabase
         .from('games')
         .select('thumbnail, image, player_count, min_age, playing_time, versions, is_expansion')
         .eq('id', listing.bgg_game_id)
@@ -50,19 +94,20 @@ export async function GET(
 
       if (game) {
         // Fetch version-specific images if bgg_version_id exists
-        let versionThumbnail = null;
-        let versionImage = null;
+        let versionThumbnail: string | null = null;
+        let versionImage: string | null = null;
 
         if (listing.bgg_version_id && game.versions) {
-          const version = game.versions.find((v: any) => v.id === listing.bgg_version_id);
+          const versions = game.versions as unknown as GameVersion[];
+          const version = versions.find((v) => v.id === listing.bgg_version_id);
           if (version) {
-            versionThumbnail = version.thumbnail;
-            versionImage = version.image;
+            versionThumbnail = version.thumbnail ?? null;
+            versionImage = version.image ?? null;
           }
         }
 
         // Priority: 1) Version image, 2) Base game image
-        listing.game = {
+        gameMetadata = {
           thumbnail: versionThumbnail || game.thumbnail,
           image: versionImage || game.image,
           player_count: game.player_count,
@@ -70,19 +115,10 @@ export async function GET(
           playing_time: game.playing_time,
           is_expansion: game.is_expansion
         };
-      } else {
-        listing.game = {
-          thumbnail: null,
-          image: null,
-          player_count: null,
-          min_age: null,
-          playing_time: null,
-          is_expansion: null
-        };
       }
     }
 
-    return NextResponse.json({ listing });
+    return NextResponse.json({ listing: { ...listing, game: gameMetadata } });
   } catch (error) {
     return handleApiError(error, 'Fetch listing');
   }
@@ -104,7 +140,7 @@ export async function PATCH(
     const body = await request.json();
 
     // Build updates object from allowed fields
-    const updates: any = {};
+    const updates: ListingUpdateFields = {};
 
     // Condition fields
     if (body.condition !== undefined) {
@@ -132,11 +168,11 @@ export async function PATCH(
       }
 
       // Fetch current listing to check for price reduction
-      const { data: currentListing } = await (supabase as any)
+      const { data: currentListing } = await supabase
         .from('listings')
         .select('price, previous_price')
         .eq('id', id)
-        .eq('seller_id', user.id)
+        .eq('seller_id', user!.id)
         .single();
 
       if (currentListing) {
@@ -206,11 +242,12 @@ export async function PATCH(
     }
 
     // Update listing (RLS policy ensures only seller can update)
-    const { data: listing, error: updateError } = await (supabase as any)
+    // Cast to Record for flexibility with fields that may not be in generated types
+    const { data: listing, error: updateError } = await supabase
       .from('listings')
-      .update(updates)
+      .update(updates as Record<string, unknown>)
       .eq('id', id)
-      .eq('seller_id', user.id) // Ensure user owns this listing
+      .eq('seller_id', user!.id) // Ensure user owns this listing
       .select()
       .single();
 
@@ -256,11 +293,11 @@ export async function DELETE(
 
     if (hardDelete) {
       // Hard delete - permanently remove from database
-      const { error: deleteError } = await (supabase as any)
+      const { error: deleteError } = await supabase
         .from('listings')
         .delete()
         .eq('id', id)
-        .eq('seller_id', user.id); // Ensure user owns this listing
+        .eq('seller_id', user!.id); // Ensure user owns this listing
 
       if (deleteError) {
         if (deleteError.code === 'PGRST116') {
@@ -281,11 +318,11 @@ export async function DELETE(
       });
     } else {
       // Soft delete - set status to 'removed'
-      const { data: listing, error: updateError } = await (supabase as any)
+      const { data: listing, error: updateError } = await supabase
         .from('listings')
         .update({ status: 'removed' })
         .eq('id', id)
-        .eq('seller_id', user.id) // Ensure user owns this listing
+        .eq('seller_id', user!.id) // Ensure user owns this listing
         .select()
         .single();
 

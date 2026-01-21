@@ -377,7 +377,7 @@ export default function StaffTransactionPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-polar-night truncate">{item.game_name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <Badge variant={item.condition as any} size="sm">
+                        <Badge variant={item.condition as ListingCondition} size="sm">
                           {getConditionLabel(item.condition as ListingCondition)}
                         </Badge>
                         <span className="text-sm font-semibold text-polar-night">€{item.price.toFixed(2)}</span>

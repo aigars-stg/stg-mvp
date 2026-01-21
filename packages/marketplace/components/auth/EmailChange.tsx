@@ -39,7 +39,7 @@ export function EmailChange({ currentEmail, compact = false }: EmailChangeProps)
 
     try {
       // Update email - Supabase will send verification to new email
-      const { error: updateError } = await (supabase as any).auth.updateUser({
+      const { error: updateError } = await supabase.auth.updateUser({
         email: newEmail,
       });
 
@@ -53,8 +53,8 @@ export function EmailChange({ currentEmail, compact = false }: EmailChangeProps)
       setLoading(false);
       setNewEmail('');
       setIsEditing(false);
-    } catch (err: any) {
-      setError(mapAuthError(err));
+    } catch (error: unknown) {
+      setError(mapAuthError(error));
       setLoading(false);
     }
   };

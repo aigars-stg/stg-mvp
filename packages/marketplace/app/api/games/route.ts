@@ -4,6 +4,41 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import type { AggregatedGame, AggregatedGamesResponse } from '@/lib/types/aggregated-game';
 import type { ListingCondition } from '@/lib/types/listing';
 
+// Type for listing with seller join
+interface ListingWithSeller {
+  id: string;
+  bgg_game_id: number;
+  game_name: string;
+  game_year: number | null;
+  price: number;
+  pricing_format: string;
+  auction_current_bid: number | null;
+  auction_start_price: number | null;
+  condition: ListingCondition | null;
+  language: string | null;
+  shipping_local_pickup: boolean;
+  shipping_parcel_locker: boolean;
+  created_at: string;
+  reserved_until: string | null;
+  seller: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    country: string | null;
+  } | null;
+}
+
+// Type for game metadata
+interface GameMetadata {
+  id: number;
+  thumbnail: string | null;
+  image: string | null;
+  player_count: string | null;
+  min_age: number | null;
+  playing_time: string | null;
+  is_expansion: boolean;
+}
+
 /**
  * GET /api/games
  *
@@ -46,7 +81,7 @@ export async function GET(request: NextRequest) {
 
     // Build query for active listings with seller info
     // Note: We include reserved listings so they can be shown with "Reserved" indicator
-    let query = (supabase as any)
+    let query = supabase
       .from('listings')
       .select(`
         id,
@@ -99,30 +134,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Cast listings to proper type
+    const typedListings = (listings || []) as unknown as ListingWithSeller[];
+
     // Get unique game IDs for fetching game metadata
-    const gameIds = [...new Set((listings || []).map((l: any) => l.bgg_game_id))];
+    const gameIds = [...new Set(typedListings.map((l) => l.bgg_game_id))];
 
     // Fetch game metadata
-    let gamesMap = new Map();
+    let gamesMap = new Map<number, GameMetadata>();
     if (gameIds.length > 0) {
-      const { data: games } = await (supabase as any)
+      const { data: games } = await supabase
         .from('games')
         .select('id, thumbnail, image, player_count, min_age, playing_time, is_expansion')
         .in('id', gameIds);
 
       if (games) {
-        gamesMap = new Map(games.map((g: any) => [g.id, g]));
+        gamesMap = new Map((games as GameMetadata[]).map((g) => [g.id, g]));
       }
     }
 
     // Group listings by game and aggregate
     const gameMap = new Map<number, {
-      listings: any[];
-      game: any;
+      listings: ListingWithSeller[];
+      game: GameMetadata | null;
       newest_listing_date: string | null;
     }>();
 
-    for (const listing of listings || []) {
+    for (const listing of typedListings) {
       const gameId = listing.bgg_game_id;
       const gameData = gamesMap.get(gameId);
 
@@ -193,7 +231,7 @@ export async function GET(request: NextRequest) {
       let hasLocalPickup = false;
       let hasParcelShipping = false;
       let hasAuction = false;
-      let cheapest: any = null;
+      let cheapest: ListingWithSeller | null = null;
 
       for (const listing of gameListings) {
         // For auctions, use current bid or starting price; for fixed price, use price
@@ -239,6 +277,9 @@ export async function GET(request: NextRequest) {
         const hasMatchingLanguage = languages.some(lang => gameLanguages.has(lang));
         if (!hasMatchingLanguage) continue;
       }
+
+      // Safety check: skip if no cheapest listing found (shouldn't happen since we check gameListings.length > 0)
+      if (!cheapest) continue;
 
       const aggregated: AggregatedGame = {
         bgg_game_id: gameId,

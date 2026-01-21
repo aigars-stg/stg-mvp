@@ -26,6 +26,9 @@ import {
   getStatusConfig,
   isCancelledStatus,
 } from '@/components/shipping';
+
+// Valid Badge variants for the design system - used for type assertion
+type DesignSystemBadgeVariant = 'trust' | 'likeNew' | 'veryGood' | 'good' | 'acceptable' | 'forParts' | 'success' | 'warning' | 'error' | 'default' | 'outline';
 import { formatDate, formatTime } from '@/lib/date-utils';
 
 export default function OrderDetailPage() {
@@ -126,7 +129,7 @@ export default function OrderDetailPage() {
                 <h1 className="text-2xl sm:text-3xl font-bold text-polar-night dark:text-snow-white">
                   {t('orderTitle', { orderNumber: order.order_number })}
                 </h1>
-                <Badge variant={statusInfo.variant as any} size="lg">
+                <Badge variant={statusInfo.variant as DesignSystemBadgeVariant} size="lg">
                   <StatusIcon className="w-4 h-4 mr-1" />
                   {statusInfo.label}
                 </Badge>
@@ -259,7 +262,7 @@ export default function OrderDetailPage() {
                         {item.game_name}
                       </Link>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge variant={item.condition as any} size="sm">
+                        <Badge variant={item.condition as ListingCondition} size="sm">
                           {getConditionLabel(item.condition as ListingCondition)}
                         </Badge>
                       </div>

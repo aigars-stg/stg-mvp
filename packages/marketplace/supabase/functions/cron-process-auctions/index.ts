@@ -111,8 +111,8 @@ Deno.serve(async (req) => {
             })
             console.log(`[Cron] Winner email sent for auction ${listing_id}`)
             winnerEmailsSent++
-          } catch (emailError: any) {
-            console.error(`[Cron] Winner email failed for auction ${listing_id}:`, emailError.message)
+          } catch (emailError: unknown) {
+            console.error(`[Cron] Winner email failed for auction ${listing_id}:`, emailError instanceof Error ? emailError.message : 'Unknown error')
           }
 
           // Create in-app notification for winner
@@ -141,8 +141,8 @@ Deno.serve(async (req) => {
             })
             console.log(`[Cron] Seller sold email sent for auction ${listing_id}`)
             sellerEmailsSent++
-          } catch (emailError: any) {
-            console.error(`[Cron] Seller email failed for auction ${listing_id}:`, emailError.message)
+          } catch (emailError: unknown) {
+            console.error(`[Cron] Seller email failed for auction ${listing_id}:`, emailError instanceof Error ? emailError.message : 'Unknown error')
           }
         }
       } else {
@@ -161,8 +161,8 @@ Deno.serve(async (req) => {
             })
             console.log(`[Cron] No-bid email sent for auction ${listing_id}`)
             noBidEmailsSent++
-          } catch (emailError: any) {
-            console.error(`[Cron] No-bid email failed for auction ${listing_id}:`, emailError.message)
+          } catch (emailError: unknown) {
+            console.error(`[Cron] No-bid email failed for auction ${listing_id}:`, emailError instanceof Error ? emailError.message : 'Unknown error')
           }
 
           // Create in-app notification for seller
@@ -191,9 +191,9 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify(summary), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Cron] Unexpected error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

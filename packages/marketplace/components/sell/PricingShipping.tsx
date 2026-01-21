@@ -12,7 +12,7 @@ interface PricingShippingProps {
   };
   pickupLocation: string;
   parcelLockerPaidBy: 'seller' | 'buyer' | null;
-  onChange: (field: string, value: any) => void;
+  onChange: (field: string, value: string | { localPickup: boolean; parcelLocker: boolean } | 'seller' | 'buyer') => void;
 }
 
 export function PricingShipping({

@@ -5,7 +5,7 @@ import { Badge, Button } from '@second-turn/design-system';
 import { LocationPin as MapPin } from 'griddy-icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { getBudgetDisplay } from '@/lib/types/wanted-listing';
-import { getConditionLabel } from '@/lib/types/listing';
+import { getConditionLabel, ListingCondition } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useTranslations } from 'next-intl';
 
@@ -50,7 +50,7 @@ export function WantedListingRow({
             {listing.acceptable_conditions.map((condition) => (
               <Badge
                 key={condition}
-                variant={condition as any}
+                variant={condition as ListingCondition}
                 size="sm"
               >
                 {getConditionLabel(condition)}
@@ -124,7 +124,7 @@ export function WantedListingRow({
             {listing.acceptable_conditions.map((condition) => (
               <Badge
                 key={condition}
-                variant={condition as any}
+                variant={condition as ListingCondition}
                 size="sm"
               >
                 {getConditionLabel(condition)}

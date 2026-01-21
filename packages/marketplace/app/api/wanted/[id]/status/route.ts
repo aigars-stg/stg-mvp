@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import type { TypedSupabase } from '@/lib/supabase/query-types';
 
 /**
  * PATCH /api/wanted/[id]/status
@@ -29,7 +30,7 @@ export async function PATCH(
     }
 
     // Update wanted listing status (RLS policy ensures only buyer can update)
-    const { data: wantedListing, error: updateError } = await (supabase as any)
+    const { data: wantedListing, error: updateError } = await (supabase as TypedSupabase)
       .from('wanted_listings')
       .update({ status })
       .eq('id', id)

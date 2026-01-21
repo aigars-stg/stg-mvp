@@ -17,7 +17,7 @@ export async function DELETE(
     const { id } = params;
 
     // Delete saved listing (RLS policy ensures only owner can delete)
-    const { error: deleteError } = await (supabase as any)
+    const { error: deleteError } = await supabase
       .from('saved_listings')
       .delete()
       .eq('id', id)

@@ -132,13 +132,19 @@ export function classifyGame(metadata: BGGGameMetadata): {
   };
 }
 
+/** Game with metadata and optional additional properties */
+interface GameWithMetadata {
+  metadata: BGGGameMetadata;
+  [key: string]: unknown;
+}
+
 /**
  * Filters search results to only base games
  * Removes expansions, compilations, and standalone expansions
  */
 export function filterToBaseGames(
-  games: Array<{ metadata: BGGGameMetadata; [key: string]: any }>
-): Array<{ metadata: BGGGameMetadata; [key: string]: any }> {
+  games: GameWithMetadata[]
+): GameWithMetadata[] {
   return games.filter((game) => {
     const classification = classifyGame(game.metadata);
     return classification.type === 'base';

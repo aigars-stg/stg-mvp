@@ -1,11 +1,10 @@
 // BGG API integration with caching and type classification
 import { XMLParser } from 'fast-xml-parser';
 import type { BGGGame, BGGVersion, BGGGameMetadata, BGGInboundLink } from './bgg-types';
-import { isExpansion, classifyGame } from './bgg-classifier';
+import { classifyGame } from './bgg-classifier';
 import {
   BGGError,
   createRateLimitError,
-  createNetworkError,
   createAPIUnavailableError,
   createParseError,
   createTimeoutError,
@@ -13,6 +12,74 @@ import {
 } from './bgg-errors';
 import { createBGGHeaders } from './bgg-config';
 import { createServiceClient } from './supabase/client';
+
+// ============================================================================
+// BGG XML Parser Result Types
+// These interfaces represent the structure returned by fast-xml-parser
+// when parsing BGG's XML API responses
+// ============================================================================
+
+/** Represents a name element from BGG XML (primary or alternate) */
+interface BGGXMLName {
+  '@_type'?: string;
+  '@_value': string;
+}
+
+/** Represents a link element from BGG XML (designer, publisher, language, expansion, etc.) */
+interface BGGXMLLink {
+  '@_id': string;
+  '@_type': string;
+  '@_value': string;
+  '@_inbound'?: string;
+}
+
+/** Represents a version item from BGG XML */
+interface BGGXMLVersion {
+  '@_id': string;
+  name?: BGGXMLName | BGGXMLName[];
+  yearpublished?: { '@_value': string };
+  productcode?: { '@_value': string };
+  thumbnail?: string;
+  image?: string;
+  link?: BGGXMLLink | BGGXMLLink[];
+}
+
+/** Represents a game/thing item from BGG XML */
+interface BGGXMLItem {
+  '@_id': string;
+  '@_type'?: string;
+  name?: BGGXMLName | BGGXMLName[];
+  yearpublished?: { '@_value': string };
+  minplayers?: { '@_value': string };
+  maxplayers?: { '@_value': string };
+  minage?: { '@_value': string };
+  playingtime?: { '@_value': string };
+  thumbnail?: string;
+  image?: string;
+  description?: string;
+  link?: BGGXMLLink | BGGXMLLink[];
+  versions?: { item?: BGGXMLVersion | BGGXMLVersion[] };
+  statistics?: {
+    ratings?: {
+      average?: { '@_value': string };
+      bayesaverage?: { '@_value': string };
+    };
+  };
+}
+
+/** Represents a search result item from BGG XML */
+interface BGGXMLSearchItem {
+  '@_id': string;
+  name?: BGGXMLName | BGGXMLName[];
+  yearpublished?: { '@_value': string };
+}
+
+/** Root structure of BGG XML response */
+interface BGGXMLResponse {
+  items?: {
+    item?: BGGXMLItem | BGGXMLItem[] | BGGXMLSearchItem | BGGXMLSearchItem[];
+  };
+}
 
 // Re-export types for convenience
 export type { BGGGame, BGGVersion, BGGGameMetadata, BGGInboundLink };
@@ -52,9 +119,9 @@ function isCacheValid(timestamp: number): boolean {
 /**
  * Check if cached data exists (even if expired)
  */
-function getStaleCache<T>(
-  cache: Map<any, { data: T; timestamp: number }>,
-  key: any
+function getStaleCache<T, K>(
+  cache: Map<K, { data: T; timestamp: number }>,
+  key: K
 ): { data: T; age: number } | null {
   const cached = cache.get(key);
   if (!cached) return null;
@@ -129,28 +196,28 @@ export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata
     }
 
     const xml = await response.text();
-    const parsed = parser.parse(xml);
+    const parsed = parser.parse(xml) as BGGXMLResponse;
 
-    const item = parsed.items?.item;
+    const item = parsed.items?.item as BGGXMLItem | undefined;
     if (!item) {
       return null;
     }
 
     // Parse alternate names (all non-primary names)
     // Decode HTML entities like &#039; (apostrophe) that BGG often includes
-    const names = item.name ? (Array.isArray(item.name) ? item.name : [item.name]) : [];
+    const names: BGGXMLName[] = item.name ? (Array.isArray(item.name) ? item.name : [item.name]) : [];
     const alternateNames = names
-      .filter((n: any) => n['@_type'] !== 'primary')
-      .map((n: any) => decodeHTMLEntities(n['@_value']))
-      .filter((name: string) => name && name.length > 0);
+      .filter((n) => n['@_type'] !== 'primary')
+      .map((n) => decodeHTMLEntities(n['@_value']))
+      .filter((name) => name && name.length > 0);
 
     // Parse links (critical for type classification)
-    const links = item.link ? (Array.isArray(item.link) ? item.link : [item.link]) : [];
+    const links: BGGXMLLink[] = item.link ? (Array.isArray(item.link) ? item.link : [item.link]) : [];
 
     // Extract inbound links (games that this game expands/integrates with)
     const inboundLinks: BGGInboundLink[] = links
-      .filter((l: any) => l['@_inbound'] === 'true')
-      .map((l: any) => ({
+      .filter((l) => l['@_inbound'] === 'true')
+      .map((l) => ({
         id: l['@_id'],
         type: l['@_type'],
         value: l['@_value'],
@@ -159,8 +226,8 @@ export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata
 
     // Extract outbound links (games that expand/integrate with this game)
     const outboundLinks: BGGInboundLink[] = links
-      .filter((l: any) => !l['@_inbound'] || l['@_inbound'] === 'false')
-      .map((l: any) => ({
+      .filter((l) => !l['@_inbound'] || l['@_inbound'] === 'false')
+      .map((l) => ({
         id: l['@_id'],
         type: l['@_type'],
         value: l['@_value'],
@@ -168,8 +235,8 @@ export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata
       }));
 
     // Parse designers (decode HTML entities in names)
-    const designerLinks = links.filter((l: any) => l['@_type'] === 'boardgamedesigner');
-    const designers = designerLinks.map((l: any) => decodeHTMLEntities(l['@_value']));
+    const designerLinks = links.filter((l) => l['@_type'] === 'boardgamedesigner');
+    const designers = designerLinks.map((l) => decodeHTMLEntities(l['@_value']));
 
     // Parse player count
     const minPlayers = item.minplayers?.['@_value'];
@@ -188,7 +255,7 @@ export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata
 
     const metadata: BGGGameMetadata = {
       id: parseInt(item['@_id']),
-      name: decodeHTMLEntities(names.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'] || 'Unknown'),
+      name: decodeHTMLEntities(names.find((n) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'] || 'Unknown'),
       type: item['@_type'] || 'boardgame',
       yearPublished: item.yearpublished ? parseInt(item.yearpublished['@_value']) : undefined,
       thumbnail: item.thumbnail,
@@ -209,15 +276,15 @@ export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata
     metadataCache.set(gameId, { data: metadata, timestamp: Date.now() });
 
     return metadata;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Convert to structured error
     let bggError: BGGError;
 
     if (error instanceof BGGError) {
       bggError = error;
-    } else if (error.name === 'AbortError') {
+    } else if (error instanceof Error && error.name === 'AbortError') {
       bggError = createTimeoutError(`game ${gameId}`);
-    } else if (error.message?.includes('parse') || error.message?.includes('XML')) {
+    } else if (error instanceof Error && (error.message?.includes('parse') || error.message?.includes('XML'))) {
       bggError = createParseError(`game ${gameId}`, error);
     } else {
       bggError = parseFetchError(error, `game ${gameId}`);
@@ -243,7 +310,7 @@ export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata
 /**
  * Internal function to perform BGG search with exact match parameter
  */
-async function performBGGSearch(query: string, exact: boolean = false): Promise<any[]> {
+async function performBGGSearch(query: string, exact: boolean = false): Promise<BGGXMLSearchItem[]> {
   const exactParam = exact ? '&exact=1' : '';
   const response = await fetch(
     `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame${exactParam}`,
@@ -257,14 +324,14 @@ async function performBGGSearch(query: string, exact: boolean = false): Promise<
   }
 
   const xml = await response.text();
-  const parsed = parser.parse(xml);
+  const parsed = parser.parse(xml) as BGGXMLResponse;
 
   if (!parsed.items) {
     return [];
   }
 
   const items = parsed.items?.item || [];
-  return Array.isArray(items) ? items : [items];
+  return Array.isArray(items) ? items as BGGXMLSearchItem[] : [items as BGGXMLSearchItem];
 }
 
 /**
@@ -293,7 +360,7 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
   }
 
   try {
-    let searchResults: any[] = [];
+    let searchResults: BGGXMLSearchItem[] = [];
 
     // Smart strategy: Exact-then-fuzzy for queries ≥4 chars
     if (query.length >= 4) {
@@ -308,8 +375,8 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
         // Not enough exact matches, fall back to fuzzy
         const fuzzyResults = await performBGGSearch(query, false);
         // Combine: exact results first, then fuzzy results
-        const exactIds = new Set(exactResults.map((r: any) => r['@_id']));
-        const additionalFuzzy = fuzzyResults.filter((r: any) => !exactIds.has(r['@_id']));
+        const exactIds = new Set(exactResults.map((r) => r['@_id']));
+        const additionalFuzzy = fuzzyResults.filter((r) => !exactIds.has(r['@_id']));
         searchResults = [...exactResults, ...additionalFuzzy];
         console.log(`[BGG Search] Exact+Fuzzy strategy for "${query}": ${exactResults.length} exact + ${additionalFuzzy.length} fuzzy`);
       }
@@ -321,12 +388,11 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
 
     // Parse search results
     const parsedResults = searchResults
-      .filter((item: any) => item['@_id'])
-      .map((item: any) => {
+      .filter((item) => item['@_id'])
+      .map((item) => {
         const nameData = item.name;
-        const name = Array.isArray(nameData)
-          ? nameData.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || nameData[0]?.['@_value']
-          : nameData?.['@_value'];
+        const names: BGGXMLName[] = nameData ? (Array.isArray(nameData) ? nameData : [nameData]) : [];
+        const name = names.find((n) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'];
 
         return {
           id: parseInt(item['@_id']),
@@ -382,13 +448,13 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
     searchCache.set(cacheKey, { data: baseGames, timestamp: Date.now() });
 
     return baseGames;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Convert to structured error
     let bggError: BGGError;
 
     if (error instanceof BGGError) {
       bggError = error;
-    } else if (error.message?.includes('BGG API error')) {
+    } else if (error instanceof Error && error.message?.includes('BGG API error')) {
       // Parse status code from error message
       const statusMatch = error.message.match(/error: (\d+)/);
       const statusCode = statusMatch ? parseInt(statusMatch[1]) : 500;
@@ -449,20 +515,20 @@ export async function getGameDetails(gameId: number): Promise<BGGGame | null> {
     }
 
     const xml = await response.text();
-    const parsed = parser.parse(xml);
+    const parsed = parser.parse(xml) as BGGXMLResponse;
 
-    const item = parsed.items?.item;
+    const item = parsed.items?.item as BGGXMLItem | undefined;
     if (!item) {
       return null;
     }
 
     // Parse name (handle both array and single object)
-    const names = item.name ? (Array.isArray(item.name) ? item.name : [item.name]) : [];
+    const names: BGGXMLName[] = item.name ? (Array.isArray(item.name) ? item.name : [item.name]) : [];
 
     // Parse designers
-    const links = item.link ? (Array.isArray(item.link) ? item.link : [item.link]) : [];
-    const designerLinks = links.filter((l: any) => l['@_type'] === 'boardgamedesigner');
-    const designers = designerLinks.map((l: any) => l['@_value']);
+    const links: BGGXMLLink[] = item.link ? (Array.isArray(item.link) ? item.link : [item.link]) : [];
+    const designerLinks = links.filter((l) => l['@_type'] === 'boardgamedesigner');
+    const designers = designerLinks.map((l) => l['@_value']);
 
     // Parse player count
     const minPlayers = item.minplayers?.['@_value'];
@@ -477,7 +543,7 @@ export async function getGameDetails(gameId: number): Promise<BGGGame | null> {
 
     const game: BGGGame = {
       id: parseInt(item['@_id']),
-      name: names.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'] || 'Unknown',
+      name: names.find((n) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'] || 'Unknown',
       yearPublished: item.yearpublished ? parseInt(item.yearpublished['@_value']) : undefined,
       thumbnail: item.thumbnail,
       image: item.image,
@@ -492,7 +558,7 @@ export async function getGameDetails(gameId: number): Promise<BGGGame | null> {
     gameDetailsCache.set(gameId, { data: game, timestamp: Date.now() });
 
     return game;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('BGG game details error:', error);
     return null;
   }
@@ -518,37 +584,36 @@ export async function getGameVersions(gameId: number): Promise<BGGVersion[]> {
     }
 
     const xml = await response.text();
-    const parsed = parser.parse(xml);
+    const parsed = parser.parse(xml) as BGGXMLResponse;
 
-    const item = parsed.items?.item;
+    const item = parsed.items?.item as BGGXMLItem | undefined;
     if (!item || !item.versions) {
       return [];
     }
 
     // Parse versions
     const versionsData = item.versions?.item || [];
-    const versionsArray = Array.isArray(versionsData) ? versionsData : [versionsData];
+    const versionsArray: BGGXMLVersion[] = Array.isArray(versionsData) ? versionsData : [versionsData];
 
     const versions: BGGVersion[] = versionsArray
-      .filter((version: any) => version['@_id'])
-      .map((version: any) => {
+      .filter((version) => version['@_id'])
+      .map((version) => {
         // Extract links
-        const versionLinks = version.link ? (Array.isArray(version.link) ? version.link : [version.link]) : [];
+        const versionLinks: BGGXMLLink[] = version.link ? (Array.isArray(version.link) ? version.link : [version.link]) : [];
 
         // Extract ALL publishers (decode HTML entities)
-        const publisherLinks = versionLinks.filter((l: any) => l['@_type'] === 'boardgamepublisher');
-        const publishers = publisherLinks.map((l: any) => decodeHTMLEntities(l['@_value']));
+        const publisherLinks = versionLinks.filter((l) => l['@_type'] === 'boardgamepublisher');
+        const publishers = publisherLinks.map((l) => decodeHTMLEntities(l['@_value']));
 
         // Extract ALL languages (for multilingual versions, decode HTML entities)
-        const languageLinks = versionLinks.filter((l: any) => l['@_type'] === 'language');
-        const languages = languageLinks.map((l: any) => decodeHTMLEntities(l['@_value']));
-        const languageIds = languageLinks.map((l: any) => parseInt(l['@_id']));
+        const languageLinks = versionLinks.filter((l) => l['@_type'] === 'language');
+        const languages = languageLinks.map((l) => decodeHTMLEntities(l['@_value']));
+        const languageIds = languageLinks.map((l) => parseInt(l['@_id']));
 
         // Parse name (decode HTML entities)
         const nameData = version.name;
-        const rawName = Array.isArray(nameData)
-          ? nameData.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || nameData[0]?.['@_value']
-          : nameData?.['@_value'];
+        const versionNames: BGGXMLName[] = nameData ? (Array.isArray(nameData) ? nameData : [nameData]) : [];
+        const rawName = versionNames.find((n) => n['@_type'] === 'primary')?.['@_value'] || versionNames[0]?.['@_value'];
         const name = decodeHTMLEntities(rawName);
 
         return {
@@ -571,7 +636,7 @@ export async function getGameVersions(gameId: number): Promise<BGGVersion[]> {
     versionCache.set(gameId, { data: versions, timestamp: Date.now() });
 
     return versions;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('BGG versions error:', error);
     return [];
   }
@@ -602,7 +667,7 @@ export async function getExpansionCount(gameId: number): Promise<number> {
     );
 
     return expansionLinks.length;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error getting expansion count for ${gameId}:`, error);
     return 0;
   }
@@ -658,43 +723,42 @@ export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansi
       }
 
       const xml = await response.text();
-      const parsed = parser.parse(xml);
+      const parsed = parser.parse(xml) as BGGXMLResponse;
 
       const items = parsed.items?.item || [];
-      const itemsArray = Array.isArray(items) ? items : [items];
+      const itemsArray: BGGXMLItem[] = Array.isArray(items) ? items as BGGXMLItem[] : [items as BGGXMLItem];
 
       for (const item of itemsArray) {
         if (!item['@_id']) continue;
 
         // Parse names (primary and alternates)
-        const names = item.name ? (Array.isArray(item.name) ? item.name : [item.name]) : [];
-        const primaryName = names.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'] || 'Unknown';
+        const names: BGGXMLName[] = item.name ? (Array.isArray(item.name) ? item.name : [item.name]) : [];
+        const primaryName = names.find((n) => n['@_type'] === 'primary')?.['@_value'] || names[0]?.['@_value'] || 'Unknown';
 
         // Parse alternate names (localized titles like "Spārnotie: Eiropas putni")
         const alternateNames = names
-          .filter((n: any) => n['@_type'] !== 'primary')
-          .map((n: any) => decodeHTMLEntities(n['@_value']))
-          .filter((name: string) => name && name.length > 0);
+          .filter((n) => n['@_type'] !== 'primary')
+          .map((n) => decodeHTMLEntities(n['@_value']))
+          .filter((name) => name && name.length > 0);
 
         // Parse versions
         const versionsData = item.versions?.item || [];
-        const versionsArray = Array.isArray(versionsData) ? versionsData : [versionsData];
+        const versionsArray: BGGXMLVersion[] = Array.isArray(versionsData) ? versionsData : [versionsData];
 
         const versions: BGGVersion[] = versionsArray
-          .filter((version: any) => version['@_id'])
-          .map((version: any) => {
-            const versionLinks = version.link ? (Array.isArray(version.link) ? version.link : [version.link]) : [];
+          .filter((version) => version['@_id'])
+          .map((version) => {
+            const versionLinks: BGGXMLLink[] = version.link ? (Array.isArray(version.link) ? version.link : [version.link]) : [];
 
-            const publisherLinks = versionLinks.filter((l: any) => l['@_type'] === 'boardgamepublisher');
-            const publishers = publisherLinks.map((l: any) => decodeHTMLEntities(l['@_value']));
+            const publisherLinks = versionLinks.filter((l) => l['@_type'] === 'boardgamepublisher');
+            const publishers = publisherLinks.map((l) => decodeHTMLEntities(l['@_value']));
 
-            const languageLinks = versionLinks.filter((l: any) => l['@_type'] === 'language');
-            const languages = languageLinks.map((l: any) => decodeHTMLEntities(l['@_value']));
+            const languageLinks = versionLinks.filter((l) => l['@_type'] === 'language');
+            const languages = languageLinks.map((l) => decodeHTMLEntities(l['@_value']));
 
             const nameData = version.name;
-            const rawName = Array.isArray(nameData)
-              ? nameData.find((n: any) => n['@_type'] === 'primary')?.['@_value'] || nameData[0]?.['@_value']
-              : nameData?.['@_value'];
+            const versionNames: BGGXMLName[] = nameData ? (Array.isArray(nameData) ? nameData : [nameData]) : [];
+            const rawName = versionNames.find((n) => n['@_type'] === 'primary')?.['@_value'] || versionNames[0]?.['@_value'];
             const name = decodeHTMLEntities(rawName);
 
             return {
@@ -731,7 +795,7 @@ export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansi
 
     console.log(`✅ [BGG API] Fetched ${expansions.length} expansions with versions`);
     return expansions;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`❌ [BGG API] Error fetching expansions:`, error);
     return [];
   }
@@ -817,7 +881,7 @@ export async function fetchGameWithFallback(gameId: number): Promise<{
       fallbackMode,
       reason,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`❌ [BGG Fallback] Error fetching game ${gameId}:`, error);
 
     // Complete API failure - definitely fallback

@@ -5,6 +5,13 @@ import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { ensureGameMetadata } from '@/lib/bgg-api';
 import type { TransactionMethod, PricingFormat } from '@/lib/types/listing';
+import type { ListingWithDetailsRow } from '@/lib/supabase/query-types';
+
+interface GameVersion {
+  id: number;
+  thumbnail?: string | null;
+  image?: string | null;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -243,7 +250,7 @@ export async function POST(request: NextRequest) {
     await ensureGameMetadata(selectedGame.id);
 
     // Insert listing into database
-    const { data: listing, error: insertError } = await (supabase as any)
+    const { data: listing, error: insertError } = await supabase
       .from('listings')
       .insert(listingData)
       .select()
@@ -263,7 +270,7 @@ export async function POST(request: NextRequest) {
     if (sourceWantedListingId) {
       try {
         // Fetch the wanted listing to get buyer info
-        const { data: wantedListing } = await (supabase as any)
+        const { data: wantedListing } = await supabase
           .from('wanted_listings')
           .select('buyer_id, game_name')
           .eq('id', sourceWantedListingId)
@@ -272,7 +279,7 @@ export async function POST(request: NextRequest) {
         if (wantedListing?.buyer_id) {
           // Create notification for the buyer
           // Copy: "{Game Name} just got listed — matches your request. Act fast!"
-          await (supabase as any).rpc('create_notification', {
+          await supabase.rpc('create_notification', {
             p_user_id: wantedListing.buyer_id,
             p_type: 'wanted_match',
             p_title: `${wantedListing.game_name || selectedGame.name} just got listed`,
@@ -334,7 +341,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createServerSupabase();
 
     // Use the optimized view that joins listings + games + seller data in one query
-    let query = (supabase as any)
+    let query = supabase
       .from('listings_with_details')
       .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
@@ -382,14 +389,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform flat view data into nested structure expected by frontend
-    const listings = (rawListings || []).map((row: any) => {
+    const listings = (rawListings || []).map((row: ListingWithDetailsRow) => {
       // Check for version-specific images
       let thumbnail = row.game_thumbnail;
       let image = row.game_image;
 
       if (row.bgg_version_id && row.game_versions) {
-        const versions = Array.isArray(row.game_versions) ? row.game_versions : [];
-        const version = versions.find((v: any) => v.id === row.bgg_version_id);
+        const versions = Array.isArray(row.game_versions) ? row.game_versions as unknown as GameVersion[] : [];
+        const version = versions.find((v) => v.id === row.bgg_version_id);
         if (version) {
           thumbnail = version.thumbnail || thumbnail;
           image = version.image || image;

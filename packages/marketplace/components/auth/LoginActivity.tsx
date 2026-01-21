@@ -40,18 +40,18 @@ export function LoginActivity() {
 
       try {
         // Add timeout to prevent hanging
-        const fetchPromise = (supabase as any)
+        const fetchPromise = supabase
           .from('login_activity')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(10);
 
-        const timeoutPromise = new Promise((_, reject) =>
+        const timeoutPromise = new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('Fetch timeout')), 10000)
         );
 
-        const { data, error: fetchError } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+        const { data, error: fetchError } = await Promise.race([fetchPromise, timeoutPromise]);
 
         if (fetchError) {
           setError(t('unavailable'));
@@ -59,9 +59,9 @@ export function LoginActivity() {
           return;
         }
 
-        setActivities(data || []);
+        setActivities((data as LoginRecord[]) || []);
         setLoading(false);
-      } catch (err: any) {
+      } catch (error: unknown) {
         // Silently fail - login activity is optional
         setError(t('unavailable'));
         setLoading(false);
@@ -91,8 +91,8 @@ export function LoginActivity() {
 
       // Redirect to sign-in page
       router.push('/auth/signin?message=signed-out-all');
-    } catch (err: any) {
-      setSignOutError(err.message || 'Failed to sign out all devices');
+    } catch (error: unknown) {
+      setSignOutError(error instanceof Error ? error.message : 'Failed to sign out all devices');
       setSignOutLoading(false);
     }
   };

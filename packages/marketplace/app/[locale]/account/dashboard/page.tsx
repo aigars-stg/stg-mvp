@@ -21,7 +21,7 @@ import { PlatformFeaturesCard } from '@/components/dashboard/PlatformFeaturesCar
 export default function DashboardPage() {
   const router = useRouter();
   const { user, profile, loading, isProfileComplete } = useAuth();
-  const sellerStatus = (profile as any)?.seller_status || 'not_started';
+  const sellerStatus = profile?.seller_status || 'not_started';
 
   // Profile card dismissal (session-based - reappears on new session)
   const [showProfileCard, setShowProfileCard] = useState(true);

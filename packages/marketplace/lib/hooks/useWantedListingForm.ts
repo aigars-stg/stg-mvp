@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import type { BGGGame, VersionSelection } from '@/lib/bgg-types';
-import type { ListingCondition } from '@/lib/types/listing';
+import type { ListingCondition, ListingWithSeller } from '@/lib/types/listing';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 
 // Default acceptable conditions (all conditions)
@@ -43,7 +43,7 @@ export interface WantedFormSectionState {
 }
 
 export interface WantedFormExistingSales {
-  existingSaleListings: any[];
+  existingSaleListings: ListingWithSeller[];
   salesBannerDismissed: boolean;
 }
 
@@ -77,7 +77,7 @@ export interface UseWantedListingFormReturn {
 
   // Existing sales
   existingSales: WantedFormExistingSales;
-  setExistingSaleListings: (listings: any[]) => void;
+  setExistingSaleListings: (listings: ListingWithSeller[]) => void;
   setSalesBannerDismissed: (value: boolean) => void;
 
   // Computed values
@@ -126,7 +126,7 @@ export function useWantedListingForm(): UseWantedListingFormReturn {
   });
 
   // Existing sales state
-  const [existingSaleListings, setExistingSaleListings] = useState<any[]>([]);
+  const [existingSaleListings, setExistingSaleListings] = useState<ListingWithSeller[]>([]);
   const [salesBannerDismissed, setSalesBannerDismissed] = useState(false);
 
   // Toggle section helper

@@ -49,8 +49,9 @@ async function fetchBGGImages(gameId: number, isExpansion: boolean): Promise<{ t
 
     console.warn(`⚠️ No images found in BGG data for game ${gameId}`);
     return { thumbnail: null, image: null };
-  } catch (error: any) {
-    console.error(`❌ Error fetching from BGG (game ${gameId}):`, error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`❌ Error fetching from BGG (game ${gameId}):`, message);
     return { thumbnail: null, image: null };
   }
 }
@@ -127,10 +128,11 @@ export async function GET(
       cached: false,
       gameId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('❌ [Thumbnail API] Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch thumbnail', details: error.message },
+      { error: 'Failed to fetch thumbnail', details: message },
       { status: 500 }
     );
   }

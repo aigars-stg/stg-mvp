@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
+import type { TypedSupabase, ListingRow, GameRow } from '@/lib/supabase/query-types';
 
 export async function GET(
   request: NextRequest,
@@ -13,7 +14,8 @@ export async function GET(
     const supabase = await createServerSupabase();
 
     // Build query
-    let query = (supabase as any)
+    const typedSupabase = supabase as TypedSupabase;
+    let query = typedSupabase
       .from('listings')
       .select(`
         *,
@@ -45,18 +47,24 @@ export async function GET(
 
     // Fetch game metadata for each listing
     if (listings && listings.length > 0) {
-      const gameIds = [...new Set(listings.map((l: any) => l.bgg_game_id).filter(Boolean))];
+      type ListingWithSeller = ListingRow & { seller?: { id: string; full_name: string | null; email: string; avatar_url: string | null } | null; game?: Record<string, unknown> };
+      const typedListings = listings as ListingWithSeller[];
+      const gameIds = [...new Set(typedListings.map((l) => l.bgg_game_id).filter(Boolean))] as number[];
 
       if (gameIds.length > 0) {
-        const { data: games } = await (supabase as any)
+        const { data: games } = await typedSupabase
           .from('games')
           .select('id, thumbnail, image, player_count, min_age, playing_time, versions, is_expansion')
           .in('id', gameIds);
 
+        type GameVersion = { id: number; thumbnail?: string | null; image?: string | null };
+        type GameWithVersions = Pick<GameRow, 'id' | 'thumbnail' | 'image' | 'player_count' | 'min_age' | 'playing_time' | 'is_expansion'> & { versions?: GameVersion[] | null };
+
         // Attach game data to listings
         if (games) {
-          listings.forEach((listing: any) => {
-            const game = games.find((g: any) => g.id === listing.bgg_game_id);
+          const typedGames = games as GameWithVersions[];
+          typedListings.forEach((listing) => {
+            const game = typedGames.find((g) => g.id === listing.bgg_game_id);
 
             if (game) {
               // Check for version-specific images
@@ -64,7 +72,7 @@ export async function GET(
               let versionImage = null;
 
               if (listing.bgg_version_id && game.versions) {
-                const version = game.versions.find((v: any) => v.id === listing.bgg_version_id);
+                const version = game.versions.find((v) => v.id === listing.bgg_version_id);
                 if (version) {
                   versionThumbnail = version.thumbnail;
                   versionImage = version.image;

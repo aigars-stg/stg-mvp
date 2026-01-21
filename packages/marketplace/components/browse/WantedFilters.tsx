@@ -46,7 +46,7 @@ export function WantedFilters({
   const tListings = useTranslations('Listings');
 
   const getConditionInfo = (condition: string) => {
-    const conditionMap: Record<string, { icon: any; label: string }> = {
+    const conditionMap: Record<string, { icon: React.ComponentType<{ className?: string }>; label: string }> = {
       likeNew: { icon: Star, label: tListings('conditions.likeNew') },
       veryGood: { icon: Sparkles, label: tListings('conditions.veryGood') },
       good: { icon: CircleCheck, label: tListings('conditions.good') },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/ratelimit';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import type { TypedSupabase } from '@/lib/supabase/query-types';
 
 /**
  * POST /api/wanted/[id]/respond
@@ -51,7 +52,7 @@ export async function POST(
     const sellerId = user.id;
 
     // Fetch wanted listing
-    const { data: wantedListing, error: fetchError } = await (supabase as any)
+    const { data: wantedListing, error: fetchError } = await (supabase as TypedSupabase)
       .from('wanted_listings')
       .select('*')
       .eq('id', wantedListingId)
@@ -97,7 +98,7 @@ export async function POST(
     }
 
     // Check if seller already responded
-    const { data: existingResponse } = await (supabase as any)
+    const { data: existingResponse } = await (supabase as TypedSupabase)
       .from('wanted_listing_responses')
       .select('id')
       .eq('wanted_listing_id', wantedListingId)
@@ -112,7 +113,7 @@ export async function POST(
     }
 
     // Check if users have blocked each other
-    const { data: blockCheck } = await (supabase as any)
+    const { data: blockCheck } = await (supabase as TypedSupabase)
       .from('blocked_users')
       .select('blocker_id')
       .or(`and(blocker_id.eq.${sellerId},blocked_id.eq.${wantedListing.buyer_id}),and(blocker_id.eq.${wantedListing.buyer_id},blocked_id.eq.${sellerId})`)
@@ -130,7 +131,7 @@ export async function POST(
     // Note: For wanted listings, the SELLER is the "buyer" in the conversation (initiator)
     // and the ISO poster is the "seller" (recipient)
     // We check by buyer/seller IDs only since listing_id is null for wanted listings
-    const { data: existingConversation } = await (supabase as any)
+    const { data: existingConversation } = await (supabase as TypedSupabase)
       .from('conversations')
       .select('id')
       .is('listing_id', null) // Only wanted listing conversations
@@ -145,7 +146,7 @@ export async function POST(
       conversationId = existingConversation.id;
 
       // Unarchive if it was archived
-      await (supabase as any)
+      await (supabase as TypedSupabase)
         .from('conversations')
         .update({
           buyer_archived_at: null, // Seller's archive status
@@ -170,7 +171,7 @@ export async function POST(
       // Create new conversation
       // For wanted listings: seller = buyer (initiator), ISO poster = seller (recipient)
       // listing_id is null for wanted listings (tracked via wanted_listing_responses instead)
-      const { data: newConversation, error: createError } = await (supabase as any)
+      const { data: newConversation, error: createError } = await (supabase as TypedSupabase)
         .from('conversations')
         .insert({
           listing_id: null, // NULL for wanted listings
@@ -191,13 +192,13 @@ export async function POST(
     }
 
     // Determine if this is a quick response (within 2 hours)
-    const createdAt = new Date(wantedListing.created_at);
+    const createdAt = new Date(wantedListing.created_at || Date.now());
     const now = new Date();
     const hoursDiff = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
     const isQuickResponse = hoursDiff <= 2;
 
     // Create response record
-    const { data: response, error: responseError } = await (supabase as any)
+    const { data: response, error: responseError } = await (supabase as TypedSupabase)
       .from('wanted_listing_responses')
       .insert({
         wanted_listing_id: wantedListingId,
@@ -242,7 +243,7 @@ export async function POST(
     messageContent += `\nLet me know if you're interested!`;
 
     // Send initial message
-    const { error: messageError } = await (supabase as any)
+    const { error: messageError } = await (supabase as TypedSupabase)
       .from('messages')
       .insert({
         conversation_id: conversationId,
