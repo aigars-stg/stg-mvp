@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useEffect, useCallback, Suspense } from 'react';
 import { Button, Card, Modal } from '@second-turn/design-system';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -12,176 +12,57 @@ import { WantedOfferCard } from '@/components/wanted/WantedOfferCard';
 import { BudgetAssistant } from '@/components/wanted/BudgetAssistant';
 import { ExistingSalesBanner } from '@/components/wanted/ExistingSalesBanner';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
+import { useWantedListingForm, DEFAULT_ACCEPTABLE_CONDITIONS } from '@/lib/hooks/useWantedListingForm';
 import type { BGGGame, VersionSelection } from '@/lib/bgg-types';
-import type { ListingCondition } from '@/lib/types/listing';
-import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { PuzzlePiece as Dices, CurrencyEuro as Euro, FileText as NotesIcon, LightbulbOn as Lightbulb, RefreshCw, AlertCircle, Check, Package } from 'griddy-icons';
 
 function CreateWantedListingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const tSuccess = useTranslations('Wanted.SuccessModal');
   const t = useTranslations('Wanted.CreatePage');
-
-  // Edit mode state
-  const editListingId = searchParams.get('edit');
-  const isEditMode = !!editListingId;
-  const [isLoadingListing, setIsLoadingListing] = useState(false);
-  const [loadError, setLoadError] = useState('');
 
   // Pre-fill search query (from navbar search)
   const initialSearchQuery = searchParams.get('q');
 
-  // Form state
-  const [selectedGame, setSelectedGame] = useState<BGGGame | null>(null);
-  const [selectedGameDisplayName, setSelectedGameDisplayName] = useState<string | null>(null);
-  const [selectedVersion, setSelectedVersion] = useState<VersionSelection | null>(null);
-  const [maxPrice, setMaxPrice] = useState('');
-  const [notes, setNotes] = useState('');
-
-  // Existing sales banner state
-  const [existingSaleListings, setExistingSaleListings] = useState<any[]>([]);
-  const [salesBannerDismissed, setSalesBannerDismissed] = useState(false);
-
-  // Default acceptable conditions (all conditions)
-  const defaultAcceptableConditions: ListingCondition[] = ['likeNew', 'veryGood', 'good', 'acceptable'];
-
-  // UI state
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [isLoadingGameDetails, setIsLoadingGameDetails] = useState(false);
-  const [fallbackMode, setFallbackMode] = useState(false);
-  const [fallbackReason, setFallbackReason] = useState<string | undefined>();
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-  // Section expansion states
-  const [expandedSections, setExpandedSections] = useState({
-    game: true,      // Always start with game section open
-    budget: false,
-    notes: false,
-  });
-
-  // Helper function to convert form data to wanted listing preview format
-  const createPreviewWantedListing = (): WantedListingWithDetails => {
-    return {
-      id: 'preview',
-      bgg_game_id: selectedGame?.id || 0,
-      game_name: selectedGameDisplayName || selectedGame?.name || 'Select a game to preview',
-      game_year: selectedGame?.yearPublished || null,
-
-      // Version/Edition information
-      version_source: 'bgg',
-      bgg_version_id: selectedVersion?.id || null,
-      version_name: selectedVersion?.name || null,
-      publisher: selectedVersion?.publishers?.join(' | ') || selectedVersion?.publisher || null,
-      language: selectedVersion?.languages?.join(' | ') || selectedVersion?.language || null,
-      edition_year: selectedVersion?.yearPublished || null,
-      version_thumbnail: selectedVersion?.thumbnail || null,
-      version_image: selectedVersion?.image || null,
-
-      // Budget
-      min_price: null,
-      max_price: parseFloat(maxPrice) || 0,
-      currency: 'EUR',
-
-      // Preferences
-      acceptable_conditions: defaultAcceptableConditions,
-      preferred_language: null,
-      location_preferences: null,
-      notes: notes || null,
-      expansion_preference: 'base_only',
-
-      // Buyer & Status
-      buyer_id: user?.id || 'preview-buyer',
-      status: 'active',
-
-      // Response tracking
-      response_count: 0,
-
-      // Expiration
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-
-      // Metadata
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-
-      // Game details
-      game: {
-        thumbnail: selectedVersion?.thumbnail || selectedGame?.thumbnail || null,
-        image: selectedVersion?.image || selectedGame?.image || null,
-        player_count: selectedGame?.playerCount || null,
-        min_age: selectedGame?.minAge || null,
-        playing_time: selectedGame?.playingTime || null,
-        is_expansion: null,
-      },
-
-      // Buyer details
-      buyer: {
-        id: user?.id || 'preview-buyer',
-        full_name: profile?.full_name || 'Your Name', // From user_profiles table
-        email: profile?.email || user?.email || 'you@example.com', // From user_profiles table
-        avatar_url: profile?.avatar_url || null, // From user_profiles table
-        country: profile?.country || null, // From user_profiles table
-      },
-    };
-  };
-
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  // Section completion checks
-  const isGameSectionComplete = (() => {
-    // Basic requirements: game and version must be selected
-    if (!selectedGame || !selectedVersion) {
-      return false;
-    }
-
-    // Check if alternate name selection is required
-    const hasAlternateNames = selectedGame.alternateNames && selectedGame.alternateNames.length > 0;
-
-    // Get version language
-    const versionLanguage = selectedVersion.language ||
-      (selectedVersion.languages && selectedVersion.languages.length > 0
-        ? selectedVersion.languages[0]
-        : null);
-
-    const isEnglish = versionLanguage === 'English';
-
-    // If game has alternate names AND version is non-English, require explicit name selection
-    if (hasAlternateNames && !isEnglish) {
-      return !!selectedGameDisplayName;
-    }
-
-    return true;
-  })();
-
-  const isBudgetSectionComplete = !!maxPrice && parseFloat(maxPrice) > 0;
-
-  const canPublish = (): boolean => {
-    return isGameSectionComplete && isBudgetSectionComplete;
-  };
-
-  // Progressive disclosure: Auto-expand next incomplete section
-  // Order: Game → Budget → Notes
-  useEffect(() => {
-    const gameComplete = isGameSectionComplete;
-    const budgetComplete = isBudgetSectionComplete;
-
-    setExpandedSections((prev) => ({
-      ...prev,
-      game: true, // Always keep game section visible
-      budget: gameComplete || prev.budget,
-      notes: (gameComplete && budgetComplete) || prev.notes,
-    }));
-  }, [
+  // Use the extracted form hook
+  const {
+    formData,
+    setSelectedGame,
+    setSelectedGameDisplayName,
+    setSelectedVersion,
+    setMaxPrice,
+    setNotes,
+    uiState,
+    setSubmitting,
+    setError,
+    setIsLoadingGameDetails,
+    setFallbackMode,
+    setFallbackReason,
+    setShowSuccessModal,
+    editState,
+    setIsLoadingListing,
+    setLoadError,
+    sectionState,
+    setExpandedSections,
+    toggleSection,
+    existingSales,
+    setExistingSaleListings,
+    setSalesBannerDismissed,
     isGameSectionComplete,
     isBudgetSectionComplete,
-  ]);
+    canPublish,
+    createPreviewWantedListing,
+    resetForm,
+  } = useWantedListingForm();
+
+  // Destructure for easier access
+  const { selectedGame, selectedGameDisplayName, selectedVersion, maxPrice, notes } = formData;
+  const { submitting, error, isLoadingGameDetails, fallbackMode, fallbackReason, showSuccessModal } = uiState;
+  const { isEditMode, editListingId, isLoadingListing, loadError } = editState;
+  const { expandedSections } = sectionState;
+  const { existingSaleListings, salesBannerDismissed } = existingSales;
 
   // Fetch wanted listing data for edit mode
   useEffect(() => {
@@ -354,7 +235,7 @@ function CreateWantedListingPageContent() {
         const updates = {
           min_price: null,
           max_price: parseFloat(maxPrice),
-          acceptable_conditions: defaultAcceptableConditions,
+          acceptable_conditions: DEFAULT_ACCEPTABLE_CONDITIONS,
           location_preferences: null,
           notes: notes || null,
           expansion_preference: 'base_only',
@@ -391,7 +272,7 @@ function CreateWantedListingPageContent() {
             selectedVersion: selectedVersion,
             minPrice: null,
             maxPrice: parseFloat(maxPrice),
-            acceptableConditions: defaultAcceptableConditions,
+            acceptableConditions: DEFAULT_ACCEPTABLE_CONDITIONS,
             locationPreferences: null,
             notes: notes || null,
             expansionPreference: 'base_only',
@@ -693,7 +574,7 @@ function CreateWantedListingPageContent() {
               <Button
                 variant="primary"
                 onClick={handlePublish}
-                disabled={!canPublish() || submitting}
+                disabled={!canPublish || submitting}
                 size="lg"
                 fullWidth
               >
@@ -708,7 +589,7 @@ function CreateWantedListingPageContent() {
               <Button
                 variant="primary"
                 onClick={handlePublish}
-                disabled={!canPublish() || submitting}
+                disabled={!canPublish || submitting}
                 size="lg"
               >
                 {submitting
@@ -783,18 +664,7 @@ function CreateWantedListingPageContent() {
               onClick={() => {
                 setShowSuccessModal(false);
                 // Reset form for another listing
-                setSelectedGame(null);
-                setSelectedVersion(null);
-                setSelectedGameDisplayName(null);
-                setMaxPrice('');
-                setNotes('');
-                setExistingSaleListings([]);
-                setSalesBannerDismissed(false);
-                setExpandedSections({
-                  game: true,
-                  budget: false,
-                  notes: false,
-                });
+                resetForm();
               }}
               fullWidth
             >

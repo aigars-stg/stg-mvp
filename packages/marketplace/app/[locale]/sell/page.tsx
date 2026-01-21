@@ -27,46 +27,10 @@ import { NotificationModal } from '@/components/common/NotificationModal';
 import { PricingAssistant } from '@/components/sell/PricingAssistant';
 import { WantedListingContextBanner } from '@/components/sell/WantedListingContextBanner';
 import { useTranslations } from 'next-intl';
+import { useListingForm, INITIAL_FORM_DATA, type ListingFormData } from '@/lib/hooks/useListingForm';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
-
-interface ListingFormData {
-  // New 2-dimensional model
-  transactionMethod: TransactionMethod;
-  pricingFormat: PricingFormat;
-
-  selectedGame: BGGGame | null;
-  selectedGameDisplayName: string | null; // Chosen display name (primary or alternate)
-  selectedVersion: VersionSelection | null;
-  selectedExpansions: SelectedExpansion[]; // Bundled expansions
-  photos: PhotoFile[];
-  condition: 'likeNew' | 'veryGood' | 'good' | 'acceptable' | null;
-  conditionNotes: string;
-  allComponentsPresent: boolean;
-  missingComponents: string;
-  price: string; // Used for both fixed price and auction starting bid
-  termsAccepted: boolean;
-  // Auction-specific (only used when pricingFormat === 'auction')
-  auctionDurationDays: AuctionDuration;
-}
-
-const INITIAL_FORM_DATA: ListingFormData = {
-  transactionMethod: 'contact_seller', // Default (no Stripe required)
-  pricingFormat: 'fixed_price', // Default
-  selectedGame: null,
-  selectedGameDisplayName: null,
-  selectedVersion: null,
-  selectedExpansions: [],
-  photos: [],
-  condition: null,
-  conditionNotes: '',
-  allComponentsPresent: true,
-  missingComponents: '',
-  price: '', // Required for all listing types
-  termsAccepted: false,
-  auctionDurationDays: 3, // Default to 3 days
-};
 
 // Helper function to convert form data to listing preview format
 function createPreviewListing(
@@ -169,23 +133,66 @@ function SellPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile } = useAuth();
-  const [formData, setFormData] = useState<ListingFormData>(INITIAL_FORM_DATA);
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [showDraftBanner, setShowDraftBanner] = useState(false);
-  const [hasDraft, setHasDraft] = useState(false);
-  const [fallbackMode, setFallbackMode] = useState(false);
-  const [fallbackReason, setFallbackReason] = useState<string | undefined>();
-  const [isLoadingGameDetails, setIsLoadingGameDetails] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showMobilePreview, setShowMobilePreview] = useState(false);
-  const [publishedListingId, setPublishedListingId] = useState<string | null>(null);
+
+  // Use the listing form hook for all form state
+  const listingForm = useListingForm();
+  const {
+    formData,
+    setFormData,
+    isPublishing,
+    setIsPublishing,
+    showDraftBanner,
+    setShowDraftBanner,
+    hasDraft,
+    setHasDraft,
+    fallbackMode,
+    setFallbackMode,
+    fallbackReason,
+    setFallbackReason,
+    isLoadingGameDetails,
+    setIsLoadingGameDetails,
+    showSuccessModal,
+    setShowSuccessModal,
+    showMobilePreview,
+    setShowMobilePreview,
+    publishedListingId,
+    setPublishedListingId,
+    existingPhotoUrls,
+    setExistingPhotoUrls,
+    isLoadingListing,
+    setIsLoadingListing,
+    loadError,
+    setLoadError,
+    availableExpansions,
+    setAvailableExpansions,
+    isLoadingExpansions,
+    setIsLoadingExpansions,
+    showExpansionSection,
+    setShowExpansionSection,
+    expansionsFetched,
+    setExpansionsFetched,
+    expansionCount,
+    setExpansionCount,
+    versionCount,
+    setVersionCount,
+    existingActiveListings,
+    setExistingActiveListings,
+    sellerCapabilities,
+    setSellerCapabilities,
+    hasSetInitialListingType,
+    expandedSections,
+    setExpandedSections,
+    validationModal,
+    setValidationModal,
+    errorModal,
+    setErrorModal,
+    draftSavedModal,
+    setDraftSavedModal,
+  } = listingForm;
 
   // Edit mode state
   const editListingId = searchParams.get('edit');
   const isEditMode = !!editListingId;
-  const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>([]);
-  const [isLoadingListing, setIsLoadingListing] = useState(false);
-  const [loadError, setLoadError] = useState('');
 
   // Pre-fill search query (from navbar search)
   const initialSearchQuery = searchParams.get('q');
@@ -197,48 +204,6 @@ function SellPageContent() {
 
   // Onboarding check state (prevents flash of form for non-onboarded users)
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(!isEditMode);
-
-  // Expansion state
-  const [availableExpansions, setAvailableExpansions] = useState<BGGExpansionInfo[]>([]);
-  const [isLoadingExpansions, setIsLoadingExpansions] = useState(false);
-  const [showExpansionSection, setShowExpansionSection] = useState(false);
-  const [expansionsFetched, setExpansionsFetched] = useState(false);
-  const [expansionCount, setExpansionCount] = useState(0);
-  const [versionCount, setVersionCount] = useState(0); // Track available versions for UI
-
-  // Existing listings warning state
-  const [existingActiveListings, setExistingActiveListings] = useState<Array<{ id: string; bgg_game_id: number; price: number; created_at: string }>>([]);
-
-  // Seller capabilities for dual-listing model
-  const [sellerCapabilities, setSellerCapabilities] = useState({
-    canCreateContactSeller: false,
-    canCreateInstantBuy: false,
-    isLoading: true,
-  });
-
-  // Track whether we've set the initial listing type default (to avoid reset on tab focus)
-  const hasSetInitialListingType = useRef(false);
-
-  // Section expansion states
-  const [expandedSections, setExpandedSections] = useState({
-    game: true,      // Always start with game section open
-    photos: false,
-    condition: false,
-    pricing: false,
-  });
-
-  // Modal states
-  const [validationModal, setValidationModal] = useState<{
-    isOpen: boolean;
-    message: string;
-  }>({ isOpen: false, message: '' });
-  const [errorModal, setErrorModal] = useState<{
-    isOpen: boolean;
-    message: string;
-    actionUrl?: string;
-    actionLabel?: string;
-  }>({ isOpen: false, message: '' });
-  const [draftSavedModal, setDraftSavedModal] = useState(false);
 
   // Fetch game details with fallback detection when game is selected
   const handleGameSelect = useCallback(async (game: BGGGame | null) => {

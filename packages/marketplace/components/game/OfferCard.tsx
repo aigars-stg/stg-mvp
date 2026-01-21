@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
-import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, Calendar, PuzzlePiece as Puzzle, BookOpen, Globe, Building as Building2, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Tag as Gavel } from 'griddy-icons';
+import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Tag as Gavel } from 'griddy-icons';
+import { OfferCardPricing } from './OfferCardPricing';
+import { OfferCardVersionInfo } from './OfferCardVersionInfo';
 import { type TerminalCountry } from '@/lib/unisend/types';
 import { useDeliveredPricing } from '@/lib/hooks/useDeliveredPricing';
-import { PriceBreakdown } from '@/components/common/PriceBreakdown';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { isAuctionListing, isContactSellerListing } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
@@ -375,98 +376,22 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                 )}
               </div>
 
-              {/* Version Info - edition, language, publisher each on own line */}
-              {(formattedEdition || listing.language || listing.publisher) && (
-                <div className="text-sm text-text-secondary dark:text-snow-stormLight mb-2 space-y-0.5">
-                  {formattedEdition && (
-                    <p className="flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
-                      {formattedEdition}
-                    </p>
-                  )}
-                  {listing.language && (
-                    <p className="flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
-                      <span>{listing.language.replace(/, /g, ' / ')}</span>
-                    </p>
-                  )}
-                  {listing.publisher && (
-                    <p className="flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
-                      <span>{listing.publisher.replace(/, /g, ' / ')}</span>
-                    </p>
-                  )}
-                </div>
-              )}
+              {/* Version Info */}
+              <OfferCardVersionInfo
+                formattedEdition={formattedEdition}
+                language={listing.language}
+                publisher={listing.publisher}
+              />
 
               </div>
 
             {/* RIGHT COLUMN: Price */}
             <div className="flex flex-col items-end gap-2 min-w-[140px]">
-              {/* Price */}
-              <div className="text-right">
-                {isAuctionListing(listing) ? (
-                  <>
-                    {/* Auction badge and current bid */}
-                    <div className="flex items-center gap-2 justify-end mb-1">
-                      <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />}>
-                        {t('auction.badge')}
-                      </Badge>
-                    </div>
-                    <div className="text-xs text-text-secondary mb-0.5">
-                      {listing.auction_current_bid ? t('auction.currentBid') : t('auction.startingPrice')}
-                    </div>
-                    <div className="text-2xl font-bold text-aurora-purple">
-                      €{(listing.auction_current_bid || listing.auction_start_price || 0).toFixed(2)}
-                    </div>
-                    {listing.auction_bid_count !== undefined && listing.auction_bid_count > 0 && (
-                      <div className="text-xs text-text-muted mt-0.5">
-                        {listing.auction_bid_count} {listing.auction_bid_count === 1 ? t('auction.bid') : t('auction.bids')}
-                      </div>
-                    )}
-                  </>
-                ) : deliveredPricing.canCalculate ? (
-                  <>
-                    {/* Total delivered as primary price */}
-                    <div className="text-2xl font-bold text-polar-night dark:text-snow-stormLightest">
-                      €{deliveredPricing.totalDelivered.toFixed(2)}
-                      {deliveredPricing.isEstimate && <span className="text-base font-normal text-text-muted dark:text-snow-stormMedium">*</span>}
-                    </div>
-                    {/* Previous price strikethrough */}
-                    {listing.previous_price && listing.previous_price > listing.price && (
-                      <div className="flex items-center justify-end gap-1.5">
-                        <span className="text-sm text-text-muted dark:text-snow-stormMedium line-through">
-                          €{listing.previous_price.toFixed(2)}
-                        </span>
-                        <span className="text-xs text-aurora-green font-medium">
-                          {t('price.save', { percentage: Math.round((1 - listing.price / listing.previous_price) * 100) })}
-                        </span>
-                      </div>
-                    )}
-                    {/* Always-visible breakdown */}
-                    <div className="mt-1.5">
-                      <PriceBreakdown pricing={deliveredPricing} variant="full" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {/* Item price only for contact_seller or non-Baltic */}
-                    <div className="text-2xl font-bold text-polar-night dark:text-snow-stormLightest">
-                      €{listing.price.toFixed(2)}
-                    </div>
-                    {listing.previous_price && listing.previous_price > listing.price && (
-                      <div className="flex items-center justify-end gap-1.5">
-                        <span className="text-sm text-text-muted dark:text-snow-stormMedium line-through">
-                          €{listing.previous_price.toFixed(2)}
-                        </span>
-                        <span className="text-xs text-aurora-green font-medium">
-                          {t('price.save', { percentage: Math.round((1 - listing.price / listing.previous_price) * 100) })}
-                        </span>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+              <OfferCardPricing
+                listing={listing}
+                deliveredPricing={deliveredPricing}
+                variant="desktop"
+              />
             </div>
           </div>
 
@@ -543,47 +468,11 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   </div>
                   {/* Price & Save */}
                   <div className="flex flex-col items-end flex-shrink-0">
-                    {isAuctionListing(listing) ? (
-                      <>
-                        {/* Auction badge */}
-                        <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />}>
-                          {t('auction.badge')}
-                        </Badge>
-                        <div className="text-xs text-text-secondary mt-1">
-                          {listing.auction_current_bid ? t('auction.currentBid') : t('auction.startingPrice')}
-                        </div>
-                        <div className="text-xl font-bold text-aurora-purple">
-                          €{(listing.auction_current_bid || listing.auction_start_price || 0).toFixed(2)}
-                        </div>
-                      </>
-                    ) : deliveredPricing.canCalculate ? (
-                      <>
-                        {/* Total delivered as primary price */}
-                        <div className="text-xl font-bold text-polar-night dark:text-snow-stormLightest">
-                          €{deliveredPricing.totalDelivered.toFixed(2)}
-                          {deliveredPricing.isEstimate && <span className="text-sm font-normal text-text-muted dark:text-snow-stormMedium">*</span>}
-                        </div>
-                        {listing.previous_price && listing.previous_price > listing.price && (
-                          <div className="text-sm text-text-muted dark:text-snow-stormMedium line-through">
-                            €{listing.previous_price.toFixed(2)}
-                          </div>
-                        )}
-                        {/* Compact breakdown */}
-                        <PriceBreakdown pricing={deliveredPricing} variant="compact" />
-                      </>
-                    ) : (
-                      <>
-                        {/* Item price only for contact_seller or non-Baltic */}
-                        <div className="text-xl font-bold text-polar-night dark:text-snow-stormLightest">
-                          €{listing.price.toFixed(2)}
-                        </div>
-                        {listing.previous_price && listing.previous_price > listing.price && (
-                          <div className="text-sm text-text-muted dark:text-snow-stormMedium line-through">
-                            €{listing.previous_price.toFixed(2)}
-                          </div>
-                        )}
-                      </>
-                    )}
+                    <OfferCardPricing
+                      listing={listing}
+                      deliveredPricing={deliveredPricing}
+                      variant="mobile"
+                    />
                   </div>
                 </div>
               </div>
@@ -606,29 +495,12 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
               </a>
             </div>
 
-            {/* Version Info - edition, language, publisher each on own line */}
-            {(formattedEdition || listing.language || listing.publisher) && (
-              <div className="text-sm text-text-secondary dark:text-snow-stormLight space-y-0.5">
-                {formattedEdition && (
-                  <p className="flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
-                    {formattedEdition}
-                  </p>
-                )}
-                {listing.language && (
-                  <p className="flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
-                    <span>{listing.language.replace(/, /g, ' / ')}</span>
-                  </p>
-                )}
-                {listing.publisher && (
-                  <p className="flex items-center gap-1.5">
-                    <Building2 className="w-3.5 h-3.5 text-text-muted dark:text-snow-stormMedium flex-shrink-0" />
-                    <span>{listing.publisher.replace(/, /g, ' / ')}</span>
-                  </p>
-                )}
-              </div>
-            )}
+            {/* Version Info */}
+            <OfferCardVersionInfo
+              formattedEdition={formattedEdition}
+              language={listing.language}
+              publisher={listing.publisher}
+            />
 
           </div>
         </div>

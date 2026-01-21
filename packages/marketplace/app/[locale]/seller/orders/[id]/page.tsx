@@ -1,260 +1,50 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge } from '@second-turn/design-system';
-import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ArrowLeft, Truck, User, FileText, LinkExternal as ExternalLink, Chat as MessageSquare } from 'griddy-icons';
-import { useAuth } from '@/lib/auth/AuthContext';
+import {
+  Package,
+  Time as Clock,
+  CheckCircleAlt01 as CheckCircle2,
+  CloseCircle as XCircle,
+  RefreshCw as Loader2,
+  AlertCircle,
+  ArrowLeft,
+  Truck,
+  User,
+  FileText,
+  LinkExternal as ExternalLink,
+  Chat as MessageSquare,
+} from 'griddy-icons';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
-import { TrackingEventsTimeline, type TrackingEvent } from '@/components/shipping';
-
-type ParcelSize = 'XS' | 'S' | 'M' | 'L';
-
-const PARCEL_SIZES: { value: ParcelSize; label: string; dimensions: string }[] = [
-  { value: 'XS', label: 'XS', dimensions: 'up to 10×7×38 cm' },
-  { value: 'S', label: 'S', dimensions: 'up to 38×64×12 cm' },
-  { value: 'M', label: 'M', dimensions: 'up to 38×64×39 cm' },
-  { value: 'L', label: 'L', dimensions: 'up to 38×64×64 cm' },
-];
-
-interface OrderItem {
-  id: string;
-  game_name: string;
-  price: number;
-  condition: string;
-  photo_url: string | null;
-}
-
-interface Order {
-  id: string;
-  order_number: string;
-  buyer_id: string;
-  buyer_name: string;
-  buyer_email: string;
-  buyer_phone: string;
-  status: string;
-  shipping_method: 't2t' | 'local_pickup';
-  destination_terminal_name?: string;
-  destination_terminal_address?: string;
-  destination_country?: string;
-  pickup_city?: string;
-  pickup_notes?: string;
-  receiver_name?: string;
-  receiver_phone?: string;
-  receiver_email?: string;
-  items_total: number;
-  shipping_cost: number;
-  service_fee: number;
-  total_amount: number;
-  created_at: string;
-  paid_at: string;
-  seller_response_deadline?: string;
-  seller_responded_at?: string;
-  parcel_size?: 'XS' | 'S' | 'M' | 'L';
-  unisend_parcel_id?: number;
-  barcode?: string;
-  tracking_url?: string;
-  label_url?: string;
-  label_generated_at?: string;
-  label_error?: string;
-  order_items: OrderItem[];
-  tracking_events?: TrackingEvent[];
-  time_remaining_ms: number | null;
-  is_expired: boolean;
-}
-
-const statusConfig = {
-  pending_payment: { label: 'Pending Payment', color: 'default', icon: Clock },
-  pending_seller: { label: 'Waiting for Your Response', color: 'warning', icon: Clock },
-  accepted: { label: 'Accepted', color: 'trust', icon: CheckCircle2 },
-  shipped: { label: 'Shipped', color: 'success', icon: Truck },
-  in_transit: { label: 'In Transit', color: 'info', icon: Truck },
-  delivered: { label: 'Delivered', color: 'success', icon: Package },
-  completed: { label: 'Completed', color: 'default', icon: CheckCircle2 },
-  cancelled: { label: 'Cancelled', color: 'danger', icon: XCircle },
-  disputed: { label: 'Disputed', color: 'danger', icon: AlertCircle },
-};
+import { TrackingEventsTimeline } from '@/components/shipping';
+import { useSellerOrderDetail, PARCEL_SIZES } from '@/lib/hooks/useSellerOrderDetail';
 
 export default function SellerOrderDetailPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
-
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Accept/Decline state
-  const [showAcceptModal, setShowAcceptModal] = useState(false);
-  const [showDeclineModal, setShowDeclineModal] = useState(false);
-  const [selectedParcelSize, setSelectedParcelSize] = useState<ParcelSize>('M');
-  const [declineReason, setDeclineReason] = useState('');
-  const [actionLoading, setActionLoading] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
-  const [retryingLabel, setRetryingLabel] = useState(false);
-  const [retryError, setRetryError] = useState<string | null>(null);
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/signin?redirect=/seller/orders');
-    }
-  }, [user, authLoading, router]);
-
-  // Fetch order details
-  const fetchOrder = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch(`/api/seller/orders/${params.id}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch order');
-      }
-
-      setOrder(data.order);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load order');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchOrder();
-    }
-  }, [user, params.id]);
-
-  // Update countdown timer for response deadline
-  useEffect(() => {
-    if (!order?.seller_response_deadline || order.status !== 'pending_seller') {
-      setTimeRemaining(null);
-      return;
-    }
-
-    const updateTimer = () => {
-      const deadline = new Date(order.seller_response_deadline!).getTime();
-      const now = Date.now();
-      const diff = deadline - now;
-
-      if (diff <= 0) {
-        setTimeRemaining('Expired');
-        return;
-      }
-
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-      if (hours > 0) {
-        setTimeRemaining(`${hours}h ${minutes}m remaining`);
-      } else {
-        setTimeRemaining(`${minutes}m remaining`);
-      }
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 60000); // Update every minute
-
-    return () => clearInterval(interval);
-  }, [order?.seller_response_deadline, order?.status]);
-
-  // Handle accept order
-  const handleAcceptOrder = async () => {
-    if (order?.shipping_method === 't2t' && !selectedParcelSize) {
-      setActionError('Please select a parcel size');
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-      setActionError(null);
-
-      const response = await fetch(`/api/seller/orders/${params.id}/accept`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          parcelSize: order?.shipping_method === 't2t' ? selectedParcelSize : undefined,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to accept order');
-      }
-
-      // Refresh order data
-      await fetchOrder();
-      setShowAcceptModal(false);
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Failed to accept order');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Handle decline order
-  const handleDeclineOrder = async () => {
-    try {
-      setActionLoading(true);
-      setActionError(null);
-
-      const response = await fetch(`/api/seller/orders/${params.id}/decline`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reason: declineReason || undefined,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to decline order');
-      }
-
-      // Redirect to orders list after declining
-      router.push('/seller/orders');
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Failed to decline order');
-      setActionLoading(false);
-    }
-  };
-
-  // Handle retry label generation
-  const handleRetryLabel = async () => {
-    try {
-      setRetryingLabel(true);
-      setRetryError(null);
-
-      const response = await fetch(`/api/seller/orders/${params.id}/retry-label`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.details || data.error || 'Failed to generate label');
-      }
-
-      // Refresh order data to show the new label
-      await fetchOrder();
-    } catch (err) {
-      setRetryError(err instanceof Error ? err.message : 'Failed to generate label');
-    } finally {
-      setRetryingLabel(false);
-    }
-  };
-
-  // Get status config
-  const getStatusConfig = (status: string) => {
-    return statusConfig[status as keyof typeof statusConfig] || statusConfig.pending_payment;
-  };
+  const {
+    order,
+    loading,
+    error,
+    authLoading,
+    showAcceptModal,
+    setShowAcceptModal,
+    showDeclineModal,
+    setShowDeclineModal,
+    selectedParcelSize,
+    setSelectedParcelSize,
+    declineReason,
+    setDeclineReason,
+    actionLoading,
+    actionError,
+    setActionError,
+    timeRemaining,
+    retryingLabel,
+    retryError,
+    handleAcceptOrder,
+    handleDeclineOrder,
+    handleRetryLabel,
+    getStatusConfig,
+  } = useSellerOrderDetail(params.id);
 
   // Loading state
   if (authLoading || loading) {
@@ -294,7 +84,12 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
   }
 
   const statusInfo = getStatusConfig(order.status);
-  const StatusIcon = statusInfo.icon;
+  const StatusIcon = statusInfo.icon === 'Clock' ? Clock :
+    statusInfo.icon === 'CheckCircle2' ? CheckCircle2 :
+    statusInfo.icon === 'Truck' ? Truck :
+    statusInfo.icon === 'Package' ? Package :
+    statusInfo.icon === 'XCircle' ? XCircle :
+    AlertCircle;
 
   return (
     <div className="min-h-screen bg-bg-primary">
