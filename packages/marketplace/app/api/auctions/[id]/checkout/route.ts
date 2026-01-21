@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, calculateMarketplacePricing } from '@/lib/stripe';
-import { createClient } from '@supabase/supabase-js';
 import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
@@ -45,12 +44,12 @@ export async function POST(request: NextRequest, { params }: Params) {
       destinationCountry,
       destinationTerminalId,
       destinationTerminalName,
-      destinationTerminalAddress,
+      destinationTerminalAddress: _destinationTerminalAddress,
       receiverName,
       receiverPhone,
       receiverEmail,
-      pickupCity,
-      pickupNotes,
+      pickupCity: _pickupCity,
+      pickupNotes: _pickupNotes,
     } = body;
 
     // Validate shipping method

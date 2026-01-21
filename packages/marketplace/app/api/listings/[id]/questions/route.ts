@@ -66,7 +66,7 @@ export async function GET(
     // Fetch replies for each question
     const questionIds = questions?.map((q: any) => q.id) || [];
 
-    let repliesByParent: Record<string, ListingQuestion[]> = {};
+    const repliesByParent: Record<string, ListingQuestion[]> = {};
 
     if (questionIds.length > 0) {
       const { data: replies, error: repliesError } = await (supabase as any)

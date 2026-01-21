@@ -128,6 +128,7 @@ export default function SellerTaxInfoPage() {
     if (user) {
       fetchStatus();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Validate tax ID on change

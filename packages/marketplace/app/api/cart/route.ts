@@ -8,7 +8,7 @@ import { handleApiError } from '@/lib/api/error-handler';
  * Get the current user's shopping cart
  * Returns baskets grouped by seller with items and timers
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;

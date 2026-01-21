@@ -186,7 +186,7 @@ export async function GET(
       },
       { status: 200 }
     );
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -357,7 +357,7 @@ export async function POST(
       { message: messageWithProfile },
       { status: 201 }
     );
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

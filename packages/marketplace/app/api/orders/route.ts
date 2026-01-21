@@ -9,7 +9,7 @@ import { handleApiError } from '@/lib/api/error-handler';
  * Get buyer's orders
  * Returns list of orders for the authenticated buyer
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;

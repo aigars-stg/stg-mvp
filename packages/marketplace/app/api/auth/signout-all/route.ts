@@ -3,7 +3,7 @@ import { handleApiError } from '@/lib/api/error-handler';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/client';
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const supabase = await createServerSupabase();
 

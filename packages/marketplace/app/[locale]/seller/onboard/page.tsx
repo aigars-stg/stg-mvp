@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@second-turn/design-system';
-import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Shield, CurrencyDollar as DollarSign, Time as Clock, Users, Package, RefreshCw as Loader2, Chat as MessageSquare, CreditCard } from 'griddy-icons';
+import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Package, RefreshCw as Loader2, Chat as MessageSquare, CreditCard } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
@@ -179,6 +179,7 @@ export default function SellerOnboardingPage() {
     if (user) {
       fetchStatus();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Accept seller terms

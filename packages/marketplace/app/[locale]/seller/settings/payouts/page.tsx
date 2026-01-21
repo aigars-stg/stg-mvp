@@ -155,7 +155,7 @@ function SellerPayoutSettingsContent() {
             <div>
               <p className="text-aurora-green font-medium">Onboarding Complete!</p>
               <p className="text-sm text-text-secondary mt-1">
-                Your payout account is set up. You'll automatically receive payments when orders are completed.
+                Your payout account is set up. You&apos;ll automatically receive payments when orders are completed.
               </p>
             </div>
           </div>
@@ -168,7 +168,7 @@ function SellerPayoutSettingsContent() {
             <div>
               <p className="text-aurora-yellow font-medium">Onboarding Incomplete</p>
               <p className="text-sm text-text-secondary mt-1">
-                You need to complete all required steps to receive payouts. Click "Continue Onboarding" below.
+                You need to complete all required steps to receive payouts. Click &ldquo;Continue Onboarding&rdquo; below.
               </p>
             </div>
           </div>

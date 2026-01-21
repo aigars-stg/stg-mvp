@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input, Select, Button, Badge } from '@second-turn/design-system';
+import { Select, Button } from '@second-turn/design-system';
 import { Package, Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, SettingsAdjustHorizontal as SlidersHorizontal } from 'griddy-icons';
 import { AggregatedGameCard, SellFilters, WantedFilters, MobileFilterDrawer, ActiveFilterChips } from '@/components/browse';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
@@ -196,6 +196,7 @@ export default function BrowsePage() {
     } else {
       fetchWantedListings();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listingType]);
 
   // Reset to page 1 when filters change
@@ -203,6 +204,7 @@ export default function BrowsePage() {
     if (filtersInitialized && listingType === 'sell') {
       fetchGames(1, false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, selectedLanguages, priceMin, priceMax, sortBy, filtersInitialized, listingType]);
 
   // Infinite scroll with Intersection Observer
@@ -228,6 +230,7 @@ export default function BrowsePage() {
     }
 
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingMore, loading, hasMore, currentPage, filtersInitialized, listingType]);
 
   // Helper: Check if a player count matches a game's player range

@@ -46,7 +46,7 @@ async function getGameData(bggId: string) {
     }
 
     // Fetch active listings count and lowest price
-    const { data: listings, error: listingsError } = await supabase
+    const { data: listings } = await supabase
       .from('listings')
       .select('price')
       .eq('bgg_game_id', bggIdNum)

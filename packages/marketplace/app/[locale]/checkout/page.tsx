@@ -121,6 +121,7 @@ function CheckoutPageContent() {
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [basketId, user, profile]);
 
   // Validate phone when it changes

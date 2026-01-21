@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
         return bRating - aRating;
       })
       .slice(0, limit)
-      .map(({ _relevanceScore, _matchedAlternateName, alternate_names, ...game }) => ({
+      .map(({ _relevanceScore, _matchedAlternateName, alternate_names: _alternateNames, ...game }) => ({
         ...game,
         // Include matched alternate name so UI can auto-select version/display name
         matchedAlternateName: _matchedAlternateName || undefined,

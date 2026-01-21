@@ -320,7 +320,7 @@ export default function GradingGuideClient() {
                     </span>
                   </div>
                   <blockquote className="text-text-secondary text-sm italic border-l-2 border-frost-ice/30 pl-4">
-                    "{t(`listingTips.${grade}`)}"
+                    {t(`listingTips.${grade}`)}
                   </blockquote>
                 </Card>
               );

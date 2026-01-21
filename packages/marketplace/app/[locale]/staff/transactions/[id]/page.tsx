@@ -201,7 +201,7 @@ export default function StaffTransactionPage() {
       } else {
         setSimulationMessage({ type: 'error', text: result.error || 'Simulation failed' });
       }
-    } catch (err) {
+    } catch (_err) {
       setSimulationMessage({ type: 'error', text: 'Failed to execute simulation' });
     } finally {
       setSimulationLoading(false);
@@ -212,6 +212,7 @@ export default function StaffTransactionPage() {
     if (user && orderId) {
       fetchTransaction();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, orderId]);
 
   // Fetch simulation options when data loads

@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense, useRef } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Modal } from '@second-turn/design-system';
-import type { BGGGame, BGGExpansionInfo } from '@/lib/bgg-api';
+import type { BGGGame } from '@/lib/bgg-api';
 import type { VersionSelection } from '@/lib/bgg-types';
 import { GameSearch } from '@/components/sell/GameSearch';
 import { GameNameSelector } from '@/components/sell/GameNameSelector';
 import { LanguageVersionSelector } from '@/components/sell/LanguageVersionSelector';
 import { ConditionSelector } from '@/components/sell/ConditionSelector';
-import { PhotoUpload, type PhotoFile } from '@/components/sell/PhotoUpload';
+import { PhotoUpload } from '@/components/sell/PhotoUpload';
 import { Input } from '@second-turn/design-system';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
@@ -20,9 +20,9 @@ import { PuzzlePiece as Dices, PhotoCamera as Camera, ClipboardCheck, CurrencyEu
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
-import type { ListingWithSeller, TransactionMethod, PricingFormat, AuctionDuration } from '@/lib/types/listing';
+import type { ListingWithSeller, TransactionMethod, PricingFormat } from '@/lib/types/listing';
+import { AuctionSettings as _AuctionSettings } from '@/components/sell/AuctionSettings';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
-import { AuctionSettings } from '@/components/sell/AuctionSettings';
 import { NotificationModal } from '@/components/common/NotificationModal';
 import { PricingAssistant } from '@/components/sell/PricingAssistant';
 import { WantedListingContextBanner } from '@/components/sell/WantedListingContextBanner';

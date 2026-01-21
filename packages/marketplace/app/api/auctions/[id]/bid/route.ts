@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { createServerSupabase } from '@/lib/supabase/server';
 
 interface Params {
   params: Promise<{ id: string }>;

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge, Card } from '@second-turn/design-system';
-import { ShoppingBasket as ShoppingCart, TrashAlt as Trash2, Package, ArrowRight, AlertCircle, RefreshCw as Loader2, ChevronRight } from 'griddy-icons';
+import { ShoppingBasket as ShoppingCart, TrashAlt as Trash2, Package, AlertCircle, RefreshCw as Loader2, ChevronRight } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useCart } from '@/lib/contexts/CartContext';
 import { CountryPrompt } from '@/components/onboarding';

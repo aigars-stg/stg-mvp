@@ -328,6 +328,7 @@ function StaffTransactionsContent() {
         fetchTransactions();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, statusFilter, hasIssues, currentPage, viewMode, dateRange, dac7StatusFilter, dac7CurrentPage]);
 
   // Handle search

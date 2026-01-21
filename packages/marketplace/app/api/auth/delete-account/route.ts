@@ -3,7 +3,7 @@ import { handleApiError } from '@/lib/api/error-handler';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/client';
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(_request: NextRequest) {
   try {
     // Create Supabase client with cookies for user auth
     const supabase = await createServerSupabase();

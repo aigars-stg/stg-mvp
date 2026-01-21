@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { Email as Mail, ArrowLeft, Check, Sparks as Sparkles } from 'griddy-icons';
+import { Email as Mail, Check, Sparks as Sparkles } from 'griddy-icons';
 import { mapAuthError } from '@/lib/auth/errors';
 import type { AuthFlowState } from '@/lib/auth/types';
 import { useTranslations } from 'next-intl';
@@ -114,7 +114,7 @@ export default function AuthPage() {
 
       setProviders(userProviders);
       setAuthState(exists ? 'existing_user' : 'new_user');
-    } catch (err) {
+    } catch (_err) {
       // Fallback: assume new user on error (safer default)
       setAuthState('new_user');
     }

@@ -49,7 +49,7 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
     setSelectedImage((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const handlePurchase = () => {
+  const _handlePurchase = () => {
     setPurchaseModalOpen(true);
   };
 
@@ -535,7 +535,7 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
               <strong className="text-polar-night">In-app messaging coming soon!</strong>
             </p>
             <p className="text-xs text-text-muted">
-              For now, you can contact this seller outside the platform. We recommend using the seller's contact information if provided.
+              For now, you can contact this seller outside the platform. We recommend using the seller&apos;s contact information if provided.
             </p>
           </div>
 

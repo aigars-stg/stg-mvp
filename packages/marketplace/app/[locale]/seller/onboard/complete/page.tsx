@@ -32,7 +32,7 @@ export default function SellerOnboardingCompletePage() {
             <CheckCircle2 className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-polar-night mb-4">
-            You're all set!
+            You&apos;re all set!
           </h1>
           <p className="text-lg text-text-secondary">
             Welcome to Second Turn Games. You can now start listing and selling your board games.
@@ -129,7 +129,7 @@ export default function SellerOnboardingCompletePage() {
               <div>
                 <h4 className="font-semibold text-polar-night mb-1">Someone Buys Your Game</h4>
                 <p className="text-sm text-text-secondary">
-                  You'll receive an email notification with shipping details and a pre-paid Unisend label.
+                  You&apos;ll receive an email notification with shipping details and a pre-paid Unisend label.
                 </p>
               </div>
             </div>

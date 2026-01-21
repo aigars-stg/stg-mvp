@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card } from '@second-turn/design-system';
-import { ArrowLeft, RefreshCw as Loader2, User, Calendar, Star, Package, ShoppingBag, Chat as MessageSquare } from 'griddy-icons';
+import { ArrowLeft, RefreshCw as Loader2, User, Star, Package, ShoppingBag, Chat as MessageSquare } from 'griddy-icons';
 import { SellerReviewsList } from '@/components/seller/SellerReviewsList';
 import { BadgeTierPill } from '@/components/seller/SellerTrustBadge';
 import type { SellerBadgeTier } from '@/lib/types/seller';

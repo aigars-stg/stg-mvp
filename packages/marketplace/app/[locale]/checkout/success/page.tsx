@@ -4,8 +4,8 @@ import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Button, Badge } from '@second-turn/design-system';
-import { CheckCircleAlt01 as CheckCircle2, Package, Time as Clock, ChatBubble as MessageCircle, ArrowRight, RefreshCw as Loader2, AlertCircle, Email as Mail, Truck as TruckIcon } from 'griddy-icons';
+import { Button } from '@second-turn/design-system';
+import { CheckCircleAlt01 as CheckCircle2, Package, Time as Clock, ArrowRight, RefreshCw as Loader2, AlertCircle, Email as Mail, Truck as TruckIcon } from 'griddy-icons';
 
 interface OrderDetails {
   order_id: string;
@@ -41,7 +41,7 @@ function SuccessPageContent() {
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  const fetchOrderDetails = useCallback(async (attempt: number): Promise<boolean> => {
+  const fetchOrderDetails = useCallback(async (_attempt: number): Promise<boolean> => {
     if (!sessionId) return false;
 
     try {
