@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, Suspense, useMemo } from 'react';
+import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge } from '@second-turn/design-system';
-import { Search, RefreshCw as Loader2, AlertCircle, Shield, ChevronLeft, ChevronRight, AlertTriangle, Package, Download, TrendUp, CurrencyDollar, FileText, Receipt, Truck, User, CheckCircleAlt01 as CheckCircle2 } from 'griddy-icons';
+import { Search, RefreshCw as Loader2, AlertCircle, Shield, ChevronLeft, ChevronRight, AlertTriangle, Package, Download, TrendUp, CurrencyDollar, FileText, Receipt, Truck, User, CheckCircleAlt01 as CheckCircle2, Chat as MessageSquare, Bug, Sparks as Lightbulb, HelpCircle } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {
   extractVatFromGross,
@@ -20,6 +20,7 @@ import {
 } from '@/lib/bookkeeping-utils';
 import { getDac7StatusLabel, type Dac7ComplianceStatus } from '@/lib/types/seller';
 import { formatDate } from '@/lib/date-utils';
+import type { FeedbackType, FeedbackStatus, FeedbackListResponse } from '@/lib/types/feedback';
 
 interface OrderSummary {
   id: string;
@@ -171,7 +172,7 @@ function StaffTransactionsContent() {
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
 
   // Bookkeeping state
-  const [viewMode, setViewMode] = useState<'operations' | 'bookkeeping' | 'dac7'>('operations');
+  const [viewMode, setViewMode] = useState<'operations' | 'bookkeeping' | 'dac7' | 'feedback'>('operations');
   const [dateRange, setDateRange] = useState('this_month');
 
   // DAC7 state
@@ -179,6 +180,12 @@ function StaffTransactionsContent() {
   const [dac7StatusFilter, setDac7StatusFilter] = useState('all');
   const [dac7SearchQuery, setDac7SearchQuery] = useState('');
   const [dac7CurrentPage, setDac7CurrentPage] = useState(1);
+
+  // Feedback state
+  const [feedbackData, setFeedbackData] = useState<FeedbackListResponse | null>(null);
+  const [feedbackStatusFilter, setFeedbackStatusFilter] = useState('all');
+  const [feedbackTypeFilter, setFeedbackTypeFilter] = useState('all');
+  const [feedbackCurrentPage, setFeedbackCurrentPage] = useState(1);
 
   // Calculate bookkeeping summary from loaded data
   const bookkeepingSummary = useMemo<BookkeepingSummary | null>(() => {
@@ -320,16 +327,52 @@ function StaffTransactionsContent() {
     fetchDac7Sellers();
   };
 
+  // Fetch feedback
+  const fetchFeedback = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams();
+      if (feedbackStatusFilter !== 'all') params.set('status', feedbackStatusFilter);
+      if (feedbackTypeFilter !== 'all') params.set('type', feedbackTypeFilter);
+      params.set('page', feedbackCurrentPage.toString());
+      params.set('limit', '20');
+
+      const response = await fetch(`/api/staff/feedback?${params}`);
+      const result = await response.json();
+
+      if (response.status === 403) {
+        setIsStaff(false);
+        setError('Staff access required');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch feedback');
+      }
+
+      setIsStaff(true);
+      setFeedbackData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load feedback');
+    } finally {
+      setLoading(false);
+    }
+  }, [feedbackStatusFilter, feedbackTypeFilter, feedbackCurrentPage]);
+
   useEffect(() => {
     if (user) {
       if (viewMode === 'dac7') {
         fetchDac7Sellers();
+      } else if (viewMode === 'feedback') {
+        fetchFeedback();
       } else {
         fetchTransactions();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, statusFilter, hasIssues, currentPage, viewMode, dateRange, dac7StatusFilter, dac7CurrentPage]);
+  }, [user, statusFilter, hasIssues, currentPage, viewMode, dateRange, dac7StatusFilter, dac7CurrentPage, feedbackStatusFilter, feedbackTypeFilter, feedbackCurrentPage]);
 
   // Handle search
   const handleSearch = (e: React.FormEvent) => {
@@ -401,7 +444,9 @@ function StaffTransactionsContent() {
                   ? 'Manage transactions, view conversations, and resolve issues.'
                   : viewMode === 'bookkeeping'
                     ? 'Financial overview with VAT breakdown for bookkeeping.'
-                    : 'Monitor seller tax reporting status and export compliance data.'}
+                    : viewMode === 'dac7'
+                      ? 'Monitor seller tax reporting status and export compliance data.'
+                      : 'Review and manage user feedback submissions.'}
               </p>
             </div>
             {/* View Mode Toggle */}
@@ -445,6 +490,24 @@ function StaffTransactionsContent() {
               >
                 DAC7
               </button>
+              <button
+                onClick={() => {
+                  setViewMode('feedback');
+                  setFeedbackCurrentPage(1);
+                }}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                  viewMode === 'feedback'
+                    ? 'bg-frost-ice text-white'
+                    : 'text-frost-ice hover:bg-frost-ice/20'
+                }`}
+              >
+                Feedback
+                {feedbackData?.data.filter(f => f.status === 'new').length ? (
+                  <span className="px-1.5 py-0.5 text-xs rounded-full bg-aurora-red text-white">
+                    {feedbackData.data.filter(f => f.status === 'new').length}
+                  </span>
+                ) : null}
+              </button>
             </div>
           </div>
         </div>
@@ -453,8 +516,8 @@ function StaffTransactionsContent() {
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 border-b border-divider-subtle">
         <div className="flex flex-wrap items-center gap-4">
-          {/* Search - different for DAC7 mode */}
-          {viewMode === 'dac7' ? (
+          {/* Search - different for each mode */}
+          {viewMode === 'dac7' && (
             <form onSubmit={handleDac7Search} className="flex-1 min-w-[200px] max-w-md">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
@@ -467,7 +530,8 @@ function StaffTransactionsContent() {
                 />
               </div>
             </form>
-          ) : (
+          )}
+          {(viewMode === 'operations' || viewMode === 'bookkeeping') && (
             <form onSubmit={handleSearch} className="flex-1 min-w-[200px] max-w-md">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
@@ -482,8 +546,8 @@ function StaffTransactionsContent() {
             </form>
           )}
 
-          {/* Status filter - different options for DAC7 */}
-          {viewMode === 'dac7' ? (
+          {/* Status filter - different options for each mode */}
+          {viewMode === 'dac7' && (
             <select
               value={dac7StatusFilter}
               onChange={(e) => {
@@ -498,7 +562,8 @@ function StaffTransactionsContent() {
                 </option>
               ))}
             </select>
-          ) : (
+          )}
+          {(viewMode === 'operations' || viewMode === 'bookkeeping') && (
             <select
               value={statusFilter}
               onChange={(e) => {
@@ -513,6 +578,38 @@ function StaffTransactionsContent() {
                 </option>
               ))}
             </select>
+          )}
+          {viewMode === 'feedback' && (
+            <>
+              <select
+                value={feedbackStatusFilter}
+                onChange={(e) => {
+                  setFeedbackStatusFilter(e.target.value);
+                  setFeedbackCurrentPage(1);
+                }}
+                className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+              >
+                <option value="all">All Statuses</option>
+                <option value="new">New</option>
+                <option value="reviewed">Reviewed</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+              </select>
+              <select
+                value={feedbackTypeFilter}
+                onChange={(e) => {
+                  setFeedbackTypeFilter(e.target.value);
+                  setFeedbackCurrentPage(1);
+                }}
+                className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+              >
+                <option value="all">All Types</option>
+                <option value="feature_request">Feature Request</option>
+                <option value="bug_report">Bug Report</option>
+                <option value="other">Other</option>
+              </select>
+            </>
           )}
 
           {/* Has issues filter (operations mode only) */}
@@ -1020,8 +1117,132 @@ function StaffTransactionsContent() {
           </div>
         )}
 
+        {/* Feedback Tab Content */}
+        {viewMode === 'feedback' && (
+          <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-background-secondary border-b border-divider-subtle">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                      Submitted
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-divider-subtle">
+                  {feedbackData?.data.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-12 text-center text-text-secondary">
+                        No feedback found
+                      </td>
+                    </tr>
+                  ) : (
+                    feedbackData?.data.map((feedback) => {
+                      const typeConfig: Record<FeedbackType, { label: string; icon: React.ReactNode; color: string }> = {
+                        feature_request: { label: 'Feature', icon: <Lightbulb className="w-4 h-4" />, color: 'text-frost-ice' },
+                        bug_report: { label: 'Bug', icon: <Bug className="w-4 h-4" />, color: 'text-aurora-red' },
+                        other: { label: 'Other', icon: <HelpCircle className="w-4 h-4" />, color: 'text-text-secondary' },
+                      };
+                      const statusInfo: Record<FeedbackStatus, { label: string; variant: 'default' | 'success' | 'warning' | 'error' | 'trust' }> = {
+                        new: { label: 'New', variant: 'warning' },
+                        reviewed: { label: 'Reviewed', variant: 'trust' },
+                        in_progress: { label: 'In Progress', variant: 'trust' },
+                        resolved: { label: 'Resolved', variant: 'success' },
+                        closed: { label: 'Closed', variant: 'default' },
+                      };
+                      const typeInfo = typeConfig[feedback.type as FeedbackType];
+                      const status = statusInfo[feedback.status as FeedbackStatus];
+
+                      return (
+                        <tr
+                          key={feedback.id}
+                          className="hover:bg-frost-ice/5 cursor-pointer transition-colors"
+                          onClick={() => router.push(`/staff/feedback/${feedback.id}`)}
+                        >
+                          <td className="px-4 py-4">
+                            <div className={`flex items-center gap-2 ${typeInfo.color}`}>
+                              {typeInfo.icon}
+                              <span className="text-sm font-medium">{typeInfo.label}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <p className="text-sm text-polar-night dark:text-snow-white line-clamp-2 max-w-md">
+                              {feedback.description}
+                            </p>
+                          </td>
+                          <td className="px-4 py-4">
+                            <Badge variant={status.variant} size="sm">
+                              {status.label}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="text-sm text-polar-night dark:text-snow-white">
+                              {feedback.user?.full_name || feedback.email || 'Anonymous'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="text-sm text-text-secondary">
+                              {formatDate(new Date(feedback.created_at))}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Feedback Pagination */}
+        {viewMode === 'feedback' && feedbackData && feedbackData.pagination.totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4">
+            <p className="text-sm text-text-secondary">
+              Showing {((feedbackData.pagination.page - 1) * feedbackData.pagination.limit) + 1} to{' '}
+              {Math.min(feedbackData.pagination.page * feedbackData.pagination.limit, feedbackData.pagination.total)} of{' '}
+              {feedbackData.pagination.total} feedback items
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={feedbackCurrentPage === 1}
+                onClick={() => setFeedbackCurrentPage((p) => p - 1)}
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Previous
+              </Button>
+              <span className="text-sm text-text-secondary">
+                Page {feedbackCurrentPage} of {feedbackData.pagination.totalPages}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={feedbackCurrentPage === feedbackData.pagination.totalPages}
+                onClick={() => setFeedbackCurrentPage((p) => p + 1)}
+              >
+                Next
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Pagination for Operations/Bookkeeping */}
-        {viewMode !== 'dac7' && data && data.pagination.total_pages > 1 && (
+        {viewMode !== 'dac7' && viewMode !== 'feedback' && data && data.pagination.total_pages > 1 && (
           <div className="flex items-center justify-between mt-4">
             <p className="text-sm text-text-secondary">
               Showing {((data.pagination.page - 1) * data.pagination.limit) + 1} to{' '}

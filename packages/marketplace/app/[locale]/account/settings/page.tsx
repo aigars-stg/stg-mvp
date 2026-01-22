@@ -11,6 +11,7 @@ import { EmailChange } from '@/components/auth/EmailChange';
 import { AccountDeletion } from '@/components/auth/AccountDeletion';
 import { LoginActivity } from '@/components/auth/LoginActivity';
 import { CountrySelector } from '@/components/auth/CountrySelector';
+import { NewsletterSettings } from '@/components/newsletter/NewsletterSettings';
 import { getCountryFlag, getCountryName, type CountryCode } from '@/lib/country-utils';
 import { formatDate } from '@/lib/date-utils';
 
@@ -575,6 +576,9 @@ export default function AccountSettingsPage() {
               </p>
             </div>
           </Card>
+
+          {/* Newsletter Subscription */}
+          <NewsletterSettings />
 
           {/* Login Activity */}
           <LoginActivity />

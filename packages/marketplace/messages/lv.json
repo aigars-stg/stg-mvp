@@ -1581,7 +1581,8 @@
         "description": "Pircēji maksā uzreiz caur platformu",
         "unavailable": "Pieejams Latvijas pārdevējiem ar pievienotu maksājumu kontu",
         "upgrade": "Iestatīt maksājumus"
-      }
+      },
+      "helpLink": "Kāda ir atšķirība?"
     },
     "pricingFormat": {
       "title": "Cenas formāts",
@@ -1757,7 +1758,8 @@
         "comingSoon": "Pirkt uzreiz drīzumā būs pieejams tavā valstī",
         "comingSoonButton": "Drīzumā"
       },
-      "upgradeNote": "Jebkurā laikā vari pievienot maksājumus pārdevēja iestatījumos."
+      "upgradeNote": "Jūs varat iespējot Tūlītējo pirkšanu jebkurā laikā no pārdevēja iestatījumiem.",
+      "helpLink": "Kā darbojas Tūlītējā pirkšana?"
     },
     "step3": {
       "backButton": "← Atpakaļ uz opcijām",
@@ -2202,7 +2204,8 @@
       "myListings": "Mani sludinājumi",
       "manageOrders": "Pārvaldīt pasūtījumus",
       "createListing": "Izveidot sludinājumu",
-      "allTransactions": "Visi darījumi"
+      "allTransactions": "Visi darījumi",
+      "learnListingTypes": "Par piedāvājumu veidiem"
     },
     "bankAccountModal": {
       "addTitle": "Pievienot bankas kontu",
@@ -2599,6 +2602,213 @@
         "sellButton": "Pārdot spēli",
         "backToHome": "← Atpakaļ uz Sākumu"
       }
+    },
+    "ListingTypes": {
+      "meta": {
+        "title": "Tūlītēja pirkšana vai Sazināties ar pārdevēju | Second Turn Games",
+        "description": "Uzziniet par Sazināties ar pārdevēju un Tūlītēja pirkšana piedāvājumu veidiem. Izprotiet maksu, maksājumu apstrādi un kura opcija Jums ir piemērotāka.",
+        "ogTitle": "Piedāvājumu veidi izskaidroti | Second Turn Games",
+        "ogDescription": "Izvēlieties pareizo pārdošanas veidu savām galda spēlēm. Salīdziniet Sazināties ar pārdevēju un Tūlītēja pirkšana."
+      },
+      "intro": {
+        "title": "Tūlītēja pirkšana vai Sazināties ar pārdevēju",
+        "tagline": "Izvēlieties, kā vēlaties pārdot savas spēles",
+        "description": "Second Turn Games piedāvā divus veidus, kā pārdot savas lietotas galda spēles. Katram ir savas priekšrocības atkarībā no Jūsu vēlmēm un situācijas."
+      },
+      "toc": {
+        "title": "Šajā lapā",
+        "comparison": "Ātrais salīdzinājums",
+        "instantBuy": "Kā darbojas Tūlītēja pirkšana",
+        "contactSeller": "Kā darbojas Sazināties ar pārdevēju",
+        "switching": "Vai varu mainīt vēlāk?",
+        "faqs": "Bieži uzdoti jautājumi"
+      },
+      "comparison": {
+        "title": "Ātrais salīdzinājums",
+        "bestFor": "Vislabākais",
+        "howBuyersPay": "Kā pircēji maksā",
+        "howShippingWorks": "Kā darbojas piegāde",
+        "yourEarnings": "Jūsu ienākumi",
+        "buyerProtection": "Pircēja aizsardzība",
+        "setupRequired": "Nepieciešamā iestatīšana",
+        "availability": "Pieejamība",
+        "instantBuy": {
+          "bestFor": "Vairumam pārdevēju Latvijā",
+          "howBuyersPay": "Caur Second Turn Games",
+          "howShippingWorks": "€2 vienota likme caur Unisend skapjiem",
+          "yourEarnings": "100% no Jūsu norādītās cenas",
+          "buyerProtection": "Jā — mēs turam maksājumu līdz piegādei",
+          "setupRequired": "Ātrs Stripe konts (2 min)",
+          "availability": "Tikai Latvijā"
+        },
+        "contactSeller": {
+          "bestFor": "Pārdevējiem, kas dod priekšroku pilnai kontrolei",
+          "howBuyersPay": "Tieši Jums (ārpus platformas)",
+          "howShippingWorks": "Jūs vienojaties ar pircēju",
+          "yourEarnings": "Tas, par ko vienojaties ar pircēju",
+          "buyerProtection": "Nē",
+          "setupRequired": "Nav nepieciešama",
+          "availability": "Latvija, Lietuva, Igaunija"
+        }
+      },
+      "instantBuySection": {
+        "title": "Kā darbojas Tūlītēja pirkšana",
+        "description": "Tūlītēja pirkšana ir mūsu pilna servisa pārdošanas opcija. Lūk, kas notiek, kad kāds pērk Jūsu spēli:",
+        "steps": {
+          "step1": {
+            "title": "Pircējs iegādājas",
+            "description": "Viņš maksā spēles cenu plus nelielu pakalpojuma maksu (6% + €0.50) un €2 piegādi. Jūs nemaksājat neko."
+          },
+          "step2": {
+            "title": "Jūs saņemat paziņojumu",
+            "description": "Mēs nosūtām Jums e-pastu un paziņojumu informācijas panelī. Jums ir 24 stundas, lai apstiprinātu pasūtījumu."
+          },
+          "step3": {
+            "title": "Jūs nosūtāt spēli",
+            "description": "Pēc apstiprināšanas Jūs saņemsiet Unisend skapīša kodu. Iepakojiet spēli, dodieties uz jebkuru no 500+ Unisend termināļiem (ieskaitot Latvijas Pastu un uDrop vietas), ievadiet kodu un ielieciet sūtījumu."
+          },
+          "step4": {
+            "title": "Pircējs to saņem",
+            "description": "Kad pircējs paņem spēli, mēs atbrīvojam Jūsu maksājumu."
+          },
+          "step5": {
+            "title": "Jūs saņemat naudu",
+            "description": "Pilna norādītā cena nonāk Jūsu pievienotajā bankas kontā. Mēs paturām tikai pircēja pakalpojuma maksu."
+          }
+        },
+        "issuesTitle": "Kas notiek, ja kaut kas noiet greizi?",
+        "issues": {
+          "cantShip": "Ja nevarat nosūtīt 24 stundu laikā, varat noraidīt pasūtījumu. Pircējs saņem pilnu atmaksu.",
+          "mismatch": "Ja spēle neatbilst Jūsu aprakstam, mēs palīdzam atrisināt problēmu un varam atmaksāt pircējam.",
+          "notPickedUp": "Ja pircējs nepaņem sūtījumu, mēs sadarbosimies ar Jums par turpmākajiem soļiem."
+        },
+        "setupTitle": "Tūlītējas pirkšanas iestatīšana",
+        "setupDescription": "Lai izmantotu Tūlītējo pirkšanu, Jums jāpievieno Stripe konts. Tas ļauj mums nosūtīt maksājumus tieši uz Jūsu banku.",
+        "setupTime": "Iestatīšana aizņem aptuveni 2 minūtes. Jums būs nepieciešams:",
+        "setupRequirements": {
+          "name": "Jūsu pilns vārds",
+          "dob": "Dzimšanas datums",
+          "bank": "Bankas konta dati (IBAN)"
+        },
+        "setupTrust": "Mēs izmantojam Stripe, jo tā ir droša un uzticas miljoniem pārdevēju visā pasaulē. Jūsu finanšu informācija nonāk tieši Stripe — mēs nekad neredzam vai neglabājam Jūsu bankas datus."
+      },
+      "contactSellerSection": {
+        "title": "Kā darbojas Sazināties ar pārdevēju",
+        "description": "Sazināties ar pārdevēju ir mūsu vienkāršā piedāvājuma opcija. Tā darbojas kā sludinājums vai Facebook Marketplace:",
+        "steps": {
+          "step1": {
+            "title": "Jūs publicējat spēli",
+            "description": "Pievienojiet fotogrāfijas, norādiet cenu, aprakstiet stāvokli."
+          },
+          "step2": {
+            "title": "Pircēji redz Jūsu piedāvājumu",
+            "description": "Jūsu spēle parādās meklēšanas rezultātos kopā ar Tūlītējās pirkšanas piedāvājumiem."
+          },
+          "step3": {
+            "title": "Pircējs Jums raksta",
+            "description": "Kad kāds ir ieinteresēts, viņš nosūta Jums ziņu caur mūsu platformu."
+          },
+          "step4": {
+            "title": "Jūs vienojaties par detaļām",
+            "description": "Vienojieties par cenu, maksājuma veidu un to, kā spēle nonāks pie viņiem (tikšanās, piegāde utt.)."
+          },
+          "step5": {
+            "title": "Darījums notiek ārpus platformas",
+            "description": "Maksājums un piegāde notiek tieši starp Jums un pircēju."
+          }
+        },
+        "whyChoose": "Kāpēc izvēlēties šo opciju?",
+        "reasons": {
+          "noStripe": "Jūs vēl neesat gatavs iestatīt Stripe",
+          "negotiate": "Jūs dodat priekšroku cenu sarunām",
+          "ownShipping": "Jūs vēlaties izvēlēties savu piegādes veidu",
+          "country": "Jūs atrodaties Lietuvā vai Igaunijā (kur Tūlītējā pirkšana vēl nav pieejama)"
+        },
+        "tradeoff": "Kompromiss: Jums pašam būs jānodrošina maksājums un piegāde, un pircējiem nav tādas pašas aizsardzības kā ar Tūlītējo pirkšanu."
+      },
+      "switchingSection": {
+        "title": "Vai varu mainīt vēlāk?",
+        "upgradeTitle": "Sākot ar Sazināties ar pārdevēju, pārejot uz Tūlītējo pirkšanu:",
+        "upgradeDescription": "Jā! Ja esat iestatījis Sazināties ar pārdevēju, Jūs varat iespējot Tūlītējo pirkšanu jebkurā laikā no Pārdevēja iestatījumiem. Vienkārši pabeidziet Stripe iestatīšanu un Jūsu nākotnes piedāvājumiem būs pieejamas abas opcijas.",
+        "downgradeTitle": "Jau ir Tūlītējā pirkšana, vēlaties izmantot Sazināties ar pārdevēju:",
+        "downgradeDescription": "Jūs varat izvēlēties piedāvājuma veidu katrai spēlei, kad veidojat piedāvājumu. Pat ar iespējotu Tūlītējo pirkšanu Jūs varat konkrētas spēles publicēt kā Sazināties ar pārdevēju, ja vēlaties.",
+        "countryNoteTitle": "Piezīme Lietuvas un Igaunijas pārdevējiem:",
+        "countryNoteDescription": "Tūlītējā pirkšana Jūsu valstī vēl nav pieejama. Mēs strādājam pie integrēto maksājumu un piegādes paplašināšanas visā Baltijas reģionā. Pierakstieties jaunumiem un mēs paziņosim, kad tas būs gatavs."
+      },
+      "faqSection": {
+        "title": "Bieži uzdoti jautājumi",
+        "q1": {
+          "question": "Kāpēc man jāiestata Stripe Tūlītējai pirkšanai?",
+          "answer": "Stripe nodrošina drošu naudas pārskaitījumu no pircējiem uz pārdevējiem. Tas ir veids, kā mēs nodrošinām, ka Jūs saņemat samaksu uzticami un pircēji zina, ka viņu maksājums ir aizsargāts. Iestatīšana aizņem 2 minūtes un Jūsu bankas dati nonāk tieši Stripe — mēs tos nekad neredzam."
+        },
+        "q2": {
+          "question": "Kurš maksā maksu?",
+          "answer": "Pircēji maksā pakalpojuma maksu (6% + €0.50) un piegādi (€2). Kā pārdevējs Jūs saņemat 100% no savas norādītās cenas. Ja publicējat spēli par €20, Jūs saņemat €20."
+        },
+        "q3": {
+          "question": "Kas ietilpst 500+ pakomātos?",
+          "answer": "Mūsu Unisend integrācija ietver termināļus no vairākiem tīkliem: Unisend paša vietas, kā arī Latvijas Pasta un uDrop termināļus. Jūs varat nodot sūtījumu tajā, kas Jums ērtākais."
+        },
+        "q4": {
+          "question": "Kāpēc Tūlītējā pirkšana nav pieejama Lietuvā un Igaunijā?",
+          "answer": "Mēs strādājam pie pārrobežu piegādes un PVN apstrādes loģistikas. Tā ir mūsu prioritāte, un mēs paziņosim, kad tas būs gatavs."
+        },
+        "q5": {
+          "question": "Vai pircēji joprojām var ar mani sazināties, ja izmantoju Tūlītējo pirkšanu?",
+          "answer": "Jā. Pircēji var Jums rakstīt ar jautājumiem par Jūsu piedāvājumu pirms pirkšanas. Tūlītējā pirkšana vienkārši nozīmē, ka viņi var arī iegādāties uzreiz, negaidot atbildi."
+        }
+      },
+      "cta": {
+        "ready": "Gatavs sākt pārdot?",
+        "sellButton": "Publicēt savu pirmo spēli",
+        "backToHome": "Atpakaļ uz sākumu"
+      }
     }
+  },
+  "Feedback": {
+    "button": "Atsauksmes",
+    "title": "Dalies ar atsauksmēm",
+    "typeLabel": "Par ko ir runa?",
+    "typefeature_request": "Funkcijas pieprasījums",
+    "typebug_report": "Kļūdas ziņojums",
+    "typeother": "Kaut kas cits",
+    "descriptionLabel": "Pastāsti vairāk",
+    "descriptionPlaceholderFeature": "Apraksti funkciju, ko vēlētos redzēt...",
+    "descriptionPlaceholderBug": "Kas notika? Ko tu gaidīji?",
+    "descriptionPlaceholderOther": "Pastāsti, kas tev prātā...",
+    "emailLabel": "E-pasts (pēc izvēles)",
+    "emailHelper": "Ja mums būs jāsazinās",
+    "screenshotLabel": "Pievieno ekrānuzņēmumu",
+    "screenshotHelper": "Noderīgi kļūdu ziņojumiem",
+    "submit": "Nosūtīt atsauksmi",
+    "sending": "Sūta...",
+    "successTitle": "Paldies par atsauksmēm",
+    "successMessage": "Mēs izlasām katru ziņojumu.",
+    "errorGeneric": "Kaut kas nogāja greizi. Mēģini vēlreiz?",
+    "errorTooShort": "Lūdzu, pievieno vairāk detaļu",
+    "errorScreenshotTooLarge": "Ekrānuzņēmumam jābūt mazākam par 5MB",
+    "errorInvalidScreenshotType": "Ekrānuzņēmumam jābūt JPEG, PNG vai WebP formātā",
+    "tryAgain": "Mēģini vēlreiz"
+  },
+  "Newsletter": {
+    "description": "Jaunas funkcijas, kopienas jaunumi un reizēm kāds labs atradums. Bez spama.",
+    "placeholder": "Tavs e-pasts",
+    "subscribe": "Pievienoties",
+    "success": "Tu esi klāt. Laipni lūgti kopienā.",
+    "error": "Kaut kas nogāja greizi. Mēģini vēlreiz?",
+    "errorInvalidEmail": "Lūdzu, ievadi derīgu e-pasta adresi",
+    "settingsTitle": "Jaunumu vēstule",
+    "settingsDescription": "Saņem jaunumus par jaunām funkcijām un kopienas aktualitātēm",
+    "settingsLoading": "Ielādē...",
+    "settingsError": "Kaut kas nogāja greizi. Mēģini vēlreiz?",
+    "settingsSubscribe": "Abonēt jaunumu vēstuli",
+    "settingsUnsubscribe": "Atteikties no jaunumu vēstules",
+    "unsubscribedTitle": "Tu esi atteicies",
+    "unsubscribedMessage": "Tu vairs nesaņemsi no mums jaunumu vēstules.",
+    "alreadyUnsubscribedTitle": "Jau atteicies",
+    "alreadyUnsubscribedMessage": "Tu jau esi atteicies no mūsu jaunumu vēstules.",
+    "unsubscribeErrorTitle": "Kaut kas nogāja greizi",
+    "unsubscribeErrorMessage": "Neizdevās apstrādāt tavu pieprasījumu. Lūdzu, mēģini vēlreiz vai sazinies ar mums.",
+    "backToHome": "Atpakaļ uz sākumu"
   }
 }

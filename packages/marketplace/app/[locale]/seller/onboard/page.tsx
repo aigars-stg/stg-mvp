@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@second-turn/design-system';
-import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Package, RefreshCw as Loader2, Chat as MessageSquare, CreditCard } from 'griddy-icons';
+import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Package, RefreshCw as Loader2, CreditCard } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { InstantBuyCard, ContactSellerCard } from '@/components/seller/onboard';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -399,105 +400,18 @@ export default function SellerOnboardingPage() {
             </p>
 
             <div className="grid sm:grid-cols-2 gap-4 mb-6">
-              {/* Contact Seller Option - neutral styling */}
-              <div className="border border-border rounded-lg p-4 sm:p-6 hover:border-text-secondary/30 transition-colors order-2 sm:order-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-text-secondary/10 flex items-center justify-center">
-                    <MessageSquare className="w-5 h-5 text-text-secondary" />
-                  </div>
-                  <h3 className="font-semibold text-polar-night">{t('step2.contactSeller.title')}</h3>
-                </div>
-                <p className="text-sm text-text-secondary mb-4">
-                  {t('step2.contactSeller.description')}
-                </p>
-                <ul className="text-xs text-text-secondary space-y-1.5 mb-4">
-                  <li className="flex items-start gap-2">
-                    <span className="text-text-secondary/60 mt-0.5 flex-shrink-0">•</span>
-                    <span>{t('step2.contactSeller.benefit1')}</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-text-secondary/60 mt-0.5 flex-shrink-0">•</span>
-                    <span>{t('step2.contactSeller.benefit2')}</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-text-secondary/60 mt-0.5 flex-shrink-0">•</span>
-                    <span>{t('step2.contactSeller.benefit3')}</span>
-                  </li>
-                </ul>
-                <Button
-                  variant="secondary"
-                  size="md"
-                  fullWidth
-                  onClick={handleCompleteTermsOnly}
+              <div className="order-2 sm:order-1">
+                <ContactSellerCard
+                  onSelect={handleCompleteTermsOnly}
                   loading={completingTermsOnly}
-                  disabled={completingTermsOnly}
-                >
-                  {t('step2.contactSeller.button')}
-                </Button>
+                  isPrimaryOption={!stripeAvailable}
+                />
               </div>
-
-              {/* Instant Buy Option - recommended, highlighted */}
-              <div className={`rounded-lg p-4 sm:p-6 transition-colors order-1 sm:order-2 ${
-                stripeAvailable
-                  ? 'ring-2 ring-frost-ice border border-transparent'
-                  : 'border border-border bg-snow-stormLight'
-              }`}>
-                {stripeAvailable && (
-                  <span className="inline-block bg-aurora-green/10 text-aurora-green text-xs font-medium px-2 py-0.5 rounded mb-3">
-                    {t('step2.instantBuy.badge')}
-                  </span>
-                )}
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-aurora-green/10 flex items-center justify-center">
-                    <CreditCard className="w-5 h-5 text-aurora-green" />
-                  </div>
-                  <h3 className="font-semibold text-polar-night">{t('step2.instantBuy.title')}</h3>
-                </div>
-                <p className="text-sm text-text-secondary mb-4">
-                  {t('step2.instantBuy.description')}
-                </p>
-                <ul className="text-xs text-text-secondary space-y-1.5 mb-4">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-aurora-green flex-shrink-0 mt-0.5" />
-                    <span>{t('step2.instantBuy.benefit1')}</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-aurora-green flex-shrink-0 mt-0.5" />
-                    <span>{t('step2.instantBuy.benefit2')}</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-aurora-green flex-shrink-0 mt-0.5" />
-                    <span>{t('step2.instantBuy.benefit3')}</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-aurora-green flex-shrink-0 mt-0.5" />
-                    <span>{t('step2.instantBuy.benefit4')}</span>
-                  </li>
-                </ul>
-                {stripeAvailable ? (
-                  <Button
-                    variant="primary"
-                    size="md"
-                    fullWidth
-                    onClick={() => setCurrentStep('stripe')}
-                    rightIcon={<ArrowRight className="w-4 h-4" />}
-                  >
-                    {t('step2.instantBuy.button')} — {t('step2.instantBuy.buttonTime')}
-                  </Button>
-                ) : (
-                  <div className="text-center">
-                    <p className="text-xs text-text-secondary mb-2">
-                      {t('step2.instantBuy.comingSoon')}
-                    </p>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled
-                    >
-                      {t('step2.instantBuy.comingSoonButton')}
-                    </Button>
-                  </div>
-                )}
+              <div className="order-1 sm:order-2">
+                <InstantBuyCard
+                  stripeAvailable={stripeAvailable}
+                  onSelect={() => setCurrentStep('stripe')}
+                />
               </div>
             </div>
 

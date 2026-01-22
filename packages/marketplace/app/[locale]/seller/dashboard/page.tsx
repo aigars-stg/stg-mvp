@@ -339,6 +339,9 @@ export default function SellerDashboardPage() {
             <Link href="/seller/transactions">
               <Button variant="secondary" size="sm">{t('quickLinks.allTransactions')}</Button>
             </Link>
+            <Link href="/help/listing-types">
+              <Button variant="secondary" size="sm">{t('quickLinks.learnListingTypes')}</Button>
+            </Link>
           </div>
         </div>
       </div>

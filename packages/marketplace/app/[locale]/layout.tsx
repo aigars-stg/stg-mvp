@@ -19,6 +19,16 @@ const BottomNav = dynamic(() => import('@/components/layout/BottomNav').then(mod
   ssr: false,
 });
 
+// Lazy load FeedbackButton - non-critical UI element
+const FeedbackButton = dynamic(() => import('@/components/feedback/FeedbackButton').then(mod => ({ default: mod.FeedbackButton })), {
+  ssr: false,
+});
+
+// Lazy load NewsletterSignup - client component in footer
+const NewsletterSignup = dynamic(() => import('@/components/newsletter/NewsletterSignup').then(mod => ({ default: mod.NewsletterSignup })), {
+  ssr: false,
+});
+
 const inter = Inter({ subsets: ['latin'] });
 
 type Props = {
@@ -163,6 +173,13 @@ export default async function LocaleLayout({ children, params }: Props) {
           {/* Footer */}
           <footer className="bg-bg-elevated dark:bg-polar-nightLight border-t border-border-subtle dark:border-polar-nightDark mt-12 sm:mt-24 pb-20 lg:pb-0">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+              {/* Newsletter Section */}
+              <div className="mb-8 pb-8 border-b border-border-subtle dark:border-polar-nightDark">
+                <div className="max-w-md">
+                  <NewsletterSignup />
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
                 <div className="md:col-span-2">
                   <img src="/images/logo_nav.svg" alt="Second Turn Games" className="h-10 mb-3 sm:mb-4" />
@@ -210,6 +227,9 @@ export default async function LocaleLayout({ children, params }: Props) {
 
           {/* Mobile Bottom Navigation */}
           <BottomNav />
+
+          {/* Floating Feedback Button */}
+          <FeedbackButton />
           </Providers>
         </NextIntlClientProvider>
       </body>

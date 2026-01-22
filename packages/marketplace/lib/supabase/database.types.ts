@@ -1601,6 +1601,125 @@ export type Database = {
         }
         Relationships: []
       }
+      user_feedback: {
+        Row: {
+          id: string
+          type: string
+          description: string
+          email: string | null
+          screenshot_url: string | null
+          page_url: string | null
+          user_id: string | null
+          user_agent: string | null
+          viewport_size: string | null
+          locale: string | null
+          status: string
+          internal_notes: string | null
+          reviewed_by: string | null
+          reviewed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          type: string
+          description: string
+          email?: string | null
+          screenshot_url?: string | null
+          page_url?: string | null
+          user_id?: string | null
+          user_agent?: string | null
+          viewport_size?: string | null
+          locale?: string | null
+          status?: string
+          internal_notes?: string | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          type?: string
+          description?: string
+          email?: string | null
+          screenshot_url?: string | null
+          page_url?: string | null
+          user_id?: string | null
+          user_agent?: string | null
+          viewport_size?: string | null
+          locale?: string | null
+          status?: string
+          internal_notes?: string | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_feedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_feedback_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          id: string
+          email: string
+          user_id: string | null
+          subscribed_at: string
+          unsubscribed_at: string | null
+          source: string
+          locale: string
+          unsubscribe_token: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          user_id?: string | null
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          source?: string
+          locale?: string
+          unsubscribe_token?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          user_id?: string | null
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          source?: string
+          locale?: string
+          unsubscribe_token?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_subscribers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wanted_listing_responses: {
         Row: {
           conversation_id: string

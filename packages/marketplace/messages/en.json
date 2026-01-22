@@ -1581,7 +1581,8 @@
         "description": "Buyers pay instantly through the platform",
         "unavailable": "Available for Latvian sellers with connected payment account",
         "upgrade": "Set up payments"
-      }
+      },
+      "helpLink": "What's the difference?"
     },
     "pricingFormat": {
       "title": "Pricing",
@@ -1757,7 +1758,8 @@
         "comingSoon": "Instant Buy is coming soon to your country",
         "comingSoonButton": "Coming soon"
       },
-      "upgradeNote": "You can upgrade anytime from seller settings."
+      "upgradeNote": "You can enable Instant Buy anytime from your seller settings.",
+      "helpLink": "How does Instant Buy work?"
     },
     "step3": {
       "backButton": "← Back to options",
@@ -2202,7 +2204,8 @@
       "myListings": "My Listings",
       "manageOrders": "Manage Orders",
       "createListing": "Create Listing",
-      "allTransactions": "All Transactions"
+      "allTransactions": "All Transactions",
+      "learnListingTypes": "Learn about listing types"
     },
     "bankAccountModal": {
       "addTitle": "Add Bank Account",
@@ -2599,6 +2602,213 @@
         "sellButton": "Sell a game",
         "backToHome": "← Back to Home"
       }
+    },
+    "ListingTypes": {
+      "meta": {
+        "title": "Instant Buy vs Contact Seller | Second Turn Games",
+        "description": "Learn about Contact Seller and Instant Buy listing types. Understand fees, payment handling, and which option works best for you.",
+        "ogTitle": "Listing Types Explained | Second Turn Games",
+        "ogDescription": "Choose the right selling method for your board games. Compare Contact Seller vs Instant Buy."
+      },
+      "intro": {
+        "title": "Instant Buy vs Contact Seller",
+        "tagline": "Choose how you want to sell your games",
+        "description": "Second Turn Games offers two ways to sell your pre-loved board games. Each has its advantages depending on your preferences and situation."
+      },
+      "toc": {
+        "title": "On this page",
+        "comparison": "Quick comparison",
+        "instantBuy": "How Instant Buy works",
+        "contactSeller": "How Contact Seller works",
+        "switching": "Can I switch later?",
+        "faqs": "Common questions"
+      },
+      "comparison": {
+        "title": "Quick comparison",
+        "bestFor": "Best for",
+        "howBuyersPay": "How buyers pay",
+        "howShippingWorks": "How shipping works",
+        "yourEarnings": "Your earnings",
+        "buyerProtection": "Buyer protection",
+        "setupRequired": "Setup required",
+        "availability": "Availability",
+        "instantBuy": {
+          "bestFor": "Most sellers in Latvia",
+          "howBuyersPay": "Through Second Turn Games",
+          "howShippingWorks": "€2 flat-rate via Unisend lockers",
+          "yourEarnings": "100% of your asking price",
+          "buyerProtection": "Yes — we hold payment until delivery",
+          "setupRequired": "Quick Stripe account (2 min)",
+          "availability": "Latvia only"
+        },
+        "contactSeller": {
+          "bestFor": "Sellers who prefer full control",
+          "howBuyersPay": "Directly to you (off-platform)",
+          "howShippingWorks": "You arrange with buyer",
+          "yourEarnings": "Whatever you agree with buyer",
+          "buyerProtection": "No",
+          "setupRequired": "None",
+          "availability": "Latvia, Lithuania, Estonia"
+        }
+      },
+      "instantBuySection": {
+        "title": "How Instant Buy works",
+        "description": "Instant Buy is our full-service selling option. Here's what happens when someone buys your game:",
+        "steps": {
+          "step1": {
+            "title": "Buyer purchases",
+            "description": "They pay the game price plus a small service fee (6% + €0.50) and €2 shipping. You don't pay anything."
+          },
+          "step2": {
+            "title": "You get notified",
+            "description": "We send you an email and dashboard notification. You have 24 hours to confirm the order."
+          },
+          "step3": {
+            "title": "You ship the game",
+            "description": "After confirming, you'll get a Unisend locker code. Pack your game, go to any of 500+ Unisend terminals (including Latvijas Pasts and uDrop locations), enter the code, and drop it off."
+          },
+          "step4": {
+            "title": "Buyer receives it",
+            "description": "Once the buyer picks up the game, we release your payment."
+          },
+          "step5": {
+            "title": "You get paid",
+            "description": "The full asking price goes to your connected bank account. We keep only the buyer's service fee."
+          }
+        },
+        "issuesTitle": "What if something goes wrong?",
+        "issues": {
+          "cantShip": "If you can't ship within 24 hours, you can decline the order. The buyer gets a full refund.",
+          "mismatch": "If the game doesn't match your description, we help resolve the issue and may refund the buyer.",
+          "notPickedUp": "If the buyer doesn't pick up the package, we'll work with you on next steps."
+        },
+        "setupTitle": "Setting up Instant Buy",
+        "setupDescription": "To use Instant Buy, you'll need to connect a Stripe account. This lets us send payments directly to your bank.",
+        "setupTime": "The setup takes about 2 minutes. You'll need:",
+        "setupRequirements": {
+          "name": "Your full name",
+          "dob": "Date of birth",
+          "bank": "Bank account details (IBAN)"
+        },
+        "setupTrust": "We use Stripe because it's secure and trusted by millions of sellers worldwide. Your financial information goes directly to Stripe — we never see or store your bank details."
+      },
+      "contactSellerSection": {
+        "title": "How Contact Seller works",
+        "description": "Contact Seller is our simple listing option. It works like a classified ad or Facebook Marketplace:",
+        "steps": {
+          "step1": {
+            "title": "You list your game",
+            "description": "Add photos, set a price, describe the condition."
+          },
+          "step2": {
+            "title": "Buyers see your listing",
+            "description": "Your game appears in search results alongside Instant Buy listings."
+          },
+          "step3": {
+            "title": "Buyer messages you",
+            "description": "When someone's interested, they send you a message through our platform."
+          },
+          "step4": {
+            "title": "You work out the details",
+            "description": "Agree on price, payment method, and how to get the game to them (meetup, shipping, etc.)."
+          },
+          "step5": {
+            "title": "Transaction happens off-platform",
+            "description": "Payment and delivery are between you and the buyer directly."
+          }
+        },
+        "whyChoose": "Why choose this option?",
+        "reasons": {
+          "noStripe": "You're not ready to set up Stripe",
+          "negotiate": "You prefer negotiating prices",
+          "ownShipping": "You want to arrange your own shipping method",
+          "country": "You're located in Lithuania or Estonia (where Instant Buy isn't available yet)"
+        },
+        "tradeoff": "The tradeoff: You'll need to handle payment and shipping yourself, and buyers don't have the same protection they get with Instant Buy."
+      },
+      "switchingSection": {
+        "title": "Can I switch later?",
+        "upgradeTitle": "Starting with Contact Seller, upgrading to Instant Buy:",
+        "upgradeDescription": "Yes! If you set up as a Contact Seller, you can enable Instant Buy anytime from your Seller Settings. Just complete the Stripe setup and your future listings will have both options.",
+        "downgradeTitle": "Already have Instant Buy, want to use Contact Seller:",
+        "downgradeDescription": "You can choose the listing type for each game when you create a listing. Even with Instant Buy enabled, you can list specific games as Contact Seller if you prefer.",
+        "countryNoteTitle": "Note for Lithuanian and Estonian sellers:",
+        "countryNoteDescription": "Instant Buy isn't available in your country yet. We're working on expanding integrated payments and shipping to the full Baltic region. Sign up for updates and we'll let you know when it's ready."
+      },
+      "faqSection": {
+        "title": "Common questions",
+        "q1": {
+          "question": "Why do I need to set up Stripe for Instant Buy?",
+          "answer": "Stripe handles the secure transfer of money from buyers to sellers. It's how we ensure you get paid reliably and how buyers know their payment is protected. Setting up takes 2 minutes and your bank details go directly to Stripe — we never see them."
+        },
+        "q2": {
+          "question": "Who pays the fees?",
+          "answer": "Buyers pay the service fee (6% + €0.50) and shipping (€2). As a seller, you receive 100% of your asking price. If you list a game for €20, you get €20."
+        },
+        "q3": {
+          "question": "What's included in the 500+ parcel terminals?",
+          "answer": "Our Unisend integration includes terminals from multiple networks: Unisend's own locations plus Latvijas Pasts and uDrop terminals. You can drop off at whichever is most convenient for you."
+        },
+        "q4": {
+          "question": "Why isn't Instant Buy available in Lithuania and Estonia?",
+          "answer": "We're working through the logistics of cross-border shipping and VAT handling. It's a priority for us, and we'll announce when it's ready."
+        },
+        "q5": {
+          "question": "Can buyers still contact me if I use Instant Buy?",
+          "answer": "Yes. Buyers can message you with questions about your listing before purchasing. Instant Buy just means they can also purchase immediately without waiting for a response."
+        }
+      },
+      "cta": {
+        "ready": "Ready to start selling?",
+        "sellButton": "List your first game",
+        "backToHome": "Back to home"
+      }
     }
+  },
+  "Feedback": {
+    "button": "Feedback",
+    "title": "Share your feedback",
+    "typeLabel": "What's this about?",
+    "typefeature_request": "Feature request",
+    "typebug_report": "Bug report",
+    "typeother": "Something else",
+    "descriptionLabel": "Tell us more",
+    "descriptionPlaceholderFeature": "Describe the feature you'd like to see...",
+    "descriptionPlaceholderBug": "What happened? What did you expect?",
+    "descriptionPlaceholderOther": "Tell us what's on your mind...",
+    "emailLabel": "Email (optional)",
+    "emailHelper": "In case we need to follow up",
+    "screenshotLabel": "Add a screenshot",
+    "screenshotHelper": "Helpful for bug reports",
+    "submit": "Send feedback",
+    "sending": "Sending...",
+    "successTitle": "Thanks for your feedback",
+    "successMessage": "We read every submission.",
+    "errorGeneric": "Something went wrong. Try again?",
+    "errorTooShort": "Please add a bit more detail",
+    "errorScreenshotTooLarge": "Screenshot must be less than 5MB",
+    "errorInvalidScreenshotType": "Screenshot must be JPEG, PNG, or WebP",
+    "tryAgain": "Try again"
+  },
+  "Newsletter": {
+    "description": "New features, community updates, and the occasional good find. No spam.",
+    "placeholder": "Your email",
+    "subscribe": "Join",
+    "success": "You're in. Welcome to the community.",
+    "error": "Something went wrong. Try again?",
+    "errorInvalidEmail": "Please enter a valid email address",
+    "settingsTitle": "Newsletter",
+    "settingsDescription": "Hear about new features and community updates",
+    "settingsLoading": "Loading...",
+    "settingsError": "Something went wrong. Try again?",
+    "settingsSubscribe": "Subscribe to newsletter",
+    "settingsUnsubscribe": "Unsubscribe from newsletter",
+    "unsubscribedTitle": "You've unsubscribed",
+    "unsubscribedMessage": "You won't receive any more newsletter emails from us.",
+    "alreadyUnsubscribedTitle": "Already unsubscribed",
+    "alreadyUnsubscribedMessage": "You're already unsubscribed from our newsletter.",
+    "unsubscribeErrorTitle": "Something went wrong",
+    "unsubscribeErrorMessage": "We couldn't process your unsubscribe request. Please try again or contact us.",
+    "backToHome": "Back to home"
   }
 }
