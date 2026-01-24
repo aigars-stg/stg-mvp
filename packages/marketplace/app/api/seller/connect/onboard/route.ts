@@ -8,7 +8,7 @@ import { handleApiError } from '@/lib/api/error-handler';
  *
  * Create or retrieve Stripe Connect onboarding link for seller
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;

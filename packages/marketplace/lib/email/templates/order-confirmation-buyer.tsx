@@ -81,9 +81,9 @@ export const OrderConfirmationBuyerEmail = ({
             <Text style={infoText}>
               <strong>1.</strong> The seller has 24 hours to accept your order
               <br />
-              <strong>2.</strong> You'll receive an email once they respond
+              <strong>2.</strong> You&apos;ll receive an email once they respond
               <br />
-              <strong>3.</strong> If they don't respond, you'll get an automatic full refund
+              <strong>3.</strong> If they don&apos;t respond, you&apos;ll get an automatic full refund
             </Text>
           </Section>
 

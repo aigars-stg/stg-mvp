@@ -1,7 +1,7 @@
 'use client';
 
 import { Package, LocationPin as MapPin } from 'griddy-icons';
-import { Card, Badge } from '@second-turn/design-system';
+import { Badge } from '@second-turn/design-system';
 import type { ListingCondition } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import type { BGGGame, VersionSelection } from '@/lib/bgg-types';
@@ -42,6 +42,7 @@ export function WantedListingPreview({
         <div className="relative">
           {selectedGame?.thumbnail ? (
             <div className="relative aspect-square flex items-center justify-center bg-surface-1 rounded-lg overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element -- external BGG thumbnail URLs */}
               <img
                 src={selectedGame.thumbnail}
                 alt={selectedGame.name}

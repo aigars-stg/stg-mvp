@@ -35,7 +35,7 @@ export default async function SellerTermsPage() {
           <Markdown
             remarkPlugins={[remarkGfm]}
             components={{
-              a: ({ node, ...props }) => {
+              a: ({ node: _node, ...props }) => {
                 const isInternal = props.href?.startsWith('/');
                 if (isInternal) {
                   return <Link href={props.href!} {...props} className="text-frost-ice hover:underline" />;

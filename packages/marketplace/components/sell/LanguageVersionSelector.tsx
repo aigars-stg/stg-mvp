@@ -1,8 +1,9 @@
+/* eslint-disable @next/next/no-img-element -- BGG version images are external URLs */
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { Card, Button } from '@second-turn/design-system';
-import type { BGGGame, BGGVersion, VersionSelection, ManualVersion } from '@/lib/bgg-types';
+import type { BGGGame, BGGVersion, VersionSelection } from '@/lib/bgg-types';
 import { ManualVersionInput } from './ManualVersionInput';
 import { useTranslations } from 'next-intl';
 
@@ -15,12 +16,15 @@ interface LanguageVersionSelectorProps {
   onVersionCountChange?: (count: number) => void; // Callback when version count is known
 }
 
+// Priority languages for Baltic region (in specific order) - defined outside component for stable reference
+const PRIMARY_LANGUAGES = ['Latvian', 'Lithuanian', 'Estonian', 'English', 'German'];
+
 export function LanguageVersionSelector({
   game,
   selectedVersion,
   onSelect,
   fallbackMode = false,
-  fallbackReason,
+  fallbackReason: _fallbackReason,
   onVersionCountChange,
 }: LanguageVersionSelectorProps) {
   const t = useTranslations('Sell.LanguageVersionSelector');
@@ -33,9 +37,6 @@ export function LanguageVersionSelector({
     selectedVersion?.language || ''
   );
   const [showOtherLanguages, setShowOtherLanguages] = useState(false);
-
-  // Priority languages for Baltic region (in specific order)
-  const PRIMARY_LANGUAGES = ['Latvian', 'Lithuanian', 'Estonian', 'English', 'German'];
 
   // Fetch versions when game changes (skip if in fallback mode)
   useEffect(() => {
@@ -124,7 +125,7 @@ export function LanguageVersionSelector({
       .sort();
 
     return { primaryLanguages: primary, otherLanguages: other };
-  }, [versions, PRIMARY_LANGUAGES]);
+  }, [versions]);
 
   // Filter versions by selected language (includes multilingual versions)
   const filteredVersions = useMemo(() => {

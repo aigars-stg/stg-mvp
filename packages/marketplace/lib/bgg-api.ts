@@ -12,6 +12,7 @@ import {
 } from './bgg-errors';
 import { createBGGHeaders } from './bgg-config';
 import { createServiceClient } from './supabase/client';
+import { decodeHTMLEntities } from './bgg-utils';
 
 // ============================================================================
 // BGG XML Parser Result Types
@@ -91,11 +92,7 @@ export {
   debounce,
   CONDITION_TEMPLATES,
   decodeHTMLEntities,
-  decodeHTMLEntitiesArray,
 } from './bgg-utils';
-
-// Import HTML entity decoder for processing BGG data
-import { decodeHTMLEntities, decodeHTMLEntitiesArray } from './bgg-utils';
 
 // Simple in-memory cache (replace with Redis/database later)
 const searchCache = new Map<string, { data: BGGGame[]; timestamp: number }>();

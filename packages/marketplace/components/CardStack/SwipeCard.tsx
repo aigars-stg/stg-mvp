@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, Badge } from '@second-turn/design-system';
+import { useState } from 'react';
+import { Badge } from '@second-turn/design-system';
 import { useSwipeGesture } from './useSwipeGesture';
 import type { SwipeCardProps } from './types';
 import { getLanguageFlag } from '@/lib/bgg-utils';
@@ -23,7 +23,7 @@ const stackPositions = [
   { rotation: 3, scale: 0.88, tx: 0, ty: 0, opacity: 1 },
 ];
 
-export function SwipeCard({ game, index, totalCards, onSwipe, onTap }: SwipeCardProps) {
+export function SwipeCard({ game, index, totalCards: _totalCards, onSwipe, onTap }: SwipeCardProps) {
   const [isExiting, setIsExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
 

@@ -1,5 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/client';
-import { getClientIP, parseUserAgent, formatLocation } from '@/lib/utils/request-helpers';
+import { getClientIP, parseUserAgent } from '@/lib/utils/request-helpers';
 import type { NextRequest } from 'next/server';
 
 // Re-export for backwards compatibility

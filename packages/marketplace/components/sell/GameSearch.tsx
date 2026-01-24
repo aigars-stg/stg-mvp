@@ -32,6 +32,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
   const initialSearchDone = useRef(false);
 
   // Debounced search function using database
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- debounce returns stable function
   const performSearch = useCallback(
     debounce(async (query: string) => {
       if (!query || query.length < 2) {

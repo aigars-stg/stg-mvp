@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 
-const legalDirectory = path.join(process.cwd(), 'packages/marketplace/content/legal');
+// Legal directory paths are constructed dynamically in getLegalDocument()
 
 // Fallback to process.cwd()/content/legal if the first one doesn't exist
 // This is because locally process.cwd() might be the root of the repo OR the package dir 
@@ -29,7 +29,7 @@ export function getLegalDocument(slug: string) {
 
 
 
-    let fullPath = possiblePaths.find(p => fs.existsSync(p));
+    const fullPath = possiblePaths.find(p => fs.existsSync(p));
 
     if (!fullPath) {
         throw new Error(`Legal document not found: ${slug}. Searched in: ${possiblePaths.join(', ')}`);

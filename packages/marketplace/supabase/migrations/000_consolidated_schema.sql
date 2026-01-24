@@ -482,6 +482,19 @@ CREATE TABLE security_audit_log (
 -- FEATURES: One basket per buyer-seller pair
 -- RELATIONSHIPS: auth.users
 -- ============================================================================
+-- ARCHITECTURE NOTE: baskets and basket_items tables
+-- These tables are accessed ONLY via RPC functions:
+--   - get_cart(buyer_id) - Retrieve cart contents
+--   - add_to_cart(buyer_id, listing_id) - Add item with 30-min reservation
+--   - remove_from_cart(buyer_id, listing_id) - Remove item and release reservation
+-- Direct table access via .from('baskets') or .from('basket_items') is NOT exposed.
+-- This ensures:
+--   1. Atomic operations for cart modifications
+--   2. Proper listing reservation handling
+--   3. Race condition prevention via SELECT FOR UPDATE
+--   4. Consistent cart state management
+-- DO NOT add direct table queries in application code.
+-- ============================================================================
 CREATE TABLE baskets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   buyer_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

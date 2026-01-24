@@ -34,7 +34,7 @@ export const AccountDeletedEmail = ({
                     <Text style={text}>Hi {userName},</Text>
 
                     <Text style={text}>
-                        We've received your request to delete your Second Turn account. Your account has been deactivated and your profile is hidden from the public.
+                        We&apos;ve received your request to delete your Second Turn account. Your account has been deactivated and your profile is hidden from the public.
                     </Text>
 
                     <Section style={warningBox}>
@@ -57,7 +57,7 @@ export const AccountDeletedEmail = ({
                     <Hr style={hr} />
 
                     <Text style={text}>
-                        We're sorry to see you go. If you didn't request this deletion, please contact our support team immediately.
+                        We&apos;re sorry to see you go. If you didn&apos;t request this deletion, please contact our support team immediately.
                     </Text>
 
                     <Section style={buttonContainer}>

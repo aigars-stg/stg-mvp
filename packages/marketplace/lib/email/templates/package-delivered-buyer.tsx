@@ -71,14 +71,14 @@ export const PackageDeliveredBuyerEmail = ({
             <Text style={instructionsTitle}>How to Pick Up Your Package</Text>
             <ol style={instructionsList}>
               <li style={instructionItem}>
-                <strong>Bring your ID:</strong> You'll need a photo ID to collect your package
+                <strong>Bring your ID:</strong> You&apos;ll need a photo ID to collect your package
               </li>
               <li style={instructionItem}>
                 <strong>Mention the tracking number:</strong> {barcode}
               </li>
               <li style={instructionItem}>
                 <strong>Terminal staff will help you:</strong> Show them your tracking number and
-                they'll retrieve your package
+                they&apos;ll retrieve your package
               </li>
               <li style={instructionItem}>
                 <strong>Storage time:</strong> Packages are held for 5 working days. Please collect
@@ -96,7 +96,7 @@ export const PackageDeliveredBuyerEmail = ({
 
           {/* Footer Note */}
           <Text style={footerText}>
-            Once you've picked up and inspected your package, you can mark the order as complete in
+            Once you&apos;ve picked up and inspected your package, you can mark the order as complete in
             your order history.
           </Text>
 
@@ -104,7 +104,7 @@ export const PackageDeliveredBuyerEmail = ({
           <Section style={reviewBox}>
             <Text style={reviewTitle}>⭐ How was your experience?</Text>
             <Text style={reviewText}>
-              Once you've received your games, we'd love to hear about your experience with{' '}
+              Once you&apos;ve received your games, we&apos;d love to hear about your experience with{' '}
               {sellerName}. Your review helps build trust in our community!
             </Text>
             <Button style={reviewButton} href={reviewUrl}>

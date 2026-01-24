@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- game thumbnails and avatars are external URLs */
 'use client';
 
 import { useRouter } from 'next/navigation';

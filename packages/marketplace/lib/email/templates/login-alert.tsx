@@ -48,7 +48,7 @@ export const LoginAlertEmail = ({
           {isUnusual ? (
             <Text style={text}>
               We detected a login to your Second Turn account from a new location or device.
-              If this wasn't you, please secure your account immediately.
+              If this wasn&apos;t you, please secure your account immediately.
             </Text>
           ) : (
             <Text style={text}>
@@ -83,7 +83,7 @@ export const LoginAlertEmail = ({
           {isUnusual && (
             <Section style={warningBox}>
               <Text style={warningText}>
-                <strong>If this wasn't you:</strong> Someone may have access to your email account.
+                <strong>If this wasn&apos;t you:</strong> Someone may have access to your email account.
                 We recommend securing your email and checking for any unauthorized activity on your account.
               </Text>
             </Section>
@@ -98,7 +98,7 @@ export const LoginAlertEmail = ({
           <Hr style={hr} />
 
           <Text style={footerText}>
-            You're receiving this email because you have login alerts enabled for your Second Turn account.
+            You&apos;re receiving this email because you have login alerts enabled for your Second Turn account.
             You can manage your security preferences in your account settings.
           </Text>
 

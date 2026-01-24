@@ -53,6 +53,7 @@ export function MarkerPopup({
       containerRef.current = null;
       setMounted(false);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- popup setup should only run when marker is ready, options handled by separate effect
   }, [isReady]);
 
   useEffect(() => {
@@ -153,6 +154,7 @@ export function MarkerTooltip({
       containerRef.current = null;
       setMounted(false);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- hover popup setup should only run when marker/map is ready, options handled by separate effect
   }, [isReady, map]);
 
   useEffect(() => {
@@ -240,6 +242,7 @@ export function MapPopup({
       }
       popupRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- standalone popup setup should only run when map is ready, position/options handled by separate effects
   }, [map]);
 
   useEffect(() => {

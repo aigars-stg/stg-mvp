@@ -55,7 +55,7 @@ export const NewMessageEmail = ({
             <Text style={orderNumberStyle}>Order #{orderNumber}</Text>
             <Hr style={hr} />
             <Text style={senderLabel}>From {senderName}:</Text>
-            <Text style={messagePreviewStyle}>"{truncatedPreview}"</Text>
+            <Text style={messagePreviewStyle}>&ldquo;{truncatedPreview}&rdquo;</Text>
             {hasPhotos && (
               <Text style={photoIndicator}>📷 Includes photos</Text>
             )}
@@ -79,7 +79,7 @@ export const NewMessageEmail = ({
             Second Turn - Board Game Marketplace
             <br />
             <span style={footerMuted}>
-              You're receiving this because someone sent you a message about an order.
+              You&apos;re receiving this because someone sent you a message about an order.
             </span>
           </Text>
         </Container>

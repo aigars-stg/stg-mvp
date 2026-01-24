@@ -18,7 +18,7 @@ interface ExistingSalesBannerProps {
   onDismiss?: () => void;
 }
 
-export function ExistingSalesBanner({ gameId, gameName, listings, onDismiss }: ExistingSalesBannerProps) {
+export function ExistingSalesBanner({ gameId, gameName: _gameName, listings, onDismiss }: ExistingSalesBannerProps) {
   const t = useTranslations('Wanted.ExistingSalesBanner');
 
   if (listings.length === 0) return null;

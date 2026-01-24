@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- message photos are user-uploaded URLs */
 'use client';
 
 import { useState } from 'react';

@@ -16,7 +16,7 @@ import { handleApiError } from '@/lib/api/error-handler';
  * - Sets seller_status to 'active'
  * - Seller can create 'contact_seller' listings but not 'instant_buy' listings
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;

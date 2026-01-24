@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- feedback screenshots are user-uploaded URLs */
 'use client';
 
 import { useState, useEffect, use, useCallback } from 'react';

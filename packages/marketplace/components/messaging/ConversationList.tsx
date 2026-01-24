@@ -73,7 +73,7 @@ export function ConversationList({
             No conversations yet
           </h3>
           <p className="text-text-secondary max-w-sm">
-            When you reach out about a listing - or someone reaches out to you - it'll show up here.
+            When you reach out about a listing - or someone reaches out to you - it&apos;ll show up here.
           </p>
         </div>
       </div>

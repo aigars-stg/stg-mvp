@@ -35,7 +35,7 @@ export default async function PrivacyPolicyPage() {
           <Markdown
             remarkPlugins={[remarkGfm]}
             components={{
-              a: ({ node, ...props }) => {
+              a: ({ node: _node, ...props }) => {
                 // Check if link is internal (starts with /)
                 const isInternal = props.href?.startsWith('/');
                 if (isInternal) {

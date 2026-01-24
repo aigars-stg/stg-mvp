@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Badge } from '@second-turn/design-system';
+// Badge available from @second-turn/design-system if needed
 import { ShoppingBag, ArrowDownRight, RefreshCw as Loader2, AlertCircle, CheckCircleAlt01 as CheckCircle2, Time as Clock, ChevronRight } from 'griddy-icons';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';

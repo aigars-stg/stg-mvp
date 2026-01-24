@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import type { TypedSupabase, WantedListingRow, GameRow } from '@/lib/supabase/query-types';
+import type { TypedSupabase, GameRow } from '@/lib/supabase/query-types';
 
 /**
  * GET /api/wanted/my-listings
  * Fetches all wanted listings created by the authenticated user
  * Includes all statuses (active, expired, fulfilled, cancelled)
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;

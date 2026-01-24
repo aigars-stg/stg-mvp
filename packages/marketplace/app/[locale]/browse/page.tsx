@@ -1,9 +1,10 @@
+/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Select, Button } from '@second-turn/design-system';
-import { Package, Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, SettingsAdjustHorizontal as SlidersHorizontal } from 'griddy-icons';
+import { Package, SettingsAdjustHorizontal as SlidersHorizontal } from 'griddy-icons';
 import { AggregatedGameCard, SellFilters, WantedFilters, MobileFilterDrawer, ActiveFilterChips } from '@/components/browse';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
@@ -21,7 +22,6 @@ export default function BrowsePage() {
   const router = useRouter();
   const { user, profile } = useAuth();
   const t = useTranslations('Browse');
-  const tListings = useTranslations('Listings');
 
   // Use the browse filters hook for all filter state and actions
   const filters = useBrowseFilters();
@@ -47,11 +47,9 @@ export default function BrowsePage() {
     listingType,
     setListingType,
     searchQuery,
-    setSearchQuery,
     sortBy,
     setSortBy,
     selectedConditions,
-    setSelectedConditions,
     selectedLanguages,
     setSelectedLanguages,
     selectedPlayerCounts,
@@ -377,28 +375,6 @@ export default function BrowsePage() {
 
     return filtered;
   }, [games, selectedPlayerCounts, selectedMinAges, selectedPlayingTimes]);
-
-  // Get condition icon and label
-  const getConditionInfo = (condition: string) => {
-    const conditionMap: Record<string, { icon: React.ComponentType<{ className?: string }>; label: string }> = {
-      likeNew: { icon: Star, label: tListings('conditions.likeNew') },
-      veryGood: { icon: Sparkles, label: tListings('conditions.veryGood') },
-      good: { icon: CircleCheck, label: tListings('conditions.good') },
-      acceptable: { icon: Wrench, label: tListings('conditions.acceptable') },
-    };
-    return conditionMap[condition] || { icon: CircleCheck, label: condition };
-  };
-
-  // Get playing time label
-  const getPlayingTimeLabel = (time: string) => {
-    const labels: Record<string, string> = {
-      '0-30': t('playingTime.under30'),
-      '30-60': t('playingTime.thirtyTo60'),
-      '60-120': t('playingTime.oneToTwoHours'),
-      '120+': t('playingTime.twoPlus'),
-    };
-    return labels[time] || time;
-  };
 
   // Handle "I Have This" click for wanted listings
   // Redirects to sell page with wanted listing context

@@ -1,10 +1,11 @@
+/* eslint-disable @next/next/no-img-element -- user avatars are external URLs */
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import {  LogOut, Package, ShoppingBag, Store, Settings, ChevronRight, Layout as LayoutDashboard, Shield, Globe  } from 'griddy-icons';
+import {  LogOut, ShoppingBag, Store, Settings, ChevronRight, Layout as LayoutDashboard, Shield, Globe  } from 'griddy-icons';
 import { getInitials } from '@/lib/auth/utils';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { ThemeToggle } from '@/components/theme';

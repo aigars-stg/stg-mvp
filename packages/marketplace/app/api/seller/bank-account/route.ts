@@ -8,7 +8,7 @@ import { handleApiError } from '@/lib/api/error-handler';
  *
  * Get seller's bank account info (display only - last4, bank name)
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { response, user } = await requireAuth();
     if (response) return response;

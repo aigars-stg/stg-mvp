@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- game images and photos are external/blob URLs */
 'use client';
 
 import { Card, Button, Badge, Checkbox } from '@second-turn/design-system';
@@ -41,12 +42,7 @@ interface ListingReviewProps {
   onTermsChange?: (accepted: boolean) => void;
 }
 
-const CONDITION_LABELS = {
-  likeNew: '📦 Like New',
-  veryGood: '✨ Very Good',
-  good: '🎲 Good',
-  acceptable: '🔧 Acceptable',
-};
+// Condition labels now use translations from t('conditions.*')
 
 const CONDITION_VARIANTS = {
   likeNew: 'default' as const,

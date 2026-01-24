@@ -14,7 +14,7 @@ interface WantedOfferCardProps {
   isPreview?: boolean;
 }
 
-export function WantedOfferCard({ wantedListing, isPreview = false }: WantedOfferCardProps) {
+export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }: WantedOfferCardProps) {
   const t = useTranslations('Wanted.OfferCard');
   const [notesExpanded, setNotesExpanded] = useState(false);
 
@@ -245,6 +245,7 @@ export function WantedOfferCard({ wantedListing, isPreview = false }: WantedOffe
         {wantedListing.buyer && (
           <div className="flex items-center gap-2">
             {wantedListing.buyer.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element -- external avatar URLs
               <img
                 src={wantedListing.buyer.avatar_url}
                 alt={wantedListing.buyer.full_name}

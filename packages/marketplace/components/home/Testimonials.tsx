@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+// Image from next/image available if needed
 import { useTranslations } from 'next-intl';
 
 interface TestimonialKey {
@@ -99,7 +99,7 @@ function TestimonialCard({ testimonial }: { testimonial: TestimonialData }) {
 
       {/* Content */}
       <p className="text-text-secondary mb-6 leading-relaxed">
-        "{testimonial.content}"
+        &ldquo;{testimonial.content}&rdquo;
       </p>
 
       {/* Author */}

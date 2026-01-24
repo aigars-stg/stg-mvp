@@ -1,7 +1,8 @@
+/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { useState, useEffect, Suspense, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
@@ -30,7 +31,6 @@ const MAX_RETRIES = 15;
 const RETRY_DELAY_MS = 2000;
 
 function SuccessPageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const t = useTranslations('Checkout.success');

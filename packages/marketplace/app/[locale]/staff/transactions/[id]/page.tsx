@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -201,7 +202,7 @@ export default function StaffTransactionPage() {
       } else {
         setSimulationMessage({ type: 'error', text: result.error || 'Simulation failed' });
       }
-    } catch (_err) {
+    } catch {
       setSimulationMessage({ type: 'error', text: 'Failed to execute simulation' });
     } finally {
       setSimulationLoading(false);

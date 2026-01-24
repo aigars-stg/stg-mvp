@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Chat as MessageSquare, ChevronDown } from 'griddy-icons';
+import { Star, Chat as MessageSquare } from 'griddy-icons';
 import { Button, Card } from '@second-turn/design-system';
 import { cn } from '@/lib/utils';
 import { UserInfoCard } from '@/components/user';

@@ -138,6 +138,7 @@ export function MapClusterLayer<
         // ignore
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- layer setup should only run when map loads, other props handled by separate effects
   }, [isLoaded, map, sourceId]);
 
   // Update source data when data prop changes (only for non-URL data )

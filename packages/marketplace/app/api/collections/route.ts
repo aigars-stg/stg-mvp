@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { createServerSupabase } from '@/lib/supabase/server';
-import type { TypedSupabase, ListingRow, GameRow, PublicProfileRow, PublicSellerProfileRow } from '@/lib/supabase/query-types';
+import type { TypedSupabase, ListingRow, PublicProfileRow, PublicSellerProfileRow } from '@/lib/supabase/query-types';
 
 // Collection listing type with enrichment
 interface CollectionListing extends ListingRow {

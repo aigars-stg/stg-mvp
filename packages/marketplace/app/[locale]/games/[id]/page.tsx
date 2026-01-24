@@ -49,10 +49,6 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
     setSelectedImage((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const _handlePurchase = () => {
-    setPurchaseModalOpen(true);
-  };
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Breadcrumb */}

@@ -25,7 +25,7 @@ export function GameResultCard({
   id,
   name,
   yearpublished,
-  bayesaverage,
+  bayesaverage: _bayesaverage,
   isExpansion,
   onClick,
   hideChevron = false,
@@ -79,6 +79,7 @@ export function GameResultCard({
         observerRef.current.disconnect();
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount
   }, []);
 
   const loadThumbnail = async () => {

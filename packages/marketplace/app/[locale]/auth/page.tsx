@@ -114,7 +114,7 @@ export default function AuthPage() {
 
       setProviders(userProviders);
       setAuthState(exists ? 'existing_user' : 'new_user');
-    } catch (_err) {
+    } catch {
       // Fallback: assume new user on error (safer default)
       setAuthState('new_user');
     }

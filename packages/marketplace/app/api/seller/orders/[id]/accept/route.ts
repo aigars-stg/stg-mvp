@@ -98,7 +98,6 @@ export async function POST(
       if (buyerProfile && sellerProfile) {
         let trackingNumber: string | undefined;
         let trackingUrl: string | undefined;
-        let labelGenerated = false;
         let labelError: string | null = null;
 
         // For T2T orders, generate Unisend shipping label
@@ -128,7 +127,6 @@ export async function POST(
 
             trackingNumber = labelResult.barcode;
             trackingUrl = labelResult.trackingUrl;
-            labelGenerated = true;
 
             console.log(`✅ [Accept Order] Label generated successfully: ParcelId ${labelResult.parcelId}`);
 

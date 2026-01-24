@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import type { SellerBadgeTier } from '@/lib/types/seller';
 import { handleApiError } from '@/lib/api/error-handler';
-import type { ListingRow, GameRow } from '@/lib/supabase/query-types';
+import type { ListingRow } from '@/lib/supabase/query-types';
 
 export const dynamic = 'force-dynamic';
 

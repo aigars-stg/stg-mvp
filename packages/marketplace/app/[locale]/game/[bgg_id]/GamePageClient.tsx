@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- game images are external BGG URLs */
 'use client';
 
 import { useState, useEffect } from 'react';

@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Star, Trophy as Award, TrendUp as TrendingUp, Users, RefreshCw as Loader2, AlertCircle } from 'griddy-icons';
-import Link from 'next/link';
-import { Button } from '@second-turn/design-system';
+// Link and Button available from next/link and design-system if needed
 import {
   SellerBadgeTier,
   formatMemberSince,

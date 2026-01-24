@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- listing thumbnails are external URLs */
 'use client';
 
 import Link from 'next/link';

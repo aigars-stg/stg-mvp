@@ -61,7 +61,7 @@ export function LoginActivity() {
 
         setActivities((data as LoginRecord[]) || []);
         setLoading(false);
-      } catch (error: unknown) {
+      } catch {
         // Silently fail - login activity is optional
         setError(t('unavailable'));
         setLoading(false);
@@ -69,6 +69,7 @@ export function LoginActivity() {
     }
 
     fetchActivities();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t is stable from useTranslations
   }, [user]);
 
   const handleSignOutAll = async () => {

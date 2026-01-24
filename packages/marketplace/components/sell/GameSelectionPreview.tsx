@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { Card } from '@second-turn/design-system';
@@ -133,7 +134,7 @@ export function GameSelectionPreview({ game, version }: GameSelectionPreviewProp
                     />
                   </svg>
                   <span>
-                    Next, you'll add photos, describe the condition, and set your price to complete this listing.
+                    Next, you&apos;ll add photos, describe the condition, and set your price to complete this listing.
                   </span>
                 </p>
               </div>

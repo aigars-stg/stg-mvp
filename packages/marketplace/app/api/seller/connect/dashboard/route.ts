@@ -8,7 +8,7 @@ import { handleApiError } from '@/lib/api/error-handler';
  *
  * Get Stripe Express dashboard login link for seller
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;

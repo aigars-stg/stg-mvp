@@ -143,7 +143,7 @@ export async function createConnectAccount(
  */
 export async function createOnboardingLink(
   accountId: string,
-  prefillData?: SellerPrefillData
+  _prefillData?: SellerPrefillData
 ): Promise<string> {
   try {
     // Update account with business profile only (individual data can't be updated for Express accounts)

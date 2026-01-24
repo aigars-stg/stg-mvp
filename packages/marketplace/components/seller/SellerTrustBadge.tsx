@@ -1,6 +1,7 @@
+/* eslint-disable @next/next/no-img-element -- seller avatars are external URLs */
 'use client';
 
-import { Star, Trophy as Award, Shield, Sparks as Sparkles, User } from 'griddy-icons';
+import { Star, Shield, Sparks as Sparkles, User } from 'griddy-icons';
 import {
   SellerBadgeTier,
   SellerTrustInfo,

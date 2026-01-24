@@ -18,7 +18,7 @@ export function WantedStatusChangeModal({
   isOpen,
   onClose,
   onConfirm,
-  currentStatus,
+  currentStatus: _currentStatus,
   newStatus,
   gameName,
   isLoading = false,

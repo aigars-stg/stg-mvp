@@ -91,7 +91,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         } finally {
             setIsLoading(false);
         }
-    }, [user]); // Removed 'cart' from dependency to avoid infinite loops, logic handles it
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- cart intentionally excluded to avoid infinite loops
+    }, [user]);
 
     // Fetch cart on mount and when user changes (wait for auth to finish loading)
     useEffect(() => {

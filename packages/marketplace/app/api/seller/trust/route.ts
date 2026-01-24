@@ -8,7 +8,7 @@ import { handleApiError } from '@/lib/api/error-handler';
  *
  * Get the authenticated seller's trust/reputation data
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;

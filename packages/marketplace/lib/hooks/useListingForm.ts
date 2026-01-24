@@ -246,7 +246,7 @@ export function useListingForm(): UseListingFormReturn {
 
   // Helper: can submit form
   const canSubmit = useCallback(() => {
-    const { selectedGame, condition, price, termsAccepted, transactionMethod, pricingFormat } = formData;
+    const { selectedGame, condition, price, termsAccepted, transactionMethod } = formData;
 
     // Basic requirements
     if (!selectedGame || !condition || !termsAccepted) return false;

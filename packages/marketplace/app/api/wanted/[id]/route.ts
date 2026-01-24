@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import type { TypedSupabase, WantedListingRow, TablesUpdate, GameRow, WantedListingResponseRow, UserProfileRow } from '@/lib/supabase/query-types';
+import type { TypedSupabase, WantedListingRow, TablesUpdate, WantedListingResponseRow, UserProfileRow } from '@/lib/supabase/query-types';
 
 // Extended types for API responses with joined data
 interface GameMetadata {

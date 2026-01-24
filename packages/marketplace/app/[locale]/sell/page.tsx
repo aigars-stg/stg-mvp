@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
@@ -30,7 +31,7 @@ interface PreviewProfile extends UserProfile {
   average_rating?: number;
   total_reviews?: number;
 }
-import { AuctionSettings as _AuctionSettings } from '@/components/sell/AuctionSettings';
+// AuctionSettings available via @/components/sell/AuctionSettings when auctions are enabled
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { NotificationModal } from '@/components/common/NotificationModal';
 import { PricingAssistant } from '@/components/sell/PricingAssistant';
@@ -165,7 +166,6 @@ function SellPageContent() {
     setShowSuccessModal,
     showMobilePreview,
     setShowMobilePreview,
-    publishedListingId,
     setPublishedListingId,
     existingPhotoUrls,
     setExistingPhotoUrls,
@@ -310,6 +310,7 @@ function SellPageContent() {
     } finally {
       setIsLoadingGameDetails(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, [user, isEditMode]);
 
   // Stable callback for version selection
@@ -320,6 +321,7 @@ function SellPageContent() {
       // Clear display name when version changes - GameNameSelector will set it
       selectedGameDisplayName: null
     }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, []);
 
   // Handler to allow changing version after selection
@@ -327,17 +329,20 @@ function SellPageContent() {
     // Clear selected version and keep game section expanded
     setFormData((prev) => ({ ...prev, selectedVersion: null }));
     setExpandedSections((prev) => ({ ...prev, game: true }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, []);
 
   // Handler to allow changing display name after selection
   const handleChangeName = useCallback(() => {
     // Clear selected display name to show selector again
     setFormData((prev) => ({ ...prev, selectedGameDisplayName: null }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, []);
 
   // Handler for expansion selection changes
   const handleExpansionsChange = useCallback((expansions: SelectedExpansion[]) => {
     setFormData((prev) => ({ ...prev, selectedExpansions: expansions }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, []);
 
   // Handler to enable expansion section and fetch expansions
@@ -364,12 +369,14 @@ function SellPageContent() {
     } finally {
       setIsLoadingExpansions(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, [formData.selectedGame, expansionsFetched]);
 
   // Handler to disable expansion section
   const handleDisableExpansions = useCallback(() => {
     setShowExpansionSection(false);
     setFormData((prev) => ({ ...prev, selectedExpansions: [] }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, []);
 
   // Fetch seller capabilities on mount
@@ -417,6 +424,7 @@ function SellPageContent() {
     }
 
     fetchSellerCapabilities();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, [user]);
 
   // Fetch listing data for edit mode
@@ -504,6 +512,7 @@ function SellPageContent() {
     }
 
     fetchListingForEdit();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, [isEditMode, editListingId, user]);
 
   // Fetch wanted listing data when coming from "I have this" flow
@@ -586,6 +595,7 @@ function SellPageContent() {
       setHasDraft(true);
       setShowDraftBanner(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount
   }, []);
 
   // Load draft handler
@@ -647,7 +657,6 @@ function SellPageContent() {
     const conditionComplete = !!formData.condition;
     // Photos required only for Acceptable condition
     const photosComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1;
-    const pricingComplete = !!formData.price && parseFloat(formData.price) > 0;
 
     // Auto-expand next section that needs completion
     setExpandedSections((prev) => ({
@@ -657,6 +666,7 @@ function SellPageContent() {
       photos: (gameComplete && conditionComplete) || prev.photos,
       pricing: (gameComplete && conditionComplete && photosComplete) || prev.pricing,
     }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, [
     formData.selectedGame,
     formData.selectedVersion,

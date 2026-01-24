@@ -104,6 +104,7 @@ export function MapMarker({
       markerElementRef.current = null;
       setIsReady(false);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- marker setup should only run when map loads, other props handled by separate effects
   }, [map, isLoaded]);
 
   useEffect(() => {

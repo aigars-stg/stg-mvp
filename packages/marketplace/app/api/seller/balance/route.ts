@@ -10,7 +10,7 @@ import { handleApiError } from '@/lib/api/error-handler';
  * Get seller's Stripe balance (available, pending, total)
  * Returns cached data if fresh (within 60 seconds)
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- expansion images are external BGG URLs */
 'use client';
 
 import { Card, Modal, Input, Button } from '@second-turn/design-system';
@@ -32,7 +33,6 @@ export function ExpansionSelector({
   const {
     searchQuery,
     setSearchQuery,
-    debouncedQuery,
     isExpanded,
     setIsExpanded,
     versionModalExpansion,

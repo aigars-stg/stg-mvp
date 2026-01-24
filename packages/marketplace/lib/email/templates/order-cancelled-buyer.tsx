@@ -42,7 +42,7 @@ export const OrderCancelledBuyerEmail = ({
           <Text style={text}>Hi {buyerName},</Text>
 
           <Text style={text}>
-            We're sorry to inform you that your order from <strong>{sellerName}</strong> has been
+            We&apos;re sorry to inform you that your order from <strong>{sellerName}</strong> has been
             cancelled.
           </Text>
 

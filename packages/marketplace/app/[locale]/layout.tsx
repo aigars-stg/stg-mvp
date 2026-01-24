@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- preload link for external BGG images */
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import dynamic from 'next/dynamic';

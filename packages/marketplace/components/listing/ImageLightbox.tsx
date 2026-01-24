@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- lightbox displays user-uploaded listing photos */
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';

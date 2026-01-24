@@ -64,6 +64,7 @@ export function MapRoute({
         // ignore
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- route layer setup should only run when map loads, style props handled by separate effect
   }, [isLoaded, map, sourceId, layerId]);
 
   // When coordinates change, update the source data

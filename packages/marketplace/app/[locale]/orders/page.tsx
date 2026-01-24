@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +7,7 @@ import Link from 'next/link';
 import { Button, Badge, Card } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User, ShoppingBag } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
-import type { ListingCondition as _ListingCondition } from '@/lib/types/listing';
+// ListingCondition type available via @/lib/types/listing if needed
 import { useTranslations } from 'next-intl';
 import { formatDate } from '@/lib/date-utils';
 

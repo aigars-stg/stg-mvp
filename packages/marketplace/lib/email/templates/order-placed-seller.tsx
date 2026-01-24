@@ -86,7 +86,7 @@ export const OrderPlacedSellerEmail = ({
 
           <Section style={warningBox}>
             <Text style={warningText}>
-              ⚠️ <strong>Important:</strong> If you don't respond within {deadlineHours} hours,
+              ⚠️ <strong>Important:</strong> If you don&apos;t respond within {deadlineHours} hours,
               the order will be automatically cancelled and the buyer will be refunded.
             </Text>
           </Section>

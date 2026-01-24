@@ -29,7 +29,6 @@ export function Dac7WarningBanner({
 
   const isBlocked = complianceStatus === 'blocked';
   const isRequired = complianceStatus === 'required';
-  const isApproaching = complianceStatus === 'approaching';
 
   // Determine which threshold is closest
   const transactionPercent = (annualTransactionCount / 30) * 100;

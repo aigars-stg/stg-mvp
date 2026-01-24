@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- user avatars are external URLs */
 'use client';
 
 import { useEffect, useState } from 'react';

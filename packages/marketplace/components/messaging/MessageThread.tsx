@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- user avatars are external URLs */
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -67,6 +68,7 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
     };
 
     fetchConversation();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- markAsRead excluded to prevent infinite loop
   }, [conversationId]);
 
   // Subscribe to realtime updates
@@ -136,6 +138,7 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
     return () => {
       supabase.removeChannel(channel);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- markAsRead excluded to prevent infinite loop
   }, [conversation, conversationId, user?.id]);
 
   const markAsRead = async (messageId: string) => {

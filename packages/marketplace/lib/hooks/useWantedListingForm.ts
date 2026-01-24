@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import type { BGGGame, VersionSelection } from '@/lib/bgg-types';
 import type { ListingCondition, ListingWithSeller } from '@/lib/types/listing';
@@ -91,7 +91,6 @@ export interface UseWantedListingFormReturn {
 }
 
 export function useWantedListingForm(): UseWantedListingFormReturn {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile } = useAuth();
 

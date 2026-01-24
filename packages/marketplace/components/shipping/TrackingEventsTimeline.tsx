@@ -16,7 +16,7 @@ export function TrackingEventsTimeline({
   events,
   title = 'Tracking History',
   maxHeight,
-  showFullTimestamps = false,
+  showFullTimestamps: _showFullTimestamps = false,
   className = '',
 }: TrackingEventsTimelineProps) {
   if (!events || events.length === 0) {

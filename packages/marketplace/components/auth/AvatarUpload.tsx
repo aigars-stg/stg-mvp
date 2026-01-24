@@ -1,9 +1,9 @@
+/* eslint-disable @next/next/no-img-element -- avatar previews are blob URLs */
 'use client';
 
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Button } from '@second-turn/design-system';
-import { Upload, Close, User } from 'griddy-icons';
+// Icons available from griddy-icons if needed
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getInitials } from '@/lib/auth/utils';
@@ -129,7 +129,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'defau
     }
   }, [user, currentAvatarUrl, onUploadComplete, t]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: {
       'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],

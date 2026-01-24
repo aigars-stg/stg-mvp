@@ -13,7 +13,7 @@ export function CardStack({
   maxCards = 5,
 }: CardStackProps) {
   const [currentGames, setCurrentGames] = useState<Game[]>(games.slice(0, maxCards));
-  const [removingCardId, setRemovingCardId] = useState<string | null>(null);
+  const [, setRemovingCardId] = useState<string | null>(null);
 
   // Update games when prop changes
   useEffect(() => {
@@ -70,7 +70,7 @@ export function CardStack({
       <div className="text-center py-16">
         <div className="text-6xl mb-4">🎉</div>
         <h3 className="text-xl font-semibold text-polar-night mb-2">
-          You've seen all featured games!
+          You&apos;ve seen all featured games!
         </h3>
         <p className="text-text-secondary">
           Check out the full catalog below

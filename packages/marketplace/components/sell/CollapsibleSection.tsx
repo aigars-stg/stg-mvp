@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, ReactNode } from 'react';
+import { useEffect, ReactNode } from 'react';
 import { Card } from '@second-turn/design-system';
 
 interface CollapsibleSectionProps {

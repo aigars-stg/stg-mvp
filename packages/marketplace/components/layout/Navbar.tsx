@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- user avatars are external URLs */
 'use client';
 
 import Link from 'next/link';
@@ -40,7 +41,7 @@ const MobileSearchButton = dynamic(() => import('./MobileSearchButton').then(mod
 
 export function Navbar() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  useAuth(); // Hook call kept for potential side effects
   const t = useTranslations('Navigation');
 
   // Helper to check if a nav link is active

@@ -26,7 +26,7 @@ interface ListingWithGame {
  * GET /api/saved-listings
  * Fetches all saved listings for the authenticated user
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;

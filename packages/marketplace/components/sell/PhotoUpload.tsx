@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- photo previews are blob URLs */
 'use client';
 
 import { useState, useRef, useCallback } from 'react';

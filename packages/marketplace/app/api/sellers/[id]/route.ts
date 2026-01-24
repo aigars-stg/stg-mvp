@@ -55,7 +55,7 @@ export async function GET(
     }
 
     // Fetch seller profile with trust data (from secure view)
-    const { data: sellerProfile, error: sellerError } = await supabase
+    const { data: sellerProfile } = await supabase
       .from('public_seller_profiles')
       .select(`
         seller_status,

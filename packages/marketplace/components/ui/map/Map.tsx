@@ -81,6 +81,7 @@ export function Map({ children, styles, ...props }: MapProps) {
       setIsLoaded(false);
       setIsStyleLoaded(false);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- map initialization should only run once on mount
   }, []);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Truck, User, LocationPin as MapPin, Phone, Email as Mail } from 'griddy-icons';
+import { User, LocationPin as MapPin, Phone, Email as Mail } from 'griddy-icons';
 import type { ShippingDestination, ParcelSize } from './types';
 
 interface ShippingInfoCardProps {

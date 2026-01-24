@@ -31,7 +31,7 @@ export const ShippingLabelSellerEmail = ({
   destinationTerminalName = 'Vilnius Akropolis',
   destinationTerminalAddress = 'Ozo g. 25, LT-07150 Vilnius',
   parcelId = '4703389',
-  barcode,
+  barcode: _barcode,
   trackingUrl = 'https://tracking.example.com',
   orderUrl = 'https://secondturn.games/seller/orders/123',
 }: ShippingLabelSellerEmailProps) => {
@@ -203,14 +203,6 @@ const value = {
 const addressText = {
   fontSize: '14px',
   color: '#6b7c93',
-};
-
-const trackingNumber = {
-  color: '#2e3a4d',
-  fontSize: '18px',
-  fontWeight: '600',
-  fontFamily: 'monospace',
-  paddingBottom: '12px',
 };
 
 const parcelIdLabel = {

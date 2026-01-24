@@ -3,7 +3,7 @@
  * SERVER-ONLY: This file should only be imported in API routes
  */
 
-import { sendEmail, resend, FROM_EMAIL } from './resend';
+import { sendEmail } from './resend';
 import { OrderPlacedSellerEmail } from './templates/order-placed-seller';
 import { OrderConfirmationBuyerEmail } from './templates/order-confirmation-buyer';
 import { OrderAcceptedBuyerEmail } from './templates/order-accepted-buyer';

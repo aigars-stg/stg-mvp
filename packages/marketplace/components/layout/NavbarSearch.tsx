@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -124,6 +125,7 @@ export function NavbarSearch({
         console.error(`Failed to load thumbnail for game ${game.id}:`, error);
       }
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- loadedThumbnails excluded to prevent infinite loop
   }, [isOpen, results]);
 
   // Close dropdown on click outside
@@ -171,6 +173,7 @@ export function NavbarSearch({
           break;
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handlers are stable
     [isOpen, results, selectedIndex, query]
   );
 
@@ -244,6 +247,7 @@ export function NavbarSearch({
             'w-full bg-bg-secondary border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice focus:border-transparent transition-all',
             isMobile ? 'pl-11 pr-10 py-3 text-base' : 'pl-9 pr-8 py-2 text-sm'
           )}
+          role="combobox"
           aria-label="Search games"
           aria-autocomplete="list"
           aria-controls="search-results"

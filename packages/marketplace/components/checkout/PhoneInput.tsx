@@ -21,7 +21,7 @@ export function PhoneInput({
   required = false,
 }: PhoneInputProps) {
   const t = useTranslations('Checkout.PhoneInput');
-  const [isFocused, setIsFocused] = useState(false);
+  const [, setIsFocused] = useState(false);
   const [isValid, setIsValid] = useState(false);
 
   const phoneFormat = PHONE_FORMATS[country];

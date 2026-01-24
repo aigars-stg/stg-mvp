@@ -1,7 +1,7 @@
 // BGG Game Type Classification
 // Handles the critical issue of expansions being marked as "boardgame" type
 
-import type { BGGGameMetadata, BGGInboundLink } from './bgg-types';
+import type { BGGGameMetadata } from './bgg-types';
 
 /**
  * Determines if a game is an expansion using two-step classification:

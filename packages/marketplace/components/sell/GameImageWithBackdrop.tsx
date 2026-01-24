@@ -35,6 +35,7 @@ export function GameImageWithBackdrop({
       {/* Image Container */}
       <div className="relative w-full h-full flex items-center justify-center">
         {src ? (
+          // eslint-disable-next-line @next/next/no-img-element -- external BGG image URLs
           <img
             src={src}
             alt={alt}

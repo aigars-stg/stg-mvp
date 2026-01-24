@@ -117,7 +117,7 @@ export async function GET(
     return NextResponse.json({
       saved: !!existingSave,
     });
-  } catch (_error: unknown) {
+  } catch {
     return NextResponse.json({ saved: false });
   }
 }

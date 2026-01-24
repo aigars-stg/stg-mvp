@@ -84,6 +84,7 @@ export function WantedListingCard({
         {/* Image Section */}
         <div className="relative h-64 bg-polar-night/5 flex items-center justify-center overflow-hidden">
           {(wantedListing.version_image || wantedListing.game?.image) ? (
+            // eslint-disable-next-line @next/next/no-img-element -- external BGG image URLs
             <img
               src={wantedListing.version_image || wantedListing.game?.image || ''}
               alt={wantedListing.game_name}
@@ -171,7 +172,7 @@ export function WantedListingCard({
             {/* Notes (like condition_notes in sale listings) */}
             {wantedListing.notes && (
               <p className="text-sm text-text-secondary line-clamp-2 italic">
-                "{wantedListing.notes}"
+                &ldquo;{wantedListing.notes}&rdquo;
               </p>
             )}
           </div>
@@ -192,6 +193,7 @@ export function WantedListingCard({
             {showBuyer && wantedListing.buyer && (
               <div className="flex items-center gap-2">
                 {wantedListing.buyer.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- external avatar URLs
                   <img
                     src={wantedListing.buyer.avatar_url}
                     alt={wantedListing.buyer.full_name}

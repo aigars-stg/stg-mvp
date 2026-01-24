@@ -14,7 +14,7 @@ export function AccountDeletion() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
 
   const handleDelete = async () => {
     if (confirmText !== 'DELETE') {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, Button, Badge } from '@second-turn/design-system';
+import { Card, Button } from '@second-turn/design-system';
 import { getLanguageFlag } from '@/lib/bgg-utils';
 import type { BGGGame, BGGVersion } from '@/lib/bgg-types';
 import { useTranslations } from 'next-intl';

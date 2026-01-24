@@ -85,9 +85,9 @@ export const OrderAcceptedBuyerEmail = ({
                 <>
                   <strong>1.</strong> The seller will drop off the package at their local terminal
                   <br />
-                  <strong>2.</strong> You'll receive tracking updates via email
+                  <strong>2.</strong> You&apos;ll receive tracking updates via email
                   <br />
-                  <strong>3.</strong> Pick up your package when it arrives (you'll get a notification)
+                  <strong>3.</strong> Pick up your package when it arrives (you&apos;ll get a notification)
                 </>
               ) : (
                 <>

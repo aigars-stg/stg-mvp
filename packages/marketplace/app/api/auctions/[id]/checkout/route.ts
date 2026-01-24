@@ -44,12 +44,9 @@ export async function POST(request: NextRequest, { params }: Params) {
       destinationCountry,
       destinationTerminalId,
       destinationTerminalName,
-      destinationTerminalAddress: _destinationTerminalAddress,
       receiverName,
       receiverPhone,
       receiverEmail,
-      pickupCity: _pickupCity,
-      pickupNotes: _pickupNotes,
     } = body;
 
     // Validate shipping method

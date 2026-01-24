@@ -31,7 +31,7 @@ export function WantedCollection({
   const t = useTranslations('HomePage.wantedCollection');
   const [listings, setListings] = useState<WantedListingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);

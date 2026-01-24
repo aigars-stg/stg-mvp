@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import Link from 'next/link';
@@ -15,8 +16,7 @@ export function ConversationListItem({
   conversation,
   isActive = false,
 }: ConversationListItemProps) {
-  const { other_user, listing, last_message, unread_count, updated_at } =
-    conversation;
+  const { other_user, listing, last_message, unread_count } = conversation;
 
   const formatTime = (timestamp: string) => {
     try {

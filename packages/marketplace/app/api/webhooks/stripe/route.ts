@@ -84,7 +84,6 @@ export async function POST(request: NextRequest) {
         destination_terminal_id,
         destination_terminal_name,
         destination_terminal_address,
-        sender_country,
         receiver_name,
         receiver_phone,
         receiver_email,
@@ -114,7 +113,6 @@ export async function POST(request: NextRequest) {
           : session.payment_intent?.id;
 
       // Convert cents to euros
-      const itemsTotal = parseInt(items_total_cents) / 100;
       const shippingCost = parseInt(shipping_cost_cents) / 100;
       const serviceFee = parseInt(service_fee_cents) / 100;
 

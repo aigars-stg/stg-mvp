@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- screenshot previews are blob URLs */
 'use client';
 
 import { useState, useRef } from 'react';

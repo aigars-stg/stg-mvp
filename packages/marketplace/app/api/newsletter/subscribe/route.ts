@@ -64,12 +64,14 @@ export async function POST(request: NextRequest) {
           // Don't expose error details, just return success (handles gracefully)
         }
 
-        // Send welcome email for re-subscription
-        await sendNewsletterWelcomeEmail({
-          email,
-          locale,
-          unsubscribeToken: existing.unsubscribe_token,
-        });
+        // Send welcome email for re-subscription (only if token exists)
+        if (existing.unsubscribe_token) {
+          await sendNewsletterWelcomeEmail({
+            email,
+            locale,
+            unsubscribeToken: existing.unsubscribe_token,
+          });
+        }
       }
       // If already subscribed and active, silently succeed (don't reveal status)
       return NextResponse.json({ success: true });

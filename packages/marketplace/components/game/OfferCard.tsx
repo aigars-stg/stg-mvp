@@ -1,18 +1,17 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
-import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Tag as Gavel } from 'griddy-icons';
+import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare } from 'griddy-icons';
 import { OfferCardPricing } from './OfferCardPricing';
 import { OfferCardVersionInfo } from './OfferCardVersionInfo';
 import { type TerminalCountry } from '@/lib/unisend/types';
 import { useDeliveredPricing } from '@/lib/hooks/useDeliveredPricing';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { isAuctionListing, isContactSellerListing } from '@/lib/types/listing';
-import { getCountryFlag, getCountryName } from '@/lib/country-utils';
+// Country utilities available from @/lib/country-utils if needed
 import { useAuth } from '@/lib/auth/AuthContext';
 import { UserInfoCard } from '@/components/user';
 import { getSellerBadgeTier } from '@/lib/types/seller';
@@ -42,7 +41,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
   const locale = useLocale();
   const t = useTranslations('OfferCard');
   const tListings = useTranslations('Listings');
-  const [localLoading, setLocalLoading] = useState(false);
+  const [localLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [showConditionInfo, setShowConditionInfo] = useState(false);
@@ -151,9 +150,6 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
     ...(listing.game?.image ? [listing.game.image] : []),
     ...listing.photo_urls,
   ].filter(Boolean);
-
-  // User-uploaded photos only (for Photos section display)
-  const userPhotos = listing.photo_urls.filter(Boolean);
 
   // Expansion images for separate lightbox access
   const expansionImages = (listing.included_expansions ?? [])

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { useEffect, useCallback, Suspense } from 'react';
@@ -139,6 +140,7 @@ function CreateWantedListingPageContent() {
     }
 
     fetchWantedListingForEdit();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, [isEditMode, editListingId, user]);
 
   const handleGameSelect = useCallback(async (game: BGGGame | null) => {
@@ -201,20 +203,24 @@ function CreateWantedListingPageContent() {
     } finally {
       setIsLoadingGameDetails(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, [t]);
 
   const handleVersionSelect = useCallback((version: VersionSelection) => {
     setSelectedVersion(version);
     setSelectedGameDisplayName(null); // Clear display name when version changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, []);
 
   const handleChangeVersion = useCallback(() => {
     setSelectedVersion(null);
     setExpandedSections((prev) => ({ ...prev, game: true }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, []);
 
   const handleChangeName = useCallback(() => {
     setSelectedGameDisplayName(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, []);
 
   const handlePublish = async () => {

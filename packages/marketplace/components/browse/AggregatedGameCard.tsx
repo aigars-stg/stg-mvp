@@ -40,6 +40,7 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
               {!imageLoaded && (
                 <div className="absolute inset-0 animate-pulse bg-polar-night/10" />
               )}
+              {/* eslint-disable-next-line @next/next/no-img-element -- external BGG image URLs */}
               <img
                 src={game.image || game.thumbnail || ''}
                 alt={game.game_name}
