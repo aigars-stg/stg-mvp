@@ -289,6 +289,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "conversations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_with_participants"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "conversations_seller_id_fkey"
             columns: ["seller_id"]
             isOneToOne: false
@@ -517,7 +524,6 @@ export type Database = {
           removed_at: string | null
           reserved_by: string | null
           reserved_until: string | null
-          seller_country: string | null
           seller_id: string
           shipping_local_pickup: boolean | null
           shipping_notes: string | null
@@ -562,7 +568,6 @@ export type Database = {
           removed_at?: string | null
           reserved_by?: string | null
           reserved_until?: string | null
-          seller_country?: string | null
           seller_id: string
           shipping_local_pickup?: boolean | null
           shipping_notes?: string | null
@@ -607,7 +612,6 @@ export type Database = {
           removed_at?: string | null
           reserved_by?: string | null
           reserved_until?: string | null
-          seller_country?: string | null
           seller_id?: string
           shipping_local_pickup?: boolean | null
           shipping_notes?: string | null
@@ -811,6 +815,45 @@ export type Database = {
           },
         ]
       }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          locale: string | null
+          source: string | null
+          subscribed_at: string
+          unsubscribe_token: string | null
+          unsubscribed_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          locale?: string | null
+          source?: string | null
+          subscribed_at?: string
+          unsubscribe_token?: string | null
+          unsubscribed_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          locale?: string | null
+          source?: string | null
+          subscribed_at?: string
+          unsubscribe_token?: string | null
+          unsubscribed_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -898,6 +941,13 @@ export type Database = {
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "order_issues_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_with_participants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       order_items: {
@@ -954,6 +1004,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_with_participants"
             referencedColumns: ["id"]
           },
         ]
@@ -1160,6 +1217,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payout_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_with_participants"
             referencedColumns: ["id"]
           },
         ]
@@ -1480,6 +1544,13 @@ export type Database = {
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "seller_reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders_with_participants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tracking_events: {
@@ -1524,7 +1595,71 @@ export type Database = {
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tracking_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_with_participants"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      user_feedback: {
+        Row: {
+          created_at: string | null
+          description: string
+          email: string | null
+          id: string
+          internal_notes: string | null
+          locale: string | null
+          page_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          screenshot_url: string | null
+          status: string | null
+          type: string
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+          viewport_size: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          email?: string | null
+          id?: string
+          internal_notes?: string | null
+          locale?: string | null
+          page_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_url?: string | null
+          status?: string | null
+          type: string
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          viewport_size?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          email?: string | null
+          id?: string
+          internal_notes?: string | null
+          locale?: string | null
+          page_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_url?: string | null
+          status?: string | null
+          type?: string
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          viewport_size?: string | null
+        }
+        Relationships: []
       }
       user_profiles: {
         Row: {
@@ -1600,125 +1735,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      user_feedback: {
-        Row: {
-          id: string
-          type: string
-          description: string
-          email: string | null
-          screenshot_url: string | null
-          page_url: string | null
-          user_id: string | null
-          user_agent: string | null
-          viewport_size: string | null
-          locale: string | null
-          status: string
-          internal_notes: string | null
-          reviewed_by: string | null
-          reviewed_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          type: string
-          description: string
-          email?: string | null
-          screenshot_url?: string | null
-          page_url?: string | null
-          user_id?: string | null
-          user_agent?: string | null
-          viewport_size?: string | null
-          locale?: string | null
-          status?: string
-          internal_notes?: string | null
-          reviewed_by?: string | null
-          reviewed_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          type?: string
-          description?: string
-          email?: string | null
-          screenshot_url?: string | null
-          page_url?: string | null
-          user_id?: string | null
-          user_agent?: string | null
-          viewport_size?: string | null
-          locale?: string | null
-          status?: string
-          internal_notes?: string | null
-          reviewed_by?: string | null
-          reviewed_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_feedback_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_feedback_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      newsletter_subscribers: {
-        Row: {
-          id: string
-          email: string
-          user_id: string | null
-          subscribed_at: string
-          unsubscribed_at: string | null
-          source: string
-          locale: string
-          unsubscribe_token: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          email: string
-          user_id?: string | null
-          subscribed_at?: string
-          unsubscribed_at?: string | null
-          source?: string
-          locale?: string
-          unsubscribe_token?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          email?: string
-          user_id?: string | null
-          subscribed_at?: string
-          unsubscribed_at?: string | null
-          source?: string
-          locale?: string
-          unsubscribe_token?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "newsletter_subscribers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       wanted_listing_responses: {
         Row: {
@@ -1923,6 +1939,18 @@ export type Database = {
       }
     }
     Views: {
+      admin_login_activity_summary: {
+        Row: {
+          countries: string[] | null
+          first_login: string | null
+          last_login: string | null
+          total_logins: number | null
+          unique_countries: number | null
+          unique_ips: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       listing_questions_with_author: {
         Row: {
           author_avatar: string | null
@@ -2063,6 +2091,118 @@ export type Database = {
           },
         ]
       }
+      notifications_with_context: {
+        Row: {
+          actor_id: string | null
+          auction_ends_at: string | null
+          bid_amount: number | null
+          body: string | null
+          created_at: string | null
+          game_name: string | null
+          id: string | null
+          listing_id: string | null
+          order_id: string | null
+          previous_bid: number | null
+          raw_data: Json | null
+          read_at: string | null
+          title: string | null
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          actor_id?: never
+          auction_ends_at?: never
+          bid_amount?: never
+          body?: string | null
+          created_at?: string | null
+          game_name?: never
+          id?: string | null
+          listing_id?: never
+          order_id?: never
+          previous_bid?: never
+          raw_data?: Json | null
+          read_at?: string | null
+          title?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          actor_id?: never
+          auction_ends_at?: never
+          bid_amount?: never
+          body?: string | null
+          created_at?: string | null
+          game_name?: never
+          id?: string | null
+          listing_id?: never
+          order_id?: never
+          previous_bid?: never
+          raw_data?: Json | null
+          read_at?: string | null
+          title?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      orders_with_participants: {
+        Row: {
+          barcode: string | null
+          buyer_avatar: string | null
+          buyer_country: string | null
+          buyer_id: string | null
+          buyer_name: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string | null
+          destination_country: string | null
+          destination_terminal_address: string | null
+          destination_terminal_id: string | null
+          destination_terminal_name: string | null
+          id: string | null
+          items_total: number | null
+          label_error: string | null
+          label_generated_at: string | null
+          label_url: string | null
+          locale: string | null
+          order_number: string | null
+          paid_at: string | null
+          parcel_size: string | null
+          payout_status: string | null
+          pickup_city: string | null
+          pickup_notes: string | null
+          receiver_email: string | null
+          receiver_name: string | null
+          receiver_phone: string | null
+          refund_amount: number | null
+          refunded_at: string | null
+          seller_avatar: string | null
+          seller_country: string | null
+          seller_decline_reason: string | null
+          seller_id: string | null
+          seller_name: string | null
+          seller_responded_at: string | null
+          seller_response_deadline: string | null
+          seller_status: string | null
+          seller_stripe_account: string | null
+          sender_country: string | null
+          service_fee: number | null
+          shipping_cost: number | null
+          shipping_method: string | null
+          status: string | null
+          stripe_payment_intent_id: string | null
+          stripe_transfer_amount: number | null
+          stripe_transfer_id: string | null
+          total_amount: number | null
+          tracking_url: string | null
+          transferred_to_seller_at: string | null
+          unisend_parcel_id: number | null
+          unisend_request_id: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
       public_profiles: {
         Row: {
           avatar_url: string | null
@@ -2183,6 +2323,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: true
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders_with_participants"
             referencedColumns: ["id"]
           },
         ]
@@ -2365,6 +2512,18 @@ export type Database = {
         }[]
       }
       get_seller_trust_summary: { Args: { p_seller_id: string }; Returns: Json }
+      get_suspicious_login_activity: {
+        Args: { p_days?: number; p_min_unique_ips?: number }
+        Returns: {
+          countries: string[]
+          email: string
+          last_login: string
+          total_logins: number
+          unique_countries: number
+          unique_ips: number
+          user_id: string
+        }[]
+      }
       get_unread_message_count: {
         Args: { user_uuid: string }
         Returns: {
@@ -2383,6 +2542,10 @@ export type Database = {
       is_user_blocked: {
         Args: { user1_uuid: string; user2_uuid: string }
         Returns: boolean
+      }
+      link_newsletter_to_user: {
+        Args: { p_email: string; p_user_id: string }
+        Returns: undefined
       }
       place_bid: {
         Args: {
@@ -2584,3 +2747,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

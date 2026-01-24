@@ -62,14 +62,14 @@ export default function DropdownPage() {
           description="Basic dropdown with action items."
         >
           <Dropdown>
-            <DropdownTrigger asChild>
+            <DropdownTrigger>
               <Button variant="secondary">Options</Button>
             </DropdownTrigger>
             <DropdownContent>
               <DropdownItem onClick={() => console.log('Edit')}>Edit</DropdownItem>
               <DropdownItem onClick={() => console.log('Duplicate')}>Duplicate</DropdownItem>
               <DropdownSeparator />
-              <DropdownItem onClick={() => console.log('Delete')} variant="danger">
+              <DropdownItem onClick={() => console.log('Delete')} destructive>
                 Delete
               </DropdownItem>
             </DropdownContent>
@@ -81,7 +81,7 @@ export default function DropdownPage() {
           description="Dropdown items with leading icons."
         >
           <Dropdown>
-            <DropdownTrigger asChild>
+            <DropdownTrigger>
               <Button>Actions</Button>
             </DropdownTrigger>
             <DropdownContent>
@@ -108,7 +108,7 @@ export default function DropdownPage() {
               </DropdownItem>
               <DropdownSeparator />
               <DropdownItem
-                variant="danger"
+                destructive
                 icon={
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                     <polyline points="3 6 5 6 21 6" />
@@ -132,7 +132,7 @@ export default function DropdownPage() {
           description="Add descriptions to explain each option."
         >
           <Dropdown>
-            <DropdownTrigger asChild>
+            <DropdownTrigger>
               <Button>Listing Status</Button>
             </DropdownTrigger>
             <DropdownContent className="w-64">
@@ -159,7 +159,7 @@ export default function DropdownPage() {
           description="Organize items into logical sections."
         >
           <Dropdown>
-            <DropdownTrigger asChild>
+            <DropdownTrigger>
               <Button variant="secondary">User Menu</Button>
             </DropdownTrigger>
             <DropdownContent className="w-56">
@@ -176,7 +176,7 @@ export default function DropdownPage() {
                 <DropdownItem>Notifications</DropdownItem>
               </DropdownGroup>
               <DropdownSeparator />
-              <DropdownItem variant="danger">Sign Out</DropdownItem>
+              <DropdownItem destructive>Sign Out</DropdownItem>
             </DropdownContent>
           </Dropdown>
         </ComponentDemo>
@@ -191,7 +191,7 @@ export default function DropdownPage() {
           description="Use DropdownLink for navigation items."
         >
           <Dropdown>
-            <DropdownTrigger asChild>
+            <DropdownTrigger>
               <Button>Navigation</Button>
             </DropdownTrigger>
             <DropdownContent>
@@ -199,7 +199,7 @@ export default function DropdownPage() {
               <DropdownLink href="/sell">Sell a Game</DropdownLink>
               <DropdownLink href="/wanted">Wanted Games</DropdownLink>
               <DropdownSeparator />
-              <DropdownLink href="/help" external>
+              <DropdownLink href="/help" target="_blank" rel="noopener noreferrer">
                 Help Center
               </DropdownLink>
             </DropdownContent>
@@ -217,7 +217,7 @@ export default function DropdownPage() {
         >
           <div className="flex gap-4 flex-wrap">
             <Dropdown>
-              <DropdownTrigger asChild>
+              <DropdownTrigger>
                 <Button variant="secondary">Align Start</Button>
               </DropdownTrigger>
               <DropdownContent align="start">
@@ -227,7 +227,7 @@ export default function DropdownPage() {
             </Dropdown>
 
             <Dropdown>
-              <DropdownTrigger asChild>
+              <DropdownTrigger>
                 <Button variant="secondary">Align Center</Button>
               </DropdownTrigger>
               <DropdownContent align="center">
@@ -237,7 +237,7 @@ export default function DropdownPage() {
             </Dropdown>
 
             <Dropdown>
-              <DropdownTrigger asChild>
+              <DropdownTrigger>
                 <Button variant="secondary">Align End</Button>
               </DropdownTrigger>
               <DropdownContent align="end">
@@ -269,14 +269,14 @@ export default function DropdownPage() {
 
 // Basic dropdown
 <Dropdown>
-  <DropdownTrigger asChild>
+  <DropdownTrigger>
     <Button>Options</Button>
   </DropdownTrigger>
   <DropdownContent>
     <DropdownItem onClick={handleEdit}>Edit</DropdownItem>
     <DropdownItem onClick={handleShare}>Share</DropdownItem>
     <DropdownSeparator />
-    <DropdownItem onClick={handleDelete} variant="danger">
+    <DropdownItem onClick={handleDelete} destructive>
       Delete
     </DropdownItem>
   </DropdownContent>
@@ -284,7 +284,7 @@ export default function DropdownPage() {
 
 // With icons and descriptions
 <Dropdown>
-  <DropdownTrigger asChild>
+  <DropdownTrigger>
     <Button>Actions</Button>
   </DropdownTrigger>
   <DropdownContent className="w-64">
@@ -305,7 +305,7 @@ export default function DropdownPage() {
 
 // Grouped menu
 <Dropdown>
-  <DropdownTrigger asChild>
+  <DropdownTrigger>
     <Avatar name="User" />
   </DropdownTrigger>
   <DropdownContent align="end">
@@ -315,7 +315,7 @@ export default function DropdownPage() {
       <DropdownLink href="/settings">Settings</DropdownLink>
     </DropdownGroup>
     <DropdownSeparator />
-    <DropdownItem variant="danger">Sign Out</DropdownItem>
+    <DropdownItem destructive>Sign Out</DropdownItem>
   </DropdownContent>
 </Dropdown>`}</code>
           </pre>

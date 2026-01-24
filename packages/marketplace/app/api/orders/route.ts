@@ -14,9 +14,10 @@ export async function GET(_request: NextRequest) {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;
 
-    // Fetch buyer's orders
+    // Fetch buyer's orders with pre-joined seller data
+    // Uses orders_with_participants view to eliminate N+1 query for seller names
     const { data: orders, error: ordersError } = await supabase
-      .from('orders')
+      .from('orders_with_participants')
       .select(`
         *,
         order_items (
@@ -38,16 +39,8 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    // Fetch seller names
-    const sellerIds = [...new Set(orders.map(o => o.seller_id))];
-    const { data: sellers } = await supabase
-      .from('user_profiles')
-      .select('id, full_name')
-      .in('id', sellerIds);
-
-    const sellerMap = new Map(sellers?.map(s => [s.id, s.full_name]) || []);
-
-    // Enrich orders with seller names and calculate time remaining
+    // Enrich orders with calculated time remaining
+    // Note: seller_name now comes from the view, no separate query needed
     const enrichedOrders = orders.map(order => {
       const timeRemaining =
         order.status === 'pending_seller' && order.seller_response_deadline
@@ -56,7 +49,9 @@ export async function GET(_request: NextRequest) {
 
       return {
         ...order,
-        seller_name: sellerMap.get(order.seller_id) || 'Unknown Seller',
+        // seller_name, seller_avatar, seller_country already in view
+        // Fall back to 'Unknown Seller' if null (shouldn't happen)
+        seller_name: order.seller_name || 'Unknown Seller',
         time_remaining_ms: timeRemaining,
         is_expired: timeRemaining !== null && timeRemaining <= 0,
       };
