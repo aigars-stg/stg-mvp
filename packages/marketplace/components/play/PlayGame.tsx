@@ -10,7 +10,9 @@ import { GameResult } from './GameResult';
 import { TurniReaction } from './TurniReaction';
 import { getTurniWinKey, getTurniStreakKey } from '@/lib/play/turni-copy';
 import { formatDate } from '@/lib/date-utils';
-import { ChevronDown, ChevronUp, Calendar, Users, Scale, Time as Clock, ChevronRight } from 'griddy-icons';
+import { ChevronDown, ChevronUp, Calendar, Users, Scale, Time as Clock, ChevronRight, Plus } from 'griddy-icons';
+import { Button } from '@second-turn/design-system';
+import { useAuth } from '@/lib/auth/AuthContext';
 import {
   loadPlayState,
   savePlayState,
@@ -205,6 +207,7 @@ interface RevealCardProps {
 }
 
 function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
+  const t = useTranslations('Play');
   const tPrice = useTranslations('OfferCard.price');
   const tTurni = useTranslations('Play.turni');
   const hasListings = lowestPrice !== null;
@@ -320,6 +323,21 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
           </div>
         )}
       </div>
+
+      {/* When no listings: Show Sell CTA */}
+      {!hasListings && (
+        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+            {t('noListingsYet')}
+          </p>
+          <Link href={`/sell?q=${encodeURIComponent(answer.name)}`}>
+            <Button variant="accent" size="sm" className="w-full">
+              <Plus className="w-4 h-4 mr-1.5" />
+              {t('sellThisGame')}
+            </Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 
@@ -336,6 +354,7 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
 
 export function PlayGame() {
   const t = useTranslations('Play');
+  const { user } = useAuth();
 
   // State
   const [playState, setPlayState] = useState<PlayState | null>(null);
@@ -458,6 +477,24 @@ export function PlayGame() {
             }
           }
 
+          // Track completion for analytics (fire-and-forget)
+          const gameStatus = result.correct ? 'won' : 'lost';
+          const guessCount = newState.puzzles[puzzleNumber]?.guesses.length || 0;
+          fetch('/api/play/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              puzzleNumber,
+              visitorId: newState.visitorId,
+              status: gameStatus,
+              guessCount,
+              completedAt: new Date().toISOString(),
+              userId: user?.id || null,
+            }),
+          }).catch(() => {
+            // Silently ignore tracking errors
+          });
+
           // Collapse guesses after a short delay
           setTimeout(() => {
             setGuessesCollapsed(true);
@@ -470,7 +507,7 @@ export function PlayGame() {
         setIsSubmitting(false);
       }
     },
-    [playState, puzzleNumber, isSubmitting, isGameOver, t]
+    [playState, puzzleNumber, isSubmitting, isGameOver, t, user]
   );
 
   // Toggle guesses collapsed state
@@ -522,7 +559,7 @@ export function PlayGame() {
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-6">
         {/* Left Column - Help (hidden on mobile, shown at bottom) */}
         <aside className="hidden lg:block">
-          <div className="sticky top-6">
+          <div className="sticky top-20">
             <HelpPanel />
           </div>
         </aside>
@@ -541,9 +578,9 @@ export function PlayGame() {
             )}
           </div>
 
-          {/* Guess Input - Sticky while playing */}
+          {/* Guess Input - Sticky while playing (top-14/16 accounts for navbar height) */}
           {!isGameOver && (
-            <div className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900 py-4 -mx-4 px-4 mb-2">
+            <div className="sticky top-14 sm:top-16 z-10 bg-gray-50 dark:bg-gray-900 py-4 -mx-4 px-4 mb-2">
               <GuessInput
                 onSelect={handleGuess}
                 disabled={isSubmitting}
@@ -615,7 +652,7 @@ export function PlayGame() {
 
         {/* Right Column - Stats */}
         <aside className="hidden lg:block">
-          <div className="sticky top-6">
+          <div className="sticky top-20">
             {playState && <StatsPanel stats={playState.stats} />}
           </div>
         </aside>

@@ -1,9 +1,5 @@
 export { PlayGame } from './PlayGame';
 export { GuessInput } from './GuessInput';
-export { FeedbackGrid } from './FeedbackGrid';
-export { FeedbackCell } from './FeedbackCell';
 export { GuessCard } from './GuessCard';
-export { GameReveal } from './GameReveal';
 export { GameResult } from './GameResult';
-export { StatsModal } from './StatsModal';
-export { HelpModal } from './HelpModal';
+export { TurniReaction } from './TurniReaction';

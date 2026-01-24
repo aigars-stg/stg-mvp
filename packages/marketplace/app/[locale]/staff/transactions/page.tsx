@@ -172,7 +172,7 @@ function StaffTransactionsContent() {
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
 
   // Bookkeeping state
-  const [viewMode, setViewMode] = useState<'operations' | 'bookkeeping' | 'dac7' | 'feedback'>('operations');
+  const [viewMode, setViewMode] = useState<'operations' | 'bookkeeping' | 'dac7' | 'feedback' | 'play'>('operations');
   const [dateRange, setDateRange] = useState('this_month');
 
   // DAC7 state
@@ -186,6 +186,34 @@ function StaffTransactionsContent() {
   const [feedbackStatusFilter, setFeedbackStatusFilter] = useState('all');
   const [feedbackTypeFilter, setFeedbackTypeFilter] = useState('all');
   const [feedbackCurrentPage, setFeedbackCurrentPage] = useState(1);
+
+  // Play analytics state
+  const [playAnalytics, setPlayAnalytics] = useState<{
+    summary: {
+      playsToday: number;
+      playsThisWeek: number;
+      playsThisMonth: number;
+      winRate: number;
+      avgGuesses: number;
+      uniqueVisitorsToday: number;
+      uniqueVisitorsWeek: number;
+      uniqueVisitorsMonth: number;
+    };
+    dailyTrends: Array<{
+      date: string;
+      plays: number;
+      wins: number;
+      uniquePlayers: number;
+    }>;
+    puzzleStats: Array<{
+      puzzleNumber: number;
+      gameName: string;
+      plays: number;
+      wins: number;
+      winRate: number;
+      avgGuesses: number;
+    }>;
+  } | null>(null);
 
   // Calculate bookkeeping summary from loaded data
   const bookkeepingSummary = useMemo<BookkeepingSummary | null>(() => {
@@ -361,12 +389,42 @@ function StaffTransactionsContent() {
     }
   }, [feedbackStatusFilter, feedbackTypeFilter, feedbackCurrentPage]);
 
+  // Fetch play analytics
+  const fetchPlayAnalytics = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/staff/play-analytics');
+      const result = await response.json();
+
+      if (response.status === 403) {
+        setIsStaff(false);
+        setError('Staff access required');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch play analytics');
+      }
+
+      setIsStaff(true);
+      setPlayAnalytics(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load play analytics');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (user) {
       if (viewMode === 'dac7') {
         fetchDac7Sellers();
       } else if (viewMode === 'feedback') {
         fetchFeedback();
+      } else if (viewMode === 'play') {
+        fetchPlayAnalytics();
       } else {
         fetchTransactions();
       }
@@ -507,6 +565,16 @@ function StaffTransactionsContent() {
                     {feedbackData.data.filter(f => f.status === 'new').length}
                   </span>
                 ) : null}
+              </button>
+              <button
+                onClick={() => setViewMode('play')}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  viewMode === 'play'
+                    ? 'bg-frost-ice text-white'
+                    : 'text-frost-ice hover:bg-frost-ice/20'
+                }`}
+              >
+                Play
               </button>
             </div>
           </div>
@@ -1241,8 +1309,175 @@ function StaffTransactionsContent() {
           </div>
         )}
 
+        {/* Play Analytics Tab Content */}
+        {viewMode === 'play' && (
+          <div className="space-y-6">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+                <p className="text-sm text-text-secondary mb-1">Players Today</p>
+                <p className="text-2xl font-bold text-polar-night dark:text-snow-white">
+                  {playAnalytics?.summary.uniqueVisitorsToday || 0}
+                </p>
+              </div>
+              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+                <p className="text-sm text-text-secondary mb-1">Plays Today</p>
+                <p className="text-2xl font-bold text-polar-night dark:text-snow-white">
+                  {playAnalytics?.summary.playsToday || 0}
+                </p>
+              </div>
+              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+                <p className="text-sm text-text-secondary mb-1">Win Rate</p>
+                <p className="text-2xl font-bold text-polar-night dark:text-snow-white">
+                  {playAnalytics?.summary.winRate || 0}%
+                </p>
+              </div>
+              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+                <p className="text-sm text-text-secondary mb-1">Avg Guesses</p>
+                <p className="text-2xl font-bold text-polar-night dark:text-snow-white">
+                  {playAnalytics?.summary.avgGuesses || 0}
+                </p>
+              </div>
+            </div>
+
+            {/* Extended Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+                <p className="text-sm text-text-secondary mb-2">This Week</p>
+                <div className="flex justify-between">
+                  <span className="text-sm text-text-secondary">Players</span>
+                  <span className="font-medium text-polar-night dark:text-snow-white">
+                    {playAnalytics?.summary.uniqueVisitorsWeek || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-text-secondary">Plays</span>
+                  <span className="font-medium text-polar-night dark:text-snow-white">
+                    {playAnalytics?.summary.playsThisWeek || 0}
+                  </span>
+                </div>
+              </div>
+              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+                <p className="text-sm text-text-secondary mb-2">This Month</p>
+                <div className="flex justify-between">
+                  <span className="text-sm text-text-secondary">Players</span>
+                  <span className="font-medium text-polar-night dark:text-snow-white">
+                    {playAnalytics?.summary.uniqueVisitorsMonth || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-text-secondary">Plays</span>
+                  <span className="font-medium text-polar-night dark:text-snow-white">
+                    {playAnalytics?.summary.playsThisMonth || 0}
+                  </span>
+                </div>
+              </div>
+              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+                <p className="text-sm text-text-secondary mb-2">Overall</p>
+                <div className="flex justify-between">
+                  <span className="text-sm text-text-secondary">Total Puzzles</span>
+                  <span className="font-medium text-polar-night dark:text-snow-white">
+                    {playAnalytics?.puzzleStats.length || 0}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Daily Trends */}
+            {playAnalytics?.dailyTrends && playAnalytics.dailyTrends.length > 0 && (
+              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-polar-night dark:text-snow-white mb-4">
+                  Daily Activity (Last 30 Days)
+                </h3>
+                <div className="h-32 flex items-end gap-1">
+                  {playAnalytics.dailyTrends.map((day, i) => {
+                    const maxPlays = Math.max(...playAnalytics.dailyTrends.map(d => d.plays), 1);
+                    const height = (day.plays / maxPlays) * 100;
+                    return (
+                      <div
+                        key={day.date}
+                        className="flex-1 bg-frost-ice/60 hover:bg-frost-ice rounded-t transition-colors cursor-default group relative"
+                        style={{ height: `${Math.max(height, 4)}%` }}
+                        title={`${day.date}: ${day.plays} plays, ${day.wins} wins`}
+                      >
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-polar-night text-snow-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
+                          {day.date.slice(5)}: {day.plays} plays
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Puzzle Performance Table */}
+            {playAnalytics?.puzzleStats && playAnalytics.puzzleStats.length > 0 && (
+              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
+                <h3 className="text-sm font-semibold text-polar-night dark:text-snow-white p-4 border-b border-divider-subtle">
+                  Puzzle Performance
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-background-secondary border-b border-divider-subtle">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          #
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Game
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Plays
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Win Rate
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Avg Guesses
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-divider-subtle">
+                      {playAnalytics.puzzleStats.map((puzzle) => (
+                        <tr key={puzzle.puzzleNumber} className="hover:bg-frost-ice/5 transition-colors">
+                          <td className="px-4 py-3 text-sm font-medium text-polar-night dark:text-snow-white">
+                            {puzzle.puzzleNumber}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white">
+                            {puzzle.gameName}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right text-polar-night dark:text-snow-white">
+                            {puzzle.plays}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right text-polar-night dark:text-snow-white">
+                            {puzzle.winRate}%
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right text-polar-night dark:text-snow-white">
+                            {puzzle.avgGuesses || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {(!playAnalytics || playAnalytics.summary.playsThisMonth === 0) && (
+              <div className="text-center py-12">
+                <TrendUp className="w-12 h-12 text-text-muted mx-auto mb-4" />
+                <p className="text-text-secondary">No play data yet</p>
+                <p className="text-sm text-text-muted mt-1">
+                  Data will appear once users start playing Galda Spēle
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Pagination for Operations/Bookkeeping */}
-        {viewMode !== 'dac7' && viewMode !== 'feedback' && data && data.pagination.total_pages > 1 && (
+        {viewMode !== 'dac7' && viewMode !== 'feedback' && viewMode !== 'play' && data && data.pagination.total_pages > 1 && (
           <div className="flex items-center justify-between mt-4">
             <p className="text-sm text-text-secondary">
               Showing {((data.pagination.page - 1) * data.pagination.limit) + 1} to{' '}

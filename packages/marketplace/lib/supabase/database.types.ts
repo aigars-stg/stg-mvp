@@ -467,6 +467,47 @@ export type Database = {
           },
         ]
       }
+      play_completions: {
+        Row: {
+          id: string
+          puzzle_number: number
+          visitor_id: string
+          user_id: string | null
+          status: string
+          guess_count: number
+          completed_at: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          puzzle_number: number
+          visitor_id: string
+          user_id?: string | null
+          status: string
+          guess_count: number
+          completed_at: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          puzzle_number?: number
+          visitor_id?: string
+          user_id?: string | null
+          status?: string
+          guess_count?: number
+          completed_at?: string
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "play_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_questions: {
         Row: {
           content: string
