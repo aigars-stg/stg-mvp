@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPuzzleNumber, getTargetGameInfo } from '@/lib/play/puzzle-service';
 
+// Force dynamic rendering since we use searchParams
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/play/reveal?puzzle=123
  *
