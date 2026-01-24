@@ -2810,5 +2810,113 @@
     "unsubscribeErrorTitle": "Something went wrong",
     "unsubscribeErrorMessage": "We couldn't process your unsubscribe request. Please try again or contact us.",
     "backToHome": "Back to home"
+  },
+  "Play": {
+    "title": "Galda Spēle",
+    "subtitle": "Guess the daily board game",
+    "guessPlaceholder": "Search for a board game...",
+    "guessButton": "Guess",
+    "guessesRemaining": "{count, plural, =1 {1 guess remaining} other {# guesses remaining}}",
+    "noResults": "No games found",
+    "players": "players",
+    "guessNumber": "Guess #{number}",
+    "yourGuesses": "{count, plural, =1 {Your guess (1)} other {Your guesses (#)}}",
+    "tapToDismiss": "Tap anywhere to continue",
+
+    "youWon": "You got it in {count}",
+    "youLost": "Better luck tomorrow",
+    "comeBackTomorrow": "Come back tomorrow for a new puzzle",
+
+    "shareResults": "Share results",
+    "copiedToClipboard": "Copied to clipboard",
+    "shared": "Shared",
+    "shareFailed": "Share failed",
+    "availableOnSTG": "Available on Second Turn Games",
+
+    "helpButton": "How to play",
+    "statsButton": "Statistics",
+
+    "statPlayed": "Played",
+    "statWinRate": "Win %",
+    "statCurrentStreak": "Streak",
+    "statMaxStreak": "Best",
+    "statsTitle": "Statistics",
+    "averageGuesses": "Average guesses",
+    "guessDistribution": "Guess distribution",
+
+    "columnGame": "Game",
+    "columnYear": "Year",
+    "columnPlayers": "Max Players",
+    "columnWeight": "Complexity",
+    "columnTime": "Play Time",
+    "columnCategory": "Categories",
+    "columnMechanic": "Mechanics",
+
+    "feedbackCorrect": "Correct",
+    "feedbackClose": "Close",
+    "feedbackHigher": "Target is higher",
+    "feedbackLower": "Target is lower",
+    "feedbackPartial": "Partial match",
+    "feedbackNone": "No match",
+    "matched": "Matched",
+    "guessed": "Your guess",
+
+    "errors": {
+      "loadFailed": "Failed to load puzzle",
+      "submitFailed": "Failed to submit guess",
+      "alreadyGuessed": "You already guessed this game"
+    },
+
+    "turni": {
+      "helpIntro": "Guess the mystery board game in 6 tries. I'll give you hints after each guess.",
+      "win": {
+        "1": "Wow, first try. Are you a mind reader?",
+        "2": "Two guesses. You really know your games.",
+        "3": "Nice work. That was a tricky one.",
+        "4": "Got it. Solid detective work.",
+        "5": "Phew, you figured it out.",
+        "6": "Just in time. That was close."
+      },
+      "loss": {
+        "reveal": "Tough one. The answer was...",
+        "encourage": "Tomorrow's another game."
+      },
+      "streak": {
+        "3": "Three in a row. You're on a roll.",
+        "7": "A whole week. Impressive dedication.",
+        "14": "Two weeks strong.",
+        "30": "A month of daily games. Legend."
+      }
+    },
+
+    "help": {
+      "title": "How to play",
+      "description": "Guess the mystery board game in 6 tries. Each guess reveals clues about how close you are.",
+      "howToPlay": "Rules",
+      "rule1": "Each day there's a new mystery board game to guess",
+      "rule2": "Type a game name and select it to make a guess",
+      "rule3": "Use the feedback from each guess to narrow down the answer",
+
+      "feedbackLegend": "Feedback guide",
+      "legendCorrect": "Exact match or very close",
+      "legendClose": "Close (within range) or partial overlap",
+      "legendHigher": "The target value is higher",
+      "legendLower": "The target value is lower",
+      "legendNone": "No match or overlap",
+
+      "attributesTitle": "Attributes compared",
+      "attrYear": "Year",
+      "attrYearDesc": "When the game was first published",
+      "attrPlayers": "Max Players",
+      "attrPlayersDesc": "Maximum player count supported",
+      "attrWeight": "Complexity",
+      "attrWeightDesc": "BGG complexity rating (Light to Very Heavy)",
+      "attrTime": "Play Time",
+      "attrTimeDesc": "Average playing time in minutes",
+      "attrCategory": "Categories",
+      "attrCategoryDesc": "BGG categories (Strategy, Family, etc.)",
+      "attrMechanic": "Mechanics",
+      "attrMechanicDesc": "Game mechanisms (Worker Placement, etc.)"
+    }
   }
 }

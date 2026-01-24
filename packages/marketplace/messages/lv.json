@@ -2810,5 +2810,113 @@
     "unsubscribeErrorTitle": "Kaut kas nogāja greizi",
     "unsubscribeErrorMessage": "Neizdevās apstrādāt tavu pieprasījumu. Lūdzu, mēģini vēlreiz vai sazinies ar mums.",
     "backToHome": "Atpakaļ uz sākumu"
+  },
+  "Play": {
+    "title": "Galda Spēle",
+    "subtitle": "Uzmini dienas galda spēli",
+    "guessPlaceholder": "Meklē galda spēli...",
+    "guessButton": "Minēt",
+    "guessesRemaining": "{count, plural, =1 {1 minējums atlicis} other {# minējumi atlikuši}}",
+    "noResults": "Spēles nav atrastas",
+    "players": "spēlētāji",
+    "guessNumber": "Minējums #{number}",
+    "yourGuesses": "{count, plural, =1 {Tavs minējums (1)} other {Tavi minējumi (#)}}",
+    "tapToDismiss": "Pieskaries, lai turpinātu",
+
+    "youWon": "Tu uzminēji ar {count}. mēģinājumu",
+    "youLost": "Vairāk veiksmes rīt",
+    "comeBackTomorrow": "Atgriezies rīt jaunai mīklai",
+
+    "shareResults": "Dalīties ar rezultātiem",
+    "copiedToClipboard": "Nokopēts starpliktuvē",
+    "shared": "Kopīgots",
+    "shareFailed": "Kopīgošana neizdevās",
+    "availableOnSTG": "Pieejama Second Turn Games",
+
+    "helpButton": "Kā spēlēt",
+    "statsButton": "Statistika",
+
+    "statPlayed": "Spēlēts",
+    "statWinRate": "Uzvaras %",
+    "statCurrentStreak": "Sērija",
+    "statMaxStreak": "Labākā",
+    "statsTitle": "Statistika",
+    "averageGuesses": "Vidējie minējumi",
+    "guessDistribution": "Minējumu sadalījums",
+
+    "columnGame": "Spēle",
+    "columnYear": "Gads",
+    "columnPlayers": "Maks. spēlētāji",
+    "columnWeight": "Sarežģītība",
+    "columnTime": "Spēles laiks",
+    "columnCategory": "Kategorijas",
+    "columnMechanic": "Mehānikas",
+
+    "feedbackCorrect": "Pareizi",
+    "feedbackClose": "Tuvu",
+    "feedbackHigher": "Mērķis ir augstāks",
+    "feedbackLower": "Mērķis ir zemāks",
+    "feedbackPartial": "Daļēja sakritība",
+    "feedbackNone": "Nav sakritības",
+    "matched": "Sakrīt",
+    "guessed": "Tavs minējums",
+
+    "errors": {
+      "loadFailed": "Neizdevās ielādēt mīklu",
+      "submitFailed": "Neizdevās iesniegt minējumu",
+      "alreadyGuessed": "Tu jau minēji šo spēli"
+    },
+
+    "turni": {
+      "helpIntro": "Uzmini noslēpumaino galda spēli 6 mēģinājumos. Es došu norādes pēc katra minējuma.",
+      "win": {
+        "1": "Oho, pirmajā reizē. Vai tu lasi domas?",
+        "2": "Divos minējumos. Tu tiešām pazīsti spēles.",
+        "3": "Labi pastrādāts. Tā bija sarežģīta.",
+        "4": "Dabūji. Laba detektīvdarba.",
+        "5": "Fūūū, tu to atrisināji.",
+        "6": "Tieši laikā. Tas bija tuvu."
+      },
+      "loss": {
+        "reveal": "Grūta bija. Atbilde bija...",
+        "encourage": "Rīt būs jauna spēle."
+      },
+      "streak": {
+        "3": "Trīs pēc kārtas. Tev iet labi.",
+        "7": "Vesela nedēļa. Iespaidīga neatlaidība.",
+        "14": "Divas nedēļas spēkā.",
+        "30": "Mēnesis ikdienas spēļu. Leģenda."
+      }
+    },
+
+    "help": {
+      "title": "Kā spēlēt",
+      "description": "Uzmini noslēpumaino galda spēli 6 mēģinājumos. Katrs minējums atklāj norādes, cik tuvu esi.",
+      "howToPlay": "Noteikumi",
+      "rule1": "Katru dienu ir jauna noslēpumaina galda spēle",
+      "rule2": "Ieraksti spēles nosaukumu un izvēlies to, lai minētu",
+      "rule3": "Izmanto atgriezenisko saiti, lai sašaurinātu meklēšanu",
+
+      "feedbackLegend": "Atgriezeniskās saites ceļvedis",
+      "legendCorrect": "Precīza sakritība vai ļoti tuvu",
+      "legendClose": "Tuvu (diapazonā) vai daļēja pārklāšanās",
+      "legendHigher": "Mērķa vērtība ir augstāka",
+      "legendLower": "Mērķa vērtība ir zemāka",
+      "legendNone": "Nav sakritības vai pārklāšanās",
+
+      "attributesTitle": "Salīdzinātie atribūti",
+      "attrYear": "Gads",
+      "attrYearDesc": "Kad spēle pirmo reizi tika izdota",
+      "attrPlayers": "Maks. spēlētāji",
+      "attrPlayersDesc": "Maksimālais atbalstītais spēlētāju skaits",
+      "attrWeight": "Sarežģītība",
+      "attrWeightDesc": "BGG sarežģītības vērtējums (Viegla līdz Ļoti smaga)",
+      "attrTime": "Spēles laiks",
+      "attrTimeDesc": "Vidējais spēles ilgums minūtēs",
+      "attrCategory": "Kategorijas",
+      "attrCategoryDesc": "BGG kategorijas (Stratēģija, Ģimenes, utt.)",
+      "attrMechanic": "Mehānikas",
+      "attrMechanicDesc": "Spēles mehānikas (Worker Placement, utt.)"
+    }
   }
 }
