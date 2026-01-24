@@ -429,6 +429,44 @@ export type Database = {
         }
         Relationships: []
       }
+      play_daily_puzzles: {
+        Row: {
+          id: string
+          puzzle_number: number
+          game_id: number
+          bgg_weight: number | null
+          bgg_categories: string[] | null
+          bgg_mechanics: string[] | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          puzzle_number: number
+          game_id: number
+          bgg_weight?: number | null
+          bgg_categories?: string[] | null
+          bgg_mechanics?: string[] | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          puzzle_number?: number
+          game_id?: number
+          bgg_weight?: number | null
+          bgg_categories?: string[] | null
+          bgg_mechanics?: string[] | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "play_daily_puzzles_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_questions: {
         Row: {
           content: string
