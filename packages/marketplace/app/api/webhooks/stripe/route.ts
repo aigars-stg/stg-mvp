@@ -53,6 +53,40 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    // ========================================================================
+    // IDEMPOTENCY CHECK
+    // Prevent duplicate processing of webhook events (PRD Section 8.7)
+    // ========================================================================
+    const { data: existingEvent } = await supabase
+      .from('stripe_webhook_events')
+      .select('id')
+      .eq('id', event.id)
+      .single();
+
+    if (existingEvent) {
+      console.log(`⏭️ [Webhook] Duplicate event skipped: ${event.id}`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
+    // Record event before processing (prevents race conditions)
+    const { error: insertError } = await supabase
+      .from('stripe_webhook_events')
+      .insert({
+        id: event.id,
+        type: event.type,
+        source: 'platform',
+        payload: event.data.object as unknown as Record<string, unknown>,
+      });
+
+    if (insertError) {
+      // If insert fails due to duplicate key, another request is processing this event
+      if (insertError.code === '23505') {
+        console.log(`⏭️ [Webhook] Event being processed by another request: ${event.id}`);
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+      console.error('⚠️ [Webhook] Failed to record event (continuing anyway):', insertError);
+    }
+
     console.log(`📨 [Webhook] Received event: ${event.type}`);
 
     // Handle checkout.session.completed event
@@ -112,6 +146,20 @@ export async function POST(request: NextRequest) {
           ? session.payment_intent
           : session.payment_intent?.id;
 
+      // Retrieve the PaymentIntent to get the charge ID for source_transaction
+      // This is needed for the payout service to link transfers to the original charge
+      let stripeChargeId: string | null = null;
+      if (paymentIntentId) {
+        try {
+          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+          stripeChargeId = paymentIntent.latest_charge as string | null;
+          console.log(`💳 [Webhook] Charge ID: ${stripeChargeId}`);
+        } catch (err) {
+          console.error('⚠️ [Webhook] Failed to retrieve PaymentIntent for charge ID:', err);
+          // Continue without charge ID - payout service will work but less optimally
+        }
+      }
+
       // Convert cents to euros
       const shippingCost = parseInt(shipping_cost_cents) / 100;
       const serviceFee = parseInt(service_fee_cents) / 100;
@@ -123,6 +171,7 @@ export async function POST(request: NextRequest) {
         p_shipping_cost: shippingCost,
         p_service_fee: serviceFee,
         p_stripe_payment_intent_id: paymentIntentId,
+        p_stripe_charge_id: stripeChargeId,
       };
 
       // Add T2T-specific parameters
@@ -172,6 +221,17 @@ export async function POST(request: NextRequest) {
         `✅ [Webhook] Order created successfully: ${orderResult.order_number} (${orderResult.order_id})`
       );
       console.log(`💰 [Webhook] Total amount: €${orderResult.total_amount}`);
+
+      // Store stripe_checkout_session_id for audit trail (PRD §6.1)
+      const { error: sessionIdError } = await supabase
+        .from('orders')
+        .update({ stripe_checkout_session_id: session.id })
+        .eq('id', orderResult.order_id);
+
+      if (sessionIdError) {
+        console.error('⚠️ [Webhook] Failed to store checkout session ID:', sessionIdError);
+        // Non-blocking - order was created successfully
+      }
 
       // Post system message to transaction conversation (non-blocking)
       postOrderCreatedMessage(orderResult.order_id);
@@ -302,6 +362,68 @@ export async function POST(request: NextRequest) {
       console.error('Reason:', dispute.reason);
       // TODO: Implement admin notification system
       return NextResponse.json({ received: true, alert: 'Admin notified' });
+    }
+
+    // Handle expired checkout sessions (PRD §8.5)
+    if (event.type === 'checkout.session.expired') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      console.log(`⏰ [Webhook] Checkout session expired: ${session.id}`);
+
+      const basketId = session.metadata?.basket_id;
+      if (basketId) {
+        // Release any basket reservations - the listing will naturally become available again
+        console.log(`🔓 [Webhook] Basket ${basketId} checkout expired, items will be released`);
+      }
+      return NextResponse.json({ received: true });
+    }
+
+    // Handle transfer created (funds moved to seller's Stripe balance)
+    if (event.type === 'transfer.created') {
+      const transfer = event.data.object as Stripe.Transfer;
+      console.log(`💸 [Webhook] Transfer created: ${transfer.id}`);
+
+      const orderId = transfer.metadata?.order_id;
+      if (orderId) {
+        const { error } = await supabase
+          .from('orders')
+          .update({
+            payout_status: 'transferred',
+            stripe_transfer_id: transfer.id,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId);
+
+        if (error) {
+          console.error('❌ [Webhook] Failed to update order transfer status:', error);
+        } else {
+          console.log(`✅ [Webhook] Order ${orderId} marked as transferred`);
+        }
+      }
+      return NextResponse.json({ received: true });
+    }
+
+    // Handle transfer reversed (refund after transfer to seller)
+    if (event.type === 'transfer.reversed') {
+      const transfer = event.data.object as Stripe.Transfer;
+      console.log(`↩️ [Webhook] Transfer reversed: ${transfer.id}`);
+
+      const orderId = transfer.metadata?.order_id;
+      if (orderId) {
+        const { error } = await supabase
+          .from('orders')
+          .update({
+            payout_status: 'reversed',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId);
+
+        if (error) {
+          console.error('❌ [Webhook] Failed to update order reversal status:', error);
+        } else {
+          console.log(`✅ [Webhook] Order ${orderId} marked as reversed`);
+        }
+      }
+      return NextResponse.json({ received: true });
     }
 
     // Handle other event types if needed

@@ -43,6 +43,7 @@ export interface OrderData {
   items_total: number;
   shipping_cost: number;
   service_fee: number;
+  refund_amount?: number | null;
   destination: ShippingDestination;
   tracking: TrackingData;
   timestamps: {
@@ -53,6 +54,7 @@ export interface OrderData {
     label_generated_at?: string;
     cancelled_at?: string;
     refunded_at?: string;
+    disputed_at?: string;
   };
 }
 

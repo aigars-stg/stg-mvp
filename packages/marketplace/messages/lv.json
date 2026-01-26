@@ -2092,10 +2092,20 @@
       "description": "Tava nākamā mīļākā spēle gaida — mēs to paturēsim šeit, kad atradīsi.",
       "browseButton": "Pārlūkot spēles"
     },
+    "item": {
+      "remove": "Noņemt no groza",
+      "delete": "Dzēst"
+    },
+    "review": "atsauksme",
+    "reviews": "atsauksmes",
     "basket": {
       "number": "Grozs {index}/{total}",
       "items": "{count, plural, one {# prece} other {# preces}}",
       "subtotal": "Starpsumma",
+      "subtotalItems": "Starpsumma ({count, plural, one {# prece} other {# preces}})",
+      "shipping": "Piegāde",
+      "serviceFee": "Servisa maksa",
+      "total": "Kopā",
       "shippingNote": "+ piegāde (aprēķināta pie norēķināšanās)",
       "checkout": "Norēķināties"
     },
@@ -2222,13 +2232,22 @@
       "noSales": "Tev vēl nav nevienas pārdošanas.",
       "noSalesHint": "Kad pārdosi spēli, tavi ieņēmumi parādīsies šeit.",
       "viewListings": "Skatīt tavus sludinājumus",
+      "heldUntilDelivery": "Aizturēts līdz piegādei",
+      "ordersInTransitSingular": "1 pasūtījums ceļā",
+      "ordersInTransitPlural": "{count} pasūtījumi ceļā",
+      "availableForPayout": "Pieejams izmaksai",
       "available": "Pieejams",
       "pending": "Gaida",
       "total": "Kopā",
+      "fundsReleasedInfo": "Līdzekļi tiek atbrīvoti 2 dienas pēc piegādes apstiprināšanas",
       "addBankHint": "Pievieno bankas kontu, lai izņemtu savus ieņēmumus.",
       "addBankAccount": "Pievienot bankas kontu",
       "requestPayout": "Pieprasīt izmaksu",
-      "updated": "Atjaunināts {time}"
+      "updated": "Atjaunināts {time}",
+      "statsSingular": "{count} pārdošana · {amount} pēdējās 30 dienās",
+      "statsPlural": "{count} pārdošanas · {amount} pēdējās 30 dienās",
+      "viewInStripe": "Skatīt izmaksu vēsturi Stripe",
+      "openingStripe": "Atver..."
     },
     "EarningsSummary": {
       "title": "Ieņēmumu kopsavilkums",
@@ -2314,6 +2333,18 @@
         "title": "Pārdošana apturēta",
         "description": "Jauni sludinājumi ir bloķēti, līdz sniegsi nodokļu informāciju. Esošie sludinājumi ir paslēpti."
       }
+    },
+    "StripeRequirements": {
+      "actionNeeded": {
+        "title": "Stripe nepieciešama papildu informācija",
+        "description": "Pabeidz {count, plural, one {# verifikācijas soli} other {# verifikācijas soļus}}, lai tavs konts paliktu aktīvs."
+      },
+      "overdue": {
+        "title": "Steidzami: verifikācija nokavēta",
+        "description": "Tavam kontam ir nokavētas verifikācijas prasības. Pabeidz tās tagad, lai izvairītos no ierobežojumiem."
+      },
+      "completeInStripe": "Pabeigt Stripe",
+      "opening": "Atver..."
     }
   },
   "Orders": {
@@ -2396,6 +2427,15 @@
         "waitingTitle": "Gaida pārdevēja atbildi",
         "expiredDescription": "Pārdevējs neatbildēja 24 stundu laikā. Tava atmaksa tiek apstrādāta automātiski.",
         "waitingDescription": "Pārdevējam ir {hours} stundas un {minutes} minūtes, lai pieņemtu tavu pasūtījumu. Ja viņš neatbildēs, tu saņemsi automātisku pilnu atmaksu."
+      },
+      "refunded": {
+        "title": "Atmaksa apstrādāta",
+        "amount": "Atmaksas summa: €{amount}"
+      },
+      "disputed": {
+        "title": "Šis pasūtījums tiek pārskatīts",
+        "openedOn": "Strīds atvērts: {date}",
+        "contactSoon": "Mūsu komanda sazināsies ar tevi 24 stundu laikā"
       },
       "items": {
         "title": "Preces ({count})"

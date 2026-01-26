@@ -42,7 +42,8 @@ export async function transferPayoutToSeller(orderId: string): Promise<PayoutRes
         service_fee,
         status,
         payout_status,
-        stripe_payment_intent_id
+        stripe_payment_intent_id,
+        stripe_charge_id
       `)
       .eq('id', orderId)
       .single();
@@ -129,7 +130,17 @@ export async function transferPayoutToSeller(orderId: string): Promise<PayoutRes
 
     // Create Stripe Transfer
     try {
-      const transfer = await stripe.transfers.create({
+      // Create transfer with source_transaction to link to original charge
+      // This prevents "insufficient funds" errors by tying funds together
+      const transferParams: {
+        amount: number;
+        currency: string;
+        destination: string;
+        description: string;
+        transfer_group?: string;
+        source_transaction?: string;
+        metadata: Record<string, string>;
+      } = {
         amount: Math.round(netAmount * 100), // Convert to cents
         currency: 'eur',
         destination: seller.stripe_connect_account_id,
@@ -140,7 +151,16 @@ export async function transferPayoutToSeller(orderId: string): Promise<PayoutRes
           seller_id: order.seller_id,
           payout_transaction_id: payoutTx.id,
         },
-      });
+      };
+
+      // Add source_transaction if we have the charge ID (recommended by Stripe)
+      // This links the transfer to the original charge, preventing timing issues
+      if (order.stripe_charge_id) {
+        transferParams.source_transaction = order.stripe_charge_id;
+        console.log(`💸 [Payout] Using source_transaction: ${order.stripe_charge_id}`);
+      }
+
+      const transfer = await stripe.transfers.create(transferParams);
 
       console.log(`✅ [Payout] Transfer created: ${transfer.id} for €${netAmount}`);
 

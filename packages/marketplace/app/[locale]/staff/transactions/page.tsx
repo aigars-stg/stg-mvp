@@ -1390,7 +1390,7 @@ function StaffTransactionsContent() {
                   Daily Activity (Last 30 Days)
                 </h3>
                 <div className="h-32 flex items-end gap-1">
-                  {playAnalytics.dailyTrends.map((day, i) => {
+                  {playAnalytics.dailyTrends.map((day) => {
                     const maxPlays = Math.max(...playAnalytics.dailyTrends.map(d => d.plays), 1);
                     const height = (day.plays / maxPlays) * 100;
                     return (

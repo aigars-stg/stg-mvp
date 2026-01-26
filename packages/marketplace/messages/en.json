@@ -2092,10 +2092,20 @@
       "description": "Your next favourite game is out there - we'll hold it here when you find it.",
       "browseButton": "Browse games"
     },
+    "item": {
+      "remove": "Remove from cart",
+      "delete": "Delete"
+    },
+    "review": "review",
+    "reviews": "reviews",
     "basket": {
       "number": "Basket {index}/{total}",
       "items": "{count, plural, one {# item} other {# items}}",
       "subtotal": "Subtotal",
+      "subtotalItems": "Subtotal ({count, plural, one {# item} other {# items}})",
+      "shipping": "Shipping",
+      "serviceFee": "Service fee",
+      "total": "Total",
       "shippingNote": "+ shipping (calculated at checkout)",
       "checkout": "Checkout"
     },
@@ -2222,13 +2232,22 @@
       "noSales": "You haven't made any sales yet.",
       "noSalesHint": "Once you sell a game, your earnings will appear here.",
       "viewListings": "View Your Listings",
+      "heldUntilDelivery": "Held until delivery",
+      "ordersInTransitSingular": "1 order in transit",
+      "ordersInTransitPlural": "{count} orders in transit",
+      "availableForPayout": "Available for payout",
       "available": "Available",
       "pending": "Pending",
       "total": "Total",
+      "fundsReleasedInfo": "Funds are released 2 days after delivery is confirmed",
       "addBankHint": "Add a bank account to withdraw your earnings.",
       "addBankAccount": "Add Bank Account",
       "requestPayout": "Request Payout",
-      "updated": "Updated {time}"
+      "updated": "Updated {time}",
+      "statsSingular": "{count} sale · {amount} last 30 days",
+      "statsPlural": "{count} sales · {amount} last 30 days",
+      "viewInStripe": "View payout history in Stripe",
+      "openingStripe": "Opening..."
     },
     "EarningsSummary": {
       "title": "Earnings Summary",
@@ -2314,6 +2333,18 @@
         "title": "Selling suspended",
         "description": "New listings are blocked until you provide tax information. Existing listings are hidden."
       }
+    },
+    "StripeRequirements": {
+      "actionNeeded": {
+        "title": "Stripe needs more information",
+        "description": "Complete {count, plural, one {# verification step} other {# verification steps}} to keep your account active."
+      },
+      "overdue": {
+        "title": "Urgent: verification overdue",
+        "description": "Your account has overdue verification requirements. Complete them now to avoid restrictions."
+      },
+      "completeInStripe": "Complete in Stripe",
+      "opening": "Opening..."
     }
   },
   "Orders": {
@@ -2396,6 +2427,15 @@
         "waitingTitle": "Waiting for Seller Response",
         "expiredDescription": "The seller did not respond within 24 hours. Your refund is being processed automatically.",
         "waitingDescription": "The seller has {hours} hours and {minutes} minutes to accept your order. If they don't respond, you'll receive an automatic full refund."
+      },
+      "refunded": {
+        "title": "Refund Processed",
+        "amount": "Refund amount: €{amount}"
+      },
+      "disputed": {
+        "title": "This order is under review",
+        "openedOn": "Dispute opened: {date}",
+        "contactSoon": "Our team will contact you within 24 hours"
       },
       "items": {
         "title": "Items ({count})"

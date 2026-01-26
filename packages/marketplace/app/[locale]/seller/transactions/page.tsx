@@ -119,6 +119,12 @@ export default function TransactionsPage() {
     if (status === 'completed' && payoutStatus === 'pending') {
       return <Badge variant="warning">Pending Payout</Badge>;
     }
+    if (status === 'completed' && payoutStatus === 'transferred') {
+      return <Badge variant="success">Transferred</Badge>;
+    }
+    if (status === 'completed' && payoutStatus === 'reversed') {
+      return <Badge variant="warning">Reversed</Badge>;
+    }
     if (status === 'completed') {
       return <Badge variant="success">Completed</Badge>;
     }
@@ -130,6 +136,9 @@ export default function TransactionsPage() {
     }
     if (status === 'failed') {
       return <Badge variant="error">Failed</Badge>;
+    }
+    if (status === 'refunded') {
+      return <Badge variant="warning">Refunded</Badge>;
     }
     return <Badge variant="default">{status}</Badge>;
   };

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
-import { getSellerBalance } from '@/lib/stripe/balance-service';
+import { getSellerBalance, getPlatformHeldFunds } from '@/lib/stripe/balance-service';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 
@@ -48,13 +48,23 @@ export async function GET(_request: NextRequest) {
       });
     }
 
-    // Fetch balance from Stripe (with caching)
-    const balance = await getSellerBalance(user.id, profile.stripe_connect_account_id);
+    // Fetch balance from Stripe (with caching) and platform-held funds
+    const [balance, platformHeld] = await Promise.all([
+      getSellerBalance(user.id, profile.stripe_connect_account_id),
+      getPlatformHeldFunds(user.id),
+    ]);
 
     return NextResponse.json({
       hasAccount: true,
       payoutsEnabled: true,
       hasBankAccount: profile.has_bank_account || false,
+      // Funds held by platform until delivery confirmed + dispute window
+      platformHeld: {
+        amount: platformHeld.amount,
+        orderCount: platformHeld.orderCount,
+        orders: platformHeld.orders,
+      },
+      // Stripe Connect account balance (available for bank payout)
       balance: {
         available: balance.available,
         pending: balance.pending,

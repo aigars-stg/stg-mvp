@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
   const query = searchParams.get('q');
   const limit = parseInt(searchParams.get('limit') || '20');
   const withListings = searchParams.get('with_listings') === 'true';
+  const baseGamesOnly = searchParams.get('base_games_only') === 'true';
 
   if (!query || query.trim().length < 2) {
     return NextResponse.json({
@@ -56,11 +57,16 @@ export async function GET(request: NextRequest) {
     const fetchLimit = Math.min(limit * 3, 300); // Cap at 300 to prevent timeouts
 
     // Search in primary name first (fast index-based search)
-    const { data: nameMatches, error: nameError } = await supabase
+    let nameQuery = supabase
       .from('games')
       .select('id, name, yearpublished, thumbnail, bayesaverage, is_expansion, alternate_names')
-      .ilike('name', `%${query}%`)
-      .limit(fetchLimit);
+      .ilike('name', `%${query}%`);
+
+    if (baseGamesOnly) {
+      nameQuery = nameQuery.eq('is_expansion', false);
+    }
+
+    const { data: nameMatches, error: nameError } = await nameQuery.limit(fetchLimit);
 
     if (nameError) {
       console.error('❌ [Search API] Database error:', nameError);
@@ -76,11 +82,16 @@ export async function GET(request: NextRequest) {
 
     let alternateMatches: GameRow[] = [];
     if ((nameMatches?.length || 0) < limit) {
-      const { data: allGamesWithAlternates } = await supabase
+      let alternateQuery = supabase
         .from('games')
         .select('id, name, yearpublished, thumbnail, bayesaverage, is_expansion, alternate_names')
-        .not('alternate_names', 'is', null)
-        .limit(500); // Fetch more to filter client-side
+        .not('alternate_names', 'is', null);
+
+      if (baseGamesOnly) {
+        alternateQuery = alternateQuery.eq('is_expansion', false);
+      }
+
+      const { data: allGamesWithAlternates } = await alternateQuery.limit(500); // Fetch more to filter client-side
 
       if (allGamesWithAlternates) {
         alternateMatches = allGamesWithAlternates.filter((game) => {

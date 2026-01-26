@@ -12,6 +12,8 @@ import {
   AlertCircle,
   ArrowLeft,
   Chat as MessageSquare,
+  CheckCircleAlt01 as CheckCircle,
+  AlertTriangle,
 } from 'griddy-icons';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { MessageBubble } from '@/components/messaging/MessageBubble';
@@ -187,6 +189,54 @@ export default function OrderDetailPage() {
                         </p>
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Refunded Notice */}
+            {order.status === 'refunded' && (
+              <div className="bg-aurora-green/10 border-2 border-aurora-green/20 rounded-xl p-4 sm:p-6">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-6 h-6 text-aurora-green flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-aurora-green mb-2">
+                      {t('refunded.title')}
+                    </h3>
+                    <p className="text-sm text-text-secondary">
+                      {t('refunded.amount', {
+                        amount: (order.refund_amount ?? order.total_amount).toFixed(2),
+                      })}
+                    </p>
+                    {order.timestamps.refunded_at && (
+                      <p className="text-xs text-text-muted mt-2">
+                        {formatDate(order.timestamps.refunded_at)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Disputed Notice */}
+            {order.status === 'disputed' && (
+              <div className="bg-aurora-yellow/10 border-2 border-aurora-yellow/20 rounded-xl p-4 sm:p-6">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-6 h-6 text-aurora-yellow flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-polar-night dark:text-snow-white mb-2">
+                      {t('disputed.title')}
+                    </h3>
+                    {order.timestamps.disputed_at && (
+                      <p className="text-sm text-text-secondary mb-2">
+                        {t('disputed.openedOn', {
+                          date: formatDate(order.timestamps.disputed_at),
+                        })}
+                      </p>
+                    )}
+                    <p className="text-xs text-text-muted">
+                      {t('disputed.contactSoon')}
+                    </p>
                   </div>
                 </div>
               </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Wallet, RefreshCw as Loader2, AlertCircle, ArrowUpRight, Plus, RefreshCw, Time as Clock } from 'griddy-icons';
+import { Wallet, RefreshCw as Loader2, AlertCircle, ArrowUpRight, Plus, RefreshCw, Time as Clock, LinkExternal as ExternalLink } from 'griddy-icons';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { formatTime } from '@/lib/date-utils';
@@ -13,13 +13,32 @@ interface BalanceData {
   total: { amount: number; currency: string };
 }
 
+interface PlatformHeldData {
+  amount: number; // in cents
+  orderCount: number;
+  orders: Array<{
+    id: string;
+    order_number: string;
+    items_total: number;
+    status: string;
+    created_at: string;
+  }>;
+}
+
 interface BalanceResponse {
   hasAccount: boolean;
   payoutsEnabled?: boolean;
   hasBankAccount?: boolean;
+  platformHeld?: PlatformHeldData;
   balance?: BalanceData;
   cachedAt?: string;
   message?: string;
+}
+
+interface EarningsData {
+  totalSalesCount: number;
+  salesLast30Days: number;
+  earningsLast30Days: number;
 }
 
 interface BalanceCardProps {
@@ -30,11 +49,13 @@ interface BalanceCardProps {
 export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardProps) {
   const t = useTranslations('SellerDashboard.BalanceCard');
   const [data, setData] = useState<BalanceResponse | null>(null);
+  const [earnings, setEarnings] = useState<EarningsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openingDashboard, setOpeningDashboard] = useState(false);
 
-  const fetchBalance = async (isRefresh = false) => {
+  const fetchData = async (isRefresh = false) => {
     try {
       if (isRefresh) {
         setRefreshing(true);
@@ -43,14 +64,23 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
       }
       setError(null);
 
-      const response = await fetch('/api/seller/balance');
-      const result = await response.json();
+      // Fetch balance and earnings in parallel
+      const [balanceResponse, earningsResponse] = await Promise.all([
+        fetch('/api/seller/balance'),
+        fetch('/api/seller/earnings'),
+      ]);
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch balance');
+      const balanceResult = await balanceResponse.json();
+      if (!balanceResponse.ok) {
+        throw new Error(balanceResult.error || 'Failed to fetch balance');
       }
+      setData(balanceResult);
 
-      setData(result);
+      // Earnings is optional - don't fail if it errors
+      if (earningsResponse.ok) {
+        const earningsResult = await earningsResponse.json();
+        setEarnings(earningsResult);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load balance');
     } finally {
@@ -60,7 +90,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
   };
 
   useEffect(() => {
-    fetchBalance();
+    fetchData();
   }, []);
 
   const formatCurrency = (cents: number): string => {
@@ -68,6 +98,33 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
       style: 'currency',
       currency: 'EUR',
     }).format(cents / 100);
+  };
+
+  const formatCurrencyFromEuros = (euros: number): string => {
+    return new Intl.NumberFormat('en-EU', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(euros);
+  };
+
+  const handleOpenStripeDashboard = async () => {
+    try {
+      setOpeningDashboard(true);
+      const response = await fetch('/api/seller/connect/dashboard', {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.dashboardUrl) {
+          window.open(result.dashboardUrl, '_blank', 'noopener,noreferrer');
+        }
+      }
+    } catch (err) {
+      console.error('Error opening Stripe dashboard:', err);
+    } finally {
+      setOpeningDashboard(false);
+    }
   };
 
   // Loading state
@@ -98,7 +155,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         </div>
         <p className="text-sm text-aurora-red mb-4">{error}</p>
-        <Button variant="secondary" size="sm" onClick={() => fetchBalance()}>
+        <Button variant="secondary" size="sm" onClick={() => fetchData()}>
           {t('tryAgain')}
         </Button>
       </div>
@@ -150,8 +207,9 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
   }
 
   const balance = data.balance!;
-  const hasBalance = balance.total.amount > 0;
-  const canPayout = hasBalance && data.hasBankAccount && balance.available.amount > 0;
+  const platformHeld = data.platformHeld;
+  const hasBalance = balance.total.amount > 0 || (platformHeld?.amount ?? 0) > 0;
+  const canPayout = data.hasBankAccount && balance.available.amount > 0;
 
   // No sales yet state
   if (!hasBalance) {
@@ -165,7 +223,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
             <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
           </div>
           <button
-            onClick={() => fetchBalance(true)}
+            onClick={() => fetchData(true)}
             disabled={refreshing}
             className="p-2 text-text-muted hover:text-frost-ice transition-colors"
             aria-label={t('refreshBalance')}
@@ -202,7 +260,7 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           <h3 className="text-lg font-semibold text-polar-night">{t('title')}</h3>
         </div>
         <button
-          onClick={() => fetchBalance(true)}
+          onClick={() => fetchData(true)}
           disabled={refreshing}
           className="p-2 text-text-muted hover:text-frost-ice transition-colors"
           aria-label={t('refreshBalance')}
@@ -212,9 +270,31 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
       </div>
 
       {/* Balance Display */}
-      <div className="space-y-3 mb-6">
+      <div className="space-y-3 mb-4">
+        {/* Platform-held funds (orders in progress) */}
+        {platformHeld && platformHeld.amount > 0 && (
+          <div className="flex justify-between items-center">
+            <span className="text-text-secondary flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {t('heldUntilDelivery')}
+            </span>
+            <span className="text-lg text-text-muted">
+              {formatCurrency(platformHeld.amount)}
+            </span>
+          </div>
+        )}
+
+        {platformHeld && platformHeld.orderCount > 0 && (
+          <p className="text-xs text-text-muted">
+            {platformHeld.orderCount === 1
+              ? t('ordersInTransitSingular')
+              : t('ordersInTransitPlural', { count: platformHeld.orderCount })}
+          </p>
+        )}
+
+        {/* Available for payout */}
         <div className="flex justify-between items-center">
-          <span className="text-text-secondary">{t('available')}</span>
+          <span className="text-text-secondary">{t('availableForPayout')}</span>
           <span className="text-xl font-semibold text-aurora-green">
             {formatCurrency(balance.available.amount)}
           </span>
@@ -232,15 +312,28 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           </div>
         )}
 
-        <div className="border-t border-border pt-3">
-          <div className="flex justify-between items-center">
-            <span className="font-medium text-polar-night">{t('total')}</span>
-            <span className="text-xl font-bold text-polar-night">
-              {formatCurrency(balance.total.amount)}
-            </span>
-          </div>
-        </div>
+        {/* Info about fund release */}
+        {platformHeld && platformHeld.amount > 0 && (
+          <p className="text-xs text-text-muted pt-2 border-t border-border">
+            {t('fundsReleasedInfo')}
+          </p>
+        )}
       </div>
+
+      {/* Stats row - merged from EarningsSummary */}
+      {earnings && earnings.totalSalesCount > 0 && (
+        <div className="text-sm text-text-muted mb-4 pb-4 border-b border-border">
+          {earnings.totalSalesCount === 1
+            ? t('statsSingular', {
+                count: earnings.totalSalesCount,
+                amount: formatCurrencyFromEuros(earnings.earningsLast30Days),
+              })
+            : t('statsPlural', {
+                count: earnings.totalSalesCount,
+                amount: formatCurrencyFromEuros(earnings.earningsLast30Days),
+              })}
+        </div>
+      )}
 
       {/* Action Button */}
       {!data.hasBankAccount ? (
@@ -270,6 +363,25 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
           {t('requestPayout')}
         </Button>
       )}
+
+      {/* Stripe Dashboard link */}
+      <button
+        onClick={handleOpenStripeDashboard}
+        disabled={openingDashboard}
+        className="w-full mt-3 text-sm text-frost-ice hover:text-frost-ice/80 transition-colors flex items-center justify-center gap-1"
+      >
+        {openingDashboard ? (
+          <>
+            <Loader2 className="w-3 h-3 animate-spin" />
+            {t('openingStripe')}
+          </>
+        ) : (
+          <>
+            {t('viewInStripe')}
+            <ExternalLink className="w-3 h-3" />
+          </>
+        )}
+      </button>
 
       {/* Cache indicator */}
       {data.cachedAt && (

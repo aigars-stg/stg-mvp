@@ -10,8 +10,8 @@ const supabase = createClient(
 /**
  * GET /api/cron/complete-delivered-orders
  *
- * Cron job to auto-complete delivered orders after 3 days
- * This allows buyers time to report issues before releasing payment
+ * Cron job to auto-complete delivered orders after 2-day dispute window
+ * This allows buyers time to report issues before releasing payment to seller
  *
  * Authorization: Bearer token (from Vercel Cron or manual trigger)
  */
@@ -36,25 +36,35 @@ export async function GET(request: NextRequest) {
 
     console.log('📦 [Cron] Checking for delivered orders to complete...');
 
-    // Find orders delivered more than 3 days ago that haven't been completed
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    // Find orders delivered more than 2 days ago that haven't been completed
+    // Uses delivered_at if set, otherwise falls back to updated_at
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
+    // Query orders where delivered_at (or updated_at as fallback) is more than 2 days ago
     const { data: orders, error: fetchError } = await supabase
       .from('orders')
-      .select('id, order_number')
-      .eq('status', 'delivered')
-      .lt('updated_at', threeDaysAgo.toISOString());
+      .select('id, order_number, delivered_at, updated_at')
+      .eq('status', 'delivered');
 
-    if (fetchError) {
-      console.error('❌ [Cron] Error fetching orders:', fetchError);
+    // Filter in JS to handle COALESCE(delivered_at, updated_at) logic
+    const ordersToComplete = orders?.filter((order) => {
+      const deliveryDate = new Date(order.delivered_at || order.updated_at);
+      return deliveryDate < twoDaysAgo;
+    }) || [];
+
+    // Re-assign for compatibility with rest of code
+    const fetchErrorToUse = fetchError;
+
+    if (fetchErrorToUse) {
+      console.error('❌ [Cron] Error fetching orders:', fetchErrorToUse);
       return NextResponse.json(
-        { error: 'Failed to fetch orders', details: fetchError.message },
+        { error: 'Failed to fetch orders', details: fetchErrorToUse.message },
         { status: 500 }
       );
     }
 
-    if (!orders || orders.length === 0) {
+    if (ordersToComplete.length === 0) {
       console.log('✅ [Cron] No orders to complete');
       return NextResponse.json({
         success: true,
@@ -63,7 +73,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    console.log(`📦 [Cron] Found ${orders.length} orders to complete`);
+    console.log(`📦 [Cron] Found ${ordersToComplete.length} orders to complete`);
 
     // Mark orders as completed
     const { error: updateError } = await supabase
@@ -74,7 +84,7 @@ export async function GET(request: NextRequest) {
       })
       .in(
         'id',
-        orders.map((o) => o.id)
+        ordersToComplete.map((o) => o.id)
       );
 
     if (updateError) {
@@ -85,17 +95,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(`✅ [Cron] Completed ${orders.length} orders`);
+    console.log(`✅ [Cron] Completed ${ordersToComplete.length} orders`);
 
     // Post system messages for each completed order (non-blocking)
-    for (const order of orders) {
+    for (const order of ordersToComplete) {
       postOrderCompletedMessage(order.id);
     }
 
     return NextResponse.json({
       success: true,
-      completedCount: orders.length,
-      completedOrders: orders.map((o) => o.order_number),
+      completedCount: ordersToComplete.length,
+      completedOrders: ordersToComplete.map((o) => o.order_number),
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {

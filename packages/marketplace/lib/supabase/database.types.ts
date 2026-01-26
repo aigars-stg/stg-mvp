@@ -429,85 +429,6 @@ export type Database = {
         }
         Relationships: []
       }
-      play_daily_puzzles: {
-        Row: {
-          id: string
-          puzzle_number: number
-          game_id: number
-          bgg_weight: number | null
-          bgg_categories: string[] | null
-          bgg_mechanics: string[] | null
-          created_at: string | null
-        }
-        Insert: {
-          id?: string
-          puzzle_number: number
-          game_id: number
-          bgg_weight?: number | null
-          bgg_categories?: string[] | null
-          bgg_mechanics?: string[] | null
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          puzzle_number?: number
-          game_id?: number
-          bgg_weight?: number | null
-          bgg_categories?: string[] | null
-          bgg_mechanics?: string[] | null
-          created_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "play_daily_puzzles_game_id_fkey"
-            columns: ["game_id"]
-            isOneToOne: false
-            referencedRelation: "games"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      play_completions: {
-        Row: {
-          id: string
-          puzzle_number: number
-          visitor_id: string
-          user_id: string | null
-          status: string
-          guess_count: number
-          completed_at: string
-          created_at: string | null
-        }
-        Insert: {
-          id?: string
-          puzzle_number: number
-          visitor_id: string
-          user_id?: string | null
-          status: string
-          guess_count: number
-          completed_at: string
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          puzzle_number?: number
-          visitor_id?: string
-          user_id?: string | null
-          status?: string
-          guess_count?: number
-          completed_at?: string
-          created_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "play_completions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       listing_questions: {
         Row: {
           content: string
@@ -1102,10 +1023,16 @@ export type Database = {
           cancelled_at: string | null
           cancelled_by: string | null
           created_at: string | null
+          delivered_at: string | null
           destination_country: string | null
           destination_terminal_address: string | null
           destination_terminal_id: string | null
           destination_terminal_name: string | null
+          dispute_description: string | null
+          dispute_reason: string | null
+          dispute_resolution: string | null
+          dispute_resolved_at: string | null
+          disputed_at: string | null
           id: string
           items_total: number
           label_error: string | null
@@ -1122,6 +1049,7 @@ export type Database = {
           receiver_name: string | null
           receiver_phone: string | null
           refund_amount: number | null
+          refund_reason: string | null
           refunded_at: string | null
           seller_decline_reason: string | null
           seller_id: string
@@ -1132,9 +1060,12 @@ export type Database = {
           shipping_cost: number
           shipping_method: string
           status: string
+          stripe_charge_id: string | null
           stripe_payment_intent_id: string | null
           stripe_transfer_amount: number | null
           stripe_transfer_id: string | null
+          stripe_refund_id: string | null
+          stripe_transfer_reversal_id: string | null
           total_amount: number
           tracking_url: string | null
           transferred_to_seller_at: string | null
@@ -1149,10 +1080,16 @@ export type Database = {
           cancelled_at?: string | null
           cancelled_by?: string | null
           created_at?: string | null
+          delivered_at?: string | null
           destination_country?: string | null
           destination_terminal_address?: string | null
           destination_terminal_id?: string | null
           destination_terminal_name?: string | null
+          dispute_description?: string | null
+          dispute_reason?: string | null
+          dispute_resolution?: string | null
+          dispute_resolved_at?: string | null
+          disputed_at?: string | null
           id?: string
           items_total: number
           label_error?: string | null
@@ -1169,6 +1106,7 @@ export type Database = {
           receiver_name?: string | null
           receiver_phone?: string | null
           refund_amount?: number | null
+          refund_reason?: string | null
           refunded_at?: string | null
           seller_decline_reason?: string | null
           seller_id: string
@@ -1179,9 +1117,12 @@ export type Database = {
           shipping_cost?: number
           shipping_method: string
           status?: string
+          stripe_charge_id?: string | null
           stripe_payment_intent_id?: string | null
           stripe_transfer_amount?: number | null
           stripe_transfer_id?: string | null
+          stripe_refund_id?: string | null
+          stripe_transfer_reversal_id?: string | null
           total_amount: number
           tracking_url?: string | null
           transferred_to_seller_at?: string | null
@@ -1196,10 +1137,16 @@ export type Database = {
           cancelled_at?: string | null
           cancelled_by?: string | null
           created_at?: string | null
+          delivered_at?: string | null
           destination_country?: string | null
           destination_terminal_address?: string | null
           destination_terminal_id?: string | null
           destination_terminal_name?: string | null
+          dispute_description?: string | null
+          dispute_reason?: string | null
+          dispute_resolution?: string | null
+          dispute_resolved_at?: string | null
+          disputed_at?: string | null
           id?: string
           items_total?: number
           label_error?: string | null
@@ -1216,6 +1163,7 @@ export type Database = {
           receiver_name?: string | null
           receiver_phone?: string | null
           refund_amount?: number | null
+          refund_reason?: string | null
           refunded_at?: string | null
           seller_decline_reason?: string | null
           seller_id?: string
@@ -1226,9 +1174,12 @@ export type Database = {
           shipping_cost?: number
           shipping_method?: string
           status?: string
+          stripe_charge_id?: string | null
           stripe_payment_intent_id?: string | null
           stripe_transfer_amount?: number | null
           stripe_transfer_id?: string | null
+          stripe_refund_id?: string | null
+          stripe_transfer_reversal_id?: string | null
           total_amount?: number
           tracking_url?: string | null
           transferred_to_seller_at?: string | null
@@ -1304,6 +1255,84 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orders_with_participants"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      play_completions: {
+        Row: {
+          completed_at: string
+          created_at: string | null
+          guess_count: number
+          id: string
+          puzzle_number: number
+          status: string
+          user_id: string | null
+          visitor_id: string
+        }
+        Insert: {
+          completed_at: string
+          created_at?: string | null
+          guess_count: number
+          id?: string
+          puzzle_number: number
+          status: string
+          user_id?: string | null
+          visitor_id: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string | null
+          guess_count?: number
+          id?: string
+          puzzle_number?: number
+          status?: string
+          user_id?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
+      play_daily_puzzles: {
+        Row: {
+          bgg_categories: string[] | null
+          bgg_mechanics: string[] | null
+          bgg_weight: number | null
+          created_at: string | null
+          game_id: number
+          id: string
+          puzzle_number: number
+        }
+        Insert: {
+          bgg_categories?: string[] | null
+          bgg_mechanics?: string[] | null
+          bgg_weight?: number | null
+          created_at?: string | null
+          game_id: number
+          id?: string
+          puzzle_number: number
+        }
+        Update: {
+          bgg_categories?: string[] | null
+          bgg_mechanics?: string[] | null
+          bgg_weight?: number | null
+          created_at?: string | null
+          game_id?: number
+          id?: string
+          puzzle_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "play_daily_puzzles_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "play_daily_puzzles_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "stats_game_pricing"
+            referencedColumns: ["bgg_game_id"]
           },
         ]
       }
@@ -2528,25 +2557,46 @@ export type Database = {
         }
         Returns: string
       }
-      create_order_from_basket: {
-        Args: {
-          p_basket_id: string
-          p_destination_country?: string
-          p_destination_terminal_address?: string
-          p_destination_terminal_id?: string
-          p_destination_terminal_name?: string
-          p_pickup_city?: string
-          p_pickup_notes?: string
-          p_receiver_email?: string
-          p_receiver_name?: string
-          p_receiver_phone?: string
-          p_service_fee?: number
-          p_shipping_cost?: number
-          p_shipping_method: string
-          p_stripe_payment_intent_id?: string
-        }
-        Returns: Json
-      }
+      create_order_from_basket:
+        | {
+            Args: {
+              p_basket_id: string
+              p_destination_country?: string
+              p_destination_terminal_address?: string
+              p_destination_terminal_id?: string
+              p_destination_terminal_name?: string
+              p_pickup_city?: string
+              p_pickup_notes?: string
+              p_receiver_email?: string
+              p_receiver_name?: string
+              p_receiver_phone?: string
+              p_service_fee?: number
+              p_shipping_cost?: number
+              p_shipping_method: string
+              p_stripe_payment_intent_id?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_basket_id: string
+              p_destination_country?: string
+              p_destination_terminal_address?: string
+              p_destination_terminal_id?: string
+              p_destination_terminal_name?: string
+              p_pickup_city?: string
+              p_pickup_notes?: string
+              p_receiver_email?: string
+              p_receiver_name?: string
+              p_receiver_phone?: string
+              p_service_fee?: number
+              p_shipping_cost?: number
+              p_shipping_method: string
+              p_stripe_charge_id?: string
+              p_stripe_payment_intent_id?: string
+            }
+            Returns: Json
+          }
       expire_wanted_listings: { Args: never; Returns: number }
       generate_order_number: { Args: never; Returns: string }
       get_cart: { Args: { p_buyer_id: string }; Returns: Json }

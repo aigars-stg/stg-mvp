@@ -7,14 +7,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { BalanceCard } from '@/components/seller/BalanceCard';
-import { EarningsSummary } from '@/components/seller/EarningsSummary';
 import { TransactionList } from '@/components/seller/TransactionList';
-import { PayoutHistory } from '@/components/seller/PayoutHistory';
 import { BankAccountCard } from '@/components/seller/BankAccountCard';
 import { BankAccountForm } from '@/components/seller/BankAccountForm';
 import { PayoutConfirmModal } from '@/components/seller/PayoutConfirmModal';
-import { SellerTrustCard } from '@/components/seller/SellerTrustCard';
 import { Dac7WarningBanner } from '@/components/seller/Dac7WarningBanner';
+import { StripeRequirementsBanner } from '@/components/seller/StripeRequirementsBanner';
 import { useTranslations } from 'next-intl';
 import type { Dac7ComplianceStatus } from '@/lib/types/seller';
 
@@ -204,25 +202,24 @@ export default function SellerDashboardPage() {
             />
           )}
 
+        {/* Stripe Requirements Banner - show when Stripe needs additional info */}
+        {profile?.stripe_connect_payouts_enabled && (
+          <StripeRequirementsBanner />
+        )}
+
         {/* Main Content */}
         {profile?.stripe_connect_payouts_enabled ? (
-          // Full dashboard for Stripe-enabled sellers
+          // Simplified dashboard for Stripe-enabled sellers
           <div className="space-y-6">
-            {/* Top Row: Balance & Earnings */}
+            {/* Top Row: Balance & Bank Account */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <BalanceCard
                 key={`balance-${refreshKey}`}
                 onRequestPayout={handleRequestPayout}
                 onAddBankAccount={() => setShowBankForm(true)}
               />
-              <EarningsSummary key={`earnings-${refreshKey}`} />
-            </div>
 
-            {/* Trust & Reputation */}
-            <SellerTrustCard key={`trust-${refreshKey}`} />
-
-            {/* Bank Account Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Bank Account Card */}
               {profile?.has_bank_account ? (
                 <div className="bg-snow-white border-2 border-border rounded-xl p-6">
                   <h3 className="text-lg font-semibold text-polar-night mb-4">{t('bankAccount.title')}</h3>
@@ -250,19 +247,14 @@ export default function SellerDashboardPage() {
                   </Button>
                 </div>
               )}
-
-              <PayoutHistory key={`payouts-${refreshKey}`} limit={3} />
             </div>
 
-            {/* Recent Transactions */}
+            {/* Recent Sales */}
             <TransactionList key={`transactions-${refreshKey}`} limit={5} showViewAll />
           </div>
         ) : (
           // Simplified dashboard for Contact Seller only
           <div className="space-y-6">
-            {/* Trust & Reputation */}
-            <SellerTrustCard key={`trust-${refreshKey}`} />
-
             {/* Quick Actions Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Link
@@ -322,28 +314,6 @@ export default function SellerDashboardPage() {
             </div>
           </div>
         )}
-
-        {/* Quick Links */}
-        <div className="mt-8 pt-6 border-t border-border">
-          <h3 className="text-sm font-medium text-text-secondary mb-3">{t('quickLinks.title')}</h3>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/my-listings">
-              <Button variant="secondary" size="sm">{t('quickLinks.myListings')}</Button>
-            </Link>
-            <Link href="/seller/orders">
-              <Button variant="secondary" size="sm">{t('quickLinks.manageOrders')}</Button>
-            </Link>
-            <Link href="/sell">
-              <Button variant="secondary" size="sm">{t('quickLinks.createListing')}</Button>
-            </Link>
-            <Link href="/seller/transactions">
-              <Button variant="secondary" size="sm">{t('quickLinks.allTransactions')}</Button>
-            </Link>
-            <Link href="/help/listing-types">
-              <Button variant="secondary" size="sm">{t('quickLinks.learnListingTypes')}</Button>
-            </Link>
-          </div>
-        </div>
       </div>
 
       {/* Bank Account Form Modal */}

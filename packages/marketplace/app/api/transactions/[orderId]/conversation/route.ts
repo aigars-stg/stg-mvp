@@ -69,7 +69,9 @@ export async function GET(
         seller_responded_at,
         label_generated_at,
         cancelled_at,
-        refunded_at
+        refunded_at,
+        disputed_at,
+        refund_amount
       `)
       .eq('id', orderId)
       .single();
@@ -276,7 +278,9 @@ export async function GET(
           label_generated_at: order.label_generated_at,
           cancelled_at: order.cancelled_at,
           refunded_at: order.refunded_at,
+          disputed_at: order.disputed_at,
         },
+        refund_amount: order.refund_amount,
       },
       order_items: orderItems || [],
       tracking_events: trackingEvents || [],

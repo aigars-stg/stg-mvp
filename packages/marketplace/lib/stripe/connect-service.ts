@@ -79,23 +79,43 @@ export async function createConnectAccount(
       businessProfile.url = APP_URL;
     }
 
-    // Create Stripe Connect Express account
+    // Create Stripe Connect account using controller properties (PRD Section 5.1.1)
+    // NOTE: Do NOT use legacy `type: 'express'` - use controller properties instead
     const account = await stripe.accounts.create({
-      type: 'express',
+      // Controller properties define account behavior (Stripe 2025+ API)
+      controller: {
+        stripe_dashboard: {
+          type: 'express', // Sellers access Express Dashboard
+        },
+        fees: {
+          payer: 'application', // Platform pays Stripe processing fees
+        },
+        losses: {
+          payments: 'application', // Platform handles negative balances
+        },
+        requirement_collection: 'stripe', // Stripe handles KYC requirements
+      },
       country: country.toUpperCase(),
       email,
+      // Request necessary capabilities
       capabilities: {
+        card_payments: { requested: true },
         transfers: { requested: true },
       },
       business_type: 'individual',
       individual: individualData,
       business_profile: businessProfile,
+      // Manual payouts - sellers control when to withdraw via Express Dashboard
       settings: {
         payouts: {
           schedule: {
-            interval: 'manual', // Manual payouts - we control when sellers get paid
+            interval: 'manual',
           },
         },
+      },
+      // Metadata for correlation with platform user
+      metadata: {
+        platform_user_id: userId,
       },
     });
 

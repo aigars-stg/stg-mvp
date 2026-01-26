@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, calculateMarketplacePricing } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js'; // For service role
-import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
+import { SHIPPING_COST_EUROS } from '@/lib/pricing/constants';
+import type { TerminalCountry } from '@/lib/unisend/types';
 import type Stripe from 'stripe';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
@@ -138,12 +139,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate shipping cost
-    const sellerCountry = (basket.seller_country || 'LT') as TerminalCountry;
-    const shippingCostEuros =
-      shippingMethod === 't2t'
-        ? getShippingPrice(sellerCountry, destinationCountry!, 'M') // Default to M size for price estimation
-        : 0;
+    // Calculate shipping cost - flat €2.00 for Latvia preview
+    const sellerCountry = (basket.seller_country || 'LV') as TerminalCountry;
+    const shippingCostEuros = shippingMethod === 't2t' ? SHIPPING_COST_EUROS : 0;
 
     // Calculate pricing with service fees
     const pricing = calculateMarketplacePricing(
@@ -171,6 +169,7 @@ export async function POST(request: NextRequest) {
             },
           },
           unit_amount: Math.round(item.price * 100), // Convert to cents
+          tax_behavior: 'inclusive', // VAT included in listing price
         },
         quantity: 1,
       });
@@ -186,6 +185,7 @@ export async function POST(request: NextRequest) {
             description: `From ${sellerCountry} to ${destinationCountry}`,
           },
           unit_amount: pricing.shippingCostCents,
+          tax_behavior: 'inclusive', // VAT included in shipping
         },
         quantity: 1,
       });
@@ -200,6 +200,7 @@ export async function POST(request: NextRequest) {
           description: 'Second Turn platform fee',
         },
         unit_amount: pricing.serviceFeeCents,
+        tax_behavior: 'inclusive', // VAT included in service fee
       },
       quantity: 1,
     });
@@ -234,13 +235,15 @@ export async function POST(request: NextRequest) {
     const sellerStripeId = sellerProfile.stripe_connect_account_id;
 
     // Create Stripe Checkout session
-    // USING DESTINATION CHARGE (on_behalf_of)
-    // - Seller is the Merchant of Record
-    // - Buyer sees Seller's name on statement
-    // - We take an application fee
+    // USING SEPARATE CHARGES WITH DELAYED TRANSFERS
+    // - Platform is the Merchant of Record (Second Turn Games on statement)
+    // - Platform holds funds until delivery confirmed + dispute window
+    // - Enables full refunds and dispute handling
+    // - Transfer to seller uses source_transaction to prevent failures
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
+      automatic_tax: { enabled: true }, // Enable Stripe Tax (Latvia 21% VAT, inclusive)
       line_items: lineItems,
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout?basket=${basketId}`,
@@ -249,6 +252,7 @@ export async function POST(request: NextRequest) {
         basket_id: basketId,
         buyer_id: user.id,
         seller_id: basket.seller_id,
+        seller_stripe_id: sellerStripeId, // Stored for payout service
         shipping_method: shippingMethod,
 
         // T2T metadata
@@ -276,15 +280,13 @@ export async function POST(request: NextRequest) {
         total_charge_cents: pricing.totalChargeCents.toString(),
       },
       payment_intent_data: {
-        application_fee_amount: pricing.serviceFeeCents,
-        transfer_data: {
-          destination: sellerStripeId,
-        },
-        on_behalf_of: sellerStripeId,
+        // transfer_group links this charge to future transfers
+        transfer_group: `BASKET_${basketId}`,
         metadata: {
           basket_id: basketId,
           buyer_id: user.id,
           seller_id: basket.seller_id,
+          seller_stripe_id: sellerStripeId,
         },
       },
     });

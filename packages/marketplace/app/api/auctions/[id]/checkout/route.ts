@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, calculateMarketplacePricing } from '@/lib/stripe';
-import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
+import { SHIPPING_COST_EUROS } from '@/lib/pricing/constants';
+import type { TerminalCountry } from '@/lib/unisend/types';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 
@@ -129,20 +130,9 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Get seller's country for shipping calculation
-    const { data: sellerUserProfile } = await supabase
-      .from('user_profiles')
-      .select('country')
-      .eq('id', listing.seller_id)
-      .single();
-
-    const sellerCountry = (sellerUserProfile?.country as TerminalCountry) || 'LV';
-
-    // Calculate shipping cost
-    let shippingCostEuros = 0;
-    if (shippingMethod === 't2t' && destinationCountry) {
-      shippingCostEuros = getShippingPrice(sellerCountry, destinationCountry);
-    }
+    // Calculate shipping cost - flat €2.00 for Latvia preview
+    // TODO: For multi-country support, fetch seller's country and calculate based on origin/destination
+    const shippingCostEuros = shippingMethod === 't2t' ? SHIPPING_COST_EUROS : 0;
 
     // Calculate pricing using the winning bid amount
     const winningBid = listing.auction_current_bid;
@@ -160,6 +150,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      automatic_tax: { enabled: true }, // Enable Stripe Tax (Latvia 21% VAT, inclusive)
       customer_email: receiverEmail || undefined,
       line_items: [
         {
@@ -173,6 +164,7 @@ export async function POST(request: NextRequest, { params }: Params) {
                 : undefined,
             },
             unit_amount: pricing.itemsTotalCents,
+            tax_behavior: 'inclusive', // VAT included in winning bid
           },
           quantity: 1,
         },
@@ -186,6 +178,7 @@ export async function POST(request: NextRequest, { params }: Params) {
                     description: `Delivery to ${destinationTerminalName}`,
                   },
                   unit_amount: pricing.shippingCostCents,
+                  tax_behavior: 'inclusive' as const, // VAT included in shipping
                 },
                 quantity: 1,
               },
@@ -199,20 +192,21 @@ export async function POST(request: NextRequest, { params }: Params) {
               description: 'Second Turn marketplace fee',
             },
             unit_amount: pricing.serviceFeeCents,
+            tax_behavior: 'inclusive', // VAT included in service fee
           },
           quantity: 1,
         },
       ],
+      // SEPARATE CHARGES WITH DELAYED TRANSFERS
+      // Platform holds funds until delivery confirmed + dispute window
+      // Transfer to seller happens via payout service after order completion
       payment_intent_data: {
-        application_fee_amount: pricing.serviceFeeCents,
-        transfer_data: {
-          destination: sellerProfile.stripe_connect_account_id,
-        },
-        on_behalf_of: sellerProfile.stripe_connect_account_id,
+        transfer_group: `AUCTION_${listingId}`,
         metadata: {
           listing_id: listingId,
           buyer_id: user.id,
           seller_id: listing.seller_id,
+          seller_stripe_id: sellerProfile.stripe_connect_account_id,
           order_type: 'auction',
           winning_bid: winningBid.toString(),
           shipping_method: shippingMethod,

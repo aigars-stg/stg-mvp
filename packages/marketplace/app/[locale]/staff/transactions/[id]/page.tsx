@@ -73,7 +73,12 @@ interface OrderData {
   stripe?: {
     payment_intent_id?: string;
     transfer_id?: string;
+    refund_id?: string;
+    transfer_reversal_id?: string;
+    payout_status?: string;
   };
+  refund_amount?: number | null;
+  refund_reason?: string | null;
   timestamps: {
     created_at: string;
     paid_at?: string;
@@ -543,6 +548,36 @@ export default function StaffTransactionPage() {
                     <div>
                       <span className="text-text-muted">Transfer ID:</span>
                       <p className="font-mono text-polar-night truncate">{order.stripe.transfer_id}</p>
+                    </div>
+                  )}
+                  {order.stripe.refund_id && (
+                    <div>
+                      <span className="text-text-muted">Refund ID:</span>
+                      <p className="font-mono text-polar-night truncate">{order.stripe.refund_id}</p>
+                    </div>
+                  )}
+                  {order.stripe.transfer_reversal_id && (
+                    <div>
+                      <span className="text-text-muted">Transfer Reversal:</span>
+                      <p className="font-mono text-polar-night truncate">{order.stripe.transfer_reversal_id}</p>
+                    </div>
+                  )}
+                  {order.stripe.payout_status && (
+                    <div>
+                      <span className="text-text-muted">Payout Status:</span>
+                      <p className="font-medium text-polar-night capitalize">{order.stripe.payout_status}</p>
+                    </div>
+                  )}
+                  {order.refund_amount && (
+                    <div>
+                      <span className="text-text-muted">Refund Amount:</span>
+                      <p className="font-medium text-aurora-red">€{order.refund_amount.toFixed(2)}</p>
+                    </div>
+                  )}
+                  {order.refund_reason && (
+                    <div>
+                      <span className="text-text-muted">Refund Reason:</span>
+                      <p className="text-polar-night">{order.refund_reason}</p>
                     </div>
                   )}
                 </div>

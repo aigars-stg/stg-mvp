@@ -49,6 +49,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ========================================================================
+    // IDEMPOTENCY CHECK
+    // Prevent duplicate processing of webhook events (PRD Section 8.7)
+    // ========================================================================
+    const { data: existingEvent } = await supabase
+      .from('stripe_webhook_events')
+      .select('id')
+      .eq('id', event.id)
+      .single();
+
+    if (existingEvent) {
+      console.log(`⏭️ [Connect Webhook] Duplicate event skipped: ${event.id}`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
+    // Record event before processing (prevents race conditions)
+    const { error: insertError } = await supabase
+      .from('stripe_webhook_events')
+      .insert({
+        id: event.id,
+        type: event.type,
+        source: 'connect',
+        payload: event.data.object as unknown as Record<string, unknown>,
+      });
+
+    if (insertError) {
+      // If insert fails due to duplicate key, another request is processing this event
+      if (insertError.code === '23505') {
+        console.log(`⏭️ [Connect Webhook] Event being processed by another request: ${event.id}`);
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+      console.error('⚠️ [Connect Webhook] Failed to record event (continuing anyway):', insertError);
+    }
+
     console.log(`📨 [Connect Webhook] Received event: ${event.type}`);
 
     // Handle events
