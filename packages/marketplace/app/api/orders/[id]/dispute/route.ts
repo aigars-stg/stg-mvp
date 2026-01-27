@@ -123,7 +123,8 @@ export async function POST(request: NextRequest, { params }: Params) {
     console.log(`⚠️ [Dispute] Opening dispute for order ${order.order_number}`);
     console.log(`⚠️ [Dispute] Reason: ${reason}`);
 
-    // Update order to disputed status
+    // Update order to disputed status with 48h seller deadline
+    const sellerDeadline = new Date(Date.now() + 48 * 60 * 60 * 1000);
     const { error: updateError } = await adminSupabase
       .from('orders')
       .update({
@@ -131,6 +132,8 @@ export async function POST(request: NextRequest, { params }: Params) {
         disputed_at: new Date().toISOString(),
         dispute_reason: reason,
         dispute_description: description,
+        dispute_status: 'awaiting_seller',
+        dispute_seller_deadline: sellerDeadline.toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq('id', orderId);
@@ -152,8 +155,15 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     // Send notification email to seller (async, don't block response)
     if (sellerProfile?.email) {
-      // TODO: Implement dispute notification email
-      console.log(`📧 [Dispute] Should notify seller: ${sellerProfile.email}`);
+      const { sendDisputeOpenedToSeller } = await import('@/lib/email/send-order-emails');
+      sendDisputeOpenedToSeller({
+        sellerName: sellerProfile.full_name || 'Seller',
+        sellerEmail: sellerProfile.email,
+        orderNumber: order.order_number,
+        orderId: order.id,
+        gameName: order.order_number,
+        buyerReason: reason,
+      });
     }
 
     console.log(`✅ [Dispute] Dispute opened for order ${order.order_number}`);
@@ -195,8 +205,15 @@ export async function GET(request: NextRequest, { params }: Params) {
         disputed_at,
         dispute_reason,
         dispute_description,
+        dispute_status,
+        dispute_seller_response,
+        dispute_seller_responded_at,
+        dispute_seller_deadline,
+        dispute_photo_urls,
         dispute_resolved_at,
-        dispute_resolution
+        dispute_resolution,
+        dispute_resolution_note,
+        dispute_resolved_by
       `)
       .eq('id', orderId)
       .single();
@@ -234,8 +251,14 @@ export async function GET(request: NextRequest, { params }: Params) {
         openedAt: order.disputed_at,
         reason: order.dispute_reason,
         description: order.dispute_description,
+        disputeStatus: order.dispute_status,
+        sellerDeadline: order.dispute_seller_deadline,
+        sellerResponse: order.dispute_seller_response,
+        sellerRespondedAt: order.dispute_seller_responded_at,
+        sellerPhotos: order.dispute_photo_urls,
         resolvedAt: order.dispute_resolved_at,
         resolution: order.dispute_resolution,
+        resolutionNote: order.dispute_resolution_note,
       } : null,
     });
   } catch (error) {

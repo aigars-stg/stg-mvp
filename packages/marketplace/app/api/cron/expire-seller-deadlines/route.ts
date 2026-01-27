@@ -157,12 +157,41 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Also handle expired dispute response deadlines
+    let disputeDeadlinesExpired = 0;
+    const { data: expiredDisputes } = await supabase
+      .from('orders')
+      .select('id, order_number')
+      .eq('status', 'disputed')
+      .eq('dispute_status', 'awaiting_seller')
+      .is('dispute_seller_responded_at', null)
+      .lt('dispute_seller_deadline', new Date().toISOString());
+
+    if (expiredDisputes && expiredDisputes.length > 0) {
+      for (const dispute of expiredDisputes) {
+        const { error: dErr } = await supabase
+          .from('orders')
+          .update({
+            dispute_status: 'under_review',
+            dispute_resolution_note: 'Seller did not respond within the 48-hour deadline.',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', dispute.id);
+
+        if (!dErr) {
+          disputeDeadlinesExpired++;
+          console.log(`⏰ [Cron] Dispute deadline expired for order ${dispute.order_number}`);
+        }
+      }
+    }
+
     const summary = {
       success: true,
       cancelledCount,
       refundsProcessed,
       refundsFailed,
       emailsSent,
+      disputeDeadlinesExpired,
       timestamp: new Date().toISOString(),
     };
 

@@ -10,6 +10,8 @@ import { OrderAcceptedBuyerEmail } from './templates/order-accepted-buyer';
 import { OrderCancelledBuyerEmail } from './templates/order-cancelled-buyer';
 import { ShippingLabelSellerEmail } from './templates/shipping-label-seller';
 import { PackageDeliveredBuyerEmail } from './templates/package-delivered-buyer';
+import { DisputeOpenedSellerEmail } from './templates/dispute-opened-seller';
+import { DisputeResolvedEmail } from './templates/dispute-resolved';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
 
@@ -256,6 +258,75 @@ export async function sendPackageDeliveredToBuyer(params: {
     return { success: true };
   } catch (error) {
     console.error('❌ [Email] Failed to send package delivered email to buyer:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send dispute opened notification to seller
+ */
+export async function sendDisputeOpenedToSeller(params: {
+  sellerName: string;
+  sellerEmail: string;
+  orderNumber: string;
+  orderId: string;
+  gameName: string;
+  buyerReason: string;
+}) {
+  const { sellerName, sellerEmail, orderNumber, orderId, gameName, buyerReason } = params;
+
+  try {
+    await sendEmail({
+      to: sellerEmail,
+      subject: `Action required: Dispute opened for Order #${orderNumber}`,
+      react: DisputeOpenedSellerEmail({
+        sellerName,
+        orderNumber,
+        gameName,
+        buyerReason,
+        deadlineHours: 48,
+        respondUrl: `${APP_URL}/seller/orders/${orderId}/dispute`,
+      }),
+    });
+
+    console.log(`✅ [Email] Dispute notification sent to seller: ${sellerEmail}`);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ [Email] Failed to send dispute notification to seller:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send dispute resolved notification to buyer or seller
+ */
+export async function sendDisputeResolved(params: {
+  recipientName: string;
+  recipientEmail: string;
+  orderNumber: string;
+  resolution: string;
+  resolutionNote: string;
+  isSellerFavor: boolean;
+}) {
+  const { recipientName, recipientEmail, orderNumber, resolution, resolutionNote, isSellerFavor } = params;
+
+  try {
+    await sendEmail({
+      to: recipientEmail,
+      subject: `Dispute resolved for Order #${orderNumber}`,
+      react: DisputeResolvedEmail({
+        recipientName,
+        orderNumber,
+        resolution,
+        resolutionNote,
+        isSellerFavor,
+      }),
+    });
+
+    console.log(`✅ [Email] Dispute resolved email sent to: ${recipientEmail}`);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ [Email] Failed to send dispute resolved email:', error);
     return { success: false, error };
   }
 }
