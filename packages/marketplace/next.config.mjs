@@ -38,6 +38,41 @@ const nextConfig = {
         destination: '/profile/:id',
         permanent: true, // 301 redirect for SEO
       },
+      {
+        source: '/:locale/terms',
+        destination: '/:locale/legal?section=terms',
+        permanent: true,
+      },
+      {
+        source: '/:locale/privacy',
+        destination: '/:locale/legal?section=privacy',
+        permanent: true,
+      },
+      {
+        source: '/:locale/seller/terms',
+        destination: '/:locale/legal?section=seller',
+        permanent: true,
+      },
+      {
+        source: '/:locale/help/selling',
+        destination: '/:locale/help?section=selling',
+        permanent: true,
+      },
+      {
+        source: '/:locale/help/grading-guide',
+        destination: '/:locale/help?section=grading',
+        permanent: true,
+      },
+      {
+        source: '/:locale/help/shipping',
+        destination: '/:locale/help?section=shipping',
+        permanent: true,
+      },
+      {
+        source: '/:locale/help/dac7',
+        destination: '/:locale/help?section=dac7',
+        permanent: true,
+      },
     ];
   },
   // Rewrites to handle locale-prefixed manifest requests

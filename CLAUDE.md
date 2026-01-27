@@ -58,5 +58,57 @@ English (default), Latvian (lv), Lithuanian (lt), Estonian (et)
 ## Important Notes
 - Always build design-system before marketplace: `pnpm build:ds`
 - Supabase RLS policies control data access
-- €2 flat-rate shipping via Unisend parcel lockers
-- Buyer-pays-fees model (6% + €0.50 service fee)
+
+## Payment Model
+
+### Pricing (all VAT-inclusive)
+- **Shipping**: €2.00 flat rate (Latvia preview, Unisend parcel lockers)
+- **Service fee**: 6% + €0.50 (buyer pays)
+- **Seller receives**: Item asking price only (after order completion)
+
+### Delayed Payout Flow
+Platform uses **separate charges with delayed transfers** (not destination charges):
+1. Buyer pays → funds held by platform
+2. Seller ships → tracking uploaded
+3. Buyer receives → delivery confirmed
+4. 2-day dispute window passes → order auto-completes
+5. Payout service transfers funds to seller
+
+### Order Status State Machine
+```
+pending_seller → confirmed → shipped → delivered → completed → paid_out
+                    ↓           ↓          ↓
+                cancelled   cancelled   disputed → resolved (completed OR refunded)
+```
+
+### Key Pricing File
+`packages/marketplace/lib/pricing/constants.ts` - Centralized pricing constants
+
+## MCP Servers
+
+The following MCP servers are configured for this project:
+
+| Server | Purpose | Auth Required |
+|--------|---------|---------------|
+| `supabase` | Database queries, migrations, type generation | `SUPABASE_ACCESS_TOKEN` |
+| `stripe` | Connect accounts, payments, transfers | `STRIPE_SECRET_KEY` |
+| `filesystem` | Direct file access | None |
+| `sequential-thinking` | Complex problem-solving | None |
+| `context7` | Library documentation lookup | None |
+| `playwright` | Browser automation and testing | None |
+
+## Custom Slash Commands
+
+| Command | Description |
+|---------|-------------|
+| `/db` | Query Supabase database with natural language |
+| `/deploy` | Deploy to Vercel with pre-flight checks |
+| `/translate` | Add or update translations across locales |
+| `/stripe-status` | Check Stripe Connect account status |
+| `/prd` | Access or create PRD documents |
+
+## Hooks (Auto-Running)
+
+- **PreToolUse**: Warns before destructive operations (rm -rf, DROP TABLE, git reset --hard)
+- **PostToolUse**: Suggests verification after file changes (type-check, translation consistency)
+- **SessionStart**: Loads project context (git status, build reminders)
