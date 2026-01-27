@@ -11,6 +11,7 @@ import { TransactionList } from '@/components/seller/TransactionList';
 import { BankAccountCard } from '@/components/seller/BankAccountCard';
 import { BankAccountForm } from '@/components/seller/BankAccountForm';
 import { PayoutConfirmModal } from '@/components/seller/PayoutConfirmModal';
+import { PayoutSettingsModal } from '@/components/seller/PayoutSettingsModal';
 import { Dac7WarningBanner } from '@/components/seller/Dac7WarningBanner';
 import { StripeRequirementsBanner } from '@/components/seller/StripeRequirementsBanner';
 import { useTranslations } from 'next-intl';
@@ -43,6 +44,7 @@ export default function SellerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showBankForm, setShowBankForm] = useState(false);
   const [showPayoutModal, setShowPayoutModal] = useState(false);
+  const [showPayoutSettings, setShowPayoutSettings] = useState(false);
   const [balance, setBalance] = useState<BalanceData | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -217,6 +219,7 @@ export default function SellerDashboardPage() {
                 key={`balance-${refreshKey}`}
                 onRequestPayout={handleRequestPayout}
                 onAddBankAccount={() => setShowBankForm(true)}
+                onOpenPayoutSettings={() => setShowPayoutSettings(true)}
               />
 
               {/* Bank Account Card */}
@@ -334,6 +337,16 @@ export default function SellerDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Payout Settings Modal */}
+      <PayoutSettingsModal
+        isOpen={showPayoutSettings}
+        onClose={() => setShowPayoutSettings(false)}
+        onSaved={() => {
+          setShowPayoutSettings(false);
+          setRefreshKey(prev => prev + 1);
+        }}
+      />
 
       {/* Payout Confirmation Modal */}
       <PayoutConfirmModal

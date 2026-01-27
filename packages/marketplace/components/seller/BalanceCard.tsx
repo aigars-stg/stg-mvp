@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Wallet, RefreshCw as Loader2, AlertCircle, ArrowUpRight, Plus, RefreshCw, Time as Clock, LinkExternal as ExternalLink } from 'griddy-icons';
+import { Wallet, RefreshCw as Loader2, AlertCircle, ArrowUpRight, Plus, RefreshCw, Time as Clock, LinkExternal as ExternalLink, Settings } from 'griddy-icons';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { formatTime } from '@/lib/date-utils';
@@ -41,15 +41,22 @@ interface EarningsData {
   earningsLast30Days: number;
 }
 
+interface PayoutSettingsData {
+  payout_threshold: number;
+  payout_type: 'auto' | 'manual';
+}
+
 interface BalanceCardProps {
   onRequestPayout?: () => void;
   onAddBankAccount?: () => void;
+  onOpenPayoutSettings?: () => void;
 }
 
-export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardProps) {
+export function BalanceCard({ onRequestPayout, onAddBankAccount, onOpenPayoutSettings }: BalanceCardProps) {
   const t = useTranslations('SellerDashboard.BalanceCard');
   const [data, setData] = useState<BalanceResponse | null>(null);
   const [earnings, setEarnings] = useState<EarningsData | null>(null);
+  const [payoutSettings, setPayoutSettings] = useState<PayoutSettingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,10 +71,11 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
       }
       setError(null);
 
-      // Fetch balance and earnings in parallel
-      const [balanceResponse, earningsResponse] = await Promise.all([
+      // Fetch balance, earnings, and payout settings in parallel
+      const [balanceResponse, earningsResponse, settingsResponse] = await Promise.all([
         fetch('/api/seller/balance'),
         fetch('/api/seller/earnings'),
+        fetch('/api/seller/payout-settings'),
       ]);
 
       const balanceResult = await balanceResponse.json();
@@ -80,6 +88,12 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
       if (earningsResponse.ok) {
         const earningsResult = await earningsResponse.json();
         setEarnings(earningsResult);
+      }
+
+      // Payout settings optional
+      if (settingsResponse.ok) {
+        const settingsResult = await settingsResponse.json();
+        setPayoutSettings(settingsResult);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load balance');
@@ -332,6 +346,24 @@ export function BalanceCard({ onRequestPayout, onAddBankAccount }: BalanceCardPr
                 count: earnings.totalSalesCount,
                 amount: formatCurrencyFromEuros(earnings.earningsLast30Days),
               })}
+        </div>
+      )}
+
+      {/* Auto-payout status */}
+      {payoutSettings && data.hasBankAccount && (
+        <div className="flex items-center justify-between text-sm mb-4 pb-4 border-b border-border">
+          <span className="text-text-secondary">
+            {payoutSettings.payout_type === 'auto'
+              ? `Auto-payout at €${payoutSettings.payout_threshold / 100}: Enabled`
+              : 'Auto-payout: Off'}
+          </span>
+          <button
+            onClick={onOpenPayoutSettings}
+            className="p-1 text-text-muted hover:text-frost-ice transition-colors"
+            aria-label="Payout settings"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
         </div>
       )}
 

@@ -79,6 +79,12 @@ export interface SellerProfile {
   dac7_info_verified: boolean;
   dac7_compliance_status: Dac7ComplianceStatus;
 
+  // Payout Settings
+  payout_threshold: number; // in cents: 1000, 2000, 5000, 10000
+  payout_type: 'auto' | 'manual';
+  last_balance_activity_at: string | null;
+  dormancy_warning_sent_at: string | null;
+
   // Banking
   has_bank_account: boolean;
   bank_account_last4: string | null;

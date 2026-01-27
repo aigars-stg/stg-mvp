@@ -175,6 +175,9 @@ export async function transferPayoutToSeller(orderId: string): Promise<PayoutRes
         })
         .eq('id', orderId);
 
+      // Track balance activity for dormancy detection
+      await updateBalanceActivity(order.seller_id);
+
       // Update transaction record
       await supabase
         .from('payout_transactions')
@@ -409,6 +412,9 @@ export async function requestBankPayout(
       // Don't fail - payout was already created in Stripe
     }
 
+    // Track balance activity for dormancy detection
+    await updateBalanceActivity(userId);
+
     return {
       success: true,
       payoutId: payout.id,
@@ -431,6 +437,285 @@ export async function requestBankPayout(
       error: error instanceof Error ? error.message : 'Failed to create payout',
     };
   }
+}
+
+// ============================================
+// PAYOUT SETTINGS FUNCTIONS
+// ============================================
+
+export const PAYOUT_THRESHOLD_OPTIONS = [1000, 2000, 5000, 10000] as const; // in cents
+export type PayoutThreshold = (typeof PAYOUT_THRESHOLD_OPTIONS)[number];
+
+/**
+ * Get seller's payout settings
+ */
+export async function getPayoutSettings(userId: string): Promise<{
+  payoutThreshold: number;
+  payoutType: 'auto' | 'manual';
+} | null> {
+  const { data, error } = await supabase
+    .from('seller_profiles')
+    .select('payout_threshold, payout_type')
+    .eq('user_id', userId)
+    .single();
+
+  if (error || !data) return null;
+  return {
+    payoutThreshold: data.payout_threshold,
+    payoutType: data.payout_type,
+  };
+}
+
+/**
+ * Update seller's payout settings
+ */
+export async function updatePayoutSettings(
+  userId: string,
+  settings: { payoutThreshold?: number; payoutType?: 'auto' | 'manual' }
+): Promise<{ success: boolean; error?: string }> {
+  const update: Record<string, unknown> = {};
+
+  if (settings.payoutThreshold !== undefined) {
+    if (!PAYOUT_THRESHOLD_OPTIONS.includes(settings.payoutThreshold as PayoutThreshold)) {
+      return { success: false, error: 'Invalid payout threshold' };
+    }
+    update.payout_threshold = settings.payoutThreshold;
+  }
+
+  if (settings.payoutType !== undefined) {
+    if (!['auto', 'manual'].includes(settings.payoutType)) {
+      return { success: false, error: 'Invalid payout type' };
+    }
+    update.payout_type = settings.payoutType;
+  }
+
+  if (Object.keys(update).length === 0) {
+    return { success: false, error: 'No settings to update' };
+  }
+
+  const { error } = await supabase
+    .from('seller_profiles')
+    .update(update)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('❌ [Payout Settings] Update failed:', error);
+    return { success: false, error: 'Failed to update settings' };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Update last_balance_activity_at for a seller
+ * Call on: sale completion, payout request, transfer
+ */
+export async function updateBalanceActivity(userId: string): Promise<void> {
+  await supabase
+    .from('seller_profiles')
+    .update({ last_balance_activity_at: new Date().toISOString() })
+    .eq('user_id', userId);
+}
+
+/**
+ * Process auto-payouts for all eligible sellers
+ * Called by weekly cron (Mondays 9:00 UTC)
+ */
+export async function processAutoPayouts(): Promise<{
+  processed: number;
+  succeeded: number;
+  failed: number;
+  results: Array<{ userId: string; amount?: number; success: boolean; error?: string }>;
+}> {
+  console.log('💸 [Auto-Payout] Starting weekly auto-payout run...');
+
+  const { data: sellers, error } = await supabase
+    .from('seller_profiles')
+    .select('user_id, stripe_connect_account_id, payout_threshold')
+    .eq('payout_type', 'auto')
+    .eq('stripe_connect_payouts_enabled', true)
+    .not('stripe_connect_account_id', 'is', null);
+
+  if (error || !sellers) {
+    console.error('❌ [Auto-Payout] Failed to fetch sellers:', error);
+    return { processed: 0, succeeded: 0, failed: 0, results: [] };
+  }
+
+  console.log(`💸 [Auto-Payout] Checking ${sellers.length} sellers with auto-payout enabled`);
+
+  let succeeded = 0;
+  let failed = 0;
+  const results: Array<{ userId: string; amount?: number; success: boolean; error?: string }> = [];
+
+  for (const seller of sellers) {
+    try {
+      const balance = await stripe.balance.retrieve({
+        stripeAccount: seller.stripe_connect_account_id!,
+      });
+
+      const eurAvailable = balance.available.find((b: { currency: string }) => b.currency === 'eur');
+      const availableAmount = eurAvailable?.amount || 0;
+
+      if (availableAmount < seller.payout_threshold) {
+        continue;
+      }
+
+      const payout = await stripe.payouts.create(
+        {
+          amount: availableAmount,
+          currency: 'eur',
+          metadata: { user_id: seller.user_id, type: 'auto' },
+        },
+        { stripeAccount: seller.stripe_connect_account_id! }
+      );
+
+      await supabase.from('seller_payouts').insert({
+        user_id: seller.user_id,
+        stripe_payout_id: payout.id,
+        stripe_connect_account_id: seller.stripe_connect_account_id,
+        amount: availableAmount / 100,
+        currency: 'eur',
+        status: payout.status,
+        payout_type: 'auto',
+        arrival_date: payout.arrival_date
+          ? new Date(payout.arrival_date * 1000).toISOString().split('T')[0]
+          : null,
+      });
+
+      await updateBalanceActivity(seller.user_id);
+
+      console.log(`✅ [Auto-Payout] Paid €${(availableAmount / 100).toFixed(2)} to ${seller.user_id}`);
+      succeeded++;
+      results.push({ userId: seller.user_id, amount: availableAmount, success: true });
+    } catch (err) {
+      console.error(`❌ [Auto-Payout] Failed for ${seller.user_id}:`, err);
+      failed++;
+      results.push({
+        userId: seller.user_id,
+        success: false,
+        error: err instanceof Error ? err.message : 'Unknown error',
+      });
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+
+  console.log(`✅ [Auto-Payout] Complete: ${succeeded} succeeded, ${failed} failed`);
+  return { processed: succeeded + failed, succeeded, failed, results };
+}
+
+/**
+ * Process dormancy payouts for sellers with 6+ months of inactivity
+ * Called by monthly cron
+ */
+export async function processDormancyPayouts(): Promise<{
+  warned: number;
+  paidOut: number;
+  results: Array<{ userId: string; action: 'warned' | 'paid_out' | 'error'; amount?: number }>;
+}> {
+  console.log('💤 [Dormancy] Starting dormancy check...');
+
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+  const fiveMonthsAgo = new Date();
+  fiveMonthsAgo.setMonth(fiveMonthsAgo.getMonth() - 5);
+
+  // Phase 1: Warn sellers at 5 months dormancy (no warning sent yet)
+  const { data: warnSellers } = await supabase
+    .from('seller_profiles')
+    .select('user_id, stripe_connect_account_id, last_balance_activity_at')
+    .eq('stripe_connect_payouts_enabled', true)
+    .not('stripe_connect_account_id', 'is', null)
+    .lt('last_balance_activity_at', fiveMonthsAgo.toISOString())
+    .gte('last_balance_activity_at', sixMonthsAgo.toISOString())
+    .is('dormancy_warning_sent_at', null);
+
+  let warned = 0;
+  let paidOut = 0;
+  const results: Array<{ userId: string; action: 'warned' | 'paid_out' | 'error'; amount?: number }> = [];
+
+  if (warnSellers) {
+    for (const seller of warnSellers) {
+      await supabase
+        .from('seller_profiles')
+        .update({ dormancy_warning_sent_at: new Date().toISOString() })
+        .eq('user_id', seller.user_id);
+      // TODO: Send dormancy warning email
+      warned++;
+      results.push({ userId: seller.user_id, action: 'warned' });
+    }
+  }
+
+  // Phase 2: Auto-payout sellers 6+ months dormant AND warned 1+ month ago
+  const { data: dormantSellers } = await supabase
+    .from('seller_profiles')
+    .select('user_id, stripe_connect_account_id')
+    .eq('stripe_connect_payouts_enabled', true)
+    .not('stripe_connect_account_id', 'is', null)
+    .lt('last_balance_activity_at', sixMonthsAgo.toISOString())
+    .not('dormancy_warning_sent_at', 'is', null)
+    .lt('dormancy_warning_sent_at', oneMonthAgo.toISOString());
+
+  if (dormantSellers) {
+    for (const seller of dormantSellers) {
+      try {
+        const balance = await stripe.balance.retrieve({
+          stripeAccount: seller.stripe_connect_account_id!,
+        });
+
+        const eurAvailable = balance.available.find((b: { currency: string }) => b.currency === 'eur');
+        const availableAmount = eurAvailable?.amount || 0;
+
+        if (availableAmount <= 0) continue;
+
+        const payout = await stripe.payouts.create(
+          {
+            amount: availableAmount,
+            currency: 'eur',
+            metadata: { user_id: seller.user_id, type: 'dormancy' },
+          },
+          { stripeAccount: seller.stripe_connect_account_id! }
+        );
+
+        await supabase.from('seller_payouts').insert({
+          user_id: seller.user_id,
+          stripe_payout_id: payout.id,
+          stripe_connect_account_id: seller.stripe_connect_account_id,
+          amount: availableAmount / 100,
+          currency: 'eur',
+          status: payout.status,
+          payout_type: 'dormancy',
+          arrival_date: payout.arrival_date
+            ? new Date(payout.arrival_date * 1000).toISOString().split('T')[0]
+            : null,
+        });
+
+        await supabase
+          .from('seller_profiles')
+          .update({
+            last_balance_activity_at: new Date().toISOString(),
+            dormancy_warning_sent_at: null,
+          })
+          .eq('user_id', seller.user_id);
+
+        // TODO: Send dormancy payout notification email
+        paidOut++;
+        results.push({ userId: seller.user_id, action: 'paid_out', amount: availableAmount });
+      } catch (err) {
+        console.error(`❌ [Dormancy] Failed for ${seller.user_id}:`, err);
+        results.push({ userId: seller.user_id, action: 'error' });
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+  }
+
+  console.log(`💤 [Dormancy] Complete: ${warned} warned, ${paidOut} paid out`);
+  return { warned, paidOut, results };
 }
 
 /**

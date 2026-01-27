@@ -173,6 +173,20 @@ export function PayoutConfirmModal({
                 </div>
               </div>
 
+              {/* Fee */}
+              <div className="flex justify-between items-center">
+                <span className="text-text-secondary">Fee</span>
+                <span className="font-medium text-aurora-green">Free</span>
+              </div>
+
+              {/* You receive */}
+              <div className="flex justify-between items-center">
+                <span className="text-text-secondary">You receive</span>
+                <span className="font-medium text-polar-night">
+                  {formatCurrency(availableAmount)}
+                </span>
+              </div>
+
               {/* Estimated Arrival */}
               <div className="flex justify-between items-center">
                 <span className="text-text-secondary">{t('expectedArrival')}</span>
