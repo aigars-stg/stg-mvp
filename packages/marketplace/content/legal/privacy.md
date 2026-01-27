@@ -1,6 +1,6 @@
 ---
 title: "Privacy Policy"
-lastUpdated: "November 25, 2025"
+lastUpdated: "January 2026"
 description: "Privacy Policy for Second Turn Games - How we collect, use, and protect your personal data in compliance with GDPR."
 ---
 
@@ -27,47 +27,54 @@ We are committed to protecting your privacy and complying with the General Data 
 
 When you create an account, we collect:
 
-- **Email address** (required) - for account identification and communication
-- **Password** (required) - stored as an encrypted hash, never in plain text
-- **Full name** (required) - displayed on your profile
-- **Country** (required) - for marketplace localization and regulatory compliance
-- **Phone number** (optional) - if you choose to add it to your profile
-- **Profile picture** (optional) - if you upload an avatar
+- **Email address** (required) — for account identification, sign-in links, and communication
+- **Full name** (required) — displayed on your profile
+- **Country** (required) — for marketplace localization and regulatory compliance
+- **Phone number** (optional) — if you choose to add it to your profile
+- **Profile picture** (optional) — if you upload an avatar
 
-**Legal Basis:** Contract performance (GDPR Article 6(1)(b)) - necessary to provide marketplace services
+:::plain-terms
+We need your email to send you sign-in links and order updates. Your name and country appear on your profile so other users know who they are dealing with.
+:::
+
+**Legal Basis:** Contract performance (GDPR Article 6(1)(b)) — necessary to provide marketplace services
 
 ### 2.2 Seller Verification Data
 
 When you register as a seller and complete Stripe Connect onboarding, additional information is collected:
 
-- **Seller status declaration** - confirmation that you are selling as a private individual
-- **Date of birth** (required) - for identity verification and DAC7 reporting
-- **Primary address** (required) - for identity verification and DAC7 reporting
-- **Tax Identification Number (TIN)** - collected when you approach or exceed DAC7 reporting thresholds
-- **Bank account details (IBAN)** - collected by Stripe Connect for payouts
-- **Identity verification documents** - collected by Stripe Connect for KYC compliance
+- **Seller status declaration** — confirmation that you are selling as a private individual
+- **Date of birth** (required) — for identity verification and DAC7 reporting
+- **Primary address** (required) — for identity verification and DAC7 reporting
+- **Tax Identification Number (TIN)** — collected when you approach DAC7 reporting thresholds
+- **Bank account details (IBAN)** — collected by Stripe Connect for payouts
+- **Identity verification documents** — collected by Stripe Connect for KYC compliance
 
-**Legal Basis:** Legal obligation (GDPR Article 6(1)(c)) - compliance with EU DAC7 tax reporting requirements and payment services regulations
+:::plain-terms
+To sell, you need to be 18+ and verify your identity through Stripe. This is required by payment regulations and EU tax laws. Stripe handles the verification — we do not see your ID documents or full bank details.
+:::
+
+**Legal Basis:** Legal obligation (GDPR Article 6(1)(c)) — compliance with EU DAC7 tax reporting requirements and payment services regulations
 
 ### 2.3 Listing Data
 
 When you create a listing to sell a board game, we collect:
 
-- **Game information** - name, version, publisher, language, condition
-- **Photos** - images of the game (we strip EXIF metadata including GPS location)
+- **Game information** — name, version, publisher, language, condition
+- **Photos** — images of the game (we strip EXIF metadata including GPS location)
 - **Price and shipping options**
-- **Condition notes and descriptions** - free-text fields you provide
+- **Condition notes and descriptions** — free-text fields you provide
 
-**Legal Basis:** Contract performance (GDPR Article 6(1)(b)) - necessary to facilitate sales
+**Legal Basis:** Contract performance (GDPR Article 6(1)(b)) — necessary to facilitate sales
 
 ### 2.4 Transaction Data
 
 When transactions occur through our platform, we collect:
 
-- **Transaction records** - details of purchases and sales
-- **Payment information** - processed by Stripe Connect (we do not store full card details)
-- **Shipping information** - parcel terminal selections processed by Unisend
-- **Sale amounts** - for platform records and regulatory reporting
+- **Transaction records** — details of purchases and sales
+- **Payment information** — processed by Stripe Connect (we do not store card details)
+- **Shipping information** — parcel terminal selections processed by Unisend
+- **Sale amounts** — for platform records and regulatory reporting
 
 **Legal Basis:** Contract performance (GDPR Article 6(1)(b)) and legal obligation (GDPR Article 6(1)(c))
 
@@ -75,34 +82,36 @@ When transactions occur through our platform, we collect:
 
 When you communicate with other users through our messaging system:
 
-- **Message content** - all messages you send and receive
-- **Conversation metadata** - participants, related listing, timestamps
-- **Read status** - whether messages have been read
+- **Message content** — all messages you send and receive
+- **Conversation metadata** — participants, related listing, timestamps
+- **Read status** — whether messages have been read
 
-> **Important Privacy Notice:** Do not share sensitive personal information in messages until you're ready to complete a transaction. We cannot control what happens to information you voluntarily share with other users.
+:::plain-terms
+Do not share sensitive personal information (like your home address or phone number) in messages until you are ready to complete a transaction. We cannot control what happens to information you share with other users.
+:::
 
-**Legal Basis:** Contract performance (GDPR Article 6(1)(b)) - necessary to facilitate buyer-seller communication
+**Legal Basis:** Contract performance (GDPR Article 6(1)(b)) — necessary to facilitate buyer-seller communication
 
-### 2.6 Security & Login Activity Data
+### 2.6 Security and Login Activity Data
 
 For security and fraud prevention, we automatically collect:
 
-- **IP address** - your internet connection's IP address
-- **Device information** - browser type, operating system, device type
-- **Geolocation** - country and city derived from your IP address
-- **Login timestamps** - when you sign in to your account
+- **IP address** — your internet connection's IP address
+- **Device information** — browser type, operating system, device type
+- **Geolocation** — country and city derived from your IP address
+- **Login timestamps** — when you sign in to your account
 
-This data is retained for 30 days and then automatically deleted.
+This data is retained for **30 days** and then automatically deleted.
 
-**Legal Basis:** Legitimate interest (GDPR Article 6(1)(f)) - protecting our users and platform from fraud and security threats
+**Legal Basis:** Legitimate interest (GDPR Article 6(1)(f)) — protecting our users and platform from fraud and security threats
 
 ### 2.7 Technical Data
 
 We may collect:
 
-- **Cookies** - see Section 6 below for detailed cookie information
-- **Local storage data** - saved searches, listing drafts (stored only on your device)
-- **Analytics data** - only with your consent (page views, session duration, device type)
+- **Cookies** — see our [Cookie Policy](/legal?section=cookies) for details
+- **Local storage data** — saved searches, listing drafts (stored only on your device)
+- **Analytics data** — only with your consent (page views, session duration, device type)
 
 ---
 
@@ -111,14 +120,15 @@ We may collect:
 We use your personal data to:
 
 - Create and manage your account
+- Send you sign-in links (magic links)
 - Display your listings to potential buyers
 - Facilitate communication between buyers and sellers
-- Facilitate payments through Stripe Connect
-- Facilitate shipping through Unisend SIA
+- Process payments through Stripe Connect
+- Generate shipping labels through Unisend SIA
 - Process and display your wanted game requests (ISO listings)
-- Send transactional emails (verification, password reset, order notifications)
+- Send transactional emails (order notifications, shipping updates)
 - Detect and prevent fraud, abuse, and security threats
-- Comply with legal obligations, including DAC7 tax reporting requirements
+- Comply with legal obligations, including DAC7 tax reporting
 - Improve our platform (with your consent for analytics)
 
 **We never sell your personal data to third parties. We never use your data for marketing without your explicit consent.**
@@ -138,9 +148,9 @@ We use trusted third-party services to operate our platform. These services proc
 | **Data Shared** | Name, email, address, date of birth, bank account details, identity documents, transaction data |
 | **Privacy Policy** | [stripe.com/privacy](https://stripe.com/privacy) |
 
-*Note: Stripe is a licensed payment services provider under EU PSD2 regulations. They process payments and verify seller identities independently. They are a separate data controller for their own compliance purposes.*
+*Stripe is a licensed payment services provider under EU PSD2 regulations. They verify seller identities independently and are a separate data controller for their compliance purposes.*
 
-### Unisend SIA (Shipping & Logistics)
+### Unisend SIA (Shipping and Logistics)
 
 | | |
 |---|---|
@@ -153,12 +163,20 @@ We use trusted third-party services to operate our platform. These services proc
 
 | | |
 |---|---|
-| **Purpose** | Backend infrastructure - stores your account data, listings, messages, and photos |
+| **Purpose** | Backend infrastructure — stores your account data, listings, messages, and photos |
 | **Data Location** | EU (Stockholm, Sweden) |
 | **Data Shared** | All data you provide (account info, listings, messages, photos) |
 | **Privacy Policy** | [supabase.com/privacy](https://supabase.com/privacy) |
 
-### Vercel (Hosting & Analytics)
+### Resend (Email Delivery)
+
+| | |
+|---|---|
+| **Purpose** | Transactional email delivery (sign-in links, order notifications, shipping updates) |
+| **Data Shared** | Email addresses, names, order information |
+| **Privacy Policy** | [resend.com/legal/privacy-policy](https://resend.com/legal/privacy-policy) |
+
+### Vercel (Hosting and Analytics)
 
 | | |
 |---|---|
@@ -183,30 +201,60 @@ We use trusted third-party services to operate our platform. These services proc
 | **Data Shared** | Email addresses, IP addresses, user IDs (auto-expires in 15 minutes to 1 hour) |
 | **Privacy Policy** | [upstash.com/privacy](https://upstash.com/privacy) |
 
+### MapLibre / Carto (Maps)
+
+| | |
+|---|---|
+| **Purpose** | Display parcel terminal locations for delivery selection |
+| **Data Shared** | No personal data — only map tile requests |
+
 ### BoardGameGeek (Game Data)
 
 | | |
 |---|---|
 | **Purpose** | Fetch board game information (names, images, versions) |
-| **Data Shared** | No personal data - only game IDs you search for |
+| **Data Shared** | No personal data — only game IDs you search for |
 | **Privacy Policy** | [boardgamegeek.com/privacy](https://boardgamegeek.com/privacy) |
 
 ---
 
 ## 5. Tax Authority Data Sharing (DAC7)
 
-Under EU Council Directive 2021/514 (DAC7), we are legally required to report certain seller information to tax authorities.
+**Most sellers on our platform will never be reported to tax authorities.**
 
-### 5.1 Reporting Thresholds
+Under EU Council Directive 2021/514 (DAC7), we are legally required to report seller information — but only for sellers who exceed certain thresholds. If you are occasionally selling games from your personal collection, you are almost certainly not affected.
 
-This applies to sellers who exceed either threshold in a calendar year:
+:::plain-terms
+This applies to all EU platforms — eBay, Vinted, Etsy, not just us. If you already pay taxes on your income honestly, this changes nothing for you. As Latvia's tax authority (VID) puts it: honest taxpayers "will not feel it in their daily lives."
+:::
 
-- **30 or more** completed sales, OR
-- **€2,000 or more** in total sales proceeds
+### 5.1 When We Report
 
-### 5.2 Data Reported
+We report your information only if you exceed **either** threshold in a calendar year:
 
-If thresholds are exceeded, we report to the Latvia State Revenue Service (VID):
+| Threshold | Amount |
+|-----------|--------|
+| Number of sales | **30 or more** |
+| Total proceeds | **€2,000 or more** |
+
+**You must exceed at least one to be reported.** If you stay below both, we report nothing about you.
+
+**Examples:**
+- 12 sales for €350 total — **Not reported** (below both)
+- 25 sales for €1,800 total — **Not reported** (below both)
+- 35 sales for €900 total — **Reported** (over 30 sales)
+- 20 sales for €2,500 total — **Reported** (over €2,000)
+
+### 5.2 We Warn You First
+
+We will notify you when you reach approximately 80% of either threshold:
+- **24 sales** or **€1,600** in proceeds
+
+At this point, we will ask for your Tax Identification Number (TIN) so we are prepared if you cross the threshold.
+
+### 5.3 Data We Report
+
+If you exceed either threshold, we report to the Latvia State Revenue Service (VID):
 
 - Full legal name
 - Primary address
@@ -218,45 +266,34 @@ If thresholds are exceeded, we report to the Latvia State Revenue Service (VID):
 
 This information is automatically exchanged with tax authorities in your country of residence via EU information sharing mechanisms.
 
-### 5.3 Legal Basis
+### 5.4 What This Means for You
 
-Legal obligation (GDPR Article 6(1)(c)) - compliance with EU tax transparency requirements. We cannot refuse to report this data or delete it upon request.
+**Reporting does not equal new taxes.** DAC7 is about information sharing, not creating tax obligations. If you already declare your income correctly, nothing changes. If you are selling personal items occasionally (not running a business), you likely have no tax obligation anyway.
+
+We recommend consulting a tax advisor if you have questions about your personal situation.
+
+### 5.5 Legal Basis
+
+Legal obligation (GDPR Article 6(1)(c)) — compliance with EU tax transparency requirements. We cannot refuse to report this data or delete it upon request.
+
+[Learn more about DAC7](/help?section=dac7)
+
+[Seller Agreement](/legal?section=seller)
 
 ---
 
-## 6. Cookies & Tracking
+## 6. Cookies and Tracking
 
-### 6.1 Essential Cookies (No Consent Required)
+We use a small number of cookies to make the platform work. For full details, see our [Cookie Policy](/legal?section=cookies).
 
-| Cookie Name | Purpose | Duration |
-|-------------|---------|----------|
-| `sb-*-auth-token` | Authentication - keeps you signed in | Session / 60 days |
+### Summary
 
-These cookies are strictly necessary for the platform to function. They cannot be disabled.
+| Type | Purpose | Your Choice |
+|------|---------|-------------|
+| **Essential** | Keep you signed in, remember your language | Required |
+| **Analytics** | Help us understand how the site is used | You choose |
 
-### 6.2 Analytics Cookies (Requires Consent)
-
-With your consent, we use Vercel Analytics to understand:
-
-- Which pages are most visited
-- How users navigate the site
-- Performance metrics (page load times)
-- Device and browser statistics
-
-Vercel's analytics are privacy-friendly - they don't track you across websites or create detailed profiles.
-
-You can manage cookie preferences via the consent banner or in account settings.
-
-### 6.3 Local Storage
-
-We use browser local storage for:
-
-- **Saved searches** - your search history (stored only on your device)
-- **Listing drafts** - auto-saves forms as you type (stored only on your device)
-- **Cookie preferences** - remembers your choices
-- **UI preferences** - remembers dismissed hints/tutorials
-
-Local storage data never leaves your device.
+We ask for your consent before setting analytics cookies. You can change your preference anytime via the cookie banner or in your account settings.
 
 ---
 
@@ -264,36 +301,44 @@ Local storage data never leaves your device.
 
 | Data Type | Retention Period |
 |-----------|------------------|
-| Account Data | Until you delete your account, plus 90 days |
+| Account data | Until you delete your account, plus 90 days |
 | Listings | Until you delete them or delete your account |
 | Messages | Until either party deletes the conversation or account |
-| Transaction Records | **7 years** (legal requirement for tax/accounting records) |
-| DAC7 Reported Data | **7 years** from reporting date |
-| Login Activity (IP, device) | 30 days |
-| Rate Limiting Data | 15 minutes to 1 hour |
+| Transaction records | **7 years** (legal requirement for tax/accounting) |
+| DAC7 reported data | **7 years** from reporting date |
+| Login activity (IP, device) | **30 days** |
+| Rate limiting data | 15 minutes to 1 hour |
+
+:::plain-terms
+We keep your account data until you delete it. Transaction records stick around for 7 years because tax law requires it — even if you delete your account.
+:::
 
 ---
 
 ## 8. Your Rights Under GDPR
 
-### ✓ Right to Access (Article 15)
+You have the following rights regarding your personal data:
+
+### Right to Access (Article 15)
 View your profile data, listings, and login activity in account settings.
 
-### ✓ Right to Data Portability (Article 20)
-Download all your data in JSON format (machine-readable).
+### Right to Data Portability (Article 20)
+Download all your data in a machine-readable format (JSON).
 
-### ✓ Right to Rectification (Article 16)
+### Right to Rectification (Article 16)
 Edit your profile information and listings at any time.
 
-### ✓ Right to Erasure (Article 17)
+### Right to Erasure (Article 17)
 Delete your account with a 14-day recovery period, then permanent deletion after 90 days.
 
-> **Note:** The right to erasure does not apply to data we are legally required to retain, such as transaction records for tax purposes or DAC7 reported data.
+:::plain-terms
+You cannot delete transaction records or DAC7 reported data — we are legally required to keep those for 7 years. Everything else gets deleted when you delete your account.
+:::
 
-### ✓ Right to Object (Article 21)
+### Right to Object (Article 21)
 Object to processing based on legitimate interest (e.g., analytics). Use cookie settings to opt out.
 
-### ✓ Right to Lodge a Complaint
+### Right to Lodge a Complaint
 File a complaint with the Latvian Data State Inspectorate (DVI) at [dvi.gov.lv](https://www.dvi.gov.lv).
 
 **To exercise your rights, contact privacy@secondturn.games. We will respond within 30 days.**
@@ -306,27 +351,30 @@ We protect your data with:
 
 - **Encryption in transit:** All connections use HTTPS/TLS encryption
 - **Encryption at rest:** Database and file storage are encrypted (AES-256)
-- **Password hashing:** Passwords are hashed with bcrypt (never stored in plain text)
 - **Access control:** Row-Level Security ensures users can only access their own data
-- **HTTP-Only cookies:** Authentication cookies cannot be accessed by JavaScript
+- **HTTP-only cookies:** Authentication cookies cannot be accessed by JavaScript
 - **Rate limiting:** Prevents brute-force attacks and abuse
 - **Security monitoring:** Login activity tracking detects suspicious behavior
+- **Photo metadata stripping:** EXIF data (including GPS location) is removed from uploaded images
 
-While we implement industry-standard security measures, no system is 100% secure. Please use a strong, unique password.
+While we implement industry-standard security measures, no system is 100% secure. Keep your email account secure, as it is used for sign-in.
 
 ---
 
 ## 10. International Data Transfers
 
-Your data is primarily stored in the European Union (Stockholm, Sweden). Some service providers (Vercel, Cloudflare, Stripe) are US-based companies but have certified compliance with EU-US data transfer frameworks.
+Your data is primarily stored in the European Union (Stockholm, Sweden). Some service providers (Stripe, Vercel, Cloudflare) are US-based companies but have certified compliance with EU-US data transfer frameworks.
 
 We ensure any data transferred outside the EU is protected by appropriate safeguards (Standard Contractual Clauses, adequacy decisions, or DPAs).
 
 ---
 
-## 11. Children's Privacy
+## 11. Age Requirements
 
-Our platform is not intended for children under 18. We do not knowingly collect personal data from children. If you believe a child has provided us with personal data, contact privacy@secondturn.games and we will delete it.
+- You must be at least **16 years old** to use the Platform
+- You must be at least **18 years old** to sell (required by Stripe for identity verification)
+
+We do not knowingly collect personal data from anyone under 16. If you believe someone under 16 has created an account, contact privacy@secondturn.games and we will delete it.
 
 ---
 

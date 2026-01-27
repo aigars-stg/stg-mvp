@@ -1033,7 +1033,9 @@
     },
     "sections": {
       "marketplace": "Marketplace",
+      "help": "Help",
       "legal": "Legal",
+      "resources": "Resources",
       "contact": "Contact"
     },
     "links": {
@@ -1041,9 +1043,15 @@
       "sellGame": "Sell a game",
       "requestGame": "Request a game",
       "conditionGuide": "Condition guide",
+      "sellingGuide": "Selling guide",
+      "shipping": "Shipping",
+      "dac7": "DAC7 & taxes",
+      "helpCentre": "Help centre",
+      "legalHub": "Legal",
       "privacyPolicy": "Privacy policy",
       "termsOfService": "Terms of service",
-      "sellerTerms": "Seller terms"
+      "sellerTerms": "Seller terms",
+      "fees": "Fees"
     },
     "company": {
       "name": "Second Turn Games SIA",

@@ -181,7 +181,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6 sm:gap-8">
                 <div className="md:col-span-2">
                   <img src="/images/logo_nav.svg" alt="Second Turn Games" className="h-10 mb-3 sm:mb-4" />
                   <p className="text-sm text-text-secondary dark:text-snow-stormLight">
@@ -196,15 +196,13 @@ export default async function LocaleLayout({ children, params }: Props) {
                     <li><Link href="/browse" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.browseGames')}</Link></li>
                     <li><Link href="/sell" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.sellGame')}</Link></li>
                     <li><Link href="/wanted/new" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.requestGame')}</Link></li>
-                    <li><Link href="/help/grading-guide" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.conditionGuide')}</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium text-polar-night dark:text-snow-stormLightest mb-2 sm:mb-3">{tFooter('sections.legal')}</h4>
+                  <h4 className="font-medium text-polar-night dark:text-snow-stormLightest mb-2 sm:mb-3">{tFooter('sections.resources')}</h4>
                   <ul className="space-y-2 text-sm text-text-secondary dark:text-snow-stormLight">
-                    <li><Link href="/privacy" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.privacyPolicy')}</Link></li>
-                    <li><Link href="/terms" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.termsOfService')}</Link></li>
-                    <li><Link href="/seller/terms" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.sellerTerms')}</Link></li>
+                    <li><Link href="/help" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.helpCentre')}</Link></li>
+                    <li><Link href="/legal" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.legalHub')}</Link></li>
                   </ul>
                 </div>
                 <div>

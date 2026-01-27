@@ -1,14 +1,14 @@
 ---
 title: "Terms of Service"
-lastUpdated: "November 25, 2025"
+lastUpdated: "January 2026"
 description: "Terms of Service for Second Turn Games - Rules and guidelines for using our peer-to-peer board game marketplace."
 ---
 
 ## 1. Agreement to Terms
 
-Welcome to Second Turn Games! These Terms of Service ("Terms") govern your use of the Second Turn Games platform ("Platform", "Service", "we", "our", or "us").
+Welcome to Second Turn Games. These Terms of Service ("Terms") govern your use of the Second Turn Games platform ("Platform", "Service", "we", "our", or "us").
 
-By creating an account or using our Platform, you agree to be bound by these Terms and our [Privacy Policy](/privacy). If you also wish to sell items, you must additionally agree to our [Seller Terms](/seller-terms). If you do not agree, you may not use our Service.
+By creating an account or using our Platform, you agree to be bound by these Terms and our [Privacy Policy](/legal?section=privacy). If you also wish to sell items, you must additionally agree to our [Seller Agreement](/legal?section=seller). If you do not agree, you may not use our Service.
 
 ### Service Provider
 
@@ -28,50 +28,58 @@ Second Turn Games is a peer-to-peer marketplace that connects buyers and sellers
 
 ### 2.1 Our Role as Facilitator
 
-> **Important: We Are a Facilitator, Not a Party to Your Transactions**
->
-> Second Turn Games provides the platform for users to list and discover board games. We do not buy, sell, or own any games. All transactions occur directly between buyers and sellers.
+Second Turn Games provides the platform for users to list and discover board games. We do not buy, sell, or own any games. All transactions occur directly between buyers and sellers.
+
+:::plain-terms
+Think of us as the venue, not the seller. We provide the space for you to meet and trade, handle the technical bits (payments, shipping labels), but the actual sale is between you and the other person.
+:::
 
 **What we do:**
 
 - Provide a platform for listing and discovering games
 - Facilitate communication between users
-- Facilitate payments through Stripe Connect (as a technical service)
-- Facilitate shipping through Unisend SIA (as a technical service)
+- Process payments securely through Stripe Connect
+- Generate shipping labels through Unisend SIA
+- Hold payment until orders are completed (buyer protection)
 - Host user-generated content (listings, profiles, messages)
 
 **What we do NOT do:**
 
 - Guarantee the quality, safety, legality, or authenticity of items
 - Guarantee delivery or successful completion of transactions
-- Mediate disputes between buyers and sellers
-- Issue refunds (refunds are processed by Stripe based on seller agreement or chargeback outcomes)
 - Act as a party to any transaction between users
+- Provide EU consumer guarantees (see Section 3)
 
 ---
 
 ## 3. Consumer Protection Notice
 
-> **🔴 IMPORTANT: Consumer-to-Consumer (C2C) Transactions**
->
-> **All sellers on this platform are private individuals. EU consumer protection laws do not apply to purchases from private sellers.**
+**All sellers on Second Turn Games are private individuals, not businesses.**
 
-When you purchase from a private seller on Second Turn Games:
+This means EU consumer protection laws do not apply to purchases made here.
 
-- **No statutory right of withdrawal:** You do NOT have a 14-day cooling-off period to return the item
-- **No legal guarantee:** The 2-year legal guarantee for conformity does NOT apply
-- **Buyer beware:** You are responsible for verifying the item's condition before purchase
+:::plain-terms
+This is more like buying at a flea market than from a shop. There is no 14-day return right, no 2-year guarantee. Check the photos, ask questions, and make sure you are happy before you buy.
+:::
 
-*This information is provided in accordance with EU Directive 2019/2161 (Omnibus Directive) requirements for online marketplaces facilitating C2C transactions.*
+When you purchase from a private seller:
+
+- **No right of withdrawal:** You do NOT have a 14-day cooling-off period
+- **No legal guarantee:** The 2-year conformity guarantee does NOT apply
+- **Buyer beware:** You are responsible for verifying condition before purchase
+
+*This information is provided in accordance with EU Directive 2019/2161 (Omnibus Directive).*
 
 ### 3.1 Protecting Yourself as a Buyer
 
-Since EU consumer protections do not apply, we strongly recommend:
+We recommend:
 
-- **Ask questions** - Message the seller about condition, completeness, and any concerns before purchasing
-- **Review photos carefully** - Examine all listing photos for wear, damage, or missing components
-- **Check seller reputation** - Review the seller's ratings and transaction history
-- **Understand what you're buying** - Ensure you know the edition, language, and condition
+- **Ask questions** — Message the seller about condition and completeness before purchasing
+- **Review photos carefully** — Look for wear, damage, or missing components
+- **Check seller reviews** — See what other buyers have said
+- **Use our payment protection** — Your payment is held until you confirm delivery
+
+[More about buyer protection](/legal?section=buyer)
 
 ---
 
@@ -80,85 +88,134 @@ Since EU consumer protections do not apply, we strongly recommend:
 ### 4.1 Account Creation
 
 - You must be at least **16 years old** to use this Platform
-- You must provide accurate, current, and complete information
-- You are responsible for maintaining the security of your password
+- You must provide accurate and current information
 - You may not share your account with others
 - You are responsible for all activity under your account
 
+:::plain-terms
+One account per person. If someone else uses your account, you are responsible for what they do.
+:::
+
 ### 4.2 Account Security
 
-If you suspect unauthorized access to your account, you must immediately:
-- Change your password
-- Contact us at info@secondturn.games
+We use magic links for sign-in — a secure link sent to your email. Keep your email account secure, as anyone with access to your email can sign in to your Second Turn Games account.
+
+If you suspect unauthorized access:
+- Contact us immediately at info@secondturn.games
 - Review your account activity
 
 ### 4.3 Account Termination
 
 You may delete your account at any time through account settings. We may suspend or terminate accounts that violate these Terms.
 
+Upon deletion:
+- Your listings will be removed
+- Your profile will be hidden
+- You can recover your account within **14 days**
+- After **90 days**, your data is permanently deleted (see [Privacy Policy](/legal?section=privacy))
+
 ---
 
-## 5. Transactions
+## 5. Listings
 
-### 5.1 How Transactions Work
+### 5.1 Listing Types
 
-1. **Buyer purchases an item** → Payment is processed via Stripe Connect
-2. **Seller is notified** → Seller ships the item via Unisend or arranges local pickup
-3. **Buyer receives the item** → Transaction is complete
-4. **Seller receives payment** → Funds are transferred to seller's bank account
+Sellers can choose how they want to sell:
 
-### 5.2 Service Fee
+**Instant Buy** — You set a fixed price. Buyers purchase immediately and you ship the game.
+
+**Contact Seller** — Buyers message you first to discuss price or ask questions before committing.
+
+### 5.2 Listing Requirements
+
+All listings must:
+
+- Accurately describe the item's condition
+- Include clear photos showing the actual item
+- State the correct edition and language
+- Disclose any missing components or damage
+- Be for items you legally own and can sell
+
+[Full listing guidelines](/legal?section=seller)
+
+---
+
+## 6. Transactions
+
+### 6.1 How Transactions Work
+
+1. **Buyer purchases** — Payment is processed and held securely
+2. **Seller ships** — Within **2 business days**, via parcel terminal
+3. **Buyer receives** — Check the game matches the description
+4. **Order completes** — Automatically **2 days after delivery**, or when buyer confirms earlier
+5. **Seller gets paid** — Funds are added to seller's balance
+
+:::plain-terms
+Your payment is processed when you buy. The seller receives funds after you have had a chance to check the game (2 days after delivery). If something is wrong, report it before then.
+:::
+
+### 6.2 Service Fees
 
 **Sellers:** No platform fees. You receive your full listing price.
 
-**Buyers:** A service fee is added to each purchase, covering platform operation and payment processing. Shipping fees also apply for parcel terminal delivery.
+**Buyers:** A service fee is added to each purchase:
 
-All fees are displayed clearly at checkout before you confirm your purchase. Current fee rates are available on our [Pricing](/pricing) page.
+| Fee | Amount |
+|-----|--------|
+| Service fee | **6% + €0.50** |
+| Shipping (parcel terminal) | **€2.00** |
 
-We may update our fees from time to time. Changes will be announced on the platform and reflected on the Pricing page. Continued use of the platform after fee changes constitutes acceptance.
+All fees are displayed at checkout before you confirm. Current rates are on our [Fees page](/legal?section=fees).
 
-### 5.3 Payment Processing
+We may update our fees from time to time. Changes will be announced on the platform. Continued use after fee changes constitutes acceptance.
 
-Payments are processed by **Stripe Connect**, a licensed payment services provider. When you make a purchase:
+### 6.3 Payment Processing
+
+Payments are processed by **Stripe Connect**, a licensed payment services provider.
 
 - Your payment is processed securely by Stripe
-- Funds are transferred to the seller's connected Stripe account
-- Second Turn Games does not hold or control transaction funds
+- The seller receives funds after the order completes
+- Sellers withdraw their balance to their bank account (Stripe charges €0.30 per payout)
 
-### 5.4 Shipping
+### 6.4 Shipping
 
-Shipping is facilitated through **Unisend SIA** parcel terminals across Latvia, Lithuania, and Estonia.
+All orders are shipped via parcel terminals (Unisend, Latvijas Pasts, uDrop) across Latvia, Lithuania, and Estonia.
 
-- Shipping costs are paid by the buyer (displayed at checkout)
-- Sellers ship via parcel terminals within the timeframe specified in their listing
-- Tracking information is provided for all shipments
+- Shipping costs are paid by the buyer
+- Sellers must ship within **2 business days** of sale
+- Tracking is provided for all shipments
+- Buyers collect from their selected parcel terminal using a PIN code
 
-**Local Pickup:** Some sellers offer local pickup at no shipping cost. Arrange pickup details via messaging and meet in safe, public locations.
+### 6.5 Disputes
 
-### 5.5 Disputes Between Users
+If something goes wrong with your order:
 
-**Transaction disputes** (e.g., disagreements about item condition, pricing, or satisfaction) are between the buyer and seller directly. We do not mediate these disputes or issue refunds.
+**Within 2 days of delivery:**
+- If the item is significantly not as described, damaged in transit, or missing components, report it through your order page
+- We will review and may issue a refund
 
-If you have an issue with a transaction:
+**After 2 days:**
+- The order is marked complete and the seller is paid
+- Contact the seller directly to resolve
+- If unresolved, you may request a chargeback through your bank (subject to their policies)
 
-1. **Contact the other party** through our messaging system
-2. **Attempt to resolve it directly** - most issues can be solved through communication
-3. **If unresolved**, you may:
-   - Request a chargeback through your payment provider (subject to their policies)
-   - Seek remedies through consumer protection agencies
-   - Pursue legal action in your jurisdiction
+:::plain-terms
+Check your game within 2 days of delivery. That is your window to report problems before we release payment to the seller. After that, it is between you and the seller.
+:::
 
-### 5.6 Our Commitment to a Safe Marketplace
+[More about buyer protection](/legal?section=buyer)
+
+### 6.6 Our Commitment to a Safe Marketplace
 
 > **We take fraud and illegal activity seriously and will act decisively against bad actors.**
 
-While we don't mediate individual transaction disputes, we actively protect our community from:
+While we do not mediate individual transaction disputes, we actively protect our community from:
 
-- **Fraud and scams** - users who take payment and never ship, or systematically deceive buyers
-- **Counterfeit items** - fake or pirated games
-- **Repeat offenders** - users with patterns of complaints or chargebacks
-- **Illegal content** - stolen goods, prohibited items, or illegal activity
-- **Platform manipulation** - fake accounts, fake reviews, or coordinated abuse
+- **Fraud and scams** — users who take payment and never ship, or systematically deceive buyers
+- **Counterfeit items** — fake or pirated games
+- **Repeat offenders** — users with patterns of complaints or chargebacks
+- **Illegal content** — stolen goods, prohibited items, or illegal activity
+- **Platform manipulation** — fake accounts, fake reviews, or coordinated abuse
 
 **If you encounter fraud or illegal activity:**
 
@@ -177,27 +234,27 @@ We cannot guarantee every transaction, but we are committed to making Second Tur
 
 ---
 
-## 6. Buyer Guidelines
+## 7. Buyer Guidelines
 
 As a buyer, you agree to:
 
-- Ask questions about condition and completeness **before** purchasing
-- Review listing photos and descriptions carefully
-- Contact sellers respectfully and professionally
+- Review listing photos and descriptions carefully before purchasing
+- Ask questions about condition and completeness **before** buying
+- Contact sellers respectfully
 - Collect your parcel promptly from the delivery terminal
-- Honor your commitments to purchase
-- Not abuse the chargeback system for invalid claims
+- Report genuine issues within **2 days of delivery**
+- Not abuse the dispute or chargeback system with false claims
 - Report fraudulent listings or suspicious activity
 
 ---
 
-## 7. Content Moderation and Reporting
+## 8. Content Moderation and Reporting
 
-### 7.1 Our Approach
+### 8.1 Our Approach
 
 We moderate content to remove illegal listings, fraudulent activity, and violations of these Terms. We do not pre-approve listings before they are published.
 
-### 7.2 Reporting Content
+### 8.2 Reporting Content
 
 If you encounter content that you believe is illegal or violates these Terms:
 
@@ -209,7 +266,7 @@ Please include:
 - An explanation of why you believe it violates our Terms or the law
 - Your contact information (optional)
 
-### 7.3 Our Response
+### 8.3 Our Response
 
 We will review reports and may:
 
@@ -219,17 +276,17 @@ We will review reports and may:
 
 We will notify affected users of our decision and provide a statement of reasons.
 
-### 7.4 Appeals
+### 8.4 Appeals
 
 If your content was removed or your account was restricted, you may appeal by contacting **appeals@secondturn.games** within 14 days. We will respond within 30 days.
 
-### 7.5 Transparency
+### 8.5 Transparency
 
 In accordance with the EU Digital Services Act (DSA), we publish information about our content moderation activities in our annual transparency report.
 
 ---
 
-## 8. Prohibited Conduct
+## 9. Prohibited Conduct
 
 You may NOT:
 
@@ -249,25 +306,29 @@ You may NOT:
 
 ---
 
-## 9. Intellectual Property
+## 10. Intellectual Property
 
-### 9.1 Platform Content
+### 10.1 Platform Content
 
 The Second Turn Games platform, including its design, logo, code, and content (excluding user-generated content), is owned by Second Turn Games SIA and protected by copyright and trademark laws.
 
-### 9.2 User-Generated Content
+### 10.2 User-Generated Content
 
 You retain ownership of content you post (listings, photos, messages). By posting content, you grant us a worldwide, non-exclusive, royalty-free license to use, display, and reproduce your content for the purpose of operating the Platform.
 
-### 9.3 Game Data
+:::plain-terms
+Your photos are yours. We just need permission to show them on the site and in emails so buyers can see your listings.
+:::
+
+### 10.3 Game Data
 
 Game information (names, images, metadata) is provided by BoardGameGeek and is the property of BoardGameGeek LLC.
 
 ---
 
-## 10. Disclaimers and Limitations
+## 11. Disclaimers and Limitations
 
-### 10.1 "As Is" Service
+### 11.1 "As Is" Service
 
 The Platform is provided "AS IS" and "AS AVAILABLE" without warranties of any kind. We do not guarantee:
 
@@ -277,7 +338,7 @@ The Platform is provided "AS IS" and "AS AVAILABLE" without warranties of any ki
 - Truthfulness of user representations
 - Successful completion of transactions
 
-### 10.2 Limitation of Liability
+### 11.2 Limitation of Liability
 
 To the maximum extent permitted by law, Second Turn Games SIA is not liable for:
 
@@ -289,34 +350,19 @@ To the maximum extent permitted by law, Second Turn Games SIA is not liable for:
 - Data loss or security breaches
 - Indirect, incidental, or consequential damages
 
-Our total liability to you for any claim shall not exceed **€100** or the amount you paid us in service fees in the past 12 months (whichever is greater).
+**Our maximum liability:** €100 or the service fees you paid us in the past 12 months, whichever is greater.
 
-### 10.3 Indemnification
+:::plain-terms
+We are the platform, not the seller. If a transaction goes wrong, our liability is limited. We do our best to provide tools (like payment protection) to help, but the transaction is ultimately between you and the other user.
+:::
+
+### 11.3 Indemnification
 
 You agree to indemnify and hold harmless Second Turn Games SIA from any claims, damages, or expenses arising from your use of the Platform, your violations of these Terms, or your transactions with other users.
 
 ---
 
-## 11. Termination
-
-We may suspend or terminate your account if you:
-
-- Violate these Terms
-- Engage in fraudulent or illegal activity
-- Receive repeated complaints from other users
-- Abuse the chargeback system
-- Pose a security or legal risk to the Platform
-
-You may delete your account at any time in account settings. Upon termination:
-
-- Your listings will be removed
-- Your profile will be hidden
-- You can recover your account within 14 days
-- After 90 days, your data is permanently deleted (see [Privacy Policy](/privacy))
-
----
-
-## 12. Governing Law & Dispute Resolution
+## 12. Governing Law and Dispute Resolution
 
 ### 12.1 Governing Law
 
@@ -332,7 +378,7 @@ For disputes with Second Turn Games SIA:
 
 ### 12.3 User-to-User Disputes
 
-Disputes between users are not our responsibility. You may seek resolution through your payment provider, consumer protection agencies, or courts in your jurisdiction.
+Disputes between users are between those users. You may seek resolution through your payment provider, consumer protection agencies, or courts in your jurisdiction.
 
 ---
 
@@ -340,13 +386,13 @@ Disputes between users are not our responsibility. You may seek resolution throu
 
 We may update these Terms from time to time. Significant changes will be announced via email and/or notice on the Platform.
 
-Continued use of the Platform after changes constitutes acceptance. If you don't agree, you must stop using the Platform and delete your account.
+Continued use of the Platform after changes constitutes acceptance. If you do not agree, you must stop using the Platform and delete your account.
 
 ---
 
 ## 14. Miscellaneous
 
-- **Entire Agreement:** These Terms, together with our Privacy Policy and (if applicable) Seller Terms, constitute the entire agreement between you and Second Turn Games SIA.
+- **Entire Agreement:** These Terms, together with our Privacy Policy and (if applicable) Seller Agreement, constitute the entire agreement between you and Second Turn Games SIA.
 - **Severability:** If any provision is found unenforceable, the remaining provisions remain in full effect.
 - **No Waiver:** Our failure to enforce any right does not constitute a waiver.
 - **Assignment:** You may not transfer your account or these Terms. We may assign our rights to a successor entity.
@@ -362,8 +408,9 @@ Continued use of the Platform after changes constitutes acceptance. If you don't
 | **Report fraud/safety** | safety@secondturn.games |
 | **DSA matters** | dsa@secondturn.games |
 | **Appeals** | appeals@secondturn.games |
+| **Privacy and data requests** | privacy@secondturn.games |
 | **Address** | Second Turn Games SIA, Evalda Valtera 5-35, Riga, LV-1021, Latvia |
 
 ---
 
-*By using Second Turn Games, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.*
+*By using Second Turn Games, you acknowledge that you have read, understood, and agree to these Terms of Service.*

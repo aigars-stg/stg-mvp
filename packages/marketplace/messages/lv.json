@@ -1033,7 +1033,9 @@
     },
     "sections": {
       "marketplace": "Tirgus",
+      "help": "Palīdzība",
       "legal": "Juridiskā informācija",
+      "resources": "Resursi",
       "contact": "Kontakti"
     },
     "links": {
@@ -1041,9 +1043,15 @@
       "sellGame": "Pārdot spēli",
       "requestGame": "Pieprasīt spēli",
       "conditionGuide": "Stāvokļa vadlīnijas",
+      "sellingGuide": "Pārdošanas ceļvedis",
+      "shipping": "Piegāde",
+      "dac7": "DAC7 un nodokļi",
+      "helpCentre": "Palīdzības centrs",
+      "legalHub": "Juridiskā informācija",
       "privacyPolicy": "Privātuma politika",
       "termsOfService": "Lietošanas noteikumi",
-      "sellerTerms": "Pārdevēja noteikumi"
+      "sellerTerms": "Pārdevēja noteikumi",
+      "fees": "Maksas"
     },
     "company": {
       "name": "Second Turn Games SIA",
