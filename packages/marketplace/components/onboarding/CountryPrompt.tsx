@@ -11,14 +11,15 @@ interface CountryPromptProps {
   onComplete?: (country: CountryCode) => void;
 }
 
-const COUNTRIES: { code: CountryCode; flagClass: string; nameKey: 'latvia' | 'estonia' | 'lithuania' }[] = [
-  { code: 'LV', flagClass: 'fi fi-lv', nameKey: 'latvia' },
-  { code: 'EE', flagClass: 'fi fi-ee', nameKey: 'estonia' },
-  { code: 'LT', flagClass: 'fi fi-lt', nameKey: 'lithuania' },
+const COUNTRIES: { code: CountryCode; flagClass: string }[] = [
+  { code: 'LV', flagClass: 'fi fi-lv' },
+  { code: 'EE', flagClass: 'fi fi-ee' },
+  { code: 'LT', flagClass: 'fi fi-lt' },
 ];
 
 export function CountryPrompt({ onComplete }: CountryPromptProps) {
   const t = useTranslations('CountryPrompt');
+  const tCountry = useTranslations('Countries');
   const { user, profile, refreshProfile } = useAuth();
   const [loading, setLoading] = useState<CountryCode | null>(null);
   const [error, setError] = useState('');
@@ -74,7 +75,7 @@ export function CountryPrompt({ onComplete }: CountryPromptProps) {
               ) : (
                 <span className={c.flagClass} />
               )}
-              <span>{t(c.nameKey)}</span>
+              <span>{tCountry(c.code)}</span>
             </button>
           ))}
         </div>

@@ -3,18 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@second-turn/design-system';
-import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Package, RefreshCw as Loader2 } from 'griddy-icons';
+import { RefreshCw as Loader2 } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { InstantBuyCard, ContactSellerCard } from '@/components/seller/onboard';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { CountryCode } from '@/lib/country-utils';
 
-const COUNTRY_CODES: { code: CountryCode; flagClass: string; nameKey: 'latvia' | 'estonia' | 'lithuania' }[] = [
-  { code: 'LV', flagClass: 'fi fi-lv', nameKey: 'latvia' },
-  { code: 'EE', flagClass: 'fi fi-ee', nameKey: 'estonia' },
-  { code: 'LT', flagClass: 'fi fi-lt', nameKey: 'lithuania' },
+const COUNTRY_CODES: { code: CountryCode; flagClass: string }[] = [
+  { code: 'LV', flagClass: 'fi fi-lv' },
+  { code: 'EE', flagClass: 'fi fi-ee' },
+  { code: 'LT', flagClass: 'fi fi-lt' },
 ];
 
 interface OnboardingStatus {
@@ -22,26 +21,20 @@ interface OnboardingStatus {
   terms_accepted: boolean;
   onboarding_completed: boolean;
   can_list_items: boolean;
-  can_create_contact_seller?: boolean;
-  can_create_instant_buy?: boolean;
 }
-
-type OnboardingStep = 'terms' | 'choice';
 
 export default function SellerOnboardingPage() {
   const router = useRouter();
   const { user, profile, refreshProfile, loading: authLoading } = useAuth();
   const t = useTranslations('SellerOnboard');
+  const tCountry = useTranslations('Countries');
 
-  const [status, setStatus] = useState<OnboardingStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [detectingCountry, setDetectingCountry] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [acceptingTerms, setAcceptingTerms] = useState(false);
-  const [completingTermsOnly, setCompletingTermsOnly] = useState(false);
   const [savingCountry, setSavingCountry] = useState<CountryCode | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [currentStep, setCurrentStep] = useState<OnboardingStep>('terms');
 
   const handleSelectCountry = async (country: CountryCode) => {
     if (!user || savingCountry) return;
@@ -107,15 +100,13 @@ export default function SellerOnboardingPage() {
     try {
       setLoading(true);
       const response = await fetch('/api/seller/onboarding/status');
-      const data = await response.json();
+      const data: OnboardingStatus = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch status');
+        throw new Error('Failed to fetch status');
       }
 
-      setStatus(data);
-
-      // If already fully onboarded (can list items), redirect to completion page
+      // If already active, redirect to completion page
       if (data.onboarding_completed && data.can_list_items) {
         router.push('/seller/onboard/complete');
         return;
@@ -125,44 +116,10 @@ export default function SellerOnboardingPage() {
       if (!profile?.country) {
         await detectAndSaveCountry();
       }
-
-      // Pre-check terms if already accepted
-      if (data.terms_accepted) {
-        setTermsAccepted(true);
-        // If terms are accepted but not fully onboarded, show choice screen
-        if (data.seller_status === 'onboarding') {
-          setCurrentStep('choice');
-        }
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load status');
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Complete terms-only onboarding (Contact Seller only)
-  const handleCompleteTermsOnly = async () => {
-    try {
-      setCompletingTermsOnly(true);
-      setError(null);
-
-      const response = await fetch('/api/seller/onboarding/complete-terms-only', {
-        method: 'POST',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to complete onboarding');
-      }
-
-      // Redirect to sell page
-      router.push('/sell');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to complete onboarding');
-    } finally {
-      setCompletingTermsOnly(false);
     }
   };
 
@@ -173,7 +130,7 @@ export default function SellerOnboardingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Accept seller terms
+  // Accept seller terms and activate seller account
   const handleAcceptTerms = async () => {
     try {
       setAcceptingTerms(true);
@@ -191,9 +148,8 @@ export default function SellerOnboardingPage() {
         throw new Error(data.error || 'Failed to accept terms');
       }
 
-      setTermsAccepted(true);
-      // Go directly to choice screen
-      setCurrentStep('choice');
+      // Seller is now active — redirect to completion page
+      router.push('/seller/onboard/complete');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to accept terms');
     } finally {
@@ -227,8 +183,6 @@ export default function SellerOnboardingPage() {
           </p>
         </div>
 
-        {/* Benefits Grid Removed */}
-
         {/* Error Message */}
         {error && (
           <div className="bg-aurora-red/10 border border-aurora-red/30 rounded-lg p-4 mb-8">
@@ -236,201 +190,118 @@ export default function SellerOnboardingPage() {
           </div>
         )}
 
-        {/* Step 1: Accept Terms (shown when currentStep === 'terms') */}
-        {currentStep === 'terms' && (
-          <div className="bg-snow-white border border-border rounded-lg p-4 sm:p-6 lg:p-8 mb-8">
-            <h2 className="text-xl sm:text-2xl font-semibold text-polar-night mb-6">
-              {t('step1.title')}
-            </h2>
+        {/* Accept Terms */}
+        <div className="bg-snow-white border border-border rounded-lg p-4 sm:p-6 lg:p-8 mb-8">
+          <h2 className="text-xl sm:text-2xl font-semibold text-polar-night mb-6">
+            {t('step1.title')}
+          </h2>
 
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex-shrink-0 bg-frost-ice">
-                <span className="text-white font-semibold text-base sm:text-lg">1</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-2">
-                  {t('step1.heading')}
-                </h3>
-                <p className="text-sm text-text-secondary mb-4">
-                  {t('step1.description')}
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex-shrink-0 bg-frost-ice">
+              <span className="text-white font-semibold text-base sm:text-lg">1</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-2">
+                {t('step1.heading')}
+              </h3>
+              <p className="text-sm text-text-secondary mb-4">
+                {t('step1.description')}
+              </p>
+
+              <div className="bg-snow-stormLight border border-border rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">
+                <p className="font-semibold text-polar-night mb-2 sm:mb-3 text-sm sm:text-base">{t('step1.keyPoints.title')}</p>
+                <ul className="space-y-2 text-xs sm:text-sm text-text-secondary">
+                  <li className="flex items-start gap-2">
+                    <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
+                    <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.zeroFees') }} />
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
+                    <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.ageRequirement') }} />
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
+                    <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.personalItems') }} />
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
+                    <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.accurateDescriptions') }} />
+                  </li>
+                </ul>
+                <p className="mt-3 sm:mt-4 pt-3 border-t border-border">
+                  <Link href="/seller/terms" target="_blank" className="text-frost-ice hover:underline text-xs sm:text-sm">
+                    {t('step1.readFullTerms')}
+                  </Link>
                 </p>
+              </div>
 
-                <div className="bg-snow-stormLight border border-border rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">
-                  <p className="font-semibold text-polar-night mb-2 sm:mb-3 text-sm sm:text-base">{t('step1.keyPoints.title')}</p>
-                  <ul className="space-y-2 text-xs sm:text-sm text-text-secondary">
-                    <li className="flex items-start gap-2">
-                      <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-                      <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.zeroFees') }} />
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-                      <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.ageRequirement') }} />
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-                      <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.personalItems') }} />
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-                      <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.accurateDescriptions') }} />
-                    </li>
-                  </ul>
-                  <p className="mt-3 sm:mt-4 pt-3 border-t border-border">
-                    <Link href="/seller/terms" target="_blank" className="text-frost-ice hover:underline text-xs sm:text-sm">
-                      {t('step1.readFullTerms')}
-                    </Link>
-                  </p>
+              {/* Country Selection */}
+              <div className="bg-frost-ice/5 border border-frost-ice/20 rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">
+                <p className="font-semibold text-polar-night mb-3 text-sm sm:text-base">
+                  {t('step1.country.title')}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {COUNTRY_CODES.map((c) => (
+                    <button
+                      key={c.code}
+                      type="button"
+                      onClick={() => handleSelectCountry(c.code)}
+                      disabled={savingCountry !== null}
+                      className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-50 ${
+                        profile?.country === c.code
+                          ? 'bg-frost-ice text-white border-2 border-frost-ice'
+                          : 'bg-snow-white hover:border-frost-ice border-2 border-border'
+                      }`}
+                    >
+                      {savingCountry === c.code ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <span className={c.flagClass} />
+                      )}
+                      <span>{tCountry(c.code)}</span>
+                    </button>
+                  ))}
                 </div>
-
-                {/* Country Selection - inline in terms step */}
-                <div className="bg-frost-ice/5 border border-frost-ice/20 rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">
-                  <p className="font-semibold text-polar-night mb-3 text-sm sm:text-base">
-                    {t('step1.country.title')}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {COUNTRY_CODES.map((c) => (
-                      <button
-                        key={c.code}
-                        type="button"
-                        onClick={() => handleSelectCountry(c.code)}
-                        disabled={savingCountry !== null}
-                        className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-50 ${
-                          profile?.country === c.code
-                            ? 'bg-frost-ice text-white border-2 border-frost-ice'
-                            : 'bg-snow-white hover:border-frost-ice border-2 border-border'
-                        }`}
-                      >
-                        {savingCountry === c.code ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <span className={c.flagClass} />
-                        )}
-                        <span>{t(`step1.country.${c.nameKey}`)}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-xs text-text-secondary mt-2">
-                    {t('step1.country.hint')}
-                  </p>
-                </div>
-
-                <label className="flex items-start gap-2.5 sm:gap-3 mb-4 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={termsAccepted}
-                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-0.5 w-5 h-5 sm:w-4 sm:h-4 text-frost-ice border-border rounded focus:ring-frost-ice flex-shrink-0"
-                    aria-label="Accept seller terms"
-                  />
-                  <span className="text-xs sm:text-sm text-text-secondary">
-                    {t('step1.checkbox')}{' '}
-                    <Link href="/seller/terms" target="_blank" className="text-frost-ice hover:underline">
-                      {t('step1.sellerTerms')}
-                    </Link>.
-                  </span>
-                </label>
-
-                <Button
-                  variant="primary"
-                  size="md"
-                  fullWidth
-                  className="sm:w-auto"
-                  onClick={handleAcceptTerms}
-                  disabled={!termsAccepted || !profile?.country || acceptingTerms}
-                  loading={acceptingTerms}
-                >
-                  {t('step1.acceptButton')}
-                </Button>
-                {!profile?.country && termsAccepted && (
-                  <p className="text-xs text-aurora-orange mt-2">
-                    {t('step1.countryRequired')}
-                  </p>
-                )}
+                <p className="text-xs text-text-secondary mt-2">
+                  {t('step1.country.hint')}
+                </p>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* Step 2: Choice Screen (shown when currentStep === 'choice') */}
-        {currentStep === 'choice' && (
-          <div className="bg-snow-white border border-border rounded-lg p-4 sm:p-6 lg:p-8 mb-8">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="w-5 h-5 text-aurora-green" />
-              <span className="text-sm text-aurora-green">{t('step2.termsAccepted')}</span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-semibold text-polar-night mb-2">
-              {t('step2.title')}
-            </h2>
-            <p className="text-text-secondary mb-6">
-              {t('step2.subtitle')}
-            </p>
-
-            <div className="grid sm:grid-cols-2 gap-4 mb-6">
-              <div className="order-2 sm:order-1">
-                <ContactSellerCard
-                  onSelect={handleCompleteTermsOnly}
-                  loading={completingTermsOnly}
+              <label className="flex items-start gap-2.5 sm:gap-3 mb-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-0.5 w-5 h-5 sm:w-4 sm:h-4 text-frost-ice border-border rounded focus:ring-frost-ice flex-shrink-0"
+                  aria-label="Accept seller terms"
                 />
-              </div>
-              <div className="order-1 sm:order-2">
-                <InstantBuyCard
-                  onSelect={handleCompleteTermsOnly}
-                  loading={completingTermsOnly}
-                />
-              </div>
-            </div>
+                <span className="text-xs sm:text-sm text-text-secondary">
+                  {t('step1.checkbox')}{' '}
+                  <Link href="/seller/terms" target="_blank" className="text-frost-ice hover:underline">
+                    {t('step1.sellerTerms')}
+                  </Link>.
+                </span>
+              </label>
 
-            <p className="text-xs text-text-secondary text-center">
-              {t('step2.upgradeNote')}
-            </p>
-          </div>
-        )}
-
-        {/* What's Next */}
-        {status?.onboarding_completed && (
-          <div className="bg-snow-white border border-border rounded-lg p-8">
-            <h2 className="text-xl font-semibold text-polar-night mb-4 flex items-center gap-2">
-              <Package className="w-6 h-6 text-frost-ice" />
-              {t('whatsNext.title')}
-            </h2>
-            <ul className="space-y-3 text-text-secondary">
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-aurora-green flex-shrink-0" />
-                <span>{t('whatsNext.step1')}</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-aurora-green flex-shrink-0" />
-                <span>{t('whatsNext.step2')}</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-aurora-green flex-shrink-0" />
-                <span>{t('whatsNext.step3')}</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-aurora-green flex-shrink-0" />
-                <span>{t('whatsNext.step4')}</span>
-              </li>
-            </ul>
-
-            <div className="mt-6 flex gap-3">
               <Button
                 variant="primary"
-                size="lg"
-                onClick={() => router.push('/sell')}
-                rightIcon={<ArrowRight className="w-5 h-5" />}
+                size="md"
+                fullWidth
+                className="sm:w-auto"
+                onClick={handleAcceptTerms}
+                disabled={!termsAccepted || !profile?.country || acceptingTerms}
+                loading={acceptingTerms}
               >
-                {t('whatsNext.createListing')}
+                {t('step1.acceptButton')}
               </Button>
-              <Button
-                variant="secondary"
-                size="lg"
-                onClick={() => router.push('/seller/onboard/complete')}
-              >
-                {t('whatsNext.viewDashboard')}
-              </Button>
+              {!profile?.country && termsAccepted && (
+                <p className="text-xs text-aurora-orange mt-2">
+                  {t('step1.countryRequired')}
+                </p>
+              )}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Support Link */}
         <div className="text-center mt-8">

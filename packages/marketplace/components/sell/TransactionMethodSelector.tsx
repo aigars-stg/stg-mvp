@@ -2,8 +2,8 @@
 
 import { Chat as MessageSquare, CreditCard, CheckCircleAlt01 as CheckCircle2, ArrowRight } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import type { TransactionMethod } from '@/lib/types/listing';
-import { ListingTypeHelpLink } from '@/components/seller/onboard';
 
 interface TransactionMethodSelectorProps {
   value: TransactionMethod;
@@ -122,7 +122,9 @@ export function TransactionMethodSelector({
       </div>
 
       <div className="text-center">
-        <ListingTypeHelpLink variant="listing" />
+        <Link href="/help/listing-types" className="text-xs text-frost-ice hover:underline">
+          {t('helpLink')}
+        </Link>
       </div>
     </div>
   );

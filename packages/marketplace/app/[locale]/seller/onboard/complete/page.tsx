@@ -165,7 +165,7 @@ export default function SellerOnboardingCompletePage() {
               <div>
                 <h4 className="font-semibold text-polar-night mb-1">Get Paid</h4>
                 <p className="text-sm text-text-secondary">
-                  Funds are transferred to your bank account within 2-7 business days. You keep 100% of the listing price!
+                  Your earnings are credited to your platform wallet after each completed sale. A 10% platform commission applies.
                 </p>
               </div>
             </div>

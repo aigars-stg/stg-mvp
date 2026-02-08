@@ -890,12 +890,15 @@
       "button": "Pievienoties"
     }
   },
+  "Countries": {
+    "LV": "Latvija",
+    "EE": "Igaunija",
+    "LT": "Lietuva",
+    "OTHER": "Cita"
+  },
   "CountryPrompt": {
     "pickCountry": "Izvēlies valsti, lai redzētu spēles tev tuvumā",
-    "somethingWentWrong": "Kaut kas nogāja greizi",
-    "latvia": "Latvija",
-    "estonia": "Igaunija",
-    "lithuania": "Lietuva"
+    "somethingWentWrong": "Kaut kas nogāja greizi"
   },
   "Browse": {
     "tabs": {
@@ -1728,85 +1731,16 @@
       "readFullTerms": "Lasīt pilnus Pārdevēja noteikumus →",
       "country": {
         "title": "Kur tu atrodies?",
-        "hint": "Tas palīdz mums parādīt pieejamās maksājumu un piegādes opcijas.",
-        "latvia": "Latvija",
-        "estonia": "Igaunija",
-        "lithuania": "Lietuva"
+        "hint": "Tas palīdz mums parādīt pieejamās maksājumu un piegādes opcijas."
       },
       "checkbox": "Es apstiprinu, ka esmu 16+, pārdodu personīgas lietas un piekrītu",
       "sellerTerms": "Pārdevēja noteikumiem",
       "acceptButton": "Pieņemt pārdevēja noteikumus",
       "countryRequired": "Lūdzu, izvēlies savu valsti augstāk, lai turpinātu"
     },
-    "step2": {
-      "termsAccepted": "Noteikumi pieņemti",
-      "title": "Kā vēlies pārdot?",
-      "subtitle": "Izvēlies, kā sazināties ar pircējiem.",
-      "contactSeller": {
-        "title": "Sazinies ar pircēju",
-        "description": "Pircēji raksta tev, lai vienotos par maksājumu un piegādi. Tu visu nokārto pats.",
-        "benefit1": "Bez platformas maksām",
-        "benefit2": "Pats nokārto maksājumu",
-        "benefit3": "Pats nokārto piegādi",
-        "button": "Sākt pārdošanu"
-      },
-      "instantBuy": {
-        "badge": "Ieteicams",
-        "title": "Pirkt uzreiz",
-        "description": "Pircēji pērk uzreiz. Tu nosūti, saņem naudu. Viss.",
-        "benefit1": "Pārdod ātrāk — pirkums ar vienu klikšķi",
-        "benefit2": "€2 piegāde uz pakomātiem",
-        "benefit3": "Nauda tieši tavā bankas kontā",
-        "benefit4": "Pircēji uzticas drošiem maksājumiem",
-        "button": "Iestatīt maksājumus",
-        "buttonTime": "2 min",
-        "comingSoon": "Pirkt uzreiz drīzumā būs pieejams tavā valstī",
-        "comingSoonButton": "Drīzumā"
-      },
-      "upgradeNote": "Jūs varat iespējot Tūlītējo pirkšanu jebkurā laikā no pārdevēja iestatījumiem.",
-      "helpLink": "Kā darbojas Tūlītējā pirkšana?"
-    },
-    "step3": {
-      "backButton": "← Atpakaļ uz opcijām",
-      "title": "Maksājumu iestatīšana",
-      "heading": "Savienot maksājumu kontu",
-      "description": "Tavi ienākumi tiek ieskaitīti platformas makā pēc katra pārdošanas. Tu vari izņemt uz savu bankas kontu jebkurā laikā, izmantojot IBAN.",
-      "requirements": {
-        "title": "Tev būs nepieciešams:",
-        "id": "Personu apliecinošs dokuments (pase, ID karte vai autovadītāja apliecība)",
-        "bank": "Bankas konta dati (IBAN)",
-        "personal": "Personiskā info (vārds, dzimšanas datums, adrese)"
-      },
-      "continueButton": "Turpināt",
-      "redirectNote": "Tu vari pievienot bankas datus vēlāk, pieprasot pirmo izņemšanu"
-    },
-    "whatsNext": {
-      "title": "Kas tālāk?",
-      "step1": "Izveido savu pirmo sludinājumu — apraksti spēli un nosaki cenu",
-      "step2": "Kad kāds pērk, saņemsi e-pastu ar piegādes info",
-      "step3": "Nodod jebkurā Unisend pakomātā 2 darba dienu laikā",
-      "step4": "Saņem naudu tieši savā bankas kontā",
-      "createListing": "Izveidot pirmo sludinājumu",
-      "viewDashboard": "Skatīt paneli"
-    },
     "support": {
       "needHelp": "Nepieciešama palīdzība?",
       "contactUs": "Sazinies ar mums"
-    },
-    "choiceScreen": {
-      "title": "Kā vēlies pārdot?",
-      "contactSeller": {
-        "title": "Sazinies ar pircēju",
-        "description": "Pircēji vispirms raksta tev. Maksājumu organizē pats.",
-        "button": "Sākt pārdot"
-      },
-      "instantBuy": {
-        "title": "Pirkt uzreiz",
-        "description": "Pieņem drošus maksājumus. Nauda nonāk tieši tavā bankas kontā.",
-        "button": "Iestatīt maksājumus"
-      },
-      "upgradeNote": "Maksājumu atbalstu vari pievienot vēlāk",
-      "countryNotSupported": "Maksājumi drīzumā būs pieejami tavā valstī"
     }
   },
   "StatusChangeModal": {
@@ -2060,14 +1994,8 @@
     },
     "SellerCTA": {
       "title": "Sāc pārdot",
-      "subtitle": "Pārvērt gaidošās spēles kāda nākamajā piedzīvojumā. Bez maksām pārdevējiem.",
-      "startSelling": "Sāc pārdot",
-      "continueSetup": {
-        "title": "Turpini pārdevēja iestatīšanu",
-        "subtitle": "Gandrīz gatavs — pabeidz maksājumu iestatīšanu, lai sāktu pārdot.",
-        "stepProgress": "1. solis no 2 pabeigts",
-        "button": "Turpināt iestatīšanu"
-      }
+      "subtitle": "Pārvērt gaidošās spēles kāda nākamajā piedzīvojumā. Tikai 10% komisija no pārdošanas.",
+      "startSelling": "Sāc pārdot"
     },
     "PlatformFeatures": {
       "title": "Kā tas darbojas",
@@ -2750,7 +2678,7 @@
         },
         "whyChoose": "Kāpēc izvēlēties šo opciju?",
         "reasons": {
-          "noStripe": "Jūs dodat priekšroku tiešiem maksājumiem",
+          "directPayments": "Jūs dodat priekšroku tiešiem maksājumiem",
           "negotiate": "Jūs dodat priekšroku cenu sarunām",
           "ownShipping": "Jūs vēlaties izvēlēties savu piegādes veidu",
           "country": "Jūs atrodaties Lietuvā vai Igaunijā (kur Tūlītējā pirkšana vēl nav pieejama)"

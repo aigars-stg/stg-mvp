@@ -71,8 +71,8 @@ export interface AuthContextType {
   /** Whether user's profile is complete (has display name and country) */
   isProfileComplete: boolean;
   /** Sign in with magic link (passwordless) - works for both new and existing users */
-  signInWithMagicLink: (email: string, locale?: string) => Promise<{ error: Error | null }>;
-  signInWithOAuth: (provider: 'google' | 'github' | 'facebook', locale?: string) => Promise<{ error: Error | null }>;
+  signInWithMagicLink: (email: string, locale?: string, redirectTo?: string) => Promise<{ error: Error | null }>;
+  signInWithOAuth: (provider: 'google' | 'github' | 'facebook', locale?: string, redirectTo?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<{ error: Error | null }>;
   refreshProfile: () => Promise<void>;

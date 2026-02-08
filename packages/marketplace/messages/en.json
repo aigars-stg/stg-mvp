@@ -890,12 +890,15 @@
       "button": "Join"
     }
   },
+  "Countries": {
+    "LV": "Latvia",
+    "EE": "Estonia",
+    "LT": "Lithuania",
+    "OTHER": "Other"
+  },
   "CountryPrompt": {
     "pickCountry": "Pick your country to see games near you",
-    "somethingWentWrong": "Something went wrong",
-    "latvia": "Latvia",
-    "estonia": "Estonia",
-    "lithuania": "Lithuania"
+    "somethingWentWrong": "Something went wrong"
   },
   "Browse": {
     "tabs": {
@@ -1728,84 +1731,16 @@
       "readFullTerms": "Read full Seller Terms →",
       "country": {
         "title": "Where are you located?",
-        "hint": "This helps us show you available payment and shipping options.",
-        "latvia": "Latvia",
-        "estonia": "Estonia",
-        "lithuania": "Lithuania"
+        "hint": "This helps us show you available payment and shipping options."
       },
       "checkbox": "I confirm I'm 16+, selling personal items, and agree to the",
       "sellerTerms": "Seller Terms",
       "acceptButton": "Accept seller terms",
       "countryRequired": "Please select your country above to continue"
     },
-    "step2": {
-      "termsAccepted": "Terms accepted",
-      "title": "How would you like to sell?",
-      "subtitle": "Choose how you want to connect with buyers.",
-      "contactSeller": {
-        "title": "Contact Seller",
-        "description": "Buyers message you to arrange payment and delivery. You handle everything yourself.",
-        "benefit1": "No platform fees",
-        "benefit2": "You arrange payment",
-        "benefit3": "You arrange shipping",
-        "button": "Start selling"
-      },
-      "instantBuy": {
-        "badge": "Recommended",
-        "title": "Instant Buy",
-        "description": "Buyers purchase instantly. You ship, you get paid. Done.",
-        "benefit1": "Sell faster — one-click checkout",
-        "benefit2": "€2 shipping via parcel lockers",
-        "benefit3": "Money direct to your bank",
-        "benefit4": "Buyers trust secure payments",
-        "button": "Set up payments",
-        "buttonTime": "2 min",
-        "comingSoon": "Instant Buy is coming soon to your country",
-        "comingSoonButton": "Coming soon"
-      },
-      "upgradeNote": "You can enable Instant Buy anytime from your seller settings.",
-      "helpLink": "How does Instant Buy work?"
-    },
-    "step3": {
-      "backButton": "← Back to options",
-      "title": "Payment setup",
-      "heading": "How you get paid",
-      "description": "Your earnings are credited to your platform wallet after each sale. You can withdraw to your bank account anytime using your IBAN.",
-      "requirements": {
-        "title": "To withdraw, you'll need:",
-        "bank": "Bank account details (IBAN)",
-        "personal": "Account holder name"
-      },
-      "continueButton": "Continue",
-      "redirectNote": "You can add your bank details later when you request your first withdrawal"
-    },
-    "whatsNext": {
-      "title": "What's next?",
-      "step1": "Create your first listing - describe your game and set a price",
-      "step2": "When someone buys, you'll get an email with shipping details",
-      "step3": "Drop off at any Unisend parcel terminal within 2 business days",
-      "step4": "Receive payment directly to your bank account",
-      "createListing": "Create first listing",
-      "viewDashboard": "View dashboard"
-    },
     "support": {
       "needHelp": "Need help?",
       "contactUs": "Contact us"
-    },
-    "choiceScreen": {
-      "title": "How would you like to sell?",
-      "contactSeller": {
-        "title": "Contact Seller",
-        "description": "Buyers message you first. Arrange payment yourselves.",
-        "button": "Start selling"
-      },
-      "instantBuy": {
-        "title": "Instant Buy",
-        "description": "Accept secure payments. Money goes directly to your bank.",
-        "button": "Set up payments"
-      },
-      "upgradeNote": "You can add payment support later",
-      "countryNotSupported": "Payments coming soon to your country"
     }
   },
   "StatusChangeModal": {
@@ -2059,14 +1994,8 @@
     },
     "SellerCTA": {
       "title": "Start selling",
-      "subtitle": "Turn waiting games into someone's next adventure. No fees for sellers.",
-      "startSelling": "Start selling",
-      "continueSetup": {
-        "title": "Continue seller setup",
-        "subtitle": "Almost there — complete your payment setup to start selling.",
-        "stepProgress": "Step 1 of 2 complete",
-        "button": "Continue setup"
-      }
+      "subtitle": "Turn waiting games into someone's next adventure. Just a 10% commission on sales.",
+      "startSelling": "Start selling"
     },
     "PlatformFeatures": {
       "title": "How it works",
@@ -2744,7 +2673,7 @@
         },
         "whyChoose": "Why choose this option?",
         "reasons": {
-          "noStripe": "You prefer to handle payments directly",
+          "directPayments": "You prefer to handle payments directly",
           "negotiate": "You prefer negotiating prices",
           "ownShipping": "You want to arrange your own shipping method",
           "country": "You're located in Lithuania or Estonia (where Instant Buy isn't available yet)"

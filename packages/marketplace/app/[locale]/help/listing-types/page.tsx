@@ -233,7 +233,7 @@ function ContactSellerSection() {
   const t = useTranslations('Help.ListingTypes.contactSellerSection');
 
   const steps = ['step1', 'step2', 'step3', 'step4', 'step5'] as const;
-  const reasons = ['noStripe', 'negotiate', 'ownShipping', 'country'] as const;
+  const reasons = ['directPayments', 'negotiate', 'ownShipping', 'country'] as const;
 
   return (
     <section id="contact-seller" className="mb-12">

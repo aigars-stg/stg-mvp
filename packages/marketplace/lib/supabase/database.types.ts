@@ -2532,65 +2532,25 @@ export type Database = {
         }
         Returns: string
       }
-      create_order_from_basket:
-        | {
-            Args: {
-              p_basket_id: string
-              p_buyer_wallet_debit_cents?: number
-              p_destination_country?: string
-              p_destination_terminal_address?: string
-              p_destination_terminal_id?: string
-              p_destination_terminal_name?: string
-              p_everypay_payment_reference?: string
-              p_pickup_city?: string
-              p_pickup_notes?: string
-              p_receiver_email?: string
-              p_receiver_name?: string
-              p_receiver_phone?: string
-              p_shipping_cost?: number
-              p_shipping_method: string
-            }
-            Returns: Json
-          }
-        | {
-            Args: {
-              p_basket_id: string
-              p_destination_country?: string
-              p_destination_terminal_address?: string
-              p_destination_terminal_id?: string
-              p_destination_terminal_name?: string
-              p_pickup_city?: string
-              p_pickup_notes?: string
-              p_receiver_email?: string
-              p_receiver_name?: string
-              p_receiver_phone?: string
-              p_service_fee?: number
-              p_shipping_cost?: number
-              p_shipping_method: string
-              p_stripe_payment_intent_id?: string
-            }
-            Returns: Json
-          }
-        | {
-            Args: {
-              p_basket_id: string
-              p_destination_country?: string
-              p_destination_terminal_address?: string
-              p_destination_terminal_id?: string
-              p_destination_terminal_name?: string
-              p_pickup_city?: string
-              p_pickup_notes?: string
-              p_receiver_email?: string
-              p_receiver_name?: string
-              p_receiver_phone?: string
-              p_service_fee?: number
-              p_shipping_cost?: number
-              p_shipping_method: string
-              p_stripe_charge_id?: string
-              p_stripe_payment_intent_id?: string
-            }
-            Returns: Json
-          }
+      create_order_from_basket: {
+        Args: {
+          p_basket_id: string
+          p_buyer_wallet_debit_cents?: number
+          p_destination_country?: string
+          p_destination_terminal_address?: string
+          p_destination_terminal_id?: string
+          p_destination_terminal_name?: string
+          p_everypay_payment_reference?: string
+          p_pickup_city?: string
+          p_pickup_notes?: string
+          p_receiver_email?: string
+          p_receiver_name?: string
+          p_receiver_phone?: string
+          p_shipping_cost?: number
+          p_shipping_method: string
+        }
+        Returns: Json
+      }
       create_withdrawal_request: {
         Args: {
           p_account_holder_name: string
@@ -2635,17 +2595,6 @@ export type Database = {
           order_id: string
           order_number: string
           platform_fee: number
-        }[]
-      }
-      get_seller_onboarding_status: {
-        Args: { p_seller_id: string }
-        Returns: {
-          can_list_items: boolean
-          needs_dac7_info: boolean
-          onboarding_completed: boolean
-          seller_status: string
-          stripe_connected: boolean
-          terms_accepted: boolean
         }[]
       }
       get_seller_payout_stats: {
@@ -2760,10 +2709,6 @@ export type Database = {
       seller_decline_order: {
         Args: { p_order_id: string; p_reason?: string; p_seller_id: string }
         Returns: Json
-      }
-      seller_onboarding_completed: {
-        Args: { p_seller_id: string }
-        Returns: boolean
       }
       seller_requires_dac7_reporting: {
         Args: { p_seller_id: string }

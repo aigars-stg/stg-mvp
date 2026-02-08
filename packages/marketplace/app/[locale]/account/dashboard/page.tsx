@@ -89,7 +89,7 @@ export default function DashboardPage() {
 
           {/* Seller CTA - show unless already active seller */}
           {sellerStatus !== 'active' && (
-            <SellerCTACard sellerStatus={sellerStatus} />
+            <SellerCTACard />
           )}
 
           {/* Platform Features - always show */}

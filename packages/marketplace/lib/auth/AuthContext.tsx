@@ -217,14 +217,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchProfile, updateAuthProviders, router]);
 
   // Sign in with OAuth provider
-  const signInWithOAuth = async (provider: 'google' | 'github' | 'facebook', locale?: string) => {
+  const signInWithOAuth = async (provider: 'google' | 'github' | 'facebook', locale?: string, redirectTo?: string) => {
     try {
       // Include locale in redirect path so callback can capture it
       const redirectLocale = locale || 'en';
+      const confirmUrl = `${window.location.origin}/${redirectLocale}/auth/confirm${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ''}`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/${redirectLocale}/auth/confirm`,
+          redirectTo: confirmUrl,
         },
       });
 
@@ -239,16 +240,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Sign in with magic link (passwordless)
-  const signInWithMagicLink = async (email: string, locale?: string) => {
+  const signInWithMagicLink = async (email: string, locale?: string, redirectTo?: string) => {
     try {
       // Derive a better default name from email (e.g. "alex" from "alex@gmail.com")
       const emailPrefix = email.split('@')[0];
       const redirectLocale = locale || 'en';
+      const confirmUrl = `${window.location.origin}/${redirectLocale}/auth/confirm${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ''}`;
 
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/${redirectLocale}/auth/confirm`,
+          emailRedirectTo: confirmUrl,
           shouldCreateUser: true, // Creates account if doesn't exist
           data: {
             full_name: emailPrefix,

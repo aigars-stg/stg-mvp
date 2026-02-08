@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         seller_terms_accepted_at: new Date().toISOString(),
         seller_terms_version: termsVersion,
-        seller_status: 'onboarding', // Move to onboarding state
+        seller_status: 'active',
       }, {
         onConflict: 'user_id',
       });

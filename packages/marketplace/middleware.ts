@@ -160,7 +160,7 @@ export async function middleware(request: NextRequest) {
     // Extract locale from pathname if present
     const localeMatch = pathname.match(/^\/(en|lv)/);
     const locale = localeMatch ? localeMatch[1] : '';
-    redirectUrl.pathname = locale ? `/${locale}/auth/signin` : '/auth/signin';
+    redirectUrl.pathname = locale ? `/${locale}/auth` : '/auth';
     redirectUrl.searchParams.set('redirectTo', pathname);
     return NextResponse.redirect(redirectUrl);
   }

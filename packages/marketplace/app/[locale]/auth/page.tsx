@@ -149,7 +149,7 @@ export default function AuthPage() {
         }
       }
 
-      const { error: magicLinkError } = await signInWithMagicLink(email, locale);
+      const { error: magicLinkError } = await signInWithMagicLink(email, locale, redirectTo);
 
       if (magicLinkError) {
         setError(mapAuthError(magicLinkError));
@@ -171,7 +171,7 @@ export default function AuthPage() {
     setOauthLoading(true);
 
     try {
-      const { error: oauthError } = await signInWithOAuth(provider, locale);
+      const { error: oauthError } = await signInWithOAuth(provider, locale, redirectTo);
 
       if (oauthError) {
         setError(mapAuthError(oauthError));
@@ -197,7 +197,7 @@ export default function AuthPage() {
     setError('');
 
     try {
-      const { error: resendError } = await signInWithMagicLink(email, locale);
+      const { error: resendError } = await signInWithMagicLink(email, locale, redirectTo);
 
       if (resendError) {
         setError(mapAuthError(resendError));
