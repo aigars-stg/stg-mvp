@@ -50,22 +50,13 @@ export interface UserProfileFull extends UserProfile {
   seller_status: SellerStatus;
   seller_terms_accepted_at: string | null;
   seller_terms_version: string;
-  stripe_connect_account_id: string | null;
-  stripe_connect_onboarding_completed: boolean;
-  stripe_connect_charges_enabled: boolean;
-  stripe_connect_payouts_enabled: boolean;
-  stripe_connect_details_submitted: boolean;
-  stripe_connect_updated_at: string | null;
-  stripe_requirements: Record<string, unknown>;
-  stripe_capabilities: Record<string, unknown>;
+  payout_iban: string | null;
+  payout_account_holder_name: string | null;
   dac7_annual_transaction_count: number;
   dac7_annual_sales_total: number;
   dac7_reporting_year: number | null;
   dac7_tax_id: string | null;
   dac7_tax_id_type: string | null;
-  has_bank_account: boolean;
-  bank_account_last4: string | null;
-  bank_account_bank_name: string | null;
 }
 
 // Re-export seller types for convenience

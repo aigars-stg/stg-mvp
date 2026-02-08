@@ -3,6 +3,7 @@ import { isManualVersion, type VersionSelection } from '@/lib/bgg-types';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { verifyTurnstile } from '@/lib/turnstile';
 import { ensureGameMetadata } from '@/lib/bgg-api';
 import { checkRateLimit, getRateLimitAction } from '@/lib/ratelimit';
 import type { TransactionMethod, PricingFormat } from '@/lib/types/listing';
@@ -134,6 +135,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Verify Turnstile token (bot protection)
+    const remoteIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
+    const turnstileResult = await verifyTurnstile(body.turnstileToken, remoteIp);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { error: 'Verification failed. Please try again.' },
+        { status: 403 }
+      );
+    }
 
     const {
       selectedGame,

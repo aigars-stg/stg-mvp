@@ -5,22 +5,19 @@ import { handleApiError } from '@/lib/api/error-handler';
 
 interface Transaction {
   id: string;
-  type: 'sale' | 'payout';
-  reference: string;
-  status: string;
-  payoutStatus?: string;
-  grossAmount: number;
-  platformFee: number;
-  netAmount: number;
+  type: 'sale_credit' | 'purchase_debit' | 'withdrawal' | 'refund_credit';
+  amountCents: number;
+  balanceAfterCents: number;
   description: string | null;
-  createdAt: string;
-  completedAt: string | null;
+  orderId: string | null;
+  withdrawalId: string | null;
+  createdAt: string | null;
 }
 
 /**
  * GET /api/seller/transactions
  *
- * Get seller's transaction history (sales and payouts)
+ * Get seller's wallet transaction history
  */
 export async function GET(request: NextRequest) {
   try {
@@ -31,112 +28,51 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
     const offset = parseInt(searchParams.get('offset') || '0');
-    const type = searchParams.get('type') || 'all'; // 'sale', 'payout', or 'all'
+    const type = searchParams.get('type') || 'all';
 
-    const transactions: Transaction[] = [];
-    let totalCount = 0;
+    // Query wallet_transactions
+    let query = supabase
+      .from('wallet_transactions')
+      .select('*', { count: 'exact' })
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
-    // Fetch sales (orders)
-    if (type === 'all' || type === 'sale') {
-      const { data: orders, error: ordersError, count: ordersCount } = await supabase
-        .from('orders')
-        .select(`
-          id,
-          order_number,
-          status,
-          payout_status,
-          items_total,
-          shipping_cost,
-          service_fee,
-          created_at,
-          updated_at
-        `, { count: 'exact' })
-        .eq('seller_id', user.id)
-        .not('status', 'in', '("pending_payment","cancelled")')
-        .order('created_at', { ascending: false });
-
-      if (!ordersError && orders) {
-        // Get game names for orders
-        const orderIds = orders.map(o => o.id);
-        const { data: orderItems } = await supabase
-          .from('order_items')
-          .select('order_id, game_name')
-          .in('order_id', orderIds);
-
-        const gameNameMap = new Map<string, string>();
-        if (orderItems) {
-          for (const item of orderItems) {
-            if (!gameNameMap.has(item.order_id)) {
-              gameNameMap.set(item.order_id, item.game_name);
-            }
-          }
-        }
-
-        for (const order of orders) {
-          const gross = Number(order.items_total) + Number(order.shipping_cost);
-          transactions.push({
-            id: order.id,
-            type: 'sale',
-            reference: order.order_number,
-            status: order.status,
-            payoutStatus: order.payout_status || undefined,
-            grossAmount: gross,
-            platformFee: Number(order.service_fee),
-            netAmount: gross, // Seller gets full gross
-            description: gameNameMap.get(order.id) || 'Game sale',
-            createdAt: order.created_at || new Date().toISOString(),
-            completedAt: order.updated_at,
-          });
-        }
-
-        totalCount += ordersCount || 0;
-      }
+    // Filter by type if specified
+    if (type !== 'all') {
+      query = query.eq('type', type);
     }
 
-    // Fetch bank payouts
-    if (type === 'all' || type === 'payout') {
-      const { data: payouts, error: payoutsError, count: payoutsCount } = await supabase
-        .from('seller_payouts')
-        .select('*', { count: 'exact' })
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+    const { data: walletTxns, error, count } = await query;
 
-      if (!payoutsError && payouts) {
-        for (const payout of payouts) {
-          const amount = Number(payout.amount);
-          transactions.push({
-            id: payout.id,
-            type: 'payout',
-            reference: payout.stripe_payout_id || '',
-            status: payout.status || 'unknown',
-            grossAmount: -amount, // Negative for payouts (money out)
-            platformFee: 0,
-            netAmount: -amount,
-            description: `Payout to ****${payout.bank_account_last4 || '****'}`,
-            createdAt: payout.created_at || new Date().toISOString(),
-            completedAt: payout.paid_at,
-          });
-        }
-
-        totalCount += payoutsCount || 0;
-      }
+    if (error) {
+      console.error('Failed to fetch wallet transactions:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch transactions' },
+        { status: 500 }
+      );
     }
 
-    // Sort by date (most recent first)
-    transactions.sort((a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    const transactions: Transaction[] = (walletTxns || []).map((txn) => ({
+      id: txn.id,
+      type: txn.type as Transaction['type'],
+      amountCents: txn.amount_cents,
+      balanceAfterCents: txn.balance_after_cents,
+      description: txn.description,
+      orderId: txn.order_id,
+      withdrawalId: txn.withdrawal_id,
+      createdAt: txn.created_at,
+    }));
 
-    // Apply pagination
-    const paginatedTransactions = transactions.slice(offset, offset + limit);
+    const totalCount = count || 0;
 
     return NextResponse.json({
-      transactions: paginatedTransactions,
+      transactions,
       pagination: {
         total: totalCount,
         limit,
         offset,
-        hasMore: offset + paginatedTransactions.length < totalCount,
+        hasMore: offset + transactions.length < totalCount,
       },
     }, {
       headers: {

@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { calculateMarketplacePricing } from '@/lib/stripe-utils';
 import { getShippingPrice, type TerminalCountry } from '@/lib/unisend/types';
+
 import type { TransactionMethod, PricingFormat, ListingType } from '@/lib/types/listing';
 
 /**
@@ -13,9 +13,7 @@ export interface DeliveredPricingResult {
   itemPrice: number;
   /** Shipping cost in EUR */
   shippingCost: number;
-  /** Platform service fee in EUR */
-  serviceFee: number;
-  /** Total delivered price (item + shipping + fee) in EUR */
+  /** Total delivered price (item + shipping) in EUR — no service fee */
   totalDelivered: number;
   /** Whether pricing could be calculated (false for contact_seller or non-Baltic) */
   canCalculate: boolean;
@@ -41,7 +39,7 @@ const VALID_COUNTRIES = ['LT', 'LV', 'EE'];
 
 /**
  * Hook to calculate delivered pricing for a listing
- * Returns pricing breakdown including shipping and service fees
+ * Returns pricing breakdown including shipping (no service fee)
  *
  * @example
  * ```tsx
@@ -53,7 +51,7 @@ const VALID_COUNTRIES = ['LT', 'LV', 'EE'];
  * });
  *
  * if (pricing.canCalculate) {
- *   console.log(pricing.totalDelivered); // 43.21
+ *   console.log(pricing.totalDelivered); // 40.50
  * }
  * ```
  */
@@ -66,10 +64,6 @@ export function useDeliveredPricing({
   buyerCountry,
 }: UseDeliveredPricingParams): DeliveredPricingResult {
   return useMemo(() => {
-    // Determine if we can calculate pricing based on new or old model
-    // New model: Check transaction_method and pricing_format
-    // Old model: Check listing_type
-
     // Contact seller listings don't have platform pricing (payment arranged via messages)
     const isContactSeller = transactionMethod
       ? transactionMethod === 'contact_seller'
@@ -85,7 +79,6 @@ export function useDeliveredPricing({
       return {
         itemPrice: price,
         shippingCost: 0,
-        serviceFee: 0,
         totalDelivered: price,
         canCalculate: false,
         isEstimate: false,
@@ -97,7 +90,6 @@ export function useDeliveredPricing({
       return {
         itemPrice: price,
         shippingCost: 0,
-        serviceFee: 0,
         totalDelivered: price,
         canCalculate: false,
         isEstimate: false,
@@ -111,13 +103,13 @@ export function useDeliveredPricing({
     const isEstimate = !buyerCountry;
 
     const shippingCost = getShippingPrice(typedSellerCountry, destinationCountry, 'M');
-    const pricing = calculateMarketplacePricing(price, shippingCost, 't2t');
+    // No service fee — buyer pays item price + shipping only
+    const totalDelivered = price + shippingCost;
 
     return {
       itemPrice: price,
       shippingCost,
-      serviceFee: pricing.serviceFeeCents / 100,
-      totalDelivered: pricing.totalChargeCents / 100,
+      totalDelivered,
       canCalculate: true,
       isEstimate,
       destinationCountry,

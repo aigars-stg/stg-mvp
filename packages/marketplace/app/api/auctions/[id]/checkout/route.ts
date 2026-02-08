@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe, calculateMarketplacePricing } from '@/lib/stripe';
+import { createClient } from '@supabase/supabase-js';
 import { SHIPPING_COST_EUROS } from '@/lib/pricing/constants';
-import type { TerminalCountry } from '@/lib/unisend/types';
+import { createAuctionCheckoutSession } from '@/lib/services/checkout';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 
@@ -11,25 +11,22 @@ interface Params {
 
 interface AuctionCheckoutBody {
   shippingMethod: 't2t' | 'local_pickup';
-
-  // For T2T shipping
-  destinationCountry?: TerminalCountry;
+  destinationCountry?: string;
   destinationTerminalId?: string;
   destinationTerminalName?: string;
   destinationTerminalAddress?: string;
   receiverName?: string;
   receiverPhone?: string;
   receiverEmail?: string;
-
-  // For local pickup
   pickupCity?: string;
   pickupNotes?: string;
+  useWallet?: boolean;
 }
 
 /**
  * POST /api/auctions/[id]/checkout
  *
- * Create a Stripe Checkout session for an auction winner.
+ * Create a payment session for an auction winner (EveryPay + wallet).
  * Only the winning bidder can access this endpoint.
  */
 export async function POST(request: NextRequest, { params }: Params) {
@@ -40,15 +37,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     const { id: listingId } = await params;
     const body: AuctionCheckoutBody = await request.json();
 
-    const {
-      shippingMethod,
-      destinationCountry,
-      destinationTerminalId,
-      destinationTerminalName,
-      receiverName,
-      receiverPhone,
-      receiverEmail,
-    } = body;
+    const { shippingMethod } = body;
 
     // Validate shipping method
     if (!shippingMethod || !['t2t', 'local_pickup'].includes(shippingMethod)) {
@@ -60,8 +49,9 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     // Validate T2T required fields
     if (shippingMethod === 't2t') {
-      if (!destinationCountry || !destinationTerminalId || !destinationTerminalName ||
-          !receiverName || !receiverPhone || !receiverEmail) {
+      if (!body.destinationCountry || !body.destinationTerminalId ||
+          !body.destinationTerminalName || !body.receiverName ||
+          !body.receiverPhone || !body.receiverEmail) {
         return NextResponse.json(
           { error: 'T2T shipping requires destination terminal and receiver contact info' },
           { status: 400 }
@@ -108,7 +98,6 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Check payment deadline hasn't expired
     if (!listing.auction_payment_deadline || new Date(listing.auction_payment_deadline) < new Date()) {
       return NextResponse.json(
         { error: 'Payment deadline has expired' },
@@ -116,25 +105,6 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Get seller's Stripe Connect account and country
-    const { data: sellerProfile, error: sellerError } = await supabase
-      .from('seller_profiles')
-      .select('stripe_connect_account_id, stripe_connect_payouts_enabled')
-      .eq('user_id', listing.seller_id)
-      .single();
-
-    if (sellerError || !sellerProfile?.stripe_connect_account_id) {
-      return NextResponse.json(
-        { error: 'Seller payment account not configured' },
-        { status: 400 }
-      );
-    }
-
-    // Calculate shipping cost - flat €2.00 for Latvia preview
-    // TODO: For multi-country support, fetch seller's country and calculate based on origin/destination
-    const shippingCostEuros = shippingMethod === 't2t' ? SHIPPING_COST_EUROS : 0;
-
-    // Calculate pricing using the winning bid amount
     const winningBid = listing.auction_current_bid;
     if (!winningBid) {
       return NextResponse.json(
@@ -142,96 +112,59 @@ export async function POST(request: NextRequest, { params }: Params) {
         { status: 400 }
       );
     }
-    const pricing = calculateMarketplacePricing(winningBid, shippingCostEuros, shippingMethod);
 
-    // Get app URL for redirects
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    // Use service role for wallet operations
+    const adminSupabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
-    // Create Stripe Checkout session
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      automatic_tax: { enabled: true }, // Enable Stripe Tax (Latvia 21% VAT, inclusive)
-      customer_email: receiverEmail || undefined,
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: listing.game_name,
-              description: `Auction winner - ${listing.condition} condition`,
-              images: listing.photo_urls?.length > 0
-                ? [listing.photo_urls[0]]
-                : undefined,
-            },
-            unit_amount: pricing.itemsTotalCents,
-            tax_behavior: 'inclusive', // VAT included in winning bid
-          },
-          quantity: 1,
-        },
-        ...(shippingCostEuros > 0
-          ? [
-              {
-                price_data: {
-                  currency: 'eur',
-                  product_data: {
-                    name: 'Shipping (Terminal to Terminal)',
-                    description: `Delivery to ${destinationTerminalName}`,
-                  },
-                  unit_amount: pricing.shippingCostCents,
-                  tax_behavior: 'inclusive' as const, // VAT included in shipping
-                },
-                quantity: 1,
-              },
-            ]
-          : []),
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: 'Service Fee',
-              description: 'Second Turn marketplace fee',
-            },
-            unit_amount: pricing.serviceFeeCents,
-            tax_behavior: 'inclusive', // VAT included in service fee
-          },
-          quantity: 1,
-        },
-      ],
-      // SEPARATE CHARGES WITH DELAYED TRANSFERS
-      // Platform holds funds until delivery confirmed + dispute window
-      // Transfer to seller happens via payout service after order completion
-      payment_intent_data: {
-        transfer_group: `AUCTION_${listingId}`,
-        metadata: {
-          listing_id: listingId,
-          buyer_id: user.id,
-          seller_id: listing.seller_id,
-          seller_stripe_id: sellerProfile.stripe_connect_account_id,
-          order_type: 'auction',
-          winning_bid: winningBid.toString(),
-          shipping_method: shippingMethod,
-          destination_country: destinationCountry || '',
-          destination_terminal_id: destinationTerminalId || '',
-          destination_terminal_name: destinationTerminalName || '',
-          receiver_name: receiverName || '',
-          receiver_phone: receiverPhone || '',
-          receiver_email: receiverEmail || '',
-        },
-      },
-      metadata: {
-        listing_id: listingId,
-        buyer_id: user.id,
-        seller_id: listing.seller_id,
-        order_type: 'auction',
-      },
-      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&type=auction`,
-      cancel_url: `${appUrl}/games/${listing.id}?checkout_cancelled=true`,
-    });
+    const shippingCostEuros = shippingMethod === 't2t' ? SHIPPING_COST_EUROS : 0;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
-    return NextResponse.json({
-      url: session.url,
-      session_id: session.id,
-    });
+    const result = await createAuctionCheckoutSession(adminSupabase, {
+      listingId,
+      buyerId: user.id,
+      sellerId: listing.seller_id,
+      shippingMethod,
+      winningBidEuros: winningBid,
+      shippingCostEuros,
+      gameName: listing.game_name,
+      locale: request.headers.get('x-locale') || 'en',
+      buyerEmail: body.receiverEmail || user.email,
+      customerIp: request.headers.get('x-forwarded-for') || undefined,
+      useWallet: body.useWallet ?? true,
+
+      destinationCountry: body.destinationCountry,
+      destinationTerminalId: body.destinationTerminalId,
+      destinationTerminalName: body.destinationTerminalName,
+      destinationTerminalAddress: body.destinationTerminalAddress,
+      receiverName: body.receiverName,
+      receiverPhone: body.receiverPhone,
+      receiverEmail: body.receiverEmail,
+      pickupCity: body.pickupCity,
+      pickupNotes: body.pickupNotes,
+    }, appUrl);
+
+    switch (result.type) {
+      case 'wallet_only':
+        return NextResponse.json({
+          redirect: result.redirect,
+          orderId: result.orderId,
+        });
+
+      case 'everypay':
+        return NextResponse.json({
+          redirect: result.paymentLink,
+          paymentReference: result.paymentReference,
+        });
+
+      case 'error':
+        return NextResponse.json(
+          { error: result.error },
+          { status: result.status }
+        );
+    }
   } catch (error) {
     return handleApiError(error, 'Auction checkout');
   }

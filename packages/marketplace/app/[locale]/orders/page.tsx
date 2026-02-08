@@ -30,7 +30,6 @@ interface Order {
   pickup_city?: string;
   items_total: number;
   shipping_cost: number;
-  service_fee: number;
   total_amount: number;
   created_at: string;
   seller_response_deadline?: string;

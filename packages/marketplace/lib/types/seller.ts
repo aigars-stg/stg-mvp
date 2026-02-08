@@ -50,15 +50,9 @@ export interface SellerProfile {
   total_completed_sales: number;
   member_since: string | null;
 
-  // Stripe Connect
-  stripe_connect_account_id: string | null;
-  stripe_connect_onboarding_completed: boolean;
-  stripe_connect_charges_enabled: boolean;
-  stripe_connect_payouts_enabled: boolean;
-  stripe_connect_details_submitted: boolean;
-  stripe_connect_updated_at: string | null;
-  stripe_requirements: Record<string, unknown>;
-  stripe_capabilities: Record<string, unknown>;
+  // Payout Banking
+  payout_iban: string | null;
+  payout_account_holder_name: string | null;
 
   // DAC7 Tax Reporting (EU platform reporting requirements)
   dac7_annual_transaction_count: number;
@@ -79,17 +73,6 @@ export interface SellerProfile {
   dac7_info_verified: boolean;
   dac7_compliance_status: Dac7ComplianceStatus;
 
-  // Payout Settings
-  payout_threshold: number; // in cents: 1000, 2000, 5000, 10000
-  payout_type: 'auto' | 'manual';
-  last_balance_activity_at: string | null;
-  dormancy_warning_sent_at: string | null;
-
-  // Banking
-  has_bank_account: boolean;
-  bank_account_last4: string | null;
-  bank_account_bank_name: string | null;
-
   // Timestamps
   created_at: string;
   updated_at: string;
@@ -105,11 +88,7 @@ export type SellerStatus = SellerProfile['seller_status'];
  */
 export function canReceivePayments(seller: SellerProfile | null): boolean {
   if (!seller) return false;
-  return (
-    seller.seller_status === 'active' &&
-    seller.stripe_connect_charges_enabled &&
-    seller.stripe_connect_payouts_enabled
-  );
+  return seller.seller_status === 'active';
 }
 
 /**
@@ -117,7 +96,7 @@ export function canReceivePayments(seller: SellerProfile | null): boolean {
  */
 export function isSellerOnboarded(seller: SellerProfile | null): boolean {
   if (!seller) return false;
-  return seller.seller_status === 'active' && seller.stripe_connect_onboarding_completed;
+  return seller.seller_status === 'active' && !!seller.seller_terms_accepted_at;
 }
 
 /**

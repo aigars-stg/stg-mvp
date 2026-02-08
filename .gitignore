@@ -48,3 +48,4 @@ coverage/
 
 .vercel
 .env*.local
+.playwright-mcp/

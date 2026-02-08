@@ -5,8 +5,8 @@ import { handleApiError } from '@/lib/api/error-handler';
 /**
  * POST /api/seller/onboarding/complete-terms-only
  *
- * Completes seller onboarding without Stripe, enabling Contact Seller listings only.
- * This allows sellers to list items for messaging-based sales without payment processing.
+ * Completes seller onboarding with terms-only flow, enabling Contact Seller listings.
+ * Instant Buy is now available to all active sellers (no Stripe dependency).
  *
  * Requirements:
  * - User must be authenticated

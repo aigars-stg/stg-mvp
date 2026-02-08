@@ -1,10 +1,31 @@
 ---
 title: "Pricing"
-lastUpdated: "November 25, 2025"
+lastUpdated: "February 8, 2026"
 description: "Current fee rates for buying and selling on Second Turn Games."
 ---
 
-Second Turn Games is free for sellers. Buyers pay a small service fee to support the platform.
+Simple, transparent pricing. Buyers pay the listed price plus shipping. Sellers pay a 10% commission on the item price.
+
+---
+
+## Buyer Costs
+
+| Cost | Amount |
+|------|--------|
+| **Game price** | As listed by seller |
+| **Shipping** | From €2.00 |
+
+No service fees, no hidden costs. You pay the listed price plus shipping.
+
+You can also use your **wallet balance** to pay for purchases. If your wallet covers the full amount, no card payment is needed.
+
+### Example
+
+| Item | Amount |
+|------|--------|
+| Game price | €25.00 |
+| Shipping (Latvia → Latvia) | €2.00 |
+| **Total** | **€27.00** |
 
 ---
 
@@ -13,29 +34,28 @@ Second Turn Games is free for sellers. Buyers pay a small service fee to support
 | Fee | Amount |
 |-----|--------|
 | Listing fee | **Free** |
-| Sale fee | **Free** |
+| Platform commission | **10% of item price** |
 
-**You receive 100% of your listing price.** No commissions, no hidden fees.
-
----
-
-## Buyer Fees
-
-| Fee | Amount | Description |
-|-----|--------|-------------|
-| **Service fee** | 3.5% + €0.50 | Covers platform operation and secure payment processing |
-| **Shipping** | From €2.00 | Varies by route (displayed at checkout) |
+Your earnings (item price minus 10% commission) are credited to your platform wallet after each completed sale.
 
 ### Example
 
 | Item | Amount |
 |------|--------|
-| Game price | €25.00 |
-| Service fee (3.5% + €0.50) | €1.38 |
-| Shipping (Latvia → Latvia) | €2.00 |
-| **Total** | **€28.38** |
+| Game listed at | €25.00 |
+| Commission (10%) | -€2.50 |
+| **Your earnings** | **€22.50** |
 
-The seller receives €25.00.
+---
+
+## Wallet & Withdrawals
+
+Your earnings are stored in your platform wallet. You can:
+
+- **Use your balance** to buy games on the marketplace
+- **Withdraw to your bank** at any time via IBAN transfer
+
+Withdrawals are processed within 1-3 business days.
 
 ---
 
@@ -54,13 +74,16 @@ Shipping via Unisend parcel terminals:
 
 ## Payment Processing
 
-Payments are processed securely by [Stripe](https://stripe.com). 
+Payments are processed securely via bank card and bank link payments through our payment partner.
 
-**Sellers:** Stripe may charge additional fees for optional services:
-- Instant payouts (instead of standard 2-7 day transfers)
-- Currency conversion (if your bank account is in a different currency)
+---
 
-These Stripe fees are separate from Second Turn Games fees and are shown in your Stripe Dashboard.
+## Refunds
+
+Refunds are available until an order is marked as completed. After completion, sales are final and the seller's wallet has been credited.
+
+- If you paid by card, the card payment portion is refunded to your card
+- If you paid from your wallet, the wallet portion is refunded to your wallet
 
 ---
 

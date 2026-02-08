@@ -40,7 +40,7 @@ interface OrderSummary {
   };
   items_total: number;
   shipping_cost: number;
-  service_fee: number;
+  platform_commission_cents: number;
 }
 
 interface TransactionListResponse {
@@ -225,7 +225,7 @@ function StaffTransactionsContent() {
       created_at: o.created_at,
       paid_at: o.paid_at,
       items_total: o.items_total,
-      service_fee: o.service_fee,
+      platform_commission_cents: o.platform_commission_cents,
       shipping_cost: o.shipping_cost,
       total_amount: o.total_amount,
       buyer_name: o.buyer_name,
@@ -244,7 +244,7 @@ function StaffTransactionsContent() {
       created_at: o.created_at,
       paid_at: o.paid_at,
       items_total: o.items_total,
-      service_fee: o.service_fee,
+      platform_commission_cents: o.platform_commission_cents,
       shipping_cost: o.shipping_cost,
       total_amount: o.total_amount,
       buyer_name: o.buyer_name,
@@ -1100,7 +1100,7 @@ function StaffTransactionsContent() {
                 <tbody className="divide-y divide-divider-subtle">
                   {data?.orders.map((order) => {
                     const statusInfo = statusConfig[order.status] || { label: order.status, variant: 'default' as const };
-                    const platformFee = extractVatFromGross(order.service_fee);
+                    const platformFee = extractVatFromGross(order.platform_commission_cents / 100);
                     const shipping = extractVatFromGross(order.shipping_cost);
                     const totalVat = platformFee.vat + shipping.vat;
                     const isCancelled = EXCLUDED_FROM_TOTALS.includes(order.status);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, useRef, FormEvent, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
@@ -9,6 +9,7 @@ import { Email as Mail, Check, Sparks as Sparkles } from 'griddy-icons';
 import { mapAuthError } from '@/lib/auth/errors';
 import type { AuthFlowState } from '@/lib/auth/types';
 import { useTranslations } from 'next-intl';
+import { TurnstileWidget, type TurnstileWidgetRef } from '@/components/common/TurnstileWidget';
 
 /**
  * Email-first authentication page (passwordless).
@@ -52,6 +53,7 @@ export default function AuthPage() {
 
   const { signInWithMagicLink, signInWithOAuth, user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const turnstileRef = useRef<TurnstileWidgetRef>(null);
 
   // Maximum resend attempts
   const MAX_RESENDS = 3;
@@ -126,6 +128,27 @@ export default function AuthPage() {
     setLoading(true);
 
     try {
+      // Verify Turnstile token for new user signups
+      if (authState === 'new_user' && turnstileRef.current) {
+        try {
+          const token = await turnstileRef.current.getTokenAsync(10000);
+          const captchaRes = await fetch('/api/auth/verify-captcha', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+          });
+          const captchaData = await captchaRes.json();
+          if (!captchaData.success) {
+            setError(tErrors('captchaFailed'));
+            turnstileRef.current.reset();
+            setLoading(false);
+            return;
+          }
+        } catch {
+          // If Turnstile times out or errors, allow through
+        }
+      }
+
       const { error: magicLinkError } = await signInWithMagicLink(email, locale);
 
       if (magicLinkError) {
@@ -381,6 +404,9 @@ export default function AuthPage() {
             {tNewUser('magicLinkDescription')}
           </p>
         </div>
+
+        {/* Turnstile bot protection */}
+        <TurnstileWidget ref={turnstileRef} action="signup" />
 
         {/* Send Magic Link Button */}
         <Button

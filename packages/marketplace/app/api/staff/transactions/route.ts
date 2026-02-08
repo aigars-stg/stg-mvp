@@ -16,7 +16,6 @@ interface OrderRow {
   paid_at: string | null;
   items_total: number;
   shipping_cost: number;
-  service_fee: number;
 }
 
 interface OrderWithIssueCount extends OrderRow {
@@ -90,7 +89,7 @@ export async function GET(request: NextRequest) {
         paid_at,
         items_total,
         shipping_cost,
-        service_fee
+        platform_commission_cents
       `, { count: 'exact' });
 
     // Apply filters

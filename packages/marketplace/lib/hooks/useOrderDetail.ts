@@ -42,7 +42,6 @@ export interface OrderData {
   total_amount: number;
   items_total: number;
   shipping_cost: number;
-  service_fee: number;
   refund_amount?: number | null;
   destination: ShippingDestination;
   tracking: TrackingData;

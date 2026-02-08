@@ -36,14 +36,13 @@ export function PriceBreakdown({ pricing, variant }: PriceBreakdownProps) {
     : '';
 
   if (variant === 'compact') {
-    // Single line: "€38.50 + €4.71 fees"
-    const fees = pricing.shippingCost + pricing.serviceFee;
+    // Single line: "€38.50 + €2.00 shipping"
     return (
       <div className="text-xs text-text-muted dark:text-snow-stormMedium">
         <span>€{pricing.itemPrice.toFixed(2)}</span>
         <span className="mx-1">+</span>
         <span>
-          €{fees.toFixed(2)} {t('fees')}
+          €{pricing.shippingCost.toFixed(2)} {t('shipping', { country: countryName })}
         </span>
         {pricing.isEstimate && <span>*</span>}
       </div>
@@ -62,10 +61,6 @@ export function PriceBreakdown({ pricing, variant }: PriceBreakdownProps) {
           {t('shipping', { country: countryName })}
         </span>
         <span className="text-text-secondary dark:text-snow-stormLight">€{pricing.shippingCost.toFixed(2)}</span>
-      </div>
-      <div className="flex justify-end gap-2">
-        <span className="text-text-muted dark:text-snow-stormMedium">{t('serviceFee')}</span>
-        <span className="text-text-secondary dark:text-snow-stormLight">€{pricing.serviceFee.toFixed(2)}</span>
       </div>
       {pricing.isEstimate && (
         <p className="text-text-muted dark:text-snow-stormMedium italic pt-0.5 text-[10px]">{t('estimateNote')}</p>

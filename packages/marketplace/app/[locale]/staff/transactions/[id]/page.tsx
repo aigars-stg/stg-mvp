@@ -53,7 +53,6 @@ interface OrderData {
   total_amount: number;
   items_total: number;
   shipping_cost: number;
-  service_fee: number;
   destination?: {
     country?: string;
     terminal_id?: string;
@@ -70,12 +69,13 @@ interface OrderData {
     tracking_url?: string;
     label_url?: string;
   };
-  stripe?: {
-    payment_intent_id?: string;
-    transfer_id?: string;
-    refund_id?: string;
-    transfer_reversal_id?: string;
-    payout_status?: string;
+  payment?: {
+    everypay_payment_reference?: string;
+    everypay_payment_state?: string;
+    buyer_wallet_debit_cents?: number;
+    platform_commission_cents?: number;
+    seller_wallet_credit_cents?: number;
+    wallet_credited_at?: string;
   };
   refund_amount?: number | null;
   refund_reason?: string | null;
@@ -403,10 +403,6 @@ export default function StaffTransactionPage() {
                   <span>Shipping</span>
                   <span>{order.shipping_cost === 0 ? 'Free' : `€${order.shipping_cost.toFixed(2)}`}</span>
                 </div>
-                <div className="flex justify-between text-text-secondary">
-                  <span>Service Fee</span>
-                  <span>€{order.service_fee.toFixed(2)}</span>
-                </div>
                 <div className="flex justify-between font-semibold text-polar-night pt-1">
                   <span>Total</span>
                   <span>€{order.total_amount.toFixed(2)}</span>
@@ -533,39 +529,45 @@ export default function StaffTransactionPage() {
               </div>
             )}
 
-            {/* Stripe Info */}
-            {order.stripe && (order.stripe.payment_intent_id || order.stripe.transfer_id) && (
+            {/* Payment Info */}
+            {order.payment && (order.payment.everypay_payment_reference || order.payment.buyer_wallet_debit_cents) && (
               <div className="bg-snow-white border border-border rounded-lg p-4">
                 <h3 className="text-sm font-semibold text-polar-night mb-3">Payment Info</h3>
                 <div className="space-y-2 text-xs">
-                  {order.stripe.payment_intent_id && (
+                  {order.payment.everypay_payment_reference && (
                     <div>
-                      <span className="text-text-muted">Payment Intent:</span>
-                      <p className="font-mono text-polar-night truncate">{order.stripe.payment_intent_id}</p>
+                      <span className="text-text-muted">EveryPay Reference:</span>
+                      <p className="font-mono text-polar-night truncate">{order.payment.everypay_payment_reference}</p>
                     </div>
                   )}
-                  {order.stripe.transfer_id && (
+                  {order.payment.everypay_payment_state && (
                     <div>
-                      <span className="text-text-muted">Transfer ID:</span>
-                      <p className="font-mono text-polar-night truncate">{order.stripe.transfer_id}</p>
+                      <span className="text-text-muted">Payment State:</span>
+                      <p className="font-medium text-polar-night capitalize">{order.payment.everypay_payment_state}</p>
                     </div>
                   )}
-                  {order.stripe.refund_id && (
+                  {order.payment.buyer_wallet_debit_cents != null && order.payment.buyer_wallet_debit_cents > 0 && (
                     <div>
-                      <span className="text-text-muted">Refund ID:</span>
-                      <p className="font-mono text-polar-night truncate">{order.stripe.refund_id}</p>
+                      <span className="text-text-muted">Wallet Debit:</span>
+                      <p className="font-medium text-polar-night">€{(order.payment.buyer_wallet_debit_cents / 100).toFixed(2)}</p>
                     </div>
                   )}
-                  {order.stripe.transfer_reversal_id && (
+                  {order.payment.platform_commission_cents != null && order.payment.platform_commission_cents > 0 && (
                     <div>
-                      <span className="text-text-muted">Transfer Reversal:</span>
-                      <p className="font-mono text-polar-night truncate">{order.stripe.transfer_reversal_id}</p>
+                      <span className="text-text-muted">Commission (10%):</span>
+                      <p className="font-medium text-polar-night">€{(order.payment.platform_commission_cents / 100).toFixed(2)}</p>
                     </div>
                   )}
-                  {order.stripe.payout_status && (
+                  {order.payment.seller_wallet_credit_cents != null && order.payment.seller_wallet_credit_cents > 0 && (
                     <div>
-                      <span className="text-text-muted">Payout Status:</span>
-                      <p className="font-medium text-polar-night capitalize">{order.stripe.payout_status}</p>
+                      <span className="text-text-muted">Seller Credit:</span>
+                      <p className="font-medium text-aurora-green">€{(order.payment.seller_wallet_credit_cents / 100).toFixed(2)}</p>
+                    </div>
+                  )}
+                  {order.payment.wallet_credited_at && (
+                    <div>
+                      <span className="text-text-muted">Credited At:</span>
+                      <p className="text-polar-night">{new Date(order.payment.wallet_credited_at).toLocaleString()}</p>
                     </div>
                   )}
                   {order.refund_amount && (

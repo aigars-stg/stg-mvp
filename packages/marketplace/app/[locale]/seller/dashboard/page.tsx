@@ -2,26 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, CreditCard, Chat as MessageSquare } from 'griddy-icons';
+import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, Chat as MessageSquare } from 'griddy-icons';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
-import { BalanceCard } from '@/components/seller/BalanceCard';
-import { TransactionList } from '@/components/seller/TransactionList';
 import { BankAccountCard } from '@/components/seller/BankAccountCard';
 import { BankAccountForm } from '@/components/seller/BankAccountForm';
-import { PayoutConfirmModal } from '@/components/seller/PayoutConfirmModal';
-import { PayoutSettingsModal } from '@/components/seller/PayoutSettingsModal';
 import { Dac7WarningBanner } from '@/components/seller/Dac7WarningBanner';
-import { StripeRequirementsBanner } from '@/components/seller/StripeRequirementsBanner';
+import { WalletBalance } from '@/components/wallet/WalletBalance';
 import { useTranslations } from 'next-intl';
 import type { Dac7ComplianceStatus } from '@/lib/types/seller';
 
 interface SellerProfile {
   seller_status: string;
-  stripe_connect_account_id: string | null;
-  stripe_connect_onboarding_completed: boolean;
-  stripe_connect_payouts_enabled: boolean;
   has_bank_account: boolean;
   bank_account_last4: string | null;
   bank_account_bank_name: string | null;
@@ -31,21 +24,12 @@ interface SellerProfile {
   dac7_annual_sales_total: number;
 }
 
-interface BalanceData {
-  available: number;
-  pending: number;
-  total: number;
-}
-
 export default function SellerDashboardPage() {
   const router = useRouter();
   const t = useTranslations('SellerDashboard');
   const [profile, setProfile] = useState<SellerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showBankForm, setShowBankForm] = useState(false);
-  const [showPayoutModal, setShowPayoutModal] = useState(false);
-  const [showPayoutSettings, setShowPayoutSettings] = useState(false);
-  const [balance, setBalance] = useState<BalanceData | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const supabase = createBrowserClient(
@@ -67,9 +51,6 @@ export default function SellerDashboardPage() {
         .from('seller_profiles')
         .select(`
           seller_status,
-          stripe_connect_account_id,
-          stripe_connect_onboarding_completed,
-          stripe_connect_payouts_enabled,
           has_bank_account,
           bank_account_last4,
           bank_account_bank_name,
@@ -89,42 +70,15 @@ export default function SellerDashboardPage() {
       setProfile(profileData);
       setLoading(false);
 
-      // Check if seller onboarding is complete (use seller_status, not Stripe status)
+      // Check if seller onboarding is complete
       if (profileData?.seller_status !== 'active') {
         router.push('/seller/onboard');
         return;
-      }
-
-      // Fetch balance for payout modal
-      if (profileData?.stripe_connect_payouts_enabled) {
-        try {
-          const response = await fetch('/api/seller/balance');
-          const data = await response.json();
-          if (response.ok && data.balance) {
-            setBalance({
-              available: data.balance.available,
-              pending: data.balance.pending,
-              total: data.balance.total,
-            });
-          }
-        } catch (err) {
-          console.error('Error fetching balance:', err);
-        }
       }
     };
 
     checkAuth();
   }, [router, supabase, refreshKey]);
-
-  const handleRequestPayout = () => {
-    setShowPayoutModal(true);
-  };
-
-  const handlePayoutComplete = () => {
-    setShowPayoutModal(false);
-    // Refresh data
-    setRefreshKey(prev => prev + 1);
-  };
 
   const handleBankAccountAdded = () => {
     setShowBankForm(false);
@@ -168,9 +122,7 @@ export default function SellerDashboardPage() {
             <div>
               <h1 className="text-2xl font-bold text-polar-night">{t('title')}</h1>
               <p className="text-sm text-text-secondary">
-                {profile?.stripe_connect_payouts_enabled
-                  ? t('subtitle.payoutsEnabled')
-                  : t('subtitle.contactOnly')}
+                {t('subtitle.contactOnly')}
               </p>
             </div>
           </div>
@@ -204,119 +156,78 @@ export default function SellerDashboardPage() {
             />
           )}
 
-        {/* Stripe Requirements Banner - show when Stripe needs additional info */}
-        {profile?.stripe_connect_payouts_enabled && (
-          <StripeRequirementsBanner />
-        )}
-
         {/* Main Content */}
-        {profile?.stripe_connect_payouts_enabled ? (
-          // Simplified dashboard for Stripe-enabled sellers
-          <div className="space-y-6">
-            {/* Top Row: Balance & Bank Account */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <BalanceCard
-                key={`balance-${refreshKey}`}
-                onRequestPayout={handleRequestPayout}
-                onAddBankAccount={() => setShowBankForm(true)}
-                onOpenPayoutSettings={() => setShowPayoutSettings(true)}
-              />
-
-              {/* Bank Account Card */}
-              {profile?.has_bank_account ? (
-                <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-polar-night mb-4">{t('bankAccount.title')}</h3>
-                  <BankAccountCard
-                    last4={profile.bank_account_last4 || '****'}
-                    bankName={profile.bank_account_bank_name || 'Bank'}
-                  />
-                  <button
-                    onClick={() => setShowBankForm(true)}
-                    className="mt-4 text-sm text-frost-ice hover:text-frost-ice/80 transition-colors"
-                  >
-                    {t('bankAccount.updateLink')}
-                  </button>
-                </div>
-              ) : (
-                <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-polar-night mb-2">
-                    {t('bankAccount.title')}
-                  </h3>
-                  <p className="text-text-secondary text-sm mb-4">
-                    {t('bankAccount.addDescription')}
-                  </p>
-                  <Button onClick={() => setShowBankForm(true)}>
-                    {t('bankAccount.addButton')}
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Recent Sales */}
-            <TransactionList key={`transactions-${refreshKey}`} limit={5} showViewAll />
-          </div>
-        ) : (
-          // Simplified dashboard for Contact Seller only
-          <div className="space-y-6">
-            {/* Quick Actions Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Link
-                href="/sell"
-                className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group"
-              >
-                <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
-                  <Package className="w-6 h-6 text-frost-ice" />
-                </div>
-                <h3 className="font-semibold text-polar-night mb-1">{t('quickActions.createListing.title')}</h3>
-                <p className="text-sm text-text-secondary">{t('quickActions.createListing.description')}</p>
-              </Link>
-
-              <Link
-                href="/my-listings"
-                className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group"
-              >
-                <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
-                  <ShoppingBag className="w-6 h-6 text-frost-ice" />
-                </div>
-                <h3 className="font-semibold text-polar-night mb-1">{t('quickActions.myListings.title')}</h3>
-                <p className="text-sm text-text-secondary">{t('quickActions.myListings.description')}</p>
-              </Link>
-
-              <Link
-                href="/seller/orders"
-                className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group"
-              >
-                <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
-                  <MessageSquare className="w-6 h-6 text-frost-ice" />
-                </div>
-                <h3 className="font-semibold text-polar-night mb-1">{t('quickActions.messagesOrders.title')}</h3>
-                <p className="text-sm text-text-secondary">{t('quickActions.messagesOrders.description')}</p>
-              </Link>
-            </div>
-
-            {/* Upgrade to Instant Buy prompt */}
-            <div className="bg-aurora-green/5 border border-aurora-green/20 rounded-xl p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-aurora-green/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <CreditCard className="w-6 h-6 text-aurora-green" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-polar-night mb-1">
-                    {t('instantBuy.title')}
-                  </h3>
-                  <p className="text-sm text-text-secondary mb-3">
-                    {t('instantBuy.description')}
-                  </p>
-                  <Link href="/seller/onboard">
-                    <Button variant="secondary" size="sm">
-                      {t('instantBuy.button')}
-                    </Button>
-                  </Link>
-                </div>
+        <div className="space-y-6">
+          {/* Quick Actions Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link
+              href="/sell"
+              className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group"
+            >
+              <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
+                <Package className="w-6 h-6 text-frost-ice" />
               </div>
-            </div>
+              <h3 className="font-semibold text-polar-night mb-1">{t('quickActions.createListing.title')}</h3>
+              <p className="text-sm text-text-secondary">{t('quickActions.createListing.description')}</p>
+            </Link>
+
+            <Link
+              href="/my-listings"
+              className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group"
+            >
+              <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
+                <ShoppingBag className="w-6 h-6 text-frost-ice" />
+              </div>
+              <h3 className="font-semibold text-polar-night mb-1">{t('quickActions.myListings.title')}</h3>
+              <p className="text-sm text-text-secondary">{t('quickActions.myListings.description')}</p>
+            </Link>
+
+            <Link
+              href="/seller/orders"
+              className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group"
+            >
+              <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
+                <MessageSquare className="w-6 h-6 text-frost-ice" />
+              </div>
+              <h3 className="font-semibold text-polar-night mb-1">{t('quickActions.messagesOrders.title')}</h3>
+              <p className="text-sm text-text-secondary">{t('quickActions.messagesOrders.description')}</p>
+            </Link>
           </div>
-        )}
+
+          {/* Wallet Balance */}
+          <WalletBalance showLink />
+
+          {/* Bank Account Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {profile?.has_bank_account ? (
+              <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-polar-night mb-4">{t('bankAccount.title')}</h3>
+                <BankAccountCard
+                  last4={profile.bank_account_last4 || '****'}
+                  bankName={profile.bank_account_bank_name || 'Bank'}
+                />
+                <button
+                  onClick={() => setShowBankForm(true)}
+                  className="mt-4 text-sm text-frost-ice hover:text-frost-ice/80 transition-colors"
+                >
+                  {t('bankAccount.updateLink')}
+                </button>
+              </div>
+            ) : (
+              <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-polar-night mb-2">
+                  {t('bankAccount.title')}
+                </h3>
+                <p className="text-text-secondary text-sm mb-4">
+                  {t('bankAccount.addDescription')}
+                </p>
+                <Button onClick={() => setShowBankForm(true)}>
+                  {t('bankAccount.addButton')}
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Bank Account Form Modal */}
@@ -337,26 +248,6 @@ export default function SellerDashboardPage() {
           </div>
         </div>
       )}
-
-      {/* Payout Settings Modal */}
-      <PayoutSettingsModal
-        isOpen={showPayoutSettings}
-        onClose={() => setShowPayoutSettings(false)}
-        onSaved={() => {
-          setShowPayoutSettings(false);
-          setRefreshKey(prev => prev + 1);
-        }}
-      />
-
-      {/* Payout Confirmation Modal */}
-      <PayoutConfirmModal
-        isOpen={showPayoutModal}
-        onClose={() => setShowPayoutModal(false)}
-        onSuccess={handlePayoutComplete}
-        availableAmount={balance?.available || 0}
-        bankLast4={profile?.bank_account_last4 || '****'}
-        bankName={profile?.bank_account_bank_name || 'Bank'}
-      />
     </div>
   );
 }

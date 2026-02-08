@@ -28,7 +28,6 @@ interface Order {
   pickup_city?: string;
   items_total: number;
   shipping_cost: number;
-  service_fee: number;
   total_amount: number;
   created_at: string;
   seller_response_deadline?: string;
@@ -399,15 +398,15 @@ export default function SellerOrdersPage() {
                     <span className="font-medium">€{order.shipping_cost.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-text-secondary">Service Fee:</span>
+                    <span className="text-text-secondary">Commission (10%):</span>
                     <span className="font-medium text-aurora-red">
-                      -€{order.service_fee.toFixed(2)}
+                      -€{(order.items_total * 0.10).toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-border-subtle">
                     <span className="font-semibold text-polar-night">You receive:</span>
                     <span className="text-lg font-bold text-aurora-green">
-                      €{(order.items_total + order.shipping_cost).toFixed(2)}
+                      €{(order.items_total * 0.90).toFixed(2)}
                     </span>
                   </div>
                 </div>

@@ -6,7 +6,7 @@ Second Turn Games - Nordic-minimalist peer-to-peer board game marketplace for th
 ## Tech Stack
 - Next.js 14 App Router with TypeScript
 - Supabase for database, auth, and storage
-- Stripe Connect Express for payments
+- EveryPay (Swedbank) for payments + platform wallet system
 - Tailwind CSS with custom design system (@second-turn/design-system)
 - Deployed on Vercel
 - pnpm monorepo
@@ -63,26 +63,40 @@ English (default), Latvian (lv), Lithuanian (lt), Estonian (et)
 
 ### Pricing (all VAT-inclusive)
 - **Shipping**: €2.00 flat rate (Latvia preview, Unisend parcel lockers)
-- **Service fee**: 6% + €0.50 (buyer pays)
-- **Seller receives**: Item asking price only (after order completion)
+- **Buyer pays**: Item price + shipping only (no service fee)
+- **Seller commission**: 10% flat on item price (deducted from earnings)
+- **Seller receives**: 90% of item price, credited to platform wallet
 
-### Delayed Payout Flow
-Platform uses **separate charges with delayed transfers** (not destination charges):
-1. Buyer pays → funds held by platform
-2. Seller ships → tracking uploaded
-3. Buyer receives → delivery confirmed
-4. 2-day dispute window passes → order auto-completes
-5. Payout service transfers funds to seller
+### Payment Flow (EveryPay + Wallet)
+1. Buyer clicks Pay → server calculates total (items + shipping)
+2. If buyer has wallet balance → debit wallet first
+3. Remaining amount (if any) → EveryPay payment (cards + bank links)
+4. If wallet covers full amount → no EveryPay, instant order creation
+5. On EveryPay callback → order created, wallet debited
+
+### Wallet & Withdrawals
+- Seller wallet credited when order completes (after 2-day dispute window)
+- Wallet uses INTEGER cents for precision
+- Sellers request withdrawals → staff processes manually via bank transfer
+- IBAN collected at first withdrawal, not during onboarding
 
 ### Order Status State Machine
 ```
-pending_seller → confirmed → shipped → delivered → completed → paid_out
+pending_seller → confirmed → shipped → delivered → completed
                     ↓           ↓          ↓
                 cancelled   cancelled   disputed → resolved (completed OR refunded)
 ```
 
-### Key Pricing File
-`packages/marketplace/lib/pricing/constants.ts` - Centralized pricing constants
+### Refund Policy
+- Refunds available only before order completion (pre-wallet-credit)
+- EveryPay portion refunded via API, wallet portion credited back to buyer
+- After completion: sales are final
+
+### Key Files
+- `packages/marketplace/lib/pricing/constants.ts` - Centralized pricing constants
+- `packages/marketplace/lib/services/` - Service layer (pricing, wallet, checkout, order, refund, withdrawal)
+- `packages/marketplace/lib/everypay/` - EveryPay API client and types
+- `packages/marketplace/lib/validation/` - Zod validation schemas
 
 ## MCP Servers
 
@@ -91,7 +105,6 @@ The following MCP servers are configured for this project:
 | Server | Purpose | Auth Required |
 |--------|---------|---------------|
 | `supabase` | Database queries, migrations, type generation | `SUPABASE_ACCESS_TOKEN` |
-| `stripe` | Connect accounts, payments, transfers | `STRIPE_SECRET_KEY` |
 | `filesystem` | Direct file access | None |
 | `sequential-thinking` | Complex problem-solving | None |
 | `context7` | Library documentation lookup | None |
@@ -104,7 +117,7 @@ The following MCP servers are configured for this project:
 | `/db` | Query Supabase database with natural language |
 | `/deploy` | Deploy to Vercel with pre-flight checks |
 | `/translate` | Add or update translations across locales |
-| `/stripe-status` | Check Stripe Connect account status |
+| `/wallet-status` | Check wallet and payment status |
 | `/prd` | Access or create PRD documents |
 
 ## Hooks (Auto-Running)

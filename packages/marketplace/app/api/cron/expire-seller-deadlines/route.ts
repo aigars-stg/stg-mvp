@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
  * GET /api/cron/expire-seller-deadlines
  *
  * Cron job to handle orders where sellers haven't responded within 24 hours
- * Cancels orders and triggers refunds
+ * Cancels orders and triggers refunds (EveryPay + wallet)
  * Should run every 5 minutes via Vercel Cron
  *
  * Add to vercel.json:
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    console.log('🕐 [Cron] Running expire-seller-deadlines job...');
+    console.log('[Cron] Running expire-seller-deadlines job...');
 
     // Call the expiration handler function
     const { data: result, error } = await supabase.rpc(
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     );
 
     if (error) {
-      console.error('❌ [Cron] Error handling expired deadlines:', error);
+      console.error('[Cron] Error handling expired deadlines:', error);
       return NextResponse.json(
         { error: 'Failed to handle expired deadlines', details: error.message },
         { status: 500 }
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     const cancelledCount = result?.cancelled_count || 0;
     const refundsNeeded = result?.refunds_needed || [];
 
-    console.log(`✅ [Cron] Cancelled ${cancelledCount} orders with expired deadlines`);
+    console.log(`[Cron] Cancelled ${cancelledCount} orders with expired deadlines`);
 
     // Process refunds and send emails
     let refundsProcessed = 0;
@@ -68,60 +68,86 @@ export async function GET(request: NextRequest) {
     let emailsSent = 0;
 
     if (refundsNeeded.length > 0) {
-      console.log(`💰 [Cron] Processing ${refundsNeeded.length} refunds...`);
+      console.log(`[Cron] Processing ${refundsNeeded.length} refunds...`);
 
-      // Import stripe, email, and transaction message functions
-      const { stripe } = await import('@/lib/stripe');
+      // Import EveryPay client, wallet service, email, and transaction message functions
+      const { refundPayment } = await import('@/lib/everypay/client');
+      const { refundToWallet } = await import('@/lib/services/wallet');
       const { sendOrderCancelledToBuyer } = await import('@/lib/email/send-order-emails');
       const { postOrderCancelledMessage } = await import('@/lib/transactions');
 
       for (const refundInfo of refundsNeeded) {
-        const { order_id, buyer_id, amount, payment_intent_id } = refundInfo;
+        const { order_id, buyer_id, amount } = refundInfo;
 
         // Post system message to transaction conversation (non-blocking)
         postOrderCancelledMessage(order_id, 'seller_timeout');
 
-        // Process Stripe refund
-        if (payment_intent_id) {
-          try {
-            console.log(`💰 [Cron] Refunding order ${order_id}...`);
+        try {
+          console.log(`[Cron] Refunding order ${order_id}...`);
 
-            const refund = await stripe.refunds.create({
-              payment_intent: payment_intent_id,
-              reason: 'requested_by_customer',
-              metadata: {
-                order_id,
-                reason: 'Seller did not respond within 24 hours',
-              },
-            });
+          // Fetch order details for EveryPay reference and wallet debit
+          const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .select('everypay_payment_reference, buyer_wallet_debit_cents, total_amount')
+            .eq('id', order_id)
+            .single();
 
-            console.log(`✅ [Cron] Refund created: ${refund.id}`);
-
-            // Update order with refund info
-            await supabase
-              .from('orders')
-              .update({
-                refunded_at: new Date().toISOString(),
-                refund_amount: amount,
-              })
-              .eq('id', order_id);
-
-            refundsProcessed++;
-          } catch (refundError: unknown) {
-            console.error(`❌ [Cron] Refund failed for order ${order_id}:`, refundError);
+          if (orderError || !order) {
+            console.error(`[Cron] Could not fetch order ${order_id}:`, orderError);
             refundsFailed++;
             continue;
           }
+
+          const totalAmountCents = Math.round(order.total_amount * 100);
+          const walletDebitCents = order.buyer_wallet_debit_cents || 0;
+          const everypayPortionCents = totalAmountCents - walletDebitCents;
+
+          // 1. Refund EveryPay portion (card payment)
+          if (everypayPortionCents > 0 && order.everypay_payment_reference) {
+            await refundPayment(order.everypay_payment_reference, everypayPortionCents);
+            console.log(`[Cron] EveryPay refund processed for order ${order_id} (${everypayPortionCents} cents)`);
+          }
+
+          // 2. Refund wallet portion back to buyer's wallet
+          if (walletDebitCents > 0) {
+            const walletResult = await refundToWallet(
+              supabase,
+              buyer_id,
+              walletDebitCents,
+              order_id
+            );
+            if (!walletResult.success) {
+              console.error(`[Cron] Wallet refund failed for order ${order_id}:`, walletResult.error);
+              refundsFailed++;
+              continue;
+            }
+            console.log(`[Cron] Wallet refund processed for order ${order_id} (${walletDebitCents} cents)`);
+          }
+
+          // Update order with refund info
+          await supabase
+            .from('orders')
+            .update({
+              refunded_at: new Date().toISOString(),
+              refund_amount: amount,
+            })
+            .eq('id', order_id);
+
+          refundsProcessed++;
+        } catch (refundError: unknown) {
+          console.error(`[Cron] Refund failed for order ${order_id}:`, refundError);
+          refundsFailed++;
+          continue;
         }
 
         // Fetch order details for email
-        const { data: order } = await supabase
+        const { data: orderForEmail } = await supabase
           .from('orders')
           .select('order_number, seller_id')
           .eq('id', order_id)
           .single();
 
-        if (!order) continue;
+        if (!orderForEmail) continue;
 
         // Fetch buyer and seller profiles
         const { data: buyerProfile } = await supabase
@@ -133,7 +159,7 @@ export async function GET(request: NextRequest) {
         const { data: sellerProfile } = await supabase
           .from('user_profiles')
           .select('full_name')
-          .eq('id', order.seller_id)
+          .eq('id', orderForEmail.seller_id)
           .single();
 
         // Send cancellation email
@@ -142,16 +168,16 @@ export async function GET(request: NextRequest) {
             await sendOrderCancelledToBuyer({
               buyerName: buyerProfile.full_name,
               buyerEmail: buyerProfile.email,
-              orderNumber: order.order_number,
+              orderNumber: orderForEmail.order_number,
               sellerName: sellerProfile.full_name,
               refundAmount: amount,
               cancellationReason: 'Seller did not respond within 24 hours',
             });
 
-            console.log(`📧 [Cron] Cancellation email sent for order ${order_id}`);
+            console.log(`[Cron] Cancellation email sent for order ${order_id}`);
             emailsSent++;
           } catch (emailError) {
-            console.error(`❌ [Cron] Email failed for order ${order_id}:`, emailError);
+            console.error(`[Cron] Email failed for order ${order_id}:`, emailError);
           }
         }
       }
@@ -180,7 +206,7 @@ export async function GET(request: NextRequest) {
 
         if (!dErr) {
           disputeDeadlinesExpired++;
-          console.log(`⏰ [Cron] Dispute deadline expired for order ${dispute.order_number}`);
+          console.log(`[Cron] Dispute deadline expired for order ${dispute.order_number}`);
         }
       }
     }
@@ -195,11 +221,11 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     };
 
-    console.log('✅ [Cron] Summary:', summary);
+    console.log('[Cron] Summary:', summary);
 
     return NextResponse.json(summary);
   } catch (error: unknown) {
-    console.error('❌ [Cron] Unexpected error:', error);
+    console.error('[Cron] Unexpected error:', error);
     return NextResponse.json(
       { error: 'Cron job failed', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

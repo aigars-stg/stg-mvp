@@ -64,7 +64,9 @@
       "Bash(xargs cat:*)",
       "mcp__supabase__get_logs",
       "mcp__stripe__list_payment_intents",
-      "mcp__filesystem__read_text_file"
+      "mcp__filesystem__read_text_file",
+      "Bash(npx prettier:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

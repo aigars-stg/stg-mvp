@@ -458,14 +458,6 @@ export default function OrderDetailPage() {
                     )}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">
-                    {t('summary.serviceFee')}
-                  </span>
-                  <span className="font-medium text-polar-night dark:text-snow-white">
-                    €{order.service_fee.toFixed(2)}
-                  </span>
-                </div>
                 <div className="flex justify-between pt-2 border-t border-border-subtle">
                   <span className="font-semibold text-polar-night dark:text-snow-white">
                     {t('summary.totalPaid')}

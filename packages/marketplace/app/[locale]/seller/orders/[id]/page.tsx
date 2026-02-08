@@ -539,13 +539,13 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
               <span className="font-medium">€{order.shipping_cost.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-text-secondary">Platform Service Fee:</span>
-              <span className="font-medium text-aurora-red">-€{order.service_fee.toFixed(2)}</span>
+              <span className="text-text-secondary">Platform Commission (10%):</span>
+              <span className="font-medium text-aurora-red">-€{(order.items_total * 0.10).toFixed(2)}</span>
             </div>
             <div className="flex justify-between pt-3 border-t border-border-subtle">
               <span className="font-semibold text-polar-night dark:text-snow-white">You Receive:</span>
               <span className="text-xl font-bold text-aurora-green">
-                €{(order.items_total + order.shipping_cost).toFixed(2)}
+                €{(order.items_total * 0.90).toFixed(2)}
               </span>
             </div>
           </div>

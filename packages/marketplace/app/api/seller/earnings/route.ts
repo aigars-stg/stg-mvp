@@ -6,96 +6,84 @@ import { handleApiError } from '@/lib/api/error-handler';
 /**
  * GET /api/seller/earnings
  *
- * Get seller's earnings summary from database
- * Uses the seller_earnings_summary view for aggregated data
+ * Get seller's earnings summary from wallet transactions and orders.
+ * With the wallet model, earnings are tracked via wallet_transactions.
  */
 export async function GET(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;
 
-    // Try to get from view first (if available)
-    const { data: summaryData, error: summaryError } = await supabase
-      .from('seller_earnings_summary')
-      .select('*')
+    // Get wallet balance
+    const { data: wallet } = await supabase
+      .from('wallets')
+      .select('balance_cents')
       .eq('user_id', user.id)
       .single();
 
-    // If view exists and has data
-    if (summaryData && !summaryError) {
-      return NextResponse.json({
-        totalSalesCount: summaryData.total_sales_count || 0,
-        totalGross: Number(summaryData.total_gross) || 0,
-        totalPlatformFees: Number(summaryData.total_platform_fees) || 0,
-        totalNet: Number(summaryData.total_net) || 0,
-        completedPayoutsCount: summaryData.completed_payouts_count || 0,
-        pendingPayoutsCount: summaryData.pending_payouts_count || 0,
-        salesLast30Days: summaryData.sales_last_30_days || 0,
-        earningsLast30Days: Number(summaryData.earnings_last_30_days) || 0,
-      }, {
-        headers: {
-          'Cache-Control': 'private, max-age=30',
-        },
-      });
-    }
+    // Get completed sales from wallet_transactions (sale_credit type)
+    const { data: saleTransactions, error: txError } = await supabase
+      .from('wallet_transactions')
+      .select('amount_cents, created_at')
+      .eq('user_id', user.id)
+      .eq('type', 'sale_credit');
 
-    // Fallback: Query orders directly if view doesn't exist or returns no data
-    const { data: orders, error: ordersError } = await supabase
-      .from('orders')
-      .select('items_total, shipping_cost, service_fee, payout_status, updated_at')
-      .eq('seller_id', user.id)
-      .eq('status', 'completed');
-
-    if (ordersError) {
+    if (txError) {
       throw new Error('Failed to fetch earnings data');
     }
 
-    // Calculate aggregates manually
+    // Get completed withdrawal totals
+    const { data: withdrawals } = await supabase
+      .from('withdrawal_requests')
+      .select('amount_cents, status')
+      .eq('user_id', user.id);
+
+    // Calculate aggregates
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     let totalSalesCount = 0;
-    let totalGross = 0;
-    let totalPlatformFees = 0;
-    let completedPayoutsCount = 0;
-    let pendingPayoutsCount = 0;
+    let totalEarningsCents = 0;
     let salesLast30Days = 0;
-    let earningsLast30Days = 0;
+    let earningsLast30DaysCents = 0;
 
-    if (orders) {
-      for (const order of orders) {
-        // Seller earns items_total only (shipping goes to platform via Unisend)
-        const sellerEarnings = Number(order.items_total);
-        const fee = Number(order.service_fee);
-        if (!order.updated_at) continue;
-        const orderDate = new Date(order.updated_at);
-
+    if (saleTransactions) {
+      for (const tx of saleTransactions) {
         totalSalesCount++;
-        totalGross += sellerEarnings;
-        totalPlatformFees += fee;
+        totalEarningsCents += tx.amount_cents;
 
-        if (order.payout_status === 'completed') {
-          completedPayoutsCount++;
-        } else if (order.payout_status === 'pending') {
-          pendingPayoutsCount++;
-        }
-
-        if (orderDate >= thirtyDaysAgo) {
+        const txDate = new Date(tx.created_at as string);
+        if (txDate >= thirtyDaysAgo) {
           salesLast30Days++;
-          earningsLast30Days += sellerEarnings;
+          earningsLast30DaysCents += tx.amount_cents;
+        }
+      }
+    }
+
+    let completedWithdrawals = 0;
+    let pendingWithdrawals = 0;
+    let totalWithdrawnCents = 0;
+
+    if (withdrawals) {
+      for (const w of withdrawals) {
+        if (w.status === 'completed') {
+          completedWithdrawals++;
+          totalWithdrawnCents += w.amount_cents;
+        } else if (w.status === 'pending' || w.status === 'processing') {
+          pendingWithdrawals++;
         }
       }
     }
 
     return NextResponse.json({
       totalSalesCount,
-      totalGross,
-      totalPlatformFees,
-      totalNet: totalGross, // Seller gets full amount
-      completedPayoutsCount,
-      pendingPayoutsCount,
+      totalEarnings: totalEarningsCents / 100,
+      totalWithdrawn: totalWithdrawnCents / 100,
+      walletBalance: (wallet?.balance_cents || 0) / 100,
+      completedWithdrawals,
+      pendingWithdrawals,
       salesLast30Days,
-      earningsLast30Days,
+      earningsLast30Days: earningsLast30DaysCents / 100,
     }, {
       headers: {
         'Cache-Control': 'private, max-age=30',

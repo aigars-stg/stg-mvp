@@ -1,50 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleApiError } from '@/lib/api/error-handler';
+import { verifyTurnstile } from '@/lib/turnstile';
 
 export async function POST(request: NextRequest) {
   try {
     const { token } = await request.json();
+    const remoteIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
+    const result = await verifyTurnstile(token, remoteIp);
 
-    if (!token) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: 'Token is required' },
-        { status: 400 }
-      );
-    }
-
-    const secretKey = process.env.TURNSTILE_SECRET_KEY;
-
-    if (!secretKey) {
-      console.warn('TURNSTILE_SECRET_KEY not configured');
-      // Allow request to proceed if Turnstile is not configured
-      return NextResponse.json({ success: true });
-    }
-
-    // Verify token with Cloudflare Turnstile
-    const verifyResponse = await fetch(
-      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          secret: secretKey,
-          response: token,
-          remoteip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
-        }),
-      }
-    );
-
-    const verifyData = await verifyResponse.json();
-
-    if (!verifyData.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Verification failed',
-          'error-codes': verifyData['error-codes']
-        },
+        { success: false, error: 'Verification failed', 'error-codes': result.errorCodes },
         { status: 400 }
       );
     }

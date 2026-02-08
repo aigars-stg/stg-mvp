@@ -16,8 +16,8 @@ interface OrderDetails {
   destination: string;
   items_total: number;
   shipping_cost: number;
-  service_fee: number;
   total_amount: number;
+  wallet_debit_cents: number;
   seller_response_deadline: string;
   items: {
     id: string;
@@ -33,15 +33,58 @@ const RETRY_DELAY_MS = 2000;
 function SuccessPageContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const orderId = searchParams.get('order_id');
+  const errorParam = searchParams.get('error');
   const t = useTranslations('Checkout.success');
 
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(errorParam);
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  const fetchOrderDetails = useCallback(async (_attempt: number): Promise<boolean> => {
+  // Fetch order by ID (EveryPay + wallet flow)
+  const fetchOrderById = useCallback(async (): Promise<boolean> => {
+    if (!orderId) return false;
+
+    try {
+      const response = await fetch(`/api/orders/${orderId}`);
+      const data = await response.json();
+
+      if (response.ok && data) {
+        setOrder({
+          order_id: data.id,
+          order_number: data.order_number,
+          seller_name: data.seller_name || 'Seller',
+          shipping_method: data.shipping_method,
+          destination: data.shipping_method === 't2t'
+            ? data.destination_terminal_name
+            : data.pickup_city,
+          items_total: data.items_total,
+          shipping_cost: data.shipping_cost,
+          total_amount: data.total_amount,
+          wallet_debit_cents: data.wallet_debit_cents || 0,
+          seller_response_deadline: data.seller_response_deadline,
+          items: (data.order_items || []).map((item: { id: string; game_name: string; price: number; photo_url: string | null }) => ({
+            id: item.id,
+            game_name: item.game_name,
+            price: item.price,
+            photo_url: item.photo_url,
+          })),
+        });
+        setLoading(false);
+        return true;
+      }
+
+      return false;
+    } catch (err) {
+      console.error('Error fetching order:', err);
+      return false;
+    }
+  }, [orderId]);
+
+  // Fetch order by EveryPay payment reference
+  const fetchOrderBySession = useCallback(async (_attempt: number): Promise<boolean> => {
     if (!sessionId) return false;
 
     try {
@@ -56,16 +99,14 @@ function SuccessPageContent() {
       }
 
       if (response.status === 404 && data.processing) {
-        // Order not created yet, webhook may still be processing
         return false;
       }
 
-      // Other errors
       if (response.status === 400 || response.status === 403) {
         setError(data.error || 'Failed to load order');
         setLoading(false);
         setProcessing(false);
-        return true; // Stop retrying
+        return true;
       }
 
       return false;
@@ -76,8 +117,26 @@ function SuccessPageContent() {
   }, [sessionId]);
 
   useEffect(() => {
+    // If there's an error param from the callback, show it immediately
+    if (errorParam) {
+      setLoading(false);
+      return;
+    }
+
+    // Order ID flow (EveryPay callback or wallet-only)
+    if (orderId) {
+      fetchOrderById().then((found) => {
+        if (!found) {
+          setError('Order not found');
+          setLoading(false);
+        }
+      });
+      return;
+    }
+
+    // EveryPay payment reference flow
     if (!sessionId) {
-      setError('No session ID provided');
+      setError('No order information provided');
       setLoading(false);
       return;
     }
@@ -86,15 +145,12 @@ function SuccessPageContent() {
     let timeoutId: NodeJS.Timeout;
 
     const pollForOrder = async () => {
-      // First attempt
-      const found = await fetchOrderDetails(0);
+      const found = await fetchOrderBySession(0);
       if (found || cancelled) return;
 
-      // Switch to processing state after first attempt fails
       setLoading(false);
       setProcessing(true);
 
-      // Retry with delay
       for (let i = 1; i <= MAX_RETRIES && !cancelled; i++) {
         setRetryCount(i);
         await new Promise(resolve => {
@@ -102,11 +158,10 @@ function SuccessPageContent() {
         });
         if (cancelled) return;
 
-        const found = await fetchOrderDetails(i);
+        const found = await fetchOrderBySession(i);
         if (found) return;
       }
 
-      // Max retries reached
       if (!cancelled) {
         setProcessing(false);
         setError('timeout');
@@ -119,7 +174,7 @@ function SuccessPageContent() {
       cancelled = true;
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [sessionId, fetchOrderDetails]);
+  }, [sessionId, orderId, errorParam, fetchOrderById, fetchOrderBySession]);
 
   // Loading state
   if (loading) {
@@ -162,8 +217,7 @@ function SuccessPageContent() {
   }
 
   // Error state
-  if (error || !sessionId) {
-    // Check if error is a translation key or a raw message
+  if (error || (!sessionId && !orderId)) {
     const errorMessage = error === 'timeout' ? t('processingTimeout') : (error || t('errorDescription'));
 
     return (
@@ -261,10 +315,12 @@ function SuccessPageContent() {
                   <span className="text-text-secondary">{t('orderSummary.shipping')}</span>
                   <span className="text-polar-night dark:text-snow-white">{order.shipping_cost.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-secondary">{t('orderSummary.serviceFee')}</span>
-                  <span className="text-polar-night dark:text-snow-white">{order.service_fee.toFixed(2)}</span>
-                </div>
+                {order.wallet_debit_cents > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-secondary">{t('orderSummary.walletCredit') || 'Wallet credit'}</span>
+                    <span className="text-aurora-green">-{(order.wallet_debit_cents / 100).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-semibold pt-2 border-t border-border">
                   <span className="text-polar-night dark:text-snow-white">{t('orderSummary.total')}</span>
                   <span className="text-frost-ice">{order.total_amount.toFixed(2)}</span>
@@ -393,11 +449,13 @@ function SuccessPageContent() {
             </Link>
           </div>
 
-          {/* Session ID for debugging */}
-          {sessionId && (
+          {/* Reference for debugging */}
+          {(sessionId || orderId) && (
             <div className="text-center">
               <p className="text-xs text-text-muted">
-                {t('sessionId', { sessionId })}
+                {sessionId
+                  ? t('sessionId', { sessionId })
+                  : `Order: ${orderId}`}
               </p>
             </div>
           )}

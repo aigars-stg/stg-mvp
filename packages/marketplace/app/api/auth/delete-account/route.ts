@@ -44,35 +44,40 @@ export async function DELETE(_request: NextRequest) {
     const anonymizedEmail = `deleted-${user.id}@internal.local`;
 
     // Step 0.5: SELLER SAFETY CHECKS (Financial Liability)
-    // Check if user is a seller and has a Stripe account
-    const { data: sellerProfile } = await supabase
-      .from('seller_profiles')
-      .select('stripe_connect_account_id')
+    // Check if seller has pending withdrawal requests
+    const { data: pendingWithdrawals } = await supabase
+      .from('withdrawal_requests')
+      .select('id')
       .eq('user_id', user.id)
-      .single();
+      .in('status', ['pending', 'processing'])
+      .limit(1);
 
-    if (sellerProfile?.stripe_connect_account_id) {
-      try {
-        const { checkSellerAccountStatus } = await import('@/lib/stripe/account-checks');
-        const status = await checkSellerAccountStatus(sellerProfile.stripe_connect_account_id);
+    if (pendingWithdrawals && pendingWithdrawals.length > 0) {
+      return NextResponse.json(
+        {
+          error: 'Cannot delete account',
+          message: 'You have pending withdrawal requests. Please wait for them to complete before deleting your account.',
+        },
+        { status: 400 }
+      );
+    }
 
-        if (!status.canDelete) {
-          return NextResponse.json(
-            {
-              error: 'Cannot delete account',
-              message: status.reason,
-              details: status.details
-            },
-            { status: 400 }
-          );
-        }
-      } catch {
-        // Fail safe: don't allow deletion if we can't verify financial state
-        return NextResponse.json(
-          { error: 'Failed to verify account status. Please try again or contact support.' },
-          { status: 500 }
-        );
-      }
+    // Check for active orders (as buyer or seller)
+    const { data: activeOrders } = await supabase
+      .from('orders')
+      .select('id')
+      .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+      .in('status', ['pending_seller', 'confirmed', 'shipped', 'delivered', 'disputed'])
+      .limit(1);
+
+    if (activeOrders && activeOrders.length > 0) {
+      return NextResponse.json(
+        {
+          error: 'Cannot delete account',
+          message: 'You have active orders. Please wait for all orders to complete before deleting your account.',
+        },
+        { status: 400 }
+      );
     }
 
     // Step 0: Send Confirmation Email (Before modifying data)

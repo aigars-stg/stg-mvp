@@ -1,21 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addBankAccount, getBankAccountInfo, validateIBAN } from '@/lib/stripe/bank-account-service';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/seller/bank-account
  *
- * Get seller's bank account info (display only - last4, bank name)
+ * Get seller's bank account info (IBAN + account holder name)
  */
 export async function GET(_request: NextRequest) {
   try {
-    const { response, user } = await requireAuth();
+    const { response, user, supabase } = await requireAuth();
     if (response) return response;
 
-    const bankInfo = await getBankAccountInfo(user.id);
+    const { data: profile, error } = await supabase
+      .from('seller_profiles')
+      .select('payout_iban, payout_account_holder_name')
+      .eq('user_id', user.id)
+      .single();
 
-    return NextResponse.json(bankInfo);
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ hasAccount: false });
+      }
+      throw error;
+    }
+
+    return NextResponse.json({
+      hasAccount: !!profile?.payout_iban,
+      iban: profile?.payout_iban ? `****${profile.payout_iban.slice(-4)}` : null,
+      accountHolderName: profile?.payout_account_holder_name || null,
+    });
   } catch (error) {
     return handleApiError(error, 'Fetch bank account info');
   }
@@ -24,18 +38,16 @@ export async function GET(_request: NextRequest) {
 /**
  * POST /api/seller/bank-account
  *
- * Add a bank account for seller payouts
+ * Save IBAN and account holder name to seller profile
  */
 export async function POST(request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;
 
-    // Parse request body
     const body = await request.json();
     const { iban, accountHolderName } = body;
 
-    // Validate required fields
     if (!iban || typeof iban !== 'string') {
       return NextResponse.json(
         { error: 'IBAN is required' },
@@ -50,65 +62,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate IBAN format
-    const validation = validateIBAN(iban);
-    if (!validation.valid) {
+    // Basic IBAN format validation (2 letter country + 2 check digits + up to 30 alphanumeric)
+    const cleanIban = iban.replace(/\s/g, '').toUpperCase();
+    if (!/^[A-Z]{2}\d{2}[A-Z0-9]{4,30}$/.test(cleanIban)) {
       return NextResponse.json(
-        { error: validation.error },
+        { error: 'Invalid IBAN format' },
         { status: 400 }
       );
     }
 
-    // Get seller profile with Connect info
-    const { data: profile, error: profileError } = await supabase
+    // Update seller profile with IBAN
+    const { error: updateError } = await supabase
       .from('seller_profiles')
-      .select('stripe_connect_account_id, stripe_connect_payouts_enabled')
-      .eq('user_id', user.id)
-      .single();
+      .update({
+        payout_iban: cleanIban,
+        payout_account_holder_name: accountHolderName.trim(),
+      })
+      .eq('user_id', user.id);
 
-    if (profileError || !profile) {
+    if (updateError) {
+      console.error('Failed to save bank account:', updateError);
       return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
-      );
-    }
-
-    // Check if seller has Connect account
-    if (!profile.stripe_connect_account_id) {
-      return NextResponse.json(
-        { error: 'Complete seller onboarding first' },
-        { status: 400 }
-      );
-    }
-
-    // Check if payouts are enabled
-    if (!profile.stripe_connect_payouts_enabled) {
-      return NextResponse.json(
-        { error: 'Complete Stripe verification first' },
-        { status: 400 }
-      );
-    }
-
-    // Add bank account
-    const result = await addBankAccount(
-      user.id,
-      profile.stripe_connect_account_id,
-      iban,
-      accountHolderName
-    );
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 400 }
+        { error: 'Failed to save bank account' },
+        { status: 500 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      bankAccount: result.bankAccount,
+      iban: `****${cleanIban.slice(-4)}`,
     });
   } catch (error) {
-    return handleApiError(error, 'Add bank account');
+    return handleApiError(error, 'Save bank account');
   }
 }

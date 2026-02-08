@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendOrderCancelledToBuyer } from '@/lib/email/send-order-emails';
-import { stripe } from '@/lib/stripe';
+import { refundPayment } from '@/lib/everypay/client';
 import { postOrderDeclinedMessage } from '@/lib/transactions';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
@@ -63,21 +63,55 @@ export async function POST(
     postOrderDeclinedMessage(orderId, reason);
 
     // Process refund if required
-    if (result.requires_refund && result.payment_intent_id) {
+    if (result.requires_refund) {
       try {
-        await stripe.refunds.create({
-          payment_intent: result.payment_intent_id,
-          reason: 'requested_by_customer',
-        });
-
-        // Update order with refund info
-        await supabase
+        // Fetch the order to get EveryPay reference and wallet debit info
+        const { data: orderForRefund } = await supabase
           .from('orders')
-          .update({
-            refunded_at: new Date().toISOString(),
-            refund_amount: result.refund_amount,
-          })
-          .eq('id', orderId);
+          .select(
+            'buyer_id, everypay_payment_reference, buyer_wallet_debit_cents, total_amount'
+          )
+          .eq('id', orderId)
+          .single();
+
+        if (orderForRefund) {
+          const {
+            buyer_id: buyerId,
+            everypay_payment_reference: everypayRef,
+            buyer_wallet_debit_cents: walletDebitCents,
+            total_amount: totalAmount,
+          } = orderForRefund;
+
+          // Refund EveryPay card payment if one exists
+          if (everypayRef) {
+            // Calculate the EveryPay portion: total minus any wallet debit
+            const everypayAmountCents = Math.round(
+              totalAmount * 100 - (walletDebitCents || 0)
+            );
+            if (everypayAmountCents > 0) {
+              await refundPayment(everypayRef, everypayAmountCents);
+            }
+          }
+
+          // Refund wallet debit back to buyer's wallet
+          if (walletDebitCents && walletDebitCents > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (supabase as any).rpc('credit_buyer_wallet_refund', {
+              p_user_id: buyerId,
+              p_amount_cents: walletDebitCents,
+              p_order_id: orderId,
+            });
+          }
+
+          // Update order with refund info
+          await supabase
+            .from('orders')
+            .update({
+              refunded_at: new Date().toISOString(),
+              refund_amount: totalAmount,
+            })
+            .eq('id', orderId);
+        }
       } catch {
         // Don't fail the whole request, order is already declined
       }

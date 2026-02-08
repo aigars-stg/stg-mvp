@@ -30,7 +30,6 @@
   "PriceBreakdown": {
     "item": "Prece:",
     "shipping": "Piegāde ({country}):",
-    "serviceFee": "Servisa maksa:",
     "fees": "maksas",
     "estimateNote": "*Aptuveni vienas valsts ietvaros"
   },
@@ -384,7 +383,7 @@
     "holderNameRequired": "Konta īpašnieka vārds ir obligāts",
     "addFailed": "Neizdevās pievienot bankas kontu",
     "formatHint": "Formāts: {hint}",
-    "securityNote": "Tavas bankas detaļas tiek droši glabātas Stripe sistēmā. Mēs saglabājam tikai pēdējos 4 ciparus attēlošanai.",
+    "securityNote": "Tavas bankas dati tiek droši glabāti. Mēs attēlojam tikai pēdējos 4 IBAN ciparus.",
     "cancel": "Atcelt",
     "addButton": "Pievienot bankas kontu",
     "adding": "Pievieno..."
@@ -514,7 +513,8 @@
       "useDifferentEmail": "Izmantot citu e-pastu"
     },
     "errors": {
-      "tooManyAttempts": "Pārāk daudz mēģinājumu — uztaisīsim pauzi. Mēģini vēlreiz pēc dažām minūtēm."
+      "tooManyAttempts": "Pārāk daudz mēģinājumu — uztaisīsim pauzi. Mēģini vēlreiz pēc dažām minūtēm.",
+      "captchaFailed": "Verifikācija neizdevās. Lūdzu, mēģini vēlreiz."
     },
     "comingSoon": {
       "title": "Mēs drīz startēsim!",
@@ -565,7 +565,6 @@
   "OfferCard": {
     "priceBreakdown": {
       "shippingTo": "Piegāde uz {country}:",
-      "serviceFee": "Servisa maksa:",
       "total": "Kopā:",
       "estimateNote": "*Aptuvens aprēķins, pamatojoties uz piegādi vienas valsts ietvaros. Galīgā cena pie norēķināšanās."
     },
@@ -648,7 +647,6 @@
       "title": "Pasūtījuma kopsavilkums",
       "subtotal": "Starpsumma ({count, plural, one {# prece} other {# preces}})",
       "shipping": "Piegāde",
-      "serviceFee": "Servisa maksa",
       "total": "Kopā"
     },
     "actions": {
@@ -686,7 +684,6 @@
         "soldBy": "Pārdod {seller}",
         "items": "Preces",
         "shipping": "Piegāde",
-        "serviceFee": "Pakalpojuma maksa",
         "total": "Kopā",
         "deliveryTo": "Piegāde uz",
         "pickupAt": "Saņemšana"
@@ -1771,17 +1768,17 @@
     },
     "step3": {
       "backButton": "← Atpakaļ uz opcijām",
-      "title": "Iestatīt maksājumus ar Stripe",
+      "title": "Maksājumu iestatīšana",
       "heading": "Savienot maksājumu kontu",
-      "description": "Mēs izmantojam Stripe, lai droši apstrādātu izmaksas — maksājumu platforma, kurai uzticas Airbnb, Shopify un miljoniem uzņēmumu visā pasaulē. Tava nauda nonāk tieši tavā bankā. Mēs nekad neredzam un neturam tavus līdzekļus.",
+      "description": "Tavi ienākumi tiek ieskaitīti platformas makā pēc katra pārdošanas. Tu vari izņemt uz savu bankas kontu jebkurā laikā, izmantojot IBAN.",
       "requirements": {
         "title": "Tev būs nepieciešams:",
         "id": "Personu apliecinošs dokuments (pase, ID karte vai autovadītāja apliecība)",
         "bank": "Bankas konta dati (IBAN)",
         "personal": "Personiskā info (vārds, dzimšanas datums, adrese)"
       },
-      "continueButton": "Turpināt uz Stripe",
-      "redirectNote": "Tiksi novirzīts uz Stripe drošo reģistrāciju (2 min)"
+      "continueButton": "Turpināt",
+      "redirectNote": "Tu vari pievienot bankas datus vēlāk, pieprasot pirmo izņemšanu"
     },
     "whatsNext": {
       "title": "Kas tālāk?",
@@ -2112,7 +2109,6 @@
       "subtotal": "Starpsumma",
       "subtotalItems": "Starpsumma ({count, plural, one {# prece} other {# preces}})",
       "shipping": "Piegāde",
-      "serviceFee": "Servisa maksa",
       "total": "Kopā",
       "shippingNote": "+ piegāde (aprēķināta pie norēķināšanās)",
       "checkout": "Norēķināties"
@@ -2187,7 +2183,7 @@
   "SellerDashboard": {
     "title": "Pārdevēja panelis",
     "subtitle": {
-      "payoutsEnabled": "Pārvaldi savus ienākumus, izmaksas un darījumus",
+      "payoutsEnabled": "Pārvaldi savus ienākumus, maku un izņemšanu",
       "contactOnly": "Pārvaldi savus sludinājumus un sazinies ar pircējiem"
     },
     "refresh": "Atjaunot",
@@ -2235,8 +2231,6 @@
       "refreshBalance": "Atsvaidzināt atlikumu",
       "noAccount": "Pabeidz pārdevēja reģistrāciju, lai redzētu savu atlikumu un saņemtu maksājumus.",
       "startSelling": "Sākt pārdot",
-      "noPayouts": "Pabeidz Stripe verifikāciju, lai aktivizētu izmaksas un redzētu savu atlikumu.",
-      "completeVerification": "Pabeigt verifikāciju",
       "noSales": "Tev vēl nav nevienas pārdošanas.",
       "noSalesHint": "Kad pārdosi spēli, tavi ieņēmumi parādīsies šeit.",
       "viewListings": "Skatīt tavus sludinājumus",
@@ -2250,12 +2244,11 @@
       "fundsReleasedInfo": "Līdzekļi tiek atbrīvoti 2 dienas pēc piegādes apstiprināšanas",
       "addBankHint": "Pievieno bankas kontu, lai izņemtu savus ieņēmumus.",
       "addBankAccount": "Pievienot bankas kontu",
-      "requestPayout": "Pieprasīt izmaksu",
+      "requestWithdrawal": "Izņemt",
       "updated": "Atjaunināts {time}",
       "statsSingular": "{count} pārdošana · {amount} pēdējās 30 dienās",
       "statsPlural": "{count} pārdošanas · {amount} pēdējās 30 dienās",
-      "viewInStripe": "Skatīt izmaksu vēsturi Stripe",
-      "openingStripe": "Atver..."
+      "viewWallet": "Skatīt maku un darījumus"
     },
     "EarningsSummary": {
       "title": "Ieņēmumu kopsavilkums",
@@ -2342,17 +2335,9 @@
         "description": "Jauni sludinājumi ir bloķēti, līdz sniegsi nodokļu informāciju. Esošie sludinājumi ir paslēpti."
       }
     },
-    "StripeRequirements": {
-      "actionNeeded": {
-        "title": "Stripe nepieciešama papildu informācija",
-        "description": "Pabeidz {count, plural, one {# verifikācijas soli} other {# verifikācijas soļus}}, lai tavs konts paliktu aktīvs."
-      },
-      "overdue": {
-        "title": "Steidzami: verifikācija nokavēta",
-        "description": "Tavam kontam ir nokavētas verifikācijas prasības. Pabeidz tās tagad, lai izvairītos no ierobežojumiem."
-      },
-      "completeInStripe": "Pabeigt Stripe",
-      "opening": "Atver..."
+    "WalletInfo": {
+      "title": "Maks",
+      "description": "Tavi ienākumi tiek glabāti platformas makā. Izņem uz savu banku jebkurā laikā."
     }
   },
   "Orders": {
@@ -2467,7 +2452,6 @@
         "title": "Pasūtījuma kopsavilkums",
         "items": "Preces",
         "shipping": "Piegāde",
-        "serviceFee": "Servisa maksa",
         "totalPaid": "Kopā samaksāts",
         "free": "Bezmaksas"
       },
@@ -2684,9 +2668,9 @@
           "bestFor": "Vairumam pārdevēju Latvijā",
           "howBuyersPay": "Caur Second Turn Games",
           "howShippingWorks": "€2 vienota likme caur Unisend skapjiem",
-          "yourEarnings": "100% no Jūsu norādītās cenas",
+          "yourEarnings": "90% no Jūsu prasītās cenas (10% komisija)",
           "buyerProtection": "Jā — mēs turam maksājumu līdz piegādei",
-          "setupRequired": "Ātrs Stripe konts (2 min)",
+          "setupRequired": "Pieņemt pārdevēja noteikumus (1 min)",
           "availability": "Tikai Latvijā"
         },
         "contactSeller": {
@@ -2705,7 +2689,7 @@
         "steps": {
           "step1": {
             "title": "Pircējs iegādājas",
-            "description": "Viņš maksā spēles cenu plus nelielu pakalpojuma maksu (6% + €0.50) un €2 piegādi. Jūs nemaksājat neko."
+            "description": "Viņi maksā spēles cenu plus €2 piegādi. Nav servisa maksas pircējiem."
           },
           "step2": {
             "title": "Jūs saņemat paziņojumu",
@@ -2721,7 +2705,7 @@
           },
           "step5": {
             "title": "Jūs saņemat naudu",
-            "description": "Pilna norādītā cena nonāk Jūsu pievienotajā bankas kontā. Mēs paturām tikai pircēja pakalpojuma maksu."
+            "description": "Tavi ienākumi (spēles cena mīnus 10% komisija) tiek ieskaitīti platformas makā. Izņem uz savu banku jebkurā laikā."
           }
         },
         "issuesTitle": "Kas notiek, ja kaut kas noiet greizi?",
@@ -2731,14 +2715,14 @@
           "notPickedUp": "Ja pircējs nepaņem sūtījumu, mēs sadarbosimies ar Jums par turpmākajiem soļiem."
         },
         "setupTitle": "Tūlītējas pirkšanas iestatīšana",
-        "setupDescription": "Lai izmantotu Tūlītējo pirkšanu, Jums jāpievieno Stripe konts. Tas ļauj mums nosūtīt maksājumus tieši uz Jūsu banku.",
+        "setupDescription": "Lai izmantotu Tūlītējo pirkšanu, vienkārši pieņemiet pārdevēja noteikumus. Jūsu ienākumi nonāks platformas makā.",
         "setupTime": "Iestatīšana aizņem aptuveni 2 minūtes. Jums būs nepieciešams:",
         "setupRequirements": {
           "name": "Jūsu pilns vārds",
           "dob": "Dzimšanas datums",
           "bank": "Bankas konta dati (IBAN)"
         },
-        "setupTrust": "Mēs izmantojam Stripe, jo tā ir droša un uzticas miljoniem pārdevēju visā pasaulē. Jūsu finanšu informācija nonāk tieši Stripe — mēs nekad neredzam vai neglabājam Jūsu bankas datus."
+        "setupTrust": "Jūsu IBAN ir nepieciešams tikai tad, kad pieprasāt pirmo izņemšanu. Maksājumi tiek apstrādāti droši caur mūsu maksājumu partneri."
       },
       "contactSellerSection": {
         "title": "Kā darbojas Sazināties ar pārdevēju",
@@ -2767,7 +2751,7 @@
         },
         "whyChoose": "Kāpēc izvēlēties šo opciju?",
         "reasons": {
-          "noStripe": "Jūs vēl neesat gatavs iestatīt Stripe",
+          "noStripe": "Jūs dodat priekšroku tiešiem maksājumiem",
           "negotiate": "Jūs dodat priekšroku cenu sarunām",
           "ownShipping": "Jūs vēlaties izvēlēties savu piegādes veidu",
           "country": "Jūs atrodaties Lietuvā vai Igaunijā (kur Tūlītējā pirkšana vēl nav pieejama)"
@@ -2777,7 +2761,7 @@
       "switchingSection": {
         "title": "Vai varu mainīt vēlāk?",
         "upgradeTitle": "Sākot ar Sazināties ar pārdevēju, pārejot uz Tūlītējo pirkšanu:",
-        "upgradeDescription": "Jā! Ja esat iestatījis Sazināties ar pārdevēju, Jūs varat iespējot Tūlītējo pirkšanu jebkurā laikā no Pārdevēja iestatījumiem. Vienkārši pabeidziet Stripe iestatīšanu un Jūsu nākotnes piedāvājumiem būs pieejamas abas opcijas.",
+        "upgradeDescription": "Jā! Ja esat iestatījis Sazināties ar pārdevēju, Jūs varat iespējot Tūlītējo pirkšanu jebkurā laikā no Pārdevēja iestatījumiem. Jūsu nākotnes piedāvājumiem būs pieejamas abas opcijas.",
         "downgradeTitle": "Jau ir Tūlītējā pirkšana, vēlaties izmantot Sazināties ar pārdevēju:",
         "downgradeDescription": "Jūs varat izvēlēties piedāvājuma veidu katrai spēlei, kad veidojat piedāvājumu. Pat ar iespējotu Tūlītējo pirkšanu Jūs varat konkrētas spēles publicēt kā Sazināties ar pārdevēju, ja vēlaties.",
         "countryNoteTitle": "Piezīme Lietuvas un Igaunijas pārdevējiem:",
@@ -2786,8 +2770,8 @@
       "faqSection": {
         "title": "Bieži uzdoti jautājumi",
         "q1": {
-          "question": "Kāpēc man jāiestata Stripe Tūlītējai pirkšanai?",
-          "answer": "Stripe nodrošina drošu naudas pārskaitījumu no pircējiem uz pārdevējiem. Tas ir veids, kā mēs nodrošinām, ka Jūs saņemat samaksu uzticami un pircēji zina, ka viņu maksājums ir aizsargāts. Iestatīšana aizņem 2 minūtes un Jūsu bankas dati nonāk tieši Stripe — mēs tos nekad neredzam."
+          "question": "Kā es saņemu samaksu?",
+          "answer": "Tavi ienākumi tiek ieskaitīti platformas makā pēc katra pārdošanas. Tu vari izņemt maka atlikumu uz savu bankas kontu jebkurā laikā, izmantojot IBAN pārskaitījumu."
         },
         "q2": {
           "question": "Kurš maksā maksu?",

@@ -38,7 +38,7 @@ export interface OrderBookkeepingData {
   created_at: string;
   paid_at: string | null;
   items_total: number;
-  service_fee: number;
+  platform_commission_cents: number;
   shipping_cost: number;
   total_amount: number;
   buyer_name: string;
@@ -53,7 +53,7 @@ export interface BookkeepingSummary {
   gmv: number;
   /** Total buyer paid - sum of total_amount */
   totalBuyerPaid: number;
-  /** Platform fee breakdown (service_fee) */
+  /** Platform commission breakdown (10% of items_total) */
   platformRevenue: VATBreakdown;
   /** Shipping revenue breakdown (shipping_cost) */
   shippingRevenue: VATBreakdown;
@@ -203,17 +203,17 @@ export function calculateBookkeepingSummary(orders: OrderBookkeepingData[]): Boo
 
   let gmv = 0;
   let totalBuyerPaid = 0;
-  let totalServiceFee = 0;
+  let totalCommission = 0;
   let totalShipping = 0;
 
   for (const order of validOrders) {
     gmv += order.items_total;
     totalBuyerPaid += order.total_amount;
-    totalServiceFee += order.service_fee;
+    totalCommission += order.platform_commission_cents / 100;
     totalShipping += order.shipping_cost;
   }
 
-  const platformRevenue = extractVatFromGross(totalServiceFee);
+  const platformRevenue = extractVatFromGross(totalCommission);
   const shippingRevenue = extractVatFromGross(totalShipping);
   const totalVatCollected = platformRevenue.vat + shippingRevenue.vat;
 
@@ -256,9 +256,9 @@ export function generateBookkeepingCSV(orders: OrderBookkeepingData[]): string {
     'Buyer',
     'Seller',
     'Game Price (EUR)',
-    'Platform Fee Gross (EUR)',
-    'Platform Fee Net (EUR)',
-    'Platform Fee VAT (EUR)',
+    'Commission Gross (EUR)',
+    'Commission Net (EUR)',
+    'Commission VAT (EUR)',
     'Shipping Gross (EUR)',
     'Shipping Net (EUR)',
     'Shipping VAT (EUR)',
@@ -267,7 +267,7 @@ export function generateBookkeepingCSV(orders: OrderBookkeepingData[]): string {
   ];
 
   const rows = orders.map((order) => {
-    const platformFee = extractVatFromGross(order.service_fee);
+    const platformFee = extractVatFromGross(order.platform_commission_cents / 100);
     const shipping = extractVatFromGross(order.shipping_cost);
     const totalVat = platformFee.vat + shipping.vat;
     const date = order.paid_at

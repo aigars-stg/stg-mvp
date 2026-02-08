@@ -71,6 +71,7 @@ export type Database = {
           buyer_id: string
           created_at: string | null
           id: string
+          metadata: Json | null
           seller_id: string
           updated_at: string | null
         }
@@ -78,6 +79,7 @@ export type Database = {
           buyer_id: string
           created_at?: string | null
           id?: string
+          metadata?: Json | null
           seller_id: string
           updated_at?: string | null
         }
@@ -85,6 +87,7 @@ export type Database = {
           buyer_id?: string
           created_at?: string | null
           id?: string
+          metadata?: Json | null
           seller_id?: string
           updated_at?: string | null
         }
@@ -317,6 +320,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      everypay_webhook_events: {
+        Row: {
+          created_at: string | null
+          event_type: string | null
+          id: string
+          order_reference: string | null
+          payload: Json | null
+          payment_reference: string
+          processed_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type?: string | null
+          id?: string
+          order_reference?: string | null
+          payload?: Json | null
+          payment_reference: string
+          processed_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string | null
+          id?: string
+          order_reference?: string | null
+          payload?: Json | null
+          payment_reference?: string
+          processed_at?: string | null
+        }
+        Relationships: []
       }
       external_pricing_cache: {
         Row: {
@@ -1019,6 +1052,7 @@ export type Database = {
         Row: {
           barcode: string | null
           buyer_id: string
+          buyer_wallet_debit_cents: number | null
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -1029,10 +1063,18 @@ export type Database = {
           destination_terminal_id: string | null
           destination_terminal_name: string | null
           dispute_description: string | null
+          dispute_photo_urls: string[] | null
           dispute_reason: string | null
           dispute_resolution: string | null
+          dispute_resolution_note: string | null
           dispute_resolved_at: string | null
+          dispute_resolved_by: string | null
+          dispute_seller_responded_at: string | null
+          dispute_seller_response: string | null
+          dispute_status: string | null
           disputed_at: string | null
+          everypay_payment_reference: string | null
+          everypay_payment_state: string | null
           id: string
           items_total: number
           label_error: string | null
@@ -1042,9 +1084,9 @@ export type Database = {
           order_number: string
           paid_at: string | null
           parcel_size: string | null
-          payout_status: string | null
           pickup_city: string | null
           pickup_notes: string | null
+          platform_commission_cents: number | null
           receiver_email: string | null
           receiver_name: string | null
           receiver_phone: string | null
@@ -1055,27 +1097,22 @@ export type Database = {
           seller_id: string
           seller_responded_at: string | null
           seller_response_deadline: string | null
+          seller_wallet_credit_cents: number | null
           sender_country: string | null
-          service_fee: number
           shipping_cost: number
           shipping_method: string
           status: string
-          stripe_charge_id: string | null
-          stripe_payment_intent_id: string | null
-          stripe_transfer_amount: number | null
-          stripe_transfer_id: string | null
-          stripe_refund_id: string | null
-          stripe_transfer_reversal_id: string | null
           total_amount: number
           tracking_url: string | null
-          transferred_to_seller_at: string | null
           unisend_parcel_id: number | null
           unisend_request_id: string | null
           updated_at: string | null
+          wallet_credited_at: string | null
         }
         Insert: {
           barcode?: string | null
           buyer_id: string
+          buyer_wallet_debit_cents?: number | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1086,10 +1123,18 @@ export type Database = {
           destination_terminal_id?: string | null
           destination_terminal_name?: string | null
           dispute_description?: string | null
+          dispute_photo_urls?: string[] | null
           dispute_reason?: string | null
           dispute_resolution?: string | null
+          dispute_resolution_note?: string | null
           dispute_resolved_at?: string | null
+          dispute_resolved_by?: string | null
+          dispute_seller_responded_at?: string | null
+          dispute_seller_response?: string | null
+          dispute_status?: string | null
           disputed_at?: string | null
+          everypay_payment_reference?: string | null
+          everypay_payment_state?: string | null
           id?: string
           items_total: number
           label_error?: string | null
@@ -1099,9 +1144,9 @@ export type Database = {
           order_number: string
           paid_at?: string | null
           parcel_size?: string | null
-          payout_status?: string | null
           pickup_city?: string | null
           pickup_notes?: string | null
+          platform_commission_cents?: number | null
           receiver_email?: string | null
           receiver_name?: string | null
           receiver_phone?: string | null
@@ -1112,27 +1157,22 @@ export type Database = {
           seller_id: string
           seller_responded_at?: string | null
           seller_response_deadline?: string | null
+          seller_wallet_credit_cents?: number | null
           sender_country?: string | null
-          service_fee?: number
           shipping_cost?: number
           shipping_method: string
           status?: string
-          stripe_charge_id?: string | null
-          stripe_payment_intent_id?: string | null
-          stripe_transfer_amount?: number | null
-          stripe_transfer_id?: string | null
-          stripe_refund_id?: string | null
-          stripe_transfer_reversal_id?: string | null
           total_amount: number
           tracking_url?: string | null
-          transferred_to_seller_at?: string | null
           unisend_parcel_id?: number | null
           unisend_request_id?: string | null
           updated_at?: string | null
+          wallet_credited_at?: string | null
         }
         Update: {
           barcode?: string | null
           buyer_id?: string
+          buyer_wallet_debit_cents?: number | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1143,10 +1183,18 @@ export type Database = {
           destination_terminal_id?: string | null
           destination_terminal_name?: string | null
           dispute_description?: string | null
+          dispute_photo_urls?: string[] | null
           dispute_reason?: string | null
           dispute_resolution?: string | null
+          dispute_resolution_note?: string | null
           dispute_resolved_at?: string | null
+          dispute_resolved_by?: string | null
+          dispute_seller_responded_at?: string | null
+          dispute_seller_response?: string | null
+          dispute_status?: string | null
           disputed_at?: string | null
+          everypay_payment_reference?: string | null
+          everypay_payment_state?: string | null
           id?: string
           items_total?: number
           label_error?: string | null
@@ -1156,9 +1204,9 @@ export type Database = {
           order_number?: string
           paid_at?: string | null
           parcel_size?: string | null
-          payout_status?: string | null
           pickup_city?: string | null
           pickup_notes?: string | null
+          platform_commission_cents?: number | null
           receiver_email?: string | null
           receiver_name?: string | null
           receiver_phone?: string | null
@@ -1169,94 +1217,19 @@ export type Database = {
           seller_id?: string
           seller_responded_at?: string | null
           seller_response_deadline?: string | null
+          seller_wallet_credit_cents?: number | null
           sender_country?: string | null
-          service_fee?: number
           shipping_cost?: number
           shipping_method?: string
           status?: string
-          stripe_charge_id?: string | null
-          stripe_payment_intent_id?: string | null
-          stripe_transfer_amount?: number | null
-          stripe_transfer_id?: string | null
-          stripe_refund_id?: string | null
-          stripe_transfer_reversal_id?: string | null
           total_amount?: number
           tracking_url?: string | null
-          transferred_to_seller_at?: string | null
           unisend_parcel_id?: number | null
           unisend_request_id?: string | null
           updated_at?: string | null
+          wallet_credited_at?: string | null
         }
         Relationships: []
-      }
-      payout_transactions: {
-        Row: {
-          completed_at: string | null
-          created_at: string | null
-          error_code: string | null
-          error_message: string | null
-          gross_amount: number
-          id: string
-          net_amount: number
-          order_id: string
-          platform_fee: number
-          retry_count: number | null
-          seller_id: string
-          status: string
-          stripe_connect_account_id: string
-          stripe_transfer_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string | null
-          error_code?: string | null
-          error_message?: string | null
-          gross_amount: number
-          id?: string
-          net_amount: number
-          order_id: string
-          platform_fee: number
-          retry_count?: number | null
-          seller_id: string
-          status?: string
-          stripe_connect_account_id: string
-          stripe_transfer_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string | null
-          error_code?: string | null
-          error_message?: string | null
-          gross_amount?: number
-          id?: string
-          net_amount?: number
-          order_id?: string
-          platform_fee?: number
-          retry_count?: number | null
-          seller_id?: string
-          status?: string
-          stripe_connect_account_id?: string
-          stripe_transfer_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payout_transactions_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payout_transactions_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders_with_participants"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       play_completions: {
         Row: {
@@ -1408,68 +1381,9 @@ export type Database = {
         }
         Relationships: []
       }
-      seller_payouts: {
-        Row: {
-          amount: number
-          arrival_date: string | null
-          bank_account_last4: string | null
-          bank_name: string | null
-          created_at: string | null
-          currency: string | null
-          failure_code: string | null
-          failure_message: string | null
-          id: string
-          initiated_at: string | null
-          paid_at: string | null
-          status: string
-          stripe_connect_account_id: string
-          stripe_payout_id: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          arrival_date?: string | null
-          bank_account_last4?: string | null
-          bank_name?: string | null
-          created_at?: string | null
-          currency?: string | null
-          failure_code?: string | null
-          failure_message?: string | null
-          id?: string
-          initiated_at?: string | null
-          paid_at?: string | null
-          status?: string
-          stripe_connect_account_id: string
-          stripe_payout_id: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          arrival_date?: string | null
-          bank_account_last4?: string | null
-          bank_name?: string | null
-          created_at?: string | null
-          currency?: string | null
-          failure_code?: string | null
-          failure_message?: string | null
-          id?: string
-          initiated_at?: string | null
-          paid_at?: string | null
-          status?: string
-          stripe_connect_account_id?: string
-          stripe_payout_id?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       seller_profiles: {
         Row: {
           average_rating: number | null
-          bank_account_bank_name: string | null
-          bank_account_last4: string | null
           created_at: string | null
           dac7_address_city: string | null
           dac7_address_country: string | null
@@ -1486,20 +1400,13 @@ export type Database = {
           dac7_tax_id: string | null
           dac7_tax_id_type: string | null
           dac7_tax_residency_country: string | null
-          has_bank_account: boolean | null
           member_since: string | null
+          payout_account_holder_name: string | null
+          payout_iban: string | null
           positive_rating_percent: number | null
           seller_status: string
           seller_terms_accepted_at: string | null
           seller_terms_version: string | null
-          stripe_capabilities: Json | null
-          stripe_connect_account_id: string | null
-          stripe_connect_charges_enabled: boolean | null
-          stripe_connect_details_submitted: boolean | null
-          stripe_connect_onboarding_completed: boolean | null
-          stripe_connect_payouts_enabled: boolean | null
-          stripe_connect_updated_at: string | null
-          stripe_requirements: Json | null
           total_completed_sales: number | null
           total_reviews: number | null
           updated_at: string | null
@@ -1507,8 +1414,6 @@ export type Database = {
         }
         Insert: {
           average_rating?: number | null
-          bank_account_bank_name?: string | null
-          bank_account_last4?: string | null
           created_at?: string | null
           dac7_address_city?: string | null
           dac7_address_country?: string | null
@@ -1525,20 +1430,13 @@ export type Database = {
           dac7_tax_id?: string | null
           dac7_tax_id_type?: string | null
           dac7_tax_residency_country?: string | null
-          has_bank_account?: boolean | null
           member_since?: string | null
+          payout_account_holder_name?: string | null
+          payout_iban?: string | null
           positive_rating_percent?: number | null
           seller_status?: string
           seller_terms_accepted_at?: string | null
           seller_terms_version?: string | null
-          stripe_capabilities?: Json | null
-          stripe_connect_account_id?: string | null
-          stripe_connect_charges_enabled?: boolean | null
-          stripe_connect_details_submitted?: boolean | null
-          stripe_connect_onboarding_completed?: boolean | null
-          stripe_connect_payouts_enabled?: boolean | null
-          stripe_connect_updated_at?: string | null
-          stripe_requirements?: Json | null
           total_completed_sales?: number | null
           total_reviews?: number | null
           updated_at?: string | null
@@ -1546,8 +1444,6 @@ export type Database = {
         }
         Update: {
           average_rating?: number | null
-          bank_account_bank_name?: string | null
-          bank_account_last4?: string | null
           created_at?: string | null
           dac7_address_city?: string | null
           dac7_address_country?: string | null
@@ -1564,20 +1460,13 @@ export type Database = {
           dac7_tax_id?: string | null
           dac7_tax_id_type?: string | null
           dac7_tax_residency_country?: string | null
-          has_bank_account?: boolean | null
           member_since?: string | null
+          payout_account_holder_name?: string | null
+          payout_iban?: string | null
           positive_rating_percent?: number | null
           seller_status?: string
           seller_terms_accepted_at?: string | null
           seller_terms_version?: string | null
-          stripe_capabilities?: Json | null
-          stripe_connect_account_id?: string | null
-          stripe_connect_charges_enabled?: boolean | null
-          stripe_connect_details_submitted?: boolean | null
-          stripe_connect_onboarding_completed?: boolean | null
-          stripe_connect_payouts_enabled?: boolean | null
-          stripe_connect_updated_at?: string | null
-          stripe_requirements?: Json | null
           total_completed_sales?: number | null
           total_reviews?: number | null
           updated_at?: string | null
@@ -1844,6 +1733,78 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          amount_cents: number
+          balance_after_cents: number
+          created_at: string | null
+          description: string | null
+          id: string
+          order_id: string | null
+          type: string
+          user_id: string
+          withdrawal_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          balance_after_cents: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          type: string
+          user_id: string
+          withdrawal_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          balance_after_cents?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          type?: string
+          user_id?: string
+          withdrawal_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_with_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallets: {
+        Row: {
+          balance_cents: number
+          created_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance_cents?: number
+          created_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance_cents?: number
+          created_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       wanted_listing_responses: {
         Row: {
           conversation_id: string
@@ -2044,6 +2005,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      withdrawal_requests: {
+        Row: {
+          account_holder_name: string
+          amount_cents: number
+          bank_reference: string | null
+          created_at: string | null
+          iban: string
+          id: string
+          processed_at: string | null
+          processed_by: string | null
+          rejection_reason: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          account_holder_name: string
+          amount_cents: number
+          bank_reference?: string | null
+          created_at?: string | null
+          iban: string
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          rejection_reason?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          account_holder_name?: string
+          amount_cents?: number
+          bank_reference?: string | null
+          created_at?: string | null
+          iban?: string
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          rejection_reason?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -2260,14 +2263,29 @@ export type Database = {
           buyer_country: string | null
           buyer_id: string | null
           buyer_name: string | null
+          buyer_wallet_debit_cents: number | null
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
           created_at: string | null
+          delivered_at: string | null
           destination_country: string | null
           destination_terminal_address: string | null
           destination_terminal_id: string | null
           destination_terminal_name: string | null
+          dispute_description: string | null
+          dispute_photo_urls: string[] | null
+          dispute_reason: string | null
+          dispute_resolution: string | null
+          dispute_resolution_note: string | null
+          dispute_resolved_at: string | null
+          dispute_resolved_by: string | null
+          dispute_seller_responded_at: string | null
+          dispute_seller_response: string | null
+          dispute_status: string | null
+          disputed_at: string | null
+          everypay_payment_reference: string | null
+          everypay_payment_state: string | null
           id: string | null
           items_total: number | null
           label_error: string | null
@@ -2277,13 +2295,14 @@ export type Database = {
           order_number: string | null
           paid_at: string | null
           parcel_size: string | null
-          payout_status: string | null
           pickup_city: string | null
           pickup_notes: string | null
+          platform_commission_cents: number | null
           receiver_email: string | null
           receiver_name: string | null
           receiver_phone: string | null
           refund_amount: number | null
+          refund_reason: string | null
           refunded_at: string | null
           seller_avatar: string | null
           seller_country: string | null
@@ -2293,21 +2312,17 @@ export type Database = {
           seller_responded_at: string | null
           seller_response_deadline: string | null
           seller_status: string | null
-          seller_stripe_account: string | null
+          seller_wallet_credit_cents: number | null
           sender_country: string | null
-          service_fee: number | null
           shipping_cost: number | null
           shipping_method: string | null
           status: string | null
-          stripe_payment_intent_id: string | null
-          stripe_transfer_amount: number | null
-          stripe_transfer_id: string | null
           total_amount: number | null
           tracking_url: string | null
-          transferred_to_seller_at: string | null
           unisend_parcel_id: number | null
           unisend_request_id: string | null
           updated_at: string | null
+          wallet_credited_at: string | null
         }
         Relationships: []
       }
@@ -2393,20 +2408,6 @@ export type Database = {
           },
         ]
       }
-      seller_earnings_summary: {
-        Row: {
-          completed_payouts_count: number | null
-          earnings_last_30_days: number | null
-          pending_payouts_count: number | null
-          sales_last_30_days: number | null
-          total_gross: number | null
-          total_net: number | null
-          total_platform_fees: number | null
-          total_sales_count: number | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
       seller_reviews_with_buyer: {
         Row: {
           buyer_avatar: string | null
@@ -2442,23 +2443,6 @@ export type Database = {
           },
         ]
       }
-      seller_transaction_history: {
-        Row: {
-          completed_at: string | null
-          created_at: string | null
-          description: string | null
-          gross_amount: number | null
-          id: string | null
-          net_amount: number | null
-          payout_status: string | null
-          platform_fee: number | null
-          reference: string | null
-          status: string | null
-          transaction_type: string | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
       stats_game_pricing: {
         Row: {
           active_listing_count: number | null
@@ -2477,8 +2461,6 @@ export type Database = {
       user_profiles_full: {
         Row: {
           avatar_url: string | null
-          bank_account_bank_name: string | null
-          bank_account_last4: string | null
           country: string | null
           created_at: string | null
           dac7_annual_sales_total: number | null
@@ -2490,23 +2472,16 @@ export type Database = {
           deletion_reason: string | null
           email: string | null
           full_name: string | null
-          has_bank_account: boolean | null
           id: string | null
           is_staff: boolean | null
           original_email: string | null
+          payout_account_holder_name: string | null
+          payout_iban: string | null
           phone: string | null
           recovery_deadline: string | null
           seller_status: string | null
           seller_terms_accepted_at: string | null
           seller_terms_version: string | null
-          stripe_capabilities: Json | null
-          stripe_connect_account_id: string | null
-          stripe_connect_charges_enabled: boolean | null
-          stripe_connect_details_submitted: boolean | null
-          stripe_connect_onboarding_completed: boolean | null
-          stripe_connect_payouts_enabled: boolean | null
-          stripe_connect_updated_at: string | null
-          stripe_requirements: Json | null
           updated_at: string | null
         }
         Relationships: []
@@ -2561,6 +2536,25 @@ export type Database = {
         | {
             Args: {
               p_basket_id: string
+              p_buyer_wallet_debit_cents?: number
+              p_destination_country?: string
+              p_destination_terminal_address?: string
+              p_destination_terminal_id?: string
+              p_destination_terminal_name?: string
+              p_everypay_payment_reference?: string
+              p_pickup_city?: string
+              p_pickup_notes?: string
+              p_receiver_email?: string
+              p_receiver_name?: string
+              p_receiver_phone?: string
+              p_shipping_cost?: number
+              p_shipping_method: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_basket_id: string
               p_destination_country?: string
               p_destination_terminal_address?: string
               p_destination_terminal_id?: string
@@ -2597,6 +2591,29 @@ export type Database = {
             }
             Returns: Json
           }
+      create_withdrawal_request: {
+        Args: {
+          p_account_holder_name: string
+          p_amount_cents: number
+          p_iban: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      credit_seller_wallet: { Args: { p_order_id: string }; Returns: Json }
+      credit_wallet: {
+        Args: {
+          p_amount_cents: number
+          p_description?: string
+          p_order_id: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      debit_buyer_wallet: {
+        Args: { p_amount_cents: number; p_order_id: string; p_user_id: string }
+        Returns: Json
+      }
       expire_wanted_listings: { Args: never; Returns: number }
       generate_order_number: { Args: never; Returns: string }
       get_cart: { Args: { p_buyer_id: string }; Returns: Json }
@@ -2692,6 +2709,14 @@ export type Database = {
       }
       process_ended_auctions: { Args: never; Returns: Json }
       refresh_game_pricing_stats: { Args: never; Returns: undefined }
+      reject_withdrawal_request: {
+        Args: {
+          p_processed_by: string
+          p_reason: string
+          p_withdrawal_id: string
+        }
+        Returns: Json
+      }
       release_expired_reservations: { Args: never; Returns: number }
       release_listing_reservation: {
         Args: { p_buyer_id: string; p_listing_id: string }
@@ -2876,4 +2901,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

@@ -205,7 +205,7 @@ export default function SellerOnboardingCompletePage() {
           </ul>
         </div>
 
-        {/* Payout Information */}
+        {/* Earnings Information */}
         <div className="bg-snow-white border border-border rounded-lg p-6 mb-8">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-aurora-green/10 rounded-lg flex-shrink-0">
@@ -213,30 +213,30 @@ export default function SellerOnboardingCompletePage() {
             </div>
             <div>
               <h3 className="font-semibold text-polar-night mb-2">
-                About Payouts
+                About Your Earnings
               </h3>
               <p className="text-sm text-text-secondary mb-3">
-                Your payouts are managed by Stripe Connect and deposited directly to your bank account.
+                Your earnings are credited to your platform wallet after each completed sale.
               </p>
               <ul className="text-sm text-text-secondary space-y-2 mb-4">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-aurora-green flex-shrink-0" />
-                  <span><strong>Zero fees</strong> - Keep 100% of your listing price</span>
+                  <span><strong>90% of listing price</strong> - A 10% platform commission is deducted</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-aurora-green flex-shrink-0" />
-                  <span><strong>Fast transfers</strong> - Typically 2-7 business days</span>
+                  <span><strong>Withdraw anytime</strong> - Request a bank transfer whenever you like</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-aurora-green flex-shrink-0" />
-                  <span><strong>Track in dashboard</strong> - View your balance and transaction history</span>
+                  <span><strong>Track in dashboard</strong> - View your wallet balance and transaction history</span>
                 </li>
               </ul>
               <Link
                 href="/seller/settings/payouts"
                 className="text-sm text-frost-ice hover:underline font-medium"
               >
-                View payout settings →
+                View wallet & withdrawals →
               </Link>
             </div>
           </div>

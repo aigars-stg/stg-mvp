@@ -79,7 +79,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
     : null;
   const showAuctionTimer = auctionTimeRemaining && auctionTimeRemaining.days === 0 && !auctionTimeRemaining.isEnded;
 
-  // Calculate total delivered price (item + shipping + service fee)
+  // Calculate total delivered price (item + shipping)
   const deliveredPricing = useDeliveredPricing({
     listingType: listing.listing_type,
     transactionMethod: listing.transaction_method,

@@ -1,33 +1,28 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Button, Badge } from '@second-turn/design-system';
-import {  CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, LinkExternal as ExternalLink, CurrencyEuro as Euro, ArrowLeft  } from 'griddy-icons';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@second-turn/design-system';
+import {
+  RefreshCw as Loader2,
+  CurrencyEuro as Euro,
+  ArrowLeft,
+  ArrowUp,
+} from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import Link from 'next/link';
+import { WalletBalance } from '@/components/wallet/WalletBalance';
+import { WalletTransactions } from '@/components/wallet/WalletTransactions';
+import { WithdrawalForm } from '@/components/wallet/WithdrawalForm';
+import { WithdrawalHistory } from '@/components/wallet/WithdrawalHistory';
 
-interface ConnectStatus {
-  hasAccount: boolean;
-  accountId?: string;
-  onboardingComplete: boolean;
-  chargesEnabled: boolean;
-  payoutsEnabled: boolean;
-  detailsSubmitted: boolean;
-}
-
-function SellerPayoutSettingsContent() {
+function WalletWithdrawalsContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
-
-  const [status, setStatus] = useState<ConnectStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [onboarding, setOnboarding] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const success = searchParams.get('success') === 'true';
-  const refresh = searchParams.get('refresh') === 'true';
+  const [showWithdrawForm, setShowWithdrawForm] = useState(false);
+  const [balanceCents, setBalanceCents] = useState(0);
+  const [savedName, setSavedName] = useState<string | undefined>();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -36,97 +31,56 @@ function SellerPayoutSettingsContent() {
     }
   }, [user, authLoading, router]);
 
-  // Fetch Connect status
-  const fetchStatus = async () => {
+  // Fetch balance and saved IBAN
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+
     try {
-      setLoading(true);
-      setError(null);
+      const [balanceRes, profileRes] = await Promise.all([
+        fetch('/api/wallet/balance'),
+        fetch('/api/seller/bank-account'),
+      ]);
 
-      const response = await fetch('/api/seller/connect/status');
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch status');
+      if (balanceRes.ok) {
+        const data = await balanceRes.json();
+        setBalanceCents(data.balanceCents);
       }
 
-      setStatus(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load status');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchStatus();
+      if (profileRes.ok) {
+        const data = await profileRes.json();
+        if (data.hasAccount) {
+          setSavedName(data.accountHolderName || undefined);
+          // IBAN is masked (****XXXX) — don't pre-fill, user re-enters for security
+        }
+      }
+    } catch {
+      // Silently fail
     }
   }, [user]);
 
-  // Start onboarding
-  const handleStartOnboarding = async () => {
-    try {
-      setOnboarding(true);
-      setError(null);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData, refreshKey]);
 
-      const response = await fetch('/api/seller/connect/onboard', {
-        method: 'POST',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to start onboarding');
-      }
-
-      // Redirect to Stripe onboarding
-      window.location.href = data.onboardingUrl;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start onboarding');
-      setOnboarding(false);
-    }
+  const handleWithdrawalSuccess = () => {
+    setShowWithdrawForm(false);
+    setRefreshKey((prev) => prev + 1);
   };
 
-  // Open Stripe Dashboard
-  const handleOpenDashboard = async () => {
-    try {
-      setOnboarding(true);
-
-      const response = await fetch('/api/seller/connect/dashboard', {
-        method: 'POST',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to get dashboard link');
-      }
-
-      // Open in new tab
-      window.open(data.dashboardUrl, '_blank');
-      setOnboarding(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to open dashboard');
-      setOnboarding(false);
-    }
-  };
-
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
-          <p className="text-text-secondary">Loading payout settings...</p>
+          <p className="text-text-secondary">Loading...</p>
         </div>
       </div>
     );
   }
 
-  if (!user || !status) {
+  if (!user) {
     return null;
   }
-
-  const canReceivePayouts = status.hasAccount && status.onboardingComplete && status.payoutsEnabled;
 
   return (
     <div className="min-h-screen bg-bg-primary">
@@ -141,176 +95,88 @@ function SellerPayoutSettingsContent() {
           </Link>
           <div className="flex items-center gap-3 mb-2">
             <Euro className="w-8 h-8 text-frost-ice" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">Payout settings</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
+              Wallet & Withdrawals
+            </h1>
           </div>
-          <p className="text-text-secondary">Manage how you receive payments from sales</p>
+          <p className="text-text-secondary">
+            Manage your earnings and withdraw funds
+          </p>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Success Message - only show if actually complete */}
-        {success && canReceivePayouts && (
-          <div className="mb-6 p-4 bg-aurora-green/10 border border-aurora-green/20 rounded-lg flex items-start gap-3">
-            <CheckCircle2 className="w-5 h-5 text-aurora-green flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-aurora-green font-medium">Onboarding Complete!</p>
-              <p className="text-sm text-text-secondary mt-1">
-                Your payout account is set up. You&apos;ll automatically receive payments when orders are completed.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Incomplete Message - returned from Stripe but not finished */}
-        {(refresh || (success && !canReceivePayouts)) && (
-          <div className="mb-6 p-4 bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-aurora-yellow flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-aurora-yellow font-medium">Onboarding Incomplete</p>
-              <p className="text-sm text-text-secondary mt-1">
-                You need to complete all required steps to receive payouts. Click &ldquo;Continue Onboarding&rdquo; below.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-aurora-red font-medium">Error</p>
-              <p className="text-sm text-text-secondary mt-1">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Status Card */}
-        <div className="bg-snow-white border-2 border-border rounded-xl p-6 mb-6">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold text-polar-night mb-1">Payout Status</h2>
-              <p className="text-sm text-text-secondary">
-                {canReceivePayouts
-                  ? 'Your account is ready to receive payouts'
-                  : 'Complete setup to receive automatic payouts'}
-              </p>
-            </div>
-            <Badge variant={canReceivePayouts ? 'success' : 'warning'}>
-              {canReceivePayouts ? (
-                <>
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                  Active
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="w-3 h-3 mr-1" />
-                  Setup Required
-                </>
-              )}
-            </Badge>
-          </div>
-
-          {/* Status Checks */}
-          <div className="space-y-3">
-            <StatusItem
-              label="Connect Account"
-              completed={status.hasAccount}
-              description={status.hasAccount ? 'Account created' : 'No account yet'}
-            />
-            <StatusItem
-              label="Onboarding Complete"
-              completed={status.onboardingComplete}
-              description={status.onboardingComplete ? 'All details submitted' : 'Pending verification'}
-            />
-            <StatusItem
-              label="Payouts Enabled"
-              completed={status.payoutsEnabled}
-              description={status.payoutsEnabled ? 'Can receive transfers' : 'Verification pending'}
-            />
-          </div>
-        </div>
-
-        {/* Actions */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+        {/* Wallet Balance + Withdraw Button */}
         <div className="bg-snow-white border-2 border-border rounded-xl p-6">
-          <h3 className="font-semibold text-polar-night mb-4">Actions</h3>
-
-          {!status.hasAccount || !status.onboardingComplete ? (
-            <div className="space-y-4">
-              <p className="text-sm text-text-secondary">
-                Connect your bank account to receive automatic payouts when buyers complete orders.
-                SecondTurn uses Stripe to ensure secure, timely payments.
-              </p>
+          <div className="flex items-start justify-between">
+            <WalletBalance compact key={refreshKey} />
+            {balanceCents > 0 && !showWithdrawForm && (
               <Button
                 variant="accent"
-                onClick={handleStartOnboarding}
-                disabled={onboarding}
-                fullWidth
+                size="sm"
+                onClick={() => setShowWithdrawForm(true)}
               >
-                {onboarding ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  <>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    {status.hasAccount ? 'Continue Onboarding' : 'Set Up Payouts'}
-                  </>
-                )}
+                <ArrowUp className="w-4 h-4 mr-1.5" />
+                Withdraw
               </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-sm text-text-secondary">
-                Manage your payout settings, view payment history, and update your bank account in
-                your Stripe dashboard.
-              </p>
-              <Button
-                variant="secondary"
-                onClick={handleOpenDashboard}
-                disabled={onboarding}
-                fullWidth
-              >
-                {onboarding ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  <>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Open Stripe Dashboard
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Info Box */}
-        <div className="mt-6 p-4 sm:p-6 bg-bg-elevated rounded-lg">
-          <h4 className="font-medium text-polar-night mb-3">How Payouts Work</h4>
+        {/* Withdrawal Form Modal */}
+        {showWithdrawForm && (
+          <div className="bg-snow-white border-2 border-frost-ice rounded-xl p-6">
+            <h2 className="text-lg font-semibold text-polar-night mb-4">
+              Request Withdrawal
+            </h2>
+            <WithdrawalForm
+              balanceCents={balanceCents}
+              savedName={savedName}
+              onSuccess={handleWithdrawalSuccess}
+              onCancel={() => setShowWithdrawForm(false)}
+            />
+          </div>
+        )}
+
+        {/* Withdrawal History */}
+        <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-polar-night mb-4">
+            Withdrawal Requests
+          </h2>
+          <WithdrawalHistory key={`wh-${refreshKey}`} />
+        </div>
+
+        {/* Transaction History */}
+        <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-polar-night mb-4">
+            Transaction History
+          </h2>
+          <WalletTransactions key={`wt-${refreshKey}`} />
+        </div>
+
+        {/* How It Works */}
+        <div className="p-4 sm:p-6 bg-bg-elevated rounded-lg">
+          <h4 className="font-medium text-polar-night mb-3">
+            How Earnings Work
+          </h4>
           <ul className="text-xs sm:text-sm text-text-secondary space-y-2">
             <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-              <span>You receive <strong>100% of your listed price</strong> - no platform fees deducted</span>
+              <span className="text-frost-ice mt-0.5 flex-shrink-0">1.</span>
+              <span>
+                When a sale completes, your earnings (item price minus 10% commission) are credited to your wallet
+              </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-              <span>Buyers pay all fees (service fee + shipping cost) separately</span>
+              <span className="text-frost-ice mt-0.5 flex-shrink-0">2.</span>
+              <span>
+                You can withdraw your balance to your bank account at any time
+              </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-              <span>Payouts are automatically processed when you mark orders as shipped</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-              <span>Funds arrive in your bank account based on your Stripe payout schedule (typically 2-7 business days)</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-              <span>You can view and adjust your payout schedule in the Stripe Dashboard</span>
+              <span className="text-frost-ice mt-0.5 flex-shrink-0">3.</span>
+              <span>
+                Withdrawals are processed via bank transfer within 1-3 business days
+              </span>
             </li>
           </ul>
         </div>
@@ -321,42 +187,17 @@ function SellerPayoutSettingsContent() {
 
 export default function SellerPayoutSettingsPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
-          <p className="text-text-secondary">Loading payout settings...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
+            <p className="text-text-secondary">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
-      <SellerPayoutSettingsContent />
+      }
+    >
+      <WalletWithdrawalsContent />
     </Suspense>
-  );
-}
-
-// Helper component for status items
-function StatusItem({
-  label,
-  completed,
-  description,
-}: {
-  label: string;
-  completed: boolean;
-  description: string;
-}) {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="flex-shrink-0 mt-0.5">
-        {completed ? (
-          <CheckCircle2 className="w-5 h-5 text-aurora-green" />
-        ) : (
-          <XCircle className="w-5 h-5 text-text-muted" />
-        )}
-      </div>
-      <div className="flex-grow">
-        <p className="font-medium text-polar-night">{label}</p>
-        <p className="text-sm text-text-secondary">{description}</p>
-      </div>
-    </div>
   );
 }

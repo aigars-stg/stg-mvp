@@ -56,7 +56,8 @@ export function createLogger(context: Record<string, unknown>) {
  */
 export const loggers = {
   auth: logger.child({ module: 'auth' }),
-  stripe: logger.child({ module: 'stripe' }),
+  payments: logger.child({ module: 'payments' }),
+  wallet: logger.child({ module: 'wallet' }),
   listings: logger.child({ module: 'listings' }),
   orders: logger.child({ module: 'orders' }),
   bgg: logger.child({ module: 'bgg' }),

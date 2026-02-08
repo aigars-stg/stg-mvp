@@ -8,7 +8,7 @@ const settingsItems = [
     href: '/seller/settings/payouts',
     icon: DollarSign,
     title: 'Payout Settings',
-    description: 'Manage your Stripe Connect account and payout preferences',
+    description: 'Manage your wallet and withdrawal preferences',
   },
 ];
 

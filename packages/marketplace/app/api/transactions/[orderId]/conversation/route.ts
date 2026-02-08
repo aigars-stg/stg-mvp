@@ -51,7 +51,6 @@ export async function GET(
         total_amount,
         items_total,
         shipping_cost,
-        service_fee,
         destination_country,
         destination_terminal_id,
         destination_terminal_name,
@@ -251,7 +250,6 @@ export async function GET(
         total_amount: order.total_amount,
         items_total: order.items_total,
         shipping_cost: order.shipping_cost,
-        service_fee: order.service_fee,
         destination: order.shipping_method === 't2t'
           ? {
               country: order.destination_country,

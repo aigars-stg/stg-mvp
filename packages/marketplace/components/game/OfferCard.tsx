@@ -134,7 +134,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
   const isOwnListing = user?.id === listing.seller_id;
   const loading = isAddingToCart || localLoading;
 
-  // Calculate total delivered price (item + shipping + service fee)
+  // Calculate total delivered price (item + shipping)
   const deliveredPricing = useDeliveredPricing({
     listingType: listing.listing_type,
     transactionMethod: listing.transaction_method,

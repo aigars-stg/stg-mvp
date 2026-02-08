@@ -13,7 +13,7 @@ import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
 import { getShippingPrice } from '@/lib/unisend/types';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
-import { calculateMarketplacePricing, formatCentsToCurrency } from '@/lib/stripe-utils';
+import { calculateBuyerPricing } from '@/lib/services/pricing';
 import { useTranslations } from 'next-intl';
 
 interface CartItem {
@@ -142,8 +142,12 @@ function CheckoutPageContent() {
   const sellerCountry = (basket?.seller_country || 'LT') as TerminalCountry;
   const shippingPrice = getShippingPrice(sellerCountry, selectedCountry, 'M');
 
+  const formatCents = (cents: number) => '\u20AC' + (cents / 100).toFixed(2);
+
+  const itemsTotalCents = basket ? Math.round(basket.subtotal * 100) : 0;
+  const shippingCostCents = Math.round(shippingPrice * 100);
   const pricing = basket
-    ? calculateMarketplacePricing(basket.subtotal, shippingPrice, 't2t')
+    ? calculateBuyerPricing(itemsTotalCents, shippingCostCents)
     : null;
 
   // Validation
@@ -185,7 +189,7 @@ function CheckoutPageContent() {
         receiverEmail,
       };
 
-      // Create Stripe Checkout session
+      // Create payment session
       const response = await fetch('/api/checkout/create-session', {
         method: 'POST',
         headers: {
@@ -200,7 +204,7 @@ function CheckoutPageContent() {
         throw new Error(data.error || t('errors.createSessionFailed'));
       }
 
-      // Redirect to Stripe Checkout
+      // Redirect to payment session
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -456,19 +460,13 @@ function CheckoutPageContent() {
                           {t('summary.subtotal', { count: basket.item_count })}
                         </span>
                         <span className="font-medium">
-                          {formatCentsToCurrency(pricing.itemsTotalCents)}
+                          {formatCents(pricing.itemsTotalCents)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-text-secondary">{t('summary.shipping')}</span>
                         <span className="font-medium">
-                          {formatCentsToCurrency(pricing.shippingCostCents)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-text-secondary">{t('summary.serviceFee')}</span>
-                        <span className="font-medium">
-                          {formatCentsToCurrency(pricing.serviceFeeCents)}
+                          {formatCents(pricing.shippingCostCents)}
                         </span>
                       </div>
                     </div>
@@ -477,7 +475,7 @@ function CheckoutPageContent() {
                     <div className="flex justify-between pt-4 pb-6">
                       <span className="font-semibold text-polar-night">{t('summary.total')}</span>
                       <span className="text-xl font-bold text-polar-night">
-                        {formatCentsToCurrency(pricing.totalChargeCents)}
+                        {formatCents(pricing.totalChargeCents)}
                       </span>
                     </div>
                   </>
@@ -538,7 +536,7 @@ function CheckoutPageContent() {
           <span className="text-sm text-text-secondary">{t('summary.total')}</span>
           {pricing && (
             <span className="text-xl font-bold text-polar-night">
-              {formatCentsToCurrency(pricing.totalChargeCents)}
+              {formatCents(pricing.totalChargeCents)}
             </span>
           )}
         </div>

@@ -10,9 +10,11 @@ const serverEnvSchema = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
 
-  // Stripe
-  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  // EveryPay
+  EVERYPAY_API_USERNAME: process.env.EVERYPAY_API_USERNAME,
+  EVERYPAY_API_SECRET: process.env.EVERYPAY_API_SECRET,
+  EVERYPAY_API_URL: process.env.EVERYPAY_API_URL,
+  EVERYPAY_ACCOUNT_NAME: process.env.EVERYPAY_ACCOUNT_NAME,
 
   // Email (Resend)
   RESEND_API_KEY: process.env.RESEND_API_KEY,
@@ -28,6 +30,10 @@ const serverEnvSchema = {
 
   // Cron (optional in development)
   CRON_SECRET: process.env.CRON_SECRET,
+
+  // Cloudflare Turnstile (optional)
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+  TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
 } as const;
 
 type EnvKey = keyof typeof serverEnvSchema;
@@ -51,8 +57,10 @@ export function validateEnv(): ValidationResult {
     'NEXT_PUBLIC_SUPABASE_URL',
     'NEXT_PUBLIC_SUPABASE_ANON_KEY',
     'SUPABASE_SERVICE_ROLE_KEY',
-    'STRIPE_SECRET_KEY',
-    'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',
+    'EVERYPAY_API_USERNAME',
+    'EVERYPAY_API_SECRET',
+    'EVERYPAY_API_URL',
+    'EVERYPAY_ACCOUNT_NAME',
     'RESEND_API_KEY',
     'RESEND_FROM_EMAIL',
     'UNISEND_API_URL',
@@ -63,6 +71,12 @@ export function validateEnv(): ValidationResult {
 
   // Optional in development, required in production
   const requiredInProduction: EnvKey[] = ['CRON_SECRET'];
+
+  // Fully optional (warnings only)
+  const optional: EnvKey[] = [
+    'NEXT_PUBLIC_TURNSTILE_SITE_KEY',
+    'TURNSTILE_SECRET_KEY',
+  ];
 
   const isProduction = process.env.NODE_ENV === 'production';
 
@@ -84,6 +98,13 @@ export function validateEnv(): ValidationResult {
     }
   }
 
+  // Check optional vars
+  for (const key of optional) {
+    if (!serverEnvSchema[key]) {
+      warnings.push(`${key} not set (Turnstile captcha will be disabled)`);
+    }
+  }
+
   // Validate URLs
   if (serverEnvSchema.NEXT_PUBLIC_SUPABASE_URL && !isValidUrl(serverEnvSchema.NEXT_PUBLIC_SUPABASE_URL)) {
     missing.push('NEXT_PUBLIC_SUPABASE_URL (invalid URL format)');
@@ -102,16 +123,9 @@ export function validateEnv(): ValidationResult {
     missing.push('RESEND_FROM_EMAIL (invalid email format)');
   }
 
-  // Validate Stripe keys
-  if (serverEnvSchema.STRIPE_SECRET_KEY && !serverEnvSchema.STRIPE_SECRET_KEY.startsWith('sk_')) {
-    warnings.push('STRIPE_SECRET_KEY does not start with sk_ (might be invalid)');
-  }
-
-  if (
-    serverEnvSchema.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY &&
-    !serverEnvSchema.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.startsWith('pk_')
-  ) {
-    warnings.push('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY does not start with pk_ (might be invalid)');
+  // Validate EveryPay URL
+  if (serverEnvSchema.EVERYPAY_API_URL && !isValidUrl(serverEnvSchema.EVERYPAY_API_URL)) {
+    missing.push('EVERYPAY_API_URL (invalid URL format)');
   }
 
   return {
@@ -167,9 +181,11 @@ export const env = {
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
   },
-  stripe: {
-    secretKey: process.env.STRIPE_SECRET_KEY!,
-    publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+  everypay: {
+    apiUsername: process.env.EVERYPAY_API_USERNAME!,
+    apiSecret: process.env.EVERYPAY_API_SECRET!,
+    apiUrl: process.env.EVERYPAY_API_URL!,
+    accountName: process.env.EVERYPAY_ACCOUNT_NAME!,
   },
   resend: {
     apiKey: process.env.RESEND_API_KEY!,
@@ -185,5 +201,9 @@ export const env = {
   },
   cron: {
     secret: process.env.CRON_SECRET,
+  },
+  turnstile: {
+    siteKey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+    secretKey: process.env.TURNSTILE_SECRET_KEY,
   },
 } as const;

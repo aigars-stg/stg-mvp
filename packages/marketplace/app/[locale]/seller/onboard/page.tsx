@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@second-turn/design-system';
-import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Package, RefreshCw as Loader2, CreditCard } from 'griddy-icons';
+import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Package, RefreshCw as Loader2 } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { InstantBuyCard, ContactSellerCard } from '@/components/seller/onboard';
 import { supabase } from '@/lib/supabase/client';
@@ -17,20 +17,16 @@ const COUNTRY_CODES: { code: CountryCode; flagClass: string; nameKey: 'latvia' |
   { code: 'LT', flagClass: 'fi fi-lt', nameKey: 'lithuania' },
 ];
 
-// Countries where Stripe Connect is currently available
-const STRIPE_AVAILABLE_COUNTRIES: CountryCode[] = ['LV'];
-
 interface OnboardingStatus {
   seller_status: string;
   terms_accepted: boolean;
-  stripe_connected: boolean;
   onboarding_completed: boolean;
   can_list_items: boolean;
   can_create_contact_seller?: boolean;
   can_create_instant_buy?: boolean;
 }
 
-type OnboardingStep = 'terms' | 'choice' | 'stripe';
+type OnboardingStep = 'terms' | 'choice';
 
 export default function SellerOnboardingPage() {
   const router = useRouter();
@@ -42,16 +38,10 @@ export default function SellerOnboardingPage() {
   const [detectingCountry, setDetectingCountry] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [acceptingTerms, setAcceptingTerms] = useState(false);
-  const [startingStripe, setStartingStripe] = useState(false);
   const [completingTermsOnly, setCompletingTermsOnly] = useState(false);
   const [savingCountry, setSavingCountry] = useState<CountryCode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('terms');
-
-  // Check if Stripe is available in user's country
-  const stripeAvailable = profile?.country
-    ? STRIPE_AVAILABLE_COUNTRIES.includes(profile.country as CountryCode)
-    : false;
 
   const handleSelectCountry = async (country: CountryCode) => {
     if (!user || savingCountry) return;
@@ -140,7 +130,7 @@ export default function SellerOnboardingPage() {
       if (data.terms_accepted) {
         setTermsAccepted(true);
         // If terms are accepted but not fully onboarded, show choice screen
-        if (!data.stripe_connected && data.seller_status === 'onboarding') {
+        if (data.seller_status === 'onboarding') {
           setCurrentStep('choice');
         }
       }
@@ -208,30 +198,6 @@ export default function SellerOnboardingPage() {
       setError(err instanceof Error ? err.message : 'Failed to accept terms');
     } finally {
       setAcceptingTerms(false);
-    }
-  };
-
-  // Start Stripe onboarding
-  const handleStartStripeOnboarding = async () => {
-    try {
-      setStartingStripe(true);
-      setError(null);
-
-      const response = await fetch('/api/seller/connect/onboard', {
-        method: 'POST',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to start Stripe onboarding');
-      }
-
-      // Redirect to Stripe onboarding
-      window.location.href = data.onboardingUrl;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start onboarding');
-      setStartingStripe(false);
     }
   };
 
@@ -404,13 +370,12 @@ export default function SellerOnboardingPage() {
                 <ContactSellerCard
                   onSelect={handleCompleteTermsOnly}
                   loading={completingTermsOnly}
-                  isPrimaryOption={!stripeAvailable}
                 />
               </div>
               <div className="order-1 sm:order-2">
                 <InstantBuyCard
-                  stripeAvailable={stripeAvailable}
-                  onSelect={() => setCurrentStep('stripe')}
+                  onSelect={handleCompleteTermsOnly}
+                  loading={completingTermsOnly}
                 />
               </div>
             </div>
@@ -418,73 +383,6 @@ export default function SellerOnboardingPage() {
             <p className="text-xs text-text-secondary text-center">
               {t('step2.upgradeNote')}
             </p>
-          </div>
-        )}
-
-        {/* Step 3: Stripe Connect (shown when currentStep === 'stripe') */}
-        {currentStep === 'stripe' && (
-          <div className="bg-snow-white border border-border rounded-lg p-4 sm:p-6 lg:p-8 mb-8">
-            <button
-              onClick={() => setCurrentStep('choice')}
-              className="text-sm text-frost-ice hover:underline mb-4 flex items-center gap-1"
-            >
-              {t('step3.backButton')}
-            </button>
-
-            <h2 className="text-xl sm:text-2xl font-semibold text-polar-night mb-6">
-              {t('step3.title')}
-            </h2>
-
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex-shrink-0 bg-frost-ice">
-                <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-2">
-                  {t('step3.heading')}
-                </h3>
-                <p className="text-sm text-text-secondary mb-4">
-                  {t('step3.description')}
-                </p>
-
-                {/* Requirements */}
-                <div className="bg-snow-stormLight border border-border rounded-lg p-3 sm:p-4 mb-4 -mx-1 sm:mx-0">
-                  <p className="text-xs sm:text-sm text-text-secondary mb-3">
-                    <strong>{t('step3.requirements.title')}</strong>
-                  </p>
-                  <ul className="text-xs sm:text-sm text-text-secondary space-y-2">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" aria-hidden="true" />
-                      <span>{t('step3.requirements.id')}</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" aria-hidden="true" />
-                      <span>{t('step3.requirements.bank')}</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" aria-hidden="true" />
-                      <span>{t('step3.requirements.personal')}</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  className="sm:w-auto"
-                  onClick={handleStartStripeOnboarding}
-                  loading={startingStripe}
-                  disabled={startingStripe}
-                  rightIcon={<ArrowRight className="w-5 h-5" />}
-                >
-                  {t('step3.continueButton')}
-                </Button>
-                <p className="text-xs text-text-secondary mt-2">
-                  {t('step3.redirectNote')}
-                </p>
-              </div>
-            </div>
           </div>
         )}
 

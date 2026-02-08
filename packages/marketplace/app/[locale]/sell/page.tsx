@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Modal } from '@second-turn/design-system';
 import type { BGGGame } from '@/lib/bgg-api';
@@ -21,6 +21,7 @@ import { PuzzlePiece as Dices, PhotoCamera as Camera, ClipboardCheck, CurrencyEu
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
+import { TurnstileWidget, type TurnstileWidgetRef } from '@/components/common/TurnstileWidget';
 import type { ListingWithSeller, TransactionMethod, PricingFormat } from '@/lib/types/listing';
 import type { User } from '@supabase/supabase-js';
 import type { UserProfile } from '@/lib/auth/types';
@@ -144,6 +145,7 @@ function SellPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile } = useAuth();
+  const turnstileRef = useRef<TurnstileWidgetRef>(null);
 
   // Use the listing form hook for all form state
   const listingForm = useListingForm();
@@ -787,6 +789,16 @@ function SellPageContent() {
 
     setIsPublishing(true);
 
+    // Get Turnstile token for new listings
+    let turnstileToken: string | undefined;
+    if (!isEditMode && turnstileRef.current) {
+      try {
+        turnstileToken = await turnstileRef.current.getTokenAsync(10000);
+      } catch {
+        // If token retrieval fails, proceed without it — server handles gracefully
+      }
+    }
+
     try {
       console.log(`📤 [Sell Page] ${isEditMode ? 'Updating' : 'Creating'} listing...`);
 
@@ -882,6 +894,8 @@ function SellPageContent() {
           })),
           // Source wanted listing (for "I have this" flow)
           ...(wantedListingId ? { sourceWantedListingId: wantedListingId } : {}),
+          // Turnstile bot protection token
+          ...(turnstileToken ? { turnstileToken } : {}),
         };
 
         const listingResponse = await fetch('/api/listings', {
@@ -902,16 +916,6 @@ function SellPageContent() {
               message: errorData.error,
               actionUrl: errorData.settingsUrl || '/profile/settings',
               actionLabel: 'Go to Settings',
-            });
-            return;
-          }
-
-          if (errorData.requiresStripe) {
-            setErrorModal({
-              isOpen: true,
-              message: errorData.error,
-              actionUrl: errorData.upgradeUrl || '/seller/settings/payouts',
-              actionLabel: 'Setup Payouts',
             });
             return;
           }
@@ -946,6 +950,7 @@ function SellPageContent() {
       });
     } finally {
       setIsPublishing(false);
+      turnstileRef.current?.reset();
     }
   };
 
@@ -1469,6 +1474,11 @@ function SellPageContent() {
             </div>
           </label>
         </div>
+
+        {/* Turnstile bot protection (new listings only) */}
+        {!isEditMode && (
+          <TurnstileWidget ref={turnstileRef} action="create-listing" />
+        )}
 
         {/* Action Buttons */}
         <div className="mt-8 space-y-3 sm:space-y-0">

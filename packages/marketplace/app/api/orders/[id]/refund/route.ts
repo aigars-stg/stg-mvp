@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { reverseTransfer, canReverseTransfer } from '@/lib/stripe/transfer-service';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-11-17.clover',
-});
+import { refundPayment } from '@/lib/everypay/client';
+import { EveryPayError } from '@/lib/everypay/client';
 
 const adminSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,12 +27,12 @@ const REFUNDABLE_STATUSES = ['pending_seller', 'confirmed', 'shipped', 'delivere
  * Issue a full refund for an order.
  * This is an admin/support action - full refunds only (no partial refunds in v1).
  *
- * Requirements:
- * - Order must be in a refundable status (paid, shipped, delivered, disputed)
- * - Order must have stripe_payment_intent_id
- * - Refunds full amount (items + shipping + service fee) to buyer
- * - Updates order status to 'refunded'
- * - Sets payout_status to 'not_applicable'
+ * Refund flow:
+ * 1. If order was paid via EveryPay (has everypay_payment_reference),
+ *    refund the card payment via EveryPay API.
+ * 2. If order used wallet balance (buyer_wallet_debit_cents > 0),
+ *    credit the buyer wallet via credit_buyer_wallet_refund RPC.
+ * 3. Update order status to 'refunded' with reason and timestamp.
  */
 export async function POST(request: NextRequest, { params }: Params) {
   try {
@@ -63,10 +59,9 @@ export async function POST(request: NextRequest, { params }: Params) {
         buyer_id,
         seller_id,
         status,
-        payout_status,
         total_amount,
-        stripe_payment_intent_id,
-        stripe_transfer_id
+        everypay_payment_reference,
+        buyer_wallet_debit_cents
       `)
       .eq('id', orderId)
       .single();
@@ -104,114 +99,104 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Track transfer reversal if needed
-    let transferReversalId: string | null = null;
+    console.log(`[Refund] Processing refund for order ${order.order_number}`);
+    console.log(`[Refund] Reason: ${reason}`);
 
-    // If transfer has been made to seller, reverse it first
-    if (order.stripe_transfer_id && order.payout_status === 'completed') {
-      console.log(`💸 [Refund] Transfer exists, checking if reversible: ${order.stripe_transfer_id}`);
+    // -----------------------------------------------------------------------
+    // 1. Refund EveryPay card payment (if applicable)
+    // -----------------------------------------------------------------------
+    let everyPayRefundState: string | null = null;
 
-      // Check if we can reverse the transfer
-      const canReverse = await canReverseTransfer(order.stripe_transfer_id);
-      if (!canReverse) {
-        return NextResponse.json(
-          { error: 'Cannot refund - transfer has already been reversed or cannot be found' },
-          { status: 400 }
-        );
+    if (order.everypay_payment_reference) {
+      console.log(`[Refund] EveryPay payment ref: ${order.everypay_payment_reference}`);
+
+      // Calculate the EveryPay portion: total minus any wallet debit
+      const walletDebitCents = order.buyer_wallet_debit_cents ?? 0;
+      const totalCents = Math.round(order.total_amount * 100);
+      const everyPayAmountCents = totalCents - walletDebitCents;
+
+      if (everyPayAmountCents > 0) {
+        try {
+          const refundResult = await refundPayment(
+            order.everypay_payment_reference,
+            everyPayAmountCents
+          );
+
+          everyPayRefundState = refundResult.payment_state;
+          console.log(`[Refund] EveryPay refund result: ${refundResult.payment_state}`);
+        } catch (everyPayError: unknown) {
+          console.error('[Refund] EveryPay refund failed:', everyPayError);
+          const errorMessage = everyPayError instanceof EveryPayError
+            ? everyPayError.message
+            : 'Failed to process EveryPay refund';
+
+          return NextResponse.json(
+            { error: errorMessage },
+            { status: 500 }
+          );
+        }
       }
+    }
 
-      // Reverse the transfer
-      try {
-        const reversal = await reverseTransfer({
-          transferId: order.stripe_transfer_id,
-          orderId: orderId,
+    // -----------------------------------------------------------------------
+    // 2. Refund wallet portion (if applicable)
+    // -----------------------------------------------------------------------
+    let walletRefunded = false;
+
+    if (order.buyer_wallet_debit_cents && order.buyer_wallet_debit_cents > 0) {
+      console.log(`[Refund] Wallet debit to refund: ${order.buyer_wallet_debit_cents} cents`);
+
+      const { error: walletError } = await (adminSupabase
+        .rpc as (...args: unknown[]) => ReturnType<typeof adminSupabase.rpc>)('credit_buyer_wallet_refund', {
+          p_user_id: order.buyer_id,
+          p_amount_cents: order.buyer_wallet_debit_cents,
+          p_order_id: orderId,
         });
-        transferReversalId = reversal.reversalId;
-        console.log(`✅ [Refund] Transfer reversed: ${transferReversalId}`);
-      } catch (reversalError: unknown) {
-        console.error('❌ [Refund] Transfer reversal failed:', reversalError);
-        const errorMessage = reversalError instanceof Error
-          ? reversalError.message
-          : 'Failed to reverse transfer';
-        return NextResponse.json(
-          { error: `Cannot refund - ${errorMessage}` },
-          { status: 500 }
-        );
+
+      if (walletError) {
+        console.error('[Refund] Wallet refund failed:', walletError);
+        // If EveryPay refund already succeeded, we have a partial refund problem
+        // Log it but continue to update order status
+        if (everyPayRefundState) {
+          console.error(
+            '[Refund] WARNING: EveryPay refund succeeded but wallet refund failed. Manual intervention needed.'
+          );
+        } else {
+          return NextResponse.json(
+            { error: 'Failed to refund wallet balance' },
+            { status: 500 }
+          );
+        }
+      } else {
+        walletRefunded = true;
+        console.log(`[Refund] Wallet refund credited: ${order.buyer_wallet_debit_cents} cents`);
       }
     }
 
-    // Check for payment intent ID
-    if (!order.stripe_payment_intent_id) {
-      return NextResponse.json(
-        { error: 'Order has no payment intent ID - cannot process refund' },
-        { status: 400 }
-      );
-    }
-
-    console.log(`💸 [Refund] Processing refund for order ${order.order_number}`);
-    console.log(`💸 [Refund] PaymentIntent: ${order.stripe_payment_intent_id}`);
-    console.log(`💸 [Refund] Reason: ${reason}`);
-
-    // Create refund in Stripe
-    try {
-      const refund = await stripe.refunds.create({
-        payment_intent: order.stripe_payment_intent_id,
-        reason: 'requested_by_customer',
-        metadata: {
-          order_id: orderId,
-          order_number: order.order_number,
-          refund_reason: reason,
-          refunded_by: user.id,
-        },
-      });
-
-      console.log(`✅ [Refund] Stripe refund created: ${refund.id}`);
-
-      // Update order status with refund tracking IDs
-      const updateData: Record<string, string | null> = {
+    // -----------------------------------------------------------------------
+    // 3. Update order status to refunded
+    // -----------------------------------------------------------------------
+    const { error: updateError } = await adminSupabase
+      .from('orders')
+      .update({
         status: 'refunded',
-        payout_status: 'not_applicable',
         refund_reason: reason,
-        stripe_refund_id: refund.id,
+        refunded_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      };
+      })
+      .eq('id', orderId);
 
-      // Include transfer reversal ID if we reversed a transfer
-      if (transferReversalId) {
-        updateData.stripe_transfer_reversal_id = transferReversalId;
-      }
-
-      const { error: updateError } = await adminSupabase
-        .from('orders')
-        .update(updateData)
-        .eq('id', orderId);
-
-      if (updateError) {
-        console.error('❌ [Refund] Failed to update order status:', updateError);
-        // Refund was already processed in Stripe, log error but don't fail
-      }
-
-      return NextResponse.json({
-        success: true,
-        refundId: refund.id,
-        amount: refund.amount,
-        status: refund.status,
-        orderNumber: order.order_number,
-        ...(transferReversalId && { transferReversalId }),
-      });
-    } catch (stripeError: unknown) {
-      console.error('❌ [Refund] Stripe refund failed:', stripeError);
-
-      const errorMessage =
-        stripeError instanceof Stripe.errors.StripeError
-          ? stripeError.message
-          : 'Failed to process refund';
-
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 500 }
-      );
+    if (updateError) {
+      console.error('[Refund] Failed to update order status:', updateError);
+      // Refund was already processed, log error but don't fail
     }
+
+    return NextResponse.json({
+      success: true,
+      orderNumber: order.order_number,
+      ...(everyPayRefundState && { everyPayRefundState }),
+      ...(walletRefunded && { walletRefundedCents: order.buyer_wallet_debit_cents }),
+    });
   } catch (error) {
     return handleApiError(error, 'Process refund');
   }

@@ -35,7 +35,6 @@ export async function GET(
       receiver_email: string | null;
       items_total: number;
       shipping_cost: number;
-      service_fee: number;
       total_amount: number;
       created_at: string;
       paid_at: string | null;
@@ -70,7 +69,6 @@ export async function GET(
         receiver_email,
         items_total,
         shipping_cost,
-        service_fee,
         total_amount,
         created_at,
         paid_at,

@@ -30,7 +30,6 @@
   "PriceBreakdown": {
     "item": "Item:",
     "shipping": "Shipping ({country}):",
-    "serviceFee": "Service fee:",
     "fees": "fees",
     "estimateNote": "*Same-country estimate"
   },
@@ -346,7 +345,7 @@
       "emailAvailable": "Your email address will become available for new registration"
     },
     "forSellers": "For Sellers:",
-    "sellerRequirements": "You must have no pending payouts or open disputes. Any remaining balance will be paid out before deletion.",
+    "sellerRequirements": "You must have no pending withdrawals or open disputes. Any remaining wallet balance will be withdrawn before deletion.",
     "recoveryTitle": "Account Recovery (14-Day Grace Period):",
     "recoveryDescription": "You have 14 days to recover your account by logging in again. After this period, deletion is permanent.",
     "dataRetentionTitle": "Data Retention (GDPR Compliance):",
@@ -384,7 +383,7 @@
     "holderNameRequired": "Account holder name is required",
     "addFailed": "Failed to add bank account",
     "formatHint": "Format: {hint}",
-    "securityNote": "Your bank details are securely stored by Stripe. We only store the last 4 digits for display.",
+    "securityNote": "Your bank details are stored securely. We only display the last 4 digits of your IBAN.",
     "cancel": "Cancel",
     "addButton": "Add Bank Account",
     "adding": "Adding..."
@@ -514,7 +513,8 @@
       "useDifferentEmail": "Use a different email"
     },
     "errors": {
-      "tooManyAttempts": "Too many attempts — let's take a breather. Try again in a few minutes."
+      "tooManyAttempts": "Too many attempts — let's take a breather. Try again in a few minutes.",
+      "captchaFailed": "Verification failed. Please try again."
     },
     "comingSoon": {
       "title": "We're launching soon!",
@@ -565,7 +565,6 @@
   "OfferCard": {
     "priceBreakdown": {
       "shippingTo": "Shipping to {country}:",
-      "serviceFee": "Service fee:",
       "total": "Total:",
       "estimateNote": "*Estimate based on same-country shipping. Final price at checkout."
     },
@@ -648,7 +647,6 @@
       "title": "Order Summary",
       "subtotal": "Subtotal ({count, plural, one {# item} other {# items}})",
       "shipping": "Shipping",
-      "serviceFee": "Service fee",
       "total": "Total"
     },
     "actions": {
@@ -686,7 +684,6 @@
         "soldBy": "Sold by {seller}",
         "items": "Items",
         "shipping": "Shipping",
-        "serviceFee": "Service fee",
         "total": "Total",
         "deliveryTo": "Delivery to",
         "pickupAt": "Pickup at"
@@ -1771,17 +1768,16 @@
     },
     "step3": {
       "backButton": "← Back to options",
-      "title": "Set up payments with Stripe",
-      "heading": "Connect payment account",
-      "description": "We use Stripe to handle payouts securely - a payment platform trusted by Airbnb, Shopify, and millions of businesses worldwide. Your money goes directly to your bank. We never see or hold your funds.",
+      "title": "Payment setup",
+      "heading": "How you get paid",
+      "description": "Your earnings are credited to your platform wallet after each sale. You can withdraw to your bank account anytime using your IBAN.",
       "requirements": {
-        "title": "You'll need:",
-        "id": "Government-issued ID (passport, ID card, or driver's license)",
-        "bank": "Bank account details (IBAN for SEPA transfers)",
-        "personal": "Personal information (name, date of birth, address)"
+        "title": "To withdraw, you'll need:",
+        "bank": "Bank account details (IBAN)",
+        "personal": "Account holder name"
       },
-      "continueButton": "Continue to Stripe",
-      "redirectNote": "You'll be redirected to Stripe's secure onboarding (2 min)"
+      "continueButton": "Continue",
+      "redirectNote": "You can add your bank details later when you request your first withdrawal"
     },
     "whatsNext": {
       "title": "What's next?",
@@ -2112,7 +2108,6 @@
       "subtotal": "Subtotal",
       "subtotalItems": "Subtotal ({count, plural, one {# item} other {# items}})",
       "shipping": "Shipping",
-      "serviceFee": "Service fee",
       "total": "Total",
       "shippingNote": "+ shipping (calculated at checkout)",
       "checkout": "Checkout"
@@ -2187,7 +2182,7 @@
   "SellerDashboard": {
     "title": "Seller Dashboard",
     "subtitle": {
-      "payoutsEnabled": "Manage your earnings, payouts, and transactions",
+      "payoutsEnabled": "Manage your earnings, wallet, and withdrawals",
       "contactOnly": "Manage your listings and connect with buyers"
     },
     "refresh": "Refresh",
@@ -2230,32 +2225,25 @@
       "updateTitle": "Update Bank Account"
     },
     "BalanceCard": {
-      "title": "Your Balance",
+      "title": "Wallet Balance",
       "tryAgain": "Try Again",
       "refreshBalance": "Refresh balance",
-      "noAccount": "Complete seller onboarding to view your balance and receive payments.",
+      "noAccount": "Complete seller onboarding to start earning.",
       "startSelling": "Start Selling",
-      "noPayouts": "Complete Stripe verification to enable payouts and view your balance.",
-      "completeVerification": "Complete Verification",
       "noSales": "You haven't made any sales yet.",
       "noSalesHint": "Once you sell a game, your earnings will appear here.",
       "viewListings": "View Your Listings",
-      "heldUntilDelivery": "Held until delivery",
-      "ordersInTransitSingular": "1 order in transit",
-      "ordersInTransitPlural": "{count} orders in transit",
-      "availableForPayout": "Available for payout",
       "available": "Available",
       "pending": "Pending",
       "total": "Total",
-      "fundsReleasedInfo": "Funds are released 2 days after delivery is confirmed",
+      "fundsReleasedInfo": "Earnings are credited to your wallet after delivery is confirmed",
       "addBankHint": "Add a bank account to withdraw your earnings.",
       "addBankAccount": "Add Bank Account",
-      "requestPayout": "Request Payout",
+      "requestWithdrawal": "Withdraw",
       "updated": "Updated {time}",
       "statsSingular": "{count} sale · {amount} last 30 days",
       "statsPlural": "{count} sales · {amount} last 30 days",
-      "viewInStripe": "View payout history in Stripe",
-      "openingStripe": "Opening..."
+      "viewWallet": "View wallet & transactions"
     },
     "EarningsSummary": {
       "title": "Earnings Summary",
@@ -2266,17 +2254,16 @@
       "noData": "No earnings data yet",
       "noDataHint": "Your earnings breakdown will appear here after your first sale"
     },
-    "PayoutHistory": {
-      "title": "Recent Payouts",
+    "WithdrawalHistory": {
+      "title": "Recent Withdrawals",
       "viewAll": "View All",
-      "noPayout": "No payouts yet",
-      "noPayoutHint": "Request a payout to see your payout history",
+      "noWithdrawals": "No withdrawals yet",
+      "noWithdrawalsHint": "Request a withdrawal to see your history",
       "status": {
         "pending": "Pending",
-        "in_transit": "In Transit",
-        "paid": "Paid",
-        "failed": "Failed",
-        "canceled": "Canceled"
+        "processing": "Processing",
+        "completed": "Completed",
+        "rejected": "Rejected"
       }
     },
     "TransactionList": {
@@ -2342,17 +2329,9 @@
         "description": "New listings are blocked until you provide tax information. Existing listings are hidden."
       }
     },
-    "StripeRequirements": {
-      "actionNeeded": {
-        "title": "Stripe needs more information",
-        "description": "Complete {count, plural, one {# verification step} other {# verification steps}} to keep your account active."
-      },
-      "overdue": {
-        "title": "Urgent: verification overdue",
-        "description": "Your account has overdue verification requirements. Complete them now to avoid restrictions."
-      },
-      "completeInStripe": "Complete in Stripe",
-      "opening": "Opening..."
+    "WalletInfo": {
+      "title": "Wallet",
+      "description": "Your earnings are stored in your platform wallet. Withdraw to your bank anytime."
     }
   },
   "Orders": {
@@ -2467,7 +2446,6 @@
         "title": "Order Summary",
         "items": "Items",
         "shipping": "Shipping",
-        "serviceFee": "Service Fee",
         "totalPaid": "Total Paid",
         "free": "Free"
       },
@@ -2684,9 +2662,9 @@
           "bestFor": "Most sellers in Latvia",
           "howBuyersPay": "Through Second Turn Games",
           "howShippingWorks": "€2 flat-rate via Unisend lockers",
-          "yourEarnings": "100% of your asking price",
+          "yourEarnings": "90% of your asking price (10% commission)",
           "buyerProtection": "Yes — we hold payment until delivery",
-          "setupRequired": "Quick Stripe account (2 min)",
+          "setupRequired": "Accept seller terms (1 min)",
           "availability": "Latvia only"
         },
         "contactSeller": {
@@ -2705,7 +2683,7 @@
         "steps": {
           "step1": {
             "title": "Buyer purchases",
-            "description": "They pay the game price plus a small service fee (6% + €0.50) and €2 shipping. You don't pay anything."
+            "description": "They pay the game price plus €2 shipping. No service fees for buyers."
           },
           "step2": {
             "title": "You get notified",
@@ -2721,7 +2699,7 @@
           },
           "step5": {
             "title": "You get paid",
-            "description": "The full asking price goes to your connected bank account. We keep only the buyer's service fee."
+            "description": "Your earnings (item price minus 10% commission) are credited to your platform wallet. Withdraw to your bank anytime."
           }
         },
         "issuesTitle": "What if something goes wrong?",
@@ -2731,14 +2709,13 @@
           "notPickedUp": "If the buyer doesn't pick up the package, we'll work with you on next steps."
         },
         "setupTitle": "Setting up Instant Buy",
-        "setupDescription": "To use Instant Buy, you'll need to connect a Stripe account. This lets us send payments directly to your bank.",
-        "setupTime": "The setup takes about 2 minutes. You'll need:",
+        "setupDescription": "To use Instant Buy, just accept the seller terms. Your earnings will go to your platform wallet.",
+        "setupTime": "To withdraw earnings, you'll need:",
         "setupRequirements": {
           "name": "Your full name",
-          "dob": "Date of birth",
           "bank": "Bank account details (IBAN)"
         },
-        "setupTrust": "We use Stripe because it's secure and trusted by millions of sellers worldwide. Your financial information goes directly to Stripe — we never see or store your bank details."
+        "setupTrust": "Your IBAN is only needed when you request your first withdrawal. Payments are processed securely through our payment partner."
       },
       "contactSellerSection": {
         "title": "How Contact Seller works",
@@ -2767,7 +2744,7 @@
         },
         "whyChoose": "Why choose this option?",
         "reasons": {
-          "noStripe": "You're not ready to set up Stripe",
+          "noStripe": "You prefer to handle payments directly",
           "negotiate": "You prefer negotiating prices",
           "ownShipping": "You want to arrange your own shipping method",
           "country": "You're located in Lithuania or Estonia (where Instant Buy isn't available yet)"
@@ -2777,7 +2754,7 @@
       "switchingSection": {
         "title": "Can I switch later?",
         "upgradeTitle": "Starting with Contact Seller, upgrading to Instant Buy:",
-        "upgradeDescription": "Yes! If you set up as a Contact Seller, you can enable Instant Buy anytime from your Seller Settings. Just complete the Stripe setup and your future listings will have both options.",
+        "upgradeDescription": "Yes! If you set up as a Contact Seller, you can enable Instant Buy anytime from your Seller Settings. Your future listings will have both options.",
         "downgradeTitle": "Already have Instant Buy, want to use Contact Seller:",
         "downgradeDescription": "You can choose the listing type for each game when you create a listing. Even with Instant Buy enabled, you can list specific games as Contact Seller if you prefer.",
         "countryNoteTitle": "Note for Lithuanian and Estonian sellers:",
@@ -2786,12 +2763,12 @@
       "faqSection": {
         "title": "Common questions",
         "q1": {
-          "question": "Why do I need to set up Stripe for Instant Buy?",
-          "answer": "Stripe handles the secure transfer of money from buyers to sellers. It's how we ensure you get paid reliably and how buyers know their payment is protected. Setting up takes 2 minutes and your bank details go directly to Stripe — we never see them."
+          "question": "How do I get paid?",
+          "answer": "Your earnings are credited to your platform wallet after each completed sale. You can withdraw your wallet balance to your bank account at any time via IBAN transfer."
         },
         "q2": {
           "question": "Who pays the fees?",
-          "answer": "Buyers pay the service fee (6% + €0.50) and shipping (€2). As a seller, you receive 100% of your asking price. If you list a game for €20, you get €20."
+          "answer": "Buyers pay the listed price plus €2 shipping — no service fees. As a seller, a 10% platform commission is deducted from your earnings. If you list a game for €20, you earn €18."
         },
         "q3": {
           "question": "What's included in the 500+ parcel terminals?",

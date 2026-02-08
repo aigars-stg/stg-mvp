@@ -8,7 +8,7 @@ export async function GET(_request: NextRequest) {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;
 
-    // Get seller onboarding status directly from the table to avoid RPC issues
+    // Get seller onboarding status directly from the table
     const { data: sellerProfile, error: profileError } = await supabase
       .from('seller_profiles')
       .select('*')
@@ -24,33 +24,27 @@ export async function GET(_request: NextRequest) {
 
     // Determine status based on profile data
     const termsAccepted = !!sellerProfile?.seller_terms_accepted_at;
-    const stripeConnected = !!sellerProfile?.stripe_connect_payouts_enabled;
     const isActive = sellerProfile?.seller_status === 'active';
 
-    // Dual-listing model capabilities:
-    // - Contact Seller: Only requires terms accepted + active status
-    // - Instant Buy: Also requires Stripe connected
+    // With wallet-based payments, all sellers with accepted terms can list
+    // All active sellers can create both listing types
     const canCreateContactSeller = termsAccepted && isActive;
-    const canCreateInstantBuy = termsAccepted && isActive && stripeConnected;
+    const canCreateInstantBuy = termsAccepted && isActive;
 
-    // Onboarding is "completed" if seller can create at least one type of listing
-    // (either contact_seller via terms-only, or instant_buy via full Stripe setup)
-    const onboardingCompleted = canCreateContactSeller || canCreateInstantBuy;
-
-    // Can list items if either capability is available
-    const canListItems = canCreateContactSeller || canCreateInstantBuy;
+    // Onboarding is "completed" if seller can create listings
+    const onboardingCompleted = termsAccepted && isActive;
+    const canListItems = onboardingCompleted;
 
     // Construct response object
     const statusData = {
       seller_status: sellerProfile?.seller_status || 'not_started',
       terms_accepted: termsAccepted,
-      stripe_connected: stripeConnected,
       onboarding_completed: onboardingCompleted,
       can_list_items: canListItems,
-      // Dual-listing model capabilities
       can_create_contact_seller: canCreateContactSeller,
       can_create_instant_buy: canCreateInstantBuy,
-      needs_dac7_info: false // Default to false for now as this is a new seller
+      has_payout_info: !!(sellerProfile?.payout_iban && sellerProfile?.payout_account_holder_name),
+      needs_dac7_info: false,
     };
 
     return NextResponse.json(statusData);

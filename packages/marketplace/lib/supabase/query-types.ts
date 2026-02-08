@@ -24,9 +24,7 @@ export type NotificationRow = Tables<'notifications'>;
 export type OrderRow = Tables<'orders'>;
 export type OrderItemRow = Tables<'order_items'>;
 export type OrderIssueRow = Tables<'order_issues'>;
-export type PayoutTransactionRow = Tables<'payout_transactions'>;
 export type SavedListingRow = Tables<'saved_listings'>;
-export type SellerPayoutRow = Tables<'seller_payouts'>;
 export type SellerProfileRow = Tables<'seller_profiles'>;
 export type SellerReviewRow = Tables<'seller_reviews'>;
 export type TrackingEventRow = Tables<'tracking_events'>;
@@ -38,9 +36,7 @@ export type WantedListingResponseRow = Tables<'wanted_listing_responses'>;
 export type ListingWithDetailsRow = Tables<'listings_with_details'>;
 export type PublicProfileRow = Tables<'public_profiles'>;
 export type PublicSellerProfileRow = Tables<'public_seller_profiles'>;
-export type SellerEarningsSummaryRow = Tables<'seller_earnings_summary'>;
 export type SellerReviewsWithBuyerRow = Tables<'seller_reviews_with_buyer'>;
-export type SellerTransactionHistoryRow = Tables<'seller_transaction_history'>;
 
 // Insert types (create operations)
 export type ListingInsert = TablesInsert<'listings'>;
