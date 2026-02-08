@@ -211,7 +211,7 @@ export default function CartPage() {
               {t('emptyCart.description')}
             </p>
             <Link href="/browse">
-              <Button variant="accent">
+              <Button variant="primary">
                 {t('emptyCart.browseButton')}
               </Button>
             </Link>

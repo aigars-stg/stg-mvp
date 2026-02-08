@@ -70,7 +70,7 @@ export function DisputeAlert({
           </div>
         </div>
         <Link href={`/seller/orders/${orderId}/dispute`}>
-          <Button variant="accent" size="sm">
+          <Button variant="primary" size="sm">
             Respond
           </Button>
         </Link>

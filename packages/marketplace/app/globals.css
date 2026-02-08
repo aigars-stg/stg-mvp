@@ -52,8 +52,8 @@
     --popover-foreground: 220 16% 22%; /* polar.night */
 
     /* Actions */
-    --primary: 193 43% 67%; /* frost.ice #88C0D0 */
-    --primary-foreground: 0 0% 100%; /* white text on frost */
+    --primary: 14 51% 63%; /* aurora.orange #D08770 */
+    --primary-foreground: 0 0% 100%; /* white text on orange */
     --secondary: 218 27% 92%; /* snow.stormLight #E5E9F0 */
     --secondary-foreground: 220 16% 22%; /* polar.night */
 
@@ -70,7 +70,7 @@
     /* Borders and inputs */
     --border: 219 28% 88%; /* snow.storm #D8DEE9 */
     --input: 219 28% 88%; /* snow.storm */
-    --ring: 193 43% 67%; /* frost.ice for focus rings */
+    --ring: 14 51% 63%; /* aurora.orange for focus rings */
 
     /* Chart colors - Aurora palette */
     --chart-1: 14 51% 63%; /* aurora.orange #D08770 */
@@ -93,8 +93,8 @@
     --popover-foreground: 220 27% 94%; /* snow.stormLightest */
 
     /* Actions */
-    --primary: 193 43% 67%; /* frost.ice stays the same */
-    --primary-foreground: 220 16% 22%; /* polar.night */
+    --primary: 14 51% 63%; /* aurora.orange #D08770 */
+    --primary-foreground: 0 0% 100%; /* white text on orange */
     --secondary: 220 17% 31%; /* polar.nightMedium #434C5E */
     --secondary-foreground: 220 27% 94%; /* snow.stormLightest */
 
@@ -111,7 +111,7 @@
     /* Borders and inputs */
     --border: 220 16% 36%; /* polar.nightDark #4C566A */
     --input: 220 16% 36%; /* polar.nightDark */
-    --ring: 193 43% 67%; /* frost.ice */
+    --ring: 14 51% 63%; /* aurora.orange */
 
     /* Chart colors - slightly adjusted for dark mode */
     --chart-1: 14 51% 63%; /* aurora.orange */

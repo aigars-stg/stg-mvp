@@ -221,7 +221,7 @@ export function WantedListingCard({
             {/* I Have This Button */}
             {onIHaveThis && (
               <Button
-                variant="accent"
+                variant="primary"
                 fullWidth
                 onClick={handleIHaveThisClick}
               >

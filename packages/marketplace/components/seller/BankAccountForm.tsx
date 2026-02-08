@@ -177,7 +177,7 @@ export function BankAccountForm({ onSuccess, onCancel, defaultName }: BankAccoun
         </Button>
         <Button
           type="submit"
-          variant="accent"
+          variant="primary"
           disabled={loading}
           className="flex-1"
         >

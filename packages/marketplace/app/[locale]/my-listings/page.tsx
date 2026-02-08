@@ -348,7 +348,7 @@ function MyListingsContent() {
                 </p>
                 {wantedActiveTab === 'all' && (
                   <Link href="/wanted/new">
-                    <Button variant="accent">
+                    <Button variant="primary">
                       <Search className="w-5 h-5 mr-2" />
                       {t('wanted.emptyAll.button')}
                     </Button>

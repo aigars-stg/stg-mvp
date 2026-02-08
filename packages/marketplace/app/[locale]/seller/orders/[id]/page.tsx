@@ -159,7 +159,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
                 {!showAcceptModal && !showDeclineModal && (
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button
-                      variant="accent"
+                      variant="primary"
                       onClick={() => {
                         setShowAcceptModal(true);
                         setShowDeclineModal(false);
@@ -229,7 +229,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
 
                     <div className="flex gap-3">
                       <Button
-                        variant="accent"
+                        variant="primary"
                         onClick={handleAcceptOrder}
                         disabled={actionLoading}
                       >
@@ -342,7 +342,7 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
                   </p>
                 )}
                 <Button
-                  variant="accent"
+                  variant="primary"
                   onClick={handleRetryLabel}
                   disabled={retryingLabel}
                 >

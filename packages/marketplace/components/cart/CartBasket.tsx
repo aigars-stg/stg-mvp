@@ -141,7 +141,7 @@ export function CartBasket({
           {/* Checkout Button */}
           <div className="flex-shrink-0">
             <Button
-              variant="accent"
+              variant="primary"
               size="lg"
               onClick={onCheckout}
               disabled={hasExpiredItems || isCheckingOut}

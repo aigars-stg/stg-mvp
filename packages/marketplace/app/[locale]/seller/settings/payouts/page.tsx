@@ -112,7 +112,7 @@ function WalletWithdrawalsContent() {
             <WalletBalance compact key={refreshKey} />
             {balanceCents > 0 && !showWithdrawForm && (
               <Button
-                variant="accent"
+                variant="primary"
                 size="sm"
                 onClick={() => setShowWithdrawForm(true)}
               >

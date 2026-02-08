@@ -415,7 +415,7 @@ export default function SellerOrdersPage() {
                 {order.status === 'pending_seller' && !order.is_expired && (
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button
-                      variant="accent"
+                      variant="primary"
                       fullWidth
                       onClick={() => handleAcceptOrder(order.id)}
                       disabled={acceptingOrder === order.id}

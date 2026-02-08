@@ -224,7 +224,7 @@ export function WithdrawalForm({
         </Button>
         <Button
           type="submit"
-          variant="accent"
+          variant="primary"
           disabled={loading || balanceCents === 0}
           className="flex-1"
         >

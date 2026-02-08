@@ -418,7 +418,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
           <div className="flex items-center gap-2 w-full sm:w-auto">
             {/* Sell This Game Button - always visible */}
             <Link href={`/sell?q=${encodeURIComponent(game.game_name)}`}>
-              <Button variant="accent" size="sm" className="flex-shrink-0">
+              <Button variant="primary" size="sm" className="flex-shrink-0">
                 <Plus className="w-4 h-4 mr-1.5" />
                 {t('actions.sellThisGame')}
               </Button>
@@ -550,7 +550,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                   {t('emptyState.beFirstToSell')}
                 </p>
                 <Link href={`/sell?q=${encodeURIComponent(game.game_name)}`}>
-                  <Button variant="accent">
+                  <Button variant="primary">
                     <Plus className="w-4 h-4 mr-1.5" />
                     {t('actions.sellThisGame')}
                   </Button>

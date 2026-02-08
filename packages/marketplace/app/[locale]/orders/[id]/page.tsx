@@ -86,7 +86,7 @@ export default function OrderDetailPage() {
             {error || t('notFound')}
           </h2>
           <Link href="/orders">
-            <Button variant="primary">{t('backToOrders')}</Button>
+            <Button variant="accent">{t('backToOrders')}</Button>
           </Link>
         </div>
       </div>

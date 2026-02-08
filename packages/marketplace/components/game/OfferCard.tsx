@@ -880,7 +880,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   </Button>
                 ) : (
                   <Button
-                    variant="accent"
+                    variant="primary"
                     size="sm"
                     onClick={handleAddToCart}
                     disabled={loading}

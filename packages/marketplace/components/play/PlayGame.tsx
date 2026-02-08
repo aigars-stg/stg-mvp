@@ -331,7 +331,7 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
             {t('noListingsYet')}
           </p>
           <Link href={`/sell?q=${encodeURIComponent(answer.name)}`}>
-            <Button variant="accent" size="sm" className="w-full">
+            <Button variant="primary" size="sm" className="w-full">
               <Plus className="w-4 h-4 mr-1.5" />
               {t('sellThisGame')}
             </Button>

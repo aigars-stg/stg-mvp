@@ -450,7 +450,7 @@ function StaffTransactionsContent() {
             This page is only accessible to staff members.
           </p>
           <Link href="/">
-            <Button variant="primary">Go Home</Button>
+            <Button variant="accent">Go Home</Button>
           </Link>
         </div>
       </div>

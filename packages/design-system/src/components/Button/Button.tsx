@@ -6,26 +6,26 @@ import { clsx } from 'clsx';
  * Button variants using class-variance-authority for type-safe variant management.
  *
  * Design philosophy:
- * - Primary uses frost.ice (trust blue) for main CTAs
- * - Accent uses aurora.orange sparingly for urgency
+ * - Primary uses aurora.orange for revenue-driving CTAs (buy, sell, list)
+ * - Trust uses frost.ice for informational/navigational actions
  * - All sizes meet minimum 44px touch targets for accessibility
- * - Focus rings use frost.ice at 30% opacity (3px width)
+ * - Focus rings use aurora.orange at 30% opacity (3px width)
  * - Transitions are 200ms (Baltic expectation for snappy UI)
  */
 const buttonVariants = cva(
   // Base styles applied to all buttons
-  'inline-flex items-center justify-center font-medium transition-all focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-frost-ice/30 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center font-medium transition-all focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-aurora-orange/30 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        // Primary: trust actions (login, purchase, main CTAs)
-        primary: 'bg-frost-ice text-polar-night hover:bg-frost-polar active:bg-frost-arctic shadow-sm hover:shadow-md',
+        // Primary: revenue-driving CTAs (buy, sell, list, submit, pay)
+        primary: 'bg-aurora-orange text-snow-white hover:bg-[#C97862] active:bg-[#B86954] shadow-sm hover:shadow-md',
 
         // Secondary: alternative actions (cancel, back, filters)
         secondary: 'bg-snow-white dark:bg-polar-nightMedium text-polar-night dark:text-snow-stormLightest border-2 border-border dark:border-polar-nightDark hover:bg-snow-stormLight dark:hover:bg-polar-nightDark hover:border-border-strong shadow-sm hover:shadow-md',
 
-        // Accent: urgency (buy now, limited time)
-        accent: 'bg-aurora-orange text-snow-white hover:bg-[#C97862] active:bg-[#B86954] shadow-sm hover:shadow-md',
+        // Trust: informational and navigational actions (save, filter, info)
+        accent: 'bg-frost-ice text-polar-night hover:bg-frost-polar active:bg-frost-arctic shadow-sm hover:shadow-md',
 
         // Ghost: subtle actions (show more, expand)
         ghost: 'text-polar-night dark:text-snow-stormLightest hover:bg-snow-stormLight dark:hover:bg-polar-nightMedium active:bg-snow-storm dark:active:bg-polar-nightDark',
@@ -79,7 +79,8 @@ export interface ButtonProps
  * Button component - the foundation of interactive UI.
  *
  * Design principles:
- * - Uses frost.ice (Nordic trust blue) for primary actions
+ * - Uses aurora.orange for primary CTAs (buy, sell, list)
+ * - Uses frost.ice for trust/info actions via accent variant
  * - Meets 44px minimum touch target for accessibility
  * - Shows clear focus states for keyboard navigation
  * - Provides loading state with spinner

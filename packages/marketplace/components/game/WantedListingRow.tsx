@@ -99,7 +99,7 @@ export function WantedListingRow({
           <div className="flex-shrink-0">
             {!isAtMaxResponses ? (
               <Button
-                variant="accent"
+                variant="primary"
                 size="sm"
                 onClick={handleIHaveThis}
               >
@@ -171,7 +171,7 @@ export function WantedListingRow({
 
             {!isAtMaxResponses ? (
               <Button
-                variant="accent"
+                variant="primary"
                 size="sm"
                 onClick={handleIHaveThis}
               >

@@ -239,7 +239,7 @@ export default function StaffTransactionPage() {
             This page is only accessible to staff members.
           </p>
           <Link href="/">
-            <Button variant="primary">Go Home</Button>
+            <Button variant="accent">Go Home</Button>
           </Link>
         </div>
       </div>
@@ -266,7 +266,7 @@ export default function StaffTransactionPage() {
           <AlertCircle className="w-12 h-12 text-aurora-red mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-polar-night mb-2">{error || 'Transaction not found'}</h2>
           <Link href="/staff/transactions">
-            <Button variant="primary">Back to Dashboard</Button>
+            <Button variant="accent">Back to Dashboard</Button>
           </Link>
         </div>
       </div>

@@ -202,7 +202,7 @@ export default function OrdersPage() {
             </p>
             {activeTab === 'all' && (
               <Link href="/browse">
-                <Button variant="accent">{t('emptyState.button')}</Button>
+                <Button variant="primary">{t('emptyState.button')}</Button>
               </Link>
             )}
           </Card>

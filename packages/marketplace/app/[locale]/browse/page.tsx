@@ -855,7 +855,7 @@ export default function BrowsePage() {
               }
             </p>
             {activeFiltersCount > 0 && (
-              <Button variant="primary" onClick={clearFilters}>
+              <Button variant="accent" onClick={clearFilters}>
                 {t('emptyState.clearAllFilters')}
               </Button>
             )}

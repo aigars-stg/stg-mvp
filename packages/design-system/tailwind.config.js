@@ -94,7 +94,7 @@ export default {
 
       // Custom ring colors for focus states
       ringColor: {
-        DEFAULT: 'rgba(136, 192, 208, 0.3)',
+        DEFAULT: 'rgba(208, 135, 112, 0.3)', // aurora.orange at 30%
       },
 
       ringWidth: {

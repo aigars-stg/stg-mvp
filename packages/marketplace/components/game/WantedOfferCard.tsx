@@ -272,7 +272,7 @@ export function WantedOfferCard({
             <div className="flex-shrink-0">
               {!isAtMaxResponses ? (
                 <Button
-                  variant="accent"
+                  variant="primary"
                   size="sm"
                   onClick={handleIHaveThis}
                 >

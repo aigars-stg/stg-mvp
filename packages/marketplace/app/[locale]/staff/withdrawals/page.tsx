@@ -283,7 +283,7 @@ function WithdrawalsContent() {
                 {w.status === 'pending' && (
                   <div className="flex gap-2 mt-3 pt-3 border-t border-border">
                     <Button
-                      variant="accent"
+                      variant="primary"
                       size="sm"
                       onClick={() => {
                         setActionModal({ withdrawal: w, action: 'complete' });

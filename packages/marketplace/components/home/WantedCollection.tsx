@@ -120,7 +120,7 @@ export function WantedCollection({
               {t('empty.description')}
             </p>
             <Link href="/wanted/new">
-              <Button variant="accent">
+              <Button variant="primary">
                 <Plus className="w-4 h-4 mr-2" />
                 {t('empty.button')}
               </Button>
@@ -166,7 +166,7 @@ export function WantedCollection({
               </Link>
             )}
             <Link href="/wanted/new">
-              <Button variant="accent" size="sm">
+              <Button variant="primary" size="sm">
                 <Plus className="w-4 h-4 mr-1" />
                 {t('postWanted')}
               </Button>
@@ -224,7 +224,7 @@ export function WantedCollection({
         {!loading && (
           <div className="mt-6 flex flex-col sm:hidden gap-3">
             <Link href="/wanted/new" className="w-full">
-              <Button variant="accent" fullWidth>
+              <Button variant="primary" fullWidth>
                 <Plus className="w-4 h-4 mr-2" />
                 {t('postWantedListing')}
               </Button>

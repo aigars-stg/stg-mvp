@@ -34,12 +34,17 @@ export const colors = {
 
   // Semantic colors - mapped from palette
   semantic: {
-    // Trust and primary actions
-    primary: '#88C0D0',           // frost.ice
-    primaryHover: '#81A1C1',      // frost.polar
-    primaryActive: '#5E81AC',     // frost.arctic
+    // Primary actions (CTAs: buy, sell, list, submit)
+    primary: '#D08770',           // aurora.orange
+    primaryHover: '#C97862',
+    primaryActive: '#B86954',
 
-    // Urgency and deals
+    // Trust and informational actions (save, filter, navigate)
+    trust: '#88C0D0',             // frost.ice
+    trustHover: '#81A1C1',        // frost.polar
+    trustActive: '#5E81AC',       // frost.arctic
+
+    // Accent (kept for backwards compat, maps to primary)
     accent: '#D08770',            // aurora.orange
     accentHover: '#C97862',
     accentActive: '#B86954',
@@ -76,7 +81,7 @@ export const colors = {
     borderSubtle: '#D8DEE9',      // snow.storm
     borderDefault: '#C8CED9',     // Slightly darker
     borderStrong: '#B8BEC9',      // For emphasis
-    borderFocus: '#88C0D0',       // frost.ice
+    borderFocus: '#D08770',       // aurora.orange
   },
 
   // Condition badge colors (special marketplace need)

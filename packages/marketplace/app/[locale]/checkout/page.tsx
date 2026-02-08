@@ -483,7 +483,7 @@ function CheckoutPageContent() {
 
                 {/* Pay Button */}
                 <Button
-                  variant="accent"
+                  variant="primary"
                   fullWidth
                   onClick={handlePayment}
                   disabled={!isValid || submitting}
@@ -541,7 +541,7 @@ function CheckoutPageContent() {
           )}
         </div>
         <Button
-          variant="accent"
+          variant="primary"
           fullWidth
           onClick={handlePayment}
           disabled={!isValid || submitting}

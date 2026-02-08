@@ -61,7 +61,7 @@ export function MobileFilterDrawer({
               {t('filters.clearAll')}
             </Button>
             <Button
-              variant="accent"
+              variant="primary"
               onClick={onClose}
               className="flex-1"
             >

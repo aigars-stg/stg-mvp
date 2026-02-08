@@ -540,7 +540,7 @@ export default function SellerTaxInfoPage() {
 
                 <Button
                   type="submit"
-                  variant="accent"
+                  variant="primary"
                   fullWidth
                   disabled={submitting || !!taxIdError}
                 >

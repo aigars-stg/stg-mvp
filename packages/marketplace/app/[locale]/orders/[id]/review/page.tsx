@@ -177,7 +177,7 @@ export default function ReviewOrderPage() {
             <h1 className="text-xl font-bold text-polar-night mb-4">Error</h1>
             <p className="text-text-secondary mb-6">{error}</p>
             <Link href="/orders">
-              <Button variant="primary">Back to Orders</Button>
+              <Button variant="accent">Back to Orders</Button>
             </Link>
           </Card>
         </div>
@@ -202,7 +202,7 @@ export default function ReviewOrderPage() {
               You&apos;ve already submitted a review for this order. Thank you for your feedback!
             </p>
             <Link href="/orders">
-              <Button variant="primary">Back to Orders</Button>
+              <Button variant="accent">Back to Orders</Button>
             </Link>
           </Card>
         </div>
@@ -226,7 +226,7 @@ export default function ReviewOrderPage() {
               {eligibility.reason || 'This order is not eligible for review yet.'}
             </p>
             <Link href="/orders">
-              <Button variant="primary">Back to Orders</Button>
+              <Button variant="accent">Back to Orders</Button>
             </Link>
           </Card>
         </div>
@@ -250,7 +250,7 @@ export default function ReviewOrderPage() {
                 <Button variant="secondary">Back to Orders</Button>
               </Link>
               <Link href="/browse">
-                <Button variant="primary">Continue Shopping</Button>
+                <Button variant="accent">Continue Shopping</Button>
               </Link>
             </div>
           </Card>

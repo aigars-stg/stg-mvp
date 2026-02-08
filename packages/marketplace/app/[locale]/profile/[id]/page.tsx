@@ -214,7 +214,7 @@ export default function ProfilePage() {
               {error || t('profileNotFound')}
             </p>
             <Link href="/browse">
-              <Button variant="primary">{t('browseListings')}</Button>
+              <Button variant="accent">{t('browseListings')}</Button>
             </Link>
           </Card>
         </div>

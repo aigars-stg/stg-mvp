@@ -185,7 +185,7 @@ export function DisputeResponseForm({
           )}
 
           <Button
-            variant="accent"
+            variant="primary"
             fullWidth
             disabled={charCount < 50 || submitting}
             onClick={handleSubmit}

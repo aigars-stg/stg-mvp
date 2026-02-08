@@ -55,7 +55,7 @@ export function UserMenu() {
   if (!user) {
     return (
       <Link href="/auth">
-        <Button variant="accent" size="sm">
+        <Button variant="primary" size="sm">
           {t('userMenu.join')}
         </Button>
       </Link>

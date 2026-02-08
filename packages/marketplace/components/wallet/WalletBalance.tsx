@@ -80,7 +80,7 @@ export function WalletBalance({ compact = false, showLink = false }: WalletBalan
 
         {!loading && (balanceCents || 0) > 0 && (
           <Link href="/seller/settings/payouts">
-            <Button variant="accent" size="sm">
+            <Button variant="primary" size="sm">
               <ArrowUp className="w-4 h-4 mr-1.5" />
               Withdraw
             </Button>

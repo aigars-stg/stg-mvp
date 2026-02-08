@@ -379,7 +379,7 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
               {t('backToEdit')}
             </Button>
             <Button
-              variant="accent"
+              variant="primary"
               size="lg"
               fullWidth
               onClick={onPublish}
