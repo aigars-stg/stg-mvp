@@ -61,9 +61,22 @@ const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Second Turn Games',
+  legalName: 'Second Turn Games SIA',
   url: baseUrl,
-  logo: `${baseUrl}/images/logo.png`,
+  logo: `${baseUrl}/images/logo_nav.svg`,
   description: 'Every game deserves a second turn. The Baltic marketplace for pre-loved board games.',
+  foundingDate: '2025',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Riga',
+    addressCountry: 'LV',
+  },
+  contactPoint: {
+    '@type': 'ContactPoint',
+    email: 'info@secondturn.games',
+    contactType: 'customer service',
+    availableLanguage: ['English', 'Latvian'],
+  },
   areaServed: [
     { '@type': 'Country', name: 'Latvia' },
     { '@type': 'Country', name: 'Estonia' },

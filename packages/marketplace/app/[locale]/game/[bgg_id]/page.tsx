@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { getTranslations } from 'next-intl/server';
 import { GamePageClient } from './GamePageClient';
+import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema';
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games';
 
 interface PageProps {
   params: Promise<{ bgg_id: string; locale: string }>;
@@ -56,6 +59,9 @@ async function getGameData(bggId: string) {
     const lowestPrice = listings && listings.length > 0
       ? Math.min(...listings.map(l => l.price))
       : 0;
+    const highestPrice = listings && listings.length > 0
+      ? Math.max(...listings.map(l => l.price))
+      : 0;
 
     return {
       game_name: gameData.name,
@@ -64,6 +70,7 @@ async function getGameData(bggId: string) {
       thumbnail: gameData.thumbnail,
       offer_count: offerCount,
       lowest_price: lowestPrice,
+      highest_price: highestPrice,
     };
   } catch (error) {
     console.error('Error fetching game for metadata:', error);
@@ -112,5 +119,50 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function GamePage({ params }: PageProps) {
   const { bgg_id } = await params;
-  return <GamePageClient bggId={bgg_id} />;
+  const game = await getGameData(bgg_id);
+
+  const productJsonLd = game ? {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: game.game_name,
+    description: `Pre-loved copy of ${game.game_name}${game.game_year ? ` (${game.game_year})` : ''} available on Second Turn Games`,
+    image: game.image || undefined,
+    url: `${baseUrl}/game/${bgg_id}`,
+    brand: { '@type': 'Organization', name: 'Second Turn Games' },
+    category: 'Board Games',
+    offers: game.offer_count > 0 ? {
+      '@type': 'AggregateOffer',
+      lowPrice: game.lowest_price.toFixed(2),
+      highPrice: game.highest_price.toFixed(2),
+      priceCurrency: 'EUR',
+      offerCount: game.offer_count,
+      availability: 'https://schema.org/InStock',
+      url: `${baseUrl}/game/${bgg_id}`,
+    } : {
+      '@type': 'Offer',
+      availability: 'https://schema.org/OutOfStock',
+      priceCurrency: 'EUR',
+      price: '0',
+      url: `${baseUrl}/game/${bgg_id}`,
+    },
+  } : null;
+
+  return (
+    <>
+      {productJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        />
+      )}
+      {game && (
+        <BreadcrumbSchema items={[
+          { name: 'Home', url: baseUrl },
+          { name: 'Browse', url: `${baseUrl}/browse` },
+          { name: game.game_name, url: `${baseUrl}/game/${bgg_id}` },
+        ]} />
+      )}
+      <GamePageClient bggId={bgg_id} />
+    </>
+  );
 }

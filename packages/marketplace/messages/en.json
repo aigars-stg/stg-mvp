@@ -914,6 +914,10 @@
     "somethingWentWrong": "Something went wrong"
   },
   "Browse": {
+    "metadata": {
+      "title": "Browse Board Games",
+      "description": "Browse pre-loved board games from sellers across Latvia, Lithuania, and Estonia. Find deals on popular titles with verified BoardGameGeek listings."
+    },
     "tabs": {
       "forSale": "For Sale",
       "wanted": "Wanted",
@@ -1121,6 +1125,10 @@
     }
   },
   "Sell": {
+    "metadata": {
+      "title": "Sell Board Games",
+      "description": "List your pre-loved board games for sale on Second Turn Games. Reach buyers across Latvia, Lithuania, and Estonia. Free to list, 10% commission on sales."
+    },
     "page": {
       "title": "Sell a game",
       "editTitle": "Edit listing",

@@ -2,6 +2,9 @@ import { Metadata } from 'next';
 import { getLegalDocument } from '@/lib/legal';
 import { LegalHub } from '@/components/legal/LegalHub';
 import { LEGAL_SECTIONS } from '@/components/legal/legal-sections';
+import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema';
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games';
 
 export const metadata: Metadata = {
   title: 'Legal | Second Turn Games',
@@ -53,5 +56,13 @@ function loadAllLegalDocuments() {
 export default function LegalPage() {
   const documents = loadAllLegalDocuments();
 
-  return <LegalHub documents={documents} />;
+  return (
+    <>
+      <BreadcrumbSchema items={[
+        { name: 'Home', url: baseUrl },
+        { name: 'Legal', url: `${baseUrl}/legal` },
+      ]} />
+      <LegalHub documents={documents} />
+    </>
+  );
 }

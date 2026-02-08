@@ -914,6 +914,10 @@
     "somethingWentWrong": "Kaut kas nogāja greizi"
   },
   "Browse": {
+    "metadata": {
+      "title": "Pārlūkot galda spēles",
+      "description": "Pārlūkojiet lietotas galda spēles no pārdevējiem Latvijā, Lietuvā un Igaunijā. Atrodiet izdevīgus piedāvājumus ar BoardGameGeek verificētiem sludinājumiem."
+    },
     "tabs": {
       "forSale": "Pārdošanā",
       "wanted": "Meklē",
@@ -1121,6 +1125,10 @@
     }
   },
   "Sell": {
+    "metadata": {
+      "title": "Pārdot galda spēles",
+      "description": "Ievietojiet savas lietotas galda spēles pārdošanā Second Turn Games. Sasniedziet pircējus Latvijā, Lietuvā un Igaunijā. Bezmaksas sludinājumi, 10% komisija no pārdošanas."
+    },
     "page": {
       "title": "Pārdot spēli",
       "editTitle": "Labot sludinājumu",

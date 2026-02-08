@@ -1,25 +1,65 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next';
+import { createClient } from '@supabase/supabase-js';
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games';
+
+function localized(path: string) {
+  const url = `${baseUrl}${path}`;
+  return {
+    en: url,
+    lv: `${baseUrl}/lv${path}`,
+  };
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games'
+  // Static pages with priorities and change frequencies
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0, alternates: { languages: localized('') } },
+    { url: `${baseUrl}/browse`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9, alternates: { languages: localized('/browse') } },
+    { url: `${baseUrl}/sell`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8, alternates: { languages: localized('/sell') } },
+    { url: `${baseUrl}/play`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7, alternates: { languages: localized('/play') } },
+    { url: `${baseUrl}/help`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6, alternates: { languages: localized('/help') } },
+    { url: `${baseUrl}/legal`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3, alternates: { languages: localized('/legal') } },
+    { url: `${baseUrl}/pricing`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6, alternates: { languages: localized('/pricing') } },
+  ];
 
-    // 1. Core Static Pages
-    const routes = [
-        '',
-        '/browse',
-        '/sell',
-        '/privacy',
-        // '/how-it-works', // TODO: Add this page when it is implemented
-    ].map((route) => ({
-        url: `${baseUrl}${route}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily' as const,
-        priority: 1,
-    }))
+  // Dynamic game pages from active listings
+  let gameRoutes: MetadataRoute.Sitemap = [];
 
-    // 2. Dynamic Listings (Placeholder for future integration)
-    // const listings = await getActiveListings() 
-    // Map listings to sitemap format...
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      );
 
-    return [...routes]
+      const { data: listings } = await supabase
+        .from('listings')
+        .select('bgg_game_id, updated_at')
+        .eq('status', 'active')
+        .order('updated_at', { ascending: false });
+
+      if (listings && listings.length > 0) {
+        // Deduplicate by bgg_game_id, keep most recent updated_at
+        const gameMap = new Map<number, string>();
+        for (const listing of listings) {
+          if (!gameMap.has(listing.bgg_game_id)) {
+            gameMap.set(listing.bgg_game_id, listing.updated_at);
+          }
+        }
+
+        gameRoutes = Array.from(gameMap.entries()).map(([bggId, updatedAt]) => ({
+          url: `${baseUrl}/game/${bggId}`,
+          lastModified: new Date(updatedAt),
+          changeFrequency: 'weekly' as const,
+          priority: 0.8,
+          alternates: { languages: localized(`/game/${bggId}`) },
+        }));
+      }
+    } catch (error) {
+      console.error('[Sitemap] Failed to fetch game listings:', error);
+    }
+  }
+
+  return [...staticRoutes, ...gameRoutes];
 }
