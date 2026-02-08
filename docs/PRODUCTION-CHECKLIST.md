@@ -4,32 +4,38 @@
 
 ### 1. Environment Variables
 - [ ] All production environment variables set in Vercel
-- [ ] `STRIPE_SECRET_KEY` uses live key (starts with `sk_live_`)
-- [ ] `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` uses live key (starts with `pk_live_`)
+- [ ] `EVERYPAY_API_URL` points to production (`https://pay.every-pay.eu/api/v4`)
+- [ ] `EVERYPAY_API_USERNAME` is production username
+- [ ] `EVERYPAY_API_SECRET` is production secret
+- [ ] `EVERYPAY_ACCOUNT_NAME` is production account
 - [ ] `UNISEND_API_URL` points to production (`https://api-manosiuntos.post.lt`)
 - [ ] `UNISEND_USERNAME` and `UNISEND_PASSWORD` are production credentials
 - [ ] `NEXT_PUBLIC_APP_URL` is production domain
 - [ ] `CRON_SECRET` is strong random value (32+ characters)
 - [ ] `RESEND_FROM_EMAIL` is verified domain
+- [ ] `NEXT_PUBLIC_SENTRY_DSN` is set (from Sentry project settings)
+- [ ] `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` set for builds
 - [ ] Supabase production keys configured
+- [ ] Upstash Redis credentials configured
 
 ### 2. Database (Supabase)
 - [ ] All migrations applied to production database
 - [ ] RLS policies enabled and tested
 - [ ] Service role key stored securely
 - [ ] Database backups enabled
-- [ ] Connection pooling configured (if using Prisma/Drizzle)
 - [ ] Storage bucket `order-documents` created
 - [ ] Storage policies configured for public read access
+- [ ] Edge Function secrets set: `EVERYPAY_API_URL`, `EVERYPAY_API_USERNAME`, `EVERYPAY_API_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `APP_URL`
 
-### 3. Stripe Configuration
-- [ ] Live mode enabled in Stripe Dashboard
-- [ ] Webhook endpoint configured: `https://yourdomain.com/api/webhooks/stripe`
-- [ ] Webhook secret stored in environment variables
-- [ ] Test a live payment to verify
-- [ ] Stripe Connect Express onboarding flow tested
-- [ ] Platform fees configured correctly
-- [ ] Payout schedule configured (daily auto-transfer)
+### 3. Payment Configuration (EveryPay + Wallet)
+- [ ] EveryPay production credentials obtained from Swedbank
+- [ ] Callback URL configured: `https://yourdomain.com/api/webhooks/everypay/callback`
+- [ ] Test a live payment (card + bank link)
+- [ ] Test wallet-only purchase (no EveryPay needed)
+- [ ] Test hybrid purchase (partial wallet + EveryPay)
+- [ ] Verify 10% commission calculation on items
+- [ ] Test wallet credit after order completion (2-day dispute window)
+- [ ] Test seller withdrawal request and staff approval flow
 
 ### 4. Unisend Configuration
 - [ ] Production API credentials obtained
@@ -48,33 +54,37 @@
   - [ ] Shipping label (seller)
   - [ ] Package delivered (buyer)
   - [ ] Order cancelled (buyer)
+  - [ ] Dispute opened (seller)
+  - [ ] Dispute resolved (buyer/seller)
 - [ ] Email sending limits sufficient for volume
 
-### 6. Cron Jobs (Vercel)
-- [ ] All cron jobs configured in `vercel.json`
-- [ ] Cron secret configured
-- [ ] Test each cron endpoint manually:
-  - [ ] `/api/cron/expire-reservations` (every 1 min)
-  - [ ] `/api/cron/expire-seller-deadlines` (every 5 min)
-  - [ ] `/api/cron/sync-tracking` (every 30 min)
-  - [ ] `/api/cron/complete-delivered-orders` (daily 1 AM)
-  - [ ] `/api/cron/process-payouts` (daily 4 AM)
-  - [ ] `/api/cron/expire-wanted-listings` (daily 3 AM)
-  - [ ] `/api/auth/cleanup-deleted-accounts` (daily 2 AM)
+### 6. Cron Jobs (Supabase pg_cron)
+All cron jobs run via Supabase pg_cron (not Vercel — free plan has no cron support).
+Verify with: `SELECT jobid, schedule, command, active FROM cron.job ORDER BY jobid;`
+
+- [ ] `expire-reservations` — every 1 min — `SELECT cleanup_expired_cart_items()`
+- [ ] `complete-delivered-orders` — daily 1 AM — `SELECT complete_delivered_orders()`
+- [ ] `expire-seller-deadlines` — every 5 min — Edge Function (EveryPay refunds + wallet)
+- [ ] `sync-tracking` — every 30 min — Edge Function (Unisend tracking)
+- [ ] `cleanup-deleted-accounts` — daily 2 AM — Edge Function
+- [ ] `refresh-game-pricing-stats` — hourly at :05 — `SELECT refresh_game_pricing_stats()`
+- [ ] `cleanup-security-audit-logs` — weekly Sunday 3 AM — `SELECT cleanup_old_security_audit_logs()`
+- [ ] `expire-wanted-listings` — daily midnight — `SELECT expire_wanted_listings()`
+- [ ] Check recent run history: `SELECT * FROM cron.job_run_details ORDER BY start_time DESC LIMIT 20;`
 
 ### 7. Security
-- [ ] Security headers configured in `vercel.json`:
+- [ ] Security headers configured in `next.config.mjs`:
   - [ ] X-Content-Type-Options: nosniff
   - [ ] X-Frame-Options: DENY
-  - [ ] X-XSS-Protection: 1; mode=block
+  - [ ] Content-Security-Policy (Sentry, Supabase, Cloudflare — no Stripe)
 - [ ] HTTPS enforced (automatic with Vercel)
 - [ ] CORS policies reviewed
-- [ ] Rate limiting considered for API routes
+- [ ] Rate limiting active (Upstash Redis)
 - [ ] Service role keys not exposed in client code
 - [ ] All secrets stored in environment variables (never in code)
 
 ### 8. Code Quality
-- [ ] TypeScript compilation passes: `npx tsc --noEmit`
+- [ ] TypeScript compilation passes: `pnpm type-check`
 - [ ] No console.errors in production code
 - [ ] Unused imports removed
 - [ ] No TODO comments in critical paths
@@ -105,27 +115,29 @@
 - [ ] Complete a test purchase:
   - [ ] Add item to cart
   - [ ] Checkout with T2T shipping
-  - [ ] Payment processes successfully
+  - [ ] EveryPay payment processes successfully
   - [ ] Order appears in buyer dashboard
   - [ ] Order appears in seller dashboard
   - [ ] Seller can accept order
   - [ ] Shipping label generated
   - [ ] Label emailed to seller
   - [ ] Tracking info sent to buyer
-- [ ] Test seller Connect onboarding
-- [ ] Verify cron jobs running (check logs)
+- [ ] Test wallet balance and withdrawal request
+- [ ] Staff can approve withdrawal
+- [ ] Verify pg_cron jobs running: check `cron.job_run_details`
+- [ ] Error boundaries work (visit `/nonexistent-route`)
 
 ## Monitoring & Maintenance
 
 ### 1. Monitoring
 - [ ] Vercel Analytics enabled
-- [ ] Error tracking set up (Sentry recommended)
+- [ ] Sentry error tracking active (`@sentry/nextjs`)
 - [ ] Uptime monitoring configured
 - [ ] Database performance monitoring
-- [ ] Set up alerts for:
-  - [ ] Failed payments
-  - [ ] Failed payouts
-  - [ ] Cron job failures
+- [ ] Set up Sentry alerts for:
+  - [ ] Failed EveryPay payments
+  - [ ] Wallet transaction errors
+  - [ ] pg_cron job failures (check `cron.job_run_details`)
   - [ ] Email delivery failures
 
 ### 2. Backups
@@ -136,7 +148,7 @@
 ### 3. Support
 - [ ] Support email configured
 - [ ] Customer support process documented
-- [ ] Refund process documented
+- [ ] Refund process documented (EveryPay + wallet dual refund)
 - [ ] Dispute resolution process documented
 
 ## Launch Checklist
@@ -144,23 +156,23 @@
 ### Day Before Launch
 - [ ] Final production test of complete buyer flow
 - [ ] Final production test of complete seller flow
-- [ ] Verify all cron jobs working
+- [ ] Verify all pg_cron jobs working
 - [ ] Check email deliverability
-- [ ] Test Stripe Connect onboarding
-- [ ] Review error logs
+- [ ] Test wallet credit and withdrawal flow
+- [ ] Review Sentry error logs
 
 ### Launch Day
-- [ ] Monitor error logs closely
-- [ ] Watch for payment issues
+- [ ] Monitor Sentry for errors
+- [ ] Watch for EveryPay payment issues
 - [ ] Monitor email delivery
-- [ ] Check cron job execution
+- [ ] Check pg_cron job execution
 - [ ] Be available for support
 
 ### Week After Launch
-- [ ] Review analytics
+- [ ] Review Vercel and Sentry analytics
 - [ ] Check for any recurring errors
 - [ ] Monitor payment success rate
-- [ ] Review payout processing
+- [ ] Review withdrawal processing
 - [ ] Gather user feedback
 - [ ] Fix any critical issues immediately
 
@@ -170,12 +182,13 @@ If critical issues occur:
 
 1. **Immediate**: Revert to previous deployment in Vercel
 2. **Database**: Restore from backup if needed
-3. **Payments**: Manually refund if necessary via Stripe Dashboard
+3. **Payments**: Refund via EveryPay merchant portal or `refundPayment()` API + `refundToWallet()` for wallet portion
 4. **Communication**: Email affected users with status update
 
 ## Support Contacts
 
-- **Stripe Support**: https://support.stripe.com
+- **EveryPay Support**: https://every-pay.com/contact/
+- **Sentry Support**: https://sentry.io/support/
 - **Vercel Support**: https://vercel.com/support
 - **Supabase Support**: https://supabase.com/support
 - **Resend Support**: https://resend.com/support

@@ -79,7 +79,7 @@
   "WantedStatusChangeModal": {
     "fulfilled": {
       "title": "Mark as Fulfilled",
-      "message": "Great news! Mark this wanted listing as fulfilled?",
+      "message": "Great news. Mark this wanted listing as fulfilled?",
       "confirm": "Mark as Fulfilled"
     },
     "cancelled": {
@@ -149,7 +149,7 @@
       "expansionsWelcomeDesc": "I'm open to bundles with expansions included"
     },
     "SuccessModal": {
-      "title": "Looking for a game posted!",
+      "title": "Looking for a game posted",
       "subtitle": "Your wanted listing is now live. Sellers who have this game will be able to see your request and respond.",
       "viewListing": "View on Game Page",
       "postAnother": "Looking for another game",
@@ -238,7 +238,7 @@
       "additionalNotes": "Additional notes"
     },
     "ExistingSalesBanner": {
-      "title": "This game is already for sale!",
+      "title": "This game is already for sale",
       "subtitle": "{count, plural, one {# seller is offering this game} other {# sellers are offering this game}}",
       "priceRangeLabel": "Price range",
       "availableConditions": "Available conditions",
@@ -292,7 +292,7 @@
   "OfflinePage": {
     "status": {
       "online": {
-        "title": "You're back online!",
+        "title": "You're back online",
         "subtitle": "Redirecting you back...",
         "statusText": "Connected"
       },
@@ -325,6 +325,19 @@
       "tip2": "Your saved games and listings are cached",
       "tip3": "New actions will sync when you're back online"
     }
+  },
+  "ErrorPage": {
+    "title": "Something went wrong",
+    "description": "We hit an unexpected problem. Our team has been notified and is looking into it.",
+    "tryAgain": "Try again",
+    "goHome": "Go to homepage",
+    "referenceCode": "Reference: {code}"
+  },
+  "NotFoundPage": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or may have been moved.",
+    "browseGames": "Browse games",
+    "goHome": "Go to homepage"
   },
   "EmailVerificationBanner": {
     "title": "Email Verification Required",
@@ -415,7 +428,7 @@
     "cancel": "Cancel",
     "processing": "Processing...",
     "confirm": "Confirm Payout",
-    "successTitle": "Payout Requested!",
+    "successTitle": "Payout requested",
     "successMessage": "{amount} is on its way to your bank account.",
     "successArrival": "Expected arrival: {date}"
   },
@@ -476,11 +489,11 @@
       "title": "One moment..."
     },
     "newUser": {
-      "title": "Welcome to the table!",
+      "title": "Welcome to the table",
       "subtitle": "Create your account securely without remembering another password.",
       "changeEmail": "Change",
       "magicLinkTitle": "What is a magic link?",
-      "magicLinkDescription": "It's a secure link we send to your email. Click it to sign in instantly. No password to create, remember, or lose!",
+      "magicLinkDescription": "It's a secure link we send to your email. Click it to sign in instantly. No password to create, remember, or lose.",
       "sendMagicLink": "Send me magic link",
       "sending": "Sending...",
       "termsPrefix": "By continuing, you agree to our",
@@ -489,7 +502,7 @@
       "privacyPolicy": "Privacy Policy"
     },
     "existingUser": {
-      "welcomeBack": "Welcome back!",
+      "welcomeBack": "Welcome back",
       "readyForAnotherTurn": "Ready for another turn?",
       "usuallySignInWith": "It looks like you usually sign in with {provider}.",
       "changeEmail": "Change",
@@ -501,7 +514,7 @@
       "sending": "Sending..."
     },
     "magicLinkSent": {
-      "title": "Check your inbox!",
+      "title": "Check your inbox",
       "subtitle": "We sent a magic link to {email}",
       "stepOpenEmail": "Open email",
       "stepClickLink": "Click link",
@@ -517,7 +530,7 @@
       "captchaFailed": "Verification failed. Please try again."
     },
     "comingSoon": {
-      "title": "We're launching soon!",
+      "title": "Launching soon",
       "subtitle": "Sign up will be available when we officially launch. In the meantime, you can explore what's coming to the Baltic board game community.",
       "exploreButton": "Explore preview",
       "signInButton": "Sign in (if you have an account)"
@@ -696,7 +709,7 @@
         "step2Title": "Shipping Arranged",
         "step2Description": "Once accepted, the seller will arrange shipping or coordinate pickup details with you via messaging.",
         "step3Title": "Receive Your Games",
-        "step3Description": "Pick up your games at the terminal or meet with the seller. Enjoy your new board games!"
+        "step3Description": "Pick up your games at the terminal or meet with the seller. Enjoy your new board games."
       },
       "email": {
         "title": "Order confirmation sent",
@@ -952,7 +965,7 @@
       "noDataAvailable": "No data available",
       "noLanguagesAvailable": "No languages available",
       "loadingMore": "Loading more games...",
-      "reachedEnd": "You've reached the end! Showing all {totalCount} games.",
+      "reachedEnd": "You've reached the end. Showing all {totalCount} games.",
       "offlineError": "We couldn't load listings. Check your connection and try again.",
       "genericError": "Something went wrong",
       "tryAgain": "Try again"
@@ -961,8 +974,8 @@
       "noGamesFound": "No games found",
       "noWantedListings": "No wanted listings yet",
       "tryAdjustingFilters": "Try adjusting your filters or search query",
-      "beFirstToList": "Be the first to list a game!",
-      "beFirstToPost": "Be the first to post what you're looking for!",
+      "beFirstToList": "Be the first to list a game.",
+      "beFirstToPost": "Be the first to post what you're looking for.",
       "clearAllFilters": "Clear all filters"
     }
   },
@@ -1076,7 +1089,7 @@
     "minimum": "Minimum",
     "placeBid": "Place Bid",
     "ended": "Auction Ended",
-    "endingSoon": "Ending Soon!",
+    "endingSoon": "Ending soon",
     "wasExtended": "This auction was extended due to last-minute bidding",
     "youWon": "You Won!",
     "completePayment": "Complete your payment within 48 hours to claim this game",
@@ -1092,15 +1105,15 @@
       "loginRequired": "Please log in to place a bid"
     },
     "success": {
-      "bidPlaced": "Bid of EUR {amount} placed successfully!",
-      "bidPlacedExtended": "Bid placed! Auction extended by {minutes} minutes"
+      "bidPlaced": "Bid of EUR {amount} placed successfully.",
+      "bidPlacedExtended": "Bid placed. Auction extended by {minutes} minutes"
     },
     "notifications": {
       "extended": "Auction extended by {minutes} minutes due to last-minute bid"
     },
     "bidHistory": {
       "title": "Bid History",
-      "noBidsYet": "No bids yet - be the first!",
+      "noBidsYet": "No bids yet — be the first.",
       "winning": "Winning",
       "extendedAuction": "This bid extended the auction",
       "showMore": "Show {count} more bids",
@@ -1123,7 +1136,7 @@
       "loadButton": "Load Draft",
       "startFreshButton": "Start fresh",
       "dismiss": "Dismiss",
-      "savedMessage": "Draft saved! You can continue later from where you left off."
+      "savedMessage": "Draft saved. You can continue later from where you left off."
     },
     "existingListings": {
       "warningTitle_one": "You already have an active listing for this game",
@@ -1189,7 +1202,7 @@
       "mobileSubtitle": "This is how buyers will see your offer"
     },
     "successModal": {
-      "title": "Listing published successfully!",
+      "title": "Listing published",
       "subtitle": "Your game is now live and ready for buyers to discover.",
       "viewListing": "View your listing",
       "listAnother": "List another game",
@@ -1867,7 +1880,7 @@
     }
   },
   "EmailChange": {
-    "verificationSent": "Verification email sent!",
+    "verificationSent": "Verification email sent",
     "verificationDescription": "We've sent verification links to both {currentEmail} and {newEmail}. Click the link in the new email to complete the change.",
     "placeholder": "newemail@example.com",
     "hint": "We'll send a verification link to confirm.",
@@ -2105,7 +2118,7 @@
       }
     },
     "clipboard": {
-      "success": "Link copied to clipboard!"
+      "success": "Link copied to clipboard"
     }
   },
   "SellerDashboard": {
@@ -2683,7 +2696,7 @@
       "switchingSection": {
         "title": "Can I switch later?",
         "upgradeTitle": "Starting with Contact Seller, upgrading to Instant Buy:",
-        "upgradeDescription": "Yes! If you set up as a Contact Seller, you can enable Instant Buy anytime from your Seller Settings. Your future listings will have both options.",
+        "upgradeDescription": "Yes, if you set up as a Contact Seller, you can enable Instant Buy anytime from your Seller Settings. Your future listings will have both options.",
         "downgradeTitle": "Already have Instant Buy, want to use Contact Seller:",
         "downgradeDescription": "You can choose the listing type for each game when you create a listing. Even with Instant Buy enabled, you can list specific games as Contact Seller if you prefer.",
         "countryNoteTitle": "Note for Lithuanian and Estonian sellers:",

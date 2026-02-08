@@ -79,7 +79,7 @@
   "WantedStatusChangeModal": {
     "fulfilled": {
       "title": "Atzīmēt kā atrastu",
-      "message": "Lieliski! Atzīmēt šo meklējumu kā atrastu?",
+      "message": "Lieliski. Atzīmēt šo meklējumu kā atrastu?",
       "confirm": "Atzīmēt kā atrastu"
     },
     "cancelled": {
@@ -149,7 +149,7 @@
       "expansionsWelcomeDesc": "Esmu atvērts komplektiem ar iekļautiem papildinājumiem"
     },
     "SuccessModal": {
-      "title": "Spēles meklējums publicēts!",
+      "title": "Spēles meklējums publicēts",
       "subtitle": "Tavs meklējums tagad ir aktīvs. Pārdevēji, kuriem ir šī spēle, varēs redzēt tavu pieprasījumu un atbildēt.",
       "viewListing": "Skatīt spēles lapā",
       "postAnother": "Meklēt vēl vienu spēli",
@@ -238,7 +238,7 @@
       "additionalNotes": "Papildu piezīmes"
     },
     "ExistingSalesBanner": {
-      "title": "Šī spēle jau ir pārdošanā!",
+      "title": "Šī spēle jau ir pārdošanā",
       "subtitle": "{count, plural, one {# pārdevējs piedāvā šo spēli} other {# pārdevēji piedāvā šo spēli}}",
       "priceRangeLabel": "Cenu diapazons",
       "availableConditions": "Pieejamie stāvokļi",
@@ -292,7 +292,7 @@
   "OfflinePage": {
     "status": {
       "online": {
-        "title": "Tu atkal esi tiešsaistē!",
+        "title": "Tu atkal esi tiešsaistē",
         "subtitle": "Pārvirza tevi atpakaļ...",
         "statusText": "Savienots"
       },
@@ -325,6 +325,19 @@
       "tip2": "Tavas saglabātās spēles un sludinājumi ir kešoti",
       "tip3": "Jaunās darbības sinhronizēsies, kad būsi atpakaļ tiešsaistē"
     }
+  },
+  "ErrorPage": {
+    "title": "Kaut kas nogāja greizi",
+    "description": "Radās negaidīta problēma. Mūsu komanda ir informēta un strādā pie tās.",
+    "tryAgain": "Mēģināt vēlreiz",
+    "goHome": "Uz sākumlapu",
+    "referenceCode": "Atsauce: {code}"
+  },
+  "NotFoundPage": {
+    "title": "Lapa nav atrasta",
+    "description": "Lapa, kuru meklējat, neeksistē vai ir pārvietota.",
+    "browseGames": "Pārlūkot spēles",
+    "goHome": "Uz sākumlapu"
   },
   "EmailVerificationBanner": {
     "title": "Nepieciešams verificēt e-pastu",
@@ -415,7 +428,7 @@
     "cancel": "Atcelt",
     "processing": "Apstrādā...",
     "confirm": "Apstiprināt izmaksu",
-    "successTitle": "Izmaksa pieprasīta!",
+    "successTitle": "Izmaksa pieprasīta",
     "successMessage": "{amount} ir ceļā uz tavu bankas kontu.",
     "successArrival": "Paredzamā saņemšana: {date}"
   },
@@ -476,11 +489,11 @@
       "title": "Brītiņu..."
     },
     "newUser": {
-      "title": "Laipni lūdzam!",
+      "title": "Laipni lūdzam",
       "subtitle": "Izveido kontu droši, bez nepieciešamības atcerēties vēl vienu paroli.",
       "changeEmail": "Mainīt",
       "magicLinkTitle": "Kas ir maģiskā saite?",
-      "magicLinkDescription": "Tā ir droša saite, ko nosūtām uz tavu e-pastu. Noklikšķini uz tās, lai uzreiz pieteiktos. Nav jāizveido vai jāatceras parole!",
+      "magicLinkDescription": "Tā ir droša saite, ko nosūtām uz tavu e-pastu. Noklikšķini uz tās, lai uzreiz pieteiktos. Nav jāizveido vai jāatceras parole.",
       "sendMagicLink": "Nosūtīt maģisko saiti",
       "sending": "Nosūta...",
       "termsPrefix": "Turpinot, tu piekrīti mūsu",
@@ -489,7 +502,7 @@
       "privacyPolicy": "Privātuma politikai"
     },
     "existingUser": {
-      "welcomeBack": "Sveiks atkal!",
+      "welcomeBack": "Sveiks atkal",
       "readyForAnotherTurn": "Gatavs vēl vienai partijai?",
       "usuallySignInWith": "Parasti tu piesakies ar {provider}.",
       "changeEmail": "Mainīt",
@@ -501,7 +514,7 @@
       "sending": "Nosūta..."
     },
     "magicLinkSent": {
-      "title": "Pārbaudi savu e-pastu!",
+      "title": "Pārbaudi savu e-pastu",
       "subtitle": "Nosūtījām maģisko saiti uz {email}",
       "stepOpenEmail": "Atver e-pastu",
       "stepClickLink": "Noklikšķini uz saites",
@@ -517,7 +530,7 @@
       "captchaFailed": "Verifikācija neizdevās. Lūdzu, mēģini vēlreiz."
     },
     "comingSoon": {
-      "title": "Mēs drīz startēsim!",
+      "title": "Drīz startēsim",
       "subtitle": "Reģistrācija būs pieejama, kad mēs oficiāli startēsim. Tikmēr vari izpētīt, kas gaidāms Baltijas galda spēļu kopienā.",
       "exploreButton": "Izpētīt priekšskatījumu",
       "signInButton": "Pierakstīties (ja tev ir konts)"
@@ -696,7 +709,7 @@
         "step2Title": "Piegāde tiek organizēta",
         "step2Description": "Pēc pieņemšanas pārdevējs organizēs piegādi vai saskaņos saņemšanas detaļas ar tevi, izmantojot ziņojumapmaiņu.",
         "step3Title": "Saņem savas spēles",
-        "step3Description": "Paņem savas spēles no termināļa vai satiec pārdevēju. Baudi savas jaunās galda spēles!"
+        "step3Description": "Paņem savas spēles no termināļa vai satiec pārdevēju. Baudi savas jaunās galda spēles."
       },
       "email": {
         "title": "Pasūtījuma apstiprinājums nosūtīts",
@@ -952,7 +965,7 @@
       "noDataAvailable": "Nav pieejamu datu",
       "noLanguagesAvailable": "Nav pieejamu valodu",
       "loadingMore": "Ielādē vairāk spēļu...",
-      "reachedEnd": "Esi sasniedzis beigas! Rādam visas {totalCount} spēles.",
+      "reachedEnd": "Esi sasniedzis beigas. Rādam visas {totalCount} spēles.",
       "offlineError": "Neizdevās ielādēt sludinājumus. Pārbaudi savienojumu un mēģini vēlreiz.",
       "genericError": "Kaut kas nogāja greizi",
       "tryAgain": "Mēģini vēlreiz"
@@ -961,8 +974,8 @@
       "noGamesFound": "Spēles nav atrastas",
       "noWantedListings": "Vēl nav meklēto sludinājumu",
       "tryAdjustingFilters": "Mēģini pielāgot filtrus vai meklēšanas vaicājumu",
-      "beFirstToList": "Esi pirmais, kas pievieno spēli!",
-      "beFirstToPost": "Esi pirmais, kas publicē, ko meklē!",
+      "beFirstToList": "Esi pirmais, kas pievieno spēli.",
+      "beFirstToPost": "Esi pirmais, kas publicē, ko meklē.",
       "clearAllFilters": "Notīrīt visus filtrus"
     }
   },
@@ -1076,7 +1089,7 @@
     "minimum": "Minimums",
     "placeBid": "Izdarīt likmi",
     "ended": "Izsole beigusies",
-    "endingSoon": "Drīz beigsies!",
+    "endingSoon": "Drīz beigsies",
     "wasExtended": "Šī izsole tika pagarināta pēdējā brīža likmes dēļ",
     "youWon": "Tu uzvarēji!",
     "completePayment": "Pabeidz maksājumu 48 stundu laikā, lai saņemtu šo spēli",
@@ -1092,15 +1105,15 @@
       "loginRequired": "Lūdzu, ielogojies, lai izdarītu likmi"
     },
     "success": {
-      "bidPlaced": "EUR {amount} likme veiksmīgi izdarīta!",
-      "bidPlacedExtended": "Likme izdarīta! Izsole pagarināta par {minutes} minūtēm"
+      "bidPlaced": "EUR {amount} likme veiksmīgi izdarīta.",
+      "bidPlacedExtended": "Likme izdarīta. Izsole pagarināta par {minutes} minūtēm"
     },
     "notifications": {
       "extended": "Izsole pagarināta par {minutes} minūtēm pēdējā brīža likmes dēļ"
     },
     "bidHistory": {
       "title": "Likšu vēsture",
-      "noBidsYet": "Vēl nav likmju - esi pirmais!",
+      "noBidsYet": "Vēl nav likmju — esi pirmais.",
       "winning": "Uzvarošā",
       "extendedAuction": "Šī likme pagarināja izsoli",
       "showMore": "Rādīt vēl {count} likmes",
@@ -1123,7 +1136,7 @@
       "loadButton": "Ielādēt melnrakstu",
       "startFreshButton": "Sākt no jauna",
       "dismiss": "Aizvērt",
-      "savedMessage": "Melnraksts saglabāts! Vari turpināt vēlāk no vietas, kur pārtrauci."
+      "savedMessage": "Melnraksts saglabāts. Vari turpināt vēlāk no vietas, kur pārtrauci."
     },
     "existingListings": {
       "warningTitle_one": "Tev jau ir aktīvs sludinājums šai spēlei",
@@ -1189,7 +1202,7 @@
       "mobileSubtitle": "Tā pircēji redzēs tavu piedāvājumu"
     },
     "successModal": {
-      "title": "Sludinājums veiksmīgi publicēts!",
+      "title": "Sludinājums publicēts",
       "subtitle": "Tava spēle tagad ir pieejama un gatava pircējiem.",
       "viewListing": "Skatīt savu sludinājumu",
       "listAnother": "Pievienot citu spēli",
@@ -1867,7 +1880,7 @@
     }
   },
   "EmailChange": {
-    "verificationSent": "Verifikācijas e-pasts nosūtīts!",
+    "verificationSent": "Verifikācijas e-pasts nosūtīts",
     "verificationDescription": "Mēs nosūtījām verifikācijas saites uz {currentEmail} un {newEmail}. Noklikšķini uz saites jaunajā e-pastā, lai pabeigtu maiņu.",
     "placeholder": "jaunsepasts@piemers.lv",
     "hint": "Mēs nosūtīsim verifikācijas saiti apstiprināšanai.",
@@ -2105,7 +2118,7 @@
       }
     },
     "clipboard": {
-      "success": "Saite nokopēta starpliktuvē!"
+      "success": "Saite nokopēta starpliktuvē"
     }
   },
   "SellerDashboard": {
@@ -2688,7 +2701,7 @@
       "switchingSection": {
         "title": "Vai varu mainīt vēlāk?",
         "upgradeTitle": "Sākot ar Sazināties ar pārdevēju, pārejot uz Tūlītējo pirkšanu:",
-        "upgradeDescription": "Jā! Ja esat iestatījis Sazināties ar pārdevēju, Jūs varat iespējot Tūlītējo pirkšanu jebkurā laikā no Pārdevēja iestatījumiem. Jūsu nākotnes piedāvājumiem būs pieejamas abas opcijas.",
+        "upgradeDescription": "Jā, ja esat iestatījis Sazināties ar pārdevēju, Jūs varat iespējot Tūlītējo pirkšanu jebkurā laikā no Pārdevēja iestatījumiem. Jūsu nākotnes piedāvājumiem būs pieejamas abas opcijas.",
         "downgradeTitle": "Jau ir Tūlītējā pirkšana, vēlaties izmantot Sazināties ar pārdevēju:",
         "downgradeDescription": "Jūs varat izvēlēties piedāvājuma veidu katrai spēlei, kad veidojat piedāvājumu. Pat ar iespējotu Tūlītējo pirkšanu Jūs varat konkrētas spēles publicēt kā Sazināties ar pārdevēju, ja vēlaties.",
         "countryNoteTitle": "Piezīme Lietuvas un Igaunijas pārdevējiem:",

@@ -1,3 +1,4 @@
+import { withSentryConfig } from '@sentry/nextjs';
 import withPWA from '@ducanh2912/next-pwa';
 import bundleAnalyzer from '@next/bundle-analyzer';
 import createNextIntlPlugin from 'next-intl/plugin';
@@ -103,8 +104,8 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              // Scripts: self + Stripe + Cloudflare Turnstile + Vercel Analytics
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://js.stripe.com https://va.vercel-scripts.com",
+              // Scripts: self + Sentry + Cloudflare Turnstile + Vercel Analytics
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://browser.sentry-cdn.com https://va.vercel-scripts.com",
               // Workers: self + blob (for MapLibre GL web workers)
               "worker-src 'self' blob:",
               // Styles: self + inline (for CSS-in-JS)
@@ -113,10 +114,10 @@ const nextConfig = {
               "img-src 'self' data: https: blob:",
               // Fonts: self
               "font-src 'self'",
-              // Connections: self + Supabase + Stripe + MapBox + Carto (map tiles) + Vercel Analytics
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.mapbox.com https://*.cartocdn.com https://*.carto.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
-              // Frames: Cloudflare Turnstile + Stripe
-              "frame-src https://challenges.cloudflare.com https://js.stripe.com",
+              // Connections: self + Supabase + Sentry + MapBox + Carto (map tiles) + Vercel Analytics
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://api.mapbox.com https://*.cartocdn.com https://*.carto.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+              // Frames: Cloudflare Turnstile
+              "frame-src https://challenges.cloudflare.com",
               // Prevent object/embed
               "object-src 'none'",
               // Restrict base URI
@@ -149,4 +150,14 @@ const withPWAConfig = withPWA({
 });
 
 // Wrap with i18n as innermost wrapper (closest to config)
-export default withBundleAnalyzer(withPWAConfig(withNextIntl(nextConfig)));
+// Sentry as outermost wrapper for source map uploads and instrumentation
+export default withSentryConfig(
+  withBundleAnalyzer(withPWAConfig(withNextIntl(nextConfig))),
+  {
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    silent: !process.env.CI,
+    widenClientFileUpload: true,
+    hideSourceMaps: true,
+  }
+);

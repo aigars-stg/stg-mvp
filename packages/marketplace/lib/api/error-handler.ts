@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { logger } from '@/lib/logger';
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -29,6 +30,7 @@ export function handleApiError(
 
   // Always log full details server-side
   logger.error({ error: message, stack, action }, `${action} failed`);
+  Sentry.captureException(error, { tags: { action }, extra: { statusCode } });
 
   // In production, return generic error to client
   // In development, return full details for debugging
