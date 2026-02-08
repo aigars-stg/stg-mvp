@@ -2719,7 +2719,6 @@
         "setupTime": "Iestatīšana aizņem aptuveni 2 minūtes. Jums būs nepieciešams:",
         "setupRequirements": {
           "name": "Jūsu pilns vārds",
-          "dob": "Dzimšanas datums",
           "bank": "Bankas konta dati (IBAN)"
         },
         "setupTrust": "Jūsu IBAN ir nepieciešams tikai tad, kad pieprasāt pirmo izņemšanu. Maksājumi tiek apstrādāti droši caur mūsu maksājumu partneri."

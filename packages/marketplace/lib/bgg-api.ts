@@ -110,10 +110,6 @@ const parser = new XMLParser({
 });
 
 
-// Check if cache is valid
-function isCacheValid(timestamp: number): boolean {
-  return Date.now() - timestamp < CACHE_DURATION;
-}
 
 /**
  * Check if cached data exists (even if expired)

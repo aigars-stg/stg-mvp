@@ -165,7 +165,7 @@ function InstantBuySection() {
 
   const steps = ['step1', 'step2', 'step3', 'step4', 'step5'] as const;
   const issues = ['cantShip', 'mismatch', 'notPickedUp'] as const;
-  const requirements = ['name', 'dob', 'bank'] as const;
+  const requirements = ['name', 'bank'] as const;
 
   return (
     <section id="instant-buy" className="mb-12">
