@@ -13,6 +13,7 @@ import {
 import { createBGGHeaders } from './bgg-config';
 import { createServiceClient } from './supabase/client';
 import { decodeHTMLEntities } from './bgg-utils';
+import { cacheGet, cacheSet } from './cache';
 
 // ============================================================================
 // BGG XML Parser Result Types
@@ -94,12 +95,13 @@ export {
   decodeHTMLEntities,
 } from './bgg-utils';
 
-// Simple in-memory cache (replace with Redis/database later)
+// In-memory Maps kept as L1 stale fallback (used when BGG API errors occur)
 const searchCache = new Map<string, { data: BGGGame[]; timestamp: number }>();
 const gameDetailsCache = new Map<number, { data: BGGGame; timestamp: number }>();
 const versionCache = new Map<number, { data: BGGVersion[]; timestamp: number }>();
 const metadataCache = new Map<number, { data: BGGGameMetadata; timestamp: number }>();
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_TTL_SECONDS = 86400; // 24 hours (for Redis)
 
 // Parse XML helper
 const parser = new XMLParser({
@@ -152,11 +154,9 @@ function logStaleCacheFallback(
  * This is critical for accurate type classification (expansion vs base game)
  */
 export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata | null> {
-  // Check fresh cache
-  const cached = metadataCache.get(gameId);
-  if (cached && isCacheValid(cached.timestamp)) {
-    return cached.data;
-  }
+  // Check Redis/in-memory cache first
+  const cached = await cacheGet<BGGGameMetadata>(`bgg:meta:${gameId}`);
+  if (cached) return cached;
 
   try {
     console.log(`📡 [BGG API] Fetching metadata for game ${gameId}`);
@@ -269,7 +269,8 @@ export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata
       outboundLinks,
     };
 
-    // Cache result
+    // Cache result in Redis + in-memory (for stale fallback)
+    await cacheSet(`bgg:meta:${gameId}`, metadata, CACHE_TTL_SECONDS);
     metadataCache.set(gameId, { data: metadata, timestamp: Date.now() });
 
     return metadata;
@@ -349,12 +350,10 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
     return [];
   }
 
-  // Check cache
+  // Check Redis/in-memory cache first
   const cacheKey = query.toLowerCase().trim();
-  const cached = searchCache.get(cacheKey);
-  if (cached && isCacheValid(cached.timestamp)) {
-    return cached.data;
-  }
+  const cached = await cacheGet<BGGGame[]>(`bgg:search:${cacheKey}`);
+  if (cached) return cached;
 
   try {
     let searchResults: BGGXMLSearchItem[] = [];
@@ -441,7 +440,8 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
 
     console.log(`[BGG Search] Final results for "${query}": ${baseGames.length} base games (filtered ${enrichedResults.length - baseGames.length} expansions)`);
 
-    // Cache results
+    // Cache results in Redis + in-memory (for stale fallback)
+    await cacheSet(`bgg:search:${cacheKey}`, baseGames, CACHE_TTL_SECONDS);
     searchCache.set(cacheKey, { data: baseGames, timestamp: Date.now() });
 
     return baseGames;
@@ -493,11 +493,9 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
 }
 
 export async function getGameDetails(gameId: number): Promise<BGGGame | null> {
-  // Check cache
-  const cached = gameDetailsCache.get(gameId);
-  if (cached && isCacheValid(cached.timestamp)) {
-    return cached.data;
-  }
+  // Check Redis/in-memory cache first
+  const cached = await cacheGet<BGGGame>(`bgg:details:${gameId}`);
+  if (cached) return cached;
 
   try {
     const response = await fetch(
@@ -551,7 +549,8 @@ export async function getGameDetails(gameId: number): Promise<BGGGame | null> {
       description: item.description,
     };
 
-    // Cache result
+    // Cache result in Redis + in-memory
+    await cacheSet(`bgg:details:${gameId}`, game, CACHE_TTL_SECONDS);
     gameDetailsCache.set(gameId, { data: game, timestamp: Date.now() });
 
     return game;
@@ -562,11 +561,9 @@ export async function getGameDetails(gameId: number): Promise<BGGGame | null> {
 }
 
 export async function getGameVersions(gameId: number): Promise<BGGVersion[]> {
-  // Check cache
-  const cached = versionCache.get(gameId);
-  if (cached && isCacheValid(cached.timestamp)) {
-    return cached.data;
-  }
+  // Check Redis/in-memory cache first
+  const cached = await cacheGet<BGGVersion[]>(`bgg:versions:${gameId}`);
+  if (cached) return cached;
 
   try {
     const response = await fetch(
@@ -629,7 +626,8 @@ export async function getGameVersions(gameId: number): Promise<BGGVersion[]> {
         };
       });
 
-    // Cache results
+    // Cache results in Redis + in-memory
+    await cacheSet(`bgg:versions:${gameId}`, versions, CACHE_TTL_SECONDS);
     versionCache.set(gameId, { data: versions, timestamp: Date.now() });
 
     return versions;

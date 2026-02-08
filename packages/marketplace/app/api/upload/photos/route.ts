@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { processImageForUpload } from '@/lib/image-processing';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { checkRateLimit } from '@/lib/ratelimit';
 import type { TypedSupabase } from '@/lib/supabase/query-types';
 
 const BUCKET_NAME = 'listing-photos';
@@ -13,6 +14,15 @@ export async function POST(request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;
+
+    // Rate limit: 10 uploads per hour (buyer default)
+    const rateLimitResult = await checkRateLimit('upload-buyer', user.id);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: rateLimitResult.error, reset: rateLimitResult.reset },
+        { status: 429 }
+      );
+    }
 
     // Parse form data
     const formData = await request.formData();

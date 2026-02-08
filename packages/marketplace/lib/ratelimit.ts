@@ -1,18 +1,14 @@
 import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+import { getRedis } from './redis';
 
 // Re-export shared utility for backwards compatibility
 export { getClientIP } from '@/lib/utils/request-helpers';
 
-// Initialize Redis client only if env vars are available
-let redis: Redis | null = null;
+// Initialize rate limiters using shared Redis client
+const redis = getRedis();
 let rateLimiters: Record<string, Ratelimit> | null = null;
 
-if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-  redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN,
-  });
+if (redis) {
 
   // Create rate limiters for different actions
   rateLimiters = {

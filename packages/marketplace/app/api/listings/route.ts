@@ -4,6 +4,7 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { ensureGameMetadata } from '@/lib/bgg-api';
+import { checkRateLimit, getRateLimitAction } from '@/lib/ratelimit';
 import type { TransactionMethod, PricingFormat } from '@/lib/types/listing';
 import type { ListingWithDetailsRow } from '@/lib/supabase/query-types';
 
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     // Check if seller has completed onboarding
     const { data: profile, error: profileError } = await supabase
       .from('seller_profiles')
-      .select('seller_status, stripe_connect_payouts_enabled, seller_terms_accepted_at')
+      .select('seller_status, seller_terms_accepted_at')
       .eq('user_id', user.id)
       .single();
 
@@ -103,15 +104,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For instant_buy transaction method, also require Stripe to be connected
-    if (transactionMethod === 'instant_buy' && !profile?.stripe_connect_payouts_enabled) {
+    // Rate limit: 50/day for sellers, 2/day for buyers
+    const isSeller = profile?.seller_status === 'active';
+    const rateLimitResult = await checkRateLimit(getRateLimitAction('listingCreate', isSeller), user.id);
+    if (!rateLimitResult.success) {
       return NextResponse.json(
-        {
-          error: 'Payment setup required for instant buy listings',
-          requiresStripe: true,
-          upgradeUrl: '/seller/settings/payouts'
-        },
-        { status: 403 }
+        { error: rateLimitResult.error, reset: rateLimitResult.reset },
+        { status: 429 }
       );
     }
 

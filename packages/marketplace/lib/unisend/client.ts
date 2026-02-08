@@ -23,6 +23,7 @@ import {
   UnisendApiError,
   ValidationErrorItem,
 } from './types';
+import { cacheGet, cacheSet } from '@/lib/cache';
 
 // ============================================
 // Configuration
@@ -82,6 +83,12 @@ async function authenticate(): Promise<AuthResponse> {
     expiresAt: Date.now() + (data.expires_in - 60) * 1000,
   };
 
+  // Persist to Redis so other serverless instances can reuse
+  const ttlSeconds = Math.max(0, data.expires_in - 60);
+  if (ttlSeconds > 0) {
+    await cacheSet('unisend:token', tokenCache, ttlSeconds).catch(() => {});
+  }
+
   return data;
 }
 
@@ -115,15 +122,28 @@ async function refreshAccessToken(): Promise<void> {
     refreshToken: data.refresh_token,
     expiresAt: Date.now() + (data.expires_in - 60) * 1000,
   };
+
+  // Persist to Redis so other serverless instances can reuse
+  const ttlSeconds = Math.max(0, data.expires_in - 60);
+  if (ttlSeconds > 0) {
+    await cacheSet('unisend:token', tokenCache, ttlSeconds).catch(() => {});
+  }
 }
 
 async function getAccessToken(): Promise<string> {
-  // Check if we have a valid token
+  // L1: Check in-memory (fastest, same-invocation reuse)
   if (tokenCache && tokenCache.expiresAt > Date.now()) {
     return tokenCache.accessToken;
   }
 
-  // Try to refresh or authenticate
+  // L2: Check Redis (survives cold starts)
+  const redisToken = await cacheGet<typeof tokenCache>('unisend:token');
+  if (redisToken && redisToken.expiresAt > Date.now()) {
+    tokenCache = redisToken;
+    return redisToken.accessToken;
+  }
+
+  // L3: Authenticate with Unisend API
   if (tokenCache?.refreshToken) {
     await refreshAccessToken();
   } else {

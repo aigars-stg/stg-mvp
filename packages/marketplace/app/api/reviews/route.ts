@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { checkRateLimit } from '@/lib/ratelimit';
 
 /**
  * GET /api/reviews
@@ -74,6 +75,15 @@ export async function POST(request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;
+
+    // Rate limit: 5 reviews per hour
+    const rateLimitResult = await checkRateLimit('reviewCreate', user.id);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: rateLimitResult.error, reset: rateLimitResult.reset },
+        { status: 429 }
+      );
+    }
 
     const body = await request.json();
     const { order_id, rating, review_text } = body;

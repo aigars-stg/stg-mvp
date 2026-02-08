@@ -111,7 +111,8 @@ export async function middleware(request: NextRequest) {
 
   // Step 2: Set locale cookie for next-intl based on user preference
   // This allows next-intl to handle the redirect correctly without creating loops
-  if (user && !shouldSkipI18n) {
+  // Skip DB query if cookie already exists (1-year maxAge, only need to set once)
+  if (user && !shouldSkipI18n && !request.cookies.get('NEXT_LOCALE')) {
     try {
       // Fetch user's preferred locale from database
       const { data: profile } = await supabase
