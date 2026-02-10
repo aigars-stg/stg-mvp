@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { ShoppingBag, Tag, Notification as Bell } from 'griddy-icons';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -46,7 +46,7 @@ function ActionCard({ href, icon, title, description, buttonText, color }: Actio
   return (
     <Link href={href} className="block h-full">
       <div
-        className={`relative h-full p-6 sm:p-8 rounded-2xl border-2 transition-all duration-200 bg-snow-white border-border ${styles.border} hover:shadow-lg cursor-pointer group`}
+        className={`relative h-full p-6 sm:p-8 rounded-2xl border transition-all duration-200 bg-snow-white border-border ${styles.border} hover:shadow-lg cursor-pointer group`}
       >
         {/* Icon */}
         <div
@@ -105,8 +105,8 @@ export function HeroSection() {
       )}
 
       {/* Content */}
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-16 lg:py-20">
-        <div className="text-center mb-10 sm:mb-14">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-10 lg:py-12">
+        <div className="text-center mb-6 sm:mb-8">
           {/* Main headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-polar-night mb-4 tracking-tight">
             <span className="text-frost-ice">{t('discover')}</span>{' '}

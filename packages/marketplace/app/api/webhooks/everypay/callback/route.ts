@@ -3,6 +3,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getPaymentStatus } from '@/lib/everypay/client';
 import { SUCCESSFUL_STATES, FAILED_STATES } from '@/lib/everypay/types';
 import { postOrderCreatedMessage } from '@/lib/transactions';
+import * as Sentry from '@sentry/nextjs';
+import { logger } from '@/lib/logger';
 
 // Use generic SupabaseClient type (untyped) for dynamic webhook operations
 type AdminClient = SupabaseClient;
@@ -139,7 +141,8 @@ export async function GET(request: NextRequest) {
       `${appUrl}/checkout/success?payment_reference=${paymentReference}&pending=true`
     );
   } catch (error) {
-    console.error('[EveryPay callback] Unexpected error:', error);
+    logger.error({ error }, 'EveryPay callback failed');
+    Sentry.captureException(error, { tags: { action: 'EveryPay callback' } });
     return NextResponse.redirect(
       `${appUrl}/checkout/success?error=verification_failed`
     );

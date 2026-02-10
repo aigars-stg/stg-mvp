@@ -11,6 +11,7 @@ import {
   Hr,
 } from '@react-email/components';
 import * as React from 'react';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface OrderPlacedSellerEmailProps {
   sellerName: string;
@@ -62,7 +63,7 @@ export const OrderPlacedSellerEmail = ({
               </tr>
               <tr>
                 <td style={label}>Total:</td>
-                <td style={value}>€{totalAmount.toFixed(2)}</td>
+                <td style={value}>{formatPrice(totalAmount)}</td>
               </tr>
               <tr>
                 <td style={label}>Buyer:</td>

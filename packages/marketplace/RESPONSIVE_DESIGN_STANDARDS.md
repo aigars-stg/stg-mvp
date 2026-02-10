@@ -46,7 +46,7 @@ min-h-[300px] sm:min-h-[400px] lg:min-h-[500px]
 
 **Card Thumbnails**
 ```tsx
-h-48 sm:h-56 lg:h-64
+h-40 sm:h-44 lg:h-48
 ```
 
 ### Spacing Scale
@@ -57,8 +57,8 @@ h-48 sm:h-56 lg:h-64
 - Large: `gap-4 sm:gap-6 md:gap-8`
 
 **Padding**
-- Container: `px-4 sm:px-6 py-6 sm:py-8 md:py-12`
-- Section: `py-6 sm:py-8 md:py-12`
+- Container: `px-4 sm:px-6 py-6`
+- Section: `py-6 sm:py-8`
 
 ### Mobile-Specific Patterns
 
@@ -104,7 +104,7 @@ sm:opacity-0 sm:group-hover:opacity-100
 - ✅ **Browse Page** - Safe-area support for mobile filter drawer
 
 ### Components Updated
-- ✅ **ListingCard** - Responsive image heights (192px→224px→256px), larger touch targets on mobile
+- ✅ **ListingCard** - Responsive image heights (160px→176px→192px), larger touch targets on mobile
 
 ### Key Improvements
 1. **Tablet Support** - Added missing `md:` breakpoints across all detail pages (768px)

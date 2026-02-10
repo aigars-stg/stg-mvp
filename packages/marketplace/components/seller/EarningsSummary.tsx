@@ -55,7 +55,7 @@ export function EarningsSummary() {
   // Loading state
   if (loading) {
     return (
-      <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+      <div className="bg-snow-white border border-border rounded-xl p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-aurora-purple/10 flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-aurora-purple" />
@@ -72,7 +72,7 @@ export function EarningsSummary() {
   // Error state
   if (error) {
     return (
-      <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+      <div className="bg-snow-white border border-border rounded-xl p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-aurora-red/10 flex items-center justify-center">
             <AlertCircle className="w-5 h-5 text-aurora-red" />
@@ -87,7 +87,7 @@ export function EarningsSummary() {
   // No data or no sales state
   if (!data || data.totalSalesCount === 0) {
     return (
-      <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+      <div className="bg-snow-white border border-border rounded-xl p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-aurora-purple/10 flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-aurora-purple" />
@@ -105,7 +105,7 @@ export function EarningsSummary() {
   }
 
   return (
-    <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+    <div className="bg-snow-white border border-border rounded-xl p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-full bg-aurora-purple/10 flex items-center justify-center">
           <TrendingUp className="w-5 h-5 text-aurora-purple" />

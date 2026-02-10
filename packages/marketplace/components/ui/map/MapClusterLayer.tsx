@@ -14,11 +14,11 @@ export type MapClusterLayerProps<
   clusterMaxZoom?: number;
   /** Radius of each cluster when clustering points in pixels (default: 50) */
   clusterRadius?: number;
-  /** Colors for cluster circles: [small, medium, large] based on point count (default: ["#51bbd6", "#f1f075", "#f28cb1"]) */
+  /** Colors for cluster circles: [small, medium, large] based on point count (default: ["#5E81AC", "#EBCB8B", "#D08770"]) */
   clusterColors?: [string, string, string];
   /** Point count thresholds for color/size steps: [medium, large] (default: [100, 750]) */
   clusterThresholds?: [number, number];
-  /** Color for unclustered individual points (default: "#3b82f6") */
+  /** Color for unclustered individual points (default: "#5E81AC") */
   pointColor?: string;
   /** Callback when an unclustered point is clicked */
   onPointClick?: (
@@ -39,9 +39,9 @@ export function MapClusterLayer<
   data,
   clusterMaxZoom = 14,
   clusterRadius = 50,
-  clusterColors = ["#51bbd6", "#f1f075", "#f28cb1"],
+  clusterColors = ["#5E81AC", "#EBCB8B", "#D08770"],
   clusterThresholds = [100, 750],
-  pointColor = "#3b82f6",
+  pointColor = "#5E81AC",
   onPointClick,
   onClusterClick,
 }: MapClusterLayerProps<P>) {

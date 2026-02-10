@@ -50,7 +50,7 @@ Instant Buy listings let you purchase immediately with full platform protection.
 
 **How it works:**
 1. You find a game and click "Buy Now"
-2. You pay securely via card (processed by Stripe)
+2. You pay securely via card or bank link
 3. The seller confirms and ships within 2 business days
 4. You collect from your chosen parcel terminal (Unisend, Latvijas Pasts, or uDrop)
 5. Check the game matches the description
@@ -135,7 +135,7 @@ A seller with no reviews is not necessarily bad — everyone starts somewhere. B
 
 When you purchase an Instant Buy listing:
 
-1. **You pay** — Stripe processes your payment securely
+1. **You pay** — Your payment is processed securely via card or bank link
 2. **Seller ships** — They have 24 hours to confirm, then 2 business days to ship
 3. **You receive** — Collect from your parcel terminal
 4. **You check** — Make sure it matches the description
@@ -217,22 +217,22 @@ If you miss the 2-day window:
 
 For Instant Buy purchases:
 
-| Item | Amount |
+| Cost | Amount |
 |------|--------|
 | Game price | Set by seller |
-| Service fee | **6% + €0.50** |
 | Shipping | **€2.00** |
+
+No service fees or hidden costs. You pay the listed price plus €2.00 flat shipping.
 
 **Example:** A game listed at €20.00
 
 | | |
 |---|---|
 | Game price | €20.00 |
-| Service fee (6% + €0.50) | €1.70 |
 | Shipping | €2.00 |
-| **You pay** | **€23.70** |
+| **You pay** | **€22.00** |
 
-The seller receives their full €20.00 — you pay the platform fees.
+You can also use your **wallet balance** to pay — if your wallet covers the full amount, no card payment is needed.
 
 ### 7.2 Contact Seller Fees
 
@@ -263,7 +263,16 @@ You choose your preferred terminal at checkout. The seller ships to that termina
 | Transit time | 1-3 business days (varies by route) |
 | Pickup window | Usually 3-7 days after arrival |
 
-### 8.3 Tracking Your Order
+### 8.3 Maximum Delivery Time
+
+- **Within the same country** (e.g. LV→LV): parcels arrive at the terminal the next working day after shipment
+- **Between Baltic countries** (e.g. LV→LT): parcels arrive within 2-3 working days after shipment
+
+Including the seller confirmation period (up to 24 hours), the maximum total time from purchase to terminal arrival is **2 working days** for domestic and **4 working days** for cross-border orders.
+
+If your order has not arrived within the maximum delivery time, contact us at info@secondturn.games.
+
+### 8.4 Tracking Your Order
 
 Once the seller ships, you will receive tracking information. Check your order page for updates.
 
@@ -287,15 +296,37 @@ If you are unsure about condition, use the messaging feature to ask the seller b
 
 ---
 
-## 10. Cancellations
+## 10. Returns, Exchanges & Refunds
 
-### 10.1 Before Shipping
+### 10.1 Order Cancellation
 
-If the seller has not yet shipped, you may be able to cancel. Contact us and we will assist.
+- **Before seller ships:** You may request cancellation. Contact us at info@secondturn.games and we will assist.
+- **After shipping:** Cancellation is not possible. You may open a dispute after receiving the item if there is a genuine problem.
 
-### 10.2 After Shipping
+### 10.2 Product Returns
 
-Once shipped, cancellation is not possible. You may open a dispute after receiving the item if there is a problem.
+Since all sellers on Second Turn Games are private individuals (not businesses), the EU 14-day right of withdrawal does not apply to purchases on this platform. Returns are available only if:
+
+- The item is significantly not as described
+- The item was damaged in transit
+- The item was not received (tracking shows issues)
+
+To initiate a return, report a problem through your Orders page within **2 days of delivery**.
+
+### 10.3 Product Exchange
+
+Product exchanges are not available on Second Turn Games. Each listing is a unique, pre-loved item. If you receive an item that does not match the listing, report a problem within 2 days of delivery for a refund.
+
+### 10.4 Refunds
+
+- Refunds are available until an order is marked as completed (2 days after delivery confirmation)
+- Card payments are refunded to the original payment method
+- Wallet payments are refunded to your platform wallet
+- After order completion, sales are final and no refunds are available through the platform
+
+:::plain-terms
+There are no returns just because you changed your mind. But if the game is not what was described, report it within 2 days of delivery and we will help resolve the issue.
+:::
 
 ---
 
@@ -326,7 +357,25 @@ We investigate all reports and take action against sellers who violate our terms
 
 ---
 
-## 13. Contact Us
+## 13. External Dispute Resolution
+
+If you are unable to resolve a problem through our platform or by contacting us directly, you can refer the matter to Latvia's consumer protection authority:
+
+**Consumer Rights Protection Centre (PTAC)**
+- Website: [www.ptac.gov.lv](https://www.ptac.gov.lv/en/consumer-dispute-resolution-commission-0)
+- Address: Brīvības iela 55, Rīga, LV-1010, Latvia
+- Phone: +371 65452554
+- Email: pasts@ptac.gov.lv
+
+Consumers in Lithuania or Estonia can find their national dispute resolution body at [consumer-redress.ec.europa.eu](https://consumer-redress.ec.europa.eu/dispute-resolution-bodies).
+
+:::plain-terms
+If we cannot solve your problem and you feel your rights were not respected, you can contact Latvia's consumer protection office (PTAC). They offer free out-of-court dispute resolution. Buyers in Lithuania or Estonia can contact their own national consumer authority instead.
+:::
+
+---
+
+## 14. Contact Us
 
 | | |
 |---|---|

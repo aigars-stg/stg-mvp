@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import Link from 'next/link';
-import { Card, Badge } from '@second-turn/design-system';
-import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle, Tag as Gavel } from 'griddy-icons';
+import { Link } from '@/i18n/navigation';
+import { Card } from '@second-turn/design-system';
+import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle, Fire, ShoppingBag, ChatBubble } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
 import { saveBrowseContext } from '@/lib/browse-context';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface AggregatedGameCardProps {
   game: AggregatedGame;
@@ -16,7 +17,6 @@ interface AggregatedGameCardProps {
 
 export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCardProps) {
   const tListings = useTranslations('Listings.card');
-  const tPrice = useTranslations('OfferCard.price');
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleClick = useCallback(() => {
@@ -25,6 +25,11 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
     }
   }, [allGameIds, index]);
 
+  const hasNonAuction = game.instant_buy_lowest_price !== null;
+  const isAuctionOnly = !hasNonAuction && game.auction_count > 0;
+  const showPlus = game.offer_count > 1;
+  const showExpansionIcon = game.is_expansion || game.has_bundled_expansions || game.has_expansion_listings;
+
   return (
     <Link href={`/game/${game.bgg_game_id}`} className="h-full" onClick={handleClick}>
       <Card
@@ -32,11 +37,10 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
         padding="none"
         className="overflow-hidden h-full flex flex-col"
       >
-        {/* Image Section */}
-        <div className="relative h-48 sm:h-56 lg:h-64 bg-polar-night/5 flex items-center justify-center overflow-hidden">
+        {/* Image Section — clean, no overlays */}
+        <div className="relative h-40 sm:h-44 lg:h-48 bg-polar-night/5 flex items-center justify-center overflow-hidden">
           {game.image || game.thumbnail ? (
             <>
-              {/* Loading placeholder */}
               {!imageLoaded && (
                 <div className="absolute inset-0 animate-pulse bg-polar-night/10" />
               )}
@@ -54,15 +58,6 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
           ) : (
             <Package className="w-16 h-16 text-text-muted" />
           )}
-
-          {/* Expansion Badge */}
-          {game.is_expansion && (
-            <div className="absolute top-3 left-3">
-              <Badge variant="default" size="sm" icon={<Puzzle className="w-3 h-3" />}>
-                {tListings('expansion')}
-              </Badge>
-            </div>
-          )}
         </div>
 
         {/* Content Section */}
@@ -72,45 +67,69 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
             {game.game_name}
           </h3>
 
-          {/* Game Metadata */}
-          {(game.player_count || game.min_age || game.playing_time) && (
-            <div className="flex flex-wrap gap-3 text-xs text-text-secondary items-center mb-3">
-              {game.player_count && (
-                <span className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  {game.player_count}
-                </span>
-              )}
-              {game.min_age && (
-                <span className="flex items-center gap-1">
-                  <Baby className="w-4 h-4" />
-                  {game.min_age}+
-                </span>
-              )}
-              {game.playing_time && (
-                <span className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  {game.playing_time}
-                </span>
-              )}
-            </div>
-          )}
+          {/* Game Metadata + Listing type icons */}
+          <div className="flex flex-wrap gap-3 text-xs text-text-secondary items-center mb-3">
+            {game.player_count && (
+              <span className="flex items-center gap-1">
+                <Users className="w-4 h-4" />
+                {game.player_count}
+              </span>
+            )}
+            {game.min_age && (
+              <span className="flex items-center gap-1">
+                <Baby className="w-4 h-4" />
+                {game.min_age}+
+              </span>
+            )}
+            {game.playing_time && (
+              <span className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                {game.playing_time}
+              </span>
+            )}
 
-          {/* Price + Auction Badge */}
-          <div className="mt-auto">
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-sm text-text-secondary">{tPrice('from')}</span>
-                <span className={`text-2xl font-bold ${game.has_auction ? 'text-aurora-purple' : 'text-polar-night'}`}>
-                  €{game.lowest_price.toFixed(2)}
+            {/* Vertical divider + listing type icons */}
+            <span className="w-px h-3.5 bg-border-subtle" />
+            {game.instant_buy_count > 0 && (
+              <span title={tListings('instantBuyTooltip', { count: game.instant_buy_count })}>
+                <ShoppingBag className="w-3.5 h-3.5 text-text-muted" />
+              </span>
+            )}
+            {game.contact_seller_count > 0 && (
+              <span title={tListings('contactSellerTooltip', { count: game.contact_seller_count })}>
+                <ChatBubble className="w-3.5 h-3.5 text-text-muted" />
+              </span>
+            )}
+            {game.auction_count > 0 && (
+              <span title={tListings('auctionTooltip', { count: game.auction_count })}>
+                <Fire className="w-3.5 h-3.5 text-aurora-purple" />
+              </span>
+            )}
+            {showExpansionIcon && (
+              <span title={tListings(game.has_expansion_listings ? 'expansionOffersTooltip' : 'expansionTooltip')}>
+                <Puzzle className="w-3.5 h-3.5 text-text-muted" />
+              </span>
+            )}
+          </div>
+
+          {/* Price + Offer count — single line, pushed to bottom */}
+          <div className="mt-auto flex items-baseline gap-2">
+            {isAuctionOnly ? (
+              <>
+                <Fire className="w-4 h-4 text-aurora-purple self-center" />
+                <span className="text-2xl font-bold text-aurora-purple">
+                  {formatPrice(game.auction_lowest_price!)}{showPlus && '+'}
                 </span>
-              </div>
-              {game.has_auction && (
-                <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />} className="border-aurora-purple/50 text-aurora-purple">
-                  {tListings('auction')}
-                </Badge>
-              )}
-            </div>
+              </>
+            ) : (
+              <span className="text-2xl font-bold text-polar-night">
+                {formatPrice(game.instant_buy_lowest_price!)}{showPlus && '+'}
+              </span>
+            )}
+            <span className="text-text-muted">·</span>
+            <span className="text-sm text-text-secondary">
+              {tListings('offers', { count: game.offer_count })}
+            </span>
           </div>
         </div>
       </Card>

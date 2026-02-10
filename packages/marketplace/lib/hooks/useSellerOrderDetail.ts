@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import type { TrackingEvent } from '@/components/shipping';
 
@@ -42,6 +42,8 @@ export interface SellerOrder {
   items_total: number;
   shipping_cost: number;
   total_amount: number;
+  platform_commission_cents?: number | null;
+  seller_wallet_credit_cents?: number | null;
   created_at: string;
   paid_at: string;
   seller_response_deadline?: string;

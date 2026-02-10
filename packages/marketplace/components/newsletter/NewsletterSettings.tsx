@@ -89,7 +89,7 @@ export function NewsletterSettings() {
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-polar-night dark:text-snow-stormLightest">
+              <h3 className="font-semibold text-polar-night">
                 {t('settingsTitle')}
               </h3>
               <p className="text-sm text-text-secondary mt-1">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
 import { ChevronLeft, ChevronRight, ArrowRight, Plus, Search } from 'griddy-icons';
@@ -96,7 +96,7 @@ export function WantedCollection({
   // Show empty state with CTA if no listings
   if (!loading && listings.length === 0) {
     return (
-      <section className="py-8 sm:py-12">
+      <section className="py-6 sm:py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Header */}
           <div className="flex items-end justify-between mb-6">
@@ -132,7 +132,7 @@ export function WantedCollection({
   }
 
   return (
-    <section className="py-8 sm:py-12">
+    <section className="py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="flex items-end justify-between mb-6">
@@ -272,7 +272,7 @@ function WantedCardSkeleton() {
  */
 export function WantedCollectionSkeleton() {
   return (
-    <section className="py-8 sm:py-12">
+    <section className="py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mb-6">
           <div className="w-48 h-8 bg-bg-elevated rounded animate-pulse" />

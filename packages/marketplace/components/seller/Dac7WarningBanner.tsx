@@ -2,7 +2,7 @@
 
 import { Button } from '@second-turn/design-system';
 import { AlertTriangle, FileText, ArrowRight } from 'griddy-icons';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import type { Dac7ComplianceStatus } from '@/lib/types/seller';
 

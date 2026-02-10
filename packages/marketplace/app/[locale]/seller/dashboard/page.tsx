@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
 import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, Chat as MessageSquare } from 'griddy-icons';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { BankAccountCard } from '@/components/seller/BankAccountCard';
 import { BankAccountForm } from '@/components/seller/BankAccountForm';
@@ -93,7 +92,7 @@ export default function SellerDashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-bg-primary">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-bg-elevated rounded w-48" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -109,7 +108,7 @@ export default function SellerDashboardPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">

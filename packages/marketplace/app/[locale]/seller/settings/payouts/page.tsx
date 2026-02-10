@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
@@ -10,7 +10,6 @@ import {
   ArrowUp,
 } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
-import Link from 'next/link';
 import { WalletBalance } from '@/components/wallet/WalletBalance';
 import { WalletTransactions } from '@/components/wallet/WalletTransactions';
 import { WithdrawalForm } from '@/components/wallet/WithdrawalForm';

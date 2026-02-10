@@ -17,16 +17,16 @@ const cardVariants = cva(
     variants: {
       variant: {
         // Standard: most cards (game listings, content blocks)
-        standard: 'bg-bg-elevated dark:bg-polar-nightLight border border-border-subtle dark:border-polar-nightDark shadow-sm',
+        standard: 'bg-bg-elevated border border-border-subtle shadow-sm',
 
         // Elevated: important cards (featured games, highlighted content)
-        elevated: 'bg-bg-elevated dark:bg-polar-nightLight shadow-md hover:shadow-lg',
+        elevated: 'bg-bg-elevated shadow-md hover:shadow-lg',
 
         // Interactive: clickable cards (game listings that navigate)
-        interactive: 'bg-bg-elevated dark:bg-polar-nightLight border-2 border-transparent shadow-sm hover:border-frost-ice/20 hover:shadow-md cursor-pointer active:scale-[0.98]',
+        interactive: 'bg-bg-elevated border-2 border-transparent shadow-sm hover:border-frost-ice/20 hover:shadow-md cursor-pointer active:scale-[0.98]',
 
         // Outlined: subtle cards (filter panels, sidebars)
-        outlined: 'bg-transparent border-2 border-border dark:border-polar-nightDark',
+        outlined: 'bg-transparent border-2 border-border',
       },
 
       padding: {
@@ -129,7 +129,7 @@ export const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={clsx('text-sm text-text-secondary dark:text-snow-storm', className)}
+    className={clsx('text-sm text-text-secondary', className)}
     {...props}
   />
 ));

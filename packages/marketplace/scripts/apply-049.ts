@@ -62,8 +62,9 @@ async function main() {
 
         console.log('✅ Migration executed successfully!');
 
-    } catch (error: any) {
-        console.error('❌ Migration failed:', error.message);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error('❌ Migration failed:', message);
         process.exit(1);
     }
 }

@@ -112,8 +112,8 @@ export function OrderActions({
 
       {/* Report Issue Form */}
       {showReportIssue && (
-        <div className="mt-3 p-4 bg-snow-white dark:bg-polar-night-light border border-border rounded-lg">
-          <h4 className="text-sm font-semibold text-polar-night dark:text-snow-white mb-3">
+        <div className="mt-3 p-4 bg-snow-white border border-border rounded-lg">
+          <h4 className="text-sm font-semibold text-polar-night mb-3">
             Report an Issue
           </h4>
 
@@ -125,7 +125,7 @@ export function OrderActions({
               <select
                 value={issueType}
                 onChange={(e) => onIssueTypeChange(e.target.value)}
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
               >
                 <option value="">Select an issue type...</option>
                 <option value="not_received">Package not received</option>
@@ -154,7 +154,7 @@ export function OrderActions({
                 onChange={(e) => onIssueDescriptionChange(e.target.value)}
                 placeholder="Describe the issue in detail..."
                 rows={3}
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50 resize-none"
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50 resize-none"
               />
               <p className="text-xs text-text-muted mt-1">
                 {issueDescription.length}/2000 characters

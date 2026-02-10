@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@second-turn/design-system';
 import { ArrowUp, RefreshCw as Loader2, Shield, AlertCircle } from 'griddy-icons';
+import { formatPrice } from '@/lib/services/pricing';
 
 // IBAN format hints by country
 const IBAN_HINTS: Record<string, string> = {
@@ -137,7 +138,7 @@ export function WithdrawalForm({
         </div>
         <div className="flex items-center justify-between mt-1">
           <p className="text-xs text-text-muted">
-            Available: €{balanceEuros.toFixed(2)}
+            Available: {formatPrice(balanceEuros)}
           </p>
           {balanceCents > 0 && (
             <button

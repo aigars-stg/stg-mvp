@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef, FormEvent, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter, useParams } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
+import { useParams } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Email as Mail, Check, Sparks as Sparkles } from 'griddy-icons';
@@ -417,7 +417,7 @@ export default function AuthPage() {
           onClick={handleMagicLink}
           disabled={loading}
           loading={loading}
-          className="shadow-md hover:shadow-lg transition-shadow !bg-[#D08770] hover:!bg-[#C97862] text-white font-medium border-none"
+          className="shadow-md hover:shadow-lg transition-shadow !bg-aurora-orange hover:!bg-aurora-orange/90 text-white font-medium border-none"
         >
           {loading ? tNewUser('sending') : tNewUser('sendMagicLink')}
         </Button>

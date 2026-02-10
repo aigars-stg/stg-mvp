@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
@@ -51,10 +51,10 @@ export async function FeaturedGames() {
   }
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20">
+    <section className="py-8 sm:py-10 lg:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Section header */}
-        <div className="text-center mb-10 sm:mb-12">
+        <div className="text-center mb-6 sm:mb-8">
           <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
             {t('title')}
           </h2>
@@ -86,9 +86,9 @@ export async function FeaturedGames() {
 // Loading state component
 export function FeaturedGamesLoading() {
   return (
-    <section className="py-12 sm:py-16 lg:py-20">
+    <section className="py-8 sm:py-10 lg:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="text-center mb-10 sm:mb-12">
+        <div className="text-center mb-6 sm:mb-8">
           <div className="h-10 bg-bg-elevated rounded w-64 mx-auto mb-4 animate-pulse" />
           <div className="h-6 bg-bg-elevated rounded w-96 mx-auto animate-pulse" />
         </div>

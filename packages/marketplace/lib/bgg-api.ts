@@ -14,6 +14,7 @@ import { createBGGHeaders } from './bgg-config';
 import { createServiceClient } from './supabase/client';
 import { decodeHTMLEntities } from './bgg-utils';
 import { cacheGet, cacheSet } from './cache';
+import { loggers } from './logger';
 
 // ============================================================================
 // BGG XML Parser Result Types
@@ -100,7 +101,6 @@ const searchCache = new Map<string, { data: BGGGame[]; timestamp: number }>();
 const gameDetailsCache = new Map<number, { data: BGGGame; timestamp: number }>();
 const versionCache = new Map<number, { data: BGGVersion[]; timestamp: number }>();
 const metadataCache = new Map<number, { data: BGGGameMetadata; timestamp: number }>();
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 const CACHE_TTL_SECONDS = 86400; // 24 hours (for Redis)
 
 // Parse XML helper
@@ -139,9 +139,9 @@ function logStaleCacheFallback(
   ageInHours: number,
   error: BGGError
 ) {
-  console.warn(
-    `⚠️  [BGG Fallback] Using ${ageInHours}h old cached ${resourceType} for "${key}" ` +
-      `(Reason: ${error.code})`
+  loggers.bgg.warn(
+    { resourceType, key, ageInHours, errorCode: error.code },
+    `Using ${ageInHours}h old cached ${resourceType} for "${key}" due to ${error.code}`
   );
 }
 
@@ -155,7 +155,7 @@ export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata
   if (cached) return cached;
 
   try {
-    console.log(`📡 [BGG API] Fetching metadata for game ${gameId}`);
+    loggers.bgg.info({ gameId }, 'Fetching metadata for game');
 
     // Add timeout to prevent hanging
     const controller = new AbortController();
@@ -284,7 +284,7 @@ export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata
       bggError = parseFetchError(error, `game ${gameId}`);
     }
 
-    console.error(`❌ [BGG API] Metadata error for game ${gameId}:`, bggError.getTechnicalDetails());
+    loggers.bgg.error({ gameId, error: bggError.getTechnicalDetails() }, 'Metadata fetch error');
 
     // Try stale cache fallback
     if (bggError.canUseStaleCacheFallback()) {
@@ -362,7 +362,7 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
       if (exactResults.length >= 3) {
         // Good exact matches found, use those
         searchResults = exactResults;
-        console.log(`[BGG Search] Exact match strategy for "${query}": ${exactResults.length} results`);
+        loggers.bgg.debug({ query, resultCount: exactResults.length }, 'Exact match strategy');
       } else {
         // Not enough exact matches, fall back to fuzzy
         const fuzzyResults = await performBGGSearch(query, false);
@@ -370,12 +370,12 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
         const exactIds = new Set(exactResults.map((r) => r['@_id']));
         const additionalFuzzy = fuzzyResults.filter((r) => !exactIds.has(r['@_id']));
         searchResults = [...exactResults, ...additionalFuzzy];
-        console.log(`[BGG Search] Exact+Fuzzy strategy for "${query}": ${exactResults.length} exact + ${additionalFuzzy.length} fuzzy`);
+        loggers.bgg.debug({ query, exactCount: exactResults.length, fuzzyCount: additionalFuzzy.length }, 'Exact+Fuzzy strategy');
       }
     } else {
       // Short query: fuzzy search only
       searchResults = await performBGGSearch(query, false);
-      console.log(`[BGG Search] Fuzzy-only strategy for "${query}": ${searchResults.length} results`);
+      loggers.bgg.debug({ query, resultCount: searchResults.length }, 'Fuzzy-only strategy');
     }
 
     // Parse search results
@@ -412,7 +412,10 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
         const classification = classifyGame(metadata);
         const isExp = classification.type === 'expansion' || classification.type === 'standalone-expansion';
 
-        console.log(`[BGG Classifier] ${metadata.name} (ID: ${metadata.id}) → ${classification.type} (${classification.reason})`);
+        loggers.bgg.debug(
+          { gameName: metadata.name, gameId: metadata.id, classificationType: classification.type, reason: classification.reason },
+          'Game classification'
+        );
 
         return {
           id: result.id,
@@ -434,7 +437,10 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
     // Filter to base games only
     const baseGames = enrichedResults.filter((game) => !game.isExpansion);
 
-    console.log(`[BGG Search] Final results for "${query}": ${baseGames.length} base games (filtered ${enrichedResults.length - baseGames.length} expansions)`);
+    loggers.bgg.info(
+      { query, baseGameCount: baseGames.length, filteredExpansions: enrichedResults.length - baseGames.length },
+      'Search complete'
+    );
 
     // Cache results in Redis + in-memory (for stale fallback)
     await cacheSet(`bgg:search:${cacheKey}`, baseGames, CACHE_TTL_SECONDS);
@@ -464,7 +470,7 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
     }
 
     // Log the error
-    console.error('❌ [BGG Search] Error:', bggError.getTechnicalDetails());
+    loggers.bgg.error({ query, error: bggError.getTechnicalDetails() }, 'Search error');
 
     // Try stale cache fallback
     if (bggError.canUseStaleCacheFallback()) {
@@ -669,13 +675,13 @@ export async function getExpansionCount(gameId: number): Promise<number> {
  * Uses batch API call for efficiency
  */
 export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansionInfo[]> {
-  console.log(`📡 [BGG API] Fetching expansions for game ${gameId}`);
+  loggers.bgg.info({ gameId }, 'Fetching expansions for game');
 
   try {
     // First, get the base game metadata to find expansion IDs
     const metadata = await fetchGameMetadata(gameId);
     if (!metadata) {
-      console.warn(`⚠️  [BGG API] No metadata for game ${gameId}`);
+      loggers.bgg.warn({ gameId }, 'No metadata for game');
       return [];
     }
 
@@ -685,12 +691,12 @@ export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansi
     );
 
     if (expansionLinks.length === 0) {
-      console.log(`📦 [BGG API] No expansions found for game ${gameId}`);
+      loggers.bgg.info({ gameId }, 'No expansions found');
       return [];
     }
 
     const expansionIds = expansionLinks.map((link) => parseInt(link.id));
-    console.log(`📦 [BGG API] Found ${expansionIds.length} expansions for ${metadata.name}`);
+    loggers.bgg.info({ gameId, gameName: metadata.name, expansionCount: expansionIds.length }, 'Found expansions');
 
     // Batch fetch all expansions (BGG API supports up to ~20 IDs per request)
     // Split into chunks if needed
@@ -709,7 +715,7 @@ export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansi
       );
 
       if (!response.ok) {
-        console.error(`❌ [BGG API] Batch fetch failed: ${response.status}`);
+        loggers.bgg.error({ status: response.status }, 'Batch fetch failed');
         continue;
       }
 
@@ -766,11 +772,10 @@ export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansi
           });
 
         // Log alternate names for debugging
-        if (alternateNames.length > 0) {
-          console.log(`📝 [BGG API] Expansion "${primaryName}" has ${alternateNames.length} alternate names:`, alternateNames);
-        } else {
-          console.log(`📝 [BGG API] Expansion "${primaryName}" has NO alternate names`);
-        }
+        loggers.bgg.debug(
+          { expansionName: primaryName, alternateNameCount: alternateNames.length, alternateNames },
+          'Expansion alternate names'
+        );
 
         expansions.push({
           bgg_id: parseInt(item['@_id']),
@@ -784,10 +789,10 @@ export async function fetchExpansionsForGame(gameId: number): Promise<BGGExpansi
       }
     }
 
-    console.log(`✅ [BGG API] Fetched ${expansions.length} expansions with versions`);
+    loggers.bgg.info({ expansionCount: expansions.length }, 'Fetched expansions with versions');
     return expansions;
   } catch (error: unknown) {
-    console.error(`❌ [BGG API] Error fetching expansions:`, error);
+    loggers.bgg.error({ error }, 'Error fetching expansions');
     return [];
   }
 }
@@ -807,7 +812,7 @@ export async function fetchGameWithFallback(gameId: number): Promise<{
   fallbackMode: boolean;
   reason?: string;
 }> {
-  console.log(`📡 [BGG Fallback Detection] Checking game ${gameId}...`);
+  loggers.bgg.info({ gameId }, 'Checking game with fallback detection');
 
   try {
     // Fetch metadata and versions in parallel
@@ -824,19 +829,19 @@ export async function fetchGameWithFallback(gameId: number): Promise<{
     if (!metadata) {
       fallbackMode = true;
       reason = 'BGG metadata unavailable';
-      console.warn(`⚠️  [BGG Fallback] No metadata available for game ${gameId}`);
+      loggers.bgg.warn({ gameId }, 'No metadata available');
     }
     // Case 2: No cover image
     else if (!metadata.image && !metadata.thumbnail) {
       fallbackMode = true;
       reason = 'Missing cover image';
-      console.warn(`⚠️  [BGG Fallback] No cover image for game ${gameId}: ${metadata.name}`);
+      loggers.bgg.warn({ gameId, gameName: metadata.name }, 'No cover image');
     }
     // Case 3: No version data
     else if (!versions || versions.length === 0) {
       fallbackMode = true;
       reason = 'No version data available';
-      console.warn(`⚠️  [BGG Fallback] No versions for game ${gameId}: ${metadata.name}`);
+      loggers.bgg.warn({ gameId, gameName: metadata.name }, 'No versions available');
     }
 
     // Apply image fallback: use game's image/thumbnail for versions without their own
@@ -856,14 +861,14 @@ export async function fetchGameWithFallback(gameId: number): Promise<{
       });
 
       if (fallbackCount > 0) {
-        console.log(`🔄 [BGG Fallback] Using game images for ${fallbackCount} version(s) without images`);
+        loggers.bgg.info({ gameId, fallbackCount }, 'Using game images for versions without images');
       }
     }
 
     if (fallbackMode) {
-      console.log(`🔄 [BGG Fallback] Entering manual input mode for game ${gameId}: ${reason}`);
+      loggers.bgg.info({ gameId, reason }, 'Entering manual input mode');
     } else {
-      console.log(`✅ [BGG Fallback] Full BGG data available for game ${gameId}`);
+      loggers.bgg.info({ gameId }, 'Full BGG data available');
     }
 
     return {
@@ -873,7 +878,7 @@ export async function fetchGameWithFallback(gameId: number): Promise<{
       reason,
     };
   } catch (error: unknown) {
-    console.error(`❌ [BGG Fallback] Error fetching game ${gameId}:`, error);
+    loggers.bgg.error({ gameId, error }, 'Error fetching game with fallback');
 
     // Complete API failure - definitely fallback
     return {
@@ -894,54 +899,121 @@ export async function fetchGameWithFallback(gameId: number): Promise<{
 export async function ensureGameMetadata(gameId: number): Promise<void> {
   const supabase = createServiceClient();
 
-  // Check if game already has metadata
+  // Check if game already has metadata and parent_bgg_id status
   const { data: game, error: fetchError } = await supabase
     .from('games')
-    .select('player_count, thumbnail, image')
+    .select('player_count, thumbnail, image, is_expansion, parent_bgg_id')
     .eq('id', gameId)
     .single();
 
   if (fetchError) {
-    console.error(`[ensureGameMetadata] Error fetching game ${gameId}:`, fetchError);
+    loggers.bgg.error({ gameId, error: fetchError }, 'Error fetching game for metadata check');
     return;
   }
 
-  // If metadata already exists, no need to fetch
-  if (game?.player_count && game?.thumbnail) {
-    console.log(`[ensureGameMetadata] Game ${gameId} already has metadata`);
+  const hasMetadata = game?.player_count && game?.thumbnail;
+  const needsParentLookup = game?.is_expansion && !game?.parent_bgg_id;
+
+  // If metadata exists and no parent lookup needed, we're done
+  if (hasMetadata && !needsParentLookup) {
+    loggers.bgg.debug({ gameId }, 'Game already has metadata');
     return;
   }
 
-  // Fetch metadata from BGG API
-  console.log(`[ensureGameMetadata] Fetching BGG metadata for game ${gameId}...`);
+  // Fetch metadata from BGG API (needed for metadata update or parent lookup)
+  loggers.bgg.info({ gameId }, 'Fetching BGG metadata');
   const metadata = await fetchGameMetadata(gameId);
 
   if (!metadata) {
-    console.warn(`[ensureGameMetadata] No metadata returned from BGG for game ${gameId}`);
+    loggers.bgg.warn({ gameId }, 'No metadata returned from BGG');
     return;
   }
 
-  // Update the games table with metadata
-  const { error: updateError } = await supabase
+  // Update game metadata if missing
+  if (!hasMetadata) {
+    const { error: updateError } = await supabase
+      .from('games')
+      .update({
+        player_count: metadata.playerCount || null,
+        min_age: metadata.minAge || null,
+        playing_time: metadata.playingTime || null,
+        thumbnail: metadata.thumbnail || null,
+        image: metadata.image || null,
+        description: metadata.description || null,
+        designers: metadata.designers && metadata.designers.length > 0 ? metadata.designers : null,
+        metadata_fetched_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', gameId);
+
+    if (updateError) {
+      loggers.bgg.error({ gameId, error: updateError }, 'Error updating game metadata');
+      return;
+    }
+
+    loggers.bgg.info({ gameId }, 'Successfully updated metadata');
+  }
+
+  // For expansion games, ensure parent_bgg_id is set
+  if (needsParentLookup) {
+    const parentLink = metadata.inboundLinks.find(
+      (l) => l.type === 'boardgameexpansion'
+    );
+
+    if (parentLink) {
+      const parentBggId = parseInt(parentLink.id);
+      const { error: parentUpdateError } = await supabase
+        .from('games')
+        .update({ parent_bgg_id: parentBggId })
+        .eq('id', gameId);
+
+      if (parentUpdateError) {
+        loggers.bgg.error({ gameId, error: parentUpdateError }, 'Error setting parent_bgg_id');
+      } else {
+        loggers.bgg.info({ gameId, parentBggId }, 'Set parent_bgg_id for expansion');
+        await ensureParentGameExists(parentBggId);
+      }
+    }
+  }
+}
+
+/**
+ * Ensures a parent/base game exists in the games table with metadata.
+ * Called when an expansion's parent_bgg_id is set but the parent game
+ * may be missing or lack metadata (thumbnail, player_count, etc.).
+ */
+async function ensureParentGameExists(parentBggId: number): Promise<void> {
+  const supabase = createServiceClient();
+
+  const { data: existing } = await supabase
     .from('games')
-    .update({
-      player_count: metadata.playerCount || null,
-      min_age: metadata.minAge || null,
-      playing_time: metadata.playingTime || null,
-      thumbnail: metadata.thumbnail || null,
-      image: metadata.image || null,
-      description: metadata.description || null,
-      designers: metadata.designers && metadata.designers.length > 0 ? metadata.designers : null,
-      metadata_fetched_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', gameId);
+    .select('id, thumbnail')
+    .eq('id', parentBggId)
+    .single();
 
-  if (updateError) {
-    console.error(`[ensureGameMetadata] Error updating game ${gameId}:`, updateError);
-    return;
-  }
+  // Parent exists with metadata — nothing to do
+  if (existing?.thumbnail) return;
 
-  console.log(`[ensureGameMetadata] Successfully updated metadata for game ${gameId}`);
+  // Fetch parent game metadata from BGG
+  const parentMeta = await fetchGameMetadata(parentBggId);
+  if (!parentMeta) return;
+
+  await supabase.from('games').upsert({
+    id: parentBggId,
+    name: parentMeta.name,
+    yearpublished: parentMeta.yearPublished || null,
+    is_expansion: false,
+    thumbnail: parentMeta.thumbnail || null,
+    image: parentMeta.image || null,
+    player_count: parentMeta.playerCount || null,
+    min_age: parentMeta.minAge || null,
+    playing_time: parentMeta.playingTime || null,
+    description: parentMeta.description || null,
+    designers: parentMeta.designers?.length ? parentMeta.designers : null,
+    bayesaverage: parentMeta.bayesaverage || null,
+    metadata_fetched_at: new Date().toISOString(),
+  }, { onConflict: 'id' });
+
+  loggers.bgg.info({ parentBggId, name: parentMeta.name }, 'Ensured parent game exists with metadata');
 }
 

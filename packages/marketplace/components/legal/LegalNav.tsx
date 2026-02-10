@@ -1,7 +1,8 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Home, FileText, Lock, Briefcase, BookOpen, Settings, Coins } from 'griddy-icons';
 import { LEGAL_SECTIONS, type LegalSectionId } from './legal-sections';
 
@@ -20,11 +21,12 @@ const SECTION_ICONS: Record<LegalSectionId, React.ComponentType<{ size?: string 
 export function LegalNav() {
   const searchParams = useSearchParams();
   const activeSection = searchParams.get('section') || 'overview';
+  const tCommon = useTranslations('Common');
 
   return (
-    <nav aria-label="Legal sections">
+    <nav aria-label={tCommon('aria.legalSections')}>
       {/* Desktop: sticky sidebar */}
-      <div className="hidden rounded-lg border border-border-subtle bg-white/60 p-2 dark:border-polar-nightDark dark:bg-polar-nightDark/60 lg:block">
+      <div className="hidden rounded-lg border border-border-subtle bg-white/60 p-2 lg:block">
         <ul className="flex flex-col gap-1">
           {LEGAL_SECTIONS.map((section) => {
             const Icon = SECTION_ICONS[section.id];
@@ -36,7 +38,7 @@ export function LegalNav() {
                   className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
                     activeSection === section.id
                       ? 'bg-frost-ice/10 font-medium text-frost-ice'
-                      : 'text-text-secondary hover:bg-bg-elevated hover:text-text dark:text-snow-stormLight dark:hover:text-snow-stormLightest'
+                      : 'text-text-secondary hover:bg-bg-elevated hover:text-text'
                   }`}
                 >
                   <Icon size={16} className="shrink-0" />
@@ -60,7 +62,7 @@ export function LegalNav() {
               className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors ${
                 activeSection === section.id
                   ? 'bg-frost-ice text-white'
-                  : 'bg-bg-elevated text-text-secondary hover:text-text dark:bg-polar-nightLight dark:text-snow-stormLight'
+                  : 'bg-bg-elevated text-text-secondary hover:text-text'
               }`}
             >
               <Icon size={14} className="shrink-0" />

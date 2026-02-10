@@ -41,17 +41,17 @@ We need your email to send you sign-in links and order updates. Your name and co
 
 ### 2.2 Seller Verification Data
 
-When you register as a seller and complete Stripe Connect onboarding, additional information is collected:
+When you register as a seller, additional information is collected:
 
 - **Seller status declaration** — confirmation that you are selling as a private individual
 - **Date of birth** (required) — for identity verification and DAC7 reporting
 - **Primary address** (required) — for identity verification and DAC7 reporting
 - **Tax Identification Number (TIN)** — collected when you approach DAC7 reporting thresholds
-- **Bank account details (IBAN)** — collected by Stripe Connect for payouts
-- **Identity verification documents** — collected by Stripe Connect for KYC compliance
+- **Bank account details (IBAN)** — collected when you request your first withdrawal
+- **Identity verification documents** — may be required for regulatory compliance
 
 :::plain-terms
-To sell, you need to be 18+ and verify your identity through Stripe. This is required by payment regulations and EU tax laws. Stripe handles the verification — we do not see your ID documents or full bank details.
+To sell, you need to be 18+ and verify your identity. This is required by payment regulations and EU tax laws.
 :::
 
 **Legal Basis:** Legal obligation (GDPR Article 6(1)(c)) — compliance with EU DAC7 tax reporting requirements and payment services regulations
@@ -72,7 +72,7 @@ When you create a listing to sell a board game, we collect:
 When transactions occur through our platform, we collect:
 
 - **Transaction records** — details of purchases and sales
-- **Payment information** — processed by Stripe Connect (we do not store card details)
+- **Payment information** — processed by our payment partner (we do not store card details)
 - **Shipping information** — parcel terminal selections processed by Unisend
 - **Sale amounts** — for platform records and regulatory reporting
 
@@ -123,7 +123,7 @@ We use your personal data to:
 - Send you sign-in links (magic links)
 - Display your listings to potential buyers
 - Facilitate communication between buyers and sellers
-- Process payments through Stripe Connect
+- Process payments through our payment partner
 - Generate shipping labels through Unisend SIA
 - Process and display your wanted game requests (ISO listings)
 - Send transactional emails (order notifications, shipping updates)
@@ -139,16 +139,16 @@ We use your personal data to:
 
 We use trusted third-party services to operate our platform. These services process your data on our behalf under Data Processing Agreements (DPAs) that ensure GDPR compliance.
 
-### Stripe Connect (Payment Processing)
+### EveryPay (Payment Processing)
 
 | | |
 |---|---|
-| **Purpose** | Payment processing, seller payouts, identity verification (KYC) |
-| **Data Location** | EU and US (with appropriate safeguards) |
-| **Data Shared** | Name, email, address, date of birth, bank account details, identity documents, transaction data |
-| **Privacy Policy** | [stripe.com/privacy](https://stripe.com/privacy) |
+| **Purpose** | Payment processing (card payments and bank links) |
+| **Data Location** | EU (Estonia) |
+| **Data Shared** | Name, email, transaction data |
+| **Privacy Policy** | [every-pay.com/privacy-policy](https://every-pay.com/privacy-policy) |
 
-*Stripe is a licensed payment services provider under EU PSD2 regulations. They verify seller identities independently and are a separate data controller for their compliance purposes.*
+*EveryPay is a licensed payment services provider operated by Swedbank. They process card and bank link payments securely under EU PSD2 regulations.*
 
 ### Unisend SIA (Shipping and Logistics)
 
@@ -363,7 +363,7 @@ While we implement industry-standard security measures, no system is 100% secure
 
 ## 10. International Data Transfers
 
-Your data is primarily stored in the European Union (Stockholm, Sweden). Some service providers (Stripe, Vercel, Cloudflare) are US-based companies but have certified compliance with EU-US data transfer frameworks.
+Your data is primarily stored in the European Union (Stockholm, Sweden). Some service providers (Vercel, Cloudflare) are US-based companies but have certified compliance with EU-US data transfer frameworks.
 
 We ensure any data transferred outside the EU is protected by appropriate safeguards (Standard Contractual Clauses, adequacy decisions, or DPAs).
 
@@ -372,7 +372,7 @@ We ensure any data transferred outside the EU is protected by appropriate safegu
 ## 11. Age Requirements
 
 - You must be at least **16 years old** to use the Platform
-- You must be at least **18 years old** to sell (required by Stripe for identity verification)
+- You must be at least **18 years old** to sell (required by payment regulations)
 
 We do not knowingly collect personal data from anyone under 16. If you believe someone under 16 has created an account, contact privacy@secondturn.games and we will delete it.
 

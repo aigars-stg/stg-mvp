@@ -2,8 +2,7 @@
 'use client';
 
 import { useState, useEffect, use, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
@@ -203,7 +202,7 @@ export default function StaffFeedbackDetailPage({
       <div className="min-h-screen flex items-center justify-center bg-bg">
         <div className="text-center max-w-md mx-auto px-4">
           <Shield className="w-16 h-16 text-aurora-red mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-text mb-2">Staff Access Required</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text mb-2">Staff Access Required</h1>
           <p className="text-text-secondary">
             This page is only accessible to staff members.
           </p>
@@ -257,7 +256,7 @@ export default function StaffFeedbackDetailPage({
               {typeConfig[feedback.type].icon}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-text">
+              <h1 className="text-2xl sm:text-3xl font-bold text-text">
                 {typeConfig[feedback.type].label}
               </h1>
               <p className="text-sm text-text-secondary">

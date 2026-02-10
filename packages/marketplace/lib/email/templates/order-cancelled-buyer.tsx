@@ -11,6 +11,7 @@ import {
   Hr,
 } from '@react-email/components';
 import * as React from 'react';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface OrderCancelledBuyerEmailProps {
   buyerName: string;
@@ -57,7 +58,7 @@ export const OrderCancelledBuyerEmail = ({
               </tr>
               <tr>
                 <td style={label}>Refund Amount:</td>
-                <td style={refundValue}>€{refundAmount.toFixed(2)}</td>
+                <td style={refundValue}>{formatPrice(refundAmount)}</td>
               </tr>
             </table>
           </Section>
@@ -65,7 +66,7 @@ export const OrderCancelledBuyerEmail = ({
           <Section style={refundBox}>
             <Text style={refundTitle}>💰 Refund Processed</Text>
             <Text style={refundText}>
-              A full refund of <strong>€{refundAmount.toFixed(2)}</strong> has been automatically
+              A full refund of <strong>{formatPrice(refundAmount)}</strong> has been automatically
               processed to your original payment method. You should see it in your account within
               5-10 business days.
             </Text>

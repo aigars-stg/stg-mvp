@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPuzzleNumber, getTargetGameInfo } from '@/lib/play/puzzle-service';
+import { handleApiError } from '@/lib/api/error-handler';
 
 // Force dynamic rendering since we use searchParams
 export const dynamic = 'force-dynamic';
@@ -43,10 +44,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ answer });
   } catch (error) {
-    console.error('[Play API] Error revealing answer:', error);
-    return NextResponse.json(
-      { error: 'Failed to reveal answer' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Reveal puzzle');
   }
 }

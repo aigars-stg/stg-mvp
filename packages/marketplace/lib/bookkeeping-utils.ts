@@ -3,6 +3,8 @@
  * Used by the Staff Dashboard Bookkeeping view
  */
 
+import { formatPrice } from '@/lib/services/pricing';
+
 // ============================================================================
 // CONSTANTS
 // ============================================================================
@@ -324,10 +326,7 @@ export function downloadCSV(content: string, filename: string): void {
  * @returns Formatted string like "€25.50"
  */
 export function formatEuros(amount: number): string {
-  return new Intl.NumberFormat('en-EU', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(amount);
+  return formatPrice(amount);
 }
 
 /**

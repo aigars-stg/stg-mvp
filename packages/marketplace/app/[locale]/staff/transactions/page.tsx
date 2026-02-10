@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Button, Badge } from '@second-turn/design-system';
 import { Search, RefreshCw as Loader2, AlertCircle, Shield, ChevronLeft, ChevronRight, AlertTriangle, Package, Download, TrendUp, CurrencyDollar, FileText, Receipt, Truck, User, CheckCircleAlt01 as CheckCircle2, Bug, Sparks as Lightbulb, HelpCircle } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -18,6 +18,7 @@ import {
   type OrderBookkeepingData,
   type BookkeepingSummary,
 } from '@/lib/bookkeeping-utils';
+import { formatPrice } from '@/lib/services/pricing';
 import { getDac7StatusLabel, type Dac7ComplianceStatus } from '@/lib/types/seller';
 import { formatDate } from '@/lib/date-utils';
 import type { FeedbackType, FeedbackStatus, FeedbackListResponse } from '@/lib/types/feedback';
@@ -445,7 +446,7 @@ function StaffTransactionsContent() {
       <div className="min-h-screen flex items-center justify-center bg-bg-primary">
         <div className="text-center max-w-md px-4">
           <Shield className="w-16 h-16 text-aurora-red mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-polar-night mb-2">Staff Access Required</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">Staff Access Required</h1>
           <p className="text-text-secondary mb-6">
             This page is only accessible to staff members.
           </p>
@@ -495,7 +496,7 @@ function StaffTransactionsContent() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <Shield className="w-6 h-6 text-frost-ice" />
-                <h1 className="text-2xl font-bold text-polar-night dark:text-snow-white">Staff Dashboard</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">Staff Dashboard</h1>
               </div>
               <p className="text-text-secondary">
                 {viewMode === 'operations'
@@ -594,7 +595,7 @@ function StaffTransactionsContent() {
                   value={dac7SearchQuery}
                   onChange={(e) => setDac7SearchQuery(e.target.value)}
                   placeholder="Search by name or email..."
-                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
                 />
               </div>
             </form>
@@ -608,7 +609,7 @@ function StaffTransactionsContent() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by order number..."
-                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
                 />
               </div>
             </form>
@@ -622,7 +623,7 @@ function StaffTransactionsContent() {
                 setDac7StatusFilter(e.target.value);
                 setDac7CurrentPage(1);
               }}
-              className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+              className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
             >
               {dac7StatusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -638,7 +639,7 @@ function StaffTransactionsContent() {
                 setStatusFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+              className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
             >
               {statusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -655,7 +656,7 @@ function StaffTransactionsContent() {
                   setFeedbackStatusFilter(e.target.value);
                   setFeedbackCurrentPage(1);
                 }}
-                className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+                className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
               >
                 <option value="all">All Statuses</option>
                 <option value="new">New</option>
@@ -670,7 +671,7 @@ function StaffTransactionsContent() {
                   setFeedbackTypeFilter(e.target.value);
                   setFeedbackCurrentPage(1);
                 }}
-                className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+                className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
               >
                 <option value="all">All Types</option>
                 <option value="feature_request">Feature Request</option>
@@ -718,7 +719,7 @@ function StaffTransactionsContent() {
                   setDateRange(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white dark:bg-polar-night text-polar-night dark:text-snow-white focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
+                className="px-3 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
               >
                 {DATE_RANGE_PRESETS.map((preset) => (
                   <option key={preset.key} value={preset.key}>
@@ -741,27 +742,27 @@ function StaffTransactionsContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {/* Orders */}
-            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+            <div className="bg-snow-white border border-border rounded-lg p-4">
               <div className="w-8 h-8 rounded-full bg-frost-ice/10 flex items-center justify-center mb-2">
                 <Package className="w-4 h-4 text-frost-ice" />
               </div>
               <p className="text-xs text-text-muted uppercase tracking-wide">Orders</p>
-              <p className="text-xl font-bold text-polar-night dark:text-snow-white">{bookkeepingSummary.orderCount}</p>
+              <p className="text-xl font-bold text-polar-night">{bookkeepingSummary.orderCount}</p>
               <p className="text-xs text-text-secondary">in selected period</p>
             </div>
 
             {/* GMV */}
-            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+            <div className="bg-snow-white border border-border rounded-lg p-4">
               <div className="w-8 h-8 rounded-full bg-frost-ice/10 flex items-center justify-center mb-2">
                 <TrendUp className="w-4 h-4 text-frost-ice" />
               </div>
               <p className="text-xs text-text-muted uppercase tracking-wide">GMV</p>
-              <p className="text-xl font-bold text-polar-night dark:text-snow-white">{formatEuros(bookkeepingSummary.gmv)}</p>
+              <p className="text-xl font-bold text-polar-night">{formatEuros(bookkeepingSummary.gmv)}</p>
               <p className="text-xs text-text-secondary">game prices total</p>
             </div>
 
             {/* Platform Revenue */}
-            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+            <div className="bg-snow-white border border-border rounded-lg p-4">
               <div className="w-8 h-8 rounded-full bg-aurora-green/10 flex items-center justify-center mb-2">
                 <CurrencyDollar className="w-4 h-4 text-aurora-green" />
               </div>
@@ -771,7 +772,7 @@ function StaffTransactionsContent() {
             </div>
 
             {/* Total VAT */}
-            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+            <div className="bg-snow-white border border-border rounded-lg p-4">
               <div className="w-8 h-8 rounded-full bg-aurora-yellow/10 flex items-center justify-center mb-2">
                 <FileText className="w-4 h-4 text-aurora-yellow" />
               </div>
@@ -781,7 +782,7 @@ function StaffTransactionsContent() {
             </div>
 
             {/* Platform Fee VAT */}
-            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+            <div className="bg-snow-white border border-border rounded-lg p-4">
               <div className="w-8 h-8 rounded-full bg-aurora-yellow/10 flex items-center justify-center mb-2">
                 <Receipt className="w-4 h-4 text-aurora-yellow" />
               </div>
@@ -791,7 +792,7 @@ function StaffTransactionsContent() {
             </div>
 
             {/* Shipping VAT */}
-            <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+            <div className="bg-snow-white border border-border rounded-lg p-4">
               <div className="w-8 h-8 rounded-full bg-aurora-yellow/10 flex items-center justify-center mb-2">
                 <Truck className="w-4 h-4 text-aurora-yellow" />
               </div>
@@ -864,13 +865,13 @@ function StaffTransactionsContent() {
             {dac7Data && dac7Data.sellers.length === 0 ? (
               <div className="text-center py-12">
                 <User className="w-12 h-12 text-text-muted mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-polar-night dark:text-snow-white mb-2">
+                <h3 className="text-lg font-medium text-polar-night mb-2">
                   No sellers found
                 </h3>
                 <p className="text-text-secondary">Try adjusting your filters.</p>
               </div>
             ) : (
-              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
+              <div className="bg-snow-white border border-border rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-background-secondary border-b border-divider-subtle">
@@ -907,19 +908,19 @@ function StaffTransactionsContent() {
                           >
                             <td className="px-4 py-3">
                               <div>
-                                <p className="font-medium text-polar-night dark:text-snow-white">
+                                <p className="font-medium text-polar-night">
                                   {seller.legalName || seller.fullName || 'Unknown'}
                                 </p>
                                 <p className="text-sm text-text-muted">{seller.email}</p>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white">
+                            <td className="px-4 py-3 text-sm text-polar-night">
                               {seller.country || '—'}
                             </td>
-                            <td className="px-4 py-3 text-sm font-semibold text-polar-night dark:text-snow-white text-right">
-                              €{seller.annualSalesTotal.toFixed(2)}
+                            <td className="px-4 py-3 text-sm font-semibold text-polar-night text-right">
+                              {formatPrice(seller.annualSalesTotal)}
                             </td>
-                            <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                            <td className="px-4 py-3 text-sm text-polar-night text-right">
                               {seller.annualTransactionCount}
                             </td>
                             <td className="px-4 py-3 text-center">
@@ -988,7 +989,7 @@ function StaffTransactionsContent() {
         {viewMode !== 'dac7' && data && data.orders.length === 0 && (
           <div className="text-center py-12">
             <Package className="w-12 h-12 text-text-muted mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-polar-night dark:text-snow-white mb-2">No transactions found</h3>
+            <h3 className="text-lg font-medium text-polar-night mb-2">No transactions found</h3>
             <p className="text-text-secondary">
               {viewMode === 'bookkeeping'
                 ? 'No transactions in the selected period.'
@@ -998,7 +999,7 @@ function StaffTransactionsContent() {
         )}
 
         {viewMode === 'operations' && data && data.orders.length > 0 && (
-          <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
+          <div className="bg-snow-white border border-border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-background-secondary border-b border-divider-subtle">
                 <tr>
@@ -1052,7 +1053,7 @@ function StaffTransactionsContent() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-sm font-semibold text-polar-night text-right">
-                        €{order.total_amount.toFixed(2)}
+                        {formatPrice(order.total_amount)}
                       </td>
                       <td className="px-4 py-3 text-center">
                         {order.issue_count.open > 0 ? (
@@ -1080,7 +1081,7 @@ function StaffTransactionsContent() {
         )}
 
         {viewMode === 'bookkeeping' && data && data.orders.length > 0 && (
-          <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
+          <div className="bg-snow-white border border-border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full" style={{ minWidth: '1000px' }}>
                 <thead className="bg-background-secondary border-b border-divider-subtle">
@@ -1124,16 +1125,16 @@ function StaffTransactionsContent() {
                             {statusInfo.label}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                        <td className="px-4 py-3 text-sm text-polar-night text-right">
                           {formatEuros(order.items_total)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                        <td className="px-4 py-3 text-sm text-polar-night text-right">
                           {formatEuros(platformFee.net)}
                         </td>
                         <td className="px-4 py-3 text-sm text-aurora-yellow text-right">
                           {formatEuros(platformFee.vat)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                        <td className="px-4 py-3 text-sm text-polar-night text-right">
                           {formatEuros(shipping.net)}
                         </td>
                         <td className="px-4 py-3 text-sm text-aurora-yellow text-right">
@@ -1142,7 +1143,7 @@ function StaffTransactionsContent() {
                         <td className="px-4 py-3 text-sm font-semibold text-aurora-yellow text-right">
                           {formatEuros(totalVat)}
                         </td>
-                        <td className="px-4 py-3 text-sm font-semibold text-polar-night dark:text-snow-white text-right">
+                        <td className="px-4 py-3 text-sm font-semibold text-polar-night text-right">
                           {formatEuros(order.total_amount)}
                         </td>
                       </tr>
@@ -1153,19 +1154,19 @@ function StaffTransactionsContent() {
                 {bookkeepingSummary && (
                   <tfoot className="bg-frost-ice/5 border-t-2 border-frost-ice/30">
                     <tr className="font-semibold">
-                      <td colSpan={3} className="px-4 py-3 text-sm text-polar-night dark:text-snow-white">
+                      <td colSpan={3} className="px-4 py-3 text-sm text-polar-night">
                         Period Totals ({bookkeepingSummary.orderCount} orders)
                       </td>
-                      <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                      <td className="px-4 py-3 text-sm text-polar-night text-right">
                         {formatEuros(bookkeepingSummary.gmv)}
                       </td>
-                      <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                      <td className="px-4 py-3 text-sm text-polar-night text-right">
                         {formatEuros(bookkeepingSummary.platformRevenue.net)}
                       </td>
                       <td className="px-4 py-3 text-sm text-aurora-yellow text-right">
                         {formatEuros(bookkeepingSummary.platformRevenue.vat)}
                       </td>
-                      <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white text-right">
+                      <td className="px-4 py-3 text-sm text-polar-night text-right">
                         {formatEuros(bookkeepingSummary.shippingRevenue.net)}
                       </td>
                       <td className="px-4 py-3 text-sm text-aurora-yellow text-right">
@@ -1174,7 +1175,7 @@ function StaffTransactionsContent() {
                       <td className="px-4 py-3 text-sm font-bold text-aurora-yellow text-right">
                         {formatEuros(bookkeepingSummary.totalVatCollected)}
                       </td>
-                      <td className="px-4 py-3 text-sm font-bold text-polar-night dark:text-snow-white text-right">
+                      <td className="px-4 py-3 text-sm font-bold text-polar-night text-right">
                         {formatEuros(bookkeepingSummary.totalBuyerPaid)}
                       </td>
                     </tr>
@@ -1187,7 +1188,7 @@ function StaffTransactionsContent() {
 
         {/* Feedback Tab Content */}
         {viewMode === 'feedback' && (
-          <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
+          <div className="bg-snow-white border border-border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-background-secondary border-b border-divider-subtle">
@@ -1246,7 +1247,7 @@ function StaffTransactionsContent() {
                             </div>
                           </td>
                           <td className="px-4 py-4">
-                            <p className="text-sm text-polar-night dark:text-snow-white line-clamp-2 max-w-md">
+                            <p className="text-sm text-polar-night line-clamp-2 max-w-md">
                               {feedback.description}
                             </p>
                           </td>
@@ -1256,7 +1257,7 @@ function StaffTransactionsContent() {
                             </Badge>
                           </td>
                           <td className="px-4 py-4">
-                            <span className="text-sm text-polar-night dark:text-snow-white">
+                            <span className="text-sm text-polar-night">
                               {feedback.user?.full_name || feedback.email || 'Anonymous'}
                             </span>
                           </td>
@@ -1314,27 +1315,27 @@ function StaffTransactionsContent() {
           <div className="space-y-6">
             {/* Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="bg-snow-white border border-border rounded-lg p-4">
                 <p className="text-sm text-text-secondary mb-1">Players Today</p>
-                <p className="text-2xl font-bold text-polar-night dark:text-snow-white">
+                <p className="text-2xl font-bold text-polar-night">
                   {playAnalytics?.summary.uniqueVisitorsToday || 0}
                 </p>
               </div>
-              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="bg-snow-white border border-border rounded-lg p-4">
                 <p className="text-sm text-text-secondary mb-1">Plays Today</p>
-                <p className="text-2xl font-bold text-polar-night dark:text-snow-white">
+                <p className="text-2xl font-bold text-polar-night">
                   {playAnalytics?.summary.playsToday || 0}
                 </p>
               </div>
-              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="bg-snow-white border border-border rounded-lg p-4">
                 <p className="text-sm text-text-secondary mb-1">Win Rate</p>
-                <p className="text-2xl font-bold text-polar-night dark:text-snow-white">
+                <p className="text-2xl font-bold text-polar-night">
                   {playAnalytics?.summary.winRate || 0}%
                 </p>
               </div>
-              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="bg-snow-white border border-border rounded-lg p-4">
                 <p className="text-sm text-text-secondary mb-1">Avg Guesses</p>
-                <p className="text-2xl font-bold text-polar-night dark:text-snow-white">
+                <p className="text-2xl font-bold text-polar-night">
                   {playAnalytics?.summary.avgGuesses || 0}
                 </p>
               </div>
@@ -1342,41 +1343,41 @@ function StaffTransactionsContent() {
 
             {/* Extended Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="bg-snow-white border border-border rounded-lg p-4">
                 <p className="text-sm text-text-secondary mb-2">This Week</p>
                 <div className="flex justify-between">
                   <span className="text-sm text-text-secondary">Players</span>
-                  <span className="font-medium text-polar-night dark:text-snow-white">
+                  <span className="font-medium text-polar-night">
                     {playAnalytics?.summary.uniqueVisitorsWeek || 0}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-text-secondary">Plays</span>
-                  <span className="font-medium text-polar-night dark:text-snow-white">
+                  <span className="font-medium text-polar-night">
                     {playAnalytics?.summary.playsThisWeek || 0}
                   </span>
                 </div>
               </div>
-              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="bg-snow-white border border-border rounded-lg p-4">
                 <p className="text-sm text-text-secondary mb-2">This Month</p>
                 <div className="flex justify-between">
                   <span className="text-sm text-text-secondary">Players</span>
-                  <span className="font-medium text-polar-night dark:text-snow-white">
+                  <span className="font-medium text-polar-night">
                     {playAnalytics?.summary.uniqueVisitorsMonth || 0}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-text-secondary">Plays</span>
-                  <span className="font-medium text-polar-night dark:text-snow-white">
+                  <span className="font-medium text-polar-night">
                     {playAnalytics?.summary.playsThisMonth || 0}
                   </span>
                 </div>
               </div>
-              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
+              <div className="bg-snow-white border border-border rounded-lg p-4">
                 <p className="text-sm text-text-secondary mb-2">Overall</p>
                 <div className="flex justify-between">
                   <span className="text-sm text-text-secondary">Total Puzzles</span>
-                  <span className="font-medium text-polar-night dark:text-snow-white">
+                  <span className="font-medium text-polar-night">
                     {playAnalytics?.puzzleStats.length || 0}
                   </span>
                 </div>
@@ -1385,8 +1386,8 @@ function StaffTransactionsContent() {
 
             {/* Daily Trends */}
             {playAnalytics?.dailyTrends && playAnalytics.dailyTrends.length > 0 && (
-              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-polar-night dark:text-snow-white mb-4">
+              <div className="bg-snow-white border border-border rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-polar-night mb-4">
                   Daily Activity (Last 30 Days)
                 </h3>
                 <div className="h-32 flex items-end gap-1">
@@ -1412,8 +1413,8 @@ function StaffTransactionsContent() {
 
             {/* Puzzle Performance Table */}
             {playAnalytics?.puzzleStats && playAnalytics.puzzleStats.length > 0 && (
-              <div className="bg-snow-white dark:bg-polar-nightLight border border-border rounded-lg overflow-hidden">
-                <h3 className="text-sm font-semibold text-polar-night dark:text-snow-white p-4 border-b border-divider-subtle">
+              <div className="bg-snow-white border border-border rounded-lg overflow-hidden">
+                <h3 className="text-sm font-semibold text-polar-night p-4 border-b border-divider-subtle">
                   Puzzle Performance
                 </h3>
                 <div className="overflow-x-auto">
@@ -1440,19 +1441,19 @@ function StaffTransactionsContent() {
                     <tbody className="divide-y divide-divider-subtle">
                       {playAnalytics.puzzleStats.map((puzzle) => (
                         <tr key={puzzle.puzzleNumber} className="hover:bg-frost-ice/5 transition-colors">
-                          <td className="px-4 py-3 text-sm font-medium text-polar-night dark:text-snow-white">
+                          <td className="px-4 py-3 text-sm font-medium text-polar-night">
                             {puzzle.puzzleNumber}
                           </td>
-                          <td className="px-4 py-3 text-sm text-polar-night dark:text-snow-white">
+                          <td className="px-4 py-3 text-sm text-polar-night">
                             {puzzle.gameName}
                           </td>
-                          <td className="px-4 py-3 text-sm text-right text-polar-night dark:text-snow-white">
+                          <td className="px-4 py-3 text-sm text-right text-polar-night">
                             {puzzle.plays}
                           </td>
-                          <td className="px-4 py-3 text-sm text-right text-polar-night dark:text-snow-white">
+                          <td className="px-4 py-3 text-sm text-right text-polar-night">
                             {puzzle.winRate}%
                           </td>
-                          <td className="px-4 py-3 text-sm text-right text-polar-night dark:text-snow-white">
+                          <td className="px-4 py-3 text-sm text-right text-polar-night">
                             {puzzle.avgGuesses || '-'}
                           </td>
                         </tr>
@@ -1530,7 +1531,7 @@ function Dac7SummaryCard({
 }) {
   return (
     <div
-      className={`bg-snow-white dark:bg-polar-nightLight border rounded-lg p-4 ${
+      className={`bg-snow-white border rounded-lg p-4 ${
         highlight ? 'border-aurora-yellow' : 'border-border'
       }`}
     >
@@ -1542,7 +1543,7 @@ function Dac7SummaryCard({
       <p className="text-xs text-text-muted uppercase tracking-wide">{label}</p>
       <p
         className={`text-xl font-bold ${
-          highlight ? 'text-aurora-yellow' : 'text-polar-night dark:text-snow-white'
+          highlight ? 'text-aurora-yellow' : 'text-polar-night'
         }`}
       >
         {value}

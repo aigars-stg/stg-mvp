@@ -2,14 +2,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Button, Badge, Card } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User, ShoppingBag } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 // ListingCondition type available via @/lib/types/listing if needed
 import { useTranslations } from 'next-intl';
 import { formatDate } from '@/lib/date-utils';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface OrderItem {
   id: string;
@@ -140,7 +140,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg py-8 px-4">
+    <div className="min-h-screen bg-bg py-6 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -238,7 +238,7 @@ export default function OrdersPage() {
                       <div className="text-right">
                         <p className="text-sm text-text-secondary">{t('orderCard.total')}</p>
                         <p className="text-xl font-bold text-polar-night">
-                          €{order.total_amount.toFixed(2)}
+                          {formatPrice(order.total_amount)}
                         </p>
                       </div>
                     </div>

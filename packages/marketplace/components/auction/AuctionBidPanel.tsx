@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Button, Input, Card, Badge } from '@second-turn/design-system';
 import {
   Tag as Gavel,
@@ -23,6 +23,7 @@ import {
   formatCompactTimeRemaining,
 } from '@/lib/types/listing';
 import { BidHistory } from './BidHistory';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface AuctionBidPanelProps {
   listing: Listing;
@@ -180,7 +181,7 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
             </Badge>
             <div className="flex items-baseline gap-1.5 min-w-0">
               <span className="font-bold text-aurora-purple text-lg">
-                €{displayPrice.toFixed(2)}
+                {formatPrice(displayPrice)}
               </span>
               <span className="text-xs text-text-muted whitespace-nowrap">
                 ({bidCount} {bidCount === 1 ? t('bid') : t('bids')})
@@ -285,7 +286,7 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
             <div className="space-y-2">
               <div>
                 <label className="text-xs text-text-muted mb-1 block">
-                  {t('minimum')}: €{minimumBid.toFixed(2)}
+                  {t('minimum')}: {formatPrice(minimumBid)}
                 </label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">

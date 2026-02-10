@@ -9,9 +9,8 @@
 // ==============================================
 
 /**
- * Flat-rate shipping for Latvia preview period
+ * Flat-rate shipping across the Baltics (Latvia, Lithuania, Estonia)
  * VAT-inclusive (21% VAT)
- * TODO: When expanding to LT/EE, consider route-based pricing
  */
 export const SHIPPING_COST_CENTS = 200; // €2.00 flat rate
 export const SHIPPING_COST_EUROS = 2.0;

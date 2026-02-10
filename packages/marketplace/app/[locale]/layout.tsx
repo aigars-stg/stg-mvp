@@ -8,7 +8,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { getTranslations } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import '../globals.css';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Providers } from './providers';
 import { Navbar } from '@/components/layout/Navbar';
 import { SkipLink } from '@/components/layout/SkipLink';
@@ -154,7 +154,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
         <meta name="theme-color" content="#D08770" />
@@ -180,15 +180,15 @@ export default async function LocaleLayout({ children, params }: Props) {
             <Navbar />
 
           {/* Main Content */}
-          <main id="main-content" className="min-h-screen bg-bg dark:bg-polar-night pb-20 lg:pb-0">
+          <main id="main-content" className="min-h-screen bg-bg pb-20 lg:pb-0">
             {children}
           </main>
 
           {/* Footer */}
-          <footer className="bg-bg-elevated dark:bg-polar-nightLight border-t border-border-subtle dark:border-polar-nightDark mt-12 sm:mt-24 pb-20 lg:pb-0">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          <footer className="bg-bg-elevated border-t border-border-subtle mt-12 sm:mt-24 pb-20 lg:pb-0">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
               {/* Newsletter Section */}
-              <div className="mb-8 pb-8 border-b border-border-subtle dark:border-polar-nightDark">
+              <div className="mb-8 pb-8 border-b border-border-subtle">
                 <div className="max-w-md">
                   <NewsletterSignup />
                 </div>
@@ -197,40 +197,43 @@ export default async function LocaleLayout({ children, params }: Props) {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6 sm:gap-8">
                 <div className="md:col-span-2">
                   <img src="/images/logo_nav.svg" alt="Second Turn Games" className="h-10 mb-3 sm:mb-4" />
-                  <p className="text-sm text-text-secondary dark:text-snow-stormLight">
+                  <p className="text-sm text-text-secondary">
                     {tFooter('tagline.line1')}
                     <br />
                     {tFooter('tagline.line2')}
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-polar-night dark:text-snow-stormLightest mb-2 sm:mb-3">{tFooter('sections.marketplace')}</h4>
-                  <ul className="space-y-2 text-sm text-text-secondary dark:text-snow-stormLight">
-                    <li><Link href="/browse" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.browseGames')}</Link></li>
-                    <li><Link href="/sell" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.sellGame')}</Link></li>
-                    <li><Link href="/wanted/new" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.requestGame')}</Link></li>
+                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.marketplace')}</h4>
+                  <ul className="space-y-2 text-sm text-text-secondary">
+                    <li><Link href="/browse" className="hover:text-text">{tFooter('links.browseGames')}</Link></li>
+                    <li><Link href="/sell" className="hover:text-text">{tFooter('links.sellGame')}</Link></li>
+                    <li><Link href="/wanted/new" className="hover:text-text">{tFooter('links.requestGame')}</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium text-polar-night dark:text-snow-stormLightest mb-2 sm:mb-3">{tFooter('sections.resources')}</h4>
-                  <ul className="space-y-2 text-sm text-text-secondary dark:text-snow-stormLight">
-                    <li><Link href="/help" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.helpCentre')}</Link></li>
-                    <li><Link href="/legal" className="hover:text-text dark:hover:text-snow-stormLightest">{tFooter('links.legalHub')}</Link></li>
+                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.legal')}</h4>
+                  <ul className="space-y-2 text-sm text-text-secondary">
+                    <li><Link href="/legal?section=terms" className="hover:text-text">{tFooter('links.termsOfService')}</Link></li>
+                    <li><Link href="/legal?section=privacy" className="hover:text-text">{tFooter('links.privacyPolicy')}</Link></li>
+                    <li><Link href="/legal?section=buyer" className="hover:text-text">{tFooter('links.deliveryAndReturns')}</Link></li>
+                    <li><Link href="/help" className="hover:text-text">{tFooter('links.helpCentre')}</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium text-polar-night dark:text-snow-stormLightest mb-2 sm:mb-3">{tFooter('sections.contact')}</h4>
-                  <ul className="space-y-2 text-sm text-text-secondary dark:text-snow-stormLight">
-                    <li><a href="mailto:info@secondturn.games" className="hover:text-text dark:hover:text-snow-stormLightest">info@secondturn.games</a></li>
+                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.contact')}</h4>
+                  <ul className="space-y-2 text-sm text-text-secondary">
                     <li>{tFooter('company.name')}</li>
                     <li>{tFooter('company.regNumber')}</li>
-                    <li>{tFooter('company.location')}</li>
+                    <li>{tFooter('company.address')}</li>
+                    <li><a href="tel:+37126779625" className="hover:text-text">{tFooter('company.phone')}</a></li>
+                    <li><a href="mailto:info@secondturn.games" className="hover:text-text">info@secondturn.games</a></li>
                   </ul>
                 </div>
               </div>
-              <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border-subtle dark:border-polar-nightDark text-center text-xs sm:text-sm text-text-secondary dark:text-snow-stormLight space-y-4">
+              <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border-subtle text-center text-xs sm:text-sm text-text-secondary space-y-4">
                 <div className="flex justify-center mb-4">
-                  <LocaleSwitcher variant="buttons" />
+                  <LocaleSwitcher />
                 </div>
                 <p>{tFooter('copyright', { year: currentYear })}</p>
               </div>

@@ -1,9 +1,10 @@
 /* eslint-disable @next/next/no-img-element -- listing thumbnails are external URLs */
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { LinkExternal as ExternalLink, Package } from 'griddy-icons';
 import type { Conversation } from '@/lib/types/message';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface ListingContextProps {
   conversation: Conversation;
@@ -67,7 +68,7 @@ export function ListingContext({ conversation }: ListingContextProps) {
 
           <div className="flex items-center gap-2 mt-1">
             <span className="text-lg font-semibold text-text-primary">
-              €{listing.price.toFixed(2)}
+              {formatPrice(listing.price)}
             </span>
             <span
               className={`text-xs font-medium px-2 py-0.5 rounded-full ${status.className}`}

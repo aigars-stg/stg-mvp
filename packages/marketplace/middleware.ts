@@ -6,6 +6,9 @@ import { routing } from './i18n/routing';
 // Create i18n middleware
 const intlMiddleware = createMiddleware(routing);
 
+// Derive locale pattern from routing config (avoids hardcoding 'en|lv')
+const localePattern = routing.locales.join('|');
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -145,8 +148,8 @@ export async function middleware(request: NextRequest) {
     // Check direct match: /sell
     if (path === route || path.startsWith(route + '/')) return true;
     // Check with locale prefix: /lv/sell
-    const localePattern = new RegExp(`^/(en|lv)${route}(/|$)`);
-    return localePattern.test(path);
+    const pattern = new RegExp(`^/(${localePattern})${route}(/|$)`);
+    return pattern.test(path);
   };
 
   const isPublicRoute = publicRoutes.some((route) => matchesRoute(pathname, route));
@@ -158,7 +161,7 @@ export async function middleware(request: NextRequest) {
   if (isProtectedRoute && !user) {
     const redirectUrl = request.nextUrl.clone();
     // Extract locale from pathname if present
-    const localeMatch = pathname.match(/^\/(en|lv)/);
+    const localeMatch = pathname.match(new RegExp(`^/(${localePattern})`));
     const locale = localeMatch ? localeMatch[1] : '';
     redirectUrl.pathname = locale ? `/${locale}/auth` : '/auth';
     redirectUrl.searchParams.set('redirectTo', pathname);

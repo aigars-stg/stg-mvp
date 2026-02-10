@@ -10,7 +10,7 @@ import { ListingContext } from './ListingContext';
 import { RefreshCw as Loader2, AlertCircle, Archive, ArrowLeft } from 'griddy-icons';
 import { Button } from '@second-turn/design-system';
 import type { Message, Conversation } from '@/lib/types/message';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 interface MessageThreadProps {
   conversationId: string;
@@ -342,7 +342,7 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
       >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <p className="text-text-secondary">No messages yet.</p>
+            <p className="text-text-secondary">No messages yet</p>
             <p className="text-text-tertiary text-sm mt-2">
               Start the conversation by sending a message below.
             </p>

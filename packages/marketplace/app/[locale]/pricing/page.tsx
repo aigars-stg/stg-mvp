@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Metadata } from 'next';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -20,7 +20,7 @@ export default function PricingPage() {
             <div className="max-w-4xl mx-auto px-4 sm:px-6">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-polar-night mb-4">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-4">
                         {frontmatter.title}
                     </h1>
                     <p className="text-text-secondary">

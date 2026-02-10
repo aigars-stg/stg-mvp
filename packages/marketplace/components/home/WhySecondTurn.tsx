@@ -17,7 +17,7 @@ export async function WhySecondTurn() {
   const t = await getTranslations('Home.WhySecondTurn');
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-bg-elevated">
+    <section className="py-8 sm:py-10 lg:py-12 bg-bg-elevated">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Section header */}
         <div className="text-center mb-12 sm:mb-16">

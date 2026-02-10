@@ -2,7 +2,7 @@
 
 import { Chat as MessageSquare, CreditCard, CheckCircleAlt01 as CheckCircle2, ArrowRight } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import type { TransactionMethod } from '@/lib/types/listing';
 
 interface TransactionMethodSelectorProps {

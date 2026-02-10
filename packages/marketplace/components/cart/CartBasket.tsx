@@ -17,10 +17,10 @@ export interface CartBasketData {
   items: CartItemData[];
   item_count: number;
   subtotal: number;
-  // Extended fields (optional - will be added to API)
-  seller_avatar_url?: string | null;
-  seller_rating?: number;
-  seller_review_count?: number;
+  seller_avatar_url: string | null;
+  seller_rating: number;
+  seller_review_count: number;
+  seller_total_sales: number;
 }
 
 interface CartBasketProps {
@@ -30,6 +30,8 @@ interface CartBasketProps {
   onCheckout: () => void;
   isCheckingOut?: boolean;
   onItemExpired?: (listingId: string) => void;
+  onExtend?: () => Promise<void>;
+  canExtend?: boolean;
 }
 
 export function CartBasket({
@@ -39,6 +41,8 @@ export function CartBasket({
   onCheckout,
   isCheckingOut = false,
   onItemExpired,
+  onExtend,
+  canExtend = false,
 }: CartBasketProps) {
   const t = useTranslations('Cart');
 
@@ -51,7 +55,7 @@ export function CartBasket({
   const hasExpiredItems = basket.items.some(item => item.is_expired);
 
   return (
-    <div className="bg-snow-white border-2 border-border rounded-xl overflow-hidden">
+    <div className="bg-snow-white border border-border rounded-xl overflow-hidden">
       {/* Basket Header - Full Seller Card */}
       <div className="px-4 sm:px-6 py-4 bg-bg-elevated border-b border-border-subtle">
         <div className="flex items-center justify-between gap-4">
@@ -75,8 +79,8 @@ export function CartBasket({
                 )}
               </div>
 
-              {/* Rating (if available) */}
-              {basket.seller_rating !== undefined && basket.seller_review_count !== undefined && (
+              {/* Rating (if seller has reviews) */}
+              {basket.seller_review_count > 0 ? (
                 <div className="flex items-center gap-1 text-sm text-text-secondary mt-0.5">
                   <span className="text-aurora-yellow">★</span>
                   <span>{basket.seller_rating.toFixed(1)}</span>
@@ -84,10 +88,7 @@ export function CartBasket({
                     ({basket.seller_review_count} {basket.seller_review_count === 1 ? t('review') : t('reviews')})
                   </span>
                 </div>
-              )}
-
-              {/* Item count (shown when no rating) */}
-              {basket.seller_rating === undefined && (
+              ) : (
                 <p className="text-sm text-text-secondary">
                   {t('basket.items', { count: basket.item_count })}
                 </p>
@@ -101,13 +102,16 @@ export function CartBasket({
               <ReservationTimer
                 expiresAt={earliestExpiry}
                 onExpire={() => {
-                  // Handle expiration for all items in basket
+                  // Only remove items whose expiry has actually passed
+                  const now = new Date();
                   basket.items.forEach(item => {
-                    if (onItemExpired) {
+                    if (onItemExpired && new Date(item.expires_at) <= now) {
                       onItemExpired(item.listing_id);
                     }
                   });
                 }}
+                onExtend={onExtend}
+                canExtend={canExtend}
                 size="sm"
               />
             </div>

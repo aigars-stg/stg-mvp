@@ -62,7 +62,7 @@ export function TrackingEventsTimeline({
             {/* Event details */}
             <div className="flex-1 min-w-0 pb-2">
               <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-medium text-polar-night dark:text-snow-white">
+                <p className="text-sm font-medium text-polar-night">
                   {event.state_text}
                 </p>
                 <p className="text-xs text-text-muted whitespace-nowrap flex-shrink-0">

@@ -2,8 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import dynamic from 'next/dynamic';
 import { Home, Grid, Plus, ShoppingBasket as ShoppingCart, User } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -102,7 +101,7 @@ export function BottomNav() {
     <>
       {/* Bottom Navigation Bar */}
       <nav
-        className="fixed bottom-0 inset-x-0 z-50 lg:hidden bg-snow-white dark:bg-polar-nightLight border-t border-border-subtle dark:border-polar-nightDark shadow-lg"
+        className="fixed bottom-0 inset-x-0 z-50 lg:hidden bg-snow-white border-t border-border-subtle shadow-lg"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
@@ -139,7 +138,7 @@ export function BottomNav() {
                 className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg transition-colors relative ${
                   item.active
                     ? 'text-frost-ice'
-                    : 'text-text-muted dark:text-snow-storm hover:text-text dark:hover:text-snow-stormLightest'
+                    : 'text-text-muted hover:text-text'
                 }`}
               >
                 <div className="relative">

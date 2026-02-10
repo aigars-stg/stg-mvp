@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { ShoppingBasket as ShoppingCart, AlertCircle } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -10,6 +9,7 @@ import { useCart } from '@/lib/contexts/CartContext';
 import { CountryPrompt } from '@/components/onboarding';
 import { CartBasket, CartBasketSkeleton, type CartBasketData } from '@/components/cart';
 import { useTranslations } from 'next-intl';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface CartSummary {
   basketCount: number;
@@ -48,7 +48,7 @@ export default function CartPage() {
       // Find and remove any expired items
       const expiredItems: string[] = [];
       fetchedBaskets.forEach(basket => {
-        basket.items.forEach(item => {
+        (basket.items || []).forEach(item => {
           if (item.is_expired) {
             expiredItems.push(item.listing_id);
           }
@@ -132,6 +132,23 @@ export default function CartPage() {
     }
   };
 
+  // Extend reservation for a basket
+  const handleExtendReservation = async (basketId: string) => {
+    const response = await fetch('/api/cart/extend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ basketId }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to extend reservation');
+    }
+
+    // Re-fetch cart to get updated expiry times
+    await fetchCart();
+  };
+
   // Proceed to checkout
   const handleCheckout = (basketId: string) => {
     router.push(`/checkout?basket=${basketId}`);
@@ -140,8 +157,8 @@ export default function CartPage() {
   // Loading state
   if (authLoading || (loading && baskets.length === 0)) {
     return (
-      <div className="min-h-screen bg-bg py-8 px-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="min-h-screen bg-bg py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="flex items-center gap-3 mb-2">
             <ShoppingCart className="w-8 h-8 text-frost-ice" />
@@ -164,8 +181,8 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg py-8 px-4">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-bg py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <ShoppingCart className="w-8 h-8 text-frost-ice" />
@@ -229,6 +246,8 @@ export default function CartPage() {
                 removingItemId={removingItem}
                 onCheckout={() => handleCheckout(basket.basket_id)}
                 onItemExpired={handleItemExpired}
+                onExtend={() => handleExtendReservation(basket.basket_id)}
+                canExtend
               />
             ))}
 
@@ -253,7 +272,7 @@ export default function CartPage() {
                         {t('orderSummary.subtotalAll')}
                       </span>
                       <span className="font-bold text-lg text-polar-night">
-                        €{summary.totalAmount.toFixed(2)}
+                        {formatPrice(summary.totalAmount)}
                       </span>
                     </div>
                   </div>
@@ -262,23 +281,11 @@ export default function CartPage() {
                   <AlertCircle className="w-3 h-3 inline mr-1" />
                   {t('orderSummary.separateCheckout')}
                 </p>
+                <p className="text-xs text-text-muted mt-1">
+                  {t('orderSummary.shippingNote')}
+                </p>
               </div>
             )}
-
-            {/* Info Box */}
-            <div className="bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-lg p-4">
-              <div className="flex gap-3">
-                <AlertCircle className="w-5 h-5 text-aurora-yellow flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-polar-night">
-                    {t('infoBox.reserved')}
-                  </p>
-                  <p className="text-text-secondary mt-1">
-                    {t('infoBox.completeCheckout')}
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </div>

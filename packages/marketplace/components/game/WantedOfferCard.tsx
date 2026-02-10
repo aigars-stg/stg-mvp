@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Button } from '@second-turn/design-system';
 import { Package, Globe, BookOpen, Building as Building2, LinkExternal as ExternalLink, InfoCircle as Info } from 'griddy-icons';
@@ -57,7 +57,7 @@ export function WantedOfferCard({
 
   return (
     <>
-      <div className="bg-snow-white border-2 rounded-xl overflow-hidden border-border">
+      <div className="bg-snow-white border rounded-xl overflow-hidden border-border">
         <div className="p-3 sm:p-4">
           {/* Desktop: 3-column grid layout */}
           <div className="hidden sm:grid sm:grid-cols-[140px_1fr_auto] lg:grid-cols-[160px_1fr_auto] gap-4">

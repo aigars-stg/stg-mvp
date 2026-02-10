@@ -7,7 +7,7 @@ import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema';
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games';
 
 export const metadata: Metadata = {
-  title: 'Help Centre | Second Turn Games',
+  title: 'Help Centre',
   description:
     'Guides and resources for buying and selling pre-loved board games on Second Turn Games.',
 };

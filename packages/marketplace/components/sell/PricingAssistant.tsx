@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, Button } from '@second-turn/design-system';
 import { TrendUp as TrendingUp, LinkExternal as ExternalLink, RefreshCw as Loader2, AlertCircle, Tag, ChartBar as BarChart3, PuzzlePiece as Puzzle, InfoCircle as Info } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface ExpansionPricing {
   bggGameId: number;
@@ -244,7 +245,7 @@ export function PricingAssistant({
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-polar-night tabular-nums">
-                    €{external.lowestPrice.toFixed(2)}
+                    {formatPrice(external.lowestPrice)}
                   </span>
                   <Button
                     variant="secondary"
@@ -268,7 +269,7 @@ export function PricingAssistant({
                     <span className="text-text-secondary">{t('baseGame')}</span>
                   </div>
                   <span className="text-text-secondary tabular-nums">
-                    €{external.lowestPrice.toFixed(2)}
+                    {formatPrice(external.lowestPrice)}
                   </span>
                 </div>
 
@@ -285,7 +286,7 @@ export function PricingAssistant({
                     </span>
                   </div>
                   <span className="text-text-secondary tabular-nums">
-                    €{bundleInfo.expansionTotal.toFixed(2)}
+                    {formatPrice(bundleInfo.expansionTotal)}
                   </span>
                 </div>
 
@@ -295,7 +296,7 @@ export function PricingAssistant({
                   <span className="text-sm font-medium text-polar-night">{t('bundleRetail')}</span>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-polar-night tabular-nums">
-                      €{bundleRetailValue.toFixed(2)}
+                      {formatPrice(bundleRetailValue)}
                     </span>
                     <Button
                       variant="secondary"
@@ -326,7 +327,7 @@ export function PricingAssistant({
             </div>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-polar-night tabular-nums">
-                €{internal.medianSoldPrice.toFixed(2)}
+                {formatPrice(internal.medianSoldPrice)}
               </span>
               <span className="text-xs text-text-muted">
                 ({t('salesCount', { count: internal.completedSalesCount })})
@@ -350,7 +351,7 @@ export function PricingAssistant({
               {t('lowestOnSecondTurn')}
             </span>
             <span className="text-text-secondary tabular-nums">
-              €{internal.lowestActivePrice.toFixed(2)}
+              {formatPrice(internal.lowestActivePrice)}
               {internal.lowestIsAuction && (
                 <span className="text-text-muted ml-1">{t('lowestIsAuction')}</span>
               )}
@@ -369,7 +370,7 @@ export function PricingAssistant({
               </span>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-frost-ice text-lg tabular-nums">
-                  €{suggestedPrice.toFixed(2)}
+                  {formatPrice(suggestedPrice)}
                 </span>
                 <Button
                   variant="primary"

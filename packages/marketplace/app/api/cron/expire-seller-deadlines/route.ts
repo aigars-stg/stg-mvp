@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/cron/expire-seller-deadlines
@@ -18,11 +19,7 @@ export async function GET(request: NextRequest) {
     const cronSecret = process.env.CRON_SECRET;
 
     if (!cronSecret) {
-      console.error('[Cron] CRON_SECRET environment variable not set');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
+      throw new Error('CRON_SECRET environment variable not set');
     }
 
     if (authHeader !== `Bearer ${cronSecret}`) {
@@ -50,11 +47,7 @@ export async function GET(request: NextRequest) {
     );
 
     if (error) {
-      console.error('[Cron] Error handling expired deadlines:', error);
-      return NextResponse.json(
-        { error: 'Failed to handle expired deadlines', details: error.message },
-        { status: 500 }
-      );
+      throw new Error(`Failed to handle expired deadlines: ${error.message}`);
     }
 
     const cancelledCount = result?.cancelled_count || 0;
@@ -225,11 +218,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(summary);
   } catch (error: unknown) {
-    console.error('[Cron] Unexpected error:', error);
-    return NextResponse.json(
-      { error: 'Cron job failed', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Expire seller deadlines');
   }
 }
 

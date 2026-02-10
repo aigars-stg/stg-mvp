@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/client';
+import { handleApiError } from '@/lib/api/error-handler';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,11 +107,7 @@ export async function GET(request: NextRequest) {
       .order('dac7_annual_sales_total', { ascending: false });
 
     if (queryError) {
-      console.error('Error fetching DAC7 sellers for export:', queryError);
-      return NextResponse.json(
-        { error: 'Failed to fetch sellers' },
-        { status: 500 }
-      );
+      throw new Error(`Failed to fetch sellers: ${queryError.message}`);
     }
 
     // Generate CSV content
@@ -178,10 +175,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error in staff DAC7 export endpoint:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Export DAC7');
   }
 }

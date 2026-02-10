@@ -1,11 +1,11 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Check, AlertCircle, InfoCircle as Info } from 'griddy-icons';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Unsubscribed | Second Turn Games',
+    title: 'Unsubscribed',
     robots: 'noindex',
   };
 }
@@ -57,11 +57,11 @@ export default async function UnsubscribedPage({ searchParams }: PageProps) {
           <Icon className={`w-8 h-8 ${config.iconColor}`} />
         </div>
 
-        <h1 className="text-2xl font-bold text-polar-night dark:text-snow-stormLightest mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-4">
           {config.title}
         </h1>
 
-        <p className="text-text-secondary dark:text-snow-stormLight mb-8">
+        <p className="text-text-secondary mb-8">
           {config.message}
         </p>
 

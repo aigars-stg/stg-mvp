@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
 import {
   ArrowDown,
@@ -10,6 +11,7 @@ import {
   Package,
 } from 'griddy-icons';
 import { formatDateTime } from '@/lib/date-utils';
+import { formatCentsToCurrency } from '@/lib/services/pricing';
 
 interface Transaction {
   id: string;
@@ -22,12 +24,12 @@ interface Transaction {
 
 const TYPE_CONFIG: Record<
   Transaction['type'],
-  { label: string; color: string; icon: typeof ArrowDown; sign: '+' | '-' }
+  { labelKey: string; color: string; icon: typeof ArrowDown; sign: '+' | '-' }
 > = {
-  sale_credit: { label: 'Sale earnings', color: 'text-aurora-green', icon: ArrowDown, sign: '+' },
-  purchase_debit: { label: 'Purchase', color: 'text-aurora-red', icon: ShoppingBag, sign: '-' },
-  withdrawal: { label: 'Withdrawal', color: 'text-aurora-red', icon: ArrowUp, sign: '-' },
-  refund_credit: { label: 'Refund', color: 'text-frost-ice', icon: Package, sign: '+' },
+  sale_credit: { labelKey: 'types.saleCredit', color: 'text-aurora-green', icon: ArrowDown, sign: '+' },
+  purchase_debit: { labelKey: 'types.purchaseDebit', color: 'text-aurora-red', icon: ShoppingBag, sign: '-' },
+  withdrawal: { labelKey: 'types.withdrawal', color: 'text-aurora-red', icon: ArrowUp, sign: '-' },
+  refund_credit: { labelKey: 'types.refundCredit', color: 'text-frost-ice', icon: Package, sign: '+' },
 };
 
 interface WalletTransactionsProps {
@@ -36,6 +38,7 @@ interface WalletTransactionsProps {
 }
 
 export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProps) {
+  const t = useTranslations('WalletTransactions');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -72,7 +75,6 @@ export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProp
     fetchTransactions(transactions.length, 20);
   };
 
-  const formatCents = (cents: number) => `€${(cents / 100).toFixed(2)}`;
 
   if (loading) {
     return (
@@ -94,9 +96,9 @@ export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProp
   if (transactions.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-text-secondary text-sm">No transactions yet</p>
+        <p className="text-text-secondary text-sm">{t('empty')}</p>
         <p className="text-text-muted text-xs mt-1">
-          Earnings from completed sales will appear here
+          {t('emptyHint')}
         </p>
       </div>
     );
@@ -121,7 +123,7 @@ export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProp
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-polar-night">
-                  {tx.description || config.label}
+                  {tx.description || t(config.labelKey)}
                 </p>
                 <p className="text-xs text-text-muted">
                   {formatDateTime(tx.createdAt)}
@@ -133,10 +135,10 @@ export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProp
                     isCredit ? 'text-aurora-green' : 'text-polar-night'
                   }`}
                 >
-                  {config.sign}{formatCents(tx.amountCents)}
+                  {config.sign}{formatCentsToCurrency(tx.amountCents)}
                 </p>
                 <p className="text-xs text-text-muted">
-                  bal. {formatCents(tx.balanceAfterCents)}
+                  {t('balance')} {formatCentsToCurrency(tx.balanceAfterCents)}
                 </p>
               </div>
             </div>
@@ -155,10 +157,10 @@ export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProp
             {loadingMore ? (
               <>
                 <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                Loading...
+                {t('loading')}
               </>
             ) : (
-              `Show more (${total - transactions.length} remaining)`
+              t('showMore', { count: total - transactions.length })
             )}
           </Button>
         </div>

@@ -2,12 +2,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
+import { formatPrice, formatCentsToCurrency } from '@/lib/services/pricing';
+import { SELLER_COMMISSION_RATE } from '@/lib/pricing/constants';
 
 interface OrderItem {
   id: string;
@@ -29,6 +31,8 @@ interface Order {
   items_total: number;
   shipping_cost: number;
   total_amount: number;
+  platform_commission_cents?: number | null;
+  seller_wallet_credit_cents?: number | null;
   created_at: string;
   seller_response_deadline?: string;
   order_items: OrderItem[];
@@ -60,6 +64,7 @@ export default function SellerOrdersPage() {
   const [decliningOrder, setDecliningOrder] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState('');
   const [showDeclineModal, setShowDeclineModal] = useState<string | null>(null);
+  const t = useTranslations('SellerOrders');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -176,7 +181,7 @@ export default function SellerOrdersPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
-          <p className="text-text-secondary">Loading your orders...</p>
+          <p className="text-text-secondary">{t('loading')}</p>
         </div>
       </div>
     );
@@ -192,8 +197,8 @@ export default function SellerOrdersPage() {
       {/* Header */}
       <div className="bg-frost-ice/5 border-b border-frost-ice/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">Seller Orders</h1>
-          <p className="text-text-secondary mt-1">Manage your orders and respond to buyers</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">{t('title')}</h1>
+          <p className="text-text-secondary mt-1">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -203,10 +208,10 @@ export default function SellerOrdersPage() {
           <div className="mb-6 p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-aurora-red font-medium">Error loading orders</p>
+              <p className="text-aurora-red font-medium">{t('error.title')}</p>
               <p className="text-sm text-text-secondary mt-1">{error}</p>
               <Button variant="ghost" size="sm" onClick={fetchOrders} className="mt-2">
-                Try again
+                {t('error.tryAgain')}
               </Button>
             </div>
           </div>
@@ -216,23 +221,23 @@ export default function SellerOrdersPage() {
         {summary && (
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-6">
             <div className="bg-snow-white border border-border rounded-lg p-4">
-              <p className="text-sm text-text-secondary">All Orders</p>
+              <p className="text-sm text-text-secondary">{t('summary.allOrders')}</p>
               <p className="text-2xl font-bold text-polar-night mt-1">{summary.total}</p>
             </div>
             <div className="bg-snow-white border border-border rounded-lg p-4">
-              <p className="text-sm text-text-secondary">Pending</p>
+              <p className="text-sm text-text-secondary">{t('summary.pending')}</p>
               <p className="text-2xl font-bold text-aurora-yellow mt-1">{summary.pending}</p>
             </div>
             <div className="bg-snow-white border border-border rounded-lg p-4">
-              <p className="text-sm text-text-secondary">Accepted</p>
+              <p className="text-sm text-text-secondary">{t('summary.accepted')}</p>
               <p className="text-2xl font-bold text-frost-ice mt-1">{summary.accepted}</p>
             </div>
             <div className="bg-snow-white border border-border rounded-lg p-4">
-              <p className="text-sm text-text-secondary">Shipped</p>
+              <p className="text-sm text-text-secondary">{t('summary.shipped')}</p>
               <p className="text-2xl font-bold text-aurora-green mt-1">{summary.shipped}</p>
             </div>
             <div className="bg-snow-white border border-border rounded-lg p-4">
-              <p className="text-sm text-text-secondary">Completed</p>
+              <p className="text-sm text-text-secondary">{t('summary.completed')}</p>
               <p className="text-2xl font-bold text-text-muted mt-1">{summary.completed}</p>
             </div>
           </div>
@@ -241,11 +246,11 @@ export default function SellerOrdersPage() {
         {/* Filter Tabs */}
         <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
           {[
-            { key: 'pending' as FilterTab, label: 'Pending', count: summary?.pending || 0 },
-            { key: 'accepted' as FilterTab, label: 'Accepted', count: summary?.accepted || 0 },
-            { key: 'shipped' as FilterTab, label: 'Shipped', count: summary?.shipped || 0 },
-            { key: 'completed' as FilterTab, label: 'Completed', count: summary?.completed || 0 },
-            { key: 'all' as FilterTab, label: 'All', count: summary?.total || 0 },
+            { key: 'pending' as FilterTab, label: t('tabs.pending'), count: summary?.pending || 0 },
+            { key: 'accepted' as FilterTab, label: t('tabs.accepted'), count: summary?.accepted || 0 },
+            { key: 'shipped' as FilterTab, label: t('tabs.shipped'), count: summary?.shipped || 0 },
+            { key: 'completed' as FilterTab, label: t('tabs.completed'), count: summary?.completed || 0 },
+            { key: 'all' as FilterTab, label: t('tabs.all'), count: summary?.total || 0 },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -268,11 +273,11 @@ export default function SellerOrdersPage() {
         {filteredOrders.length === 0 ? (
           <div className="text-center py-16">
             <Package className="w-16 h-16 text-text-muted mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-polar-night mb-2">No orders found</h2>
+            <h2 className="text-xl font-semibold text-polar-night mb-2">{t('noOrders.title')}</h2>
             <p className="text-text-secondary">
               {activeTab === 'pending'
-                ? 'You have no pending orders to review'
-                : `No ${activeTab} orders`}
+                ? t('noOrders.pending')
+                : t('noOrders.other', { tab: activeTab })}
             </p>
           </div>
         ) : (
@@ -302,7 +307,7 @@ export default function SellerOrdersPage() {
                       </Badge>
                     </div>
                     <p className="text-sm text-text-secondary">
-                      Buyer: {order.buyer_name}
+                      {t('card.buyer', { name: order.buyer_name })}
                     </p>
                   </div>
 
@@ -320,10 +325,8 @@ export default function SellerOrdersPage() {
                       <Clock className="w-4 h-4" />
                       <span className="text-sm font-medium">
                         {order.is_expired
-                          ? 'Expired'
-                          : `${Math.floor(order.time_remaining_ms / 3600000)}h ${Math.floor(
-                              (order.time_remaining_ms % 3600000) / 60000
-                            )}m left`}
+                          ? t('card.expired')
+                          : t('card.timeRemaining', { hours: Math.floor(order.time_remaining_ms / 3600000), minutes: Math.floor((order.time_remaining_ms % 3600000) / 60000) })}
                       </span>
                     </div>
                   )}
@@ -332,7 +335,7 @@ export default function SellerOrdersPage() {
                 {/* Order Items */}
                 <div className="mb-4">
                   <p className="text-sm font-medium text-polar-night mb-2">
-                    Items ({order.order_items.length})
+                    {t('card.items', { count: order.order_items.length })}
                   </p>
                   <div className="space-y-2">
                     {order.order_items.map((item) => (
@@ -357,7 +360,7 @@ export default function SellerOrdersPage() {
                               {getConditionLabel(item.condition as ListingCondition)}
                             </Badge>
                             <span className="text-sm font-medium text-polar-night">
-                              €{item.price.toFixed(2)}
+                              {formatPrice(item.price)}
                             </span>
                           </div>
                         </div>
@@ -372,7 +375,7 @@ export default function SellerOrdersPage() {
                     {order.shipping_method === 't2t' ? (
                       <>
                         <Truck className="w-4 h-4 text-frost-ice" />
-                        <span className="font-medium">Terminal Pickup:</span>
+                        <span className="font-medium">{t('shipping.terminalPickup')}</span>
                         <span className="text-text-secondary">
                           {order.destination_terminal_name}
                         </span>
@@ -380,7 +383,7 @@ export default function SellerOrdersPage() {
                     ) : (
                       <>
                         <User className="w-4 h-4 text-frost-ice" />
-                        <span className="font-medium">Local Pickup:</span>
+                        <span className="font-medium">{t('shipping.localPickup')}</span>
                         <span className="text-text-secondary">{order.pickup_city}</span>
                       </>
                     )}
@@ -390,23 +393,23 @@ export default function SellerOrdersPage() {
                 {/* Pricing */}
                 <div className="mb-4 space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-text-secondary">Items:</span>
-                    <span className="font-medium">€{order.items_total.toFixed(2)}</span>
+                    <span className="text-text-secondary">{t('pricing.items')}</span>
+                    <span className="font-medium">{formatPrice(order.items_total)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-text-secondary">Shipping:</span>
-                    <span className="font-medium">€{order.shipping_cost.toFixed(2)}</span>
+                    <span className="text-text-secondary">{t('pricing.shipping')}</span>
+                    <span className="font-medium">{formatPrice(order.shipping_cost)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-text-secondary">Commission (10%):</span>
+                    <span className="text-text-secondary">{t('pricing.commission')}</span>
                     <span className="font-medium text-aurora-red">
-                      -€{(order.items_total * 0.10).toFixed(2)}
+                      -{formatCentsToCurrency(order.platform_commission_cents ?? Math.round(order.items_total * SELLER_COMMISSION_RATE * 100))}
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-border-subtle">
-                    <span className="font-semibold text-polar-night">You receive:</span>
+                    <span className="font-semibold text-polar-night">{t('pricing.youReceive')}</span>
                     <span className="text-lg font-bold text-aurora-green">
-                      €{(order.items_total * 0.90).toFixed(2)}
+                      {formatCentsToCurrency(order.seller_wallet_credit_cents ?? Math.round(order.items_total * (1 - SELLER_COMMISSION_RATE) * 100))}
                     </span>
                   </div>
                 </div>
@@ -423,12 +426,12 @@ export default function SellerOrdersPage() {
                       {acceptingOrder === order.id ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Accepting...
+                          {t('actions.accepting')}
                         </>
                       ) : (
                         <>
                           <CheckCircle2 className="w-4 h-4 mr-2" />
-                          Accept Order
+                          {t('actions.acceptOrder')}
                         </>
                       )}
                     </Button>
@@ -439,7 +442,7 @@ export default function SellerOrdersPage() {
                       disabled={decliningOrder === order.id}
                     >
                       <XCircle className="w-4 h-4 mr-2" />
-                      Decline
+                      {t('actions.decline')}
                     </Button>
                   </div>
                 )}
@@ -447,7 +450,7 @@ export default function SellerOrdersPage() {
                 {order.status !== 'pending_seller' && (
                   <Link href={`/seller/orders/${order.id}`}>
                     <Button variant="secondary" fullWidth>
-                      View Details
+                      {t('actions.viewDetails')}
                       <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
@@ -462,15 +465,14 @@ export default function SellerOrdersPage() {
       {showDeclineModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-snow-white rounded-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-semibold text-polar-night mb-4">Decline Order</h3>
+            <h3 className="text-xl font-semibold text-polar-night mb-4">{t('declineModal.title')}</h3>
             <p className="text-text-secondary mb-4">
-              Please provide a reason for declining this order. The buyer will be automatically
-              refunded.
+              {t('declineModal.description')}
             </p>
             <textarea
               value={declineReason}
               onChange={(e) => setDeclineReason(e.target.value)}
-              placeholder="e.g., Item no longer available"
+              placeholder={t('declineModal.placeholder')}
               className="w-full p-3 border border-border rounded-lg mb-4 min-h-[100px] focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
             />
             <div className="flex gap-3">
@@ -483,7 +485,7 @@ export default function SellerOrdersPage() {
                 }}
                 disabled={decliningOrder === showDeclineModal}
               >
-                Cancel
+                {t('declineModal.cancel')}
               </Button>
               <Button
                 variant="primary"
@@ -494,10 +496,10 @@ export default function SellerOrdersPage() {
                 {decliningOrder === showDeclineModal ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Declining...
+                    {t('declineModal.declining')}
                   </>
                 ) : (
-                  'Confirm Decline'
+                  t('declineModal.confirmDecline')
                 )}
               </Button>
             </div>

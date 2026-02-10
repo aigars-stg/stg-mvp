@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getPuzzleNumber, getTodayDateString } from '@/lib/play/puzzle-service';
 import type { DailyPuzzleResponse } from '@/lib/play/types';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/play/daily
@@ -20,10 +21,6 @@ export async function GET() {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('[Play API] Error getting daily puzzle:', error);
-    return NextResponse.json(
-      { error: 'Failed to get daily puzzle' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Fetch daily puzzle');
   }
 }

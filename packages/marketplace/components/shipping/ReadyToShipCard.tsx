@@ -36,7 +36,7 @@ export function ReadyToShipCard({
           <Truck className="w-6 h-6 text-frost-ice" />
         </div>
         <div className="flex-grow">
-          <h3 className="text-lg font-semibold text-polar-night dark:text-snow-white mb-1">
+          <h3 className="text-lg font-semibold text-polar-night mb-1">
             Ready to Ship
           </h3>
           <p className="text-sm text-text-secondary mb-4">
@@ -45,7 +45,7 @@ export function ReadyToShipCard({
           </p>
 
           {/* Parcel ID - Main focus */}
-          <div className="mb-4 p-4 bg-snow-white dark:bg-polar-night rounded-lg border-2 border-frost-ice">
+          <div className="mb-4 p-4 bg-snow-white rounded-lg border-2 border-frost-ice">
             <p className="text-xs text-text-secondary mb-1">Your Parcel ID</p>
             <p className="font-mono text-2xl font-bold text-frost-ice">
               {displayParcelId}
@@ -60,7 +60,7 @@ export function ReadyToShipCard({
               </div>
               <p className="text-sm text-text-secondary">
                 Go to your nearest{' '}
-                <strong className="text-polar-night dark:text-snow-white">
+                <strong className="text-polar-night">
                   Unisend terminal
                 </strong>
               </p>
@@ -71,7 +71,7 @@ export function ReadyToShipCard({
               </div>
               <p className="text-sm text-text-secondary">
                 Enter the{' '}
-                <strong className="text-polar-night dark:text-snow-white">
+                <strong className="text-polar-night">
                   Parcel ID
                 </strong>{' '}
                 above at the terminal screen
@@ -82,7 +82,7 @@ export function ReadyToShipCard({
                 3
               </div>
               <p className="text-sm text-text-secondary">
-                <strong className="text-polar-night dark:text-snow-white">
+                <strong className="text-polar-night">
                   Print the label
                 </strong>{' '}
                 at the terminal and attach it to your parcel
@@ -93,7 +93,7 @@ export function ReadyToShipCard({
                 4
               </div>
               <p className="text-sm text-text-secondary">
-                <strong className="text-polar-night dark:text-snow-white">
+                <strong className="text-polar-night">
                   Place the parcel
                 </strong>{' '}
                 in the locker opened by the terminal

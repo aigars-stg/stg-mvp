@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Package, CurrencyDollar as DollarSign, TrendUp as TrendingUp, Heart } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
-import Link from 'next/link';
 
 export default function SellerOnboardingCompletePage() {
   const router = useRouter();

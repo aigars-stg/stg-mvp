@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, Button } from '@second-turn/design-system';
 import { TrendUp as TrendingUp, LinkExternal as ExternalLink, RefreshCw as Loader2, AlertCircle, Tag, ChartBar as BarChart3, InfoCircle as Info } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
+import { formatPrice } from '@/lib/services/pricing';
 import type { ListingCondition } from '@/lib/types/listing';
 
 interface PricingData {
@@ -179,7 +180,7 @@ export function BudgetAssistant({
             </div>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-polar-night tabular-nums">
-                €{external.lowestPrice.toFixed(2)}
+                {formatPrice(external.lowestPrice)}
               </span>
               <Button
                 variant="secondary"
@@ -207,7 +208,7 @@ export function BudgetAssistant({
             </div>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-polar-night tabular-nums">
-                €{internal.medianSoldPrice.toFixed(2)}
+                {formatPrice(internal.medianSoldPrice)}
               </span>
               <span className="text-xs text-text-muted">
                 ({t('salesCount', { count: internal.completedSalesCount })})
@@ -231,7 +232,7 @@ export function BudgetAssistant({
               {t('lowestOnSecondTurn')}
             </span>
             <span className="text-text-secondary tabular-nums">
-              €{internal.lowestActivePrice.toFixed(2)}
+              {formatPrice(internal.lowestActivePrice)}
             </span>
           </div>
         )}
@@ -253,7 +254,7 @@ export function BudgetAssistant({
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-aurora-orange text-lg tabular-nums">
-                  €{suggestedBudget.toFixed(2)}
+                  {formatPrice(suggestedBudget)}
                 </span>
                 <Button
                   variant="primary"

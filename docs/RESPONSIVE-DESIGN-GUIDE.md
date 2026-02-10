@@ -28,10 +28,10 @@ Second Turn follows a **mobile-first responsive design** strategy:
 - Performance-optimized for slower mobile connections
 
 ### Nordic Minimalism
-- Clean, spacious layouts
+- Clean, compact marketplace layouts
 - Minimal use of decorative elements
-- Focus on content and usability
-- Breathing room at all screen sizes
+- Focus on content density and usability
+- Balanced breathing room — tighter than editorial, roomier than spreadsheets
 
 ---
 
@@ -73,7 +73,7 @@ All pages use the same container pattern for consistency:
 
 ```tsx
 // Standard Container
-<div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+<div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
   {/* Content */}
 </div>
 ```
@@ -82,7 +82,7 @@ All pages use the same container pattern for consistency:
 - `max-w-7xl` (1280px): Maximum content width
 - `mx-auto`: Centered on large screens
 - `px-4 sm:px-6`: Horizontal padding (16px mobile, 24px tablet+)
-- `py-8 sm:py-12`: Vertical padding (32px mobile, 48px tablet+)
+- `py-6`: Vertical padding (24px — compact marketplace spacing)
 
 ### Grid Patterns
 
@@ -180,8 +180,8 @@ className="gap-4 sm:gap-6"     // Gap: 16px → 24px
 className="space-y-4 sm:space-y-6"  // Stack spacing
 
 // Large Spacing
-className="py-8 sm:py-12"      // Section padding: 32px → 48px
-className="mt-12 sm:mt-24"     // Section margin: 48px → 96px
+className="py-6 sm:py-8"       // Section padding: 24px → 32px
+className="mt-8 sm:mt-12"      // Section margin: 32px → 48px
 ```
 
 ### Component Sizing

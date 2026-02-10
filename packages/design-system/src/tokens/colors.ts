@@ -30,6 +30,7 @@ export const colors = {
     green: '#A3BE8C',       // Success states only (minimal use)
     red: '#BF616A',         // Errors, rare/collectible items
     yellow: '#EBCB8B',      // Warnings, attention needed
+    purple: '#B48EAD',      // Auctions, bidding (Nord purple)
   },
 
   // Semantic colors - mapped from palette

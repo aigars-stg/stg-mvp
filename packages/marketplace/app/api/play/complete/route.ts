@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { getPuzzleNumber } from '@/lib/play/puzzle-service';
+import { handleApiError } from '@/lib/api/error-handler';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -97,8 +98,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[Play API] Error in complete endpoint:', error);
-    // Don't fail the request - tracking is non-critical
-    return NextResponse.json({ success: false, error: 'Internal error' });
+    return handleApiError(error, 'Complete puzzle');
   }
 }

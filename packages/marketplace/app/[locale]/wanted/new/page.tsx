@@ -4,7 +4,8 @@
 import { useEffect, useCallback, Suspense } from 'react';
 import { Button, Card, Modal } from '@second-turn/design-system';
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { GameSearch } from '@/components/sell/GameSearch';
 import { LanguageVersionSelector } from '@/components/sell/LanguageVersionSelector';
@@ -132,7 +133,6 @@ function CreateWantedListingPageContent() {
           notes: true,
         });
       } catch (err: unknown) {
-        console.error('Error fetching wanted listing for edit:', err);
         setLoadError(err instanceof Error ? err.message : 'Failed to load wanted listing');
       } finally {
         setIsLoadingListing(false);
@@ -180,7 +180,6 @@ function CreateWantedListingPageContent() {
       }
 
       if (data.fallbackMode) {
-        console.log(`🔄 [Wanted New Page] Entering fallback mode: ${data.reason}`);
         setFallbackMode(true);
         setFallbackReason(data.reason);
       }
@@ -196,8 +195,7 @@ function CreateWantedListingPageContent() {
       } catch {
         // Silently fail - banner is optional
       }
-    } catch (error) {
-      console.error('Error fetching game details:', error);
+    } catch {
       setFallbackMode(true);
       setFallbackReason(t('errors.gameDetailsFailed'));
     } finally {
@@ -236,8 +234,6 @@ function CreateWantedListingPageContent() {
 
       if (isEditMode) {
         // Edit mode: Update existing wanted listing
-        console.log('📝 [Wanted New Page] Updating wanted listing...');
-
         const updates = {
           min_price: null,
           max_price: parseFloat(maxPrice),
@@ -258,13 +254,10 @@ function CreateWantedListingPageContent() {
           throw new Error(error.error || 'Failed to update wanted listing');
         }
 
-        console.log(`✅ [Wanted New Page] Updated wanted listing ${editListingId}`);
-
         // Redirect to game page with wanted section
         router.push(`/game/${selectedGame.id}#wanted`);
       } else {
         // Create mode: Create new wanted listing
-        console.log('📝 [Wanted New Page] Creating wanted listing...');
 
         const response = await fetch('/api/wanted', {
           method: 'POST',
@@ -291,13 +284,10 @@ function CreateWantedListingPageContent() {
           throw new Error(data.error || 'Failed to create wanted listing');
         }
 
-        console.log('✅ [Wanted New Page] Created wanted listing');
-
         // Show success modal
         setShowSuccessModal(true);
       }
     } catch (err: unknown) {
-      console.error('Error saving wanted listing:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setSubmitting(false);
@@ -445,7 +435,7 @@ function CreateWantedListingPageContent() {
                   selectedVersion={selectedVersion}
                   onChange={(name) => setSelectedGameDisplayName(name)}
                   onAutoComplete={() => {
-                    console.log('[GameNameSelector] Auto-completed with primary name');
+                    // Auto-completed, can mark section as complete
                   }}
                   onChangeName={handleChangeName}
                   hideChangeNameButton={true}

@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Button, Card } from '@second-turn/design-system';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 /**

@@ -38,7 +38,7 @@ Think of us as the venue, not the seller. We provide the space for you to meet a
 
 - Provide a platform for listing and discovering games
 - Facilitate communication between users
-- Process payments securely through Stripe Connect
+- Process payments securely via card and bank link payments
 - Generate shipping labels through Unisend SIA
 - Hold payment until orders are completed (buyer protection)
 - Host user-generated content (listings, profiles, messages)
@@ -154,28 +154,34 @@ All listings must:
 Your payment is processed when you buy. The seller receives funds after you have had a chance to check the game (2 days after delivery). If something is wrong, report it before then.
 :::
 
-### 6.2 Service Fees
+### 6.2 Fees
 
-**Sellers:** No platform fees. You receive your full listing price.
+**Buyers:** You pay the listed price plus flat-rate shipping:
 
-**Buyers:** A service fee is added to each purchase:
+| Cost | Amount |
+|------|--------|
+| Game price | As listed by seller |
+| Shipping (parcel terminal) | **€2.00** |
+
+No service fees or hidden costs. All costs are displayed at checkout before you confirm.
+
+**Sellers:** A 10% commission is deducted from the item price for each Instant Buy sale:
 
 | Fee | Amount |
 |-----|--------|
-| Service fee | **6% + €0.50** |
-| Shipping (parcel terminal) | **€2.00** |
+| Platform commission | **10% of item price** |
 
-All fees are displayed at checkout before you confirm. Current rates are on our [Fees page](/legal?section=fees).
+Your earnings are credited to your platform wallet after each completed sale. Current rates are on our [Fees page](/legal?section=fees).
 
 We may update our fees from time to time. Changes will be announced on the platform. Continued use after fee changes constitutes acceptance.
 
 ### 6.3 Payment Processing
 
-Payments are processed by **Stripe Connect**, a licensed payment services provider.
+Payments are processed securely via card and bank link payments through our payment partner.
 
-- Your payment is processed securely by Stripe
-- The seller receives funds after the order completes
-- Sellers withdraw their balance to their bank account (Stripe charges €0.30 per payout)
+- Your payment is processed securely at checkout
+- The seller receives earnings (minus 10% commission) after the order completes
+- Sellers can withdraw their wallet balance to their bank account at any time (no fees)
 
 ### 6.4 Shipping
 
@@ -376,7 +382,20 @@ For disputes with Second Turn Games SIA:
 2. If unresolved, disputes will be subject to the jurisdiction of the courts of Riga, Latvia
 3. EU consumers may contact their national consumer protection agency
 
-### 12.3 User-to-User Disputes
+### 12.3 Out-of-Court Dispute Resolution
+
+If you are unable to resolve a dispute with us directly, you may refer the matter to the **Consumer Rights Protection Centre of Latvia (PTAC)**, which facilitates out-of-court consumer dispute resolution:
+
+| | |
+|---|---|
+| **Consumer Dispute Resolution Commission** | [www.ptac.gov.lv](https://www.ptac.gov.lv/en/consumer-dispute-resolution-commission-0) |
+| **Address** | Brīvības iela 55, Rīga, LV-1010, Latvia |
+| **Phone** | +371 65452554 |
+| **Email** | pasts@ptac.gov.lv |
+
+For consumers in other EU member states, a directory of national dispute resolution bodies is available at [consumer-redress.ec.europa.eu](https://consumer-redress.ec.europa.eu/dispute-resolution-bodies).
+
+### 12.4 User-to-User Disputes
 
 Disputes between users are between those users. You may seek resolution through your payment provider, consumer protection agencies, or courts in your jurisdiction.
 

@@ -127,7 +127,15 @@ export function calculateCheckoutPricingFromEuros(
 // ==============================================
 
 /**
- * Format cents to Euro string
+ * Format euro amount to currency string
+ * @example formatPrice(25.5) => "€25.50"
+ */
+export function formatPrice(euros: number): string {
+  return `€${euros.toFixed(2)}`;
+}
+
+/**
+ * Format cents to Euro string (without symbol)
  * @example formatCentsToEuros(2550) => "25.50"
  */
 export function formatCentsToEuros(cents: number): string {
@@ -139,8 +147,5 @@ export function formatCentsToEuros(cents: number): string {
  * @example formatCentsToCurrency(2550) => "€25.50"
  */
 export function formatCentsToCurrency(cents: number): string {
-  return new Intl.NumberFormat('en-EU', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(cents / 100);
+  return formatPrice(cents / 100);
 }

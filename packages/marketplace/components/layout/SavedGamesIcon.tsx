@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { Heart } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';

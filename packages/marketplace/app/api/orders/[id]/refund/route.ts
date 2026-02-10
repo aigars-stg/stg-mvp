@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { refundPayment } from '@/lib/everypay/client';
 import { EveryPayError } from '@/lib/everypay/client';
+import { createServiceClient } from '@/lib/supabase/client';
 
 const adminSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -73,10 +74,19 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Check if user is buyer, seller, or admin
-    // For now, only allow buyer or seller to request refund
-    // TODO: Add proper admin role check
-    if (order.buyer_id !== user.id && order.seller_id !== user.id) {
+    // Check if user is buyer, seller, or staff
+    const serviceClient = createServiceClient();
+    const { data: profile } = await serviceClient
+      .from('user_profiles')
+      .select('is_staff')
+      .eq('id', user.id)
+      .single();
+
+    const isStaff = profile?.is_staff === true;
+    const isBuyer = order.buyer_id === user.id;
+    const isSeller = order.seller_id === user.id;
+
+    if (!isStaff && !isBuyer && !isSeller) {
       return NextResponse.json(
         { error: 'You are not authorized to refund this order' },
         { status: 403 }

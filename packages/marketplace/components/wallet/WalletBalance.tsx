@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
 import { CurrencyEuro as Euro, ArrowUp } from 'griddy-icons';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
+import { formatCentsToCurrency } from '@/lib/services/pricing';
 
 interface WalletBalanceProps {
   /** Show a compact version (no withdraw button) */
@@ -35,10 +36,6 @@ export function WalletBalance({ compact = false, showLink = false }: WalletBalan
     }
   };
 
-  const formatBalance = (cents: number) => {
-    return `€${(cents / 100).toFixed(2)}`;
-  };
-
   if (compact) {
     return (
       <div className="flex items-center gap-3">
@@ -51,7 +48,7 @@ export function WalletBalance({ compact = false, showLink = false }: WalletBalan
             <div className="h-6 w-16 bg-bg-elevated rounded animate-pulse" />
           ) : (
             <p className="text-lg font-bold text-polar-night">
-              {formatBalance(balanceCents || 0)}
+              {formatCentsToCurrency(balanceCents || 0)}
             </p>
           )}
         </div>
@@ -72,7 +69,7 @@ export function WalletBalance({ compact = false, showLink = false }: WalletBalan
               <div className="h-8 w-24 bg-bg-elevated rounded animate-pulse mt-1" />
             ) : (
               <p className="text-2xl font-bold text-polar-night">
-                {formatBalance(balanceCents || 0)}
+                {formatCentsToCurrency(balanceCents || 0)}
               </p>
             )}
           </div>

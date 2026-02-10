@@ -46,7 +46,7 @@ export function TrackingNumberCard({
     <div
       className={`p-4 bg-frost-ice/10 border border-frost-ice/20 rounded-lg ${className}`}
     >
-      <p className="text-sm font-medium text-polar-night dark:text-snow-white mb-2">
+      <p className="text-sm font-medium text-polar-night mb-2">
         {title}
       </p>
       <p className="font-mono text-lg font-bold text-frost-ice">

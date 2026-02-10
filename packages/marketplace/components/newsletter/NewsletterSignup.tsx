@@ -91,7 +91,7 @@ export function NewsletterSignup() {
 
   return (
     <div className="w-full">
-      <p className="text-sm text-text-secondary dark:text-snow-stormLight mb-3">
+      <p className="text-sm text-text-secondary mb-3">
         {t('description')}
       </p>
 

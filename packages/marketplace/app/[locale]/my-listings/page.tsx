@@ -3,7 +3,7 @@
 import { Suspense } from 'react';
 import { Button, Card } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircle, CloseCircle as XCircle, Plus, Search, Heart, Layout as LayoutDashboard } from 'griddy-icons';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { OfferCard } from '@/components/game/OfferCard';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
 import { ListingActionsMenu } from '@/components/listing/ListingActionsMenu';
@@ -108,7 +108,7 @@ function MyListingsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-bg py-8 px-4">
+    <div className="min-h-screen bg-bg py-6 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-6 sm:mb-8">

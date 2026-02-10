@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { getTerminals, TerminalCountry, UnisendApiError } from '@/lib/unisend';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/shipping/terminals
@@ -36,8 +37,6 @@ export async function GET(request: NextRequest) {
       count: terminals.length,
     });
   } catch (error) {
-    console.error('❌ [Terminals] Error:', error);
-
     if (error instanceof UnisendApiError) {
       return NextResponse.json(
         { error: error.message },
@@ -45,9 +44,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to fetch terminals' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Fetch terminals');
   }
 }

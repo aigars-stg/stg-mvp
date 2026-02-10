@@ -32,7 +32,7 @@ export function MobileFilterDrawer({
       />
 
       {/* Drawer */}
-      <div className="fixed inset-x-0 bottom-0 bg-snow-white rounded-t-2xl shadow-2xl z-50 max-h-[85vh] flex flex-col lg:hidden animate-in slide-in-from-bottom-full duration-300">
+      <div className="fixed inset-x-0 bottom-0 bg-snow-white rounded-t-2xl shadow-xl z-50 max-h-[85vh] flex flex-col lg:hidden animate-in slide-in-from-bottom-full duration-300">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border-subtle">
           <h2 className="text-lg font-semibold text-polar-night">{t('filters.title')}</h2>

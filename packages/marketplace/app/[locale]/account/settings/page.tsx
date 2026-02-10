@@ -228,7 +228,7 @@ export default function AccountSettingsPage() {
   }
 
   // The return statement is wrapped carefully to avoid syntax errors
-  return <div className="min-h-screen bg-bg py-4 sm:py-8 px-4" id="account-settings">
+  return <div className="min-h-screen bg-bg py-4 sm:py-6 px-4 sm:px-6" id="account-settings">
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-4 sm:mb-8">

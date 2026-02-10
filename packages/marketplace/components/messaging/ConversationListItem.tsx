@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { Package } from 'griddy-icons';
 import type { ConversationListItem as ConversationListItemType } from '@/lib/types/message';
 import { Avatar } from '@/components/user';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface ConversationListItemProps {
   conversation: ConversationListItemType;
@@ -98,7 +99,7 @@ export function ConversationListItem({
                   {listing.title}
                 </p>
                 <p className="text-xs font-medium text-text-primary">
-                  €{listing.price.toFixed(2)}
+                  {formatPrice(listing.price)}
                 </p>
               </div>
             </div>
@@ -113,7 +114,7 @@ export function ConversationListItem({
                   Order {conversation.order.order_number}
                 </p>
                 <p className="text-xs font-medium text-text-primary">
-                  €{conversation.order.total_amount.toFixed(2)}
+                  {formatPrice(conversation.order.total_amount)}
                 </p>
               </div>
             </div>

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/navigation';
+import { useParams } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { ArrowLeft, RefreshCw as Loader2, User, Star, Package, ShoppingBag, Chat as MessageSquare } from 'griddy-icons';
 import { SellerReviewsList } from '@/components/seller/SellerReviewsList';
@@ -197,7 +197,7 @@ export default function ProfilePage() {
   // Error state
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-bg-secondary py-8 px-4">
+      <div className="min-h-screen bg-bg-secondary py-6 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           <Link
             href="/browse"
@@ -209,7 +209,7 @@ export default function ProfilePage() {
 
           <Card className="p-8 text-center">
             <User className="w-16 h-16 text-text-muted mx-auto mb-4 opacity-50" />
-            <h1 className="text-xl font-bold text-polar-night mb-2">{t('userNotFound')}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">{t('userNotFound')}</h1>
             <p className="text-text-secondary mb-6">
               {error || t('profileNotFound')}
             </p>
@@ -226,7 +226,7 @@ export default function ProfilePage() {
   const isSeller = !!seller;
 
   return (
-    <div className="min-h-screen bg-bg-secondary py-8 px-4">
+    <div className="min-h-screen bg-bg-secondary py-6 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Back Link */}
         <button

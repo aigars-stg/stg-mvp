@@ -14,9 +14,9 @@ const RESULT_STYLES = {
   correct: 'bg-teal-500 text-white',
   close: 'bg-amber-400 text-gray-900',
   partial: 'bg-amber-400 text-gray-900',
-  higher: 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200',
-  lower: 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200',
-  none: 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200',
+  higher: 'bg-gray-200 text-gray-700',
+  lower: 'bg-gray-200 text-gray-700',
+  none: 'bg-gray-200 text-gray-700',
 };
 
 const RESULT_ICONS: Record<NumericFeedbackResult | SetFeedbackResult, string> = {
@@ -49,13 +49,13 @@ interface AttributeRowProps {
 
 function AttributeRow({ icon, label, value, result, suffix = '' }: AttributeRowProps) {
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-0">
-      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+    <div className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0">
+      <div className="flex items-center gap-2 text-sm text-gray-600">
         {icon}
         <span>{label}</span>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-gray-900 dark:text-white">
+        <span className="text-sm font-medium text-gray-900">
           {value}{suffix}
         </span>
         <span
@@ -78,9 +78,9 @@ interface SetAttributeRowProps {
 
 function SetAttributeRow({ icon, label, items, matched, result }: SetAttributeRowProps) {
   return (
-    <div className="py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+    <div className="py-2 border-b border-gray-100 last:border-0">
       <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
           {icon}
           <span>{label}</span>
         </div>
@@ -98,8 +98,8 @@ function SetAttributeRow({ icon, label, items, matched, result }: SetAttributeRo
               key={item}
               className={`text-xs px-2 py-0.5 rounded-full ${
                 isMatched
-                  ? 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200'
-                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                  ? 'bg-teal-100 text-teal-800'
+                  : 'bg-gray-100 text-gray-600'
               }`}
             >
               {item}
@@ -117,12 +117,12 @@ export function GuessCard({ guess, index }: GuessCardProps) {
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300"
+      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       {/* Header with game info */}
-      <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex-shrink-0 w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
+      <div className="flex items-center gap-3 p-4 bg-gray-50 border-b border-gray-200">
+        <div className="flex-shrink-0 w-12 h-12 bg-gray-200 rounded-lg overflow-hidden">
           {guess.thumbnail ? (
             <Image
               src={guess.thumbnail}
@@ -139,10 +139,10 @@ export function GuessCard({ guess, index }: GuessCardProps) {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+          <h3 className="font-semibold text-gray-900 truncate">
             {guess.gameName}
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500">
             {t('guessNumber', { number: index + 1 })}
           </p>
         </div>

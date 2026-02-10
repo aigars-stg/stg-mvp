@@ -11,6 +11,7 @@ import type { ListingQuestion } from '@/lib/types/question';
 import type { ListingCondition } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import { useTranslations } from 'next-intl';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface ListingQuestionsDrawerProps {
   listingId: string;
@@ -181,7 +182,7 @@ export function ListingQuestionsDrawer({
                 {gameName}
               </h3>
               <p className="text-sm text-text-secondary">
-                €{price.toFixed(2)} · {conditionLabel}
+                {formatPrice(price)} · {conditionLabel}
               </p>
             </div>
           </div>

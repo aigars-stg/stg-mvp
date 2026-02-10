@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import type { User, Session, AuthChangeEvent, Subscription, UserIdentity } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
 import { loggers } from '@/lib/logger';

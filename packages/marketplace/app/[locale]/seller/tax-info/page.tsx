@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Button, Badge, Input, Select } from '@second-turn/design-system';
 import {
   CheckCircleAlt01 as CheckCircle2,
@@ -12,7 +12,6 @@ import {
   ShieldCheck,
 } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
-import Link from 'next/link';
 import {
   validateTaxId,
   getTaxIdLabel,
@@ -25,6 +24,7 @@ import {
   getDac7StatusLabel,
   type Dac7ComplianceStatus,
 } from '@/lib/types/seller';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface TaxInfoStatus {
   complianceStatus: Dac7ComplianceStatus;
@@ -326,8 +326,7 @@ export default function SellerTaxInfoPage() {
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-text-secondary">Sales total this year</span>
                 <span className="font-medium">
-                  €{status.annualSalesTotal.toFixed(2)} / €
-                  {DAC7_THRESHOLDS.SALES_TOTAL}
+                  {formatPrice(status.annualSalesTotal)} / {formatPrice(DAC7_THRESHOLDS.SALES_TOTAL)}
                 </span>
               </div>
               <div className="h-2 bg-bg-elevated rounded-full overflow-hidden">

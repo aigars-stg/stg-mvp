@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/games/[id]/pricing
@@ -35,11 +36,7 @@ export async function GET(
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('[Pricing API] Missing Supabase configuration');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
+      throw new Error('Missing Supabase configuration');
     }
 
     // Call the Edge Function with optional expansion IDs
@@ -75,10 +72,6 @@ export async function GET(
       },
     });
   } catch (error: unknown) {
-    console.error('[Pricing API] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch pricing data' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Fetch pricing');
   }
 }

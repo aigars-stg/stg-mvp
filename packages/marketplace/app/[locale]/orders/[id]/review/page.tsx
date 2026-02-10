@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/navigation';
+import { useParams } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { Star, ArrowLeft, RefreshCw as Loader2, CheckCircleAlt01 as CheckCircle2, Package } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -171,7 +171,7 @@ export default function ReviewOrderPage() {
   // Error state
   if (error && !order) {
     return (
-      <div className="min-h-screen bg-bg-secondary py-8 px-4">
+      <div className="min-h-screen bg-bg-secondary py-6 px-4 sm:px-6">
         <div className="max-w-lg mx-auto text-center">
           <Card className="p-8">
             <h1 className="text-xl font-bold text-polar-night mb-4">Error</h1>
@@ -188,7 +188,7 @@ export default function ReviewOrderPage() {
   // Already reviewed state
   if (eligibility && !eligibility.can_review && eligibility.reason === 'Already reviewed') {
     return (
-      <div className="min-h-screen bg-bg-secondary py-8 px-4">
+      <div className="min-h-screen bg-bg-secondary py-6 px-4 sm:px-6">
         <div className="max-w-lg mx-auto">
           <Link href="/orders" className="inline-flex items-center gap-2 text-text-secondary hover:text-polar-night mb-6">
             <ArrowLeft className="w-4 h-4" />
@@ -213,7 +213,7 @@ export default function ReviewOrderPage() {
   // Cannot review state
   if (eligibility && !eligibility.can_review) {
     return (
-      <div className="min-h-screen bg-bg-secondary py-8 px-4">
+      <div className="min-h-screen bg-bg-secondary py-6 px-4 sm:px-6">
         <div className="max-w-lg mx-auto">
           <Link href="/orders" className="inline-flex items-center gap-2 text-text-secondary hover:text-polar-night mb-6">
             <ArrowLeft className="w-4 h-4" />
@@ -237,7 +237,7 @@ export default function ReviewOrderPage() {
   // Success state
   if (submitted) {
     return (
-      <div className="min-h-screen bg-bg-secondary py-8 px-4">
+      <div className="min-h-screen bg-bg-secondary py-6 px-4 sm:px-6">
         <div className="max-w-lg mx-auto">
           <Card className="p-8 text-center">
             <CheckCircle2 className="w-16 h-16 text-aurora-green mx-auto mb-4" />
@@ -261,7 +261,7 @@ export default function ReviewOrderPage() {
 
   // Review form
   return (
-    <div className="min-h-screen bg-bg-secondary py-8 px-4">
+    <div className="min-h-screen bg-bg-secondary py-6 px-4 sm:px-6">
       <div className="max-w-lg mx-auto">
         <Link href="/orders" className="inline-flex items-center gap-2 text-text-secondary hover:text-polar-night mb-6">
           <ArrowLeft className="w-4 h-4" />

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { GuessInput } from './GuessInput';
 import { GuessCard } from './GuessCard';
 import { GameResult } from './GameResult';
@@ -12,6 +12,7 @@ import { getTurniWinKey, getTurniStreakKey } from '@/lib/play/turni-copy';
 import { formatDate } from '@/lib/date-utils';
 import { ChevronDown, ChevronUp, Calendar, Users, Scale, Time as Clock, ChevronRight, Plus } from 'griddy-icons';
 import { Button } from '@second-turn/design-system';
+import { formatPrice } from '@/lib/services/pricing';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {
   loadPlayState,
@@ -49,8 +50,8 @@ function HelpPanel() {
   const tTurni = useTranslations('Play.turni');
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t('title')}</h2>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+      <h2 className="text-lg font-bold text-gray-900 mb-4">{t('title')}</h2>
 
       {/* Turni introduction */}
       <div className="mb-4">
@@ -59,8 +60,8 @@ function HelpPanel() {
 
       {/* Rules */}
       <div className="mb-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-2">{t('howToPlay')}</h3>
-        <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-300">
+        <h3 className="font-semibold text-gray-900 text-sm mb-2">{t('howToPlay')}</h3>
+        <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
           <li>{t('rule1')}</li>
           <li>{t('rule2')}</li>
           <li>{t('rule3')}</li>
@@ -69,41 +70,41 @@ function HelpPanel() {
 
       {/* Feedback Legend */}
       <div className="space-y-2">
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-2">{t('feedbackLegend')}</h3>
+        <h3 className="font-semibold text-gray-900 text-sm mb-2">{t('feedbackLegend')}</h3>
 
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-teal-500 flex items-center justify-center text-white text-xs font-bold">
             ✓
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-300">{t('legendCorrect')}</p>
+          <p className="text-xs text-gray-600">{t('legendCorrect')}</p>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-amber-400 flex items-center justify-center text-gray-900 text-xs font-bold">
             ~
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-300">{t('legendClose')}</p>
+          <p className="text-xs text-gray-600">{t('legendClose')}</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-700 dark:text-gray-200 text-xs font-bold">
+          <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-bold">
             ↑
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-300">{t('legendHigher')}</p>
+          <p className="text-xs text-gray-600">{t('legendHigher')}</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-700 dark:text-gray-200 text-xs font-bold">
+          <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-bold">
             ↓
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-300">{t('legendLower')}</p>
+          <p className="text-xs text-gray-600">{t('legendLower')}</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-700 dark:text-gray-200 text-xs font-bold">
+          <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-bold">
             ✗
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-300">{t('legendNone')}</p>
+          <p className="text-xs text-gray-600">{t('legendNone')}</p>
         </div>
       </div>
     </div>
@@ -128,8 +129,8 @@ function StatsPanel({ stats }: StatsPanelProps) {
   const streakKey = getTurniStreakKey(stats.currentStreak);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t('statsTitle')}</h2>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+      <h2 className="text-lg font-bold text-gray-900 mb-4">{t('statsTitle')}</h2>
 
       {/* Turni streak milestone */}
       {streakKey && (
@@ -145,41 +146,41 @@ function StatsPanel({ stats }: StatsPanelProps) {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="text-center">
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.played}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('statPlayed')}</p>
+          <p className="text-2xl font-bold text-gray-900">{stats.played}</p>
+          <p className="text-xs text-gray-500">{t('statPlayed')}</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{winPercent}%</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('statWinRate')}</p>
+          <p className="text-2xl font-bold text-gray-900">{winPercent}%</p>
+          <p className="text-xs text-gray-500">{t('statWinRate')}</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.currentStreak}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('statCurrentStreak')}</p>
+          <p className="text-2xl font-bold text-gray-900">{stats.currentStreak}</p>
+          <p className="text-xs text-gray-500">{t('statCurrentStreak')}</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.maxStreak}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('statMaxStreak')}</p>
+          <p className="text-2xl font-bold text-gray-900">{stats.maxStreak}</p>
+          <p className="text-xs text-gray-500">{t('statMaxStreak')}</p>
         </div>
       </div>
 
       {/* Average Guesses */}
       {stats.won > 0 && (
-        <div className="text-center mb-4 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t('averageGuesses')}: <span className="font-semibold text-gray-900 dark:text-white">{avgGuesses}</span>
+        <div className="text-center mb-4 py-2 bg-gray-50 rounded-lg">
+          <p className="text-sm text-gray-500">
+            {t('averageGuesses')}: <span className="font-semibold text-gray-900">{avgGuesses}</span>
           </p>
         </div>
       )}
 
       {/* Distribution */}
       <div className="space-y-1.5">
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <h3 className="text-sm font-medium text-gray-700 mb-2">
           {t('guessDistribution')}
         </h3>
         {stats.distribution.map((count, index) => (
           <div key={index} className="flex items-center gap-2">
-            <span className="w-3 text-xs text-gray-600 dark:text-gray-400">{index + 1}</span>
-            <div className="flex-1 h-4 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden">
+            <span className="w-3 text-xs text-gray-600">{index + 1}</span>
+            <div className="flex-1 h-4 bg-gray-100 rounded overflow-hidden">
               <div
                 className="h-full bg-teal-500 transition-all duration-500"
                 style={{
@@ -188,7 +189,7 @@ function StatsPanel({ stats }: StatsPanelProps) {
                 }}
               />
             </div>
-            <span className="w-6 text-xs text-gray-600 dark:text-gray-400 text-right">{count}</span>
+            <span className="w-6 text-xs text-gray-600 text-right">{count}</span>
           </div>
         ))}
       </div>
@@ -215,8 +216,8 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
 
   const cardContent = (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6 ${
-        hasListings ? 'hover:border-teal-300 dark:hover:border-teal-600 transition-colors cursor-pointer' : ''
+      className={`bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6 ${
+        hasListings ? 'hover:border-teal-300 transition-colors cursor-pointer' : ''
       }`}
     >
       {/* Turni reaction */}
@@ -247,11 +248,11 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
               alt={answer.name}
               width={100}
               height={100}
-              className="w-24 h-24 object-contain rounded-lg bg-gray-50 dark:bg-gray-700"
+              className="w-24 h-24 object-contain rounded-lg bg-gray-50"
               unoptimized
             />
           ) : (
-            <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 text-2xl">
+            <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-2xl">
               ?
             </div>
           )}
@@ -261,28 +262,28 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
         <div className="flex-1 min-w-0">
           {/* Game Name */}
           <div className="mb-2">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+            <h2 className="text-lg font-bold text-gray-900 leading-tight">
               {answer.name}
             </h2>
           </div>
 
           {/* Compact stats row with icons */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600 dark:text-gray-300 mb-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600 mb-2">
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               {answer.yearPublished}
             </span>
-            <span className="text-gray-300 dark:text-gray-600">·</span>
+            <span className="text-gray-300">·</span>
             <span className="flex items-center gap-1">
               <Users className="w-3 h-3" />
               {answer.maxPlayers}
             </span>
-            <span className="text-gray-300 dark:text-gray-600">·</span>
+            <span className="text-gray-300">·</span>
             <span className="flex items-center gap-1">
               <Scale className="w-3 h-3" />
               {answer.weight.toFixed(1)}
             </span>
-            <span className="text-gray-300 dark:text-gray-600">·</span>
+            <span className="text-gray-300">·</span>
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {answer.playingTimeMinutes} min
@@ -294,7 +295,7 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
             {answer.categories.slice(0, 3).map((cat) => (
               <span
                 key={cat}
-                className="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300"
+                className="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-700"
               >
                 {cat}
               </span>
@@ -302,7 +303,7 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
             {answer.mechanics.slice(0, 2).map((mech) => (
               <span
                 key={mech}
-                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600"
               >
                 {mech}
               </span>
@@ -314,9 +315,9 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
         {hasListings && (
           <div className="flex-shrink-0 flex flex-col items-end justify-center">
             <div className="text-right">
-              <span className="text-xs text-gray-500 dark:text-gray-400">{tPrice('from')}</span>
-              <p className="text-xl font-bold text-teal-600 dark:text-teal-400">
-                €{lowestPrice.toFixed(2)}
+              <span className="text-xs text-gray-500">{tPrice('from')}</span>
+              <p className="text-xl font-bold text-teal-600">
+                {formatPrice(lowestPrice)}
               </p>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400 mt-1" />
@@ -326,8 +327,8 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
 
       {/* When no listings: Show Sell CTA */}
       {!hasListings && (
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <p className="text-xs text-gray-500 mb-2">
             {t('noListingsYet')}
           </p>
           <Link href={`/sell?q=${encodeURIComponent(answer.name)}`}>
@@ -568,11 +569,11 @@ export function PlayGame() {
         <main>
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900">
               {t('title')} #{puzzleNumber}
             </h1>
             {puzzleDate && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-500 mt-1">
                 {formatDate(new Date(puzzleDate))}
               </p>
             )}
@@ -580,7 +581,7 @@ export function PlayGame() {
 
           {/* Guess Input - Sticky while playing (top-14/16 accounts for navbar height) */}
           {!isGameOver && (
-            <div className="sticky top-14 sm:top-16 z-10 bg-gray-50 dark:bg-gray-900 py-4 -mx-4 px-4 mb-2">
+            <div className="sticky top-14 sm:top-16 z-10 bg-gray-50 py-4 -mx-4 px-4 mb-2">
               <GuessInput
                 onSelect={handleGuess}
                 disabled={isSubmitting}
@@ -588,7 +589,7 @@ export function PlayGame() {
               />
               {/* Guesses Remaining */}
               {currentPuzzle && (
-                <p className="text-center text-gray-600 dark:text-gray-400 mt-3 text-sm">
+                <p className="text-center text-gray-600 mt-3 text-sm">
                   {t('guessesRemaining', { count: guessesRemaining })}
                 </p>
               )}
@@ -606,7 +607,7 @@ export function PlayGame() {
 
           {/* Error Display */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm">
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
               {error}
             </div>
           )}
@@ -618,7 +619,7 @@ export function PlayGame() {
               {isGameOver && (
                 <button
                   onClick={toggleGuessesCollapsed}
-                  className="w-full flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800 rounded-lg mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  className="w-full flex items-center justify-between p-3 bg-gray-100 rounded-lg mb-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
                 >
                   <span>
                     {t('yourGuesses', { count: currentPuzzle.guesses.length })}

@@ -3,10 +3,11 @@
 
 import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
 import { CheckCircleAlt01 as CheckCircle2, Package, Time as Clock, ArrowRight, RefreshCw as Loader2, AlertCircle, Email as Mail, Truck as TruckIcon } from 'griddy-icons';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface OrderDetails {
   order_id: string;
@@ -224,7 +225,7 @@ function SuccessPageContent() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
           <AlertCircle className="w-12 h-12 text-aurora-red mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-polar-night dark:text-snow-white mb-2">
+          <h2 className="text-xl font-semibold text-polar-night mb-2">
             {t('errorTitle')}
           </h2>
           <p className="text-text-secondary mb-6">
@@ -254,7 +255,7 @@ function SuccessPageContent() {
           <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-aurora-green/20 mb-4 sm:mb-6">
             <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-aurora-green" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night dark:text-snow-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">
             {t('title')}
           </h1>
           <p className="text-base sm:text-lg text-text-secondary">
@@ -273,8 +274,8 @@ function SuccessPageContent() {
         <div className="space-y-4 sm:space-y-6">
           {/* Order Summary */}
           {order && (
-            <section className="bg-snow-white dark:bg-polar-night-light border-2 border-border rounded-xl p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-polar-night dark:text-snow-white mb-4 flex items-center gap-2">
+            <section className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
                 <Package className="w-5 h-5 text-frost-ice" />
                 {t('orderSummary.title')}
               </h2>
@@ -291,15 +292,15 @@ function SuccessPageContent() {
                       />
                     )}
                     <div className="flex-grow min-w-0">
-                      <p className="font-medium text-polar-night dark:text-snow-white truncate">
+                      <p className="font-medium text-polar-night truncate">
                         {item.game_name}
                       </p>
                       <p className="text-sm text-text-secondary">
                         {t('orderSummary.soldBy', { seller: order.seller_name })}
                       </p>
                     </div>
-                    <p className="font-medium text-polar-night dark:text-snow-white">
-                      {item.price.toFixed(2)}
+                    <p className="font-medium text-polar-night">
+                      {formatPrice(item.price)}
                     </p>
                   </div>
                 ))}
@@ -309,21 +310,21 @@ function SuccessPageContent() {
               <div className="border-t border-border pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-text-secondary">{t('orderSummary.items')}</span>
-                  <span className="text-polar-night dark:text-snow-white">{order.items_total.toFixed(2)}</span>
+                  <span className="text-polar-night">{formatPrice(order.items_total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-text-secondary">{t('orderSummary.shipping')}</span>
-                  <span className="text-polar-night dark:text-snow-white">{order.shipping_cost.toFixed(2)}</span>
+                  <span className="text-polar-night">{formatPrice(order.shipping_cost)}</span>
                 </div>
                 {order.wallet_debit_cents > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-text-secondary">{t('orderSummary.walletCredit') || 'Wallet credit'}</span>
-                    <span className="text-aurora-green">-{(order.wallet_debit_cents / 100).toFixed(2)}</span>
+                    <span className="text-aurora-green">-{formatPrice(order.wallet_debit_cents / 100)}</span>
                   </div>
                 )}
                 <div className="flex justify-between font-semibold pt-2 border-t border-border">
-                  <span className="text-polar-night dark:text-snow-white">{t('orderSummary.total')}</span>
-                  <span className="text-frost-ice">{order.total_amount.toFixed(2)}</span>
+                  <span className="text-polar-night">{t('orderSummary.total')}</span>
+                  <span className="text-frost-ice">{formatPrice(order.total_amount)}</span>
                 </div>
               </div>
 
@@ -333,7 +334,7 @@ function SuccessPageContent() {
                   <div className="flex items-start gap-2">
                     <TruckIcon className="w-4 h-4 text-frost-ice mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-polar-night dark:text-snow-white">
+                      <p className="text-sm font-medium text-polar-night">
                         {order.shipping_method === 't2t' ? t('orderSummary.deliveryTo') : t('orderSummary.pickupAt')}
                       </p>
                       <p className="text-sm text-text-secondary">{order.destination}</p>

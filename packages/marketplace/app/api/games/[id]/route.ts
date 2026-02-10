@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase/client';
 import { fetchGameWithFallback, fetchExpansionsForGame, getExpansionCount, type BGGExpansionInfo } from '@/lib/bgg-api';
 import type { BGGVersion } from '@/lib/bgg-types';
 import type { Json } from '@/lib/supabase/database.types';
+import { handleApiError } from '@/lib/api/error-handler';
 
 // Extended game type with metadata fields (standalone type)
 interface GameWithMetadata {
@@ -45,8 +46,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       .single();
 
     if (dbError || !game) {
-      console.error('❌ [Game Details] Database error:', dbError);
-      return NextResponse.json({ error: 'Game not found' }, { status: 404 });
+      throw new Error(`Game not found: ${dbError?.message || 'Unknown error'}`);
     }
 
     // Cast to our extended type with metadata fields
@@ -163,11 +163,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       expansionCount,
     });
   } catch (error: unknown) {
-    console.error('❌ [Game Details] Error:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to fetch game details', details: message },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Fetch game');
   }
 }

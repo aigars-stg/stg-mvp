@@ -7,7 +7,7 @@ import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema';
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games';
 
 export const metadata: Metadata = {
-  title: 'Legal | Second Turn Games',
+  title: 'Legal',
   description:
     'Terms of service, privacy policy, seller agreement, and other legal documents for Second Turn Games.',
 };

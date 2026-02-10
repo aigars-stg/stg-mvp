@@ -32,7 +32,7 @@ export function StatusTimeline({
     return (
       <div className={className}>
         {title && (
-          <h3 className="text-sm font-semibold text-polar-night dark:text-snow-white mb-4">
+          <h3 className="text-sm font-semibold text-polar-night mb-4">
             {title}
           </h3>
         )}
@@ -84,7 +84,7 @@ export function StatusTimeline({
   return (
     <div className={className}>
       {title && (
-        <h2 className="text-lg font-semibold text-polar-night dark:text-snow-white mb-6">
+        <h2 className="text-lg font-semibold text-polar-night mb-6">
           {title}
         </h2>
       )}
@@ -131,7 +131,7 @@ export function StatusTimeline({
                 <p
                   className={`font-medium ${
                     isActive || isCurrent
-                      ? 'text-polar-night dark:text-snow-white'
+                      ? 'text-polar-night'
                       : 'text-text-muted'
                   }`}
                 >

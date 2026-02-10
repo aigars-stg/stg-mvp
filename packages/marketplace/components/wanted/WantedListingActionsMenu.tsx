@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { MoreVertical, Edit, CheckCircle, TrashAlt as Trash2, LinkExternal as ExternalLink, Undo as RotateCcw } from 'griddy-icons';
 

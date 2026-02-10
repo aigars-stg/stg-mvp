@@ -36,7 +36,7 @@ export function ShippingInfoCard({
   return (
     <div className={className}>
       {title && (
-        <h3 className="text-sm font-semibold text-polar-night dark:text-snow-white mb-3">
+        <h3 className="text-sm font-semibold text-polar-night mb-3">
           {title}
         </h3>
       )}
@@ -44,10 +44,10 @@ export function ShippingInfoCard({
       <div className="space-y-3">
         {/* Terminal location */}
         {destination.terminal_name && (
-          <div className="flex items-start gap-3 p-3 bg-bg-elevated dark:bg-polar-night-light rounded-lg">
+          <div className="flex items-start gap-3 p-3 bg-bg-elevated rounded-lg">
             <MapPin className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-polar-night dark:text-snow-white">
+              <p className="font-medium text-polar-night">
                 {destination.terminal_name}
               </p>
               {destination.terminal_address && (
@@ -68,7 +68,7 @@ export function ShippingInfoCard({
         {parcelSize && (
           <div className="flex items-center gap-2 text-sm">
             <span className="text-text-secondary">Parcel Size:</span>
-            <span className="font-medium text-polar-night dark:text-snow-white">
+            <span className="font-medium text-polar-night">
               {parcelSize}
             </span>
           </div>
@@ -80,7 +80,7 @@ export function ShippingInfoCard({
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-text-muted" />
               <span className="text-text-secondary">Recipient:</span>
-              <span className="font-medium text-polar-night dark:text-snow-white">
+              <span className="font-medium text-polar-night">
                 {destination.receiver_name}
               </span>
             </div>
@@ -88,7 +88,7 @@ export function ShippingInfoCard({
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-text-muted" />
                 <span className="text-text-secondary">Phone:</span>
-                <span className="font-medium text-polar-night dark:text-snow-white">
+                <span className="font-medium text-polar-night">
                   {destination.receiver_phone}
                 </span>
               </div>
@@ -97,7 +97,7 @@ export function ShippingInfoCard({
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-text-muted" />
                 <span className="text-text-secondary">Email:</span>
-                <span className="font-medium text-polar-night dark:text-snow-white">
+                <span className="font-medium text-polar-night">
                   {destination.receiver_email}
                 </span>
               </div>

@@ -14,7 +14,8 @@ export function GameImageWithBackdrop({
   hasError
 }: GameImageWithBackdropProps) {
   // Using a subtle backdrop from design system - color extraction would require CORS from BGG
-  const backdropColor = '#E5E9F0'; // snow.stormLight
+  // Maps to snow.stormLight token (#E5E9F0)
+  const backdropColor = '#E5E9F0';
 
   return (
     <div

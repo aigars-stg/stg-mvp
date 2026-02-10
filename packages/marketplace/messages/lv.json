@@ -8,6 +8,28 @@
     "confirm": "Apstiprināt",
     "delete": "Dzēst",
     "edit": "Labot",
+    "aria": {
+      "previousImage": "Iepriekšējais attēls",
+      "nextImage": "Nākamais attēls",
+      "closeLightbox": "Aizvērt attēlu",
+      "addToWishlist": "Pievienot vēlmju sarakstam",
+      "removeFromWishlist": "Noņemt no vēlmju saraksta",
+      "dismiss": "Aizvērt",
+      "helpSections": "Palīdzības sadaļas",
+      "legalSections": "Juridiskās sadaļas",
+      "mainNavigation": "Galvenā navigācija",
+      "searchGames": "Meklēt spēles",
+      "clearSearch": "Notīrīt meklēšanu",
+      "userMenu": "Lietotāja izvēlne",
+      "selectLanguage": "Izvēlēties valodu",
+      "acceptTerms": "Piekrist pārdevēja noteikumiem"
+    },
+    "emptyStates": {
+      "noMessages": "Nav vēl neviena ziņojuma",
+      "noTransactions": "Nav vēl nevienas transakcijas",
+      "noWithdrawals": "Nav vēl neviena izmaksas pieprasījuma",
+      "noImage": "Nav attēla"
+    },
     "ConditionInfoModal": {
       "title": "Spēles stāvokļa novērtējums",
       "fullGradingGuide": "Pilns vērtēšanas ceļvedis",
@@ -26,12 +48,6 @@
     "sellThisGame": "Pārdot šo spēli",
     "requestThisGame": "Pieprasīt šo spēli",
     "noGamesFound": "Nav atrasta neviena spēle vaicājumam \"{query}\""
-  },
-  "PriceBreakdown": {
-    "item": "Prece:",
-    "shipping": "Piegāde ({country}):",
-    "fees": "maksas",
-    "estimateNote": "*Aptuveni vienas valsts ietvaros"
   },
   "CookieConsent": {
     "title": "Mēs izmantojam sīkdatnes",
@@ -558,7 +574,13 @@
       "prevImageAria": "Iepriekšējais attēls",
       "nextImageAria": "Nākamais attēls",
       "viewImageAria": "Skatīt attēlu {number}",
-      "learnConditionAria": "Uzzināt par {condition} stāvokli"
+      "learnConditionAria": "Uzzināt par {condition} stāvokli",
+      "offers": "{count, plural, one {# piedāvājums} other {# piedāvājumi}}",
+      "instantBuyTooltip": "{count, plural, one {# tūlītējs pirkums} other {# tūlītēji pirkumi}}",
+      "contactSellerTooltip": "{count, plural, one {# sazināties ar pārdevēju} other {# sazināties ar pārdevēju}}",
+      "auctionTooltip": "{count, plural, one {# izsole} other {# izsoles}}",
+      "expansionTooltip": "Papildinājums",
+      "expansionOffersTooltip": "Ietver papildinājumu piedāvājumus"
     },
     "detail": {},
     "create": {},
@@ -638,12 +660,31 @@
     "orderFrom": "Pasūtījums no {sellerName}",
     "shipping": {
       "title": "Piegāde uz paku termināli",
-      "description": "Saņem ērtā paku termināli pie Tevis. Ātra un droša piegāde 1-3 darba dienu laikā."
+      "description": "Saņem ērtā paku termināli pie Tevis. Ātra un droša piegāde 1-3 darba dienu laikā.",
+      "summaryLine": "Piegāde uz paku termināli"
     },
     "sections": {
       "selectTerminal": "1. Izvēlies saņemšanas termināli",
-      "contactInfo": "2. Kontaktinformācija"
+      "contactInfo": "2. Kontaktinformācija",
+      "termsConsent": "3. Noteikumi un nosacījumi"
     },
+    "collapse": {
+      "selectTerminal": "Izvēlies saņemšanas termināli",
+      "contactInfo": "Kontaktinformācija",
+      "termsConsent": "Noteikumi un nosacījumi",
+      "terminalPrompt": "Izvēlies pakomātu",
+      "contactPrompt": "Nosūtīsim izsekošanas informāciju šeit",
+      "termsPrompt": "Lūdzu, izskatiet un apstipriniet",
+      "termsAccepted": "Noteikumi apstiprināti",
+      "complete": "Pabeigts",
+      "required": "Obligāts"
+    },
+    "country": {
+      "title": "Kur Tu atrodies?",
+      "subtitle": "Tas palīdz mums parādīt piemērotus termināļus, bankas un tālruņa formātu",
+      "detected": "noteikts"
+    },
+    "payment": {},
     "form": {
       "fullName": "Vārds un uzvārds",
       "email": "E-pasts",
@@ -663,9 +704,24 @@
       "total": "Kopā"
     },
     "actions": {
-      "paySecurely": "Droši samaksāt",
+      "paySecurely": "Apstiprināt un maksāt",
       "processing": "Apstrādā...",
       "backToCart": "Atpakaļ uz grozu"
+    },
+    "merchant": {
+      "label": "Tirgotājs"
+    },
+    "consent": {
+      "refundSummaryTitle": "Naudas atmaksas politikas kopsavilkums",
+      "refundPoint1": "Visi pārdevēji ir privātpersonas, nevis uzņēmumi",
+      "refundPoint2": "Nav 14 dienu atgriešanas tiesību — preci nevar atgriezt, ja vienkārši pārdomājāt",
+      "refundPoint3": "Ziņojiet par problēmām 2 dienu laikā pēc piegādes, lai pieprasītu atmaksu",
+      "refundPoint4": "Pēc pasūtījuma pabeigšanas darījumi ir galīgi",
+      "checkboxPrefix": "Ieliekot atzīmi, es apstiprinu, ka esmu iepazinies/-usies un piekrītu",
+      "termsLink": "Noteikumiem un nosacījumiem",
+      "and": "un",
+      "refundLink": "Preču atgriešanas un naudas atmaksas nosacījumiem",
+      "pleaseAccept": "Lūdzu, pieņemiet noteikumus, lai turpinātu"
     },
     "info": {
       "sellerDeadline": "Pārdevējam ir 24 stundas, lai pieņemtu",
@@ -737,7 +793,8 @@
     "ReservationTimer": {
       "expired": "Beidzies",
       "reserved": "Rezervēts:",
-      "ariaLabel": "Atlikušas {minutes} minūtes un {seconds} sekundes"
+      "ariaLabel": "Atlikušas {minutes} minūtes un {seconds} sekundes",
+      "extendButton": "+5 min"
     },
     "TerminalMap": {
       "selectTerminal": "Izvēlēties šo termināli",
@@ -1068,12 +1125,14 @@
       "privacyPolicy": "Privātuma politika",
       "termsOfService": "Lietošanas noteikumi",
       "sellerTerms": "Pārdevēja noteikumi",
-      "fees": "Maksas"
+      "fees": "Maksas",
+      "deliveryAndReturns": "Piegāde un atgriešana"
     },
     "company": {
       "name": "Second Turn Games SIA",
       "regNumber": "Reģ. Nr. 50203665371",
-      "location": "Rīga, Latvija"
+      "address": "Evalda Valtera 5-35, Rīga, LV-1021, Latvija",
+      "phone": "+371 2677 9625"
     },
     "copyright": "Autortiesības © 2025-{year} Second Turn Games SIA"
   },
@@ -1116,7 +1175,7 @@
       "extended": "Izsole pagarināta par {minutes} minūtēm pēdējā brīža likmes dēļ"
     },
     "bidHistory": {
-      "title": "Likšu vēsture",
+      "title": "Likmju vēsture",
       "noBidsYet": "Vēl nav likmju — esi pirmais.",
       "winning": "Uzvarošā",
       "extendedAuction": "Šī likme pagarināja izsoli",
@@ -2067,11 +2126,8 @@
       "totalItems": "Kopā preces",
       "fromSellers": "No pārdevējiem",
       "subtotalAll": "Starpsumma (visi grozi)",
-      "separateCheckout": "Katrs grozs tiek norēķināts un apmaksāts atsevišķi"
-    },
-    "infoBox": {
-      "reserved": "Preces ir rezervētas 30 minūtes",
-      "completeCheckout": "Pabeidz norēķināšanos pirms taimera beigām, lai nodrošinātu savas spēles. Katra pārdevēja grozs tiek apmaksāts atsevišķi."
+      "separateCheckout": "Katrs grozs tiek norēķināts un apmaksāts atsevišķi",
+      "shippingNote": "Piegāde tiek pievienota katram pārdevējam pie norēķināšanās"
     }
   },
   "MyListings": {
@@ -2901,5 +2957,164 @@
       "attrMechanic": "Mehānikas",
       "attrMechanicDesc": "Spēles mehānikas (Worker Placement, utt.)"
     }
+  },
+  "SellerOrders": {
+    "title": "Pārdevēja pasūtījumi",
+    "subtitle": "Pārvaldiet savus pasūtījumus un atbildiet pircējiem",
+    "loading": "Ielādē pasūtījumus...",
+    "error": {
+      "title": "Kļūda ielādējot pasūtījumus",
+      "tryAgain": "Mēģināt vēlreiz"
+    },
+    "noOrders": {
+      "title": "Pasūtījumi nav atrasti",
+      "pending": "Jums nav gaidošu pasūtījumu",
+      "other": "Nav {tab} pasūtījumu"
+    },
+    "summary": {
+      "allOrders": "Visi pasūtījumi",
+      "pending": "Gaida",
+      "accepted": "Pieņemti",
+      "shipped": "Nosūtīti",
+      "completed": "Pabeigti"
+    },
+    "tabs": {
+      "pending": "Gaida",
+      "accepted": "Pieņemti",
+      "shipped": "Nosūtīti",
+      "completed": "Pabeigti",
+      "all": "Visi"
+    },
+    "card": {
+      "buyer": "Pircējs: {name}",
+      "expired": "Beidzies",
+      "timeRemaining": "{hours}h {minutes}m atlicis",
+      "items": "Preces ({count})"
+    },
+    "shipping": {
+      "terminalPickup": "Pakomāts:",
+      "localPickup": "Personīgi:"
+    },
+    "pricing": {
+      "items": "Preces:",
+      "shipping": "Piegāde:",
+      "commission": "Komisija (10%):",
+      "youReceive": "Jūs saņemat:"
+    },
+    "actions": {
+      "acceptOrder": "Pieņemt pasūtījumu",
+      "accepting": "Pieņem...",
+      "decline": "Noraidīt",
+      "viewDetails": "Skatīt detaļas"
+    },
+    "declineModal": {
+      "title": "Noraidīt pasūtījumu",
+      "description": "Lūdzu, norādiet iemeslu pasūtījuma noraidīšanai. Pircējam tiks automātiski atgriezta nauda.",
+      "placeholder": "piem., Prece vairs nav pieejama",
+      "cancel": "Atcelt",
+      "confirmDecline": "Apstiprināt noraidīšanu",
+      "declining": "Noraida..."
+    }
+  },
+  "SellerOrderDetail": {
+    "loading": "Ielādē pasūtījuma detaļas...",
+    "error": {
+      "title": "Kļūda ielādējot pasūtījumu",
+      "orderNotFound": "Pasūtījums nav atrasts"
+    },
+    "backToOrders": "Atpakaļ uz pasūtījumiem",
+    "viewOrderAndMessages": "Skatīt pasūtījumu un ziņas",
+    "buyer": "Pircējs: {name}",
+    "actionRequired": {
+      "title": "Nepieciešama darbība",
+      "description": "Lūdzu, pieņemiet vai noraidiet šo pasūtījumu. Jums ir 24 stundas no pasūtījuma veikšanas brīža, lai atbildētu. Ja neatbildēsiet laikā, pasūtījums tiks automātiski atcelts un pircējam tiks atgriezta nauda.",
+      "acceptOrder": "Pieņemt pasūtījumu",
+      "declineOrder": "Noraidīt pasūtījumu"
+    },
+    "acceptModal": {
+      "title": "Apstiprināt pasūtījuma pieņemšanu",
+      "parcelSizeLabel": "Izvēlieties sūtījuma izmēru *",
+      "parcelSizeHelp": "Izvēlieties izmēru, kas atbilst jūsu iepakotajai spēlei(-ēm). Tas nepieciešams piegādes uzlīmes ģenerēšanai.",
+      "localPickupConfirm": "Pieņemot pasūtījumu, jūs piekrītat koordinēt saņemšanu ar pircēju pilsētā {city}. Lūdzu, izmantojiet čatu, lai vienotos par tikšanās laiku un vietu.",
+      "confirmAccept": "Apstiprināt pieņemšanu",
+      "cancel": "Atcelt",
+      "processing": "Apstrādā..."
+    },
+    "declineModal": {
+      "title": "Noraidīt pasūtījumu",
+      "description": "Vai tiešām vēlaties noraidīt šo pasūtījumu? Pircējam tiks automātiski atgriezta nauda.",
+      "reasonLabel": "Iemesls (neobligāts)",
+      "reasonPlaceholder": "piem., Prece vairs nav pieejama, bojāta, utt.",
+      "declineAndRefund": "Noraidīt un atgriezt naudu",
+      "cancel": "Atcelt",
+      "processing": "Apstrādā..."
+    },
+    "labelFailed": {
+      "title": "Piegādes uzlīme nav ģenerēta",
+      "description": "Ģenerējot piegādes uzlīmi, radās kļūda. Lūdzu, mēģiniet vēlreiz.",
+      "retryLabelGeneration": "Mēģināt ģenerēt uzlīmi",
+      "generatingLabel": "Ģenerē uzlīmi..."
+    },
+    "readyToShip": {
+      "title": "Gatavs nosūtīšanai",
+      "description": "Jūsu sūtījums ir reģistrēts Unisend. Sekojiet šiem soļiem:",
+      "parcelId": "Jūsu sūtījuma ID",
+      "step1": "Dodieties uz tuvāko <strong>Unisend pakomātu</strong>",
+      "step2": "Ievadiet augstāk redzamo <strong>sūtījuma ID</strong> pakomāta ekrānā",
+      "step3": "<strong>Izdrukājiet uzlīmi</strong> pakomātā un pielīmējiet to sūtījumam",
+      "step4": "<strong>Ievietojiet sūtījumu</strong> pakomāta atvērtajā skapītī",
+      "trackPackage": "Izsekot sūtījumu"
+    },
+    "shippingInfo": {
+      "title": "Piegādes informācija",
+      "terminalShipping": "Pakomāts-pakomāts piegāde",
+      "localPickup": "Personīga saņemšana",
+      "parcelSize": "Sūtījuma izmērs: {size}",
+      "receiver": "Saņēmējs:",
+      "buyerContact": "Pircēja kontakti:"
+    },
+    "trackingHistory": "Izsekošanas vēsture",
+    "orderItems": "Pasūtījuma preces ({count})",
+    "pricingSummary": {
+      "title": "Cenu kopsavilkums",
+      "itemsTotal": "Preču summa:",
+      "shippingCost": "Piegādes izmaksas:",
+      "platformCommission": "Platformas komisija (10%):",
+      "youReceive": "Jūs saņemat:"
+    },
+    "timeline": {
+      "title": "Pasūtījuma laika līnija",
+      "orderPlaced": "Pasūtījums veikts",
+      "paymentReceived": "Maksājums saņemts",
+      "orderAccepted": "Pasūtījums pieņemts",
+      "shippingLabelGenerated": "Piegādes uzlīme ģenerēta"
+    }
+  },
+  "WalletTransactions": {
+    "types": {
+      "saleCredit": "Pārdošanas ieņēmumi",
+      "purchaseDebit": "Pirkums",
+      "withdrawal": "Izmaksa",
+      "refundCredit": "Atmaksa"
+    },
+    "empty": "Nav vēl nevienas transakcijas",
+    "emptyHint": "Šeit parādīsies ieņēmumi no pabeigtiem pārdošanas darījumiem",
+    "balance": "atl.",
+    "loading": "Ielādē...",
+    "showMore": "Rādīt vairāk (vēl {count})"
+  },
+  "WithdrawalHistory": {
+    "statuses": {
+      "pending": "Gaida",
+      "processing": "Apstrādē",
+      "completed": "Pabeigts",
+      "rejected": "Noraidīts"
+    },
+    "empty": "Nav vēl neviena izmaksas pieprasījuma",
+    "to": "Uz {iban}",
+    "bankRef": "Bankas ref: {ref}",
+    "reason": "Iemesls: {reason}",
+    "loading": "Ielādē...",
+    "showMore": "Rādīt vairāk"
   }
 }

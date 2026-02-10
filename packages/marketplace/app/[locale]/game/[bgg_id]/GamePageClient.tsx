@@ -2,8 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
 import { Package, Users, User as Baby, Time as Clock, LinkExternal as ExternalLink, ArrowLeft, RefreshCw as Loader2, AlertCircle, SettingsAdjustHorizontal as SlidersHorizontal, Close, ChevronDown, ChevronUp, Settings as Cog, PuzzlePiece as Puzzle, Plus } from 'griddy-icons';
@@ -26,14 +25,11 @@ interface GamePageClientProps {
 
 export function GamePageClient({ bggId }: GamePageClientProps) {
   const router = useRouter();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { fetchCart } = useCart();
   const t = useTranslations('GameDetail');
   const tNav = useTranslations('Navigation');
   const tListings = useTranslations('Listings');
-
-  // Buyer's country for pricing estimates (from profile)
-  const buyerCountry = profile?.country as 'LT' | 'LV' | 'EE' | undefined;
 
   const [game, setGame] = useState<GameWithOffers | null>(null);
   const [wantedListings, setWantedListings] = useState<WantedListingWithDetails[]>([]);
@@ -200,10 +196,10 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-primary dark:bg-polar-night">
+      <div className="min-h-screen flex items-center justify-center bg-bg-primary">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
-          <p className="text-text-secondary dark:text-snow-stormLight">{t('loading')}</p>
+          <p className="text-text-secondary">{t('loading')}</p>
         </div>
       </div>
     );
@@ -212,13 +208,13 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   // Error state
   if (error || !game) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-primary dark:bg-polar-night">
+      <div className="min-h-screen flex items-center justify-center bg-bg-primary">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-aurora-red mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-polar-night dark:text-snow-stormLightest mb-2">
+          <h2 className="text-xl font-semibold text-polar-night mb-2">
             {error || t('errors.gameNotFound')}
           </h2>
-          <p className="text-text-secondary dark:text-snow-stormLight mb-4">
+          <p className="text-text-secondary mb-4">
             {t('errors.noActiveListings')}
           </p>
           <Link href="/browse">
@@ -230,18 +226,18 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary dark:bg-polar-night">
+    <div className="min-h-screen bg-bg-primary">
       {/* Header */}
-      <div className="bg-frost-ice/5 dark:bg-polar-nightLight/50 border-b border-frost-ice/20 dark:border-polar-nightDark">
+      <div className="bg-frost-ice/5 border-b border-frost-ice/20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-text-secondary dark:text-snow-stormLight mb-4">
+          <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
             <Link href="/browse" className="hover:text-frost-ice flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" />
               {tNav('browse')}
             </Link>
             <span>/</span>
-            <span className="text-polar-night dark:text-snow-stormLightest font-medium line-clamp-1">
+            <span className="text-polar-night font-medium line-clamp-1">
               {game.game_name}
             </span>
           </div>
@@ -260,7 +256,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
 
             {/* Game Card with swipe support */}
             <div
-              className="bg-snow-white dark:bg-polar-nightLight rounded-xl border-2 border-border dark:border-polar-nightDark overflow-hidden touch-pan-y"
+              className="bg-snow-white rounded-xl border border-border overflow-hidden touch-pan-y"
               style={swipeStyle}
               {...swipeBind()}
             >
@@ -289,10 +285,10 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
               {/* Game Info */}
               <div className="flex-grow p-4 sm:p-6 flex flex-col">
                 {/* Game Name with Year */}
-                <h1 className="text-xl sm:text-2xl font-bold text-polar-night dark:text-snow-stormLightest mb-1 line-clamp-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-1 line-clamp-2">
                   {game.game_name}
                   {game.game_year && (
-                    <span className="font-normal text-text-secondary dark:text-snow-stormLight ml-2">
+                    <span className="font-normal text-text-secondary ml-2">
                       ({game.game_year})
                     </span>
                   )}
@@ -300,7 +296,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
 
                 {/* Designers */}
                 {game.designers && game.designers.length > 0 && (
-                  <p className="text-sm text-text-secondary dark:text-snow-stormLight mb-3 flex items-center gap-1.5">
+                  <p className="text-sm text-text-secondary mb-3 flex items-center gap-1.5">
                     <Cog className="w-3.5 h-3.5 flex-shrink-0" />
                     <span>
                       {game.designers.length === 1
@@ -311,7 +307,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                 )}
 
                 {/* Metadata Row - compact format like listing card */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-secondary dark:text-snow-stormLight mb-4">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-secondary mb-4">
                   {game.player_count && (
                     <span className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
@@ -335,7 +331,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                 {/* Description */}
                 {game.description && (
                   <div className="mb-4">
-                    <p className={`text-sm text-text-secondary dark:text-snow-stormLight ${descriptionExpanded ? '' : 'line-clamp-3'}`}>
+                    <p className={`text-sm text-text-secondary ${descriptionExpanded ? '' : 'line-clamp-3'}`}>
                       {decodeHTMLEntities(game.description)}
                     </p>
                     {game.description.length > 200 && (
@@ -360,7 +356,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                 )}
 
                 {/* Powered by BGG - at bottom */}
-                <div className="mt-auto pt-3 border-t border-border-subtle dark:border-polar-nightDark flex items-center justify-between">
+                <div className="mt-auto pt-3 border-t border-border-subtle flex items-center justify-between">
                   <a
                     href="https://boardgamegeek.com"
                     target="_blank"
@@ -411,7 +407,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
 
         {/* Filters Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-          <h2 className="text-xl font-semibold text-polar-night dark:text-snow-stormLightest">
+          <h2 className="text-xl font-semibold text-polar-night">
             {t('offers.availableOffers', { count: game.offers.length })}
           </h2>
 
@@ -431,7 +427,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                 <select
                 value={listingTypeFilter}
                 onChange={(e) => setListingTypeFilter(e.target.value as ListingType | 'all')}
-                className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-border dark:border-polar-nightDark bg-snow-white dark:bg-polar-nightLight text-sm text-polar-night dark:text-snow-stormLightest focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
+                className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-border bg-snow-white text-sm text-polar-night focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
               >
                 <option value="all">{t('filter.allListings')}</option>
                 <option value="instant_buy">{t('filter.instantBuy')}</option>
@@ -442,7 +438,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-border dark:border-polar-nightDark bg-snow-white dark:bg-polar-nightLight text-sm text-polar-night dark:text-snow-stormLightest focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
+                className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-border bg-snow-white text-sm text-polar-night focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
               >
                 <option value="price_asc">{t('sort.priceLowHigh')}</option>
                 <option value="price_desc">{t('sort.priceHighLow')}</option>
@@ -472,9 +468,9 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
 
         {/* Filter Panel */}
         {showFilters && game.offers.length > 1 && (
-          <div className="mb-6 p-4 bg-snow-white dark:bg-polar-nightLight border-2 border-border dark:border-polar-nightDark rounded-xl">
+          <div className="mb-6 p-4 bg-snow-white border border-border rounded-xl">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium text-polar-night dark:text-snow-stormLightest">{t('filter.filterByCondition')}</h3>
+              <h3 className="font-medium text-polar-night">{t('filter.filterByCondition')}</h3>
               {filterConditions.length > 0 && (
                 <button
                   onClick={clearFilters}
@@ -522,19 +518,19 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                 listing={offer}
                 onAddToCart={handleAddToCart}
                 isAddingToCart={addingToCart === offer.id}
-                buyerCountry={buyerCountry}
+
               />
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-snow-white dark:bg-polar-nightLight border-2 border-border dark:border-polar-nightDark rounded-xl">
-            <Package className="w-12 h-12 text-text-muted dark:text-snow-stormMedium mx-auto mb-4" />
+          <div className="text-center py-12 bg-snow-white border border-border rounded-xl">
+            <Package className="w-12 h-12 text-text-muted mx-auto mb-4" />
             {filterConditions.length > 0 || listingTypeFilter !== 'all' ? (
               <>
-                <h3 className="text-lg font-semibold text-polar-night dark:text-snow-stormLightest mb-2">
+                <h3 className="text-lg font-semibold text-polar-night mb-2">
                   {t('emptyState.noOffersMatch')}
                 </h3>
-                <p className="text-text-secondary dark:text-snow-stormLight mb-4">
+                <p className="text-text-secondary mb-4">
                   {t('emptyState.tryAdjusting')}
                 </p>
                 <Button variant="secondary" onClick={clearFilters}>
@@ -543,10 +539,10 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
               </>
             ) : (
               <>
-                <h3 className="text-lg font-semibold text-polar-night dark:text-snow-stormLightest mb-2">
+                <h3 className="text-lg font-semibold text-polar-night mb-2">
                   {t('emptyState.noOffersYet')}
                 </h3>
-                <p className="text-text-secondary dark:text-snow-stormLight mb-4">
+                <p className="text-text-secondary mb-4">
                   {t('emptyState.beFirstToSell')}
                 </p>
                 <Link href={`/sell?q=${encodeURIComponent(game.game_name)}`}>
@@ -563,7 +559,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
         {/* People Looking For This (Wanted Listings) */}
         {wantedListings.length > 0 && (
           <section id="wanted" className="mt-12 scroll-mt-8">
-            <h2 className="text-xl font-semibold text-polar-night dark:text-snow-stormLightest mb-6">
+            <h2 className="text-xl font-semibold text-polar-night mb-6">
               {t('wanted.title', { count: wantedListings.length })}
             </h2>
             <div className="space-y-4">

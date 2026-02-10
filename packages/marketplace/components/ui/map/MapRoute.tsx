@@ -8,7 +8,7 @@ import { useMap } from "./context";
 export type MapRouteProps = {
   /** Array of [longitude, latitude] coordinate pairs defining the route */
   coordinates: [number, number][];
-  /** Line color as CSS color value (default: "#4285F4") */
+  /** Line color as CSS color value (default: "#5E81AC") */
   color?: string;
   /** Line width in pixels (default: 3) */
   width?: number;
@@ -20,7 +20,7 @@ export type MapRouteProps = {
 
 export function MapRoute({
   coordinates,
-  color = "#4285F4",
+  color = "#5E81AC",
   width = 3,
   opacity = 0.8,
   dashArray,

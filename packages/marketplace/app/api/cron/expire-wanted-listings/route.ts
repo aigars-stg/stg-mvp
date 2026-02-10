@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * Cron job to expire wanted listings
@@ -12,11 +13,7 @@ export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
 
   if (!cronSecret) {
-    console.error('[Cron] CRON_SECRET environment variable not set');
-    return NextResponse.json(
-      { error: 'Server configuration error' },
-      { status: 500 }
-    );
+    throw new Error('CRON_SECRET environment variable not set');
   }
 
   if (authHeader !== `Bearer ${cronSecret}`) {
@@ -32,11 +29,7 @@ export async function GET(request: Request) {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    console.error('[Cron] Missing Supabase environment variables');
-    return NextResponse.json(
-      { error: 'Server configuration error' },
-      { status: 500 }
-    );
+    throw new Error('Missing Supabase environment variables');
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey, {
@@ -53,8 +46,7 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.rpc('expire_wanted_listings');
 
     if (error) {
-      console.error('[Cron] Database error:', error);
-      throw error;
+      throw new Error(`Database error: ${error.message}`);
     }
 
     const expiredCount = data || 0;
@@ -67,13 +59,6 @@ export async function GET(request: Request) {
       message: `Expired ${expiredCount} wanted listing(s)`,
     });
   } catch (error: unknown) {
-    console.error('[Cron] Fatal error:', error);
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Failed to expire wanted listings',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Expire wanted listings');
   }
 }

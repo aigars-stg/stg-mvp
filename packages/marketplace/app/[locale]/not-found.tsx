@@ -1,7 +1,7 @@
 import { Search } from 'griddy-icons';
 import { Button } from '@second-turn/design-system';
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 /**
  * Locale-scoped not-found page — renders inside the locale layout (navbar, footer visible).

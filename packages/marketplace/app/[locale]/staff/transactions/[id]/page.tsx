@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/navigation';
+import { useParams } from 'next/navigation';
 import { Button, Badge } from '@second-turn/design-system';
 import { RefreshCw as Loader2, AlertCircle, Shield, ArrowLeft, User, Package, LocationPin as MapPin, LinkExternal as ExternalLink, Chat as MessageSquare, AlertTriangle, CheckCircleAlt01 as CheckCircle2, Time as Clock, Phone, Email as Mail, Beaker as Flask } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -18,6 +18,7 @@ import {
   issueStatusConfig,
 } from '@/components/shipping';
 import { formatDateTime } from '@/lib/date-utils';
+import { formatPrice, formatCentsToCurrency } from '@/lib/services/pricing';
 
 // Simulation types
 type SimulationAction = 'label_printed' | 'set_barcode' | 'shipped' | 'in_transit' | 'delivered';
@@ -234,7 +235,7 @@ export default function StaffTransactionPage() {
       <div className="min-h-screen flex items-center justify-center bg-bg-primary">
         <div className="text-center max-w-md px-4">
           <Shield className="w-16 h-16 text-aurora-red mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-polar-night mb-2">Staff Access Required</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">Staff Access Required</h1>
           <p className="text-text-secondary mb-6">
             This page is only accessible to staff members.
           </p>
@@ -295,7 +296,7 @@ export default function StaffTransactionPage() {
             <div>
               <div className="flex items-center gap-3 flex-wrap">
                 <Shield className="w-5 h-5 text-frost-ice" />
-                <h1 className="text-xl font-bold text-polar-night">
+                <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
                   {order.order_number}
                 </h1>
                 <Badge variant={statusInfo.variant} size="sm">
@@ -386,7 +387,7 @@ export default function StaffTransactionPage() {
                         <Badge variant={item.condition as ListingCondition} size="sm">
                           {getConditionLabel(item.condition as ListingCondition)}
                         </Badge>
-                        <span className="text-sm font-semibold text-polar-night">€{item.price.toFixed(2)}</span>
+                        <span className="text-sm font-semibold text-polar-night">{formatPrice(item.price)}</span>
                       </div>
                     </div>
                   </div>
@@ -397,15 +398,15 @@ export default function StaffTransactionPage() {
               <div className="border-t border-divider-subtle mt-4 pt-4 space-y-1 text-sm">
                 <div className="flex justify-between text-text-secondary">
                   <span>Items</span>
-                  <span>€{order.items_total.toFixed(2)}</span>
+                  <span>{formatPrice(order.items_total)}</span>
                 </div>
                 <div className="flex justify-between text-text-secondary">
                   <span>Shipping</span>
-                  <span>{order.shipping_cost === 0 ? 'Free' : `€${order.shipping_cost.toFixed(2)}`}</span>
+                  <span>{order.shipping_cost === 0 ? 'Free' : formatPrice(order.shipping_cost)}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-polar-night pt-1">
                   <span>Total</span>
-                  <span>€{order.total_amount.toFixed(2)}</span>
+                  <span>{formatPrice(order.total_amount)}</span>
                 </div>
               </div>
             </div>
@@ -549,19 +550,19 @@ export default function StaffTransactionPage() {
                   {order.payment.buyer_wallet_debit_cents != null && order.payment.buyer_wallet_debit_cents > 0 && (
                     <div>
                       <span className="text-text-muted">Wallet Debit:</span>
-                      <p className="font-medium text-polar-night">€{(order.payment.buyer_wallet_debit_cents / 100).toFixed(2)}</p>
+                      <p className="font-medium text-polar-night">{formatCentsToCurrency(order.payment.buyer_wallet_debit_cents)}</p>
                     </div>
                   )}
                   {order.payment.platform_commission_cents != null && order.payment.platform_commission_cents > 0 && (
                     <div>
                       <span className="text-text-muted">Commission (10%):</span>
-                      <p className="font-medium text-polar-night">€{(order.payment.platform_commission_cents / 100).toFixed(2)}</p>
+                      <p className="font-medium text-polar-night">{formatCentsToCurrency(order.payment.platform_commission_cents)}</p>
                     </div>
                   )}
                   {order.payment.seller_wallet_credit_cents != null && order.payment.seller_wallet_credit_cents > 0 && (
                     <div>
                       <span className="text-text-muted">Seller Credit:</span>
-                      <p className="font-medium text-aurora-green">€{(order.payment.seller_wallet_credit_cents / 100).toFixed(2)}</p>
+                      <p className="font-medium text-aurora-green">{formatCentsToCurrency(order.payment.seller_wallet_credit_cents)}</p>
                     </div>
                   )}
                   {order.payment.wallet_credited_at && (
@@ -573,7 +574,7 @@ export default function StaffTransactionPage() {
                   {order.refund_amount && (
                     <div>
                       <span className="text-text-muted">Refund Amount:</span>
-                      <p className="font-medium text-aurora-red">€{order.refund_amount.toFixed(2)}</p>
+                      <p className="font-medium text-aurora-red">{formatPrice(order.refund_amount)}</p>
                     </div>
                   )}
                   {order.refund_reason && (

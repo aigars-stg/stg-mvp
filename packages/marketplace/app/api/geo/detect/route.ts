@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isValidCountryCode, type CountryCode } from '@/lib/country-utils';
+import { handleApiError } from '@/lib/api/error-handler';
 
 // Force dynamic since we read request headers
 export const dynamic = 'force-dynamic';
@@ -40,10 +41,6 @@ export async function GET(request: NextRequest) {
       country: null,
     });
   } catch (error) {
-    console.error('[Geo Detect] Error:', error);
-    return NextResponse.json({
-      detected: false,
-      country: null,
-    });
+    return handleApiError(error, 'Detect country');
   }
 }

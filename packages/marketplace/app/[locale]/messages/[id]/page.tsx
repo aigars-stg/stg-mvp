@@ -3,7 +3,7 @@ import { MessageThread } from '@/components/messaging/MessageThread';
 import { ConversationList } from '@/components/messaging/ConversationList';
 
 export const metadata: Metadata = {
-  title: 'Conversation | Second Turn Games',
+  title: 'Conversation',
   description: 'View your conversation',
 };
 
@@ -18,7 +18,7 @@ export default function ConversationPage({ params }: ConversationPageProps) {
 
   return (
     <div className="min-h-screen bg-background-primary">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Conversation list (desktop only) */}
           <div className="hidden md:block md:col-span-1">

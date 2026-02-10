@@ -7,6 +7,7 @@ import {
 } from '@/lib/play/puzzle-service';
 import { calculateFeedback } from '@/lib/play/feedback';
 import type { GuessRequest, GuessResponse } from '@/lib/play/types';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * POST /api/play/guess
@@ -72,10 +73,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('[Play API] Error processing guess:', error);
-    return NextResponse.json(
-      { error: 'Failed to process guess' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Submit guess');
   }
 }

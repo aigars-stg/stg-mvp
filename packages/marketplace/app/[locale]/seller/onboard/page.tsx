@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import { RefreshCw as Loader2 } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { CountryCode } from '@/lib/country-utils';
 

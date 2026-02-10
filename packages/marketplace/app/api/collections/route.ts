@@ -110,6 +110,7 @@ export async function GET(request: NextRequest) {
 
 // Recently listed - newest first
 async function getRecentlyListed(supabase: TypedSupabase, limit: number): Promise<{ listings: CollectionListing[] }> {
+  // Fetch extra to account for ended auctions being filtered out
   const { data: listings, error } = await supabase
     .from('listings')
     .select(`
@@ -117,14 +118,23 @@ async function getRecentlyListed(supabase: TypedSupabase, limit: number): Promis
     `)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
-    .limit(limit);
+    .limit(limit * 2);
 
   if (error) {
     return { listings: [] };
   }
 
+  // Filter out ended auctions
+  const now = new Date().toISOString();
+  const activeListing = (listings || []).filter((l) => {
+    if (l.listing_type === 'auction' && l.auction_ends_at && l.auction_ends_at < now) {
+      return false;
+    }
+    return true;
+  }).slice(0, limit);
+
   // Fetch game and seller trust data separately
-  const enrichedListings = await enrichListingsWithGames(supabase, listings || []);
+  const enrichedListings = await enrichListingsWithGames(supabase, activeListing);
   const withTrust = await enrichListingsWithSellerTrust(supabase, enrichedListings);
   return { listings: transformListings(withTrust) };
 }

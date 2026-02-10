@@ -2,19 +2,17 @@
 
 import { Badge } from '@second-turn/design-system';
 import { Tag as Gavel } from 'griddy-icons';
-import { PriceBreakdown } from '@/components/common/PriceBreakdown';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { isAuctionListing } from '@/lib/types/listing';
-import type { DeliveredPricingResult } from '@/lib/hooks/useDeliveredPricing';
 import { useTranslations } from 'next-intl';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface OfferCardPricingProps {
   listing: ListingWithSeller;
-  deliveredPricing: DeliveredPricingResult;
   variant?: 'desktop' | 'mobile';
 }
 
-export function OfferCardPricing({ listing, deliveredPricing, variant = 'desktop' }: OfferCardPricingProps) {
+export function OfferCardPricing({ listing, variant = 'desktop' }: OfferCardPricingProps) {
   const t = useTranslations('OfferCard');
 
   const priceClasses = variant === 'mobile' ? 'text-xl' : 'text-2xl';
@@ -42,7 +40,7 @@ export function OfferCardPricing({ listing, deliveredPricing, variant = 'desktop
         {hasBids ? (
           <>
             <div className={`${priceClasses} font-bold text-aurora-purple ${variant === 'mobile' ? 'mt-1' : ''}`}>
-              €{displayPrice.toFixed(2)}
+              {formatPrice(displayPrice)}
             </div>
             <div className="text-xs text-text-muted mt-0.5">
               {listing.auction_bid_count} {listing.auction_bid_count === 1 ? t('auction.bid') : t('auction.bids')}
@@ -57,56 +55,21 @@ export function OfferCardPricing({ listing, deliveredPricing, variant = 'desktop
     );
   }
 
-  if (deliveredPricing.canCalculate) {
-    return (
-      <div className={variant === 'mobile' ? '' : 'text-right'}>
-        {/* Total delivered as primary price */}
-        <div className={`${priceClasses} font-bold text-polar-night dark:text-snow-stormLightest`}>
-          €{deliveredPricing.totalDelivered.toFixed(2)}
-          {deliveredPricing.isEstimate && (
-            <span className={`${variant === 'mobile' ? 'text-sm' : 'text-base'} font-normal text-text-muted dark:text-snow-stormMedium`}>*</span>
-          )}
-        </div>
-        {/* Previous price strikethrough */}
-        {listing.previous_price && listing.previous_price > listing.price && (
-          <div className={`flex items-center gap-1.5 ${variant === 'desktop' ? 'justify-end' : ''}`}>
-            <span className="text-sm text-text-muted dark:text-snow-stormMedium line-through">
-              €{listing.previous_price.toFixed(2)}
-            </span>
-            {variant === 'desktop' && (
-              <span className="text-xs text-aurora-green font-medium">
-                {t('price.save', { percentage: Math.round((1 - listing.price / listing.previous_price) * 100) })}
-              </span>
-            )}
-          </div>
-        )}
-        {/* Price breakdown */}
-        {variant === 'desktop' && (
-          <div className="mt-1.5">
-            <PriceBreakdown pricing={deliveredPricing} variant="full" />
-          </div>
-        )}
-        {variant === 'mobile' && (
-          <PriceBreakdown pricing={deliveredPricing} variant="compact" />
-        )}
-      </div>
-    );
-  }
-
-  // Item price only for contact_seller or non-Baltic
   return (
     <div className={variant === 'mobile' ? '' : 'text-right'}>
-      <div className={`${priceClasses} font-bold text-polar-night dark:text-snow-stormLightest`}>
-        €{listing.price.toFixed(2)}
+      <div className={`${priceClasses} font-bold text-polar-night`}>
+        {formatPrice(listing.price)}
       </div>
       {listing.previous_price && listing.previous_price > listing.price && (
         <div className={`flex items-center gap-1.5 ${variant === 'desktop' ? 'justify-end' : ''}`}>
-          <span className="text-sm text-text-muted dark:text-snow-stormMedium line-through">
-            €{listing.previous_price.toFixed(2)}
+          <span className="text-sm text-text-muted line-through">
+            {formatPrice(listing.previous_price)}
           </span>
-          <span className="text-xs text-aurora-green font-medium">
-            {t('price.save', { percentage: Math.round((1 - listing.price / listing.previous_price) * 100) })}
-          </span>
+          {variant === 'desktop' && (
+            <span className="text-xs text-aurora-green font-medium">
+              {t('price.save', { percentage: Math.round((1 - listing.price / listing.previous_price) * 100) })}
+            </span>
+          )}
         </div>
       )}
     </div>

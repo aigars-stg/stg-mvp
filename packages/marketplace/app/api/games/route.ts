@@ -12,12 +12,14 @@ interface ListingWithSeller {
   game_year: number | null;
   price: number;
   pricing_format: string;
+  transaction_method: string;
   auction_current_bid: number | null;
   auction_start_price: number | null;
   condition: ListingCondition | null;
   language: string | null;
   shipping_local_pickup: boolean;
   shipping_parcel_locker: boolean;
+  included_expansions: unknown[] | null;
   created_at: string;
   reserved_until: string | null;
   seller: {
@@ -31,12 +33,14 @@ interface ListingWithSeller {
 // Type for game metadata
 interface GameMetadata {
   id: number;
+  name: string;
   thumbnail: string | null;
   image: string | null;
   player_count: string | null;
   min_age: number | null;
   playing_time: string | null;
   is_expansion: boolean;
+  parent_bgg_id: number | null;
 }
 
 /**
@@ -90,12 +94,14 @@ export async function GET(request: NextRequest) {
         game_year,
         price,
         pricing_format,
+        transaction_method,
         auction_current_bid,
         auction_start_price,
         condition,
         language,
         shipping_local_pickup,
         shipping_parcel_locker,
+        included_expansions,
         created_at,
         reserved_until,
         seller:user_profiles!seller_id (
@@ -145,7 +151,7 @@ export async function GET(request: NextRequest) {
     if (gameIds.length > 0) {
       const { data: games } = await supabase
         .from('games')
-        .select('id, thumbnail, image, player_count, min_age, playing_time, is_expansion')
+        .select('id, name, thumbnail, image, player_count, min_age, playing_time, is_expansion, parent_bgg_id')
         .in('id', gameIds);
 
       if (games) {
@@ -153,29 +159,61 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Group listings by game and aggregate
+    // Fetch parent game metadata for expansions that will be grouped
+    const parentIdsNeeded = new Set<number>();
+    for (const [, gameData] of gamesMap) {
+      if (gameData.is_expansion && gameData.parent_bgg_id && !gamesMap.has(gameData.parent_bgg_id)) {
+        parentIdsNeeded.add(gameData.parent_bgg_id);
+      }
+    }
+
+    if (parentIdsNeeded.size > 0) {
+      const { data: parentGames } = await supabase
+        .from('games')
+        .select('id, name, thumbnail, image, player_count, min_age, playing_time, is_expansion, parent_bgg_id')
+        .in('id', [...parentIdsNeeded]);
+
+      if (parentGames) {
+        for (const g of parentGames as GameMetadata[]) {
+          gamesMap.set(g.id, g);
+        }
+      }
+    }
+
+    // Group listings by game and aggregate (expansion listings grouped under parent)
     const gameMap = new Map<number, {
       listings: ListingWithSeller[];
       game: GameMetadata | null;
       newest_listing_date: string | null;
+      expansionGameIds: Set<number>;
     }>();
 
     for (const listing of typedListings) {
-      const gameId = listing.bgg_game_id;
-      const gameData = gamesMap.get(gameId);
+      const listingGameId = listing.bgg_game_id;
+      const gameData = gamesMap.get(listingGameId);
 
-      // Apply game-level filters
-      if (gameData) {
-        // Filter expansions
-        if (!includeExpansions && gameData.is_expansion) {
-          continue;
+      // Determine group key: remap expansion listings to their parent game
+      let groupKey = listingGameId;
+      let groupGameData = gameData;
+
+      if (gameData?.is_expansion && gameData.parent_bgg_id) {
+        const parentData = gamesMap.get(gameData.parent_bgg_id);
+        if (parentData) {
+          groupKey = gameData.parent_bgg_id;
+          groupGameData = parentData;
         }
+        // If parent not in gamesMap, falls through as own card
+      } else if (gameData?.is_expansion && !gameData.parent_bgg_id) {
+        // Ungrouped expansion (parent not yet backfilled) — skip unless includeExpansions
+        if (!includeExpansions) continue;
+      }
 
+      // Apply game-level filters using the group's game data
+      if (groupGameData) {
         // Filter by player count
         if (minPlayers !== undefined || maxPlayers !== undefined) {
-          const playerCount = gameData.player_count;
+          const playerCount = groupGameData.player_count;
           if (playerCount) {
-            // Parse player count like "2-4" or "3"
             const match = playerCount.match(/(\d+)(?:-(\d+))?/);
             if (match) {
               const minP = parseInt(match[1]);
@@ -187,32 +225,37 @@ export async function GET(request: NextRequest) {
         }
 
         // Filter by min age
-        if (minAge !== undefined && gameData.min_age && gameData.min_age > minAge) {
+        if (minAge !== undefined && groupGameData.min_age && groupGameData.min_age > minAge) {
           continue;
         }
 
         // Filter by play time
-        if (maxPlayTime !== undefined && gameData.playing_time) {
-          const playTime = parseInt(gameData.playing_time);
+        if (maxPlayTime !== undefined && groupGameData.playing_time) {
+          const playTime = parseInt(groupGameData.playing_time);
           if (!isNaN(playTime) && playTime > maxPlayTime) continue;
         }
       }
 
-      if (!gameMap.has(gameId)) {
-        gameMap.set(gameId, {
+      if (!gameMap.has(groupKey)) {
+        gameMap.set(groupKey, {
           listings: [],
-          game: gameData || null,
+          game: groupGameData || null,
           newest_listing_date: listing.created_at,
+          expansionGameIds: new Set(),
         });
       } else {
-        // Track the newest listing date
-        const existing = gameMap.get(gameId)!;
+        const existing = gameMap.get(groupKey)!;
         if (listing.created_at > (existing.newest_listing_date || '')) {
           existing.newest_listing_date = listing.created_at;
         }
       }
 
-      gameMap.get(gameId)!.listings.push(listing);
+      gameMap.get(groupKey)!.listings.push(listing);
+
+      // Track which expansion games are grouped under this card
+      if (listingGameId !== groupKey) {
+        gameMap.get(groupKey)!.expansionGameIds.add(listingGameId);
+      }
     }
 
     // Build aggregated games array
@@ -231,23 +274,54 @@ export async function GET(request: NextRequest) {
       let hasLocalPickup = false;
       let hasParcelShipping = false;
       let hasAuction = false;
-      let cheapest: ListingWithSeller | null = null;
+
+      // Split pricing and counts by listing type
+      let instantBuyLowestPrice = Infinity;
+      let instantBuyCount = 0;
+      let contactSellerCount = 0;
+      let auctionCount = 0;
+      let auctionLowestPrice = Infinity;
+      let hasBundledExpansions = false;
+
+      // Track cheapest non-auction and cheapest auction separately
+      let cheapestNonAuction: ListingWithSeller | null = null;
+      let cheapestNonAuctionPrice = Infinity;
+      let cheapestAuction: ListingWithSeller | null = null;
+      let cheapestAuctionPrice = Infinity;
 
       for (const listing of gameListings) {
         // For auctions, use current bid or starting price; for fixed price, use price
         const isAuction = listing.pricing_format === 'auction';
+        const isContactSeller = listing.transaction_method === 'contact_seller';
         const effectivePrice = isAuction
           ? (listing.auction_current_bid || listing.auction_start_price || listing.price)
           : listing.price;
 
-        // Track cheapest listing (by effective price)
-        const cheapestEffectivePrice = cheapest
-          ? (cheapest.pricing_format === 'auction'
-              ? (cheapest.auction_current_bid || cheapest.auction_start_price || cheapest.price)
-              : cheapest.price)
-          : Infinity;
-        if (cheapest === null || effectivePrice < cheapestEffectivePrice) {
-          cheapest = listing;
+        // Split tracking by listing type
+        if (isAuction) {
+          auctionCount++;
+          if (effectivePrice < auctionLowestPrice) auctionLowestPrice = effectivePrice;
+          if (effectivePrice < cheapestAuctionPrice) {
+            cheapestAuction = listing;
+            cheapestAuctionPrice = effectivePrice;
+          }
+        } else {
+          if (isContactSeller) {
+            contactSellerCount++;
+          } else {
+            instantBuyCount++;
+          }
+          // Both instant-buy and contact-seller feed into the primary price
+          if (effectivePrice < instantBuyLowestPrice) instantBuyLowestPrice = effectivePrice;
+          if (effectivePrice < cheapestNonAuctionPrice) {
+            cheapestNonAuction = listing;
+            cheapestNonAuctionPrice = effectivePrice;
+          }
+        }
+
+        // Check for bundled expansions
+        if (listing.included_expansions && Array.isArray(listing.included_expansions) && listing.included_expansions.length > 0) {
+          hasBundledExpansions = true;
         }
 
         // Aggregate unique values
@@ -272,6 +346,9 @@ export async function GET(request: NextRequest) {
         if (isAuction) hasAuction = true;
       }
 
+      // Prefer non-auction listing as featured; fall back to auction-only
+      const cheapest = cheapestNonAuction || cheapestAuction;
+
       // Filter by language: skip game if it doesn't have any matching language
       if (languages.length > 0) {
         const hasMatchingLanguage = languages.some(lang => gameLanguages.has(lang));
@@ -283,7 +360,7 @@ export async function GET(request: NextRequest) {
 
       const aggregated: AggregatedGame = {
         bgg_game_id: gameId,
-        game_name: cheapest.game_name,
+        game_name: game?.name || cheapest.game_name,
         game_year: cheapest.game_year,
         image: game?.image || null,
         thumbnail: game?.thumbnail || null,
@@ -294,6 +371,13 @@ export async function GET(request: NextRequest) {
         offer_count: gameListings.length,
         lowest_price: lowestPrice === Infinity ? 0 : lowestPrice,
         highest_price: highestPrice === -Infinity ? 0 : highestPrice,
+        instant_buy_lowest_price: instantBuyLowestPrice === Infinity ? null : instantBuyLowestPrice,
+        auction_lowest_price: auctionLowestPrice === Infinity ? null : auctionLowestPrice,
+        instant_buy_count: instantBuyCount,
+        contact_seller_count: contactSellerCount,
+        auction_count: auctionCount,
+        has_bundled_expansions: hasBundledExpansions,
+        has_expansion_listings: data.expansionGameIds.size > 0,
         conditions: [...conditions] as ListingCondition[],
         languages: [...gameLanguages].sort(),
         seller_countries: [...sellerCountries],
@@ -316,10 +400,18 @@ export async function GET(request: NextRequest) {
     // Sort aggregated games
     switch (sort) {
       case 'price_asc':
-        aggregatedGames.sort((a, b) => a.lowest_price - b.lowest_price);
+        aggregatedGames.sort((a, b) => {
+          const priceA = a.instant_buy_lowest_price ?? a.auction_lowest_price ?? Infinity;
+          const priceB = b.instant_buy_lowest_price ?? b.auction_lowest_price ?? Infinity;
+          return priceA - priceB;
+        });
         break;
       case 'price_desc':
-        aggregatedGames.sort((a, b) => b.lowest_price - a.lowest_price);
+        aggregatedGames.sort((a, b) => {
+          const priceA = a.instant_buy_lowest_price ?? a.auction_lowest_price ?? 0;
+          const priceB = b.instant_buy_lowest_price ?? b.auction_lowest_price ?? 0;
+          return priceB - priceA;
+        });
         break;
       case 'offers':
         aggregatedGames.sort((a, b) => b.offer_count - a.offer_count);

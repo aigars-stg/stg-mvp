@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { XMLParser } from 'fast-xml-parser';
 import { createServiceClient } from '@/lib/supabase/client';
 import { createBGGHeaders } from '@/lib/bgg-config';
+import { handleApiError } from '@/lib/api/error-handler';
+import { logger } from '@/lib/logger';
 
 const BGG_API_DELAY = 100; // 100ms delay between BGG requests (rate limit friendly)
 let lastBGGRequestTime = 0;
@@ -20,7 +22,7 @@ async function fetchBGGImages(gameId: number, isExpansion: boolean): Promise<{ t
     lastBGGRequestTime = Date.now();
 
     const type = isExpansion ? 'boardgameexpansion' : 'boardgame';
-    console.log(`📡 Fetching images from BGG for ${isExpansion ? 'expansion' : 'game'} ${gameId}`);
+    logger.debug({ gameId, isExpansion }, 'Fetching images from BGG');
 
     const response = await fetch(
       `https://boardgamegeek.com/xmlapi2/thing?id=${gameId}&type=${type}`,
@@ -31,7 +33,7 @@ async function fetchBGGImages(gameId: number, isExpansion: boolean): Promise<{ t
     );
 
     if (!response.ok) {
-      console.warn(`⚠️ BGG API returned ${response.status} for game ${gameId}`);
+      logger.warn({ gameId, status: response.status }, 'BGG API error');
       return { thumbnail: null, image: null };
     }
 
@@ -43,15 +45,14 @@ async function fetchBGGImages(gameId: number, isExpansion: boolean): Promise<{ t
     const image = result?.items?.item?.image;
 
     if (thumbnail || image) {
-      console.log(`✅ Found images for game ${gameId} (thumbnail: ${!!thumbnail}, image: ${!!image})`);
+      logger.debug({ gameId, hasThumbnail: !!thumbnail, hasImage: !!image }, 'Found images');
       return { thumbnail: thumbnail || null, image: image || null };
     }
 
-    console.warn(`⚠️ No images found in BGG data for game ${gameId}`);
+    logger.warn({ gameId }, 'No images found in BGG data');
     return { thumbnail: null, image: null };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`❌ Error fetching from BGG (game ${gameId}):`, message);
+    logger.error({ gameId, error }, 'Error fetching from BGG');
     return { thumbnail: null, image: null };
   }
 }
@@ -69,7 +70,7 @@ export async function GET(
   const supabase = createServiceClient();
 
   try {
-    console.log(`🖼️ [Thumbnail API] Fetching thumbnail for game ${gameId}`);
+    logger.debug({ gameId }, 'Fetching thumbnail');
 
     // Step 1: Check cache in Supabase
     const { data: game, error: dbError } = await supabase
@@ -79,13 +80,12 @@ export async function GET(
       .single();
 
     if (dbError) {
-      console.error(`❌ [Thumbnail API] Database error:`, dbError);
-      return NextResponse.json({ error: 'Game not found' }, { status: 404 });
+      throw new Error(`Game not found: ${dbError.message}`);
     }
 
     // If cached, return immediately
     if (game?.thumbnail) {
-      console.log(`💾 [Thumbnail API] Returning cached thumbnail for game ${gameId}`);
+      logger.debug({ gameId }, 'Returning cached thumbnail');
       return NextResponse.json({
         thumbnail: game.thumbnail,
         cached: true,
@@ -94,11 +94,11 @@ export async function GET(
     }
 
     // Step 2: Not cached, fetch from BGG (use correct type for expansions)
-    console.log(`🔄 [Thumbnail API] Cache miss, fetching from BGG...`);
+    logger.debug({ gameId }, 'Cache miss, fetching from BGG');
     const { thumbnail: thumbnailUrl, image: imageUrl } = await fetchBGGImages(gameId, game.is_expansion || false);
 
     if (!thumbnailUrl && !imageUrl) {
-      console.warn(`⚠️ [Thumbnail API] No images available for game ${gameId}`);
+      logger.warn({ gameId }, 'No images available');
       return NextResponse.json({
         thumbnail: null,
         cached: false,
@@ -117,10 +117,10 @@ export async function GET(
       .eq('id', gameId);
 
     if (updateError) {
-      console.warn(`⚠️ [Thumbnail API] Failed to cache images:`, updateError);
+      logger.warn({ gameId, error: updateError }, 'Failed to cache images');
       // Don't fail the request, just log it
     } else {
-      console.log(`✅ [Thumbnail API] Cached images for game ${gameId}`);
+      logger.info({ gameId }, 'Cached images');
     }
 
     return NextResponse.json({
@@ -129,11 +129,6 @@ export async function GET(
       gameId,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('❌ [Thumbnail API] Unexpected error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch thumbnail', details: message },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Fetch thumbnail');
   }
 }

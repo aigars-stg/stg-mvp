@@ -31,7 +31,7 @@ export function GameResult({ puzzleNumber, puzzle }: GameResultProps) {
   return (
     <div className="mt-6 flex flex-col items-center gap-4">
       {/* Come back tomorrow - Prominent */}
-      <p className="text-lg font-medium text-gray-900 dark:text-white text-center">
+      <p className="text-lg font-medium text-gray-900 text-center">
         {t('comeBackTomorrow')}
       </p>
 
@@ -39,7 +39,7 @@ export function GameResult({ puzzleNumber, puzzle }: GameResultProps) {
       <button
         onClick={handleShare}
         disabled={shareStatus !== 'idle'}
-        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
+        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-teal-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
         title={t('shareResults')}
       >
         {shareStatus === 'idle' && (

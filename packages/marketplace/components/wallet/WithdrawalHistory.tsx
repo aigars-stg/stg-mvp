@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Badge, Button } from '@second-turn/design-system';
 import { RefreshCw as Loader2 } from 'griddy-icons';
 import { formatDateTime } from '@/lib/date-utils';
+import { formatCentsToCurrency } from '@/lib/services/pricing';
 
 interface Withdrawal {
   id: string;
@@ -19,15 +21,16 @@ interface Withdrawal {
 
 const STATUS_CONFIG: Record<
   Withdrawal['status'],
-  { label: string; variant: 'warning' | 'default' | 'success' | 'error' }
+  { labelKey: string; variant: 'warning' | 'default' | 'success' | 'error' }
 > = {
-  pending: { label: 'Pending', variant: 'warning' },
-  processing: { label: 'Processing', variant: 'default' },
-  completed: { label: 'Completed', variant: 'success' },
-  rejected: { label: 'Rejected', variant: 'error' },
+  pending: { labelKey: 'statuses.pending', variant: 'warning' },
+  processing: { labelKey: 'statuses.processing', variant: 'default' },
+  completed: { labelKey: 'statuses.completed', variant: 'success' },
+  rejected: { labelKey: 'statuses.rejected', variant: 'error' },
 };
 
 export function WithdrawalHistory() {
+  const t = useTranslations('WithdrawalHistory');
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -60,7 +63,6 @@ export function WithdrawalHistory() {
     }
   };
 
-  const formatCents = (cents: number) => `€${(cents / 100).toFixed(2)}`;
 
   const maskIban = (iban: string) => {
     if (iban.length <= 8) return iban;
@@ -86,7 +88,7 @@ export function WithdrawalHistory() {
   if (withdrawals.length === 0) {
     return (
       <div className="text-center py-6">
-        <p className="text-text-secondary text-sm">No withdrawal requests yet</p>
+        <p className="text-text-secondary text-sm">{t('empty')}</p>
       </div>
     );
   }
@@ -104,24 +106,24 @@ export function WithdrawalHistory() {
             >
               <div className="flex items-center justify-between mb-2">
                 <p className="font-semibold text-polar-night">
-                  {formatCents(w.amountCents)}
+                  {formatCentsToCurrency(w.amountCents)}
                 </p>
                 <Badge variant={config.variant}>
-                  {config.label}
+                  {t(config.labelKey)}
                 </Badge>
               </div>
               <div className="flex items-center justify-between text-xs text-text-muted">
-                <span>To {maskIban(w.iban)}</span>
+                <span>{t('to', { iban: maskIban(w.iban) })}</span>
                 <span>{formatDateTime(w.createdAt)}</span>
               </div>
               {w.status === 'completed' && w.bankReference && (
                 <p className="text-xs text-text-muted mt-1">
-                  Bank ref: {w.bankReference}
+                  {t('bankRef', { ref: w.bankReference })}
                 </p>
               )}
               {w.status === 'rejected' && w.rejectionReason && (
                 <p className="text-xs text-aurora-red mt-1">
-                  Reason: {w.rejectionReason}
+                  {t('reason', { reason: w.rejectionReason })}
                 </p>
               )}
             </div>
@@ -140,10 +142,10 @@ export function WithdrawalHistory() {
             {loadingMore ? (
               <>
                 <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                Loading...
+                {t('loading')}
               </>
             ) : (
-              'Show more'
+              t('showMore')
             )}
           </Button>
         </div>

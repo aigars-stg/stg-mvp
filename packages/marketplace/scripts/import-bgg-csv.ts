@@ -166,8 +166,9 @@ async function main() {
       if ((i + 1) % 10 === 0 || i === batches.length - 1) {
         console.log(`✅ Batch ${i + 1}/${batches.length} (${progress.toFixed(1)}%)`);
       }
-    } catch (error: any) {
-      console.error(`❌ Batch ${i + 1} exception:`, error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`❌ Batch ${i + 1} exception:`, message);
       failedBatches++;
     }
   }

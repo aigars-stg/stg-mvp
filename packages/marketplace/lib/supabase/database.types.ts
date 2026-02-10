@@ -415,6 +415,7 @@ export type Database = {
           metadata_fetched_at: string | null
           min_age: number | null
           name: string
+          parent_bgg_id: number | null
           player_count: string | null
           playing_time: string | null
           thumbnail: string | null
@@ -434,6 +435,7 @@ export type Database = {
           metadata_fetched_at?: string | null
           min_age?: number | null
           name: string
+          parent_bgg_id?: number | null
           player_count?: string | null
           playing_time?: string | null
           thumbnail?: string | null
@@ -453,6 +455,7 @@ export type Database = {
           metadata_fetched_at?: string | null
           min_age?: number | null
           name?: string
+          parent_bgg_id?: number | null
           player_count?: string | null
           playing_time?: string | null
           thumbnail?: string | null
@@ -2575,6 +2578,10 @@ export type Database = {
         Returns: Json
       }
       expire_wanted_listings: { Args: never; Returns: number }
+      extend_cart_reservation: {
+        Args: { p_basket_id: string; p_buyer_id: string }
+        Returns: Json
+      }
       generate_order_number: { Args: never; Returns: string }
       get_cart: { Args: { p_buyer_id: string }; Returns: Json }
       get_listing_question_count: {

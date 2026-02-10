@@ -2,25 +2,18 @@
 
 import MapLibreGL from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useTheme } from "next-themes";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { MapContext } from "./context";
 
-const defaultStyles = {
-  dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-  light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-};
+const defaultStyle = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 
 type MapStyleOption = string | MapLibreGL.StyleSpecification;
 
 export type MapProps = {
   children?: ReactNode;
-  /** Custom map styles for light and dark themes. Overrides the default Carto styles. */
-  styles?: {
-    light?: MapStyleOption;
-    dark?: MapStyleOption;
-  };
+  /** Custom map style. Overrides the default Carto Positron style. */
+  style?: MapStyleOption;
 } & Omit<MapLibreGL.MapOptions, "container" | "style">;
 
 function DefaultLoader() {
@@ -35,26 +28,16 @@ function DefaultLoader() {
   );
 }
 
-export function Map({ children, styles, ...props }: MapProps) {
+export function Map({ children, style: customStyle, ...props }: MapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreGL.Map | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isStyleLoaded, setIsStyleLoaded] = useState(false);
-  const { resolvedTheme } = useTheme();
 
-  const mapStyles = useMemo(
-    () => ({
-      dark: styles?.dark ?? defaultStyles.dark,
-      light: styles?.light ?? defaultStyles.light,
-    }),
-    [styles]
-  );
+  const mapStyle = customStyle ?? defaultStyle;
 
   useEffect(() => {
     if (!containerRef.current) return;
-
-    const mapStyle =
-      resolvedTheme === "dark" ? mapStyles.dark : mapStyles.light;
 
     const mapInstance = new MapLibreGL.Map({
       container: containerRef.current,
@@ -83,16 +66,6 @@ export function Map({ children, styles, ...props }: MapProps) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- map initialization should only run once on mount
   }, []);
-
-  useEffect(() => {
-    if (mapRef.current) {
-      setIsStyleLoaded(false);
-      mapRef.current.setStyle(
-        resolvedTheme === "dark" ? mapStyles.dark : mapStyles.light,
-        { diff: true }
-      );
-    }
-  }, [resolvedTheme, mapStyles]);
 
   const isLoading = !isLoaded || !isStyleLoaded;
 

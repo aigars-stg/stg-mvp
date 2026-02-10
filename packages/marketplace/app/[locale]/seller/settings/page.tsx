@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowLeft, CurrencyDollar as DollarSign, ChevronRight } from 'griddy-icons';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 const settingsItems = [
   {

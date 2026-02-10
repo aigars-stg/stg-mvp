@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { ProfileCompletionCard } from '@/components/dashboard/ProfileCompletionCard';

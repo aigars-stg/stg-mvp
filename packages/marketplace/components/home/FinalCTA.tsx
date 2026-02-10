@@ -1,12 +1,12 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 
 export function FinalCTA() {
   const t = useTranslations('HomePage.finalCTA');
   return (
-    <section className="py-12 sm:py-16 lg:py-20">
+    <section className="py-8 sm:py-10 lg:py-12">
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <div className="text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">

@@ -5,7 +5,7 @@ import { Card } from '@second-turn/design-system';
 import { getTranslations } from 'next-intl/server';
 
 export const metadata: Metadata = {
-  title: 'Messages | Second Turn Games',
+  title: 'Messages',
   description: 'View your messages and conversations',
 };
 
@@ -13,7 +13,7 @@ export default async function MessagesPage() {
   const t = await getTranslations('MessagesPage');
 
   return (
-    <div className="min-h-screen bg-bg py-8 px-4">
+    <div className="min-h-screen bg-bg py-6 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Page header */}
         <div className="mb-6">

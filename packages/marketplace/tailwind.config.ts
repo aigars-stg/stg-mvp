@@ -2,7 +2,6 @@ import type { Config } from 'tailwindcss';
 import { colors, spacing, typography, borderRadius, shadows } from '@second-turn/design-system/tokens';
 
 const config: Config = {
-  darkMode: ['class'],
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',

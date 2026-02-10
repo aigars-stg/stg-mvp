@@ -36,10 +36,10 @@ export function TurniReaction({
     <div className="flex items-start gap-3">
       {/* Speech bubble (left side) */}
       <div className="relative flex-1">
-        <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-200">
+        <div className="bg-blue-50 rounded-lg px-4 py-2 text-sm text-gray-700">
           <p>{message}</p>
           {secondaryMessage && (
-            <p className="mt-1 text-gray-500 dark:text-gray-400">{secondaryMessage}</p>
+            <p className="mt-1 text-gray-500">{secondaryMessage}</p>
           )}
         </div>
         {/* Triangle pointer pointing right toward Turni */}
@@ -47,7 +47,7 @@ export function TurniReaction({
           className="absolute top-3 -right-2 w-0 h-0
             border-t-[6px] border-t-transparent
             border-b-[6px] border-b-transparent
-            border-l-[8px] border-l-blue-50 dark:border-l-blue-950/30"
+            border-l-[8px] border-l-blue-50"
         />
       </div>
 

@@ -57,7 +57,7 @@ We are a Latvian company building a marketplace where board games find new playe
 Anyone 16 or older in Latvia, Lithuania, or Estonia can browse and buy. To sell, you must be at least 18.
 
 :::plain-terms
-The 18+ requirement for selling comes from Stripe, our payment processor. They need to verify your identity and can only do that for adults.
+The 18+ requirement for selling comes from payment regulations. We need to verify your identity to comply with financial and tax reporting requirements.
 :::
 
 ---
@@ -76,24 +76,24 @@ Both listing types are free to create. You can have multiple active listings at 
 
 ### What does it cost?
 
-**Sellers pay nothing to list or sell.** No listing fees, no commission.
+**Buyers pay the listed price plus €2.00 flat shipping.** No service fees, no hidden costs.
 
-**Buyers pay a service fee:** 6% + €0.50 per order, plus €2.00 for shipping via parcel locker.
+**Sellers pay a 10% commission** on the item price, deducted from earnings.
 
 **Example — a €20 game:**
 
 | | |
 |---|---|
 | Game price | €20.00 |
-| Service fee (6% + €0.50) | €1.70 |
 | Shipping | €2.00 |
-| **Buyer pays** | **€23.70** |
-| **Seller receives** | **€20.00** |
+| **Buyer pays** | **€22.00** |
+| Commission (10%) | -€2.00 |
+| **Seller receives** | **€18.00** |
 
-**Payouts to your bank:** When you withdraw your balance, Stripe (our payment processor) charges a small fee for the bank transfer. This fee varies by country and is shown before you confirm the withdrawal.
+**Withdrawals to your bank:** Your earnings go to your platform wallet. Withdraw to your bank account at any time — no fees.
 
 :::plain-terms
-Buyers cover all the platform costs. As a seller, what you set as your price is what you get — minus a small bank transfer fee when you withdraw to your account.
+Buyers pay the listed price plus €2 shipping — that is it, no surprise fees at checkout. Sellers pay 10% commission, and can withdraw earnings to their bank for free.
 :::
 
 [See complete fee breakdown](/legal?section=fees)
@@ -104,7 +104,7 @@ Buyers cover all the platform costs. As a seller, what you set as your price is 
 
 Payment is processed when you buy, and the seller receives funds after the order completes. Here is how it works:
 
-1. **You pay** — Payment is processed by Stripe
+1. **You pay** — Payment is processed securely via card or bank link
 2. **Seller ships** — Within 2 business days
 3. **You receive** — Check the game matches the description
 4. **Order completes** — After 2 days, or when you confirm earlier

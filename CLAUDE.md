@@ -41,11 +41,25 @@ Always use the centralized utilities from `@/lib/date-utils` for consistent Euro
 Never use `toLocaleDateString()`, `toLocaleTimeString()`, or `toLocaleString()` directly.
 Never use 12-hour time format (AM/PM).
 
+## Layout Standards
+- Page containers: `max-w-7xl mx-auto px-4 sm:px-6`
+- Focused/form pages: `max-w-4xl mx-auto px-4 sm:px-6`
+- Page vertical padding: `py-6` (standard content pages)
+- Homepage sections: `py-8 sm:py-10 lg:py-12`
+- Collection sections: `py-6 sm:py-8`
+- Card image heights: `h-40 sm:h-44 lg:h-48`
+- H1 page headings: `text-2xl sm:text-3xl font-bold`
+- H2 section headings: `text-xl sm:text-2xl font-semibold`
+- Borders: `border` (1px) by default; `border-2` only for selected/active states
+- Shadows: `shadow-sm` (resting) → `shadow-md` (hover) → `shadow-lg` (dropdowns) → `shadow-xl` (modals/sheets)
+- Colors: Never hardcode hex values — use Tailwind design token classes (e.g., `bg-aurora-orange`, `text-frost-ice`)
+
 ## Brand Voice
 - Welcoming, straightforward, playful, trustworthy
 - "Pre-loved" not "used" or "secondhand"
 - No exclamation marks in UI copy
-- See `/docs` for full brand guidelines
+- See `/docs/STG-Brand-Voice-Guide.md` for communication style
+- See `/docs/STG-Brand-Strategy.md` for purpose, values, and positioning
 
 ## Key Files
 - `packages/marketplace/middleware.ts` - Auth and i18n routing
@@ -119,6 +133,7 @@ The following MCP servers are configured for this project:
 | `/translate` | Add or update translations across locales |
 | `/wallet-status` | Check wallet and payment status |
 | `/prd` | Access or create PRD documents |
+| `/tech-debt` | Run structured technical debt scan with prioritized findings |
 
 ## Hooks (Auto-Running)
 

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, Suspense, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Badge } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
@@ -172,7 +173,7 @@ function StaffFeedbackContent() {
       <div className="min-h-screen flex items-center justify-center bg-bg">
         <div className="text-center max-w-md mx-auto px-4">
           <Shield className="w-16 h-16 text-aurora-red mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-text mb-2">Staff Access Required</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text mb-2">Staff Access Required</h1>
           <p className="text-text-secondary">
             This page is only accessible to staff members.
           </p>
@@ -185,12 +186,12 @@ function StaffFeedbackContent() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <MessageSquare className="w-8 h-8 text-frost-ice" />
-            <h1 className="text-2xl font-bold text-text">User Feedback</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-text">User Feedback</h1>
             {newCount > 0 && (
               <Badge variant="error">{newCount} new</Badge>
             )}

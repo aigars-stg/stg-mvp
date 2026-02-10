@@ -170,17 +170,14 @@ export function useMyListings(): UseMyListingsReturn {
     const fetchWantedListings = async () => {
       try {
         setWantedLoading(true);
-        console.log('Fetching wanted listings for user:', user.id);
         const response = await fetch('/api/wanted/my-listings');
 
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('Failed to fetch wanted listings:', errorData);
           throw new Error(errorData.error || 'Failed to fetch wanted listings');
         }
 
         const data = await response.json();
-        console.log('Wanted listings response:', data);
         setWantedListings(data.wantedListings || []);
         setWantedIsOffline(false);
         setWantedError('');

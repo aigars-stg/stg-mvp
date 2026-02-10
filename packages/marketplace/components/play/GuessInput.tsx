@@ -31,7 +31,7 @@ export function GuessInput({ onSelect, disabled, placeholder }: GuessInputProps)
   const listRef = useRef<HTMLUListElement>(null);
 
   // Debounced search
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- debounce creates a stable function; including it would recreate on every render, defeating the purpose of debouncing
   const performSearch = useCallback(
     debounce(async (searchQuery: string) => {
       if (!searchQuery || searchQuery.length < 2) {
@@ -182,7 +182,7 @@ export function GuessInput({ onSelect, disabled, placeholder }: GuessInputProps)
       {isOpen && results.length > 0 && (
         <ul
           ref={listRef}
-          className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-80 overflow-auto"
+          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-auto"
           role="listbox"
         >
           {results.map((game, index) => (
@@ -192,14 +192,14 @@ export function GuessInput({ onSelect, disabled, placeholder }: GuessInputProps)
               aria-selected={index === highlightedIndex}
               className={`flex items-center gap-3 px-3 py-2 cursor-pointer ${
                 index === highlightedIndex
-                  ? 'bg-teal-50 dark:bg-teal-900/30'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  ? 'bg-teal-50'
+                  : 'hover:bg-gray-50'
               }`}
               onClick={() => handleSelect(game)}
               onMouseEnter={() => setHighlightedIndex(index)}
             >
               {/* Thumbnail */}
-              <div className="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden">
+              <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded overflow-hidden">
                 {game.thumbnail ? (
                   <Image
                     src={game.thumbnail}
@@ -218,11 +218,11 @@ export function GuessInput({ onSelect, disabled, placeholder }: GuessInputProps)
 
               {/* Game info */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                <p className="text-sm font-medium text-gray-900 truncate">
                   {game.name}
                 </p>
                 {game.yearpublished && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500">
                     {game.yearpublished}
                   </p>
                 )}
@@ -234,7 +234,7 @@ export function GuessInput({ onSelect, disabled, placeholder }: GuessInputProps)
 
       {/* No results */}
       {isOpen && !isLoading && query.length >= 2 && results.length === 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 text-center text-gray-500 dark:text-gray-400">
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500">
           {t('noResults')}
         </div>
       )}

@@ -74,8 +74,9 @@ async function main() {
       console.log(`   ID: ${data[0].id}, Name: ${data[0].name}, BayesAvg: ${data[0].bayesaverage || 'NULL'}\n`);
     }
 
-  } catch (error: any) {
-    console.error('❌ Migration failed:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ Migration failed:', message);
     console.log('\n💡 Please apply the migration manually via Supabase Dashboard:');
     console.log('   1. Go to SQL Editor in Supabase Dashboard');
     console.log('   2. Copy SQL from: packages/marketplace/supabase/migrations/002_add_bayesaverage.sql');

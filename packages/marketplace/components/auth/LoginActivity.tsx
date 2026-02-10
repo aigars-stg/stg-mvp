@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import {  Monitor, Phone as Smartphone, Tablet, LocationPin as MapPin, Calendar, AlertCircle, LogOut, ChevronDown  } from 'griddy-icons';
 import { supabase } from '@/lib/supabase/client';

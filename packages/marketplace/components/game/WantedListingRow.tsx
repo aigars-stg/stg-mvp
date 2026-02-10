@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails and avatars are external URLs */
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { Badge, Button } from '@second-turn/design-system';
 import { LocationPin as MapPin } from 'griddy-icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';

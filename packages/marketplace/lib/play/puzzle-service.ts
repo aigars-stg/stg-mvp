@@ -10,6 +10,7 @@ import { createServiceClient, supabase } from '@/lib/supabase/client';
 import { createBGGHeaders } from '@/lib/bgg-config';
 import type { GameAttributes, TargetGame } from './types';
 import { LAUNCH_DATE, RIGA_TIMEZONE } from './types';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // CONSTANTS
@@ -94,7 +95,7 @@ async function getEligibleGameIds(): Promise<number[]> {
   // Update cache
   eligibleGamesCache = { ids, timestamp: Date.now() };
 
-  console.log(`[Puzzle Service] Loaded ${ids.length} eligible games`);
+  logger.info({ eligibleGameCount: ids.length }, 'Loaded eligible games for puzzles');
   return ids;
 }
 
@@ -142,7 +143,7 @@ interface BGGExtendedData {
 async function fetchBGGExtendedData(gameId: number, retries = 3): Promise<BGGExtendedData> {
   const url = `${BGG_API_URL}/thing?id=${gameId}&stats=1`;
 
-  console.log(`[BGG API] Fetching data for game ${gameId}`);
+  logger.debug({ gameId }, 'Fetching BGG extended data');
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
@@ -152,7 +153,7 @@ async function fetchBGGExtendedData(gameId: number, retries = 3): Promise<BGGExt
       });
 
       if (!response.ok) {
-        console.error(`[BGG API] HTTP error ${response.status} for game ${gameId}`);
+        logger.warn({ gameId, status: response.status, attempt }, 'BGG API HTTP error');
         if (attempt < retries) {
           await new Promise(r => setTimeout(r, 1000 * attempt)); // Exponential backoff
           continue;
@@ -164,7 +165,7 @@ async function fetchBGGExtendedData(gameId: number, retries = 3): Promise<BGGExt
 
       // BGG sometimes returns empty or "please wait" responses
       if (xml.includes('Please try again') || xml.length < 100) {
-        console.log(`[BGG API] Rate limited, retrying... (attempt ${attempt})`);
+        logger.debug({ gameId, attempt }, 'BGG API rate limited, retrying');
         if (attempt < retries) {
           await new Promise(r => setTimeout(r, 2000 * attempt));
           continue;
@@ -181,7 +182,7 @@ async function fetchBGGExtendedData(gameId: number, retries = 3): Promise<BGGExt
       const item = result?.items?.item;
 
       if (!item) {
-        console.error(`[BGG API] Game ${gameId} not found in response`);
+        logger.error({ gameId }, 'Game not found in BGG response');
         throw new Error(`Game ${gameId} not found in BGG`);
       }
 
@@ -206,11 +207,14 @@ async function fetchBGGExtendedData(gameId: number, retries = 3): Promise<BGGExt
         .filter((l: { '@_type': string; '@_value': string }) => l['@_type'] === 'boardgamemechanic')
         .map((l: { '@_type': string; '@_value': string }) => l['@_value']);
 
-      console.log(`[BGG API] Success for game ${gameId}: weight=${weight}, players=${minPlayers}-${maxPlayers}, time=${playingTime}, categories=${categories.length}, mechanics=${mechanics.length}`);
+      logger.info(
+        { gameId, weight, minPlayers, maxPlayers, playingTime, categoryCount: categories.length, mechanicCount: mechanics.length },
+        'BGG extended data fetched successfully'
+      );
       return { weight, categories, mechanics, minPlayers, maxPlayers, playingTime };
 
     } catch (error) {
-      console.error(`[BGG API] Attempt ${attempt} failed for game ${gameId}:`, error);
+      logger.warn({ gameId, attempt, error }, 'BGG API attempt failed');
       if (attempt === retries) {
         throw error;
       }
@@ -238,7 +242,7 @@ interface DailyPuzzle {
  * Get or create today's puzzle
  */
 export async function getOrCreateDailyPuzzle(puzzleNumber: number): Promise<DailyPuzzle> {
-  console.log(`[Puzzle Service] Getting puzzle #${puzzleNumber}`);
+  logger.info({ puzzleNumber }, 'Getting daily puzzle');
 
   // Try to get existing puzzle
   const { data: existing, error: fetchError } = await supabase
@@ -249,11 +253,11 @@ export async function getOrCreateDailyPuzzle(puzzleNumber: number): Promise<Dail
 
   if (fetchError && fetchError.code !== 'PGRST116') {
     // PGRST116 = no rows returned, which is expected for new puzzles
-    console.error('[Puzzle Service] Error fetching puzzle:', fetchError);
+    logger.error({ puzzleNumber, error: fetchError }, 'Error fetching puzzle');
   }
 
   if (existing) {
-    console.log(`[Puzzle Service] Found existing puzzle #${puzzleNumber}, game_id=${existing.game_id}`);
+    logger.debug({ puzzleNumber, gameId: existing.game_id }, 'Found existing puzzle');
     return {
       puzzleNumber: existing.puzzle_number,
       gameId: existing.game_id,
@@ -264,16 +268,15 @@ export async function getOrCreateDailyPuzzle(puzzleNumber: number): Promise<Dail
   }
 
   // Generate new puzzle
-  console.log(`[Puzzle Service] Generating new puzzle #${puzzleNumber}`);
+  logger.info({ puzzleNumber }, 'Generating new puzzle');
 
   const gameId = await selectGameId(puzzleNumber);
-  console.log(`[Puzzle Service] Selected game_id=${gameId} for puzzle #${puzzleNumber}`);
+  logger.info({ puzzleNumber, gameId }, 'Selected game for puzzle');
 
   const bggData = await fetchBGGExtendedData(gameId);
-  console.log(`[Puzzle Service] Fetched BGG data for game_id=${gameId}`);
+  logger.debug({ gameId }, 'Fetched BGG data');
 
   // Insert using service role (bypasses RLS)
-  console.log('[Puzzle Service] Creating service client for insert...');
   const serviceClient = createServiceClient();
 
   const { error: insertError } = await serviceClient
@@ -287,11 +290,11 @@ export async function getOrCreateDailyPuzzle(puzzleNumber: number): Promise<Dail
     });
 
   if (insertError) {
-    console.error('[Puzzle Service] Failed to insert puzzle:', insertError);
+    logger.error({ puzzleNumber, gameId, error: insertError }, 'Failed to insert puzzle');
     throw new Error(`Failed to create puzzle: ${insertError.message}`);
   }
 
-  console.log(`[Puzzle Service] Created puzzle #${puzzleNumber} with game ${gameId}`);
+  logger.info({ puzzleNumber, gameId }, 'Created puzzle');
 
   return {
     puzzleNumber,
@@ -310,7 +313,7 @@ export async function getOrCreateDailyPuzzle(puzzleNumber: number): Promise<Dail
  * Get full game attributes for feedback calculation
  */
 export async function getGameAttributes(gameId: number): Promise<GameAttributes | null> {
-  console.log(`[Puzzle Service] Getting attributes for guessed game ${gameId}`);
+  logger.debug({ gameId }, 'Getting attributes for guessed game');
 
   // Get basic info from our database
   const { data: game, error: gameError } = await supabase
@@ -320,16 +323,16 @@ export async function getGameAttributes(gameId: number): Promise<GameAttributes 
     .single();
 
   if (gameError) {
-    console.error(`[Puzzle Service] Error fetching game ${gameId}:`, gameError);
+    logger.error({ gameId, error: gameError }, 'Error fetching game');
     return null;
   }
 
   if (!game) {
-    console.error(`[Puzzle Service] Game ${gameId} not found in database`);
+    logger.warn({ gameId }, 'Game not found in database');
     return null;
   }
 
-  console.log(`[Puzzle Service] Found game: ${game.name}`);
+  logger.debug({ gameId, gameName: game.name }, 'Found game');
 
   // Fetch extended BGG data (includes player count, play time, weight, categories, mechanics)
   const bggData = await fetchBGGExtendedData(gameId);

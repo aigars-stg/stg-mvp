@@ -76,7 +76,7 @@ Some features involve third-party services that may set their own cookies:
 
 | Service | Purpose | Their Cookie Policy |
 |---------|---------|---------------------|
-| **Stripe** | Payment processing (when you checkout) | [stripe.com/cookies-policy](https://stripe.com/cookies-policy) |
+| **EveryPay** | Payment processing (when you checkout) | [every-pay.com/privacy-policy](https://every-pay.com/privacy-policy) |
 | **Cloudflare** | Security and bot protection | [cloudflare.com/cookie-policy](https://cloudflare.com/cookie-policy) |
 
 We do not control these cookies. Check each provider's policy for details.
@@ -153,4 +153,4 @@ Questions about our cookie practices?
 | **Essential** (sign-in, security) | Yes | No |
 | **Functional** (preferences, drafts) | Yes | No |
 | **Analytics** (usage statistics) | No | Yes — we ask first |
-| **Third-party** (Stripe, Cloudflare) | Only when you use those features | Check their policies |
+| **Third-party** (EveryPay, Cloudflare) | Only when you use those features | Check their policies |

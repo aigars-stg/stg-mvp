@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
+import { handleApiError } from '@/lib/api/error-handler';
 
 function calculateRelevance(
   gameName: string,
@@ -69,11 +70,7 @@ export async function GET(request: NextRequest) {
     const { data: nameMatches, error: nameError } = await nameQuery.limit(fetchLimit);
 
     if (nameError) {
-      console.error('❌ [Search API] Database error:', nameError);
-      return NextResponse.json(
-        { error: 'Search failed', details: nameError.message },
-        { status: 500 }
-      );
+      throw new Error(`Search failed: ${nameError.message}`);
     }
 
     // Also search in alternate names (slower, client-side filtering)
@@ -200,10 +197,6 @@ export async function GET(request: NextRequest) {
       durationMs: duration,
     });
   } catch (error: unknown) {
-    console.error('❌ [Search API] Unexpected error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Search games');
   }
 }

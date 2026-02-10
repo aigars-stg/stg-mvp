@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { SHIPPING_COST_EUROS } from '@/lib/pricing/constants';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface CartBasketSummaryProps {
   itemCount: number;
@@ -27,7 +28,7 @@ export function CartBasketSummary({
           {t('basket.subtotalItems', { count: itemCount })}
         </span>
         <span className="font-medium text-polar-night">
-          €{subtotal.toFixed(2)}
+          {formatPrice(subtotal)}
         </span>
       </div>
 
@@ -37,7 +38,7 @@ export function CartBasketSummary({
           {t('basket.shipping')}
         </span>
         <span className="font-medium text-polar-night">
-          €{shippingCost.toFixed(2)}
+          {formatPrice(shippingCost)}
         </span>
       </div>
 
@@ -50,7 +51,7 @@ export function CartBasketSummary({
           {t('basket.total')}
         </span>
         <span className="text-xl font-bold text-polar-night">
-          €{total.toFixed(2)}
+          {formatPrice(total)}
         </span>
       </div>
     </div>

@@ -12,6 +12,7 @@ import { ShippingLabelSellerEmail } from './templates/shipping-label-seller';
 import { PackageDeliveredBuyerEmail } from './templates/package-delivered-buyer';
 import { DisputeOpenedSellerEmail } from './templates/dispute-opened-seller';
 import { DisputeResolvedEmail } from './templates/dispute-resolved';
+import { loggers } from '../logger';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
 
@@ -53,7 +54,7 @@ export async function sendOrderPlacedToSeller(data: OrderEmailData) {
 
     return { success: true };
   } catch (error) {
-    console.error('❌ [Email] Failed to send order placed email to seller:', error);
+    loggers.email.error({ orderNumber, sellerEmail, error }, 'Failed to send order placed email to seller');
     return { success: false, error };
   }
 }
@@ -82,7 +83,7 @@ export async function sendOrderConfirmationToBuyer(data: OrderEmailData) {
 
     return { success: true };
   } catch (error) {
-    console.error('❌ [Email] Failed to send order confirmation to buyer:', error);
+    loggers.email.error({ orderNumber, buyerEmail, error }, 'Failed to send order confirmation to buyer');
     return { success: false, error };
   }
 }
@@ -121,7 +122,7 @@ export async function sendOrderAcceptedToBuyer(params: {
 
     return { success: true };
   } catch (error) {
-    console.error('❌ [Email] Failed to send order accepted email to buyer:', error);
+    loggers.email.error({ orderNumber, buyerEmail, error }, 'Failed to send order accepted email to buyer');
     return { success: false, error };
   }
 }
@@ -155,7 +156,7 @@ export async function sendOrderCancelledToBuyer(params: {
 
     return { success: true };
   } catch (error) {
-    console.error('❌ [Email] Failed to send order cancelled email to buyer:', error);
+    loggers.email.error({ orderNumber, buyerEmail, error }, 'Failed to send order cancelled email to buyer');
     return { success: false, error };
   }
 }
@@ -206,10 +207,10 @@ export async function sendShippingLabelToSeller(params: {
       }),
     });
 
-    console.log(`✅ [Email] Shipping notification sent to seller: ${sellerEmail}`);
+    loggers.email.info({ orderNumber, sellerEmail }, 'Shipping notification sent to seller');
     return { success: true };
   } catch (error) {
-    console.error('❌ [Email] Failed to send shipping notification to seller:', error);
+    loggers.email.error({ orderNumber, sellerEmail, error }, 'Failed to send shipping notification to seller');
     return { success: false, error };
   }
 }
@@ -254,10 +255,10 @@ export async function sendPackageDeliveredToBuyer(params: {
       }),
     });
 
-    console.log(`✅ [Email] Package delivered notification sent to buyer: ${buyerEmail}`);
+    loggers.email.info({ orderNumber, buyerEmail }, 'Package delivered notification sent to buyer');
     return { success: true };
   } catch (error) {
-    console.error('❌ [Email] Failed to send package delivered email to buyer:', error);
+    loggers.email.error({ orderNumber, buyerEmail, error }, 'Failed to send package delivered email to buyer');
     return { success: false, error };
   }
 }
@@ -289,10 +290,10 @@ export async function sendDisputeOpenedToSeller(params: {
       }),
     });
 
-    console.log(`✅ [Email] Dispute notification sent to seller: ${sellerEmail}`);
+    loggers.email.info({ orderNumber, sellerEmail }, 'Dispute notification sent to seller');
     return { success: true };
   } catch (error) {
-    console.error('❌ [Email] Failed to send dispute notification to seller:', error);
+    loggers.email.error({ orderNumber, sellerEmail, error }, 'Failed to send dispute notification to seller');
     return { success: false, error };
   }
 }
@@ -323,10 +324,10 @@ export async function sendDisputeResolved(params: {
       }),
     });
 
-    console.log(`✅ [Email] Dispute resolved email sent to: ${recipientEmail}`);
+    loggers.email.info({ orderNumber, recipientEmail }, 'Dispute resolved email sent');
     return { success: true };
   } catch (error) {
-    console.error('❌ [Email] Failed to send dispute resolved email:', error);
+    loggers.email.error({ orderNumber, recipientEmail, error }, 'Failed to send dispute resolved email');
     return { success: false, error };
   }
 }

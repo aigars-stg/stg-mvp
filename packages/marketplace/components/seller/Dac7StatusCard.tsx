@@ -6,7 +6,7 @@ import {
   AlertCircle,
   FileText,
 } from 'griddy-icons';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import {
   DAC7_THRESHOLDS,

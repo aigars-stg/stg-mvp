@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Button, Modal } from '@second-turn/design-system';
 import type { BGGGame } from '@/lib/bgg-api';
 import type { VersionSelection } from '@/lib/bgg-types';
@@ -40,6 +41,7 @@ import { WantedListingContextBanner } from '@/components/sell/WantedListingConte
 import { useTranslations } from 'next-intl';
 import { useListingForm, INITIAL_FORM_DATA, type ListingFormData } from '@/lib/hooks/useListingForm';
 import { formatDate } from '@/lib/date-utils';
+import { formatPrice } from '@/lib/services/pricing';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
@@ -256,9 +258,8 @@ function SellPageContent() {
             })));
           }
         }
-      } catch (error) {
-        console.error('Error checking existing listings:', error);
-        // Non-critical, continue with game selection
+      } catch {
+        // Non-critical error checking existing listings, continue with game selection
       }
     }
 
@@ -294,7 +295,6 @@ function SellPageContent() {
       }
 
       if (data.fallbackMode) {
-        console.log(`🔄 [Sell Page] Entering fallback mode: ${data.reason}`);
         setFallbackMode(true);
         setFallbackReason(data.reason);
       }
@@ -302,10 +302,8 @@ function SellPageContent() {
       // Store expansion count (used to show/hide expansion toggle)
       if (typeof data.expansionCount === 'number') {
         setExpansionCount(data.expansionCount);
-        console.log(`📦 [Sell Page] Game has ${data.expansionCount} expansions`);
       }
-    } catch (error) {
-      console.error('Error fetching game details:', error);
+    } catch {
       // If error, assume fallback mode
       setFallbackMode(true);
       setFallbackReason('Failed to load game details');
@@ -363,11 +361,10 @@ function SellPageContent() {
 
       if (data.expansions && Array.isArray(data.expansions)) {
         setAvailableExpansions(data.expansions);
-        console.log(`📦 [Sell Page] Found ${data.expansions.length} expansions for ${formData.selectedGame.name}`);
       }
       setExpansionsFetched(true);
-    } catch (error) {
-      console.error('Error fetching expansions:', error);
+    } catch {
+      // Non-critical error, expansions are optional
     } finally {
       setIsLoadingExpansions(false);
     }
@@ -415,8 +412,7 @@ function SellPageContent() {
             isLoading: false,
           });
         }
-      } catch (err) {
-        console.error('Failed to fetch seller capabilities:', err);
+      } catch {
         setSellerCapabilities({
           canCreateContactSeller: false,
           canCreateInstantBuy: false,
@@ -505,8 +501,7 @@ function SellPageContent() {
         });
 
         setExistingPhotoUrls(listing.photo_urls || []);
-      } catch (err) {
-        console.error('Error fetching listing:', err);
+      } catch {
         setLoadError('Failed to load listing');
       } finally {
         setIsLoadingListing(false);
@@ -524,19 +519,15 @@ function SellPageContent() {
 
       try {
         setIsLoadingWantedListing(true);
-        console.log(`📥 [Sell Page] Fetching wanted listing ${wantedListingId}...`);
 
         const response = await fetch(`/api/wanted/${wantedListingId}`);
         if (!response.ok) {
-          console.error('Failed to fetch wanted listing');
           return;
         }
 
         const data = await response.json();
         const wanted = data.wantedListing;
         setWantedListing(wanted);
-
-        console.log(`✅ [Sell Page] Loaded wanted listing for "${wanted.game_name}"`);
 
         // Auto-select the game from the wanted listing
         const gameData: BGGGame = {
@@ -549,8 +540,8 @@ function SellPageContent() {
 
         // Set the game selection
         handleGameSelect(gameData);
-      } catch (err) {
-        console.error('Error fetching wanted listing:', err);
+      } catch {
+        // Silently fail - wanted listing context is optional
       } finally {
         setIsLoadingWantedListing(false);
       }
@@ -575,14 +566,12 @@ function SellPageContent() {
 
         // If seller hasn't completed onboarding, redirect to onboarding page
         if (!data.onboarding_completed || !data.can_list_items) {
-          console.log('⚠️ [Sell Page] Seller not onboarded, redirecting...');
           router.push('/seller/onboard');
           return; // Keep loading state while redirecting
         }
 
         setIsCheckingOnboarding(false);
-      } catch (error) {
-        console.error('Error checking seller onboarding:', error);
+      } catch {
         setIsCheckingOnboarding(false); // Allow through but API will catch it
       }
     }
@@ -608,8 +597,7 @@ function SellPageContent() {
         const parsed = JSON.parse(draft);
         setFormData({ ...INITIAL_FORM_DATA, ...parsed.formData });
         setShowDraftBanner(false);
-      } catch (error) {
-        console.error('Error loading draft:', error);
+      } catch {
         setErrorModal({
           isOpen: true,
           message: 'Failed to load draft. Please start fresh.',
@@ -800,12 +788,9 @@ function SellPageContent() {
     }
 
     try {
-      console.log(`📤 [Sell Page] ${isEditMode ? 'Updating' : 'Creating'} listing...`);
-
       // Step 1: Upload new photos (if any)
       let newPhotoUrls: string[] = [];
       if (formData.photos.length > 0) {
-        console.log(`📸 [Sell Page] Uploading ${formData.photos.length} new photos...`);
         const photoFormData = new FormData();
         formData.photos.forEach((photoFile) => {
           photoFormData.append('photos', photoFile.file);
@@ -822,7 +807,6 @@ function SellPageContent() {
 
         const uploadData = await uploadResponse.json();
         newPhotoUrls = uploadData.urls;
-        console.log(`✅ [Sell Page] Uploaded ${newPhotoUrls.length} photos`);
       }
 
       // Combine existing and new photo URLs
@@ -830,8 +814,6 @@ function SellPageContent() {
 
       if (isEditMode) {
         // Edit mode: Update existing listing
-        console.log('📝 [Sell Page] Updating listing...');
-
         const updates = {
           photo_urls: allPhotoUrls,
           condition: formData.condition,
@@ -852,14 +834,10 @@ function SellPageContent() {
           throw new Error(error.error || 'Failed to update listing');
         }
 
-        console.log(`✅ [Sell Page] Updated listing ${editListingId}`);
-
         // Redirect to game page
         router.push(`/game/${formData.selectedGame?.id}`);
       } else {
         // Create mode: Create new listing
-        console.log('📝 [Sell Page] Creating listing...');
-
         const listingData = {
           selectedGame: {
             ...formData.selectedGame,
@@ -929,7 +907,6 @@ function SellPageContent() {
         }
 
         const { listing } = await listingResponse.json();
-        console.log(`✅ [Sell Page] Created listing ${listing.id}`);
 
         // Clear draft
         localStorage.removeItem('listing-draft');
@@ -940,7 +917,6 @@ function SellPageContent() {
         setShowSuccessModal(true);
       }
     } catch (error: unknown) {
-      console.error(`❌ [Sell Page] Error ${isEditMode ? 'updating' : 'publishing'} listing:`, error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setErrorModal({
         isOpen: true,
@@ -1196,7 +1172,6 @@ function SellPageContent() {
                   onChange={(name) => setFormData(prev => ({ ...prev, selectedGameDisplayName: name }))}
                   onAutoComplete={() => {
                     // Auto-completed, can mark section as complete
-                    console.log('[GameNameSelector] Auto-completed with primary name');
                   }}
                   onChangeName={handleChangeName}
                   hideChangeNameButton={true}
@@ -1275,7 +1250,7 @@ function SellPageContent() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-snow-white border border-border rounded-lg text-sm text-frost-ice hover:text-aurora-blue hover:border-frost-ice transition-colors"
                     >
-                      €{listing.price.toFixed(2)} • {formatDate(listing.created_at)}
+                      {formatPrice(listing.price)} • {formatDate(listing.created_at)}
                       <span className="text-xs">↗</span>
                     </a>
                   ))}

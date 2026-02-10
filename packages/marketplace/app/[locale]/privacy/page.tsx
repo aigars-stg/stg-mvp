@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Metadata } from 'next';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';

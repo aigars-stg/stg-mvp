@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Card } from '@second-turn/design-system';
 import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, PhotoCamera as Camera, AlertTriangle, LightbulbOn as Lightbulb, BookOpen, ChevronDown, ChevronUp  } from 'griddy-icons';
 import { useState } from 'react';

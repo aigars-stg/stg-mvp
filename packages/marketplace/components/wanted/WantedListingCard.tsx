@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Card, Badge, Button } from '@second-turn/design-system';
 import { Package, Users, User as Baby, Time as Clock, BookOpen, PuzzlePiece as Puzzle, Globe, Building } from 'griddy-icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Card } from '@second-turn/design-system';
 import {
   Chat as MessageSquare,
@@ -361,7 +361,7 @@ export default function ListingTypesPage() {
   const t = useTranslations('Help.ListingTypes');
 
   return (
-    <div className="min-h-screen bg-bg py-8 sm:py-12">
+    <div className="min-h-screen bg-bg py-6 sm:py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="mb-8">

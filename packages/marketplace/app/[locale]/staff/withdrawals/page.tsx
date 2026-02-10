@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { Button, Badge } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
@@ -12,6 +12,7 @@ import {
 } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { formatDateTime } from '@/lib/date-utils';
+import { formatCentsToCurrency } from '@/lib/services/pricing';
 
 interface Withdrawal {
   id: string;
@@ -136,7 +137,6 @@ function WithdrawalsContent() {
     }
   };
 
-  const formatCents = (cents: number) => `€${(cents / 100).toFixed(2)}`;
 
   if (authLoading) {
     return (
@@ -177,7 +177,7 @@ function WithdrawalsContent() {
             <div>
               <p className="font-medium text-polar-night">
                 {data.summary.pendingCount} pending withdrawal{data.summary.pendingCount !== 1 ? 's' : ''} totalling{' '}
-                {formatCents(data.summary.pendingTotalCents)}
+                {formatCentsToCurrency(data.summary.pendingTotalCents)}
               </p>
               <p className="text-xs text-text-secondary">
                 Process these via bank transfer and mark as completed
@@ -242,7 +242,7 @@ function WithdrawalsContent() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-lg font-bold text-polar-night">
-                      {formatCents(w.amountCents)}
+                      {formatCentsToCurrency(w.amountCents)}
                     </p>
                     <p className="text-sm text-text-secondary">
                       {w.sellerName} ({w.sellerEmail})
@@ -328,8 +328,8 @@ function WithdrawalsContent() {
             </h2>
             <p className="text-sm text-text-secondary mb-4">
               {actionModal.action === 'complete'
-                ? `Mark ${formatCents(actionModal.withdrawal.amountCents)} to ${actionModal.withdrawal.accountHolderName} as transferred.`
-                : `Reject ${formatCents(actionModal.withdrawal.amountCents)} withdrawal. Amount will be refunded to seller's wallet.`}
+                ? `Mark ${formatCentsToCurrency(actionModal.withdrawal.amountCents)} to ${actionModal.withdrawal.accountHolderName} as transferred.`
+                : `Reject ${formatCentsToCurrency(actionModal.withdrawal.amountCents)} withdrawal. Amount will be refunded to seller's wallet.`}
             </p>
 
             {actionModal.action === 'complete' ? (

@@ -112,8 +112,9 @@ async function backfillGameMetadata() {
       // Rate limit: wait 600ms between requests (< 2 req/sec)
       await delay(600);
 
-    } catch (err: any) {
-      console.log(`   ❌ Error: ${err.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`   ❌ Error: ${message}`);
       failed++;
       // Wait longer on error (might be rate limited)
       await delay(2000);

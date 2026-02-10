@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { WifiOff, Wifi, RefreshCw, Home, Time as Clock, AlertTriangle } from 'griddy-icons';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import { useTranslations } from 'next-intl';
 

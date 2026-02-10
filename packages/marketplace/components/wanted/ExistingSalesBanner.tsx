@@ -4,7 +4,7 @@ import { Card, Badge, Button } from '@second-turn/design-system';
 import { Tag } from 'griddy-icons';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 interface ExistingSalesBannerProps {
   gameId: number;

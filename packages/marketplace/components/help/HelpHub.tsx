@@ -29,7 +29,7 @@ function HelpHubInner({ documents }: HelpHubProps) {
   }
 
   return (
-    <div className="min-h-screen bg-bg py-8 sm:py-12">
+    <div className="min-h-screen bg-bg py-6 sm:py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-10">
           {/* Sidebar / Mobile tabs */}
@@ -40,7 +40,7 @@ function HelpHubInner({ documents }: HelpHubProps) {
           </aside>
 
           {/* Content */}
-          <main className="min-w-0 rounded-lg border border-border-subtle bg-white p-6 sm:p-8 dark:border-polar-nightDark dark:bg-polar-nightDark">
+          <main className="min-w-0 rounded-lg border border-border-subtle bg-white p-6 sm:p-8">
             <LegalSection
               title={doc.frontmatter.title}
               lastUpdated={doc.frontmatter.lastUpdated}

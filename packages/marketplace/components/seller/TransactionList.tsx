@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 // Badge available from @second-turn/design-system if needed
 import { ShoppingBag, ArrowDownRight, RefreshCw as Loader2, AlertCircle, CheckCircleAlt01 as CheckCircle2, Time as Clock, ChevronRight } from 'griddy-icons';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { formatDateShort } from '@/lib/date-utils';
 

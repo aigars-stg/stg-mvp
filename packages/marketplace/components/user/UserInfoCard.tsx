@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Avatar, AvatarSize } from './Avatar';
 import { CountryDisplay, CountryDisplayMode } from './CountryDisplay';

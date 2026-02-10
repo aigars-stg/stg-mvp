@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { postOrderCompletedMessage } from '@/lib/transactions';
+import { handleApiError } from '@/lib/api/error-handler';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,11 +23,7 @@ export async function GET(request: NextRequest) {
     const cronSecret = process.env.CRON_SECRET;
 
     if (!cronSecret) {
-      console.error('[Cron] CRON_SECRET environment variable not set');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
+      throw new Error('CRON_SECRET environment variable not set');
     }
 
     if (authHeader !== `Bearer ${cronSecret}`) {
@@ -57,11 +54,7 @@ export async function GET(request: NextRequest) {
     const fetchErrorToUse = fetchError;
 
     if (fetchErrorToUse) {
-      console.error('❌ [Cron] Error fetching orders:', fetchErrorToUse);
-      return NextResponse.json(
-        { error: 'Failed to fetch orders', details: fetchErrorToUse.message },
-        { status: 500 }
-      );
+      throw new Error(`Failed to fetch orders: ${fetchErrorToUse.message}`);
     }
 
     if (ordersToComplete.length === 0) {
@@ -88,11 +81,7 @@ export async function GET(request: NextRequest) {
       );
 
     if (updateError) {
-      console.error('❌ [Cron] Error completing orders:', updateError);
-      return NextResponse.json(
-        { error: 'Failed to complete orders', details: updateError.message },
-        { status: 500 }
-      );
+      throw new Error(`Failed to complete orders: ${updateError.message}`);
     }
 
     console.log(`✅ [Cron] Completed ${ordersToComplete.length} orders`);
@@ -109,15 +98,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {
-    console.error('❌ [Cron] Order completion job failed:', error);
-    return NextResponse.json(
-      {
-        error: 'Order completion failed',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Complete delivered orders');
   }
 }
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 import { Chat as MessageSquarePlus } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import { FeedbackModal } from './FeedbackModal';

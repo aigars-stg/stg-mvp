@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { formatDistanceToNow } from 'date-fns';
 import { Time as Clock, Flash as Zap, ChevronDown, Trophy } from 'griddy-icons';
 import type { BidWithBidder } from '@/lib/types/listing';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface BidHistoryProps {
   listingId: string;
@@ -123,7 +124,7 @@ export function BidHistory({ listingId }: BidHistoryProps) {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className="text-sm font-bold text-aurora-green">
-                    €{bid.amount.toFixed(2)}
+                    {formatPrice(bid.amount)}
                   </span>
                   <span className="text-xs text-text-muted hidden sm:flex items-center gap-0.5">
                     <Clock className="w-2.5 h-2.5" />
@@ -146,7 +147,7 @@ export function BidHistory({ listingId }: BidHistoryProps) {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className="text-xs font-medium text-text-secondary">
-                    €{bid.amount.toFixed(2)}
+                    {formatPrice(bid.amount)}
                   </span>
                   <span className="text-xs text-text-muted hidden sm:flex items-center gap-0.5">
                     <Clock className="w-2.5 h-2.5" />

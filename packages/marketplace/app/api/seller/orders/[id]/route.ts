@@ -36,6 +36,8 @@ export async function GET(
       items_total: number;
       shipping_cost: number;
       total_amount: number;
+      platform_commission_cents: number | null;
+      seller_wallet_credit_cents: number | null;
       created_at: string;
       paid_at: string | null;
       seller_response_deadline: string | null;
@@ -70,6 +72,8 @@ export async function GET(
         items_total,
         shipping_cost,
         total_amount,
+        platform_commission_cents,
+        seller_wallet_credit_cents,
         created_at,
         paid_at,
         seller_response_deadline,

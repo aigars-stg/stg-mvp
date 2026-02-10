@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { logLoginActivity, getClientIP } from '@/lib/auth/activity-logger';
+import { handleApiError } from '@/lib/api/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,7 +53,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, logged: result.success });
   } catch (error: unknown) {
     // Don't fail the request if logging fails
-    console.error('Failed to log activity:', error);
-    return NextResponse.json({ success: true, logged: false });
+    return handleApiError(error, 'Log activity');
   }
 }

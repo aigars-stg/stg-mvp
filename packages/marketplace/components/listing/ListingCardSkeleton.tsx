@@ -12,7 +12,7 @@ export function ListingCardSkeleton() {
       className="overflow-hidden h-full flex flex-col animate-pulse"
     >
       {/* Image Skeleton */}
-      <div className="relative h-48 sm:h-56 lg:h-64 bg-polar-night/5">
+      <div className="relative h-40 sm:h-44 lg:h-48 bg-polar-night/5">
         <div className="absolute inset-0 bg-gradient-to-br from-polar-night/10 to-polar-night/5" />
 
         {/* Condition Badge Skeleton - top right */}

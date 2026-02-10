@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Badge, Button } from '@second-turn/design-system';
 import {
@@ -33,6 +33,7 @@ import {
 // Valid Badge variants for the design system - used for type assertion
 type DesignSystemBadgeVariant = 'trust' | 'likeNew' | 'veryGood' | 'good' | 'acceptable' | 'forParts' | 'success' | 'warning' | 'error' | 'default' | 'outline';
 import { formatDate, formatTime } from '@/lib/date-utils';
+import { formatPrice } from '@/lib/services/pricing';
 
 export default function OrderDetailPage() {
   const t = useTranslations('Orders.detail');
@@ -82,7 +83,7 @@ export default function OrderDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
           <AlertCircle className="w-12 h-12 text-aurora-red mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-polar-night dark:text-snow-white mb-2">
+          <h2 className="text-xl font-semibold text-polar-night mb-2">
             {error || t('notFound')}
           </h2>
           <Link href="/orders">
@@ -129,7 +130,7 @@ export default function OrderDetailPage() {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-polar-night dark:text-snow-white">
+                <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
                   {t('orderTitle', { orderNumber: order.order_number })}
                 </h1>
                 <Badge variant={statusInfo.variant as DesignSystemBadgeVariant} size="lg">
@@ -154,7 +155,7 @@ export default function OrderDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Status Timeline */}
             {!isCancelled && (
-              <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl p-4 sm:p-6">
+              <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
                 <StatusTimeline
                   currentStatus={order.status}
                   timeRemainingMs={timeRemainingMs}
@@ -177,7 +178,7 @@ export default function OrderDetailPage() {
                     </p>
                     {order.timestamps.refunded_at && (
                       <div className="p-3 bg-aurora-green/10 border border-aurora-green/20 rounded-lg">
-                        <p className="text-sm font-medium text-polar-night dark:text-snow-white">
+                        <p className="text-sm font-medium text-polar-night">
                           {t('cancelled.refundProcessed', {
                             amount: order.total_amount.toFixed(2),
                           })}
@@ -224,7 +225,7 @@ export default function OrderDetailPage() {
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="w-6 h-6 text-aurora-yellow flex-shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-polar-night dark:text-snow-white mb-2">
+                    <h3 className="font-semibold text-polar-night mb-2">
                       {t('disputed.title')}
                     </h3>
                     {order.timestamps.disputed_at && (
@@ -264,7 +265,7 @@ export default function OrderDetailPage() {
                       className={`font-semibold mb-2 ${
                         timeRemainingMs <= 0
                           ? 'text-aurora-red'
-                          : 'text-polar-night dark:text-snow-white'
+                          : 'text-polar-night'
                       }`}
                     >
                       {timeRemainingMs <= 0
@@ -287,8 +288,8 @@ export default function OrderDetailPage() {
             )}
 
             {/* Order Items */}
-            <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-polar-night dark:text-snow-white mb-4">
+            <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-polar-night mb-4">
                 {t('items.title', { count: order_items.length })}
               </h2>
               <div className="space-y-4">
@@ -308,7 +309,7 @@ export default function OrderDetailPage() {
                     <div className="flex-grow min-w-0">
                       <Link
                         href={`/game/${item.game_bgg_id}`}
-                        className="font-medium text-polar-night dark:text-snow-white hover:text-frost-ice transition-colors line-clamp-2"
+                        className="font-medium text-polar-night hover:text-frost-ice transition-colors line-clamp-2"
                       >
                         {item.game_name}
                       </Link>
@@ -319,8 +320,8 @@ export default function OrderDetailPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="font-bold text-polar-night dark:text-snow-white">
-                        €{item.price.toFixed(2)}
+                      <span className="font-bold text-polar-night">
+                        {formatPrice(item.price)}
                       </span>
                     </div>
                   </div>
@@ -329,7 +330,7 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Shipping Information */}
-            <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl p-4 sm:p-6">
+            <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
               <ShippingInfoCard
                 destination={order.destination}
                 title={t('shipping.deliveryTitle')}
@@ -378,12 +379,12 @@ export default function OrderDetailPage() {
             )}
 
             {/* Messages Section */}
-            <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl overflow-hidden">
+            <div className="bg-snow-white border border-border rounded-xl overflow-hidden">
               {/* Messages header */}
-              <div className="px-4 py-3 border-b border-border-subtle bg-bg-secondary dark:bg-polar-night">
+              <div className="px-4 py-3 border-b border-border-subtle bg-bg-secondary">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-frost-ice" />
-                  <h2 className="text-sm font-semibold text-polar-night dark:text-snow-white">
+                  <h2 className="text-sm font-semibold text-polar-night">
                     Messages
                   </h2>
                   <span className="text-xs text-text-tertiary">
@@ -420,7 +421,7 @@ export default function OrderDetailPage() {
               </div>
 
               {/* Message input */}
-              <div className="border-t border-border-subtle bg-bg-primary dark:bg-polar-night px-4 py-3">
+              <div className="border-t border-border-subtle bg-bg-primary px-4 py-3">
                 <MessageInput
                   onSend={handleSendMessage}
                   disabled={sendingMessage}
@@ -435,15 +436,15 @@ export default function OrderDetailPage() {
           {/* Sidebar - Right Column */}
           <div className="lg:col-span-1 space-y-6">
             {/* Order Summary */}
-            <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl p-4 sm:p-6">
-              <h3 className="font-semibold text-polar-night dark:text-snow-white mb-4">
+            <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
+              <h3 className="font-semibold text-polar-night mb-4">
                 {t('summary.title')}
               </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-text-secondary">{t('summary.items')}</span>
-                  <span className="font-medium text-polar-night dark:text-snow-white">
-                    €{order.items_total.toFixed(2)}
+                  <span className="font-medium text-polar-night">
+                    {formatPrice(order.items_total)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -454,16 +455,16 @@ export default function OrderDetailPage() {
                     {order.shipping_cost === 0 ? (
                       <span className="text-aurora-green">{t('summary.free')}</span>
                     ) : (
-                      <span className="text-polar-night dark:text-snow-white">€{order.shipping_cost.toFixed(2)}</span>
+                      <span className="text-polar-night">{formatPrice(order.shipping_cost)}</span>
                     )}
                   </span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-border-subtle">
-                  <span className="font-semibold text-polar-night dark:text-snow-white">
+                  <span className="font-semibold text-polar-night">
                     {t('summary.totalPaid')}
                   </span>
-                  <span className="text-lg font-bold text-polar-night dark:text-snow-white">
-                    €{order.total_amount.toFixed(2)}
+                  <span className="text-lg font-bold text-polar-night">
+                    {formatPrice(order.total_amount)}
                   </span>
                 </div>
               </div>
@@ -471,8 +472,8 @@ export default function OrderDetailPage() {
 
             {/* Other Party Information */}
             {otherUser && (
-              <div className="bg-snow-white dark:bg-polar-night-light border border-border rounded-xl p-4 sm:p-6">
-                <h3 className="font-semibold text-polar-night dark:text-snow-white mb-4">
+              <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
+                <h3 className="font-semibold text-polar-night mb-4">
                   {current_user.role === 'buyer'
                     ? t('seller.title')
                     : 'Buyer'}
@@ -495,7 +496,7 @@ export default function OrderDetailPage() {
               <div className="flex gap-2">
                 <AlertCircle className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-medium text-polar-night dark:text-snow-white mb-1">
+                  <p className="font-medium text-polar-night mb-1">
                     {t('help.title')}
                   </p>
                   <p className="text-text-secondary">{t('help.description')}</p>

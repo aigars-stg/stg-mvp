@@ -14,7 +14,9 @@
 
 import type {
   CreatePaymentRequest,
+  EveryPayPaymentMethod,
   EveryPayPaymentResponse,
+  EveryPayProcessingAccountResponse,
   EveryPayRefundResponse,
   RefundPaymentRequest,
 } from './types';
@@ -144,6 +146,7 @@ export async function createPayment(
     ...(options?.locale && { locale: options.locale }),
     ...(options?.email && { email: options.email }),
     ...(options?.customerIp && { customer_ip: options.customerIp }),
+    mobile_payment: true,
   };
 
   const response = await request<EveryPayPaymentResponse>(
@@ -207,6 +210,37 @@ export async function refundPayment(
     config,
     body
   );
+}
+
+// ---------------------------------------------------------------------------
+// Payment Methods
+// ---------------------------------------------------------------------------
+
+let cachedMethods: EveryPayPaymentMethod[] | null = null;
+let cacheExpiry = 0;
+const CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
+
+/**
+ * Fetch available payment methods from EveryPay.
+ * Results are cached in-memory for 4 hours.
+ */
+export async function getPaymentMethods(): Promise<EveryPayPaymentMethod[]> {
+  if (cachedMethods && Date.now() < cacheExpiry) {
+    return cachedMethods;
+  }
+
+  const config = getConfig();
+
+  const data = await request<EveryPayProcessingAccountResponse>(
+    'GET',
+    `${config.apiUrl}/processing_accounts/${encodeURIComponent(config.accountName)}?api_username=${encodeURIComponent(config.apiUsername)}`,
+    config
+  );
+
+  cachedMethods = data.payment_methods;
+  cacheExpiry = Date.now() + CACHE_TTL_MS;
+
+  return cachedMethods;
 }
 
 export { EveryPayError };

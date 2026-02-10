@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { Card, Badge } from '@second-turn/design-system';
 import { Package, LocationPin as MapPin, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Chat as MessageSquare, Tag as Gavel } from 'griddy-icons';
 import { ImageCarousel } from '@/components/common/ImageCarousel';
@@ -9,21 +8,17 @@ import type { ListingWithSeller } from '@/lib/types/listing';
 import { isContactSellerListing, isAuctionListing, getAuctionTimeRemaining, formatCompactTimeRemaining } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { ConditionInfoModal } from '@/components/common/ConditionInfoModal';
-import { PriceBreakdown } from '@/components/common/PriceBreakdown';
 import { getConditionBadgeVariant } from '@/lib/utils/condition-utils';
-import { useDeliveredPricing } from '@/lib/hooks/useDeliveredPricing';
-import type { TerminalCountry } from '@/lib/unisend/types';
 import { useTranslations } from 'next-intl';
+import { formatPrice } from '@/lib/services/pricing';
 
 interface ListingCardProps {
   listing: ListingWithSeller;
   showSeller?: boolean;
   isOwnListing?: boolean; // Whether this listing belongs to the current user
-  /** Buyer's country for calculating accurate shipping estimate */
-  buyerCountry?: TerminalCountry;
 }
 
 // Priority languages for Baltic region
@@ -61,7 +56,7 @@ function formatLanguages(languageString: string): string {
   return displayLangs.join(' / ');
 }
 
-export function ListingCard({ listing, showSeller = false, isOwnListing = false, buyerCountry }: ListingCardProps) {
+export function ListingCard({ listing, showSeller = false, isOwnListing = false }: ListingCardProps) {
   const t = useTranslations('Listings');
   const router = useRouter();
   const { user } = useAuth();
@@ -78,16 +73,6 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
     ? getAuctionTimeRemaining(listing.auction_ends_at)
     : null;
   const showAuctionTimer = auctionTimeRemaining && auctionTimeRemaining.days === 0 && !auctionTimeRemaining.isEnded;
-
-  // Calculate total delivered price (item + shipping)
-  const deliveredPricing = useDeliveredPricing({
-    listingType: listing.listing_type,
-    transactionMethod: listing.transaction_method,
-    pricingFormat: listing.pricing_format,
-    price: displayPrice,
-    sellerCountry: listing.seller.country,
-    buyerCountry,
-  });
 
   // Collect all available images (BGG main image + user photos only)
   const allImages = [
@@ -198,7 +183,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
           {/* Variable height content */}
           <div className="space-y-2">
             {/* Game Name */}
-            <h3 className="font-bold text-lg text-polar-night dark:text-snow-stormLightest line-clamp-2 min-h-[2.5rem]">
+            <h3 className="font-bold text-lg text-polar-night line-clamp-2 min-h-[2.5rem]">
               {listing.game_name}
             </h3>
 
@@ -228,7 +213,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
 
             {/* Game Metadata - tighter spacing */}
             {(listing.game?.player_count || listing.game?.min_age || listing.game?.playing_time || (listing.included_expansions && listing.included_expansions.length > 0)) && (
-              <div className="flex flex-wrap gap-2 text-xs text-text-secondary dark:text-snow-stormLight items-center">
+              <div className="flex flex-wrap gap-2 text-xs text-text-secondary items-center">
                 {listing.game?.player_count && (
                   <span className="flex items-center gap-0.5">
                     <Users className="w-3.5 h-3.5" />
@@ -261,7 +246,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
 
             {/* Language + Missing Components Warning */}
             {(listing.language || !listing.all_components_present) && (
-              <div className="flex items-center gap-1.5 text-sm text-text-secondary dark:text-snow-stormLight">
+              <div className="flex items-center gap-1.5 text-sm text-text-secondary">
                 {listing.language && (
                   <span
                     className="flex items-center gap-1 line-clamp-1"
@@ -285,46 +270,24 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
 
           {/* Price - aligned at bottom */}
           <div className="pt-2">
-            {deliveredPricing.canCalculate ? (
-              <>
-                {/* Total delivered as primary price */}
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-polar-night dark:text-snow-stormLightest">
-                    €{deliveredPricing.totalDelivered.toFixed(2)}
-                    {deliveredPricing.isEstimate && <span className="text-base font-normal text-text-muted dark:text-snow-stormMedium">*</span>}
-                  </span>
-                  {listing.previous_price && listing.previous_price > listing.price && (
-                    <span className="text-base text-text-muted dark:text-snow-stormMedium line-through">
-                      €{listing.previous_price.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-                {/* Compact breakdown */}
-                <PriceBreakdown pricing={deliveredPricing} variant="compact" />
-              </>
-            ) : (
-              <>
-                {/* Item price only for contact_seller, auctions, or non-Baltic */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-2xl font-bold ${isAuction ? 'text-aurora-purple' : 'text-polar-night dark:text-snow-stormLightest'}`}>
-                    {isAuction && !hasBids && (
-                      <span className="text-sm font-normal text-text-muted mr-1">{t('auction.startingAt')}</span>
-                    )}
-                    €{displayPrice.toFixed(2)}
-                  </span>
-                  {isAuction && hasBids && (
-                    <span className="text-sm text-text-muted dark:text-snow-stormMedium">
-                      ({listing.auction_bid_count} {listing.auction_bid_count === 1 ? t('bid') : t('bids')})
-                    </span>
-                  )}
-                  {!isAuction && listing.previous_price && listing.previous_price > listing.price && (
-                    <span className="text-base text-text-muted dark:text-snow-stormMedium line-through">
-                      €{listing.previous_price.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-              </>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-2xl font-bold ${isAuction ? 'text-aurora-purple' : 'text-polar-night'}`}>
+                {isAuction && !hasBids && (
+                  <span className="text-sm font-normal text-text-muted">{t('auction.startingAt')}{'\u00A0'}</span>
+                )}
+                {formatPrice(displayPrice)}
+              </span>
+              {isAuction && hasBids && (
+                <span className="text-sm text-text-muted">
+                  ({listing.auction_bid_count} {listing.auction_bid_count === 1 ? t('bid') : t('bids')})
+                </span>
+              )}
+              {!isAuction && listing.previous_price && listing.previous_price > listing.price && (
+                <span className="text-base text-text-muted line-through">
+                  {formatPrice(listing.previous_price)}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Bottom Section: Location + Shipping + Buy Now Button */}
@@ -332,7 +295,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
             {/* Location + Shipping - answers "Can I get this?" and "How?" */}
             {/* Contact Seller listings don't show shipping options - arranged directly */}
             {showSeller && listing.seller?.country && (
-              <div className="flex items-center gap-1.5 text-sm text-text-secondary dark:text-snow-stormLight">
+              <div className="flex items-center gap-1.5 text-sm text-text-secondary">
                 {getCountryFlag(listing.seller.country) && (
                   <span
                     className={getCountryFlag(listing.seller.country)}
@@ -344,7 +307,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
                 {/* Only show shipping options for instant_buy listings */}
                 {!isContactSellerListing(listing) && (
                   <>
-                    <span className="text-text-muted dark:text-snow-stormMedium">•</span>
+                    <span className="text-text-muted">•</span>
                     {listing.shipping_parcel_locker ? (
                       <span className="flex items-center gap-1">
                         <Package className="w-3.5 h-3.5" />

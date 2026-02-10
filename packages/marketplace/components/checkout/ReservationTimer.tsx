@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Time as Clock, AlertTriangle } from 'griddy-icons';
+import { Time as Clock, AlertTriangle, RefreshCw as Loader2 } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 
 interface ReservationTimerProps {
   expiresAt: string | Date;
   onExpire?: () => void;
+  onExtend?: () => Promise<void>;
+  canExtend?: boolean;
   showLabel?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -14,12 +16,15 @@ interface ReservationTimerProps {
 export function ReservationTimer({
   expiresAt,
   onExpire,
+  onExtend,
+  canExtend = false,
   showLabel = true,
   size = 'md',
 }: ReservationTimerProps) {
   const t = useTranslations('Checkout.ReservationTimer');
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isExpired, setIsExpired] = useState(false);
+  const [extending, setExtending] = useState(false);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -57,6 +62,17 @@ export function ReservationTimer({
   };
 
   const urgency = getUrgencyLevel();
+  const showExtendButton = canExtend && onExtend && urgency === 'critical' && !isExpired;
+
+  const handleExtend = async () => {
+    if (!onExtend || extending) return;
+    setExtending(true);
+    try {
+      await onExtend();
+    } finally {
+      setExtending(false);
+    }
+  };
 
   const colorClasses = {
     normal: 'text-aurora-green bg-aurora-green/10',
@@ -89,17 +105,34 @@ export function ReservationTimer({
   }
 
   return (
-    <div
-      className={`inline-flex items-center gap-1.5 rounded-md font-medium ${colorClasses[urgency]} ${sizeClasses[size]}`}
-      role="timer"
-      aria-live="polite"
-      aria-label={t('ariaLabel', { minutes, seconds })}
-    >
-      <Clock className={iconSizes[size]} />
-      {showLabel && <span>{t('reserved')}</span>}
-      <span className="font-mono tabular-nums">
-        {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-      </span>
+    <div className="inline-flex items-center gap-2">
+      <div
+        className={`inline-flex items-center gap-1.5 rounded-md font-medium ${colorClasses[urgency]} ${sizeClasses[size]}`}
+        role="timer"
+        aria-live="polite"
+        aria-label={t('ariaLabel', { minutes, seconds })}
+      >
+        <Clock className={iconSizes[size]} />
+        {showLabel && <span>{t('reserved')}</span>}
+        <span className="font-mono tabular-nums">
+          {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+        </span>
+      </div>
+
+      {showExtendButton && (
+        <button
+          type="button"
+          onClick={handleExtend}
+          disabled={extending}
+          className="inline-flex items-center gap-1 text-xs font-medium text-aurora-red hover:text-aurora-red/80 bg-aurora-red/10 hover:bg-aurora-red/20 px-2 py-1 rounded-md transition-colors disabled:opacity-50"
+        >
+          {extending ? (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          ) : (
+            <span>{t('extendButton')}</span>
+          )}
+        </button>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/orders/by-session/[sessionId]
@@ -119,11 +120,6 @@ export async function GET(
       },
     });
   } catch (error: unknown) {
-    console.error('[by-session] Error fetching order:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to fetch order', details: message },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Fetch order by session');
   }
 }

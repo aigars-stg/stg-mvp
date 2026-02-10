@@ -13,7 +13,7 @@ Simple, transparent pricing. Buyers pay the listed price plus shipping. Sellers 
 | Cost | Amount |
 |------|--------|
 | **Game price** | As listed by seller |
-| **Shipping** | From €2.00 |
+| **Shipping** | **€2.00** (flat rate) |
 
 No service fees, no hidden costs. You pay the listed price plus shipping.
 
@@ -61,14 +61,19 @@ Withdrawals are processed within 1-3 business days.
 
 ## Shipping Rates
 
-Shipping via Unisend parcel terminals:
+Flat-rate shipping via Unisend parcel terminals to any location in the Baltics:
 
 | Route | Price |
 |-------|-------|
-| Within same country (LV→LV, LT→LT, EE→EE) | €2.00 |
-| Between Baltic countries | €2.50 |
+| Any Baltic route | **€2.00** |
 
-*Rates are subject to change based on carrier pricing.*
+Same price whether you are shipping across town or across the Baltics — Latvia, Lithuania, and Estonia.
+
+### Maximum Delivery Time
+
+- **Within the same country:** next working day after shipment
+- **Between Baltic countries:** 2-3 working days after shipment
+- **Total from purchase** (including seller confirmation): up to 2 working days domestic, 4 working days cross-border
 
 ---
 

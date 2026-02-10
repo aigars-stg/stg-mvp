@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertTriangle, Time as Clock } from 'griddy-icons';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 
 interface DisputeAlertProps {

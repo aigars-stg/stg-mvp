@@ -8,6 +8,28 @@
     "confirm": "Confirm",
     "delete": "Delete",
     "edit": "Edit",
+    "aria": {
+      "previousImage": "Previous image",
+      "nextImage": "Next image",
+      "closeLightbox": "Close lightbox",
+      "addToWishlist": "Add to wishlist",
+      "removeFromWishlist": "Remove from wishlist",
+      "dismiss": "Dismiss",
+      "helpSections": "Help sections",
+      "legalSections": "Legal sections",
+      "mainNavigation": "Main navigation",
+      "searchGames": "Search games",
+      "clearSearch": "Clear search",
+      "userMenu": "User menu",
+      "selectLanguage": "Select language",
+      "acceptTerms": "Accept seller terms"
+    },
+    "emptyStates": {
+      "noMessages": "No messages yet",
+      "noTransactions": "No transactions yet",
+      "noWithdrawals": "No withdrawal requests yet",
+      "noImage": "No image"
+    },
     "ConditionInfoModal": {
       "title": "Condition grade",
       "fullGradingGuide": "Full grading guide",
@@ -26,12 +48,6 @@
     "sellThisGame": "Sell this game",
     "requestThisGame": "Request this game",
     "noGamesFound": "No games found for \"{query}\""
-  },
-  "PriceBreakdown": {
-    "item": "Item:",
-    "shipping": "Shipping ({country}):",
-    "fees": "fees",
-    "estimateNote": "*Same-country estimate"
   },
   "CookieConsent": {
     "title": "We use cookies",
@@ -558,7 +574,13 @@
       "prevImageAria": "Previous image",
       "nextImageAria": "Next image",
       "viewImageAria": "View image {number}",
-      "learnConditionAria": "Learn about {condition} condition"
+      "learnConditionAria": "Learn about {condition} condition",
+      "offers": "{count, plural, one {# offer} other {# offers}}",
+      "instantBuyTooltip": "{count, plural, one {# instant buy} other {# instant buy}}",
+      "contactSellerTooltip": "{count, plural, one {# contact seller} other {# contact seller}}",
+      "auctionTooltip": "{count, plural, one {# auction} other {# auctions}}",
+      "expansionTooltip": "Expansion",
+      "expansionOffersTooltip": "Includes expansion offers"
     },
     "detail": {},
     "create": {},
@@ -638,12 +660,31 @@
     "orderFrom": "Order from {sellerName}",
     "shipping": {
       "title": "Parcel Terminal Delivery",
-      "description": "Pick up at a convenient parcel locker near you. Fast and secure delivery within 1-3 business days."
+      "description": "Pick up at a convenient parcel locker near you. Fast and secure delivery within 1-3 business days.",
+      "summaryLine": "Parcel terminal delivery"
     },
     "sections": {
       "selectTerminal": "1. Select Pickup Terminal",
-      "contactInfo": "2. Contact Information"
+      "contactInfo": "2. Contact Information",
+      "termsConsent": "3. Terms & Conditions"
     },
+    "collapse": {
+      "selectTerminal": "Select Pickup Terminal",
+      "contactInfo": "Contact Information",
+      "termsConsent": "Terms & Conditions",
+      "terminalPrompt": "Choose a parcel locker",
+      "contactPrompt": "We'll send tracking info here",
+      "termsPrompt": "Please review and accept",
+      "termsAccepted": "Terms accepted",
+      "complete": "Complete",
+      "required": "Required"
+    },
+    "country": {
+      "title": "Where are you based?",
+      "subtitle": "This helps us show the right terminals, banks, and phone format for you",
+      "detected": "detected"
+    },
+    "payment": {},
     "form": {
       "fullName": "Full Name",
       "email": "Email",
@@ -663,9 +704,24 @@
       "total": "Total"
     },
     "actions": {
-      "paySecurely": "Pay Securely",
+      "paySecurely": "Confirm and Pay",
       "processing": "Processing...",
       "backToCart": "Back to Cart"
+    },
+    "merchant": {
+      "label": "Merchant"
+    },
+    "consent": {
+      "refundSummaryTitle": "Refund policy summary",
+      "refundPoint1": "All sellers are private individuals, not businesses",
+      "refundPoint2": "No 14-day return right — you cannot return an item because you changed your mind",
+      "refundPoint3": "Report problems within 2 days of delivery to request a refund",
+      "refundPoint4": "After order completion, sales are final",
+      "checkboxPrefix": "By checking this box, I confirm I have read and agree to the",
+      "termsLink": "Terms & Conditions",
+      "and": "and the",
+      "refundLink": "Returns & Refunds policy",
+      "pleaseAccept": "Please accept the terms to continue"
     },
     "info": {
       "sellerDeadline": "Seller has 24 hours to accept",
@@ -737,7 +793,8 @@
     "ReservationTimer": {
       "expired": "Expired",
       "reserved": "Reserved:",
-      "ariaLabel": "{minutes} minutes and {seconds} seconds remaining"
+      "ariaLabel": "{minutes} minutes and {seconds} seconds remaining",
+      "extendButton": "+5 min"
     },
     "TerminalMap": {
       "selectTerminal": "Select This Terminal",
@@ -1068,12 +1125,14 @@
       "privacyPolicy": "Privacy policy",
       "termsOfService": "Terms of service",
       "sellerTerms": "Seller terms",
-      "fees": "Fees"
+      "fees": "Fees",
+      "deliveryAndReturns": "Delivery & Returns"
     },
     "company": {
       "name": "Second Turn Games SIA",
       "regNumber": "Reg. No. 50203665371",
-      "location": "Riga, Latvia"
+      "address": "Evalda Valtera 5-35, Riga, LV-1021, Latvia",
+      "phone": "+371 2677 9625"
     },
     "copyright": "Copyright © 2025-{year} Second Turn Games SIA"
   },
@@ -2067,11 +2126,8 @@
       "totalItems": "Total items",
       "fromSellers": "From sellers",
       "subtotalAll": "Subtotal (all baskets)",
-      "separateCheckout": "Each basket is checked out and paid separately"
-    },
-    "infoBox": {
-      "reserved": "Items are reserved for 30 minutes",
-      "completeCheckout": "Complete your checkout before the timer expires to secure your games. Each seller basket is paid separately."
+      "separateCheckout": "Each basket is checked out and paid separately",
+      "shippingNote": "Shipping is added per seller at checkout"
     }
   },
   "MyListings": {
@@ -2896,5 +2952,164 @@
       "attrMechanic": "Mechanics",
       "attrMechanicDesc": "Game mechanisms (Worker Placement, etc.)"
     }
+  },
+  "SellerOrders": {
+    "title": "Seller Orders",
+    "subtitle": "Manage your orders and respond to buyers",
+    "loading": "Loading your orders...",
+    "error": {
+      "title": "Error loading orders",
+      "tryAgain": "Try again"
+    },
+    "noOrders": {
+      "title": "No orders found",
+      "pending": "You have no pending orders to review",
+      "other": "No {tab} orders"
+    },
+    "summary": {
+      "allOrders": "All Orders",
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "shipped": "Shipped",
+      "completed": "Completed"
+    },
+    "tabs": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "shipped": "Shipped",
+      "completed": "Completed",
+      "all": "All"
+    },
+    "card": {
+      "buyer": "Buyer: {name}",
+      "expired": "Expired",
+      "timeRemaining": "{hours}h {minutes}m left",
+      "items": "Items ({count})"
+    },
+    "shipping": {
+      "terminalPickup": "Terminal Pickup:",
+      "localPickup": "Local Pickup:"
+    },
+    "pricing": {
+      "items": "Items:",
+      "shipping": "Shipping:",
+      "commission": "Commission (10%):",
+      "youReceive": "You receive:"
+    },
+    "actions": {
+      "acceptOrder": "Accept Order",
+      "accepting": "Accepting...",
+      "decline": "Decline",
+      "viewDetails": "View Details"
+    },
+    "declineModal": {
+      "title": "Decline Order",
+      "description": "Please provide a reason for declining this order. The buyer will be automatically refunded.",
+      "placeholder": "e.g., Item no longer available",
+      "cancel": "Cancel",
+      "confirmDecline": "Confirm Decline",
+      "declining": "Declining..."
+    }
+  },
+  "SellerOrderDetail": {
+    "loading": "Loading order details...",
+    "error": {
+      "title": "Error loading order",
+      "orderNotFound": "Order not found"
+    },
+    "backToOrders": "Back to Orders",
+    "viewOrderAndMessages": "View Order & Messages",
+    "buyer": "Buyer: {name}",
+    "actionRequired": {
+      "title": "Action Required",
+      "description": "Please accept or decline this order. You have 24 hours from when the order was placed to respond. If you don\u2019t respond in time, the order will be automatically cancelled and the buyer will be refunded.",
+      "acceptOrder": "Accept Order",
+      "declineOrder": "Decline Order"
+    },
+    "acceptModal": {
+      "title": "Confirm Accept Order",
+      "parcelSizeLabel": "Select Parcel Size *",
+      "parcelSizeHelp": "Choose the size that fits your packaged game(s). This is required for generating the shipping label.",
+      "localPickupConfirm": "By accepting, you agree to coordinate pickup with the buyer in {city}. Please use the chat feature to arrange a meeting time and location.",
+      "confirmAccept": "Confirm Accept",
+      "cancel": "Cancel",
+      "processing": "Processing..."
+    },
+    "declineModal": {
+      "title": "Decline Order",
+      "description": "Are you sure you want to decline this order? The buyer will be automatically refunded.",
+      "reasonLabel": "Reason (optional)",
+      "reasonPlaceholder": "e.g., Item is no longer available, damaged, etc.",
+      "declineAndRefund": "Decline & Refund",
+      "cancel": "Cancel",
+      "processing": "Processing..."
+    },
+    "labelFailed": {
+      "title": "Shipping Label Not Generated",
+      "description": "There was an error generating your shipping label. Please try again.",
+      "retryLabelGeneration": "Retry Label Generation",
+      "generatingLabel": "Generating Label..."
+    },
+    "readyToShip": {
+      "title": "Ready to Ship",
+      "description": "Your parcel has been registered with Unisend. Follow these steps to ship:",
+      "parcelId": "Your Parcel ID",
+      "step1": "Go to your nearest <strong>Unisend terminal</strong>",
+      "step2": "Enter the <strong>Parcel ID</strong> above at the terminal screen",
+      "step3": "<strong>Print the label</strong> at the terminal and attach it to your parcel",
+      "step4": "<strong>Place the parcel</strong> in the locker opened by the terminal",
+      "trackPackage": "Track Package"
+    },
+    "shippingInfo": {
+      "title": "Shipping Information",
+      "terminalShipping": "Terminal-to-Terminal Shipping",
+      "localPickup": "Local Pickup",
+      "parcelSize": "Parcel Size: {size}",
+      "receiver": "Receiver:",
+      "buyerContact": "Buyer Contact:"
+    },
+    "trackingHistory": "Tracking History",
+    "orderItems": "Order Items ({count})",
+    "pricingSummary": {
+      "title": "Pricing Summary",
+      "itemsTotal": "Items Total:",
+      "shippingCost": "Shipping Cost:",
+      "platformCommission": "Platform Commission (10%):",
+      "youReceive": "You Receive:"
+    },
+    "timeline": {
+      "title": "Order Timeline",
+      "orderPlaced": "Order Placed",
+      "paymentReceived": "Payment Received",
+      "orderAccepted": "Order Accepted",
+      "shippingLabelGenerated": "Shipping Label Generated"
+    }
+  },
+  "WalletTransactions": {
+    "types": {
+      "saleCredit": "Sale earnings",
+      "purchaseDebit": "Purchase",
+      "withdrawal": "Withdrawal",
+      "refundCredit": "Refund"
+    },
+    "empty": "No transactions yet",
+    "emptyHint": "Earnings from completed sales will appear here",
+    "balance": "bal.",
+    "loading": "Loading...",
+    "showMore": "Show more ({count} remaining)"
+  },
+  "WithdrawalHistory": {
+    "statuses": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "rejected": "Rejected"
+    },
+    "empty": "No withdrawal requests yet",
+    "to": "To {iban}",
+    "bankRef": "Bank ref: {ref}",
+    "reason": "Reason: {reason}",
+    "loading": "Loading...",
+    "showMore": "Show more"
   }
 }

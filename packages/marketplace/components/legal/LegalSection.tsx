@@ -1,4 +1,5 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
+import { Download } from 'griddy-icons';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { PlainTermsBox } from './PlainTermsBox';
@@ -23,18 +24,29 @@ export function LegalSection({ title, lastUpdated, content }: LegalSectionProps)
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-polar-night dark:text-snow-stormLightest sm:text-4xl">
-          {title}
-        </h1>
-        {lastUpdated && (
-          <p className="mt-2 text-text-secondary dark:text-snow-stormLight">
-            Last updated: {lastUpdated}
-          </p>
-        )}
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-polar-night sm:text-4xl">
+            {title}
+          </h1>
+          {lastUpdated && (
+            <p className="mt-2 text-text-secondary">
+              Last updated: {lastUpdated}
+            </p>
+          )}
+        </div>
+        <button
+          data-no-print
+          onClick={() => window.print()}
+          className="mt-1 flex shrink-0 items-center gap-1.5 rounded-md border border-border-subtle px-3 py-1.5 text-sm text-text-secondary transition-colors hover:bg-snow-storm hover:text-polar-night"
+          title="Print or save as PDF"
+        >
+          <Download className="h-4 w-4" />
+          <span className="hidden sm:inline">Print / Save</span>
+        </button>
       </div>
 
-      <article className="prose prose-polar-night max-w-none prose-headings:text-polar-night prose-p:text-text-secondary prose-strong:text-polar-night prose-li:text-text-secondary prose-a:text-frost-ice prose-a:no-underline hover:prose-a:underline prose-th:text-polar-night prose-td:text-text-secondary prose-tr:border-b-polar-night/20 dark:prose-headings:text-snow-stormLightest dark:prose-p:text-snow-stormLight dark:prose-strong:text-snow-stormLightest dark:prose-li:text-snow-stormLight dark:prose-th:text-snow-stormLightest dark:prose-td:text-snow-stormLight">
+      <article className="prose prose-polar-night max-w-none prose-headings:text-polar-night prose-p:text-text-secondary prose-strong:text-polar-night prose-li:text-text-secondary prose-a:text-frost-ice prose-a:no-underline hover:prose-a:underline prose-th:text-polar-night prose-td:text-text-secondary prose-tr:border-b-polar-night/20">
         {segments.map((segment, i) =>
           segment.type === 'plain-terms' ? (
             <PlainTermsBox key={i}>

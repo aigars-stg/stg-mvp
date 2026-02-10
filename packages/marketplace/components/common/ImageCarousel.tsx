@@ -51,7 +51,7 @@ export function ImageCarousel({
   showCounter = false,
   enableSwipe = true,
   minSwipeDistance = 50,
-  containerClassName = 'relative h-48 sm:h-56 lg:h-64 bg-polar-night/5 flex items-center justify-center group overflow-hidden',
+  containerClassName = 'relative h-40 sm:h-44 lg:h-48 bg-polar-night/5 flex items-center justify-center group overflow-hidden',
   imageClassName = 'object-contain p-4',
   imageSizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
   placeholderIcon,

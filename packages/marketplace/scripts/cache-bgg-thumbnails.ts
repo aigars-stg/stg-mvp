@@ -9,6 +9,7 @@
 
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import { PostgrestError } from '@supabase/supabase-js';
 import { createServiceClient } from '../lib/supabase/client';
 import { fetchGameMetadata } from '../lib/bgg-api';
 
@@ -37,7 +38,7 @@ async function main() {
     .select('id, name, bayesaverage')
     .is('thumbnail', null)
     .order('bayesaverage', { ascending: false })
-    .limit(BATCH_SIZE) as { data: Game[] | null; error: any };
+    .limit(BATCH_SIZE) as { data: Game[] | null; error: PostgrestError | null };
 
   if (error) {
     console.error('❌ Database error:', error);
@@ -100,12 +101,13 @@ async function main() {
       if (i < games.length - 1) {
         await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
       }
-    } catch (error: any) {
-      console.log(`  ❌ Error: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`  ❌ Error: ${message}`);
       failCount++;
 
       // If we get 401/403, stop the script
-      if (error.message?.includes('401') || error.message?.includes('403')) {
+      if (message?.includes('401') || message?.includes('403')) {
         console.error('\n⛔ BGG API authentication error - stopping script');
         console.error('   Please check BGG API access and authentication requirements\n');
         break;

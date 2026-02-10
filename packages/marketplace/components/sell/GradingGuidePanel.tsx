@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { SlidePanel, Card } from '@second-turn/design-system';
 import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, ChevronDown, ChevronUp, LightbulbOn as Lightbulb, LinkExternal as ExternalLink  } from 'griddy-icons';
 import type { ListingCondition } from '../../lib/types/listing';

@@ -7,6 +7,7 @@ import {
   postOrderInTransitMessage,
   postOrderDeliveredMessage,
 } from '@/lib/transactions';
+import { handleApiError } from '@/lib/api/error-handler';
 
 // Use service role for cron jobs
 const supabase = createClient(
@@ -29,11 +30,7 @@ export async function GET(request: NextRequest) {
     const cronSecret = process.env.CRON_SECRET;
 
     if (!cronSecret) {
-      console.error('[Cron] CRON_SECRET environment variable not set');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
+      throw new Error('CRON_SECRET environment variable not set');
     }
 
     if (authHeader !== `Bearer ${cronSecret}`) {
@@ -126,15 +123,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {
-    console.error('❌ [Cron] Tracking sync job failed:', error);
-    return NextResponse.json(
-      {
-        error: 'Tracking sync failed',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Sync tracking');
   }
 }
 

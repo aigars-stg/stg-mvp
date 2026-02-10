@@ -5,7 +5,7 @@ import * as Sentry from '@sentry/nextjs';
 import { AlertTriangle } from 'griddy-icons';
 import { Button } from '@second-turn/design-system';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 /**
  * Locale-scoped error boundary — renders inside the locale layout (navbar, footer visible).

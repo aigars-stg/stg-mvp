@@ -8,7 +8,7 @@ import type { WantedListingWithDetails } from './wanted-listing';
 
 /**
  * Aggregated game data for browse page display
- * Shows "From €X" pricing and offer count
+ * Groups listings by game, shows split pricing by type
  */
 export interface AggregatedGame {
   // Game identification
@@ -29,6 +29,19 @@ export interface AggregatedGame {
   lowest_price: number;
   highest_price: number;
 
+  // Split pricing by listing type
+  instant_buy_lowest_price: number | null;  // Lowest from non-auction listings (instant_buy + contact_seller)
+  auction_lowest_price: number | null;      // Lowest current_bid or start_price from auctions
+
+  // Counts by listing type (for icon strip tooltips)
+  instant_buy_count: number;       // transaction_method='instant_buy' AND pricing_format='fixed_price'
+  contact_seller_count: number;    // transaction_method='contact_seller'
+  auction_count: number;           // pricing_format='auction'
+
+  // Content signals
+  has_bundled_expansions: boolean;  // Any listing includes expansions
+  has_expansion_listings: boolean;  // Expansion offers grouped under this base game
+
   // Available options across all offers
   conditions: ListingCondition[];
   languages: string[];  // Languages available from listings
@@ -37,7 +50,7 @@ export interface AggregatedGame {
   has_parcel_shipping: boolean;
   has_auction: boolean;  // Whether any offers are auctions
 
-  // Featured offer (lowest price)
+  // Featured offer (lowest non-auction price, or lowest auction if auction-only)
   featured_listing_id: string;
   featured_seller: {
     id: string;

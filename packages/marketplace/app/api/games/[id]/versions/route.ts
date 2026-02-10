@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getGameVersions } from '@/lib/bgg-api';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/games/[id]/versions
@@ -34,15 +35,6 @@ export async function GET(
       gameId,
     });
   } catch (error: unknown) {
-    console.error(`❌ [Versions API] Error fetching versions for game ${gameId}:`, error);
-
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch game versions',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        gameId,
-      },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Fetch versions');
   }
 }

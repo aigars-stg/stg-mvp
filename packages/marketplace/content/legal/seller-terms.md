@@ -27,7 +27,7 @@ This platform is for clearing out your personal game shelf — not for running a
 By listing items on Second Turn Games, you declare and warrant that:
 
 - You are selling personal items as a **private individual**
-- You are at least **18 years old** (required for Stripe identity verification)
+- You are at least **18 years old** (required by payment regulations)
 - You are **NOT** registered as a business for selling goods
 - You are **NOT** buying items specifically to resell them for profit as a regular activity
 - You are **NOT** VAT-registered for commercial sales activity
@@ -60,7 +60,7 @@ With Instant Buy, you get the complete Second Turn Games experience:
 - **No chasing payments** — Everything is handled automatically
 
 **Requirements for Instant Buy:**
-- Complete Stripe Connect onboarding (identity verification)
+- Complete seller verification (identity and age confirmation)
 - Be located in Latvia (Estonian and Lithuanian sellers coming soon)
 
 ### 3.2 Contact Seller — Basic Listings
@@ -76,7 +76,7 @@ Contact Seller is a simpler option — think of it like a listing board with mor
 - You are located in Estonia or Lithuania (Instant Buy coming soon)
 - You want to negotiate price before committing
 
-**No Stripe onboarding required** for Contact Seller listings.
+**No identity verification required** for Contact Seller listings.
 
 :::plain-terms
 Instant Buy is the full experience — secure payment, easy shipping across the Baltics, buyer protection. Contact Seller is just a listing board where you handle everything yourself. We recommend Instant Buy for the smoothest experience.
@@ -84,20 +84,20 @@ Instant Buy is the full experience — secure payment, easy shipping across the 
 
 ---
 
-## 4. Stripe Onboarding (Instant Buy Only)
+## 4. Seller Verification (Instant Buy Only)
 
-To use Instant Buy, you must complete onboarding with **Stripe Connect**, our payment processing partner.
+To use Instant Buy, you must complete our seller verification process.
 
 ### 4.1 What Is Required
 
-1. **Identity Verification** — Providing your legal name, date of birth, and address
-2. **Document Upload** — Submitting identity documents as required by Stripe
-3. **Bank Account Setup** — Connecting a bank account for payouts
+1. **Age Confirmation** — You must be at least 18 years old
+2. **Identity Information** — Providing your legal name, date of birth, and address
+3. **Bank Account Setup** — Providing your IBAN for withdrawals (collected at first withdrawal request)
 
-Stripe is a licensed payment services provider and conducts this verification independently to comply with financial regulations (KYC/AML requirements).
+This verification is required to comply with financial regulations and EU tax reporting requirements (DAC7).
 
 :::plain-terms
-Stripe handles all the identity checks. We do not see your ID documents or full bank details — Stripe verifies you directly.
+We verify your identity to comply with payment regulations and EU tax laws. Your bank details (IBAN) are only needed when you request your first withdrawal.
 :::
 
 ### 4.2 Information Required
@@ -108,8 +108,8 @@ Stripe handles all the identity checks. We do not see your ID documents or full 
 | Date of birth | Identity verification, DAC7 reporting |
 | Residential address | Identity verification, DAC7 reporting |
 | Phone number | Account security, shipping notifications |
-| Government ID | Stripe identity verification |
-| Bank account (IBAN) | Receiving payouts |
+| Government ID | Identity verification (if required) |
+| Bank account (IBAN) | Receiving withdrawals (collected at first request) |
 | Tax Identification Number (TIN) | DAC7 reporting (when thresholds are reached) |
 
 ### 4.3 Ongoing Requirements
@@ -117,10 +117,10 @@ Stripe handles all the identity checks. We do not see your ID documents or full 
 You must:
 
 - Keep your information accurate and up-to-date
-- Respond to verification requests from Stripe promptly
+- Respond to verification requests promptly
 - Notify us of any changes to your seller status
 
-Failure to complete verification or provide requested information may result in suspension of your Instant Buy privileges and/or withholding of payouts.
+Failure to complete verification or provide requested information may result in suspension of your Instant Buy privileges and/or withholding of withdrawals.
 
 ---
 
@@ -252,23 +252,23 @@ You have full control over your listing price. Set prices that reflect the item'
 
 ### 7.2 Seller Fees
 
-**Second Turn Games charges no fees to sellers.** You receive the full listing price for every sale.
+**Second Turn Games charges a 10% commission on the item price for each Instant Buy sale.** Shipping costs are not included in the commission calculation.
 
 :::plain-terms
-If you list a game for 25 EUR, you get 25 EUR when it sells. Buyers pay the platform fees on top of your price.
+If you list a game for €25, you receive €22.50 when it sells (€25 minus 10% commission). The buyer pays €25 plus €2.00 shipping — they do not pay any service fee.
 :::
 
-We reserve the right to introduce seller fees in the future. Any such changes will be announced in advance and you will have the opportunity to remove your listings before new fees take effect.
+We reserve the right to adjust the commission rate in the future. Any such changes will be announced in advance and you will have the opportunity to remove your listings before new rates take effect.
 
-### 7.3 Buyer Fees (Instant Buy)
+### 7.3 Buyer Costs
 
-For Instant Buy listings, buyers pay a service fee (6% + €0.50) plus shipping (€2.00). This is added to your listing price at checkout and does not affect your payout.
+For Instant Buy listings, buyers pay the listed price plus €2.00 flat-rate shipping. There is no buyer service fee.
 
 [See complete fee breakdown](/legal?section=fees)
 
-### 7.4 Stripe Payout Fees
+### 7.4 Withdrawals
 
-When you withdraw your balance to your bank account, Stripe charges **€0.30 per payout**. This is deducted from the amount transferred.
+When you withdraw your wallet balance to your bank account, there is no fee. Withdrawals are processed within 1-3 business days via IBAN bank transfer.
 
 ---
 
@@ -276,7 +276,7 @@ When you withdraw your balance to your bank account, Stripe charges **€0.30 pe
 
 ### 8.1 Order Flow
 
-1. **Buyer purchases** — Payment is processed by Stripe
+1. **Buyer purchases** — Payment is processed securely
 2. **You confirm** — You have **24 hours** to confirm the order
 3. **We provide shipping code** — After you confirm, you receive a code for the parcel terminal
 4. **You ship** — Pack the game, go to a terminal, enter the code, load the package
@@ -349,54 +349,53 @@ You are responsible for packaging items securely:
 
 When a buyer purchases your Instant Buy listing:
 
-1. **Payment is processed** — Stripe processes the buyer's payment at checkout
+1. **Payment is processed** — The buyer's payment is processed securely at checkout
 2. **Order completes** — Automatically 2 days after delivery, or when the buyer confirms earlier
-3. **You receive funds** — Payment is transferred to your Stripe balance
-4. **You withdraw** — Transfer your balance to your bank account when ready
+3. **Earnings credited** — Your earnings (item price minus 10% commission) are added to your platform wallet
+4. **You withdraw** — Transfer your wallet balance to your bank account when ready
 
-### 10.2 Payout Schedule
+### 10.2 Withdrawal Schedule
 
-When you request a payout from your balance:
+You can request a withdrawal from your wallet at any time:
 
-- **Standard payouts**: 2-7 business days to reach your bank account
-- **Minimum payout**: €5.00
+- **Processing time**: 1-3 business days to reach your bank account
+- **Minimum withdrawal**: €5.00
+- **No fees** — you receive the full amount
 
 ### 10.3 Payout Holds
 
-Stripe or Second Turn Games may place temporary holds on payouts in certain situations:
+Second Turn Games may place temporary holds on withdrawals in certain situations:
 
 - New seller accounts (until trust is established)
 - Unusually high-value transactions
 - Suspected fraudulent activity
-- Pending disputes or chargebacks
+- Pending disputes
 - Incomplete verification
 
 ---
 
-## 11. Chargebacks and Disputes
+## 11. Disputes
 
-### 11.1 What Is a Chargeback?
+### 11.1 What Is a Dispute?
 
-A chargeback occurs when a buyer disputes a transaction with their bank or card issuer, requesting a refund. This bypasses both you and our platform — the bank makes the decision.
+A dispute occurs when a buyer reports a problem with their order within the 2-day window after delivery.
 
-### 11.2 Chargeback Liability
+### 11.2 Dispute Process
 
-**As the seller, you bear the financial risk of chargebacks.**
+If a buyer opens a dispute:
 
-If a buyer initiates a chargeback:
-
-- The disputed amount will be debited from your Stripe account
-- Stripe charges a chargeback fee (typically ~€15)
-- You may provide evidence to contest the chargeback
-- The buyer's bank makes the final decision (typically 60-90 days)
+- We review the buyer's claim against the original listing
+- You may be asked to provide evidence (photos, communication history)
+- We make the final decision on whether a refund is warranted
+- If a refund is issued, the amount is deducted from your wallet
 
 :::plain-terms
-If a buyer tells their bank "I did not receive this" or "it was not as described," the bank can take the money back from you. That is why honest listings and good photos matter — they protect you if a dispute happens.
+If a buyer reports a genuine problem (item not as described, missing components, damaged in transit), we may issue them a refund. That is why honest listings and good photos matter — they protect you if a dispute happens.
 :::
 
-### 11.3 Protecting Yourself from Chargebacks
+### 11.3 Protecting Yourself from Disputes
 
-To minimize chargeback risk:
+To minimize dispute risk:
 
 - **Describe items accurately** — Honest listings reduce "not as described" disputes
 - **Use clear photos** — Show the actual item, including any flaws
@@ -405,44 +404,38 @@ To minimize chargeback risk:
 - **Keep records** — Save tracking information and buyer communications
 - **Package securely** — Damaged items lead to disputes
 
-### 11.4 Contesting Chargebacks
+### 11.4 Bank Chargebacks
 
-If you believe a chargeback is invalid, you can contest it through Stripe by providing evidence such as:
+In rare cases, a buyer may also dispute the charge directly with their bank. If this happens:
 
-- Proof of delivery (tracking showing delivered)
-- Photos of item matching listing description
-- Communication with buyer
-- Proof that buyer received and accepted the item
+- The disputed amount may be held pending resolution
+- You may be asked to provide evidence
+- The buyer's bank makes the final decision on chargebacks
 
-Stripe will guide you through the dispute process.
+### 11.5 Excessive Disputes
 
-### 11.5 Excessive Chargebacks
-
-If you receive excessive chargebacks, we may:
+If you receive excessive disputes, we may:
 
 - Suspend your selling privileges
 - Require you to resolve outstanding disputes before continuing
 - Terminate your account
-- Report suspected fraud to authorities
 
-### 11.6 Fraudulent Chargebacks
+### 11.6 Fraudulent Claims
 
-We recognize that some chargebacks are fraudulent — buyers who receive items but falsely claim otherwise.
+We recognize that some disputes are fraudulent — buyers who receive items but falsely claim otherwise.
 
-**If you believe you are a victim of chargeback fraud:**
+**If you believe you are a victim of a fraudulent claim:**
 
-1. Contest the chargeback through Stripe with evidence
+1. Provide evidence through the dispute process
 2. Report the buyer to us at **info@secondturn.games**
 3. Provide transaction details and evidence
 
 **We will:**
 
 - Investigate reported fraudulent buyers
-- Suspend or ban buyers who abuse the chargeback system
+- Suspend or ban buyers who abuse the dispute system
 - Track patterns of suspicious buyer behavior
 - Support sellers with documentation when possible
-
-We cannot guarantee chargeback outcomes (banks make final decisions), but we take action against buyers who systematically abuse the system.
 
 ---
 

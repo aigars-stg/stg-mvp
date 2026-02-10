@@ -2,56 +2,47 @@
 
 /**
  * Loading skeleton for CartItemCard
- * Matches the structure of the cart item for smooth loading transitions
+ * Matches the compact horizontal layout for smooth loading transitions
  */
 export function CartItemCardSkeleton() {
   return (
     <div className="bg-snow-white animate-pulse">
       {/* Mobile Layout */}
-      <div className="sm:hidden">
-        {/* Image placeholder */}
-        <div className="h-44 bg-bg-secondary" />
+      <div className="sm:hidden p-4">
+        <div className="flex gap-3">
+          {/* Thumbnail */}
+          <div className="w-20 h-20 bg-bg-secondary rounded-lg flex-shrink-0" />
 
-        {/* Content */}
-        <div className="p-4">
-          <div className="flex justify-between items-start gap-3">
-            <div className="flex-grow space-y-2">
-              {/* Game name */}
+          {/* Content */}
+          <div className="flex-grow min-w-0 space-y-2">
+            <div className="flex justify-between gap-2">
               <div className="h-5 bg-bg-secondary rounded w-3/4" />
-              <div className="h-5 bg-bg-secondary rounded w-1/2" />
-
-              {/* Badges */}
-              <div className="flex gap-2">
-                <div className="h-5 bg-bg-secondary rounded w-16" />
-                <div className="h-5 bg-bg-secondary rounded w-20" />
-              </div>
-
-              {/* Language icons */}
-              <div className="h-4 bg-bg-secondary rounded w-20" />
+              <div className="h-5 bg-bg-secondary rounded w-14 flex-shrink-0" />
             </div>
-
-            {/* Price */}
-            <div className="h-6 bg-bg-secondary rounded w-16" />
+            <div className="flex gap-2">
+              <div className="h-5 bg-bg-secondary rounded w-16" />
+              <div className="h-5 bg-bg-secondary rounded w-20" />
+            </div>
+            <div className="h-4 bg-bg-secondary rounded w-40" />
+            <div className="h-4 bg-bg-secondary rounded w-28" />
           </div>
         </div>
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden sm:flex gap-4 p-5">
-        {/* Image */}
-        <div className="flex-shrink-0 w-32 h-32 bg-bg-secondary rounded-lg" />
+      <div className="hidden sm:grid sm:grid-cols-[100px_1fr_auto] gap-4 p-5">
+        {/* Thumbnail */}
+        <div className="w-[100px] h-[100px] bg-bg-secondary rounded-lg" />
 
         {/* Content */}
-        <div className="flex-grow space-y-2">
-          {/* Game name */}
+        <div className="space-y-2 flex flex-col justify-center">
           <div className="h-5 bg-bg-secondary rounded w-2/3" />
-
-          {/* Badges */}
           <div className="flex gap-2">
             <div className="h-5 bg-bg-secondary rounded w-16" />
             <div className="h-5 bg-bg-secondary rounded w-20" />
-            <div className="h-4 bg-bg-secondary rounded w-16" />
           </div>
+          <div className="h-4 bg-bg-secondary rounded w-44" />
+          <div className="h-4 bg-bg-secondary rounded w-32" />
         </div>
 
         {/* Price & Action */}
@@ -103,10 +94,6 @@ export function CartBasketSkeleton() {
             </div>
             <div className="flex justify-between">
               <div className="h-4 bg-bg-secondary rounded w-16" />
-              <div className="h-4 bg-bg-secondary rounded w-12" />
-            </div>
-            <div className="flex justify-between">
-              <div className="h-4 bg-bg-secondary rounded w-20" />
               <div className="h-4 bg-bg-secondary rounded w-12" />
             </div>
             <div className="border-t border-border-subtle pt-2">

@@ -39,10 +39,10 @@ export function Testimonials() {
   }));
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20">
+    <section className="py-8 sm:py-10 lg:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Section header */}
-        <div className="text-center mb-10 sm:mb-12">
+        <div className="text-center mb-6 sm:mb-8">
           <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
             {t('title')}
           </h2>

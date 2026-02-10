@@ -71,6 +71,8 @@ export interface CreatePaymentRequest {
   email?: string;
   /** Customer IP address (for fraud detection) */
   customer_ip?: string;
+  /** Enable mobile wallet methods (Apple Pay, Google Pay) on hosted page */
+  mobile_payment?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -160,4 +162,26 @@ export interface EveryPayCallbackParams {
   payment_reference: string;
   /** Our order reference */
   order_reference: string;
+}
+
+// ---------------------------------------------------------------------------
+// Payment Methods (from GET /processing_accounts/:account_name)
+// ---------------------------------------------------------------------------
+
+/** A single payment method returned by EveryPay */
+export interface EveryPayPaymentMethod {
+  /** Method identifier, e.g. "card", "ob_swedbank_lv", "ob_seb_lt" */
+  source: string;
+  /** Human-readable name, e.g. "Swedbank" */
+  display_name: string;
+  /** Country code, e.g. "LV", "LT", "EE". Null for card methods. */
+  country_code: string | null;
+  /** URL to the method's logo image */
+  logo_url: string;
+}
+
+/** Response from GET /processing_accounts/:account_name */
+export interface EveryPayProcessingAccountResponse {
+  account_name: string;
+  payment_methods: EveryPayPaymentMethod[];
 }

@@ -6,6 +6,7 @@ import {
   ParcelSize,
   SHIPPING_PRICES,
 } from '@/lib/unisend';
+import { handleApiError } from '@/lib/api/error-handler';
 
 /**
  * GET /api/shipping/price
@@ -59,11 +60,6 @@ export async function GET(request: NextRequest) {
       prices: allPrices || null,
     });
   } catch (error) {
-    console.error('❌ [Shipping Price] Error:', error);
-
-    return NextResponse.json(
-      { error: 'Failed to calculate shipping price' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Calculate shipping');
   }
 }
