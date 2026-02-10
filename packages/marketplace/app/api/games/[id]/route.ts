@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createServiceClient } from '@/lib/supabase/client';
+import { createServerSupabaseReadOnly } from '@/lib/supabase/server';
 import { fetchGameWithFallback, fetchExpansionsForGame, getExpansionCount, type BGGExpansionInfo } from '@/lib/bgg-api';
 import type { BGGVersion } from '@/lib/bgg-types';
 import type { Json } from '@/lib/supabase/database.types';
@@ -38,8 +39,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   try {
     console.log(`📡 [Game Details] Fetching game ${gameId}${includeExpansions ? ' with expansions' : ''}`);
 
-    // 1. Get basic info from database
-    const { data: game, error: dbError } = await supabase
+    // 1. Get basic info from database (read-only, respects RLS)
+    const supabaseRead = await createServerSupabaseReadOnly();
+    const { data: game, error: dbError } = await supabaseRead
       .from('games')
       .select('*')
       .eq('id', parseInt(gameId))
@@ -105,8 +107,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       });
     }
 
-    // 4. Update database with fresh metadata (including alternate_names, versions, bayesaverage, description, designers)
-    const { data: updatedGame, error: updateError } = await supabase
+    // 4. Update database with fresh metadata (service role bypasses RLS - games table has no UPDATE policy)
+    const supabaseService = createServiceClient();
+    const { data: updatedGame, error: updateError } = await supabaseService
       .from('games')
       .update({
         thumbnail: bggData.thumbnail,

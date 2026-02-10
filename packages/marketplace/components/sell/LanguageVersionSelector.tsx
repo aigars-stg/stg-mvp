@@ -14,6 +14,7 @@ interface LanguageVersionSelectorProps {
   fallbackMode?: boolean;
   fallbackReason?: string;
   onVersionCountChange?: (count: number) => void; // Callback when version count is known
+  initialVersions?: BGGVersion[]; // Pre-fetched versions to avoid duplicate API call
 }
 
 // Priority languages for Baltic region (in specific order) - defined outside component for stable reference
@@ -26,6 +27,7 @@ export function LanguageVersionSelector({
   fallbackMode = false,
   fallbackReason: _fallbackReason,
   onVersionCountChange,
+  initialVersions,
 }: LanguageVersionSelectorProps) {
   const t = useTranslations('Sell.LanguageVersionSelector');
   const tNoVersions = useTranslations('Sell.LanguageVersionSelector.noVersions');
@@ -47,15 +49,20 @@ export function LanguageVersionSelector({
       setSelectedLanguage(''); // Reset language selection when game changes
 
       try {
-        // Call server-side API route instead of BGG directly
-        const response = await fetch(`/api/games/${game.id}/versions`);
+        // Use pre-fetched versions if available, otherwise call API
+        let fetchedVersions: BGGVersion[];
+        if (initialVersions && initialVersions.length > 0) {
+          fetchedVersions = initialVersions;
+        } else {
+          const response = await fetch(`/api/games/${game.id}/versions`);
 
-        if (!response.ok) {
-          throw new Error(`API returned ${response.status}`);
+          if (!response.ok) {
+            throw new Error(`API returned ${response.status}`);
+          }
+
+          const data = await response.json();
+          fetchedVersions = data.versions;
         }
-
-        const data = await response.json();
-        const fetchedVersions = data.versions;
 
         setVersions(fetchedVersions);
 

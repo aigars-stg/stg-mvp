@@ -47,8 +47,6 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
       setError(null);
 
       try {
-        console.log(`🔍 [GameSearch] Searching database for: "${query}"`);
-
         const response = await fetch(
           `/api/games/search?q=${encodeURIComponent(query)}&limit=20`
         );
@@ -58,8 +56,6 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
         }
 
         const data = await response.json();
-
-        console.log(`✅ [GameSearch] Found ${data.count} results in ${data.durationMs}ms`);
 
         // Define the shape of database results
         interface DatabaseGame {

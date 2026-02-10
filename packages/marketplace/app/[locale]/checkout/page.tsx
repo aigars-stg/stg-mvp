@@ -8,7 +8,8 @@ import { Button } from '@second-turn/design-system';
 import { Package, ArrowLeft, RefreshCw as Loader2, AlertCircle, Truck, User, Email as Mail, CreditCard, ShieldCheck, LocationPin as MapPin } from 'griddy-icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { TerminalSelectorWithMap } from '@/components/checkout/TerminalSelectorWithMap';
-import { PhoneInput, validatePhone } from '@/components/checkout/PhoneInput';
+import { PhoneInput } from '@/components/common/PhoneInput';
+import { isValidPhoneNumber } from '@/lib/phone-utils';
 import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 import { CheckoutSection } from '@/components/checkout/CheckoutSection';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
@@ -191,14 +192,11 @@ function CheckoutPageContent() {
           }
 
           // If contact info is pre-filled and valid, start section collapsed
-          const countryForValidation = (userCountry && ['LT', 'LV', 'EE'].includes(userCountry)
-            ? userCountry
-            : 'LT') as TerminalCountry;
           const contactPrefilled =
             name.trim().length > 0 &&
             email.trim().length > 0 &&
             phone.length > 0 &&
-            validatePhone(phone, countryForValidation);
+            isValidPhoneNumber(phone);
 
           if (contactPrefilled) {
             setContactExpanded(false);
@@ -218,7 +216,7 @@ function CheckoutPageContent() {
   // Validate phone when it changes
   useEffect(() => {
     if (receiverPhone) {
-      if (!validatePhone(receiverPhone, selectedCountry)) {
+      if (!isValidPhoneNumber(receiverPhone)) {
         setPhoneError(t('form.phoneError'));
       } else {
         setPhoneError(null);
@@ -226,7 +224,7 @@ function CheckoutPageContent() {
     } else {
       setPhoneError(null);
     }
-  }, [receiverPhone, selectedCountry, t]);
+  }, [receiverPhone, t]);
 
   // --- Auto-collapse effects (500ms delay) ---
 
@@ -590,11 +588,12 @@ function CheckoutPageContent() {
 
                 {/* Phone */}
                 <PhoneInput
-                  country={selectedCountry}
                   value={receiverPhone}
                   onChange={setReceiverPhone}
                   error={phoneError || undefined}
                   required
+                  defaultCountry={(profileCountry && ['LV', 'LT', 'EE'].includes(profileCountry) ? profileCountry : 'LV') as CountryCode}
+                  id="receiver-phone"
                 />
 
                 {/* Save Phone Checkbox */}

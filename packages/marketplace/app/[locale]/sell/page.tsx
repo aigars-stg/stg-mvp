@@ -1,12 +1,12 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
-import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Button, Modal } from '@second-turn/design-system';
 import type { BGGGame } from '@/lib/bgg-api';
-import type { VersionSelection } from '@/lib/bgg-types';
+import type { BGGVersion, VersionSelection } from '@/lib/bgg-types';
 import { GameSearch } from '@/components/sell/GameSearch';
 import { GameNameSelector } from '@/components/sell/GameNameSelector';
 import { LanguageVersionSelector } from '@/components/sell/LanguageVersionSelector';
@@ -16,13 +16,13 @@ import { Input } from '@second-turn/design-system';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
 import { TransactionMethodSelector } from '@/components/sell/TransactionMethodSelector';
+import type { CountryCode } from '@/lib/country-utils';
 import { PricingFormatSelector } from '@/components/sell/PricingFormatSelector';
 import { OfferCard } from '@/components/game/OfferCard';
 import { PuzzlePiece as Dices, PhotoCamera as Camera, ClipboardCheck, CurrencyEuro as Euro, InfoCircle as Info, Close, CheckCircleAlt01 as CheckCircle2, RefreshCw, AlertCircle, PuzzlePiece as Puzzle, Package, RefreshCw as Loader2 } from 'griddy-icons';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
-import { TurnstileWidget, type TurnstileWidgetRef } from '@/components/common/TurnstileWidget';
 import type { ListingWithSeller, TransactionMethod, PricingFormat } from '@/lib/types/listing';
 import type { User } from '@supabase/supabase-js';
 import type { UserProfile } from '@/lib/auth/types';
@@ -146,8 +146,9 @@ function SellPageContent() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, profile } = useAuth();
-  const turnstileRef = useRef<TurnstileWidgetRef>(null);
+  const { user, profile, updateProfile } = useAuth();
+  const [sellerPhone, setSellerPhone] = useState<string | null>(null);
+  const [hasPhone, setHasPhone] = useState(true); // default true to avoid flash
 
   // Use the listing form hook for all form state
   const listingForm = useListingForm();
@@ -216,6 +217,9 @@ function SellPageContent() {
   const [wantedListing, setWantedListing] = useState<WantedListingWithDetails | null>(null);
   const [isLoadingWantedListing, setIsLoadingWantedListing] = useState(false);
 
+  // Pre-fetched versions from /api/games/{id} response (avoids duplicate fetch)
+  const [prefetchedVersions, setPrefetchedVersions] = useState<BGGVersion[] | null>(null);
+
   // Onboarding check state (prevents flash of form for non-onboarded users)
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(!isEditMode);
 
@@ -230,6 +234,7 @@ function SellPageContent() {
     }));
     setFallbackMode(false);
     setFallbackReason(undefined);
+    setPrefetchedVersions(null); // Clear pre-fetched versions
     setAvailableExpansions([]); // Clear available expansions
     setShowExpansionSection(false); // Reset expansion section
     setExpansionsFetched(false); // Reset fetched flag
@@ -297,6 +302,11 @@ function SellPageContent() {
       if (data.fallbackMode) {
         setFallbackMode(true);
         setFallbackReason(data.reason);
+      }
+
+      // Store pre-fetched versions (avoids duplicate fetch in LanguageVersionSelector)
+      if (data.versions && Array.isArray(data.versions)) {
+        setPrefetchedVersions(data.versions);
       }
 
       // Store expansion count (used to show/hide expansion toggle)
@@ -390,6 +400,8 @@ function SellPageContent() {
         if (response.ok) {
           const canCreateContactSeller = data.can_create_contact_seller ?? false;
           const canCreateInstantBuy = data.can_create_instant_buy ?? false;
+
+          setHasPhone(data.has_phone ?? true);
 
           setSellerCapabilities({
             canCreateContactSeller,
@@ -712,12 +724,15 @@ function SellPageContent() {
   // Shipping is now always T2T, no user selection needed
   const isPricingSectionComplete = isPriceSectionComplete;
 
+  const isPhoneComplete = formData.transactionMethod !== 'instant_buy' || hasPhone || (!!sellerPhone && sellerPhone.trim().length >= 8);
+
   const canPublish = (): boolean => {
     return (
       isGameSectionComplete &&
       isConditionSectionComplete &&
       isPhotosSectionComplete &&
       isPricingSectionComplete &&
+      isPhoneComplete &&
       formData.termsAccepted
     );
   };
@@ -751,6 +766,14 @@ function SellPageContent() {
       });
       return false;
     }
+    // Validate phone is provided for instant_buy if seller doesn't have one
+    if (formData.transactionMethod === 'instant_buy' && !hasPhone && (!sellerPhone || sellerPhone.trim().length < 8)) {
+      setValidationModal({
+        isOpen: true,
+        message: tValidation('phoneRequired'),
+      });
+      return false;
+    }
     if (!formData.termsAccepted) {
       setValidationModal({
         isOpen: true,
@@ -776,16 +799,6 @@ function SellPageContent() {
     }
 
     setIsPublishing(true);
-
-    // Get Turnstile token for new listings
-    let turnstileToken: string | undefined;
-    if (!isEditMode && turnstileRef.current) {
-      try {
-        turnstileToken = await turnstileRef.current.getTokenAsync(10000);
-      } catch {
-        // If token retrieval fails, proceed without it — server handles gracefully
-      }
-    }
 
     try {
       // Step 1: Upload new photos (if any)
@@ -872,9 +885,21 @@ function SellPageContent() {
           })),
           // Source wanted listing (for "I have this" flow)
           ...(wantedListingId ? { sourceWantedListingId: wantedListingId } : {}),
-          // Turnstile bot protection token
-          ...(turnstileToken ? { turnstileToken } : {}),
         };
+
+        // Save phone to profile if newly entered
+        if (formData.transactionMethod === 'instant_buy' && sellerPhone && !hasPhone) {
+          const { error: phoneError } = await updateProfile({ phone: sellerPhone.trim() });
+          if (phoneError) {
+            setErrorModal({
+              isOpen: true,
+              message: tErrors('phoneSaveFailed'),
+            });
+            setIsPublishing(false);
+            return;
+          }
+          setHasPhone(true);
+        }
 
         const listingResponse = await fetch('/api/listings', {
           method: 'POST',
@@ -888,16 +913,6 @@ function SellPageContent() {
           const errorData = await listingResponse.json();
 
           // Handle special error cases with redirects
-          if (errorData.requiresPhone) {
-            setErrorModal({
-              isOpen: true,
-              message: errorData.error,
-              actionUrl: errorData.settingsUrl || '/profile/settings',
-              actionLabel: 'Go to Settings',
-            });
-            return;
-          }
-
           if (errorData.requiresOnboarding) {
             router.push(errorData.onboardingUrl || '/seller/onboard');
             return;
@@ -926,7 +941,6 @@ function SellPageContent() {
       });
     } finally {
       setIsPublishing(false);
-      turnstileRef.current?.reset();
     }
   };
 
@@ -1070,6 +1084,10 @@ function SellPageContent() {
               }))}
               canUseInstantBuy={sellerCapabilities.canCreateInstantBuy}
               onUpgradeClick={() => router.push('/seller/settings/payouts')}
+              hasPhone={hasPhone}
+              phoneValue={sellerPhone || ''}
+              onPhoneChange={(phone) => setSellerPhone(phone)}
+              defaultCountry={(profile?.country && ['LV', 'LT', 'EE'].includes(profile.country) ? profile.country : 'LV') as CountryCode}
             />
           </Card>
         )}
@@ -1157,6 +1175,7 @@ function SellPageContent() {
                       fallbackMode={fallbackMode}
                       fallbackReason={fallbackReason}
                       onVersionCountChange={setVersionCount}
+                      initialVersions={prefetchedVersions ?? undefined}
                     />
                   )}
                 </>
@@ -1449,11 +1468,6 @@ function SellPageContent() {
             </div>
           </label>
         </div>
-
-        {/* Turnstile bot protection (new listings only) */}
-        {!isEditMode && (
-          <TurnstileWidget ref={turnstileRef} action="create-listing" />
-        )}
 
         {/* Action Buttons */}
         <div className="mt-8 space-y-3 sm:space-y-0">

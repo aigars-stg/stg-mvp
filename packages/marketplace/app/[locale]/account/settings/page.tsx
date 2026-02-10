@@ -12,6 +12,7 @@ import { AccountDeletion } from '@/components/auth/AccountDeletion';
 import { LoginActivity } from '@/components/auth/LoginActivity';
 import { CountrySelector } from '@/components/auth/CountrySelector';
 import { NewsletterSettings } from '@/components/newsletter/NewsletterSettings';
+import { PhoneInput } from '@/components/common/PhoneInput';
 import { getCountryFlag, getCountryName, type CountryCode } from '@/lib/country-utils';
 import { formatDate } from '@/lib/date-utils';
 
@@ -459,61 +460,40 @@ export default function AccountSettingsPage() {
                 </div>
               ) : (
                 <div className="p-3 border-2 border-frost-ice/20 rounded-lg bg-snow-white">
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <span id="phone-label" className="sr-only">Phone number</span>
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Phone className="h-4 w-4 text-frost-ice" />
-                      </div>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-frost-ice/30 focus:border-frost-ice text-polar-night bg-white"
-                        placeholder="+371 12345678"
-                        aria-labelledby="phone-label"
-                        disabled={loading}
-                        maxLength={20}
-                        pattern="[\d\s\+\-\(\)]+"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === 'Escape') {
-                            setIsChangingPhone(false);
-                            setPhone(profile.phone || '');
-                          }
-                          if (e.key === 'Enter') {
-                            handleUpdatePhone();
-                          }
-                        }}
-                      />
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={handleUpdatePhone}
-                        disabled={loading}
-                        className="p-2 text-aurora-green hover:bg-aurora-green/10 rounded-md transition-colors disabled:opacity-50"
-                        title="Save"
-                      >
-                        {loading ? (
-                          <div className="w-4 h-4 border-2 border-aurora-green border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Check className="w-4 h-4" />
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsChangingPhone(false);
-                          setPhone(profile.phone || '');
-                        }}
-                        disabled={loading}
-                        className="p-2 text-aurora-red hover:bg-aurora-red/10 rounded-md transition-colors disabled:opacity-50"
-                        title="Cancel"
-                      >
-                        <Close className="w-4 h-4" />
-                      </button>
-                    </div>
+                  <PhoneInput
+                    value={phone}
+                    onChange={setPhone}
+                    compact
+                    disabled={loading}
+                    defaultCountry={(profile.country && ['LV', 'LT', 'EE'].includes(profile.country) ? profile.country : 'LV') as CountryCode}
+                    id="settings-phone"
+                  />
+                  <div className="flex items-center gap-1 mt-2 justify-end">
+                    <button
+                      type="button"
+                      onClick={handleUpdatePhone}
+                      disabled={loading}
+                      className="p-2 text-aurora-green hover:bg-aurora-green/10 rounded-md transition-colors disabled:opacity-50"
+                      title="Save"
+                    >
+                      {loading ? (
+                        <div className="w-4 h-4 border-2 border-aurora-green border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsChangingPhone(false);
+                        setPhone(profile.phone || '');
+                      }}
+                      disabled={loading}
+                      className="p-2 text-aurora-red hover:bg-aurora-red/10 rounded-md transition-colors disabled:opacity-50"
+                      title="Cancel"
+                    >
+                      <Close className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               )}

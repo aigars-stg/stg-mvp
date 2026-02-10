@@ -3,11 +3,13 @@
 import { useState, useCallback } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Card } from '@second-turn/design-system';
-import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle, Fire, ShoppingBag, ChatBubble } from 'griddy-icons';
+import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle, CalendarTime, Delivery, ChatBubbleDots } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
 import { saveBrowseContext } from '@/lib/browse-context';
 import { formatPrice } from '@/lib/services/pricing';
+import { getAuctionUrgencyTier } from '@/lib/types/listing';
+import { AuctionCountdown } from './AuctionCountdown';
 
 interface AggregatedGameCardProps {
   game: AggregatedGame;
@@ -27,8 +29,14 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
 
   const hasNonAuction = game.instant_buy_lowest_price !== null;
   const isAuctionOnly = !hasNonAuction && game.auction_count > 0;
+  const isAuctionEndedOnly = !hasNonAuction && game.auction_count === 0 && game.auction_ended_count > 0;
   const showPlus = game.offer_count > 1;
   const showExpansionIcon = game.is_expansion || game.has_bundled_expansions || game.has_expansion_listings;
+
+  // Urgency tier for auction icon and price coloring
+  const urgency = getAuctionUrgencyTier(game.auction_soonest_ends_at);
+  const hasActiveAuction = game.auction_count > 0 && urgency.tier !== 'ended';
+  const hasAnyAuction = hasActiveAuction || game.auction_ended_count > 0;
 
   return (
     <Link href={`/game/${game.bgg_game_id}`} className="h-full" onClick={handleClick}>
@@ -92,22 +100,25 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
             <span className="w-px h-3.5 bg-border-subtle" />
             {game.instant_buy_count > 0 && (
               <span title={tListings('instantBuyTooltip', { count: game.instant_buy_count })}>
-                <ShoppingBag className="w-3.5 h-3.5 text-text-muted" />
+                <Delivery className="w-4 h-4 text-aurora-orange" />
               </span>
             )}
             {game.contact_seller_count > 0 && (
               <span title={tListings('contactSellerTooltip', { count: game.contact_seller_count })}>
-                <ChatBubble className="w-3.5 h-3.5 text-text-muted" />
+                <ChatBubbleDots className="w-4 h-4 text-text-muted" />
               </span>
             )}
-            {game.auction_count > 0 && (
-              <span title={tListings('auctionTooltip', { count: game.auction_count })}>
-                <Fire className="w-3.5 h-3.5 text-aurora-purple" />
+            {hasAnyAuction && (
+              <span
+                title={tListings('auctionTooltip', { count: game.auction_count + game.auction_ended_count })}
+                className={hasActiveAuction ? urgency.textColorClass : 'text-text-muted'}
+              >
+                <CalendarTime className="w-4 h-4" />
               </span>
             )}
             {showExpansionIcon && (
               <span title={tListings(game.has_expansion_listings ? 'expansionOffersTooltip' : 'expansionTooltip')}>
-                <Puzzle className="w-3.5 h-3.5 text-text-muted" />
+                <Puzzle className="w-4 h-4 text-text-muted" />
               </span>
             )}
           </div>
@@ -116,8 +127,15 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
           <div className="mt-auto flex items-baseline gap-2">
             {isAuctionOnly ? (
               <>
-                <Fire className="w-4 h-4 text-aurora-purple self-center" />
-                <span className="text-2xl font-bold text-aurora-purple">
+                <CalendarTime className={`w-4 h-4 self-center ${urgency.priceColorClass}`} />
+                <span className={`text-2xl font-bold ${urgency.priceColorClass}`}>
+                  {formatPrice(game.auction_lowest_price!)}{showPlus && '+'}
+                </span>
+              </>
+            ) : isAuctionEndedOnly ? (
+              <>
+                <CalendarTime className="w-4 h-4 self-center text-text-muted" />
+                <span className="text-2xl font-bold text-text-muted">
                   {formatPrice(game.auction_lowest_price!)}{showPlus && '+'}
                 </span>
               </>
@@ -131,6 +149,14 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
               {tListings('offers', { count: game.offer_count })}
             </span>
           </div>
+
+          {/* Auction countdown — live-ticking for hot/critical tiers */}
+          {hasActiveAuction && (
+            <AuctionCountdown endsAt={game.auction_soonest_ends_at} />
+          )}
+          {!hasActiveAuction && game.auction_ended_count > 0 && (
+            <AuctionCountdown endsAt={null} showEnded />
+          )}
         </div>
       </Card>
     </Link>

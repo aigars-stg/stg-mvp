@@ -15,6 +15,7 @@ interface ListingWithSeller {
   transaction_method: string;
   auction_current_bid: number | null;
   auction_start_price: number | null;
+  auction_ends_at: string | null;
   condition: ListingCondition | null;
   language: string | null;
   shipping_local_pickup: boolean;
@@ -97,6 +98,7 @@ export async function GET(request: NextRequest) {
         transaction_method,
         auction_current_bid,
         auction_start_price,
+        auction_ends_at,
         condition,
         language,
         shipping_local_pickup,
@@ -274,6 +276,8 @@ export async function GET(request: NextRequest) {
       let hasLocalPickup = false;
       let hasParcelShipping = false;
       let hasAuction = false;
+      let soonestAuctionEndsAt: string | null = null;
+      let auctionEndedCount = 0;
 
       // Split pricing and counts by listing type
       let instantBuyLowestPrice = Infinity;
@@ -304,6 +308,15 @@ export async function GET(request: NextRequest) {
           if (effectivePrice < cheapestAuctionPrice) {
             cheapestAuction = listing;
             cheapestAuctionPrice = effectivePrice;
+          }
+          if (listing.auction_ends_at) {
+            if (listing.auction_ends_at > new Date().toISOString()) {
+              if (!soonestAuctionEndsAt || listing.auction_ends_at < soonestAuctionEndsAt) {
+                soonestAuctionEndsAt = listing.auction_ends_at;
+              }
+            } else {
+              auctionEndedCount++;
+            }
           }
         } else {
           if (isContactSeller) {
@@ -384,6 +397,8 @@ export async function GET(request: NextRequest) {
         has_local_pickup: hasLocalPickup,
         has_parcel_shipping: hasParcelShipping,
         has_auction: hasAuction,
+        auction_soonest_ends_at: soonestAuctionEndsAt,
+        auction_ended_count: auctionEndedCount,
         featured_listing_id: cheapest.id,
         featured_seller: {
           id: cheapest.seller?.id || '',

@@ -741,9 +741,11 @@ export default function BrowsePage() {
 
         {/* Loading State - Skeleton Cards */}
         {loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-pl-4 sm:grid sm:grid-cols-2 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0 sm:snap-none lg:grid-cols-3 xl:grid-cols-4 sm:gap-6">
             {Array.from({ length: 8 }).map((_, index) => (
-              <ListingCardSkeleton key={`skeleton-${index}`} />
+              <div key={`skeleton-${index}`} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
+                <ListingCardSkeleton />
+              </div>
             ))}
           </div>
         )}
@@ -779,31 +781,34 @@ export default function BrowsePage() {
         {/* Games Grid - Full Width, Responsive */}
         {!loading && !error && !isOffline && (listingType === 'sell' ? filteredGames.length > 0 : filteredWantedListings.length > 0) && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-pl-4 sm:grid sm:grid-cols-2 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0 sm:snap-none lg:grid-cols-3 xl:grid-cols-4 sm:gap-6">
               {listingType === 'sell'
                 ? filteredGames.map((game, index) => (
-                    <AggregatedGameCard
-                      key={game.bgg_game_id}
-                      game={game}
-                      allGameIds={gameIds}
-                      index={index}
-                    />
+                    <div key={game.bgg_game_id} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
+                      <AggregatedGameCard
+                        game={game}
+                        allGameIds={gameIds}
+                        index={index}
+                      />
+                    </div>
                   ))
                 : filteredWantedListings.map((wantedListing) => (
-                    <WantedListingCard
-                      key={wantedListing.id}
-                      wantedListing={wantedListing}
-                      onIHaveThis={handleIHaveThis}
-                      showBuyer={true}
-                    />
+                    <div key={wantedListing.id} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
+                      <WantedListingCard
+                        wantedListing={wantedListing}
+                        onIHaveThis={handleIHaveThis}
+                        showBuyer={true}
+                      />
+                    </div>
                   ))
               }
-            </div>
 
-            {/* Infinite scroll sentinel - triggers loading when visible */}
-            {listingType === 'sell' && hasMore && !loading && (
-              <div ref={loadMoreRef} className="h-1" aria-hidden="true" />
-            )}
+              {/* Infinite scroll sentinel - inside container for both layouts */}
+              {/* Mobile: thin element at end of horizontal scroll. Desktop: full-width row at bottom of grid */}
+              {listingType === 'sell' && hasMore && !loading && (
+                <div ref={loadMoreRef} className="flex-shrink-0 w-1 sm:w-full sm:col-span-full sm:h-1" aria-hidden="true" />
+              )}
+            </div>
 
             {/* Loading More Indicator - Only for sell listings */}
             {listingType === 'sell' && loadingMore && (

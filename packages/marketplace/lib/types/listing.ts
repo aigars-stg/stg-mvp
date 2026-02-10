@@ -369,3 +369,43 @@ export function formatCompactTimeRemaining(time: ReturnType<typeof getAuctionTim
 
   return `${time.minutes}m ${time.seconds}s`;
 }
+
+// Urgency tiers for graduated auction countdown display
+export type AuctionUrgencyTier = 'calm' | 'warm' | 'hot' | 'critical' | 'ended';
+
+const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const FIVE_MINUTES_MS = 5 * 60 * 1000;
+
+export interface AuctionUrgencyInfo {
+  tier: AuctionUrgencyTier;
+  textColorClass: string;
+  priceColorClass: string;
+  tickInterval: number | null; // ms between updates, null = no live ticking
+}
+
+export function getAuctionUrgencyTier(endsAt: string | null): AuctionUrgencyInfo {
+  if (!endsAt) {
+    return { tier: 'ended', textColorClass: 'text-text-muted', priceColorClass: 'text-text-muted', tickInterval: null };
+  }
+
+  const time = getAuctionTimeRemaining(endsAt);
+
+  if (time.isEnded) {
+    return { tier: 'ended', textColorClass: 'text-text-muted', priceColorClass: 'text-text-muted', tickInterval: null };
+  }
+
+  if (time.totalMs <= FIVE_MINUTES_MS) {
+    return { tier: 'critical', textColorClass: 'text-aurora-red animate-pulse', priceColorClass: 'text-aurora-red animate-pulse', tickInterval: 1000 };
+  }
+
+  if (time.totalMs <= ONE_HOUR_MS) {
+    return { tier: 'hot', textColorClass: 'text-aurora-red', priceColorClass: 'text-aurora-red', tickInterval: 30_000 };
+  }
+
+  if (time.totalMs <= TWELVE_HOURS_MS) {
+    return { tier: 'warm', textColorClass: 'text-aurora-orange', priceColorClass: 'text-aurora-orange', tickInterval: null };
+  }
+
+  return { tier: 'calm', textColorClass: 'text-text-secondary', priceColorClass: 'text-aurora-purple', tickInterval: null };
+}

@@ -4,8 +4,8 @@
  */
 
 import { getUnisendClient } from './client';
-import type { CreateParcelRequest, TerminalCountry } from './types';
-import { PHONE_FORMATS } from './types';
+import type { CreateParcelRequest } from './types';
+import { isValidPhoneNumber } from '@/lib/phone-utils';
 import { createClient } from '@supabase/supabase-js';
 
 /**
@@ -59,22 +59,14 @@ export async function generateShippingLabel(
 
   if (!params.senderPhone || params.senderPhone.trim() === '') {
     validationErrors.push('Seller phone number is missing. Please add your phone number in your profile.');
-  } else {
-    // Validate phone format for sender country
-    const senderFormat = PHONE_FORMATS[params.senderCountry as TerminalCountry];
-    if (senderFormat && !senderFormat.regex.test(params.senderPhone)) {
-      validationErrors.push(`Seller phone number format is invalid. Expected format: ${senderFormat.example}`);
-    }
+  } else if (!isValidPhoneNumber(params.senderPhone)) {
+    validationErrors.push('Seller phone number format is invalid. Please enter a valid international phone number.');
   }
 
   if (!params.receiverPhone || params.receiverPhone.trim() === '') {
     validationErrors.push('Buyer phone number is missing. The buyer needs to add their phone number to their profile.');
-  } else {
-    // Validate phone format for receiver country
-    const receiverFormat = PHONE_FORMATS[params.receiverCountry as TerminalCountry];
-    if (receiverFormat && !receiverFormat.regex.test(params.receiverPhone)) {
-      validationErrors.push(`Buyer phone number format is invalid. Expected format: ${receiverFormat.example}`);
-    }
+  } else if (!isValidPhoneNumber(params.receiverPhone)) {
+    validationErrors.push('Buyer phone number format is invalid. Please enter a valid international phone number.');
   }
 
   if (!params.destinationTerminalId || params.destinationTerminalId.trim() === '') {

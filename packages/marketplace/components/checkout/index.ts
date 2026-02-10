@@ -1,4 +1,5 @@
 export { ReservationTimer } from './ReservationTimer';
 export { TerminalSelector } from './TerminalSelector';
 export { TerminalSelectorWithMap } from './TerminalSelectorWithMap';
-export { PhoneInput, validatePhone } from './PhoneInput';
+export { PhoneInput } from '@/components/common/PhoneInput';
+export { validatePhone, isValidPhoneNumber } from '@/lib/phone-utils';

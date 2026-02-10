@@ -97,13 +97,10 @@ export function GameResultCard({
 
       if (data.thumbnail) {
         setThumbnail(data.thumbnail);
-        console.log(`✅ Loaded thumbnail for ${name}${data.cached ? ' (cached)' : ''}`);
       } else {
         setHasError(true);
-        console.warn(`⚠️ No thumbnail available for ${name}`);
       }
-    } catch (error) {
-      console.error(`❌ Failed to load thumbnail for ${name}:`, error);
+    } catch {
       setHasError(true);
     } finally {
       setIsLoading(false);

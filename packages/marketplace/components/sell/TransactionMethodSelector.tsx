@@ -1,8 +1,10 @@
 'use client';
 
-import { Chat as MessageSquare, CreditCard, CheckCircleAlt01 as CheckCircle2, ArrowRight } from 'griddy-icons';
+import { Chat as MessageSquare, CreditCard, CheckCircleAlt01 as CheckCircle2, ArrowRight, Phone } from 'griddy-icons';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { PhoneInput } from '@/components/common/PhoneInput';
+import type { CountryCode } from '@/lib/country-utils';
 import type { TransactionMethod } from '@/lib/types/listing';
 
 interface TransactionMethodSelectorProps {
@@ -10,6 +12,10 @@ interface TransactionMethodSelectorProps {
   onChange: (method: TransactionMethod) => void;
   canUseInstantBuy: boolean;
   onUpgradeClick?: () => void;
+  hasPhone?: boolean;
+  phoneValue?: string;
+  onPhoneChange?: (phone: string) => void;
+  defaultCountry?: CountryCode;
 }
 
 export function TransactionMethodSelector({
@@ -17,6 +23,10 @@ export function TransactionMethodSelector({
   onChange,
   canUseInstantBuy,
   onUpgradeClick,
+  hasPhone = true,
+  phoneValue = '',
+  onPhoneChange,
+  defaultCountry = 'LV',
 }: TransactionMethodSelectorProps) {
   const t = useTranslations('Sell.transactionMethod');
 
@@ -119,6 +129,34 @@ export function TransactionMethodSelector({
             </div>
           </div>
         </button>
+
+        {/* Inline phone input - shown when instant_buy is selected but seller has no phone */}
+        {value === 'instant_buy' && !hasPhone && onPhoneChange && (
+          <div className="sm:col-span-2 p-4 rounded-lg border border-aurora-orange/30 bg-aurora-orange/5">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-aurora-orange/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Phone className="w-4 h-4 text-aurora-orange" />
+              </div>
+              <div className="flex-1 min-w-0 space-y-2">
+                <div>
+                  <p className="text-sm font-medium text-polar-night">
+                    {t('instantBuy.phoneRequired.label')}
+                  </p>
+                  <p className="text-xs text-text-secondary mt-0.5">
+                    {t('instantBuy.phoneRequired.description')}
+                  </p>
+                </div>
+                <PhoneInput
+                  value={phoneValue}
+                  onChange={onPhoneChange}
+                  compact
+                  defaultCountry={defaultCountry}
+                  id="seller-phone-inline"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="text-center">

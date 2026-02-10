@@ -49,6 +49,8 @@ export interface AggregatedGame {
   has_local_pickup: boolean;
   has_parcel_shipping: boolean;
   has_auction: boolean;  // Whether any offers are auctions
+  auction_soonest_ends_at: string | null;  // Earliest non-expired auction end time
+  auction_ended_count: number;  // Auctions that have ended (auction_ends_at in the past)
 
   // Featured offer (lowest non-auction price, or lowest auction if auction-only)
   featured_listing_id: string;

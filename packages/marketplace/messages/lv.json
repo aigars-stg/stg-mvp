@@ -39,6 +39,18 @@
       "components": "Komponenti",
       "typicalValue": "Parasti saglabā ~",
       "ofRetailPrice": "no jaunas spēles cenas"
+    },
+    "PhoneInput": {
+      "label": "Tālruņa numurs",
+      "dropdownLabel": "Izvēlieties valsts kodu",
+      "prefixLabel": "Valsts kods",
+      "otherPlaceholder": "123456789",
+      "formatHint": {
+        "LV": "Latvijas numurs, 8 cipari",
+        "EE": "Igaunijas numurs, 7-8 cipari",
+        "LT": "Lietuvas mobilais, 8 cipari",
+        "OTHER": "Ievadiet valsts kodu un tālruņa numuru"
+      }
     }
   },
   "NavbarSearch": {
@@ -580,7 +592,9 @@
       "contactSellerTooltip": "{count, plural, one {# sazināties ar pārdevēju} other {# sazināties ar pārdevēju}}",
       "auctionTooltip": "{count, plural, one {# izsole} other {# izsoles}}",
       "expansionTooltip": "Papildinājums",
-      "expansionOffersTooltip": "Ietver papildinājumu piedāvājumus"
+      "expansionOffersTooltip": "Ietver papildinājumu piedāvājumus",
+      "auctionEndsIn": "Beidzas pēc",
+      "auctionEnded": "Izsole beigusies"
     },
     "detail": {},
     "create": {},
@@ -1280,11 +1294,13 @@
       "selectCondition": "Lūdzu, izvēlies savas spēles stāvokli",
       "photoRequired": "Lūdzu, augšupielādē vismaz 1 fotoattēlu priekšmetiem ar pieņemamu stāvokli",
       "priceRequired": "Lūdzu, ievadi derīgu cenu",
+      "phoneRequired": "Lūdzu, ievadi savu tālruņa numuru, lai iespējotu piegādi Instant Buy sludinājumiem",
       "termsRequired": "Lūdzu, piekrīti noteikumiem un nosacījumiem",
       "emailVerificationRequired": "Lūdzu, verificē savu e-pasta adresi pirms sludinājuma izveidošanas. Pārbaudi savu iesūtni, lai atrastu verificēšanas saiti."
     },
     "errors": {
       "loadDraftFailed": "Neizdevās ielādēt melnrakstu. Sāc no jauna.",
+      "phoneSaveFailed": "Neizdevās saglabāt tālruņa numuru. Mēģini vēlreiz.",
       "publishFailed": "Neizdevās publicēt sludinājumu: {message}",
       "updateFailed": "Neizdevās atjaunināt sludinājumu: {message}",
       "permissionDenied": "Tu vari labot tikai savus sludinājumus.",
@@ -1568,7 +1584,7 @@
         "good": "Labs",
         "acceptable": "Pieņemams"
       },
-      "tooltip": "Balstīts uz zemākajām ES mazumcenām. Tavs vietējais tirgus var atšķirties - izmanto kā vadlīniju."
+      "disclaimer": "Balstīts uz zemākajām ES mazumcenām. Tavs vietējais tirgus var atšķirties - izmanto kā vadlīniju."
     },
     "WantedContext": {
       "title": "Atbilst pieprasījumam",
@@ -1668,7 +1684,12 @@
         "label": "Pirkt uzreiz",
         "description": "Pircēji maksā uzreiz caur platformu",
         "unavailable": "Pieejams Latvijas pārdevējiem ar pievienotu maksājumu kontu",
-        "upgrade": "Iestatīt maksājumus"
+        "upgrade": "Iestatīt maksājumus",
+        "phoneRequired": {
+          "label": "Nepieciešams tālruņa numurs",
+          "description": "Unisend pakomāti izmanto tālruņa numuru sūtījuma uzlīmju izveidei. Tas tiks saglabāts tavā profilā.",
+          "placeholder": "+371 12345678"
+        }
       },
       "helpLink": "Kāda ir atšķirība?"
     },

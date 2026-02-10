@@ -69,6 +69,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
 
   // Fetch question count on mount (lightweight endpoint)
   useEffect(() => {
+    if (listing.id === 'preview') return;
     fetch(`/api/listings/${listing.id}/questions?count_only=true`)
       .then(res => res.ok ? res.json() : { count: 0 })
       .then(data => setQuestionCount(data.count ?? 0))

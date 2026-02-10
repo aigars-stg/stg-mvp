@@ -39,6 +39,18 @@
       "components": "Components",
       "typicalValue": "Typical value:",
       "ofRetailPrice": "of retail price"
+    },
+    "PhoneInput": {
+      "label": "Phone Number",
+      "dropdownLabel": "Select country code",
+      "prefixLabel": "Country code",
+      "otherPlaceholder": "123456789",
+      "formatHint": {
+        "LV": "Latvian number, 8 digits",
+        "EE": "Estonian number, 7-8 digits",
+        "LT": "Lithuanian mobile, 8 digits",
+        "OTHER": "Enter country code and phone number"
+      }
     }
   },
   "NavbarSearch": {
@@ -580,7 +592,9 @@
       "contactSellerTooltip": "{count, plural, one {# contact seller} other {# contact seller}}",
       "auctionTooltip": "{count, plural, one {# auction} other {# auctions}}",
       "expansionTooltip": "Expansion",
-      "expansionOffersTooltip": "Includes expansion offers"
+      "expansionOffersTooltip": "Includes expansion offers",
+      "auctionEndsIn": "Ends in",
+      "auctionEnded": "Auction ended"
     },
     "detail": {},
     "create": {},
@@ -1280,11 +1294,13 @@
       "selectCondition": "Please select the condition of your game",
       "photoRequired": "Please upload at least 1 photo for Acceptable condition items",
       "priceRequired": "Please enter a valid price",
+      "phoneRequired": "Please enter your phone number to enable shipping for Instant Buy listings",
       "termsRequired": "Please accept the terms and conditions",
       "emailVerificationRequired": "Please verify your email address before creating a listing. Check your inbox for the verification link."
     },
     "errors": {
       "loadDraftFailed": "Failed to load draft. Please start fresh.",
+      "phoneSaveFailed": "Failed to save phone number. Please try again.",
       "publishFailed": "Failed to publish listing: {message}",
       "updateFailed": "Failed to update listing: {message}",
       "permissionDenied": "You can only edit your own listings.",
@@ -1568,7 +1584,7 @@
         "good": "Good",
         "acceptable": "Acceptable"
       },
-      "tooltip": "Based on lowest EU retail prices. Your local market may differ - use as a guide."
+      "disclaimer": "Based on lowest EU retail prices. Your local market may differ - use as a guide."
     },
     "WantedContext": {
       "title": "Matching a request",
@@ -1668,7 +1684,12 @@
         "label": "Instant Buy",
         "description": "Buyers pay instantly through the platform",
         "unavailable": "Available for Latvian sellers with connected payment account",
-        "upgrade": "Set up payments"
+        "upgrade": "Set up payments",
+        "phoneRequired": {
+          "label": "Phone number required",
+          "description": "Unisend parcel lockers need your phone number to create shipping labels. This will be saved to your profile.",
+          "placeholder": "+371 12345678"
+        }
       },
       "helpLink": "What's the difference?"
     },

@@ -22,6 +22,15 @@ export async function GET(_request: NextRequest) {
       );
     }
 
+    // Check if user has a phone number (needed for Unisend shipping labels)
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('phone')
+      .eq('id', user.id)
+      .single();
+
+    const hasPhone = !!(userProfile?.phone && userProfile.phone.trim() !== '');
+
     // Determine status based on profile data
     const termsAccepted = !!sellerProfile?.seller_terms_accepted_at;
     const isActive = sellerProfile?.seller_status === 'active';
@@ -43,6 +52,7 @@ export async function GET(_request: NextRequest) {
       can_list_items: canListItems,
       can_create_contact_seller: canCreateContactSeller,
       can_create_instant_buy: canCreateInstantBuy,
+      has_phone: hasPhone,
       has_payout_info: !!(sellerProfile?.payout_iban && sellerProfile?.payout_account_holder_name),
       needs_dac7_info: false,
     };
