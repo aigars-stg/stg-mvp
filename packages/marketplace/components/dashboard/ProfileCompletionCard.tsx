@@ -5,7 +5,7 @@ import { Button, Card } from '@second-turn/design-system';
 import clsx from 'clsx';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { COUNTRIES } from '@/lib/country-utils';
-import { User, LocationPin as MapPin, Check, Close } from 'griddy-icons';
+import { User, LocationPin as MapPin, Check, Close } from '@/lib/icons';
 import type { UserProfile } from '@/lib/auth/types';
 import { useTranslations } from 'next-intl';
 

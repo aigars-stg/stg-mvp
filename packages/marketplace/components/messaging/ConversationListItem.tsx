@@ -3,7 +3,7 @@
 
 import { Link } from '@/i18n/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import { Package } from 'griddy-icons';
+import { Package } from '@/lib/icons';
 import type { ConversationListItem as ConversationListItemType } from '@/lib/types/message';
 import { Avatar } from '@/components/user';
 import { formatPrice } from '@/lib/services/pricing';

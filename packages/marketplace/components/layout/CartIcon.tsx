@@ -1,7 +1,7 @@
 'use client';
 
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
-import { ShoppingBasket as ShoppingCart } from 'griddy-icons';
+import { ShoppingBasket as ShoppingCart } from '@/lib/icons';
 import { useCart } from '@/lib/contexts/CartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
 

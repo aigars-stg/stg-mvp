@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@second-turn/design-system';
-import { Package, ArrowLeft, RefreshCw as Loader2, AlertCircle, Truck, User, Email as Mail, CreditCard, ShieldCheck, LocationPin as MapPin } from 'griddy-icons';
+import { Package, ArrowLeft, RefreshCw as Loader2, AlertCircle, Truck, User, Email as Mail, CreditCard, ShieldCheck, LocationPin as MapPin } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { TerminalSelectorWithMap } from '@/components/checkout/TerminalSelectorWithMap';
 import { PhoneInput } from '@/components/common/PhoneInput';

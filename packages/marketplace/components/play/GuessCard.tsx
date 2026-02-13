@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import type { GuessResult, NumericFeedbackResult, SetFeedbackResult } from '@/lib/play/types';
-import { Users, Time as Clock, Scale, Calendar, Tag, PuzzlePiece as Puzzle } from 'griddy-icons';
+import { Users, Time as Clock, Scale, Calendar, Tag, PuzzlePiece as Puzzle } from '@/lib/icons';
 
 interface GuessCardProps {
   guess: GuessResult;

@@ -4,7 +4,9 @@ import { getPaymentStatus } from '@/lib/everypay/client';
 import { SUCCESSFUL_STATES, FAILED_STATES } from '@/lib/everypay/types';
 import { postOrderCreatedMessage } from '@/lib/transactions';
 import * as Sentry from '@sentry/nextjs';
-import { logger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
+
+const log = loggers.payments;
 
 // Use generic SupabaseClient type (untyped) for dynamic webhook operations
 type AdminClient = SupabaseClient;
@@ -29,7 +31,7 @@ export async function GET(request: NextRequest) {
   const paymentReference = searchParams.get('payment_reference');
 
   if (!paymentReference) {
-    console.error('[EveryPay callback] Missing payment_reference');
+    log.error('Missing payment_reference');
     return NextResponse.redirect(
       `${appUrl}/checkout/success?error=missing_reference`
     );
@@ -50,7 +52,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (lookupError || !checkoutEvent) {
-      console.error('[EveryPay callback] Unknown payment_reference:', paymentReference);
+      log.error({ paymentReference }, 'Unknown payment_reference');
       return NextResponse.redirect(
         `${appUrl}/checkout/success?error=unknown_payment`
       );
@@ -90,7 +92,7 @@ export async function GET(request: NextRequest) {
       } else if (orderRef.startsWith('AUCTION_')) {
         orderId = await processAuctionPayment(supabase, metadata, paymentReference);
       } else {
-        console.error('[EveryPay callback] Unknown order_reference type:', orderRef);
+        log.error({ orderRef }, 'Unknown order_reference type');
         return NextResponse.redirect(
           `${appUrl}/checkout/success?error=unknown_type`
         );
@@ -109,7 +111,7 @@ export async function GET(request: NextRequest) {
       // 6. Post system message and send emails (non-blocking)
       postOrderCreatedMessage(orderId);
       sendOrderEmails(supabase, orderId, metadata).catch((err) =>
-        console.error('[EveryPay callback] Email sending failed:', err)
+        log.error({ err, orderId }, 'Email sending failed')
       );
 
       return NextResponse.redirect(
@@ -141,7 +143,7 @@ export async function GET(request: NextRequest) {
       `${appUrl}/checkout/success?payment_reference=${paymentReference}&pending=true`
     );
   } catch (error) {
-    logger.error({ error }, 'EveryPay callback failed');
+    log.error({ error }, 'EveryPay callback failed');
     Sentry.captureException(error, { tags: { action: 'EveryPay callback' } });
     return NextResponse.redirect(
       `${appUrl}/checkout/success?error=verification_failed`
@@ -185,12 +187,12 @@ async function processBasketPayment(
   });
 
   if (error) {
-    console.error('[EveryPay callback] Basket order creation failed:', error);
+    log.error({ error, basketId }, 'Basket order creation failed');
     throw new Error(`Order creation failed: ${error.message}`);
   }
 
   if (!result.success) {
-    console.error('[EveryPay callback] Basket order creation failed:', result.error);
+    log.error({ error: result.error, basketId }, 'Basket order creation failed');
     throw new Error(`Order creation failed: ${result.error}`);
   }
 
@@ -207,9 +209,7 @@ async function processBasketPayment(
     })
     .eq('id', orderId);
 
-  console.log(
-    `[EveryPay callback] Basket order created: ${result.order_number} (${orderId})`
-  );
+  log.info({ orderNumber: result.order_number, orderId }, 'Basket order created');
 
   return orderId;
 }
@@ -232,79 +232,45 @@ async function processAuctionPayment(
   const walletDebitCents = (metadata.wallet_debit_cents as number) || 0;
   const commissionCents = (metadata.platform_commission_cents as number) || 0;
   const walletCreditCents = (metadata.seller_wallet_credit_cents as number) || 0;
-  const gameName = metadata.game_name as string;
   const locale = (metadata.locale as string) || 'en';
 
-  // Create order directly (no basket RPC for auctions)
-  const { data: order, error } = await supabase
-    .from('orders')
-    .insert({
-      buyer_id: buyerId,
-      seller_id: sellerId,
-      order_number: `A-${Date.now()}`,
-      shipping_method: shippingMethod,
-      destination_country: (metadata.destination_country as string) || null,
-      destination_terminal_id: (metadata.destination_terminal_id as string) || null,
-      destination_terminal_name: (metadata.destination_terminal_name as string) || null,
-      destination_terminal_address: (metadata.destination_terminal_address as string) || null,
-      receiver_name: (metadata.receiver_name as string) || null,
-      receiver_phone: (metadata.receiver_phone as string) || null,
-      receiver_email: (metadata.receiver_email as string) || null,
-      pickup_city: (metadata.pickup_city as string) || null,
-      pickup_notes: (metadata.pickup_notes as string) || null,
-      items_total: winningBidEuros,
-      shipping_cost: shippingCost,
-      total_amount: winningBidEuros + shippingCost,
-      status: 'pending_seller',
-      paid_at: new Date().toISOString(),
-      locale,
-      everypay_payment_reference: paymentReference,
-      everypay_payment_state: 'settled',
-      buyer_wallet_debit_cents: walletDebitCents,
-      platform_commission_cents: commissionCents,
-      seller_wallet_credit_cents: walletCreditCents,
-    })
-    .select('id')
-    .single();
-
-  if (error || !order) {
-    console.error('[EveryPay callback] Auction order creation failed:', error);
-    throw new Error(`Auction order creation failed: ${error?.message}`);
-  }
-
-  // Debit wallet if applicable
-  if (walletDebitCents > 0) {
-    const { error: walletError } = await (supabase.rpc as (...args: unknown[]) => ReturnType<typeof supabase.rpc>)('debit_buyer_wallet', {
-      p_user_id: buyerId,
-      p_amount_cents: walletDebitCents,
-      p_order_id: order.id,
-    });
-    if (walletError) {
-      console.error('[EveryPay callback] Wallet debit failed:', walletError);
-    }
-  }
-
-  // Mark listing as sold
-  await supabase
-    .from('listings')
-    .update({
-      status: 'sold',
-      sold_at: new Date().toISOString(),
-      reserved_by: null,
-    })
-    .eq('id', listingId);
-
-  // Create order item
-  await supabase.from('order_items').insert({
-    order_id: order.id,
-    listing_id: listingId,
-    game_name: gameName,
-    price: winningBidEuros,
+  // Call the RPC to create the auction order atomically
+  const { data: result, error } = await supabase.rpc('create_order_from_auction', {
+    p_listing_id: listingId,
+    p_buyer_id: buyerId,
+    p_seller_id: sellerId,
+    p_shipping_method: shippingMethod,
+    p_destination_country: (metadata.destination_country as string) || null,
+    p_destination_terminal_id: (metadata.destination_terminal_id as string) || null,
+    p_destination_terminal_name: (metadata.destination_terminal_name as string) || null,
+    p_destination_terminal_address: (metadata.destination_terminal_address as string) || null,
+    p_receiver_name: (metadata.receiver_name as string) || null,
+    p_receiver_phone: (metadata.receiver_phone as string) || null,
+    p_receiver_email: (metadata.receiver_email as string) || null,
+    p_pickup_city: (metadata.pickup_city as string) || null,
+    p_pickup_notes: (metadata.pickup_notes as string) || null,
+    p_winning_bid_euros: winningBidEuros,
+    p_shipping_cost: shippingCost,
+    p_everypay_payment_reference: paymentReference,
+    p_buyer_wallet_debit_cents: walletDebitCents,
+    p_platform_commission_cents: commissionCents,
+    p_seller_wallet_credit_cents: walletCreditCents,
+    p_locale: locale,
   });
 
-  console.log(`[EveryPay callback] Auction order created: ${order.id}`);
+  if (error) {
+    log.error({ error, listingId }, 'Auction order creation failed');
+    throw new Error(`Auction order creation failed: ${error.message}`);
+  }
 
-  return order.id;
+  if (!result.success) {
+    log.error({ error: result.error, listingId }, 'Auction order creation failed');
+    throw new Error(`Auction order creation failed: ${result.error}`);
+  }
+
+  log.info({ orderId: result.order_id, orderNumber: result.order_number, listingId }, 'Auction order created');
+
+  return result.order_id as string;
 }
 
 // ==============================================

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
-import { CurrencyEuro as Euro, ArrowUp } from 'griddy-icons';
+import { CurrencyEuro as Euro, ArrowUp } from '@/lib/icons';
 import { Link } from '@/i18n/navigation';
 import { formatCentsToCurrency } from '@/lib/services/pricing';
 

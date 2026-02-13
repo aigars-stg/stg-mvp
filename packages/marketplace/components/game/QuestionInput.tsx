@@ -2,7 +2,7 @@
 
 import { useState, useRef, KeyboardEvent } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Send, RefreshCw as Loader2 } from 'griddy-icons';
+import { Send, RefreshCw as Loader2 } from '@/lib/icons';
 import { QUESTION_CONSTRAINTS } from '@/lib/types/question';
 import { useTranslations } from 'next-intl';
 

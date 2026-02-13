@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Badge } from '@second-turn/design-system';
-import { Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, ArrowDownRight, RefreshCw as Loader2, AlertCircle } from 'griddy-icons';
+import { Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, ArrowDownRight, RefreshCw as Loader2, AlertCircle } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import { formatDateShort } from '@/lib/date-utils';
 

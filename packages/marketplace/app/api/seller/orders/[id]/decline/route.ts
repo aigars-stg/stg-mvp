@@ -95,12 +95,11 @@ export async function POST(
 
           // Refund wallet debit back to buyer's wallet
           if (walletDebitCents && walletDebitCents > 0) {
-            // credit_buyer_wallet_refund is a SECURITY DEFINER function not exposed in generated types
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (supabase as any).rpc('credit_buyer_wallet_refund', {
+            await supabase.rpc('credit_wallet', {
               p_user_id: buyerId,
               p_amount_cents: walletDebitCents,
               p_order_id: orderId,
+              p_description: 'Refund — order declined by seller',
             });
           }
 

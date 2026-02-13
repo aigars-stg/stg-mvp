@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { handleApiError } from '@/lib/api/error-handler';
+import { loggers } from '@/lib/logger';
+
+const log = loggers.cron;
 
 /**
  * GET /api/cron/expire-seller-deadlines
@@ -23,7 +26,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (authHeader !== `Bearer ${cronSecret}`) {
-      console.error('[Cron] Unauthorized cron request');
+      log.error('Unauthorized cron request');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -39,7 +42,7 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    console.log('[Cron] Running expire-seller-deadlines job...');
+    log.info('Running expire-seller-deadlines job');
 
     // Call the expiration handler function
     const { data: result, error } = await supabase.rpc(
@@ -53,7 +56,7 @@ export async function GET(request: NextRequest) {
     const cancelledCount = result?.cancelled_count || 0;
     const refundsNeeded = result?.refunds_needed || [];
 
-    console.log(`[Cron] Cancelled ${cancelledCount} orders with expired deadlines`);
+    log.info({ cancelledCount }, 'Cancelled orders with expired deadlines');
 
     // Process refunds and send emails
     let refundsProcessed = 0;
@@ -61,7 +64,7 @@ export async function GET(request: NextRequest) {
     let emailsSent = 0;
 
     if (refundsNeeded.length > 0) {
-      console.log(`[Cron] Processing ${refundsNeeded.length} refunds...`);
+      log.info({ count: refundsNeeded.length }, 'Processing refunds');
 
       // Import EveryPay client, wallet service, email, and transaction message functions
       const { refundPayment } = await import('@/lib/everypay/client');
@@ -76,7 +79,7 @@ export async function GET(request: NextRequest) {
         postOrderCancelledMessage(order_id, 'seller_timeout');
 
         try {
-          console.log(`[Cron] Refunding order ${order_id}...`);
+          log.info({ orderId: order_id }, 'Refunding order');
 
           // Fetch order details for EveryPay reference and wallet debit
           const { data: order, error: orderError } = await supabase
@@ -86,7 +89,7 @@ export async function GET(request: NextRequest) {
             .single();
 
           if (orderError || !order) {
-            console.error(`[Cron] Could not fetch order ${order_id}:`, orderError);
+            log.error({ orderId: order_id, orderError }, 'Could not fetch order');
             refundsFailed++;
             continue;
           }
@@ -98,7 +101,7 @@ export async function GET(request: NextRequest) {
           // 1. Refund EveryPay portion (card payment)
           if (everypayPortionCents > 0 && order.everypay_payment_reference) {
             await refundPayment(order.everypay_payment_reference, everypayPortionCents);
-            console.log(`[Cron] EveryPay refund processed for order ${order_id} (${everypayPortionCents} cents)`);
+            log.info({ orderId: order_id, amountCents: everypayPortionCents }, 'EveryPay refund processed');
           }
 
           // 2. Refund wallet portion back to buyer's wallet
@@ -110,11 +113,11 @@ export async function GET(request: NextRequest) {
               order_id
             );
             if (!walletResult.success) {
-              console.error(`[Cron] Wallet refund failed for order ${order_id}:`, walletResult.error);
+              log.error({ orderId: order_id, error: walletResult.error }, 'Wallet refund failed');
               refundsFailed++;
               continue;
             }
-            console.log(`[Cron] Wallet refund processed for order ${order_id} (${walletDebitCents} cents)`);
+            log.info({ orderId: order_id, amountCents: walletDebitCents }, 'Wallet refund processed');
           }
 
           // Update order with refund info
@@ -128,7 +131,7 @@ export async function GET(request: NextRequest) {
 
           refundsProcessed++;
         } catch (refundError: unknown) {
-          console.error(`[Cron] Refund failed for order ${order_id}:`, refundError);
+          log.error({ orderId: order_id, error: refundError }, 'Refund failed');
           refundsFailed++;
           continue;
         }
@@ -167,10 +170,10 @@ export async function GET(request: NextRequest) {
               cancellationReason: 'Seller did not respond within 24 hours',
             });
 
-            console.log(`[Cron] Cancellation email sent for order ${order_id}`);
+            log.info({ orderId: order_id }, 'Cancellation email sent');
             emailsSent++;
           } catch (emailError) {
-            console.error(`[Cron] Email failed for order ${order_id}:`, emailError);
+            log.error({ orderId: order_id, error: emailError }, 'Email failed');
           }
         }
       }
@@ -199,7 +202,7 @@ export async function GET(request: NextRequest) {
 
         if (!dErr) {
           disputeDeadlinesExpired++;
-          console.log(`[Cron] Dispute deadline expired for order ${dispute.order_number}`);
+          log.info({ orderNumber: dispute.order_number }, 'Dispute deadline expired');
         }
       }
     }
@@ -214,7 +217,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     };
 
-    console.log('[Cron] Summary:', summary);
+    log.info(summary, 'expire-seller-deadlines completed');
 
     return NextResponse.json(summary);
   } catch (error: unknown) {

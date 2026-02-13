@@ -16,7 +16,7 @@ import {
   Timer,
   Globe,
   User,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 

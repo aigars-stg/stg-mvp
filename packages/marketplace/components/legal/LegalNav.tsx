@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Home, FileText, Lock, Briefcase, BookOpen, Settings, Coins } from 'griddy-icons';
+import { Home, FileText, Lock, Briefcase, BookOpen, Settings, Coins } from '@/lib/icons';
 import { LEGAL_SECTIONS, type LegalSectionId } from './legal-sections';
 
 export type { LegalSectionId } from './legal-sections';

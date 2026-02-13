@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePathname } from '@/i18n/navigation';
-import { Chat as MessageSquarePlus } from 'griddy-icons';
+import { Chat as MessageSquarePlus } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import { FeedbackModal } from './FeedbackModal';
 

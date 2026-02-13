@@ -1,7 +1,7 @@
 'use client';
 
 import { Modal, Button } from '@second-turn/design-system';
-import { HelpCircle } from 'griddy-icons';
+import { HelpCircle } from '@/lib/icons';
 import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 

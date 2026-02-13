@@ -14,7 +14,7 @@ import {
   Chat as MessageSquare,
   CheckCircleAlt01 as CheckCircle,
   AlertTriangle,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { MessageBubble } from '@/components/messaging/MessageBubble';
 import { MessageInput } from '@/components/messaging/MessageInput';

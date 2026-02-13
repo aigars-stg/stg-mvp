@@ -15,7 +15,7 @@ import {
   CheckCircle,
   LinkExternal as ExternalLink,
   User,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { formatDateTime } from '@/lib/date-utils';
 import type { FeedbackType, FeedbackStatus, UserFeedback } from '@/lib/types/feedback';

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { shareResults } from '@/lib/play/share';
 import type { PuzzleState } from '@/lib/play/types';
-import { ArrowUpRight as ShareIcon, Check, X } from 'griddy-icons';
+import { ArrowUpRight as ShareIcon, Check, X } from '@/lib/icons';
 
 interface GameResultProps {
   puzzleNumber: number;

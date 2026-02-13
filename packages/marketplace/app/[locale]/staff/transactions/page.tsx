@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Button, Badge } from '@second-turn/design-system';
-import { Search, RefreshCw as Loader2, AlertCircle, Shield, ChevronLeft, ChevronRight, AlertTriangle, Package, Download, TrendUp, CurrencyDollar, FileText, Receipt, Truck, User, CheckCircleAlt01 as CheckCircle2, Bug, Sparks as Lightbulb, HelpCircle } from 'griddy-icons';
+import { Search, RefreshCw as Loader2, AlertCircle, Shield, ChevronLeft, ChevronRight, AlertTriangle, Package, Download, TrendUp, CurrencyDollar, FileText, Receipt, Truck, User, CheckCircleAlt01 as CheckCircle2, Bug, Sparks as Lightbulb, HelpCircle } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {
   extractVatFromGross,

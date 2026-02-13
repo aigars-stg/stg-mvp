@@ -1,6 +1,7 @@
 import { Link } from '@/i18n/navigation';
-import { Download } from 'griddy-icons';
+import { Download } from '@/lib/icons';
 import Markdown from 'react-markdown';
+import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import { PlainTermsBox } from './PlainTermsBox';
 
@@ -65,6 +66,7 @@ function MarkdownContent({ content }: { content: string }) {
   return (
     <Markdown
       remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeSlug]}
       components={{
         a: ({ node: _node, ...props }) => {
           const isInternal = props.href?.startsWith('/');

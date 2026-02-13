@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { ConversationList } from '@/components/messaging/ConversationList';
-import { ChatBubble as MessageCircle } from 'griddy-icons';
+import { ChatBubble as MessageCircle } from '@/lib/icons';
 import { Card } from '@second-turn/design-system';
 import { getTranslations } from 'next-intl/server';
 

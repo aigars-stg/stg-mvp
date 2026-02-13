@@ -170,6 +170,18 @@ Good photos sell games. Include these shots:
 | Inventing grades like "Near Mint" | Stick to our four grades. Custom terms make comparison harder. |
 | Grading based on what you paid | Grade the actual condition, not the value. |
 
+## Listing description examples
+
+Not sure what to write? Here are example descriptions for each grade:
+
+**Like New:** "Opened to read the rules, never played. All components still in original packaging. Cards never shuffled. Stored flat on a shelf in a smoke-free home."
+
+**Very Good:** "Played maybe five times. Cards sleeved from first play, no wear. All components present. Original insert intact. Box shows minor shelf wear."
+
+**Good:** "Box shows shelf wear and one soft corner. Inside is in great shape — cards show light edge wear from shuffling. All components present."
+
+**Acceptable:** "Box has significant wear and a taped corner. Components are all there and play fine, but cards show shuffling wear. Rulebook has some creases. Good candidate for sleeving."
+
 ## Quick reference
 
 | Grade | Summary | Value range |

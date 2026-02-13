@@ -3,7 +3,7 @@
 
 import { useState, useRef } from 'react';
 import { Button, Input } from '@second-turn/design-system';
-import { PhotoCamera as Camera, Close, RefreshCw as Loader2 } from 'griddy-icons';
+import { PhotoCamera as Camera, Close, RefreshCw as Loader2 } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import type { FeedbackType, SubmitFeedbackRequest } from '@/lib/types/feedback';

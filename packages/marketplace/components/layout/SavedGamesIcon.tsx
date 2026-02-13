@@ -1,7 +1,7 @@
 'use client';
 
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
-import { Heart } from 'griddy-icons';
+import { Heart } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 

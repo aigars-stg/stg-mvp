@@ -43,10 +43,11 @@ We are a Latvian company building a marketplace where board games find new playe
 
 ### Contact
 
-| For | Email |
-|-----|-------|
+| For | Details |
+|-----|---------|
 | General questions | info@secondturn.games |
 | Privacy and data requests | privacy@secondturn.games |
+| Phone | +371 2677 9625 |
 
 ---
 

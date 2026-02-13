@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from '@/i18n/navigation';
-import { Package, Search, Close } from 'griddy-icons';
+import { Package, Search, Close } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';
 

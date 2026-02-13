@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
+import { Cookie } from '@/lib/icons';
 import {
   getConsentStatus,
   saveConsentStatus,
@@ -61,7 +62,7 @@ export function CookieConsent() {
           {/* Message */}
           <div className="flex-1">
             <h2 className="flex items-center gap-2 text-lg font-semibold text-polar-night">
-              <span className="text-xl">🍪</span>
+              <Cookie className="w-5 h-5 text-aurora-orange" />
               {t('title')}
             </h2>
             <p className="mt-1 text-sm text-text-secondary">

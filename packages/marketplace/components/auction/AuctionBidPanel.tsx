@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Button, Input, Card, Badge } from '@second-turn/design-system';
 import {
-  Tag as Gavel,
+  Gavel,
   Time as Clock,
   AlertCircle,
   CheckCircleAlt01 as CheckCircle2,
   RefreshCw,
   Flash as Zap,
   ChevronDown,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useAuctionRealtime } from '@/lib/hooks/useAuctionRealtime';

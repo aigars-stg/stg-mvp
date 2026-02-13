@@ -92,7 +92,7 @@ For **Acceptable** condition, you must add notes explaining the issues. Be speci
 
 **Golden rule:** When in doubt, grade lower. Buyers appreciate honesty, and you will avoid disputes.
 
-See also: [Condition Grading Guide](/help/grading-guide) for detailed examples
+See also: [Condition Grading Guide](/help?section=grading) for detailed examples
 
 ---
 

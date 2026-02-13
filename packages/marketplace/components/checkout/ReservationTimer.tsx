@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Time as Clock, AlertTriangle, RefreshCw as Loader2 } from 'griddy-icons';
+import { Time as Clock, AlertTriangle, RefreshCw as Loader2 } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 interface ReservationTimerProps {

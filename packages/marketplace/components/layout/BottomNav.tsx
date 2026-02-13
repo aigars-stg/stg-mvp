@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
 import dynamic from 'next/dynamic';
-import { Home, Grid, Plus, ShoppingBasket as ShoppingCart, User } from 'griddy-icons';
+import { Home, Grid, Plus, ShoppingBasket as ShoppingCart, User } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
 import { useCart } from '@/lib/contexts/CartContext';

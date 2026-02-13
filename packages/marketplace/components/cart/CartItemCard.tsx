@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Badge } from '@second-turn/design-system';
-import { Package, AlertCircle, PuzzlePiece as Puzzle, TrashAlt as Trash2, RefreshCw as Loader2 } from 'griddy-icons';
+import { Package, AlertCircle, PuzzlePiece as Puzzle, TrashAlt as Trash2, RefreshCw as Loader2 } from '@/lib/icons';
 import { ImageLightbox } from '@/components/listing/ImageLightbox';
 import { SwipeToDelete } from '@/components/common/SwipeToDelete';
 import { OfferCardVersionInfo } from '@/components/game/OfferCardVersionInfo';

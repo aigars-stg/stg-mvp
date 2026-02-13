@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Input } from '@second-turn/design-system';
 import { debounce } from '@/lib/bgg-utils';
-import { Search, Close } from 'griddy-icons';
+import { Search, Close } from '@/lib/icons';
 import Image from 'next/image';
 
 interface GameSearchResult {

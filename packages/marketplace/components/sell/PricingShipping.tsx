@@ -1,7 +1,7 @@
 'use client';
 
 import { Input } from '@second-turn/design-system';
-import { Package, LocationPin as MapPin } from 'griddy-icons';
+import { Package, LocationPin as MapPin } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 interface PricingShippingProps {

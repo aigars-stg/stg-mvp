@@ -1,7 +1,7 @@
 'use client';
 
 import { Modal, Button } from '@second-turn/design-system';
-import { AlertTriangle } from 'griddy-icons';
+import { AlertTriangle } from '@/lib/icons';
 
 /**
  * Generic destructive (delete) confirmation modal

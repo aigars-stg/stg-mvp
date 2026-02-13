@@ -7,7 +7,7 @@ import {
   CheckCircleAlt01 as CheckCircle2,
   AlertTriangle,
   Check,
-} from 'griddy-icons';
+} from '@/lib/icons';
 
 interface OrderActionsProps {
   orderStatus: string;

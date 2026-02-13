@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from '@/i18n/navigation';
-import { Search, Close, RefreshCw as Loader2, PuzzlePiece as Puzzle, Tag, Heart } from 'griddy-icons';
+import { Search, Close, RefreshCw as Loader2, PuzzlePiece as Puzzle, Tag, Heart } from '@/lib/icons';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { TrashAlt as Trash2 } from 'griddy-icons';
+import { TrashAlt as Trash2 } from '@/lib/icons';
 
 interface SwipeToDeleteProps {
   /** Child content to wrap */

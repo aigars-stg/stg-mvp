@@ -1,6 +1,6 @@
 'use client';
 
-import { Package, LocationPin as MapPin } from 'griddy-icons';
+import { Package, LocationPin as MapPin } from '@/lib/icons';
 import { Badge } from '@second-turn/design-system';
 import type { ListingCondition } from '@/lib/types/listing';
 import { getConditionLabel } from '@/lib/types/listing';

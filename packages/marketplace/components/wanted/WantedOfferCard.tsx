@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { Badge } from '@second-turn/design-system';
-import { Package, PuzzlePiece as Puzzle, BookOpen, Globe, Building, LinkExternal as ExternalLink, Calendar, InfoCircle as Info } from 'griddy-icons';
+import { Package, PuzzlePiece as Puzzle, BookOpen, Globe, Building, LinkExternal as ExternalLink, Calendar, InfoCircle as Info } from '@/lib/icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useTranslations } from 'next-intl';

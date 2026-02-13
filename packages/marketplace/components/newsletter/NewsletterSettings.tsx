@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card } from '@second-turn/design-system';
-import { Email as Mail, RefreshCw as Loader2 } from 'griddy-icons';
+import { Email as Mail, RefreshCw as Loader2 } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 export function NewsletterSettings() {

@@ -2,7 +2,7 @@
 'use client';
 
 import { Link } from '@/i18n/navigation';
-import { LinkExternal as ExternalLink, Package } from 'griddy-icons';
+import { LinkExternal as ExternalLink, Package } from '@/lib/icons';
 import type { Conversation } from '@/lib/types/message';
 import { formatPrice } from '@/lib/services/pricing';
 

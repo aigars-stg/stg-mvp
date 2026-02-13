@@ -3,7 +3,7 @@
 
 import { useRouter } from '@/i18n/navigation';
 import { Badge, Button } from '@second-turn/design-system';
-import { LocationPin as MapPin } from 'griddy-icons';
+import { LocationPin as MapPin } from '@/lib/icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { getBudgetDisplay } from '@/lib/types/wanted-listing';
 import { getConditionLabel, ListingCondition } from '@/lib/types/listing';

@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, Badge } from '@second-turn/design-system';
-import { User as UserIcon, LocationPin as MapPin, Notification as Bell } from 'griddy-icons';
+import { User as UserIcon, LocationPin as MapPin, Notification as Bell } from '@/lib/icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { getConditionLabel } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {  Close, ChevronLeft, ChevronRight, SearchPlus as ZoomIn, SearchMinus as ZoomOut  } from 'griddy-icons';
+import {  Close, ChevronLeft, ChevronRight, SearchPlus as ZoomIn, SearchMinus as ZoomOut  } from '@/lib/icons';
 
 interface ImageLightboxProps {
   images: string[];

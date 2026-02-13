@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, Input } from '@second-turn/design-system';
-import { Time as Clock, CurrencyEuro, InfoCircle as Info } from 'griddy-icons';
+import { Time as Clock, CurrencyEuro, InfoCircle as Info } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import type { AuctionDuration } from '@/lib/types/listing';
 

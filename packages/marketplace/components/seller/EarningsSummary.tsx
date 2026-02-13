@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TrendUp as TrendingUp, ShoppingBag, Calendar, RefreshCw as Loader2, AlertCircle } from 'griddy-icons';
+import { TrendUp as TrendingUp, ShoppingBag, Calendar, RefreshCw as Loader2, AlertCircle } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 interface EarningsData {

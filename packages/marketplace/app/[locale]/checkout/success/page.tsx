@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
-import { CheckCircleAlt01 as CheckCircle2, Package, Time as Clock, ArrowRight, RefreshCw as Loader2, AlertCircle, Email as Mail, Truck as TruckIcon } from 'griddy-icons';
+import { CheckCircleAlt01 as CheckCircle2, Package, Time as Clock, ArrowRight, RefreshCw as Loader2, AlertCircle, Email as Mail, Truck as TruckIcon } from '@/lib/icons';
 import { formatPrice } from '@/lib/services/pricing';
 
 interface OrderDetails {

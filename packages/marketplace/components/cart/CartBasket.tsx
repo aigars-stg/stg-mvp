@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@second-turn/design-system';
-import { ChevronRight } from 'griddy-icons';
+import { ChevronRight } from '@/lib/icons';
 import { Avatar } from '@/components/user/Avatar';
 import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 import { CartItemCard, type CartItemData } from './CartItemCard';

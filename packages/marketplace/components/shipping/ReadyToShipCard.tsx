@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@second-turn/design-system';
-import { Truck, LinkExternal as ExternalLink } from 'griddy-icons';
+import { Truck, LinkExternal as ExternalLink } from '@/lib/icons';
 import type { TrackingData } from './types';
 
 interface ReadyToShipCardProps {

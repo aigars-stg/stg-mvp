@@ -14,7 +14,7 @@ const nextConfig = {
   transpilePackages: ['@second-turn/design-system'],
   // Optimize bundle chunks
   experimental: {
-    optimizePackageImports: ['lucide-react', '@supabase/supabase-js'],
+    optimizePackageImports: ['@phosphor-icons/react', '@supabase/supabase-js'],
   },
   // Enable image optimization for external domains
   images: {

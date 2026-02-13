@@ -49,3 +49,13 @@ coverage/
 .vercel
 .env*.local
 .playwright-mcp/
+
+# Root-level clutter (screenshots, one-off SQL scripts, seed data)
+/*.png
+/*.csv
+/*.sql
+/package-lock.json
+
+# Build logs
+**/build_*.txt
+**/build_err.txt

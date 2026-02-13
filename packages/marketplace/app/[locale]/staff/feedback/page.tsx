@@ -13,7 +13,7 @@ import {
   Bug,
   Sparks as Lightbulb,
   HelpCircle,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { formatDate } from '@/lib/date-utils';
 import type {

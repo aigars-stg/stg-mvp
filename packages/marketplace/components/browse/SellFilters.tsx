@@ -1,7 +1,7 @@
 'use client';
 
 import { Input, Checkbox, Button, Badge } from '@second-turn/design-system';
-import { Users, User as Baby, Time as Clock } from 'griddy-icons';
+import { Users, User as Baby, Time as Clock } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 export interface SellFiltersProps {

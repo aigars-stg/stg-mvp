@@ -2,7 +2,7 @@
 
 import { Link } from '@/i18n/navigation';
 import { Button, Card } from '@second-turn/design-system';
-import { Search, Chat as MessageSquare, Shield, Truck } from 'griddy-icons';
+import { Search, Chat as MessageSquare, Shield, Truck } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 /**

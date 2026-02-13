@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LocationPin as MapPin, RefreshCw as Loader2 } from 'griddy-icons';
+import { LocationPin as MapPin, RefreshCw as Loader2 } from '@/lib/icons';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';

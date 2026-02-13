@@ -1,6 +1,6 @@
 'use client';
 
-import { Time as Clock, CheckCircleAlt01 as CheckCircle2 } from 'griddy-icons';
+import { Time as Clock, CheckCircleAlt01 as CheckCircle2 } from '@/lib/icons';
 import { statusSteps, getStepStatus } from './ShippingStatusConfig';
 
 interface StatusTimelineProps {

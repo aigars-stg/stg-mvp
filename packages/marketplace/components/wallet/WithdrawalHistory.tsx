@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Badge, Button } from '@second-turn/design-system';
-import { RefreshCw as Loader2 } from 'griddy-icons';
+import { RefreshCw as Loader2 } from '@/lib/icons';
 import { formatDateTime } from '@/lib/date-utils';
 import { formatCentsToCurrency } from '@/lib/services/pricing';
 

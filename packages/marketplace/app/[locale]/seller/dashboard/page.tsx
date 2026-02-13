@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, Chat as MessageSquare } from 'griddy-icons';
+import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, Chat as MessageSquare } from '@/lib/icons';
 import { Link, useRouter } from '@/i18n/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { BankAccountCard } from '@/components/seller/BankAccountCard';

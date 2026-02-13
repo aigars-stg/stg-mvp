@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Image from 'next/image';
-import { Package, ChevronLeft, ChevronRight } from 'griddy-icons';
+import { Package, ChevronLeft, ChevronRight } from '@/lib/icons';
 
 interface ImageCarouselProps {
   /** Array of image URLs to display */

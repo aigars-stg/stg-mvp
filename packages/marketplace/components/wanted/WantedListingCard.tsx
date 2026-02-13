@@ -2,7 +2,7 @@
 
 import { Link, useRouter } from '@/i18n/navigation';
 import { Card, Badge, Button } from '@second-turn/design-system';
-import { Package, Users, User as Baby, Time as Clock, BookOpen, PuzzlePiece as Puzzle, Globe, Building } from 'griddy-icons';
+import { Package, Users, User as Baby, Time as Clock, BookOpen, PuzzlePiece as Puzzle, Globe, Building } from '@/lib/icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useTranslations } from 'next-intl';
@@ -87,7 +87,7 @@ export function WantedListingCard({
             <img
               src={wantedListing.version_image || wantedListing.game?.image || ''}
               alt={wantedListing.game_name}
-              className="max-w-full max-h-full object-contain p-4"
+              className="max-w-full max-h-full object-contain"
             />
           ) : (
             <Package className="w-16 h-16 text-text-muted" />

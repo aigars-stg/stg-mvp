@@ -1,6 +1,6 @@
 'use client';
 
-import { WifiOff, RefreshCw } from 'griddy-icons';
+import { WifiOff, RefreshCw } from '@/lib/icons';
 import { Button } from '@second-turn/design-system';
 import { useTranslations } from 'next-intl';
 

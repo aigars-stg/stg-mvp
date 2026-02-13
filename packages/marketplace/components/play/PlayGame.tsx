@@ -10,7 +10,7 @@ import { GameResult } from './GameResult';
 import { TurniReaction } from './TurniReaction';
 import { getTurniWinKey, getTurniStreakKey } from '@/lib/play/turni-copy';
 import { formatDate } from '@/lib/date-utils';
-import { ChevronDown, ChevronUp, Calendar, Users, Scale, Time as Clock, ChevronRight, Plus } from 'griddy-icons';
+import { ChevronDown, ChevronUp, Calendar, Users, Scale, Time as Clock, ChevronRight, Plus } from '@/lib/icons';
 import { Button } from '@second-turn/design-system';
 import { formatPrice } from '@/lib/services/pricing';
 import { useAuth } from '@/lib/auth/AuthContext';

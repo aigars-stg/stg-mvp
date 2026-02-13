@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Badge } from '@second-turn/design-system';
-import { Users, User as Baby, Time as Clock, Close, Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench } from 'griddy-icons';
+import { Users, User as Baby, Time as Clock, Close, Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 interface ActiveFilterChipsProps {

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight } from 'griddy-icons';
+import { ChevronLeft, ChevronRight } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 interface GameNavigationArrowsProps {

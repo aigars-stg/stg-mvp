@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, CheckCircle, Undo as RotateCcw, CloseCircle as XCircle } from 'griddy-icons';
+import { AlertCircle, CheckCircle, Undo as RotateCcw, CloseCircle as XCircle } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import { BaseStatusChangeModal, type StatusConfig } from '@/components/common/StatusChangeModal';
 

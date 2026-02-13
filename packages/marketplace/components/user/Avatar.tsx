@@ -1,6 +1,6 @@
 'use client';
 
-import { User } from 'griddy-icons';
+import { User } from '@/lib/icons';
 import { getInitials } from '@/lib/auth/utils';
 import { cn } from '@/lib/utils';
 

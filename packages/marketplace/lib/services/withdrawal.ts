@@ -165,7 +165,7 @@ export async function rejectWithdrawal(
 // HELPERS
 // ==============================================
 
-function mapWithdrawalRow(row: Record<string, unknown>): WithdrawalRequest {
+export function mapWithdrawalRow(row: Record<string, unknown>): WithdrawalRequest {
   return {
     id: row.id as string,
     userId: row.user_id as string,

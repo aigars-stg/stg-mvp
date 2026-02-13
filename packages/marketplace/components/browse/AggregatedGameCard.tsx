@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Card } from '@second-turn/design-system';
-import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle, CalendarTime, Delivery, ChatBubbleDots } from 'griddy-icons';
+import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle, Delivery, Handshake } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
 import { saveBrowseContext } from '@/lib/browse-context';
@@ -36,7 +36,6 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
   // Urgency tier for auction icon and price coloring
   const urgency = getAuctionUrgencyTier(game.auction_soonest_ends_at);
   const hasActiveAuction = game.auction_count > 0 && urgency.tier !== 'ended';
-  const hasAnyAuction = hasActiveAuction || game.auction_ended_count > 0;
 
   return (
     <Link href={`/game/${game.bgg_game_id}`} className="h-full" onClick={handleClick}>
@@ -56,7 +55,7 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
               <img
                 src={game.image || game.thumbnail || ''}
                 alt={game.game_name}
-                className={`max-w-full max-h-full object-contain p-4 transition-opacity duration-300 ${
+                className={`max-w-full max-h-full object-contain transition-opacity duration-300 ${
                   imageLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
                 loading="lazy"
@@ -105,15 +104,7 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
             )}
             {game.contact_seller_count > 0 && (
               <span title={tListings('contactSellerTooltip', { count: game.contact_seller_count })}>
-                <ChatBubbleDots className="w-4 h-4 text-text-muted" />
-              </span>
-            )}
-            {hasAnyAuction && (
-              <span
-                title={tListings('auctionTooltip', { count: game.auction_count + game.auction_ended_count })}
-                className={hasActiveAuction ? urgency.textColorClass : 'text-text-muted'}
-              >
-                <CalendarTime className="w-4 h-4" />
+                <Handshake className="w-4 h-4 text-text-muted" />
               </span>
             )}
             {showExpansionIcon && (
@@ -126,19 +117,13 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
           {/* Price + Offer count — single line, pushed to bottom */}
           <div className="mt-auto flex items-baseline gap-2">
             {isAuctionOnly ? (
-              <>
-                <CalendarTime className={`w-4 h-4 self-center ${urgency.priceColorClass}`} />
-                <span className={`text-2xl font-bold ${urgency.priceColorClass}`}>
-                  {formatPrice(game.auction_lowest_price!)}{showPlus && '+'}
-                </span>
-              </>
+              <span className={`text-2xl font-bold ${urgency.priceColorClass}`}>
+                {formatPrice(game.auction_lowest_price!)}{showPlus && '+'}
+              </span>
             ) : isAuctionEndedOnly ? (
-              <>
-                <CalendarTime className="w-4 h-4 self-center text-text-muted" />
-                <span className="text-2xl font-bold text-text-muted">
-                  {formatPrice(game.auction_lowest_price!)}{showPlus && '+'}
-                </span>
-              </>
+              <span className="text-2xl font-bold text-text-muted">
+                {formatPrice(game.auction_lowest_price!)}{showPlus && '+'}
+              </span>
             ) : (
               <span className="text-2xl font-bold text-polar-night">
                 {formatPrice(game.instant_buy_lowest_price!)}{showPlus && '+'}

@@ -5,7 +5,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { Email as Mail, Check, Sparks as Sparkles } from 'griddy-icons';
+import { Email as Mail, Check, Sparks as Sparkles } from '@/lib/icons';
 import { mapAuthError } from '@/lib/auth/errors';
 import type { AuthFlowState } from '@/lib/auth/types';
 import { useTranslations } from 'next-intl';

@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, Badge, Button } from '@second-turn/design-system';
-import { Tag } from 'griddy-icons';
+import { Tag } from '@/lib/icons';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';

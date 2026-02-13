@@ -5,7 +5,7 @@ import {
   CheckCircleAlt01 as CheckCircle2,
   AlertCircle,
   FileText,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import {

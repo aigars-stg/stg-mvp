@@ -2,7 +2,7 @@
 
 import { Link } from '@/i18n/navigation';
 import { Modal, Button } from '@second-turn/design-system';
-import { Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, LinkExternal as ExternalLink } from 'griddy-icons';
+import { Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, LinkExternal as ExternalLink } from '@/lib/icons';
 import type { ListingCondition } from '../../lib/types/listing';
 import { useTranslations } from 'next-intl';
 
@@ -54,7 +54,7 @@ export function ConditionInfoModal({
       footer={
         <div className="flex items-center justify-between w-full">
           <Link
-            href="/help/grading-guide"
+            href="/help?section=grading"
             target="_blank"
             className="text-frost-ice hover:text-aurora-blue text-sm flex items-center gap-1 transition-colors"
           >

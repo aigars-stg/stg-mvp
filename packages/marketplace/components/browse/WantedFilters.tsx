@@ -1,7 +1,7 @@
 'use client';
 
 import { Input, Checkbox, Button } from '@second-turn/design-system';
-import { Star, Tool as Wrench, Sparks as Sparkles, CheckCircle as CircleCheck, LocationPin as MapPin, AlertCircle } from 'griddy-icons';
+import { Star, Tool as Wrench, Sparks as Sparkles, CheckCircle as CircleCheck, LocationPin as MapPin, AlertCircle } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 export interface WantedFiltersProps {

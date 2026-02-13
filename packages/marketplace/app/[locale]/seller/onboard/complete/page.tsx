@@ -2,13 +2,19 @@
 
 import { useEffect } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
-import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Package, CurrencyDollar as DollarSign, TrendUp as TrendingUp, Heart } from 'griddy-icons';
+import { CheckCircleAlt01 as CheckCircle2, ArrowRight, Package, CurrencyDollar as DollarSign, TrendUp as TrendingUp, Heart } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
+
+const richText = {
+  strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+};
 
 export default function SellerOnboardingCompletePage() {
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations('SellerOnboard');
 
   useEffect(() => {
     // Redirect to sign in if not authenticated
@@ -21,6 +27,8 @@ export default function SellerOnboardingCompletePage() {
     return null;
   }
 
+  const tipKeys = ['photos', 'condition', 'pricing', 'shipping', 'packaging', 'messages'] as const;
+
   return (
     <div className="min-h-screen bg-bg py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -31,17 +39,17 @@ export default function SellerOnboardingCompletePage() {
             <CheckCircle2 className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-polar-night mb-4">
-            You&apos;re all set!
+            {t('complete.title')}
           </h1>
           <p className="text-lg text-text-secondary">
-            Welcome to Second Turn Games. You can now start listing and selling your board games.
+            {t('complete.subtitle')}
           </p>
         </div>
 
         {/* What You Can Do Now */}
         <div className="bg-snow-white border border-border rounded-lg p-8 mb-8">
           <h2 className="text-xl font-semibold text-polar-night mb-6">
-            What You Can Do Now
+            {t('complete.whatYouCanDo.title')}
           </h2>
 
           <div className="space-y-6">
@@ -52,10 +60,10 @@ export default function SellerOnboardingCompletePage() {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-polar-night mb-2">
-                  Create Your First Listing
+                  {t('complete.whatYouCanDo.createListing.title')}
                 </h3>
                 <p className="text-sm text-text-secondary mb-3">
-                  List a board game from your collection. Set your price, upload photos, and describe the condition. Takes less than 3 minutes.
+                  {t('complete.whatYouCanDo.createListing.description')}
                 </p>
                 <Button
                   variant="primary"
@@ -63,7 +71,7 @@ export default function SellerOnboardingCompletePage() {
                   onClick={() => router.push('/sell')}
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  Create Listing
+                  {t('complete.whatYouCanDo.createListing.button')}
                 </Button>
               </div>
             </div>
@@ -75,17 +83,17 @@ export default function SellerOnboardingCompletePage() {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-polar-night mb-2">
-                  Browse & Buy Games
+                  {t('complete.whatYouCanDo.browseGames.title')}
                 </h3>
                 <p className="text-sm text-text-secondary mb-3">
-                  While you wait for sales, explore games from other sellers. Build your collection!
+                  {t('complete.whatYouCanDo.browseGames.description')}
                 </p>
                 <Button
                   variant="secondary"
                   size="md"
                   onClick={() => router.push('/browse')}
                 >
-                  Browse Marketplace
+                  {t('complete.whatYouCanDo.browseGames.button')}
                 </Button>
               </div>
             </div>
@@ -97,17 +105,17 @@ export default function SellerOnboardingCompletePage() {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-polar-night mb-2">
-                  Manage Your Sales
+                  {t('complete.whatYouCanDo.manageSales.title')}
                 </h3>
                 <p className="text-sm text-text-secondary mb-3">
-                  View your active listings, pending orders, and payout history in your seller dashboard.
+                  {t('complete.whatYouCanDo.manageSales.description')}
                 </p>
                 <Button
                   variant="secondary"
                   size="md"
                   onClick={() => router.push('/seller/orders')}
                 >
-                  Go to Dashboard
+                  {t('complete.whatYouCanDo.manageSales.button')}
                 </Button>
               </div>
             </div>
@@ -117,90 +125,40 @@ export default function SellerOnboardingCompletePage() {
         {/* How Selling Works */}
         <div className="bg-snow-white border border-border rounded-lg p-8 mb-8">
           <h2 className="text-xl font-semibold text-polar-night mb-6">
-            How Selling Works
+            {t('complete.howItWorks.title')}
           </h2>
 
           <div className="space-y-4">
-            <div className="flex gap-4">
-              <div className="flex items-center justify-center w-8 h-8 bg-frost-ice text-white rounded-full font-semibold flex-shrink-0">
-                1
+            {([1, 2, 3, 4] as const).map((step) => (
+              <div key={step} className="flex gap-4">
+                <div className={`flex items-center justify-center w-8 h-8 ${step === 4 ? 'bg-aurora-green' : 'bg-frost-ice'} text-white rounded-full font-semibold flex-shrink-0`}>
+                  {step}
+                </div>
+                <div>
+                  <h4 className="font-semibold text-polar-night mb-1">
+                    {t(`complete.howItWorks.step${step}.title`)}
+                  </h4>
+                  <p className="text-sm text-text-secondary">
+                    {t(`complete.howItWorks.step${step}.description`)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-semibold text-polar-night mb-1">Someone Buys Your Game</h4>
-                <p className="text-sm text-text-secondary">
-                  You&apos;ll receive an email notification with shipping details and a pre-paid Unisend label.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="flex items-center justify-center w-8 h-8 bg-frost-ice text-white rounded-full font-semibold flex-shrink-0">
-                2
-              </div>
-              <div>
-                <h4 className="font-semibold text-polar-night mb-1">Package & Ship</h4>
-                <p className="text-sm text-text-secondary">
-                  Pack the game securely and drop it off at any Unisend parcel terminal within 2 business days.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="flex items-center justify-center w-8 h-8 bg-frost-ice text-white rounded-full font-semibold flex-shrink-0">
-                3
-              </div>
-              <div>
-                <h4 className="font-semibold text-polar-night mb-1">Buyer Receives Game</h4>
-                <p className="text-sm text-text-secondary">
-                  The buyer picks up the game from their selected parcel terminal. Tracking updates automatically.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="flex items-center justify-center w-8 h-8 bg-aurora-green text-white rounded-full font-semibold flex-shrink-0">
-                4
-              </div>
-              <div>
-                <h4 className="font-semibold text-polar-night mb-1">Get Paid</h4>
-                <p className="text-sm text-text-secondary">
-                  Your earnings are credited to your platform wallet after each completed sale. A 10% platform commission applies.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
         {/* Tips for Success */}
         <div className="bg-frost-ice/10 border border-frost-ice/20 rounded-lg p-6 mb-8">
           <h3 className="font-semibold text-polar-night mb-4">
-            Tips for Successful Selling
+            {t('complete.tips.title')}
           </h3>
           <ul className="space-y-2 text-sm text-text-secondary">
-            <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-1">•</span>
-              <span><strong>Take clear photos:</strong> Show the actual game, including any wear or damage</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-1">•</span>
-              <span><strong>Be honest about condition:</strong> Accurate descriptions prevent disputes</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-1">•</span>
-              <span><strong>Price competitively:</strong> Check similar listings to set fair prices</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-1">•</span>
-              <span><strong>Ship promptly:</strong> Fast shipping leads to better reviews</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-1">•</span>
-              <span><strong>Package securely:</strong> Protect games from damage during transit</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-frost-ice mt-1">•</span>
-              <span><strong>Respond to messages:</strong> Quick communication builds trust</span>
-            </li>
+            {tipKeys.map((key) => (
+              <li key={key} className="flex items-start gap-2">
+                <span className="text-frost-ice mt-1">&bull;</span>
+                <span>{t.rich(`complete.tips.${key}`, richText)}</span>
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -212,30 +170,24 @@ export default function SellerOnboardingCompletePage() {
             </div>
             <div>
               <h3 className="font-semibold text-polar-night mb-2">
-                About Your Earnings
+                {t('complete.earnings.title')}
               </h3>
               <p className="text-sm text-text-secondary mb-3">
-                Your earnings are credited to your platform wallet after each completed sale.
+                {t('complete.earnings.subtitle')}
               </p>
               <ul className="text-sm text-text-secondary space-y-2 mb-4">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-aurora-green flex-shrink-0" />
-                  <span><strong>90% of listing price</strong> - A 10% platform commission is deducted</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-aurora-green flex-shrink-0" />
-                  <span><strong>Withdraw anytime</strong> - Request a bank transfer whenever you like</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-aurora-green flex-shrink-0" />
-                  <span><strong>Track in dashboard</strong> - View your wallet balance and transaction history</span>
-                </li>
+                {(['commission', 'withdraw', 'track'] as const).map((key) => (
+                  <li key={key} className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-aurora-green flex-shrink-0" />
+                    <span>{t.rich(`complete.earnings.${key}`, richText)}</span>
+                  </li>
+                ))}
               </ul>
               <Link
                 href="/seller/settings/payouts"
                 className="text-sm text-frost-ice hover:underline font-medium"
               >
-                View wallet & withdrawals →
+                {t('complete.earnings.viewWallet')}
               </Link>
             </div>
           </div>
@@ -244,13 +196,13 @@ export default function SellerOnboardingCompletePage() {
         {/* Support */}
         <div className="text-center">
           <p className="text-sm text-text-secondary mb-2">
-            Questions or need help?
+            {t('complete.completeSupport.questions')}
           </p>
           <a
             href="mailto:sellers@secondturn.games"
             className="text-frost-ice hover:underline font-medium"
           >
-            Contact Seller Support
+            {t('complete.completeSupport.contactSeller')}
           </a>
         </div>
 
@@ -262,10 +214,10 @@ export default function SellerOnboardingCompletePage() {
             onClick={() => router.push('/sell')}
             rightIcon={<ArrowRight className="w-5 h-5" />}
           >
-            Create Your First Listing
+            {t('complete.cta.button')}
           </Button>
           <p className="text-xs text-text-secondary mt-3">
-            Ready to sell? List your first game now!
+            {t('complete.cta.subtitle')}
           </p>
         </div>
       </div>

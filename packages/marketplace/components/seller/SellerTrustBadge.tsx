@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- seller avatars are external URLs */
 'use client';
 
-import { Star, Shield, Sparks as Sparkles, User } from 'griddy-icons';
+import { Star, Shield, Sparks as Sparkles, User } from '@/lib/icons';
 import {
   SellerBadgeTier,
   SellerTrustInfo,
@@ -107,7 +107,7 @@ export function SellerTrustBadge({
       {/* Rating */}
       {totalReviews > 0 ? (
         <div className="flex items-center gap-0.5 text-text-secondary">
-          <Star className={cn(styles.star, 'text-amber-400')} filled />
+          <Star className={cn(styles.star, 'text-amber-400')} weight="fill" />
           <span className="font-medium">{averageRating.toFixed(1)}</span>
         </div>
       ) : null}
@@ -153,7 +153,7 @@ export function SellerTrustCompact({
     <div className={cn('flex items-center gap-1 text-xs text-text-muted', className)}>
       {totalReviews > 0 && (
         <>
-          <Star className="w-3 h-3 text-amber-400" filled />
+          <Star className="w-3 h-3 text-amber-400" weight="fill" />
           <span className="font-medium text-text-secondary">{averageRating.toFixed(1)}</span>
         </>
       )}

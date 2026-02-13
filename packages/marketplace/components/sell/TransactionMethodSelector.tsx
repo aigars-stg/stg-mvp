@@ -1,6 +1,6 @@
 'use client';
 
-import { Chat as MessageSquare, CreditCard, CheckCircleAlt01 as CheckCircle2, ArrowRight, Phone } from 'griddy-icons';
+import { Chat as MessageSquare, CreditCard, CheckCircleAlt01 as CheckCircle2, ArrowRight, Phone } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { PhoneInput } from '@/components/common/PhoneInput';

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Badge } from '@second-turn/design-system';
 import type { VersionSelection } from '@/lib/bgg-types';
-import { RefreshCw, InfoCircle as Info, ChevronDown } from 'griddy-icons';
+import { RefreshCw, InfoCircle as Info, ChevronDown } from '@/lib/icons';
 
 interface GameNameSelectorProps {
   primaryName: string;

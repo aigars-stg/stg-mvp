@@ -10,7 +10,7 @@ import {
   ArrowLeft,
   FileText,
   ShieldCheck,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {
   validateTaxId,

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { AlertCircle, Email as Mail, Close } from 'griddy-icons';
+import { AlertCircle, Email as Mail, Close } from '@/lib/icons';
 import { Button } from '@second-turn/design-system';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslations } from 'next-intl';

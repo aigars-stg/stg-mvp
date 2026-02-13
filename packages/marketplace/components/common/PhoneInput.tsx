@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronDown, Check, AlertCircle, Globe } from 'griddy-icons';
+import { ChevronDown, Check, AlertCircle, Globe } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import { COUNTRIES, type CountryCode } from '@/lib/country-utils';
 import {

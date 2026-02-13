@@ -338,6 +338,6 @@ Before every shipment:
 
 ## Related Help
 
-- [Condition Grading Guide](/help/grading-guide) — How to grade your games accurately
+- [Condition Grading Guide](/help?section=grading) — How to grade your games accurately
 - [Selling Guide](/help/selling) — Complete guide to selling on Second Turn Games
 - [DAC7 Tax Reporting](/help/dac7) — Tax reporting thresholds for sellers

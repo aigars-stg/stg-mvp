@@ -9,7 +9,7 @@ import {
   RefreshCw as Loader2,
   ShoppingBag,
   Package,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { formatDateTime } from '@/lib/date-utils';
 import { formatCentsToCurrency } from '@/lib/services/pricing';
 

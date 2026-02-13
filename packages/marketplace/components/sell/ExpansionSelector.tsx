@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, Modal, Input, Button } from '@second-turn/design-system';
-import { Package, RefreshCw, Search, Close, LinkExternal as ExternalLink, TextFont as Type, ChevronDown, ChevronUp } from 'griddy-icons';
+import { Package, RefreshCw, Search, Close, LinkExternal as ExternalLink, TextFont as Type, ChevronDown, ChevronUp } from '@/lib/icons';
 import type { VersionSelection } from '@/lib/bgg-types';
 import type { BGGExpansionInfo } from '@/lib/bgg-api';
 import { LanguageVersionSelector } from './LanguageVersionSelector';

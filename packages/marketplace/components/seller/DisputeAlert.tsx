@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, Time as Clock } from 'griddy-icons';
+import { AlertTriangle, Time as Clock } from '@/lib/icons';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 

@@ -2,7 +2,7 @@
 
 import { useRouter } from '@/i18n/navigation';
 import { Modal, Button } from '@second-turn/design-system';
-import { CheckCircle, AlertCircle, InfoCircle as Info, CloseCircle as XCircle } from 'griddy-icons';
+import { CheckCircle, AlertCircle, InfoCircle as Info, CloseCircle as XCircle } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';

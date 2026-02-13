@@ -1,7 +1,7 @@
 'use client';
 
 import { Link } from '@/i18n/navigation';
-import { ShoppingBag, Tag, Notification as Bell } from 'griddy-icons';
+import { ShoppingBag, Tag, Notification as Bell } from '@/lib/icons';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 

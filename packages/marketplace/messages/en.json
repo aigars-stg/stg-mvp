@@ -759,7 +759,7 @@
       "errorTitle": "Order Processing Issue",
       "errorDescription": "We couldn't load your order details. Please check your email for confirmation.",
       "processingTimeout": "Order processing is taking longer than expected. Please check your orders page or contact support.",
-      "title": "Payment Successful!",
+      "title": "Payment Successful",
       "subtitle": "Your order has been placed and payment confirmed",
       "orderNumber": "Order",
       "orderSummary": {
@@ -1082,7 +1082,7 @@
       "contactSeller": "Contact Seller"
     },
     "cart": {
-      "addedToCart": "Added to cart!",
+      "addedToCart": "Added to cart",
       "viewCart": "View Cart"
     },
     "actions": {
@@ -1123,8 +1123,7 @@
       "marketplace": "Marketplace",
       "help": "Help",
       "legal": "Legal",
-      "resources": "Resources",
-      "contact": "Contact"
+      "resources": "Resources"
     },
     "links": {
       "browseGames": "Browse games",
@@ -1142,13 +1141,11 @@
       "fees": "Fees",
       "deliveryAndReturns": "Delivery & Returns"
     },
-    "company": {
-      "name": "Second Turn Games SIA",
-      "regNumber": "Reg. No. 50203665371",
-      "address": "Evalda Valtera 5-35, Riga, LV-1021, Latvia",
-      "phone": "+371 2677 9625"
-    },
-    "copyright": "Copyright © 2025-{year} Second Turn Games SIA"
+    "copyright": "Copyright © 2025-{year} Second Turn Games SIA",
+    "compliance": {
+      "paymentMethods": "Accepted payment methods",
+      "contactUs": "Contact us"
+    }
   },
   "Legal": {
     "lastUpdated": "Last updated: {date}",
@@ -1168,7 +1165,7 @@
     "ended": "Auction Ended",
     "endingSoon": "Ending soon",
     "wasExtended": "This auction was extended due to last-minute bidding",
-    "youWon": "You Won!",
+    "youWon": "You Won",
     "completePayment": "Complete your payment within 48 hours to claim this game",
     "payNow": "Pay Now",
     "ownAuction": "You cannot bid on your own auction",
@@ -1842,6 +1839,72 @@
     "support": {
       "needHelp": "Need help?",
       "contactUs": "Contact us"
+    },
+    "complete": {
+      "title": "You're all set",
+      "subtitle": "Welcome to Second Turn Games. You can now start listing and selling your board games.",
+      "whatYouCanDo": {
+        "title": "What You Can Do Now",
+        "createListing": {
+          "title": "Create Your First Listing",
+          "description": "List a board game from your collection. Set your price, upload photos, and describe the condition. Takes less than 3 minutes.",
+          "button": "Create Listing"
+        },
+        "browseGames": {
+          "title": "Browse & Buy Games",
+          "description": "While you wait for sales, explore games from other sellers. Build your collection.",
+          "button": "Browse Marketplace"
+        },
+        "manageSales": {
+          "title": "Manage Your Sales",
+          "description": "View your active listings, pending orders, and payout history in your seller dashboard.",
+          "button": "Go to Dashboard"
+        }
+      },
+      "howItWorks": {
+        "title": "How Selling Works",
+        "step1": {
+          "title": "Someone Buys Your Game",
+          "description": "You'll receive an email notification with shipping details and a pre-paid Unisend label."
+        },
+        "step2": {
+          "title": "Package & Ship",
+          "description": "Pack the game securely and drop it off at any Unisend parcel terminal within 2 business days."
+        },
+        "step3": {
+          "title": "Buyer Receives Game",
+          "description": "The buyer picks up the game from their selected parcel terminal. Tracking updates automatically."
+        },
+        "step4": {
+          "title": "Get Paid",
+          "description": "Your earnings are credited to your platform wallet after each completed sale. A 10% platform commission applies."
+        }
+      },
+      "tips": {
+        "title": "Tips for Successful Selling",
+        "photos": "<strong>Take clear photos:</strong> Show the actual game, including any wear or damage",
+        "condition": "<strong>Be honest about condition:</strong> Accurate descriptions prevent disputes",
+        "pricing": "<strong>Price competitively:</strong> Check similar listings to set fair prices",
+        "shipping": "<strong>Ship promptly:</strong> Fast shipping leads to better reviews",
+        "packaging": "<strong>Package securely:</strong> Protect games from damage during transit",
+        "messages": "<strong>Respond to messages:</strong> Quick communication builds trust"
+      },
+      "earnings": {
+        "title": "About Your Earnings",
+        "subtitle": "Your earnings are credited to your platform wallet after each completed sale.",
+        "commission": "<strong>90% of listing price</strong> — A 10% platform commission is deducted",
+        "withdraw": "<strong>Withdraw anytime</strong> — Request a bank transfer whenever you like",
+        "track": "<strong>Track in dashboard</strong> — View your wallet balance and transaction history",
+        "viewWallet": "View wallet & withdrawals →"
+      },
+      "completeSupport": {
+        "questions": "Questions or need help?",
+        "contactSeller": "Contact Seller Support"
+      },
+      "cta": {
+        "button": "Create Your First Listing",
+        "subtitle": "Ready to sell? List your first game now."
+      }
     }
   },
   "StatusChangeModal": {
@@ -2486,176 +2549,6 @@
     }
   },
   "Help": {
-    "GradingGuide": {
-      "intro": {
-        "title": "Condition grading guide",
-        "tagline": "Grade honestly. Sell faster. Keep everyone happy.",
-        "description": "When you grade your game accurately, buyers know exactly what they're getting. No surprises, no disputes, no disappointment. A well-graded listing sells faster and keeps everyone happy."
-      },
-      "toc": {
-        "title": "On this page",
-        "grades": "Condition grades",
-        "quickReference": "Quick reference table",
-        "specialConsiderations": "Special considerations",
-        "listingTips": "Listing description tips",
-        "photoTips": "Photo tips",
-        "commonMistakes": "Common mistakes"
-      },
-      "sections": {
-        "conditionGrades": "Condition grades",
-        "quickReference": "Quick reference",
-        "specialConsiderations": "Special considerations",
-        "listingTips": "Listing description examples",
-        "photoTips": "Photos make the difference",
-        "commonMistakes": "Common grading mistakes"
-      },
-      "gradeCard": {
-        "boxCondition": "Box Condition",
-        "componentCondition": "Component Condition",
-        "typicalScenarios": "Typical Scenarios",
-        "proTip": "Pro tip:"
-      },
-      "quickReferenceTable": {
-        "grade": "Grade",
-        "description": "Description",
-        "value": "Value",
-        "disclaimer": "Value percentages are rough guidelines. Rare and out-of-print games often sell for more regardless of condition."
-      },
-      "grades": {
-        "likeNew": {
-          "oneLineSummary": "Opened but unplayed, no wear"
-        },
-        "veryGood": {
-          "oneLineSummary": "Played with care, minimal wear"
-        },
-        "good": {
-          "oneLineSummary": "Regular play wear, fully functional"
-        },
-        "acceptable": {
-          "oneLineSummary": "Heavy wear, possible minor issues"
-        }
-      },
-      "specialConsiderations": {
-        "punchedTokens": {
-          "title": "Punched vs unpunched tokens",
-          "description": "Whether cardboard tokens have been punched from their sheets matters to some buyers.",
-          "details": [
-            "Unpunched: tokens still in their original sheets, never removed",
-            "Punched: tokens removed from sheets (standard for any played game)",
-            "Cleanly punched: removed carefully with no lifting, tearing, or damage",
-            "Roughly punched: some lifting, tearing, or white edges visible"
-          ]
-        },
-        "sleevedCards": {
-          "title": "Sleeved cards",
-          "description": "Cards protected in sleeves are a plus. Note this in your listing.",
-          "details": [
-            "Cards sleeved since purchase (never shuffled unsleeved)",
-            "Cards sleeved after some play (mention any pre-sleeve wear)",
-            "Note if sleeves are included or if cards will be removed from sleeves"
-          ]
-        },
-        "paintedMinis": {
-          "title": "Painted miniatures",
-          "description": "Some buyers want painted minis, others specifically don't. Be clear about the state.",
-          "details": [
-            "Unpainted (original)",
-            "Primed only",
-            "Partially painted",
-            "Fully painted (describe quality: tabletop standard, display quality, etc.)",
-            "Modified or converted"
-          ]
-        },
-        "promosExtras": {
-          "title": "Promos & extras",
-          "description": "Promotional content, Kickstarter extras, or expansion material adds value - make sure buyers know.",
-          "details": [
-            "List specific promos by name",
-            "Note if from Kickstarter or retail edition",
-            "Mention any bonus components not in retail version",
-            "Separate pricing for valuable promos is acceptable"
-          ]
-        },
-        "editionLanguage": {
-          "title": "Edition & language",
-          "description": "Edition matters a lot. Different editions can have different components, art, or rules.",
-          "details": [
-            "Which edition (1st, 2nd, Revised, Collector's, etc.)",
-            "Publisher (different publishers = different components)",
-            "Language of the game",
-            "Whether language-independent (no text on components)"
-          ]
-        }
-      },
-      "listingTips": {
-        "likeNew": "Opened to read the rules, never played. All components still in original packaging. Cards never shuffled. Stored flat on a shelf in a smoke-free home.",
-        "veryGood": "Played maybe five times. Cards sleeved from first play, no wear. All components present. Original insert intact. Box shows minor shelf wear.",
-        "good": "Box shows shelf wear and one soft corner. Inside is in great shape - cards show light edge wear from shuffling. All components present.",
-        "acceptable": "Box has significant wear and a taped corner. Components are all there and play fine, but cards show shuffling wear. Rulebook has some creases. Good candidate for sleeving."
-      },
-      "photoTips": {
-        "intro": "Good photos build trust. Here's what to show:",
-        "tip": "Natural daylight works best. Photograph on a plain background and show actual condition, not the best angle.",
-        "tipLabel": "Tip:",
-        "subjects": {
-          "boxFront": {
-            "title": "Box front",
-            "description": "Straight on, good lighting - shows the game and any wear"
-          },
-          "boxBack": {
-            "title": "Box back",
-            "description": "Shows edition info and component list"
-          },
-          "boxCorners": {
-            "title": "Box corners",
-            "description": "If there's wear, show it honestly"
-          },
-          "componentsSpread": {
-            "title": "Components spread",
-            "description": "Show what's included - full component photo"
-          },
-          "anyDamage": {
-            "title": "Any damage",
-            "description": "Close-ups of specific issues buyers should know about"
-          },
-          "cards": {
-            "title": "Cards",
-            "description": "Show edge wear if present - that's where wear shows first"
-          }
-        }
-      },
-      "commonMistakes": [
-        {
-          "mistake": "\"It's old, so it must be worn\"",
-          "correction": "Age doesn't equal condition. A 20-year-old game stored well can be Like New. A 2-year-old game from 50 game nights might be Good."
-        },
-        {
-          "mistake": "\"The box doesn't matter\"",
-          "correction": "It matters to collectors. Many buyers care about box condition for display. Grade it honestly."
-        },
-        {
-          "mistake": "\"Complete means nothing's missing\"",
-          "correction": "Complete also means original. If you've replaced dice or printed new player aids, note it."
-        },
-        {
-          "mistake": "Inventing grades like \"Near Mint\" or \"Excellent\"",
-          "correction": "Stick to our four grades: Like New, Very Good, Good, Acceptable. Custom terms make comparison harder."
-        },
-        {
-          "mistake": "Grading based on how much you paid",
-          "correction": "A €100 game in rough shape is still Acceptable. Grade the actual condition, not the value."
-        }
-      ],
-      "philosophy": {
-        "title": "When you're unsure",
-        "content": "If you're debating between two grades, go with the lower one. A buyer who receives a game in better condition than expected is delighted. A buyer who receives a game in worse condition than expected opens a dispute. Under-promise, over-deliver."
-      },
-      "cta": {
-        "ready": "Ready to list your game with confidence?",
-        "sellButton": "Sell a game",
-        "backToHome": "← Back to Home"
-      }
-    },
     "ListingTypes": {
       "meta": {
         "title": "Instant Buy vs Contact Seller | Second Turn Games",
@@ -2814,6 +2707,46 @@
         "ready": "Ready to start selling?",
         "sellButton": "List your first game",
         "backToHome": "Back to home"
+      }
+    },
+    "page": {
+      "title": "Help Centre",
+      "description": "Guides and resources for buying and selling pre-loved board games on Second Turn Games.",
+      "breadcrumbHome": "Home",
+      "breadcrumbHelp": "Help Centre"
+    },
+    "faq": {
+      "q1": {
+        "question": "What is Second Turn Games?",
+        "answer": "Second Turn Games is a peer-to-peer marketplace for buying and selling pre-loved board games in the Baltic region (Latvia, Lithuania, Estonia). Every listing is verified against BoardGameGeek's database of 170,000+ games."
+      },
+      "q2": {
+        "question": "Where can I sell board games in Latvia?",
+        "answer": "Second Turn Games is the dedicated marketplace for selling board games in Latvia, Lithuania, and Estonia. List your games with verified BoardGameGeek data, set your price, and ship via parcel lockers. Sellers receive 90% of the sale price."
+      },
+      "q3": {
+        "question": "Is Second Turn Games safe?",
+        "answer": "Yes. Second Turn Games uses EveryPay (via Swedbank) for secure payment processing, offers buyer protection with a dispute resolution window, and verifies all listings against BoardGameGeek's database. The platform is operated by Second Turn Games SIA, registered in Latvia."
+      },
+      "q4": {
+        "question": "What are the fees on Second Turn Games?",
+        "answer": "Buyers pay the item price plus a flat €2.00 shipping fee (no service fee). Sellers pay a 10% commission on the item price, deducted automatically. Listing is free."
+      },
+      "q5": {
+        "question": "How does selling on Second Turn Games work?",
+        "answer": "Search for your game in the BoardGameGeek database, grade its condition, set a price, add photos, and publish. When someone buys, you confirm the order within 24 hours, pack the game, and drop it off at a parcel terminal. Your earnings are credited to your wallet after delivery."
+      },
+      "q6": {
+        "question": "How does shipping work on Second Turn Games?",
+        "answer": "Second Turn Games uses Unisend parcel terminals across the Baltic region. Shipping costs a flat €2.00 per order. After confirming an order, sellers receive a shipping code, pack the game, and drop it off at any Unisend terminal. Tracking updates automatically."
+      },
+      "q7": {
+        "question": "How do I get paid as a seller?",
+        "answer": "After a buyer confirms delivery (or after the automatic 2-day dispute window), your earnings (90% of item price) are credited to your platform wallet. You can request a withdrawal to your IBAN bank account at any time."
+      },
+      "q8": {
+        "question": "What board game conditions are accepted?",
+        "answer": "Second Turn Games uses four condition grades: Like New (played 1-2 times, all components present), Very Good (light wear, fully playable), Good (moderate wear, complete and playable), and Acceptable (noticeable wear but complete). All grades require complete, playable games."
       }
     }
   },

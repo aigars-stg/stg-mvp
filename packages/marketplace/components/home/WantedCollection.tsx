@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
-import { ChevronLeft, ChevronRight, ArrowRight, Plus, Search } from 'griddy-icons';
+import { ChevronLeft, ChevronRight, ArrowRight, Plus, Search } from '@/lib/icons';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 

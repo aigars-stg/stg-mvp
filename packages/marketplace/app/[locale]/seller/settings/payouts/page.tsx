@@ -8,7 +8,7 @@ import {
   CurrencyEuro as Euro,
   ArrowLeft,
   ArrowUp,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { WalletBalance } from '@/components/wallet/WalletBalance';
 import { WalletTransactions } from '@/components/wallet/WalletTransactions';

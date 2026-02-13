@@ -17,7 +17,7 @@ import {
   FileText,
   LinkExternal as ExternalLink,
   Chat as MessageSquare,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 
 // Badge variant type for proper typing

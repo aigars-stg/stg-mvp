@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@second-turn/design-system';
-import { ArrowUp, RefreshCw as Loader2, Shield, AlertCircle } from 'griddy-icons';
+import { ArrowUp, RefreshCw as Loader2, Shield, AlertCircle } from '@/lib/icons';
 import { formatPrice } from '@/lib/services/pricing';
 
 // IBAN format hints by country

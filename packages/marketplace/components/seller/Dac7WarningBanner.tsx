@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@second-turn/design-system';
-import { AlertTriangle, FileText, ArrowRight } from 'griddy-icons';
+import { AlertTriangle, FileText, ArrowRight } from '@/lib/icons';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import type { Dac7ComplianceStatus } from '@/lib/types/seller';

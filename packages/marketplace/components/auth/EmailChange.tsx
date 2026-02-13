@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 // Button from design-system available if needed
-import { At as AtSign, AlertCircle, CheckCircleAlt01 as CheckCircle2, Edit as Pencil, Check, Close } from 'griddy-icons';
+import { At as AtSign, AlertCircle, CheckCircleAlt01 as CheckCircle2, Edit as Pencil, Check, Close } from '@/lib/icons';
 import { supabase } from '@/lib/supabase/client';
 import { validateEmail } from '@/lib/auth/utils';
 import { mapAuthError } from '@/lib/auth/errors';

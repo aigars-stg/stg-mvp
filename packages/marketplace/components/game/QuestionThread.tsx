@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ChatBubble as MessageCircle, User } from 'griddy-icons';
+import { ChatBubble as MessageCircle, User } from '@/lib/icons';
 import { formatDistanceToNow } from 'date-fns';
 import type { ListingQuestion } from '@/lib/types/question';
 import { QuestionInput } from './QuestionInput';

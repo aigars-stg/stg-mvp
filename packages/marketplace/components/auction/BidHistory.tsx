@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Badge } from '@second-turn/design-system';
 import { useTranslations } from 'next-intl';
 import { formatDistanceToNow } from 'date-fns';
-import { Time as Clock, Flash as Zap, ChevronDown, Trophy } from 'griddy-icons';
+import { Time as Clock, Flash as Zap, ChevronDown, Trophy } from '@/lib/icons';
 import type { BidWithBidder } from '@/lib/types/listing';
 import { formatPrice } from '@/lib/services/pricing';
 

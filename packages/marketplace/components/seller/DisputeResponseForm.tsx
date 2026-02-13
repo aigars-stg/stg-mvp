@@ -8,7 +8,7 @@ import {
   CheckCircleAlt01 as CheckCircle2,
   AlertTriangle,
   Time as Clock,
-} from 'griddy-icons';
+} from '@/lib/icons';
 
 interface DisputeResponseFormProps {
   orderId: string;

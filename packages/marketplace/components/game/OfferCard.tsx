@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
-import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare } from 'griddy-icons';
+import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare } from '@/lib/icons';
 import { OfferCardPricing } from './OfferCardPricing';
 import { OfferCardVersionInfo } from './OfferCardVersionInfo';
 
@@ -676,7 +676,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                 aria-label={isSaved ? t('actions.unsaveAria') : t('actions.saveAria')}
                 title={isSaved ? t('actions.unsaveTooltip') : t('actions.saveTooltip')}
               >
-                <Heart className={`w-5 h-5 ${isSaved ? 'text-aurora-red' : 'text-text-muted hover:text-aurora-red'}`} filled={isSaved} />
+                <Heart className={`w-5 h-5 ${isSaved ? 'text-aurora-red' : 'text-text-muted hover:text-aurora-red'}`} weight={isSaved ? 'fill' : 'regular'} />
               </button>
             )}
 
@@ -819,7 +819,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                   className="p-2 rounded-md hover:bg-bg-secondary transition-colors disabled:opacity-50"
                   aria-label={isSaved ? t('actions.unsaveAria') : t('actions.saveAria')}
                 >
-                  <Heart className={`w-5 h-5 ${isSaved ? 'text-aurora-red' : 'text-text-muted'}`} filled={isSaved} />
+                  <Heart className={`w-5 h-5 ${isSaved ? 'text-aurora-red' : 'text-text-muted'}`} weight={isSaved ? 'fill' : 'regular'} />
                 </button>
 
                 {/* Message Button */}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ConversationListItem } from './ConversationListItem';
-import { RefreshCw as Loader2, ChatBubble as MessageCircle, AlertCircle } from 'griddy-icons';
+import { RefreshCw as Loader2, ChatBubble as MessageCircle, AlertCircle } from '@/lib/icons';
 import type { ConversationListItem as ConversationListItemType } from '@/lib/types/message';
 
 interface ConversationListProps {

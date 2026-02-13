@@ -14,7 +14,8 @@
     "build:site": "pnpm --filter design-system-site build",
     "build:marketplace": "pnpm --filter @second-turn/marketplace build",
     "lint": "pnpm --recursive lint",
-    "type-check": "pnpm --recursive type-check"
+    "type-check": "pnpm --recursive type-check",
+    "test": "pnpm --filter @second-turn/marketplace test run"
   },
   "keywords": [
     "board-games",

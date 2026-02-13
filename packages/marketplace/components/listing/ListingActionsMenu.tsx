@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { MoreVertical, Edit, Package, TrashAlt as Trash2, LinkExternal as ExternalLink, Undo as RotateCcw } from 'griddy-icons';
+import { MoreVertical, Edit, Package, TrashAlt as Trash2, LinkExternal as ExternalLink, Undo as RotateCcw } from '@/lib/icons';
 
 export interface ListingActionsMenuProps {
   listingId: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { LinkExternal as ExternalLink } from 'griddy-icons';
+import { LinkExternal as ExternalLink } from '@/lib/icons';
 import type { TrackingData } from './types';
 
 interface TrackingNumberCardProps {

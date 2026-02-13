@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
-import { RefreshCw as Loader2 } from 'griddy-icons';
+import { RefreshCw as Loader2 } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslations } from 'next-intl';

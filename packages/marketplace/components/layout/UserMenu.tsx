@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import {  LogOut, ShoppingBag, Store, Settings, ChevronRight, Layout as LayoutDashboard, Shield, Globe  } from 'griddy-icons';
+import {  LogOut, ShoppingBag, Store, Settings, ChevronRight, Layout as LayoutDashboard, Shield, Globe  } from '@/lib/icons';
 import { getInitials } from '@/lib/auth/utils';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { useTranslations } from 'next-intl';

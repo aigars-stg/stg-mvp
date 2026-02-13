@@ -9,7 +9,7 @@ import {
   AlertCircle,
   CheckCircleAlt01 as CheckCircle,
   Shield,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { formatDateTime } from '@/lib/date-utils';
 import { formatCentsToCurrency } from '@/lib/services/pricing';

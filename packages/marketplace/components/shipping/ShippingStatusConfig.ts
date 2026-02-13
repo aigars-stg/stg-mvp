@@ -5,7 +5,7 @@ import {
   CloseCircle as XCircle,
   AlertCircle,
   Truck,
-} from 'griddy-icons';
+} from '@/lib/icons';
 import type { FC, SVGProps } from 'react';
 
 // Order status type - all possible statuses

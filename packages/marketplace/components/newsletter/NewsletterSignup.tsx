@@ -2,7 +2,7 @@
 
 import { useState, useEffect, FormEvent } from 'react';
 import { Button, Input } from '@second-turn/design-system';
-import { Check } from 'griddy-icons';
+import { Check } from '@/lib/icons';
 import { useTranslations, useLocale } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {

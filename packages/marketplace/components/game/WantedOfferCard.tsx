@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Button } from '@second-turn/design-system';
-import { Package, Globe, BookOpen, Building as Building2, LinkExternal as ExternalLink, InfoCircle as Info } from 'griddy-icons';
+import { Package, Globe, BookOpen, Building as Building2, LinkExternal as ExternalLink, InfoCircle as Info } from '@/lib/icons';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { UserInfoCard } from '@/components/user';
 import { ImageLightbox } from '@/components/listing/ImageLightbox';

@@ -2,7 +2,7 @@
 
 import { useRouter } from '@/i18n/navigation';
 import { Button, Card } from '@second-turn/design-system';
-import { Package } from 'griddy-icons';
+import { Package } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 /**

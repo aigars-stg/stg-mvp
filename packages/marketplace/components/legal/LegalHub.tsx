@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LegalNav, type LegalSectionId } from './LegalNav';
 import { LegalSection } from './LegalSection';
@@ -19,6 +19,17 @@ function LegalHubInner({ documents }: LegalHubProps) {
   const searchParams = useSearchParams();
   const section = (searchParams.get('section') || 'overview') as LegalSectionId;
   const doc = documents[section];
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const el = document.getElementById(hash);
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+  }, [section]);
 
   if (!doc) {
     return (

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Modal } from '@second-turn/design-system';
-import { CheckCircle } from 'griddy-icons';
+import { CheckCircle } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import { FeedbackForm } from './FeedbackForm';
 

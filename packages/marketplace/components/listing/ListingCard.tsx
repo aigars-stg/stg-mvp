@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Card, Badge } from '@second-turn/design-system';
-import { Package, LocationPin as MapPin, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Chat as MessageSquare, Tag as Gavel } from 'griddy-icons';
+import { Package, LocationPin as MapPin, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Chat as MessageSquare, Gavel } from '@/lib/icons';
 import { ImageCarousel } from '@/components/common/ImageCarousel';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { isContactSellerListing, isAuctionListing, getAuctionTimeRemaining, formatCompactTimeRemaining } from '@/lib/types/listing';
@@ -126,6 +126,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
           showDots={true}
           showCounter={true}
           enableSwipe={true}
+          imageClassName="object-contain"
           currentIndex={currentImageIndex}
           onIndexChange={setCurrentImageIndex}
           placeholderIcon={<Package className="w-16 h-16 text-text-muted" />}

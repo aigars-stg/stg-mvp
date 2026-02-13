@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@second-turn/design-system';
-import { CreditCard, RefreshCw as Loader2, Shield, AlertCircle } from 'griddy-icons';
+import { CreditCard, RefreshCw as Loader2, Shield, AlertCircle } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 interface BankAccountFormProps {

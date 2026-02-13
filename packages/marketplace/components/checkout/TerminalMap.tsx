@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
-import { LocationPin as MapPin } from 'griddy-icons';
+import { LocationPin as MapPin } from '@/lib/icons';
 import {
   Map,
   MapMarker,

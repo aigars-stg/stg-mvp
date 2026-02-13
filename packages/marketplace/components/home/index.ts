@@ -1,4 +1,6 @@
 export { HeroSection } from './HeroSection';
+export { CompactHero } from './CompactHero';
+export { HomepageBrowse } from './HomepageBrowse';
 export { StatsCounter } from './StatsCounter';
 export { Features } from './Features';
 export { FeaturedGames, FeaturedGamesLoading } from './FeaturedGames';

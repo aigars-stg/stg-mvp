@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { HelpCircle, TrendUp, Star, Package, Calculator } from 'griddy-icons';
+import { HelpCircle, TrendUp, Star, Package, Calculator } from '@/lib/icons';
 import { HELP_SECTIONS, type HelpSectionId } from './help-sections';
 
 export type { HelpSectionId } from './help-sections';

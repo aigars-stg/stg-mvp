@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/client';
 import { handleApiError } from '@/lib/api/error-handler';
+import { checkRateLimit, getClientIP } from '@/lib/ratelimit';
 
 /**
  * Check if an email already exists in the system.
@@ -28,6 +29,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Invalid email format' },
         { status: 400 }
+      );
+    }
+
+    // Rate limit by IP to prevent user enumeration
+    const ip = getClientIP(request.headers) || 'unknown';
+    const rateLimit = await checkRateLimit('signIn', ip);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: rateLimit.error || 'Too many requests' },
+        { status: 429 }
       );
     }
 

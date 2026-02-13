@@ -759,7 +759,7 @@
       "errorTitle": "Pasūtījuma apstrādes problēma",
       "errorDescription": "Mēs nevarējām ielādēt tava pasūtījuma detaļas. Lūdzu, pārbaudi savu e-pastu apstiprinājumam.",
       "processingTimeout": "Pasūtījuma apstrāde aizņem ilgāku laiku nekā paredzēts. Lūdzu, pārbaudi savu pasūtījumu lapu vai sazinies ar atbalsta dienestu.",
-      "title": "Maksājums veiksmīgs!",
+      "title": "Maksājums veiksmīgs",
       "subtitle": "Tavs pasūtījums ir veikts un maksājums apstiprināts",
       "orderNumber": "Pasūtījums",
       "orderSummary": {
@@ -1082,7 +1082,7 @@
       "contactSeller": "Sazināties ar pārdevēju"
     },
     "cart": {
-      "addedToCart": "Pievienots grozam!",
+      "addedToCart": "Pievienots grozam",
       "viewCart": "Skatīt grozu"
     },
     "actions": {
@@ -1123,8 +1123,7 @@
       "marketplace": "Tirgus",
       "help": "Palīdzība",
       "legal": "Juridiskā informācija",
-      "resources": "Resursi",
-      "contact": "Kontakti"
+      "resources": "Resursi"
     },
     "links": {
       "browseGames": "Pārlūkot spēles",
@@ -1142,13 +1141,11 @@
       "fees": "Maksas",
       "deliveryAndReturns": "Piegāde un atgriešana"
     },
-    "company": {
-      "name": "Second Turn Games SIA",
-      "regNumber": "Reģ. Nr. 50203665371",
-      "address": "Evalda Valtera 5-35, Rīga, LV-1021, Latvija",
-      "phone": "+371 2677 9625"
-    },
-    "copyright": "Autortiesības © 2025-{year} Second Turn Games SIA"
+    "copyright": "Autortiesības © 2025-{year} Second Turn Games SIA",
+    "compliance": {
+      "paymentMethods": "Pieņemtie maksājumu veidi",
+      "contactUs": "Sazināties ar mums"
+    }
   },
   "Legal": {
     "lastUpdated": "Pēdējoreiz atjaunināts: {date}",
@@ -1168,7 +1165,7 @@
     "ended": "Izsole beigusies",
     "endingSoon": "Drīz beigsies",
     "wasExtended": "Šī izsole tika pagarināta pēdējā brīža likmes dēļ",
-    "youWon": "Tu uzvarēji!",
+    "youWon": "Tu uzvarēji",
     "completePayment": "Pabeidz maksājumu 48 stundu laikā, lai saņemtu šo spēli",
     "payNow": "Maksāt tagad",
     "ownAuction": "Tu nevari likt likmi savā izsolē",
@@ -1842,6 +1839,72 @@
     "support": {
       "needHelp": "Nepieciešama palīdzība?",
       "contactUs": "Sazinies ar mums"
+    },
+    "complete": {
+      "title": "Viss gatavs",
+      "subtitle": "Laipni lūdzam Second Turn Games. Tagad vari sākt izvietot un pārdot savas galda spēles.",
+      "whatYouCanDo": {
+        "title": "Ko tagad vari darīt",
+        "createListing": {
+          "title": "Izveido savu pirmo sludinājumu",
+          "description": "Ievieto galda spēli no savas kolekcijas. Nosaki cenu, augšupielādē fotogrāfijas un apraksti stāvokli. Aizņem mazāk nekā 3 minūtes.",
+          "button": "Izveidot sludinājumu"
+        },
+        "browseGames": {
+          "title": "Pārlūko un pērc spēles",
+          "description": "Kamēr gaidi pārdošanu, izpēti spēles no citiem pārdevējiem. Papildini savu kolekciju.",
+          "button": "Pārlūkot tirgu"
+        },
+        "manageSales": {
+          "title": "Pārvaldi savas pārdošanas",
+          "description": "Skati savus aktīvos sludinājumus, gaidošos pasūtījumus un izmaksu vēsturi pārdevēja panelī.",
+          "button": "Uz paneli"
+        }
+      },
+      "howItWorks": {
+        "title": "Kā darbojas pārdošana",
+        "step1": {
+          "title": "Kāds nopērk tavu spēli",
+          "description": "Saņemsi e-pasta paziņojumu ar piegādes informāciju un iepriekš apmaksātu Unisend uzlīmi."
+        },
+        "step2": {
+          "title": "Iepako un nosūti",
+          "description": "Droši iepako spēli un nodod to jebkurā Unisend pakomātā 2 darba dienu laikā."
+        },
+        "step3": {
+          "title": "Pircējs saņem spēli",
+          "description": "Pircējs izņem spēli no izvēlētā pakomāta. Izsekošana atjauninās automātiski."
+        },
+        "step4": {
+          "title": "Saņem samaksu",
+          "description": "Tavi ieņēmumi tiek ieskaitīti platformas makā pēc katras pabeigtas pārdošanas. Tiek piemērota 10% platformas komisija."
+        }
+      },
+      "tips": {
+        "title": "Padomi veiksmīgai pārdošanai",
+        "photos": "<strong>Uzņem skaidras fotogrāfijas:</strong> Parādi pašu spēli, ieskaitot jebkādu nolietojumu vai bojājumus",
+        "condition": "<strong>Esi godīgs par stāvokli:</strong> Precīzi apraksti novērš strīdus",
+        "pricing": "<strong>Nosaki konkurētspējīgu cenu:</strong> Pārbaudi līdzīgus sludinājumus, lai noteiktu taisnīgu cenu",
+        "shipping": "<strong>Sūti ātri:</strong> Ātra piegāde nodrošina labākas atsauksmes",
+        "packaging": "<strong>Iepako droši:</strong> Pasargā spēles no bojājumiem pārvadāšanas laikā",
+        "messages": "<strong>Atbildi uz ziņām:</strong> Ātra komunikācija veido uzticību"
+      },
+      "earnings": {
+        "title": "Par taviem ieņēmumiem",
+        "subtitle": "Tavi ieņēmumi tiek ieskaitīti platformas makā pēc katras pabeigtas pārdošanas.",
+        "commission": "<strong>90% no sludinājuma cenas</strong> — Tiek ieturēta 10% platformas komisija",
+        "withdraw": "<strong>Izņem jebkurā laikā</strong> — Pieprasi bankas pārskaitījumu kad vēlies",
+        "track": "<strong>Seko līdzi panelī</strong> — Skati maka atlikumu un darījumu vēsturi",
+        "viewWallet": "Skatīt maku un izmaksas →"
+      },
+      "completeSupport": {
+        "questions": "Ir jautājumi vai nepieciešama palīdzība?",
+        "contactSeller": "Sazināties ar pārdevēju atbalstu"
+      },
+      "cta": {
+        "button": "Izveido savu pirmo sludinājumu",
+        "subtitle": "Gatavs pārdot? Ievieto savu pirmo spēli tagad."
+      }
     }
   },
   "StatusChangeModal": {
@@ -2491,176 +2554,6 @@
     }
   },
   "Help": {
-    "GradingGuide": {
-      "intro": {
-        "title": "Stāvokļa novērtēšanas ceļvedis",
-        "tagline": "Novērtē godīgi. Pārdod ātrāk. Turi visus apmierinātus.",
-        "description": "Ja precīzi novērtē spēles stāvokli, pircēji precīzi zina, ko saņems. Bez pārsteigumiem, bez strīdiem, bez vilšanās. Labi novērtēts sludinājums pārdodas ātrāk un turi visus apmierinātus."
-      },
-      "toc": {
-        "title": "Šajā lapā",
-        "grades": "Stāvokļa pakāpes",
-        "quickReference": "Ātrā uzziņas tabula",
-        "specialConsiderations": "Īpaši apsvērumi",
-        "listingTips": "Sludinājuma apraksta padomi",
-        "photoTips": "Foto padomi",
-        "commonMistakes": "Biežākās kļūdas"
-      },
-      "sections": {
-        "conditionGrades": "Stāvokļa pakāpes",
-        "quickReference": "Ātrā uzziņa",
-        "specialConsiderations": "Īpaši apsvērumi",
-        "listingTips": "Sludinājuma apraksta piemēri",
-        "photoTips": "Fotogrāfijas rada atšķirību",
-        "commonMistakes": "Biežākās novērtēšanas kļūdas"
-      },
-      "gradeCard": {
-        "boxCondition": "Kastes stāvoklis",
-        "componentCondition": "Komponentu stāvoklis",
-        "typicalScenarios": "Tipiski scenāriji",
-        "proTip": "Padoms:"
-      },
-      "quickReferenceTable": {
-        "grade": "Pakāpe",
-        "description": "Apraksts",
-        "value": "Vērtība",
-        "disclaimer": "Vērtības procenti ir aptuvenas vadlīnijas. Retas un vairs neražotas spēles bieži pārdodas par vairāk neatkarīgi no stāvokļa."
-      },
-      "grades": {
-        "likeNew": {
-          "oneLineSummary": "Atvērta, bet nespēlēta, bez nolietojuma"
-        },
-        "veryGood": {
-          "oneLineSummary": "Spēlēta rūpīgi, minimāls nolietojums"
-        },
-        "good": {
-          "oneLineSummary": "Regulārs spēlēšanas nolietojums, pilnībā funkcionāla"
-        },
-        "acceptable": {
-          "oneLineSummary": "Liels nolietojums, iespējamas nelielas problēmas"
-        }
-      },
-      "specialConsiderations": {
-        "punchedTokens": {
-          "title": "Izstansti vs neizstansti žetoni",
-          "description": "Vai kartona žetoni ir izstansti no to lapām, dažiem pircējiem ir svarīgi.",
-          "details": [
-            "Neizstansti: žetoni joprojām oriģinālajās lapās, nekad nav izņemti",
-            "Izstansti: žetoni izņemti no lapām (standarts jebkurai spēlētai spēlei)",
-            "Tīri izstansti: uzmanīgi izņemti bez plēšanās vai bojājumiem",
-            "Rupji izstansti: redzama plēšanās vai baltas malas"
-          ]
-        },
-        "sleevedCards": {
-          "title": "Kārtis aplīklēs",
-          "description": "Kārtis, kas aizsargātas aplīklēs, ir pluss. Norādi to sludinājumā.",
-          "details": [
-            "Kārtis aplīklēs kopš iegādes (nekad nav maisītas bez aplīklēm)",
-            "Kārtis ievietotas aplīklēs pēc dažām spēlēm (piemini nolietojumu pirms aplīklēm)",
-            "Norādi, vai aplīkles ir iekļautas vai kārtis tiks izņemtas no aplīklēm"
-          ]
-        },
-        "paintedMinis": {
-          "title": "Krāsotas miniatūras",
-          "description": "Daži pircēji vēlas krāsotas miniatūras, citi īpaši nevēlas. Esi skaidrs par stāvokli.",
-          "details": [
-            "Nekrāsotas (oriģinālas)",
-            "Tikai gruntētas",
-            "Daļēji krāsotas",
-            "Pilnībā krāsotas (apraksti kvalitāti: galda standarts, izstādes kvalitāte utt.)",
-            "Pārveidotas vai konvertētas"
-          ]
-        },
-        "promosExtras": {
-          "title": "Promo un papildinājumi",
-          "description": "Reklāmas saturs, Kickstarter papildinājumi vai paplašinājumu materiāli pievieno vērtību - pārliecinies, ka pircēji zina.",
-          "details": [
-            "Uzskaiti konkrētus promo pēc nosaukuma",
-            "Norādi, vai no Kickstarter vai mazumtirdzniecības izdevuma",
-            "Piemini jebkurus bonus komponentus, kas nav mazumtirdzniecības versijā",
-            "Atsevišķa cena vērtīgiem promo ir pieņemama"
-          ]
-        },
-        "editionLanguage": {
-          "title": "Izdevums un valoda",
-          "description": "Izdevums ir ļoti svarīgs. Dažādiem izdevumiem var būt dažādi komponenti, māksla vai noteikumi.",
-          "details": [
-            "Kurš izdevums (1., 2., Pārskatītais, Kolekcionāra utt.)",
-            "Izdevējs (dažādi izdevēji = dažādi komponenti)",
-            "Spēles valoda",
-            "Vai nav atkarīga no valodas (nav teksta uz komponentiem)"
-          ]
-        }
-      },
-      "listingTips": {
-        "likeNew": "Atvērta, lai izlasītu noteikumus, nekad nav spēlēta. Visi komponenti joprojām oriģinālajā iepakojumā. Kārtis nekad nav maisītas. Glabāta horizontāli plauktā nekūpētājmājā.",
-        "veryGood": "Spēlēta varbūt piecas reizes. Kārtis aplīklēs kopš pirmās spēles, bez nolietojuma. Visi komponenti ir. Oriģinālais ieliktnis neskarts. Kaste ar nelielu plaukta nolietojumu.",
-        "good": "Kaste ar plaukta nolietojumu un vienu mīkstu stūri. Iekšpuse ir lieliskā stāvoklī - kārtīm ir viegls malu nolietojums no maisīšanas. Visi komponenti ir.",
-        "acceptable": "Kastei ir ievērojams nolietojums un aplīmēts stūris. Komponenti visi ir un spēlē labi, bet kārtīm ir maisīšanas nolietojums. Noteikumu grāmatai ir dažas krokas. Labs kandidāts aplīklēm."
-      },
-      "photoTips": {
-        "intro": "Labas fotogrāfijas rada uzticību. Lūk, ko parādīt:",
-        "tip": "Dabiskā dienasgaisma darbojas vislabāk. Fotografē uz vienkārša fona un parādi faktisko stāvokli, nevis labāko leņķi.",
-        "tipLabel": "Padoms:",
-        "subjects": {
-          "boxFront": {
-            "title": "Kastes priekšpuse",
-            "description": "Tieši pretī, labs apgaismojums - parāda spēli un jebkuru nolietojumu"
-          },
-          "boxBack": {
-            "title": "Kastes aizmugure",
-            "description": "Parāda izdevuma info un komponentu sarakstu"
-          },
-          "boxCorners": {
-            "title": "Kastes stūri",
-            "description": "Ja ir nolietojums, parādi to godīgi"
-          },
-          "componentsSpread": {
-            "title": "Komponentu izkārtojums",
-            "description": "Parādi, kas ir iekļauts - pilna komponentu fotogrāfija"
-          },
-          "anyDamage": {
-            "title": "Jebkādi bojājumi",
-            "description": "Tuvplāni konkrētām problēmām, par kurām pircējiem jāzina"
-          },
-          "cards": {
-            "title": "Kārtis",
-            "description": "Parādi malu nolietojumu, ja ir - tur nolietojums parādās vispirms"
-          }
-        }
-      },
-      "commonMistakes": [
-        {
-          "mistake": "\"Tā ir veca, tāpēc tai jābūt nolietotai\"",
-          "correction": "Vecums nav vienāds ar stāvokli. 20 gadus veca spēle, kas labi glabāta, var būt Kā Jauna. 2 gadus veca spēle pēc 50 spēļu vakariem var būt Laba."
-        },
-        {
-          "mistake": "\"Kastei nav nozīmes\"",
-          "correction": "Kolekcionāriem tā ir svarīga. Daudzi pircēji rūpējas par kastes stāvokli izstādīšanai. Novērtē to godīgi."
-        },
-        {
-          "mistake": "\"Pilna nozīmē, ka nekas netrūkst\"",
-          "correction": "Pilna arī nozīmē oriģināla. Ja esi nomainījis kauliņus vai izdrukājis jaunus spēlētāju palīgus, norādi to."
-        },
-        {
-          "mistake": "Izdomāt pakāpes kā \"Gandrīz ideāla\" vai \"Lieliska\"",
-          "correction": "Turi pie mūsu četrām pakāpēm: Kā Jauna, Ļoti Laba, Laba, Pieņemama. Pielāgoti termini apgrūtina salīdzināšanu."
-        },
-        {
-          "mistake": "Novērtēšana pēc tā, cik samaksāji",
-          "correction": "€100 spēle sliktā stāvoklī joprojām ir Pieņemama. Novērtē faktisko stāvokli, nevis vērtību."
-        }
-      ],
-      "philosophy": {
-        "title": "Kad neesi pārliecināts",
-        "content": "Ja svārsties starp divām pakāpēm, izvēlies zemāko. Pircējs, kas saņem spēli labākā stāvoklī nekā gaidīts, ir sajūsmināts. Pircējs, kas saņem spēli sliktākā stāvoklī nekā gaidīts, atver strīdu. Soli mazāk, piegādā vairāk."
-      },
-      "cta": {
-        "ready": "Gatavs ar pārliecību publicēt savu spēli?",
-        "sellButton": "Pārdot spēli",
-        "backToHome": "← Atpakaļ uz Sākumu"
-      }
-    },
     "ListingTypes": {
       "meta": {
         "title": "Tūlītēja pirkšana vai Sazināties ar pārdevēju | Second Turn Games",
@@ -2819,6 +2712,46 @@
         "ready": "Gatavs sākt pārdot?",
         "sellButton": "Publicēt savu pirmo spēli",
         "backToHome": "Atpakaļ uz sākumu"
+      }
+    },
+    "page": {
+      "title": "Palīdzības centrs",
+      "description": "Ceļveži un resursi galda spēļu pirkšanai un pārdošanai platformā Second Turn Games.",
+      "breadcrumbHome": "Sākums",
+      "breadcrumbHelp": "Palīdzības centrs"
+    },
+    "faq": {
+      "q1": {
+        "question": "Kas ir Second Turn Games?",
+        "answer": "Second Turn Games ir vienādranga tirgus vieta, kur pirkt un pārdot iepriekš mīlētas galda spēles Baltijas reģionā (Latvijā, Lietuvā, Igaunijā). Katrs sludinājums tiek verificēts pret BoardGameGeek datubāzi ar vairāk nekā 170 000 spēlēm."
+      },
+      "q2": {
+        "question": "Kur es varu pārdot galda spēles Latvijā?",
+        "answer": "Second Turn Games ir specializēta tirgus vieta galda spēļu pārdošanai Latvijā, Lietuvā un Igaunijā. Ievieto savas spēles ar verificētiem BoardGameGeek datiem, nosaki cenu un nosūti caur pakomātiem. Pārdevēji saņem 90% no pārdošanas cenas."
+      },
+      "q3": {
+        "question": "Vai Second Turn Games ir droša?",
+        "answer": "Jā. Second Turn Games izmanto EveryPay (caur Swedbank) drošai maksājumu apstrādei, piedāvā pircēja aizsardzību ar strīdu risināšanas periodu un verificē visus sludinājumus pret BoardGameGeek datubāzi. Platformu pārvalda Second Turn Games SIA, reģistrēta Latvijā."
+      },
+      "q4": {
+        "question": "Kādas ir maksas Second Turn Games?",
+        "answer": "Pircēji maksā preces cenu plus fiksētu €2.00 piegādes maksu (bez pakalpojuma maksas). Pārdevēji maksā 10% komisiju no preces cenas, kas tiek ieturēta automātiski. Sludinājuma izvietošana ir bezmaksas."
+      },
+      "q5": {
+        "question": "Kā darbojas pārdošana Second Turn Games?",
+        "answer": "Meklē savu spēli BoardGameGeek datubāzē, novērtē tās stāvokli, nosaki cenu, pievieno fotogrāfijas un publicē. Kad kāds nopērk, apstiprini pasūtījumu 24 stundu laikā, iepako spēli un nodod pakomātā. Tavi ieņēmumi tiek ieskaitīti makā pēc piegādes."
+      },
+      "q6": {
+        "question": "Kā darbojas piegāde Second Turn Games?",
+        "answer": "Second Turn Games izmanto Unisend pakomātus visā Baltijas reģionā. Piegāde maksā fiksētu €2.00 par pasūtījumu. Pēc pasūtījuma apstiprināšanas pārdevēji saņem sūtīšanas kodu, iepako spēli un nodod to jebkurā Unisend pakomātā. Izsekošana atjauninās automātiski."
+      },
+      "q7": {
+        "question": "Kā es saņemu samaksu kā pārdevējs?",
+        "answer": "Pēc tam, kad pircējs apstiprina piegādi (vai pēc automātiskā 2 dienu strīdu perioda), tavi ieņēmumi (90% no preces cenas) tiek ieskaitīti platformas makā. Tu vari pieprasīt izmaksu uz savu IBAN bankas kontu jebkurā laikā."
+      },
+      "q8": {
+        "question": "Kādi galda spēļu stāvokļi tiek pieņemti?",
+        "answer": "Second Turn Games izmanto četras stāvokļa pakāpes: Gandrīz jauna (spēlēta 1-2 reizes, visi komponenti klāt), Ļoti laba (neliels nolietojums, pilnībā spēlējama), Laba (mērens nolietojums, pilnīga un spēlējama) un Pieņemama (pamanāms nolietojums, bet pilnīga). Visām pakāpēm nepieciešamas pilnīgas, spēlējamas spēles."
       }
     }
   },

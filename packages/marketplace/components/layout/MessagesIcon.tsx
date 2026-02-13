@@ -1,7 +1,7 @@
 'use client';
 
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
-import { ChatBubble as MessageCircle } from 'griddy-icons';
+import { ChatBubble as MessageCircle } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
 

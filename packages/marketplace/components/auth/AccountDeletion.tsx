@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
-import { AlertTriangle, TrashAlt as Trash2 } from 'griddy-icons';
+import { AlertTriangle, TrashAlt as Trash2 } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';
 

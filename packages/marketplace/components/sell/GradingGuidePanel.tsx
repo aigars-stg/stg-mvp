@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { SlidePanel, Card } from '@second-turn/design-system';
-import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, ChevronDown, ChevronUp, LightbulbOn as Lightbulb, LinkExternal as ExternalLink  } from 'griddy-icons';
+import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, ChevronDown, ChevronUp, LightbulbOn as Lightbulb, LinkExternal as ExternalLink  } from '@/lib/icons';
 import type { ListingCondition } from '../../lib/types/listing';
 import { useTranslations } from 'next-intl';
 
@@ -280,7 +280,7 @@ export function GradingGuidePanel({
         {/* Link to full guide */}
         <div className="pt-4 border-t border-border">
           <Link
-            href="/help/grading-guide"
+            href="/help?section=grading"
             target="_blank"
             className="flex items-center justify-center gap-2 text-frost-ice hover:text-aurora-blue text-sm font-medium transition-colors"
           >

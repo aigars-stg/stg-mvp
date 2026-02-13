@@ -1,4 +1,4 @@
-import { ClipboardList } from 'griddy-icons';
+import { ClipboardList } from '@/lib/icons';
 
 interface PlainTermsBoxProps {
   children: React.ReactNode;

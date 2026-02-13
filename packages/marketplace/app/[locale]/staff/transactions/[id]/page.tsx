@@ -1,11 +1,11 @@
-/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import { Button, Badge } from '@second-turn/design-system';
-import { RefreshCw as Loader2, AlertCircle, Shield, ArrowLeft, User, Package, LocationPin as MapPin, LinkExternal as ExternalLink, Chat as MessageSquare, AlertTriangle, CheckCircleAlt01 as CheckCircle2, Time as Clock, Phone, Email as Mail, Beaker as Flask } from 'griddy-icons';
+import { RefreshCw as Loader2, AlertCircle, Shield, ArrowLeft, User, Package, LocationPin as MapPin, LinkExternal as ExternalLink, Chat as MessageSquare, AlertTriangle, CheckCircleAlt01 as CheckCircle2, Time as Clock, Phone, Email as Mail, Beaker as Flask } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { MessageBubble } from '@/components/messaging/MessageBubble';
@@ -374,9 +374,9 @@ export default function StaffTransactionPage() {
               <div className="space-y-3">
                 {order_items.map((item) => (
                   <div key={item.id} className="flex gap-3">
-                    <div className="w-12 h-12 rounded bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <div className="relative w-12 h-12 rounded bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
                       {item.photo_url ? (
-                        <img src={item.photo_url} alt={item.game_name} className="w-full h-full object-cover" />
+                        <Image src={item.photo_url} alt={item.game_name} fill className="object-cover" sizes="48px" />
                       ) : (
                         <Package className="w-5 h-5 text-text-muted" />
                       )}
@@ -638,9 +638,9 @@ export default function StaffTransactionPage() {
                                 href={url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-16 h-16 rounded overflow-hidden border border-border"
+                                className="relative w-16 h-16 rounded overflow-hidden border border-border"
                               >
-                                <img src={url} alt={`Evidence ${idx + 1}`} className="w-full h-full object-cover" />
+                                <Image src={url} alt={`Evidence ${idx + 1}`} fill className="object-cover" sizes="64px" />
                               </a>
                             ))}
                           </div>

@@ -1,4 +1,4 @@
-import { Search } from 'griddy-icons';
+import { Search } from '@/lib/icons';
 import { Button } from '@second-turn/design-system';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';

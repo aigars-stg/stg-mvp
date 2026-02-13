@@ -1,7 +1,7 @@
 import { Link } from '@/i18n/navigation';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { Check, AlertCircle, InfoCircle as Info } from 'griddy-icons';
+import { Check, AlertCircle, InfoCircle as Info } from '@/lib/icons';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

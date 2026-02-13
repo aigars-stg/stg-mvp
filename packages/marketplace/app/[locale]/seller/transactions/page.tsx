@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Button, Badge } from '@second-turn/design-system';
-import { ArrowLeft, ShoppingBag, ArrowDownRight, RefreshCw as Loader2, AlertCircle, Filter } from 'griddy-icons';
+import { ArrowLeft, ShoppingBag, ArrowDownRight, RefreshCw as Loader2, AlertCircle, Filter } from '@/lib/icons';
 import { Link, useRouter } from '@/i18n/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { formatDate } from '@/lib/date-utils';

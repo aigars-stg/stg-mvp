@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@second-turn/design-system';
-import { Tag as Gavel } from 'griddy-icons';
+import { Gavel } from '@/lib/icons';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { isAuctionListing } from '@/lib/types/listing';
 import { useTranslations } from 'next-intl';

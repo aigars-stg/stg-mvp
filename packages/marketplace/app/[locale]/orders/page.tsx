@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { Button, Badge, Card } from '@second-turn/design-system';
-import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User, ShoppingBag } from 'griddy-icons';
+import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User, ShoppingBag } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 // ListingCondition type available via @/lib/types/listing if needed
 import { useTranslations } from 'next-intl';

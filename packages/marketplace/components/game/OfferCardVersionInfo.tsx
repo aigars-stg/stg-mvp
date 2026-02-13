@@ -1,6 +1,6 @@
 'use client';
 
-import { Globe, BookOpen, Building as Building2 } from 'griddy-icons';
+import { Globe, BookOpen, Building as Building2 } from '@/lib/icons';
 
 interface OfferCardVersionInfoProps {
   formattedEdition: string | null;

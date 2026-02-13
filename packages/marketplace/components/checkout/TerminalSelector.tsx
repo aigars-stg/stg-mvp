@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Search, LocationPin as MapPin, Check, RefreshCw as Loader2 } from 'griddy-icons';
+import { Search, LocationPin as MapPin, Check, RefreshCw as Loader2 } from '@/lib/icons';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
 import { useTranslations } from 'next-intl';
 

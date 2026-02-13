@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { Check, ChevronDown } from 'griddy-icons';
+import { Check, ChevronDown } from '@/lib/icons';
 
 interface CheckoutSectionProps {
   title: string;

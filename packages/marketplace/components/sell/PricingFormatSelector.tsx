@@ -1,6 +1,6 @@
 'use client';
 
-import { Tag, Tag as Gavel, CheckCircleAlt01 as CheckCircle2, Time as Clock, InfoCircle as Info } from 'griddy-icons';
+import { Tag, Gavel, CheckCircleAlt01 as CheckCircle2, Time as Clock, InfoCircle as Info } from '@/lib/icons';
 import { Card } from '@second-turn/design-system';
 import { useTranslations } from 'next-intl';
 import type { PricingFormat, AuctionDuration } from '@/lib/types/listing';

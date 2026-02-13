@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
-import { Star, ArrowLeft, RefreshCw as Loader2, CheckCircleAlt01 as CheckCircle2, Package } from 'griddy-icons';
+import { Star, ArrowLeft, RefreshCw as Loader2, CheckCircleAlt01 as CheckCircle2, Package } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 interface OrderDetails {

@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, Package, Undo as RotateCcw, Eye, EyeOff, Chat as MessageSquare } from 'griddy-icons';
+import { AlertCircle, Package, Undo as RotateCcw, Eye, EyeOff, Chat as MessageSquare } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import type { ListingType } from '@/lib/types/listing';
 import { BaseStatusChangeModal, type StatusConfig } from '@/components/common/StatusChangeModal';

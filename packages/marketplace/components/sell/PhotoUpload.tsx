@@ -3,7 +3,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { Card } from '@second-turn/design-system';
-import { PhotoCamera as Camera, Close } from 'griddy-icons';
+import { PhotoCamera as Camera, Close } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 export interface PhotoFile {

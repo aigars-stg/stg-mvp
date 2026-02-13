@@ -1,6 +1,6 @@
 'use client';
 
-import { InfoCircle as Info } from 'griddy-icons';
+import { InfoCircle as Info } from '@/lib/icons';
 import type { ListingCondition } from '@/lib/types/listing';
 import { useTranslations } from 'next-intl';
 

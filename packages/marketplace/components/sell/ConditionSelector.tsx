@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Card } from '@second-turn/design-system';
-import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, ShieldCheck, CheckCircleAlt01 as CheckCircle2, AlertCircle, HelpCircle  } from 'griddy-icons';
+import {  Star, Sparks as Sparkles, CheckCircle as CircleCheck, Tool as Wrench, ShieldCheck, CheckCircleAlt01 as CheckCircle2, AlertCircle, HelpCircle  } from '@/lib/icons';
 import { GradingGuidePanel } from './GradingGuidePanel';
 import { useTranslations } from 'next-intl';
 

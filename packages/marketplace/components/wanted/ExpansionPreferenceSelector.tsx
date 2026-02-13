@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from '@second-turn/design-system';
-import { PuzzlePiece as Puzzle, Check } from 'griddy-icons';
+import { PuzzlePiece as Puzzle, Check } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 export type ExpansionPreference = 'base_only' | 'expansions_welcome';

@@ -3,7 +3,7 @@
 
 import { useState, useRef, KeyboardEvent } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Send, RefreshCw as Loader2, ImagePlus, Close } from 'griddy-icons';
+import { Send, RefreshCw as Loader2, ImagePlus, Close } from '@/lib/icons';
 import { MESSAGE_CONSTRAINTS } from '@/lib/types/message';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslations } from 'next-intl';

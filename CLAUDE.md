@@ -21,8 +21,17 @@ Run from repo root:
 - `pnpm dev:marketplace` - Start marketplace dev server (localhost:3000)
 - `pnpm build:ds` - Build design system (required before marketplace)
 - `pnpm build:marketplace` - Production build
+- `pnpm test` - Run Vitest test suite (marketplace)
 - `pnpm lint` - Run ESLint across all packages
 - `pnpm type-check` - TypeScript validation
+
+## Testing
+- Framework: Vitest with React Testing Library (config in `packages/marketplace/vitest.config.ts`)
+- Test files co-located with source: `pricing.ts` → `pricing.test.ts`
+- Convention: `describe` per function, `it` per behavior
+- Current coverage: pricing, date-utils, validation (pure logic, no mocking)
+- Use `vi.useFakeTimers()` for time-dependent tests; always `vi.useRealTimers()` in `afterEach`
+- Run tests before committing changes to `lib/services/` or `lib/validation/`
 
 ## Code Style
 - Use ES modules (import/export)

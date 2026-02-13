@@ -5,6 +5,9 @@ import { handleApiError } from '@/lib/api/error-handler';
 import { refundPayment } from '@/lib/everypay/client';
 import { EveryPayError } from '@/lib/everypay/client';
 import { createServiceClient } from '@/lib/supabase/client';
+import { loggers } from '@/lib/logger';
+
+const log = loggers.payments;
 
 const adminSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,7 +35,7 @@ const REFUNDABLE_STATUSES = ['pending_seller', 'confirmed', 'shipped', 'delivere
  * 1. If order was paid via EveryPay (has everypay_payment_reference),
  *    refund the card payment via EveryPay API.
  * 2. If order used wallet balance (buyer_wallet_debit_cents > 0),
- *    credit the buyer wallet via credit_buyer_wallet_refund RPC.
+ *    credit the buyer wallet via credit_wallet RPC.
  * 3. Update order status to 'refunded' with reason and timestamp.
  */
 export async function POST(request: NextRequest, { params }: Params) {
@@ -109,8 +112,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    console.log(`[Refund] Processing refund for order ${order.order_number}`);
-    console.log(`[Refund] Reason: ${reason}`);
+    log.info({ orderNumber: order.order_number, reason }, 'Processing refund');
 
     // -----------------------------------------------------------------------
     // 1. Refund EveryPay card payment (if applicable)
@@ -118,7 +120,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     let everyPayRefundState: string | null = null;
 
     if (order.everypay_payment_reference) {
-      console.log(`[Refund] EveryPay payment ref: ${order.everypay_payment_reference}`);
+      log.info({ paymentRef: order.everypay_payment_reference }, 'Refunding EveryPay payment');
 
       // Calculate the EveryPay portion: total minus any wallet debit
       const walletDebitCents = order.buyer_wallet_debit_cents ?? 0;
@@ -133,9 +135,9 @@ export async function POST(request: NextRequest, { params }: Params) {
           );
 
           everyPayRefundState = refundResult.payment_state;
-          console.log(`[Refund] EveryPay refund result: ${refundResult.payment_state}`);
+          log.info({ paymentState: refundResult.payment_state, amountCents: everyPayAmountCents }, 'EveryPay refund result');
         } catch (everyPayError: unknown) {
-          console.error('[Refund] EveryPay refund failed:', everyPayError);
+          log.error({ error: everyPayError, orderId }, 'EveryPay refund failed');
           const errorMessage = everyPayError instanceof EveryPayError
             ? everyPayError.message
             : 'Failed to process EveryPay refund';
@@ -154,22 +156,24 @@ export async function POST(request: NextRequest, { params }: Params) {
     let walletRefunded = false;
 
     if (order.buyer_wallet_debit_cents && order.buyer_wallet_debit_cents > 0) {
-      console.log(`[Refund] Wallet debit to refund: ${order.buyer_wallet_debit_cents} cents`);
+      log.info({ amountCents: order.buyer_wallet_debit_cents, orderId }, 'Refunding wallet debit');
 
-      const { error: walletError } = await (adminSupabase
-        .rpc as (...args: unknown[]) => ReturnType<typeof adminSupabase.rpc>)('credit_buyer_wallet_refund', {
+      const { error: walletError } = await adminSupabase
+        .rpc('credit_wallet', {
           p_user_id: order.buyer_id,
           p_amount_cents: order.buyer_wallet_debit_cents,
           p_order_id: orderId,
+          p_description: 'Refund — order refunded',
         });
 
       if (walletError) {
-        console.error('[Refund] Wallet refund failed:', walletError);
+        log.error({ walletError, orderId }, 'Wallet refund failed');
         // If EveryPay refund already succeeded, we have a partial refund problem
         // Log it but continue to update order status
         if (everyPayRefundState) {
-          console.error(
-            '[Refund] WARNING: EveryPay refund succeeded but wallet refund failed. Manual intervention needed.'
+          log.error(
+            { orderId, everyPayRefundState },
+            'EveryPay refund succeeded but wallet refund failed — manual intervention needed'
           );
         } else {
           return NextResponse.json(
@@ -179,7 +183,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         }
       } else {
         walletRefunded = true;
-        console.log(`[Refund] Wallet refund credited: ${order.buyer_wallet_debit_cents} cents`);
+        log.info({ amountCents: order.buyer_wallet_debit_cents, orderId }, 'Wallet refund credited');
       }
     }
 
@@ -197,7 +201,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       .eq('id', orderId);
 
     if (updateError) {
-      console.error('[Refund] Failed to update order status:', updateError);
+      log.error({ updateError, orderId }, 'Failed to update order status');
       // Refund was already processed, log error but don't fail
     }
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { Button, Card } from '@second-turn/design-system';
-import {  Monitor, Phone as Smartphone, Tablet, LocationPin as MapPin, Calendar, AlertCircle, LogOut, ChevronDown  } from 'griddy-icons';
+import {  Monitor, Phone as Smartphone, Tablet, LocationPin as MapPin, Calendar, AlertCircle, LogOut, ChevronDown  } from '@/lib/icons';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { LinkExternal as ExternalLink, PuzzlePiece as Puzzle } from 'griddy-icons';
+import { LinkExternal as ExternalLink, PuzzlePiece as Puzzle } from '@/lib/icons';
 import { GameImageWithBackdrop } from './GameImageWithBackdrop';
 
 interface GameResultCardProps {

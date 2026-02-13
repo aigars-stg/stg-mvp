@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element -- preload link for external BGG images */
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { Inter } from 'next/font/google';
 import dynamic from 'next/dynamic';
 import { NextIntlClientProvider } from 'next-intl';
@@ -13,7 +13,6 @@ import { Providers } from './providers';
 import { Navbar } from '@/components/layout/Navbar';
 import { SkipLink } from '@/components/layout/SkipLink';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
-import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
 
 // Lazy load BottomNav - it's only visible on mobile and can be deferred
 const BottomNav = dynamic(() => import('@/components/layout/BottomNav').then(mod => ({ default: mod.BottomNav })), {
@@ -194,9 +193,9 @@ export default async function LocaleLayout({ children, params }: Props) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6 sm:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
                 <div className="md:col-span-2">
-                  <img src="/images/logo_nav.svg" alt="Second Turn Games" className="h-10 mb-3 sm:mb-4" />
+                  <Image src="/images/logo_nav.svg" alt="Second Turn Games" width={160} height={40} className="h-10 w-auto mb-3 sm:mb-4" />
                   <p className="text-sm text-text-secondary">
                     {tFooter('tagline.line1')}
                     <br />
@@ -212,30 +211,33 @@ export default async function LocaleLayout({ children, params }: Props) {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.legal')}</h4>
+                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.resources')}</h4>
                   <ul className="space-y-2 text-sm text-text-secondary">
-                    <li><Link href="/legal?section=terms" className="hover:text-text">{tFooter('links.termsOfService')}</Link></li>
-                    <li><Link href="/legal?section=privacy" className="hover:text-text">{tFooter('links.privacyPolicy')}</Link></li>
-                    <li><Link href="/legal?section=buyer" className="hover:text-text">{tFooter('links.deliveryAndReturns')}</Link></li>
                     <li><Link href="/help" className="hover:text-text">{tFooter('links.helpCentre')}</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.contact')}</h4>
-                  <ul className="space-y-2 text-sm text-text-secondary">
-                    <li>{tFooter('company.name')}</li>
-                    <li>{tFooter('company.regNumber')}</li>
-                    <li>{tFooter('company.address')}</li>
-                    <li><a href="tel:+37126779625" className="hover:text-text">{tFooter('company.phone')}</a></li>
-                    <li><a href="mailto:info@secondturn.games" className="hover:text-text">info@secondturn.games</a></li>
+                    <li><Link href="/legal" className="hover:text-text">{tFooter('links.legalHub')}</Link></li>
                   </ul>
                 </div>
               </div>
-              <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border-subtle text-center text-xs sm:text-sm text-text-secondary space-y-4">
-                <div className="flex justify-center mb-4">
-                  <LocaleSwitcher />
+              {/* EveryPay/Swedbank compliance strip */}
+              <div className="mt-6 sm:mt-8 pt-4 border-t border-border-subtle">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-muted">
+                  <p>{tFooter('copyright', { year: currentYear })}</p>
+                  <div className="flex items-center gap-3">
+                    <span className="sr-only">{tFooter('compliance.paymentMethods')}</span>
+                    <Image src="/images/payments/mastercard.svg" alt="Mastercard" width={152} height={108} className="h-7 w-auto" />
+                    <Image src="/images/payments/visa.svg" alt="Visa" width={262} height={85} className="h-4 w-auto" />
+                    <nav aria-label="Payment compliance" className="flex flex-wrap items-center gap-x-1">
+                      <span className="text-border-subtle" aria-hidden="true">|</span>
+                      <Link href="/legal#contact" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('compliance.contactUs')}</Link>
+                      <span className="text-border-subtle" aria-hidden="true">|</span>
+                      <Link href="/legal?section=terms" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.termsOfService')}</Link>
+                      <span className="text-border-subtle" aria-hidden="true">|</span>
+                      <Link href="/legal?section=privacy" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.privacyPolicy')}</Link>
+                      <span className="text-border-subtle" aria-hidden="true">|</span>
+                      <Link href="/legal?section=buyer#8-shipping-and-delivery" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.deliveryAndReturns')}</Link>
+                    </nav>
+                  </div>
                 </div>
-                <p>{tFooter('copyright', { year: currentYear })}</p>
               </div>
             </div>
           </footer>

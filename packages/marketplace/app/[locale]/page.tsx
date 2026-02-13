@@ -1,11 +1,8 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import {
-  HeroSection,
-  GameCollection,
-  WantedCollection,
-  HowItWorks,
-  FinalCTA,
+  CompactHero,
+  HomepageBrowse,
 } from '@/components/home';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -24,23 +21,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default function HomePage() {
   return (
     <div className="overflow-hidden">
-      {/* Hero Section */}
-      <HeroSection />
+      {/* Compact Hero */}
+      <CompactHero />
 
-      {/* Collections - Listings and Wanted */}
-      <GameCollection
-        type="recently_listed"
-        limit={8}
-        viewAllHref="/browse?sort=newest"
-      />
-
-      <WantedCollection limit={8} />
-
-      {/* How It Works */}
-      <HowItWorks />
-
-      {/* Final CTA */}
-      <FinalCTA />
+      {/* Recently Listed Games */}
+      <HomepageBrowse />
     </div>
   );
 }

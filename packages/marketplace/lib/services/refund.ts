@@ -8,18 +8,48 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { refundToWallet } from './wallet';
 
 // Statuses that allow refunds (before seller wallet credit)
-const REFUNDABLE_STATUSES = [
+export const REFUNDABLE_STATUSES = [
   'pending_seller',
   'confirmed',
   'shipped',
   'delivered',
 ] as const;
 
+export type RefundableStatus = (typeof REFUNDABLE_STATUSES)[number];
+
 export interface RefundResult {
   success: boolean;
   walletRefundedCents: number;
   everypayRefundedCents: number;
   error?: string;
+}
+
+export interface RefundAmounts {
+  totalAmountCents: number;
+  walletPortionCents: number;
+  everypayPortionCents: number;
+}
+
+/**
+ * Check if an order status allows refunds
+ */
+export function isRefundableStatus(status: string): status is RefundableStatus {
+  return REFUNDABLE_STATUSES.includes(status as RefundableStatus);
+}
+
+/**
+ * Calculate the wallet and EveryPay portions of a refund
+ * total_amount is stored in euros (decimal), buyer_wallet_debit_cents in integer cents
+ */
+export function calculateRefundAmounts(
+  totalAmountEuros: number,
+  buyerWalletDebitCents: number | null | undefined
+): RefundAmounts {
+  const totalAmountCents = Math.round(totalAmountEuros * 100);
+  const walletPortionCents = buyerWalletDebitCents || 0;
+  const everypayPortionCents = totalAmountCents - walletPortionCents;
+
+  return { totalAmountCents, walletPortionCents, everypayPortionCents };
 }
 
 /**
@@ -45,7 +75,7 @@ export async function processRefund(
   }
 
   // Check if order is refundable
-  if (!REFUNDABLE_STATUSES.includes(order.status)) {
+  if (!isRefundableStatus(order.status)) {
     return {
       success: false,
       walletRefundedCents: 0,
@@ -54,9 +84,10 @@ export async function processRefund(
     };
   }
 
-  const totalAmountCents = Math.round(order.total_amount * 100);
-  const walletPortionCents = order.buyer_wallet_debit_cents || 0;
-  const everypayPortionCents = totalAmountCents - walletPortionCents;
+  const { walletPortionCents, everypayPortionCents } = calculateRefundAmounts(
+    order.total_amount,
+    order.buyer_wallet_debit_cents
+  );
 
   let walletRefundedCents = 0;
   let everypayRefundedCents = 0;

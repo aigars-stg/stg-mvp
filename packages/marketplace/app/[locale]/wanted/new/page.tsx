@@ -16,7 +16,7 @@ import { ExistingSalesBanner } from '@/components/wanted/ExistingSalesBanner';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
 import { useWantedListingForm, DEFAULT_ACCEPTABLE_CONDITIONS } from '@/lib/hooks/useWantedListingForm';
 import type { BGGGame, VersionSelection } from '@/lib/bgg-types';
-import { PuzzlePiece as Dices, CurrencyEuro as Euro, FileText as NotesIcon, LightbulbOn as Lightbulb, RefreshCw, AlertCircle, Check, Package } from 'griddy-icons';
+import { PuzzlePiece as Dices, CurrencyEuro as Euro, FileText as NotesIcon, LightbulbOn as Lightbulb, RefreshCw, AlertCircle, Check, Package } from '@/lib/icons';
 
 function CreateWantedListingPageContent() {
   const router = useRouter();

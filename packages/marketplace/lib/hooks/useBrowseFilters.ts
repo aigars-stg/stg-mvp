@@ -83,7 +83,7 @@ export interface UseBrowseFiltersReturn extends BrowseFiltersState, BrowseFilter
   activeFiltersCount: number;
 }
 
-export function useBrowseFilters(): UseBrowseFiltersReturn {
+export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {}): UseBrowseFiltersReturn {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -162,7 +162,7 @@ export function useBrowseFilters(): UseBrowseFiltersReturn {
 
   // Update URL when filters change
   useEffect(() => {
-    if (!filtersInitialized) return;
+    if (!urlSync || !filtersInitialized) return;
 
     const params = new URLSearchParams();
 
@@ -212,6 +212,7 @@ export function useBrowseFilters(): UseBrowseFiltersReturn {
     showExpiringOnly,
     sortBy,
     filtersInitialized,
+    urlSync,
     pathname,
     router,
   ]);

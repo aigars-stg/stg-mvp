@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Badge } from '@second-turn/design-system';
-import { Close } from 'griddy-icons';
+import { Close } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 interface MobileFilterDrawerProps {

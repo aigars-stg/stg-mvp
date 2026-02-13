@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { Select, Button } from '@second-turn/design-system';
-import { Package, SettingsAdjustHorizontal as SlidersHorizontal } from 'griddy-icons';
+import { Package, SettingsAdjustHorizontal as SlidersHorizontal } from '@/lib/icons';
 import { AggregatedGameCard, SellFilters, WantedFilters, MobileFilterDrawer, ActiveFilterChips } from '@/components/browse';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';

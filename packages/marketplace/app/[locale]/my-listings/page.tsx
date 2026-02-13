@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { Button, Card } from '@second-turn/design-system';
-import { Package, Time as Clock, CheckCircle, CloseCircle as XCircle, Plus, Search, Heart, Layout as LayoutDashboard } from 'griddy-icons';
+import { Package, Time as Clock, CheckCircle, CloseCircle as XCircle, Plus, Search, Heart, Layout as LayoutDashboard } from '@/lib/icons';
 import { Link } from '@/i18n/navigation';
 import { OfferCard } from '@/components/game/OfferCard';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';

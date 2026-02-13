@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { Search, LocationPin as MapPin, Check, RefreshCw as Loader2, Map as MapIcon, ListBulleted as List } from 'griddy-icons';
+import { Search, LocationPin as MapPin, Check, RefreshCw as Loader2, Map as MapIcon, ListBulleted as List } from '@/lib/icons';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
 import { useTranslations } from 'next-intl';
 

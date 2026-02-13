@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, Button } from '@second-turn/design-system';
-import { TrendUp as TrendingUp, LinkExternal as ExternalLink, RefreshCw as Loader2, AlertCircle, Tag, ChartBar as BarChart3, InfoCircle as Info } from 'griddy-icons';
+import { TrendUp as TrendingUp, LinkExternal as ExternalLink, RefreshCw as Loader2, AlertCircle, Tag, ChartBar as BarChart3, InfoCircle as Info } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import { formatPrice } from '@/lib/services/pricing';
 import type { ListingCondition } from '@/lib/types/listing';

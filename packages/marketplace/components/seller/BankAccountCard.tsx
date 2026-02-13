@@ -1,6 +1,6 @@
 'use client';
 
-import { CreditCard, CheckCircleAlt01 as CheckCircle2 } from 'griddy-icons';
+import { CreditCard, CheckCircleAlt01 as CheckCircle2 } from '@/lib/icons';
 
 interface BankAccountCardProps {
   last4: string;

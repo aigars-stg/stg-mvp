@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CalendarTime } from 'griddy-icons';
+import { Gavel } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import {
   getAuctionTimeRemaining,
@@ -39,7 +39,7 @@ export function AuctionCountdown({ endsAt, showEnded = false, className = '' }: 
     if (!showEnded) return null;
     return (
       <div className={`flex items-center gap-1 mt-1.5 text-xs ${urgency.textColorClass} ${className}`}>
-        <CalendarTime className="w-3.5 h-3.5" />
+        <Gavel className="w-3.5 h-3.5" />
         <span>{t('auctionEnded')}</span>
       </div>
     );
@@ -53,7 +53,7 @@ export function AuctionCountdown({ endsAt, showEnded = false, className = '' }: 
       role="timer"
       aria-live="polite"
     >
-      <CalendarTime className="w-3.5 h-3.5" />
+      <Gavel className="w-3.5 h-3.5" />
       <span>{t('auctionEndsIn')} {formatCompactTimeRemaining(time)}</span>
     </div>
   );

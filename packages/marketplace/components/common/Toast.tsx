@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
-import { CheckCircle, AlertCircle, InfoCircle as Info, CloseCircle as XCircle, Close } from 'griddy-icons';
+import { CheckCircle, AlertCircle, InfoCircle as Info, CloseCircle as XCircle, Close } from '@/lib/icons';
 import { cn } from '@/lib/utils';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';

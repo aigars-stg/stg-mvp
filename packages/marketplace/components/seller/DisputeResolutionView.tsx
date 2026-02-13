@@ -4,7 +4,7 @@ import {
   CheckCircleAlt01 as CheckCircle2,
   Close as XCircle,
   InfoCircle as Info,
-} from 'griddy-icons';
+} from '@/lib/icons';
 
 interface DisputeResolutionViewProps {
   resolution: string;

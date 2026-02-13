@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { Button, Card } from '@second-turn/design-system';
-import { ShoppingBasket as ShoppingCart, AlertCircle } from 'griddy-icons';
+import { ShoppingBasket as ShoppingCart, AlertCircle } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useCart } from '@/lib/contexts/CartContext';
 import { CountryPrompt } from '@/components/onboarding';

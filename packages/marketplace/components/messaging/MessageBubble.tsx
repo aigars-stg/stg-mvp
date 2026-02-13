@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Close } from 'griddy-icons';
+import { Close } from '@/lib/icons';
 import type { Message } from '@/lib/types/message';
 import { formatMessageTime } from '@/lib/date-utils';
 
