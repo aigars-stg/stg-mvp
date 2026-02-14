@@ -117,7 +117,7 @@ const nextConfig = {
               // Connections: self + Supabase + Sentry + MapBox + Carto (map tiles) + Vercel Analytics
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://api.mapbox.com https://*.cartocdn.com https://*.carto.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://vercel.live",
               // Frames: Cloudflare Turnstile
-              "frame-src https://challenges.cloudflare.com",
+              "frame-src https://challenges.cloudflare.com https://vercel.live",
               // Prevent object/embed
               "object-src 'none'",
               // Restrict base URI

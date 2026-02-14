@@ -28,13 +28,13 @@ describe('checkoutSessionSchema', () => {
   });
 
   it('rejects t2t checkout missing receiver fields', () => {
-    const { receiverName, receiverPhone, receiverEmail, ...incomplete } = validT2tCheckout;
+    const { receiverName: _rn, receiverPhone: _rp, receiverEmail: _re, ...incomplete } = validT2tCheckout;
     const result = checkoutSessionSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
 
   it('rejects t2t checkout missing terminal', () => {
-    const { destinationTerminalId, destinationTerminalName, ...incomplete } = validT2tCheckout;
+    const { destinationTerminalId: _tid, destinationTerminalName: _tn, ...incomplete } = validT2tCheckout;
     const result = checkoutSessionSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
@@ -45,13 +45,13 @@ describe('checkoutSessionSchema', () => {
   });
 
   it('rejects local pickup missing city', () => {
-    const { pickupCity, ...incomplete } = validPickupCheckout;
+    const { pickupCity: _pc, ...incomplete } = validPickupCheckout;
     const result = checkoutSessionSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
 
   it('defaults useWallet to true when omitted', () => {
-    const { useWallet, ...withoutWallet } = validT2tCheckout;
+    const { useWallet: _uw, ...withoutWallet } = validT2tCheckout;
     const result = checkoutSessionSchema.safeParse(withoutWallet);
     expect(result.success).toBe(true);
     if (result.success) {

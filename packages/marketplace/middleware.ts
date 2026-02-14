@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const shouldSkipI18n =
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
-    pathname.match(/\.(svg|png|jpg|jpeg|gif|webp)$/);
+    pathname.match(/\.(svg|png|jpg|jpeg|gif|webp|js|json|xml|txt|map|ico|woff|woff2)$/);
 
   let response: NextResponse;
 
@@ -192,6 +192,6 @@ export const config = {
      * - public folder
      * - api routes that handle their own auth
      */
-    '/((?!_next/static|_next/image|favicon.ico|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp|js|json|xml|txt|map|ico|woff|woff2)$).*)',
   ],
 };
