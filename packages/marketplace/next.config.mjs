@@ -105,7 +105,7 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               // Scripts: self + Sentry + Cloudflare Turnstile + Vercel Analytics
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://browser.sentry-cdn.com https://va.vercel-scripts.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://browser.sentry-cdn.com https://va.vercel-scripts.com https://vercel.live",
               // Workers: self + blob (for MapLibre GL web workers)
               "worker-src 'self' blob:",
               // Styles: self + inline (for CSS-in-JS)
@@ -115,7 +115,7 @@ const nextConfig = {
               // Fonts: self
               "font-src 'self'",
               // Connections: self + Supabase + Sentry + MapBox + Carto (map tiles) + Vercel Analytics
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://api.mapbox.com https://*.cartocdn.com https://*.carto.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://api.mapbox.com https://*.cartocdn.com https://*.carto.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://vercel.live",
               // Frames: Cloudflare Turnstile
               "frame-src https://challenges.cloudflare.com",
               // Prevent object/embed
