@@ -615,10 +615,13 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
         </div>
 
         {/* Auction Bid Panel - Full bidding interface for auction listings */}
+        {/* Hide bid panel for ended auctions without a winner (awaiting cron processing) */}
         {isAuctionListing(listing) && !isOwnListing && (
-          <div className="border-t border-border-subtle p-3 sm:p-4">
-            <AuctionBidPanel listing={listing} />
-          </div>
+          !(listing.auction_ends_at && new Date(listing.auction_ends_at) < new Date() && !listing.auction_winner_id) && (
+            <div className="border-t border-border-subtle p-3 sm:p-4">
+              <AuctionBidPanel listing={listing} />
+            </div>
+          )
         )}
 
         {/* Contact Seller Warning Banner (Legal Requirement) - Desktop */}

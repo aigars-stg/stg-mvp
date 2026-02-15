@@ -5,9 +5,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import {  LogOut, ShoppingBag, Store, Settings, ChevronRight, Layout as LayoutDashboard, Shield, Globe  } from '@/lib/icons';
+import {  LogOut, ShoppingBag, Store, Settings, ChevronRight, Layout as LayoutDashboard, Shield  } from '@/lib/icons';
 import { getInitials } from '@/lib/auth/utils';
-import { LocaleSwitcher } from './LocaleSwitcher';
 import { useTranslations } from 'next-intl';
 
 
@@ -180,15 +179,6 @@ export function UserMenu() {
                 {t('userMenu.staffDashboard')}
               </Link>
             )}
-          </div>
-
-          {/* Language Selection */}
-          <div className="border-t border-border-subtle py-2 px-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Globe className="w-4 h-4 text-text-secondary" />
-              <span className="text-xs text-text-secondary font-medium">{t('language')}</span>
-            </div>
-            <LocaleSwitcher />
           </div>
 
           {/* Sign Out */}

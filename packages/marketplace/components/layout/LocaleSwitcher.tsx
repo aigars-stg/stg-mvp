@@ -82,8 +82,9 @@ export function LocaleSwitcher({ className = '' }: LocaleSwitcherProps) {
           }
         }
 
-        // 3. Navigate to new locale using next-intl router
-        router.replace(pathname, { locale: newLocale });
+        // 3. Navigate to new locale, preserving query params
+        const search = window.location.search;
+        router.replace(pathname + search, { locale: newLocale });
       } catch (error) {
         console.error('Error changing locale:', error);
       }

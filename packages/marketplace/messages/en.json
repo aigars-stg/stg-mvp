@@ -82,6 +82,7 @@
     "markAsSold": "Mark as Sold",
     "removeListing": "Remove Listing",
     "copyLink": "Copy Link",
+    "relist": "Re-list",
     "deletePermanently": "Delete Permanently"
   },
   "DeleteConfirmationModal": {
@@ -655,11 +656,14 @@
     "contactSellerWarning": "This listing is not processed through our payment system. Arrange payment directly with the seller. We cannot provide buyer protection for this transaction.",
     "auction": {
       "badge": "Auction",
+      "ended": "Auction Ended",
       "currentBid": "Current bid",
       "startingPrice": "Starting price",
       "startingAt": "Starting at €{price}",
       "bid": "bid",
-      "bids": "bids"
+      "bids": "bids",
+      "finalBid": "Final bid",
+      "awaitingPayment": "Awaiting payment"
     }
   },
   "Checkout": {
@@ -672,24 +676,11 @@
     },
     "title": "Checkout",
     "orderFrom": "Order from {sellerName}",
-    "shipping": {
-      "title": "Parcel Terminal Delivery",
-      "description": "Pick up at a convenient parcel locker near you. Fast and secure delivery within 1-3 business days.",
-      "summaryLine": "Parcel terminal delivery"
-    },
-    "sections": {
-      "selectTerminal": "1. Select Pickup Terminal",
-      "contactInfo": "2. Contact Information",
-      "termsConsent": "3. Terms & Conditions"
-    },
     "collapse": {
       "selectTerminal": "Select Pickup Terminal",
       "contactInfo": "Contact Information",
-      "termsConsent": "Terms & Conditions",
       "terminalPrompt": "Choose a parcel locker",
       "contactPrompt": "We'll send tracking info here",
-      "termsPrompt": "Please review and accept",
-      "termsAccepted": "Terms accepted",
       "complete": "Complete",
       "required": "Required"
     },
@@ -698,7 +689,13 @@
       "subtitle": "This helps us show the right terminals, banks, and phone format for you",
       "detected": "detected"
     },
-    "payment": {},
+    "payment": {
+      "weAccept": "We accept"
+    },
+    "preferredTerminal": {
+      "indicator": "Your preferred terminal",
+      "changeForThisOrder": "Change for this order"
+    },
     "form": {
       "fullName": "Full Name",
       "email": "Email",
@@ -833,7 +830,9 @@
   "Game": {
     "NavigationArrows": {
       "previousGame": "Previous game",
-      "nextGame": "Next game"
+      "nextGame": "Next game",
+      "previous": "Previous",
+      "next": "Next"
     },
     "QuestionsDrawer": {
       "title": "Questions",
@@ -1064,13 +1063,17 @@
       "viewOnBGG": "View on BGG"
     },
     "offers": {
-      "availableOffers": "Available Offers ({count})"
+      "availableOffers": "Available Offers ({count})",
+      "activeAuctions": "Active Auctions ({count})"
     },
     "sort": {
       "priceLowHigh": "Price: Low to High",
       "priceHighLow": "Price: High to Low",
       "conditionBestFirst": "Condition: Best First",
-      "newestFirst": "Newest First"
+      "newestFirst": "Newest First",
+      "priceAsc": "Price ↑",
+      "priceDesc": "Price ↓",
+      "newest": "Newest"
     },
     "filter": {
       "filters": "Filters",
@@ -1079,20 +1082,24 @@
       "clearFilters": "Clear Filters",
       "allListings": "All Listings",
       "instantBuy": "Instant Buy",
-      "contactSeller": "Contact Seller"
+      "contactSeller": "Contact Seller",
+      "all": "All",
+      "buy": "Buy now",
+      "contact": "Contact"
     },
     "cart": {
       "addedToCart": "Added to cart",
       "viewCart": "View Cart"
     },
     "actions": {
-      "sellThisGame": "Sell This Game"
+      "sellThisGame": "Sell this game",
+      "gotThisGame": "Have a copy gathering dust?"
     },
     "emptyState": {
       "noOffersMatch": "No offers match your filters",
       "tryAdjusting": "Try adjusting your filters to see more results.",
-      "noOffersYet": "No offers available yet",
-      "beFirstToSell": "Be the first to list your copy of this game"
+      "noOffersYet": "No copies listed yet",
+      "beFirstToSell": "Have a copy gathering dust? Someone may be looking for it."
     },
     "errors": {
       "gameNotFound": "Game not found",
@@ -1138,13 +1145,14 @@
       "privacyPolicy": "Privacy policy",
       "termsOfService": "Terms of service",
       "sellerTerms": "Seller terms",
-      "fees": "Fees",
-      "deliveryAndReturns": "Delivery & Returns"
+      "fees": "Fees"
     },
     "copyright": "Copyright © 2025-{year} Second Turn Games SIA",
     "compliance": {
       "paymentMethods": "Accepted payment methods",
-      "contactUs": "Contact us"
+      "contactUs": "Contact us",
+      "delivery": "Delivery",
+      "returns": "Returns"
     }
   },
   "Legal": {
@@ -2003,6 +2011,17 @@
       "download": "Download",
       "gdprNote": "This feature complies with GDPR Article 20. Learn more in our",
       "privacyPolicy": "Privacy Policy"
+    },
+    "preferredTerminal": {
+      "title": "Preferred Terminal",
+      "description": "Save your favorite terminal for faster checkout and shipping.",
+      "choose": "Choose Terminal",
+      "change": "Change",
+      "remove": "Remove",
+      "updated": "Preferred terminal updated",
+      "removed": "Preferred terminal removed",
+      "errorUpdate": "Failed to update preferred terminal",
+      "errorRemove": "Failed to remove preferred terminal"
     }
   },
   "LoginActivity": {
@@ -2212,6 +2231,14 @@
       "subtotalAll": "Subtotal (all baskets)",
       "separateCheckout": "Each basket is checked out and paid separately",
       "shippingNote": "Shipping is added per seller at checkout"
+    },
+    "expiredItems": {
+      "title": "Previously in your cart",
+      "description": "These items are no longer reserved but still available.",
+      "dismissAll": "Dismiss all",
+      "addAgain": "Add to cart again",
+      "adding": "Adding...",
+      "noLongerAvailable": "This item is no longer available"
     }
   },
   "MyListings": {
@@ -2264,6 +2291,16 @@
         "description": "Start saving listings you're interested in by clicking the heart icon on any listing card or detail page.",
         "button": "Browse Listings"
       }
+    },
+    "auction": {
+      "active": "Auction ({time})",
+      "awaitingPayment": "Awaiting Payment",
+      "noBids": "No Bids",
+      "paymentExpired": "Payment Expired",
+      "sold": "Sold (Auction)",
+      "processing": "Ending...",
+      "winningBid": "Winning bid: {amount}",
+      "payBy": "Pay by: {time}"
     },
     "clipboard": {
       "success": "Link copied to clipboard"
@@ -2819,7 +2856,7 @@
     "availableOnSTG": "Available on Second Turn Games",
 
     "noListingsYet": "No one is selling this game yet",
-    "sellThisGame": "Sell This Game",
+    "sellThisGame": "Sell this game",
 
     "helpButton": "How to play",
     "statsButton": "Statistics",

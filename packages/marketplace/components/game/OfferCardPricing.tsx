@@ -20,30 +20,46 @@ export function OfferCardPricing({ listing, variant = 'desktop' }: OfferCardPric
   if (isAuctionListing(listing)) {
     const hasBids = listing.auction_bid_count !== undefined && listing.auction_bid_count > 0;
     const displayPrice = listing.auction_current_bid || listing.auction_start_price || 0;
+    const isEnded = listing.auction_ends_at && new Date(listing.auction_ends_at) < new Date();
 
     return (
       <div className={variant === 'mobile' ? '' : 'text-right'}>
-        {/* Auction badge */}
+        {/* Auction badge — show "Ended" variant for expired auctions */}
         {variant === 'desktop' && (
           <div className="flex items-center gap-2 justify-end mb-1">
-            <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />}>
-              {t('auction.badge')}
-            </Badge>
+            {isEnded ? (
+              <Badge variant="default" size="sm">
+                {t('auction.ended')}
+              </Badge>
+            ) : (
+              <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />}>
+                {t('auction.badge')}
+              </Badge>
+            )}
           </div>
         )}
         {variant === 'mobile' && (
-          <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />}>
-            {t('auction.badge')}
-          </Badge>
+          isEnded ? (
+            <Badge variant="default" size="sm">
+              {t('auction.ended')}
+            </Badge>
+          ) : (
+            <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />}>
+              {t('auction.badge')}
+            </Badge>
+          )
         )}
         {/* Price display */}
         {hasBids ? (
           <>
-            <div className={`${priceClasses} font-bold text-aurora-purple ${variant === 'mobile' ? 'mt-1' : ''}`}>
+            <div className={`${priceClasses} font-bold ${isEnded ? 'text-text-muted' : 'text-aurora-purple'} ${variant === 'mobile' ? 'mt-1' : ''}`}>
               {formatPrice(displayPrice)}
             </div>
             <div className="text-xs text-text-muted mt-0.5">
-              {listing.auction_bid_count} {listing.auction_bid_count === 1 ? t('auction.bid') : t('auction.bids')}
+              {isEnded
+                ? t('auction.finalBid')
+                : `${listing.auction_bid_count} ${listing.auction_bid_count === 1 ? t('auction.bid') : t('auction.bids')}`
+              }
             </div>
           </>
         ) : (

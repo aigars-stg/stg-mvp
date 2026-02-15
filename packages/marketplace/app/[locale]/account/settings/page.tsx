@@ -15,6 +15,7 @@ import { NewsletterSettings } from '@/components/newsletter/NewsletterSettings';
 import { PhoneInput } from '@/components/common/PhoneInput';
 import { getCountryFlag, getCountryName, type CountryCode } from '@/lib/country-utils';
 import { formatDate } from '@/lib/date-utils';
+import { PreferredTerminalSection } from '@/components/account/PreferredTerminalSection';
 
 export default function AccountSettingsPage() {
   const t = useTranslations('AccountSettings');
@@ -499,6 +500,9 @@ export default function AccountSettingsPage() {
               )}
             </div>
           </Card>
+
+          {/* Preferred Terminal */}
+          <PreferredTerminalSection />
 
           {/* View Public Profile */}
           <Card padding="lg" className="sm:p-6 p-4">

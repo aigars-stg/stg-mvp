@@ -29,7 +29,7 @@ interface CartBasketProps {
   removingItemId?: string | null;
   onCheckout: () => void;
   isCheckingOut?: boolean;
-  onItemExpired?: (listingId: string) => void;
+  onItemExpired?: (item: CartItemData) => void;
   onExtend?: () => Promise<void>;
   canExtend?: boolean;
 }
@@ -106,7 +106,7 @@ export function CartBasket({
                   const now = new Date();
                   basket.items.forEach(item => {
                     if (onItemExpired && new Date(item.expires_at) <= now) {
-                      onItemExpired(item.listing_id);
+                      onItemExpired(item);
                     }
                   });
                 }}

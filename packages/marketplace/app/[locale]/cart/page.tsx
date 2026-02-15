@@ -7,7 +7,8 @@ import { ShoppingBasket as ShoppingCart, AlertCircle } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useCart } from '@/lib/contexts/CartContext';
 import { CountryPrompt } from '@/components/onboarding';
-import { CartBasket, CartBasketSkeleton, type CartBasketData } from '@/components/cart';
+import { CartBasket, CartBasketSkeleton, type CartBasketData, type CartItemData } from '@/components/cart';
+import { ExpiredItemsSection } from '@/components/cart/ExpiredItemsSection';
 import { useTranslations } from 'next-intl';
 import { formatPrice } from '@/lib/services/pricing';
 
@@ -21,7 +22,7 @@ interface CartSummary {
 export default function CartPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
-  const { fetchCart: refreshCartContext } = useCart();
+  const { fetchCart: refreshCartContext, captureExpiredItems, expiredItems } = useCart();
   const t = useTranslations('Cart');
 
   const [baskets, setBaskets] = useState<CartBasketData[]>([]);
@@ -45,20 +46,27 @@ export default function CartPage() {
 
       const fetchedBaskets: CartBasketData[] = data.baskets || [];
 
-      // Find and remove any expired items
-      const expiredItems: string[] = [];
+      // Find expired items, capture them, then remove from server
+      const expiredItemObjects: CartItemData[] = [];
+      const expiredListingIds: string[] = [];
       fetchedBaskets.forEach(basket => {
         (basket.items || []).forEach(item => {
           if (item.is_expired) {
-            expiredItems.push(item.listing_id);
+            expiredItemObjects.push(item);
+            expiredListingIds.push(item.listing_id);
           }
         });
       });
 
+      // Capture expired items to context before deletion
+      if (expiredItemObjects.length > 0) {
+        captureExpiredItems(expiredItemObjects);
+      }
+
       // If there are expired items, remove them silently
-      if (expiredItems.length > 0) {
+      if (expiredListingIds.length > 0) {
         await Promise.all(
-          expiredItems.map(listingId =>
+          expiredListingIds.map(listingId =>
             fetch(`/api/cart?listingId=${listingId}`, { method: 'DELETE' }).catch(() => { })
           )
         );
@@ -117,10 +125,11 @@ export default function CartPage() {
     }
   };
 
-  // Handle expired item - automatically remove from cart
-  const handleItemExpired = async (listingId: string) => {
+  // Handle expired item - capture to expired state, then remove from cart
+  const handleItemExpired = async (item: CartItemData) => {
+    captureExpiredItems([item]);
     try {
-      await fetch(`/api/cart?listingId=${listingId}`, {
+      await fetch(`/api/cart?listingId=${item.listing_id}`, {
         method: 'DELETE',
       });
       await fetchCart();
@@ -219,20 +228,29 @@ export default function CartPage() {
 
         {/* Empty Cart */}
         {!loading && baskets.length === 0 && (
-          <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
-            <ShoppingCart className="w-16 h-16 text-text-muted mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-polar-night mb-2">
-              {t('emptyCart.title')}
-            </h2>
-            <p className="text-text-secondary mb-6">
-              {t('emptyCart.description')}
-            </p>
-            <Link href="/browse">
-              <Button variant="primary">
-                {t('emptyCart.browseButton')}
-              </Button>
-            </Link>
-          </Card>
+          <>
+            {/* Expired items shown above empty cart message */}
+            {expiredItems.length > 0 && (
+              <div className="mb-6">
+                <ExpiredItemsSection />
+              </div>
+            )}
+
+            <Card padding="lg" className={`text-center flex flex-col justify-center items-center ${expiredItems.length > 0 ? 'min-h-[30vh]' : 'min-h-[60vh]'}`}>
+              <ShoppingCart className="w-16 h-16 text-text-muted mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-polar-night mb-2">
+                {t('emptyCart.title')}
+              </h2>
+              <p className="text-text-secondary mb-6">
+                {t('emptyCart.description')}
+              </p>
+              <Link href="/browse">
+                <Button variant="primary">
+                  {t('emptyCart.browseButton')}
+                </Button>
+              </Link>
+            </Card>
+          </>
         )}
 
         {/* Cart Baskets */}
@@ -250,6 +268,9 @@ export default function CartPage() {
                 canExtend
               />
             ))}
+
+            {/* Expired items section */}
+            {expiredItems.length > 0 && <ExpiredItemsSection />}
 
             {/* Multi-seller Summary */}
             {summary && baskets.length > 1 && (

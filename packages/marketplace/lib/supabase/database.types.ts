@@ -1677,7 +1677,11 @@ export type Database = {
           onboarding_email_step: number | null
           original_email: string | null
           phone: string | null
+          preferred_delivery_country: string | null
           preferred_locale: string | null
+          preferred_terminal_address: string | null
+          preferred_terminal_id: string | null
+          preferred_terminal_name: string | null
           profile_banner_dismissed_until: string | null
           recovery_codes: string[] | null
           recovery_codes_generated_at: string | null
@@ -1701,7 +1705,11 @@ export type Database = {
           onboarding_email_step?: number | null
           original_email?: string | null
           phone?: string | null
+          preferred_delivery_country?: string | null
           preferred_locale?: string | null
+          preferred_terminal_address?: string | null
+          preferred_terminal_id?: string | null
+          preferred_terminal_name?: string | null
           profile_banner_dismissed_until?: string | null
           recovery_codes?: string[] | null
           recovery_codes_generated_at?: string | null
@@ -1725,7 +1733,11 @@ export type Database = {
           onboarding_email_step?: number | null
           original_email?: string | null
           phone?: string | null
+          preferred_delivery_country?: string | null
           preferred_locale?: string | null
+          preferred_terminal_address?: string | null
+          preferred_terminal_id?: string | null
+          preferred_terminal_name?: string | null
           profile_banner_dismissed_until?: string | null
           recovery_codes?: string[] | null
           recovery_codes_generated_at?: string | null
@@ -2481,6 +2493,10 @@ export type Database = {
           payout_account_holder_name: string | null
           payout_iban: string | null
           phone: string | null
+          preferred_delivery_country: string | null
+          preferred_terminal_address: string | null
+          preferred_terminal_id: string | null
+          preferred_terminal_name: string | null
           recovery_deadline: string | null
           seller_status: string | null
           seller_terms_accepted_at: string | null
@@ -2534,6 +2550,31 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      create_order_from_auction: {
+        Args: {
+          p_buyer_id: string
+          p_buyer_wallet_debit_cents?: number
+          p_destination_country?: string
+          p_destination_terminal_address?: string
+          p_destination_terminal_id?: string
+          p_destination_terminal_name?: string
+          p_everypay_payment_reference?: string
+          p_listing_id: string
+          p_locale?: string
+          p_pickup_city?: string
+          p_pickup_notes?: string
+          p_platform_commission_cents?: number
+          p_receiver_email?: string
+          p_receiver_name?: string
+          p_receiver_phone?: string
+          p_seller_id: string
+          p_seller_wallet_credit_cents?: number
+          p_shipping_cost?: number
+          p_shipping_method: string
+          p_winning_bid_euros?: number
+        }
+        Returns: Json
       }
       create_order_from_basket: {
         Args: {

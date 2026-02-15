@@ -82,6 +82,7 @@
     "markAsSold": "Atzīmēt kā pārdotu",
     "removeListing": "Noņemt",
     "copyLink": "Kopēt saiti",
+    "relist": "Publicēt atkārtoti",
     "deletePermanently": "Dzēst neatgriezeniski"
   },
   "DeleteConfirmationModal": {
@@ -655,11 +656,14 @@
     "contactSellerWarning": "Šis sludinājums netiek apstrādāts caur mūsu maksājumu sistēmu. Vienojies par maksājumu tieši ar pārdevēju. Mēs nevaram nodrošināt pircēja aizsardzību šim darījumam.",
     "auction": {
       "badge": "Izsole",
+      "ended": "Izsole beigusies",
       "currentBid": "Pašreizējā solījums",
       "startingPrice": "Sākuma cena",
       "startingAt": "Sākot no €{price}",
       "bid": "solījums",
-      "bids": "solījumi"
+      "bids": "solījumi",
+      "finalBid": "Galīgais solījums",
+      "awaitingPayment": "Gaida maksājumu"
     }
   },
   "Checkout": {
@@ -672,24 +676,11 @@
     },
     "title": "Norēķināšanās",
     "orderFrom": "Pasūtījums no {sellerName}",
-    "shipping": {
-      "title": "Piegāde uz paku termināli",
-      "description": "Saņem ērtā paku termināli pie Tevis. Ātra un droša piegāde 1-3 darba dienu laikā.",
-      "summaryLine": "Piegāde uz paku termināli"
-    },
-    "sections": {
-      "selectTerminal": "1. Izvēlies saņemšanas termināli",
-      "contactInfo": "2. Kontaktinformācija",
-      "termsConsent": "3. Noteikumi un nosacījumi"
-    },
     "collapse": {
       "selectTerminal": "Izvēlies saņemšanas termināli",
       "contactInfo": "Kontaktinformācija",
-      "termsConsent": "Noteikumi un nosacījumi",
       "terminalPrompt": "Izvēlies pakomātu",
       "contactPrompt": "Nosūtīsim izsekošanas informāciju šeit",
-      "termsPrompt": "Lūdzu, izskatiet un apstipriniet",
-      "termsAccepted": "Noteikumi apstiprināti",
       "complete": "Pabeigts",
       "required": "Obligāts"
     },
@@ -698,7 +689,13 @@
       "subtitle": "Tas palīdz mums parādīt piemērotus termināļus, bankas un tālruņa formātu",
       "detected": "noteikts"
     },
-    "payment": {},
+    "payment": {
+      "weAccept": "Mēs pieņemam"
+    },
+    "preferredTerminal": {
+      "indicator": "Jūsu iecienītais terminālis",
+      "changeForThisOrder": "Mainīt šim pasūtījumam"
+    },
     "form": {
       "fullName": "Vārds un uzvārds",
       "email": "E-pasts",
@@ -833,7 +830,9 @@
   "Game": {
     "NavigationArrows": {
       "previousGame": "Iepriekšējā spēle",
-      "nextGame": "Nākamā spēle"
+      "nextGame": "Nākamā spēle",
+      "previous": "Iepriekšējā",
+      "next": "Nākamā"
     },
     "QuestionsDrawer": {
       "title": "Jautājumi",
@@ -1064,13 +1063,17 @@
       "viewOnBGG": "Skatīt BGG"
     },
     "offers": {
-      "availableOffers": "Pieejamie piedāvājumi ({count})"
+      "availableOffers": "Pieejamie piedāvājumi ({count})",
+      "activeAuctions": "Aktīvās izsoles ({count})"
     },
     "sort": {
       "priceLowHigh": "Cena: no zemākās",
       "priceHighLow": "Cena: no augstākās",
       "conditionBestFirst": "Stāvoklis: labākie pirmie",
-      "newestFirst": "Jaunākie pirmie"
+      "newestFirst": "Jaunākie pirmie",
+      "priceAsc": "Cena ↑",
+      "priceDesc": "Cena ↓",
+      "newest": "Jaunākie"
     },
     "filter": {
       "filters": "Filtri",
@@ -1079,20 +1082,24 @@
       "clearFilters": "Notīrīt filtrus",
       "allListings": "Visi sludinājumi",
       "instantBuy": "Pirkt uzreiz",
-      "contactSeller": "Sazināties ar pārdevēju"
+      "contactSeller": "Sazināties ar pārdevēju",
+      "all": "Visi",
+      "buy": "Pirkt",
+      "contact": "Kontaktēt"
     },
     "cart": {
       "addedToCart": "Pievienots grozam",
       "viewCart": "Skatīt grozu"
     },
     "actions": {
-      "sellThisGame": "Pārdot šo spēli"
+      "sellThisGame": "Pārdod šo spēli",
+      "gotThisGame": "Stāv plauktā un krāj putekļus?"
     },
     "emptyState": {
       "noOffersMatch": "Neviens piedāvājums neatbilst filtriem",
       "tryAdjusting": "Mēģini pielāgot filtrus, lai redzētu vairāk rezultātu.",
       "noOffersYet": "Piedāvājumu pagaidām nav",
-      "beFirstToSell": "Esi pirmais, kas piedāvā šo spēli"
+      "beFirstToSell": "Stāv plauktā un krāj putekļus? Iespējams, kāds to meklē."
     },
     "errors": {
       "gameNotFound": "Spēle nav atrasta",
@@ -1138,13 +1145,14 @@
       "privacyPolicy": "Privātuma politika",
       "termsOfService": "Lietošanas noteikumi",
       "sellerTerms": "Pārdevēja noteikumi",
-      "fees": "Maksas",
-      "deliveryAndReturns": "Piegāde un atgriešana"
+      "fees": "Maksas"
     },
     "copyright": "Autortiesības © 2025-{year} Second Turn Games SIA",
     "compliance": {
       "paymentMethods": "Pieņemtie maksājumu veidi",
-      "contactUs": "Sazināties ar mums"
+      "contactUs": "Sazināties ar mums",
+      "delivery": "Piegāde",
+      "returns": "Atgriešana"
     }
   },
   "Legal": {
@@ -2003,6 +2011,17 @@
       "download": "Lejupielādēt",
       "gdprNote": "Šī funkcija atbilst GDPR 20. pantam. Uzzini vairāk mūsu",
       "privacyPolicy": "Privātuma politikā"
+    },
+    "preferredTerminal": {
+      "title": "Iecienītais terminālis",
+      "description": "Saglabā savu iecienīto termināli ātrākai norēķināšanās un sūtīšanai.",
+      "choose": "Izvēlēties termināli",
+      "change": "Mainīt",
+      "remove": "Noņemt",
+      "updated": "Iecienītais terminālis atjaunināts",
+      "removed": "Iecienītais terminālis noņemts",
+      "errorUpdate": "Neizdevās atjaunināt iecienīto termināli",
+      "errorRemove": "Neizdevās noņemt iecienīto termināli"
     }
   },
   "LoginActivity": {
@@ -2212,6 +2231,14 @@
       "subtotalAll": "Starpsumma (visi grozi)",
       "separateCheckout": "Katrs grozs tiek norēķināts un apmaksāts atsevišķi",
       "shippingNote": "Piegāde tiek pievienota katram pārdevējam pie norēķināšanās"
+    },
+    "expiredItems": {
+      "title": "Iepriekš tavā grozā",
+      "description": "Šīs preces vairs nav rezervētas, bet joprojām ir pieejamas.",
+      "dismissAll": "Noņemt visas",
+      "addAgain": "Pievienot grozam vēlreiz",
+      "adding": "Pievieno...",
+      "noLongerAvailable": "Šī prece vairs nav pieejama"
     }
   },
   "MyListings": {
@@ -2264,6 +2291,16 @@
         "description": "Sāc saglabāt sludinājumus, kas tev interesē, noklikšķinot uz sirsniņas ikonas jebkurā sludinājuma kartē vai detaļu lapā.",
         "button": "Pārlūkot sludinājumus"
       }
+    },
+    "auction": {
+      "active": "Izsole ({time})",
+      "awaitingPayment": "Gaida maksājumu",
+      "noBids": "Nav solījumu",
+      "paymentExpired": "Maksājuma termiņš beidzies",
+      "sold": "Pārdots (izsole)",
+      "processing": "Beidzas...",
+      "winningBid": "Uzvarošais solījums: {amount}",
+      "payBy": "Apmaksāt līdz: {time}"
     },
     "clipboard": {
       "success": "Saite nokopēta starpliktuvē"

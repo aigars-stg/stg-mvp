@@ -24,10 +24,6 @@ const FeedbackButton = dynamic(() => import('@/components/feedback/FeedbackButto
   ssr: false,
 });
 
-// Lazy load NewsletterSignup - client component in footer
-const NewsletterSignup = dynamic(() => import('@/components/newsletter/NewsletterSignup').then(mod => ({ default: mod.NewsletterSignup })), {
-  ssr: false,
-});
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -186,13 +182,6 @@ export default async function LocaleLayout({ children, params }: Props) {
           {/* Footer */}
           <footer className="bg-bg-elevated border-t border-border-subtle mt-12 sm:mt-24 pb-20 lg:pb-0">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-              {/* Newsletter Section */}
-              <div className="mb-8 pb-8 border-b border-border-subtle">
-                <div className="max-w-md">
-                  <NewsletterSignup />
-                </div>
-              </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
                 <div className="md:col-span-2">
                   <Image src="/images/logo_nav.svg" alt="Second Turn Games" width={160} height={40} className="h-10 w-auto mb-3 sm:mb-4" />
@@ -226,15 +215,17 @@ export default async function LocaleLayout({ children, params }: Props) {
                     <span className="sr-only">{tFooter('compliance.paymentMethods')}</span>
                     <Image src="/images/payments/mastercard.svg" alt="Mastercard" width={152} height={108} className="h-7 w-auto" />
                     <Image src="/images/payments/visa.svg" alt="Visa" width={262} height={85} className="h-4 w-auto" />
-                    <nav aria-label="Payment compliance" className="flex flex-wrap items-center gap-x-1">
-                      <span className="text-border-subtle" aria-hidden="true">|</span>
+                    <nav aria-label="Payment compliance" className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-1">
+                      <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
                       <Link href="/legal#contact" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('compliance.contactUs')}</Link>
-                      <span className="text-border-subtle" aria-hidden="true">|</span>
+                      <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
                       <Link href="/legal?section=terms" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.termsOfService')}</Link>
-                      <span className="text-border-subtle" aria-hidden="true">|</span>
+                      <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
+                      <Link href="/legal?section=buyer#8-shipping-and-delivery" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('compliance.delivery')}</Link>
+                      <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
+                      <Link href="/legal?section=buyer#10-returns-exchanges--refunds" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('compliance.returns')}</Link>
+                      <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
                       <Link href="/legal?section=privacy" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.privacyPolicy')}</Link>
-                      <span className="text-border-subtle" aria-hidden="true">|</span>
-                      <Link href="/legal?section=buyer#8-shipping-and-delivery" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.deliveryAndReturns')}</Link>
                     </nav>
                   </div>
                 </div>

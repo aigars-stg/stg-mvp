@@ -15,6 +15,31 @@ interface CartItem {
     is_expired: boolean;
 }
 
+// Expired item preserved in session state after reservation expires
+export interface ExpiredCartItem {
+    listing_id: string;
+    game_name: string;
+    bgg_game_id: number;
+    price: number;
+    photo_url: string | null;
+    game_thumbnail: string | null;
+    condition: string;
+    is_expansion: boolean;
+    expired_at: string;
+}
+
+// Input type for capturing expired items (accepts CartItemData-shaped objects)
+interface ExpiredCartItemInput {
+    listing_id: string;
+    game_name: string;
+    bgg_game_id: number;
+    price: number;
+    photo_url: string | null;
+    game_thumbnail: string | null;
+    condition: string;
+    is_expansion: boolean;
+}
+
 interface CartBasket {
     basket_id: string;
     seller_id: string;
@@ -52,6 +77,10 @@ interface CartContextType {
     fetchCart: () => Promise<void>;
     addToCart: (listingId: string) => Promise<CartOperationResult>;
     removeFromCart: (listingId: string) => Promise<CartOperationResult>;
+    expiredItems: ExpiredCartItem[];
+    captureExpiredItems: (items: ExpiredCartItemInput[]) => void;
+    dismissExpiredItem: (listingId: string) => void;
+    clearExpiredItems: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -61,6 +90,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cart, setCart] = useState<CartData | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [expiredItems, setExpiredItems] = useState<ExpiredCartItem[]>([]);
 
     const fetchCart = useCallback(async () => {
         if (!user) {
@@ -174,6 +204,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return data;
     }, [user, fetchCart]);
 
+    const captureExpiredItems = useCallback((items: ExpiredCartItemInput[]) => {
+        setExpiredItems(prev => {
+            const existingIds = new Set(prev.map(i => i.listing_id));
+            const newItems: ExpiredCartItem[] = items
+                .filter(item => !existingIds.has(item.listing_id))
+                .map(item => ({
+                    listing_id: item.listing_id,
+                    game_name: item.game_name,
+                    bgg_game_id: item.bgg_game_id,
+                    price: item.price,
+                    photo_url: item.photo_url,
+                    game_thumbnail: item.game_thumbnail,
+                    condition: item.condition,
+                    is_expansion: item.is_expansion,
+                    expired_at: new Date().toISOString(),
+                }));
+            return newItems.length > 0 ? [...prev, ...newItems] : prev;
+        });
+    }, []);
+
+    const dismissExpiredItem = useCallback((listingId: string) => {
+        setExpiredItems(prev => prev.filter(i => i.listing_id !== listingId));
+    }, []);
+
+    const clearExpiredItems = useCallback(() => {
+        setExpiredItems([]);
+    }, []);
+
     const value = {
         cart,
         baskets: cart?.baskets || [],
@@ -184,6 +242,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         fetchCart,
         addToCart,
         removeFromCart,
+        expiredItems,
+        captureExpiredItems,
+        dismissExpiredItem,
+        clearExpiredItems,
     };
 
     return (

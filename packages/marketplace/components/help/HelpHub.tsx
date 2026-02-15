@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { HelpNav, type HelpSectionId } from './HelpNav';
 import { LegalSection } from '../legal/LegalSection';
@@ -19,6 +19,10 @@ function HelpHubInner({ documents }: HelpHubProps) {
   const searchParams = useSearchParams();
   const section = (searchParams.get('section') || 'overview') as HelpSectionId;
   const doc = documents[section];
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [section]);
 
   if (!doc) {
     return (

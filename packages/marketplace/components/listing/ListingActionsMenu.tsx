@@ -9,6 +9,8 @@ export interface ListingActionsMenuProps {
   listingId: string;
   bggGameId: number;
   status: 'draft' | 'active' | 'sold' | 'removed';
+  isAuction?: boolean;
+  auctionBidCount?: number;
   onStatusChange: (status: 'draft' | 'active' | 'sold' | 'removed') => void;
   onDelete: () => void;
   onLinkCopied?: () => void;
@@ -18,6 +20,8 @@ export function ListingActionsMenu({
   listingId,
   bggGameId,
   status,
+  isAuction,
+  auctionBidCount,
   onStatusChange,
   onDelete,
   onLinkCopied,
@@ -44,6 +48,11 @@ export function ListingActionsMenu({
   const handleEdit = () => {
     setIsOpen(false);
     router.push(`/sell?edit=${listingId}`);
+  };
+
+  const handleRelist = () => {
+    setIsOpen(false);
+    router.push(`/sell?relist=${listingId}`);
   };
 
   const handleView = () => {
@@ -108,16 +117,30 @@ export function ListingActionsMenu({
 
           {/* Status Actions */}
           {status !== 'active' && (
-            <button
-              onClick={() => handleStatusChange('active')}
-              className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
-            >
-              <RotateCcw className="w-4 h-4 text-northern-lights-green" />
-              {status === 'draft' ? t('publish') : t('reactivate')}
-            </button>
+            <>
+              {/* Re-list for removed auctions (can't reactivate since end time passed) */}
+              {status === 'removed' && isAuction ? (
+                <button
+                  onClick={handleRelist}
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
+                >
+                  <RotateCcw className="w-4 h-4 text-northern-lights-green" />
+                  {t('relist')}
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleStatusChange('active')}
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
+                >
+                  <RotateCcw className="w-4 h-4 text-northern-lights-green" />
+                  {status === 'draft' ? t('publish') : t('reactivate')}
+                </button>
+              )}
+            </>
           )}
 
-          {status === 'active' && (
+          {/* Mark as Sold - hide for auctions (sales happen via winner checkout) */}
+          {status === 'active' && !isAuction && (
             <button
               onClick={() => handleStatusChange('sold')}
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"
@@ -127,7 +150,8 @@ export function ListingActionsMenu({
             </button>
           )}
 
-          {(status === 'active' || status === 'draft') && (
+          {/* Remove - hide for active auctions with bids (can't cancel after bids) */}
+          {(status === 'active' || status === 'draft') && !(isAuction && status === 'active' && (auctionBidCount ?? 0) > 0) && (
             <button
               onClick={() => handleStatusChange('removed')}
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors w-full text-left"

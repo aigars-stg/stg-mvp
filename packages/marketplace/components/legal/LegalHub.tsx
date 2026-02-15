@@ -28,6 +28,8 @@ function LegalHubInner({ documents }: LegalHubProps) {
         const y = el.getBoundingClientRect().top + window.scrollY - 80;
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
+    } else {
+      window.scrollTo({ top: 0 });
     }
   }, [section]);
 

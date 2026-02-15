@@ -13,7 +13,8 @@ import { WantedListingActionsMenu } from '@/components/wanted/WantedListingActio
 import { WantedStatusChangeModal } from '@/components/wanted/WantedStatusChangeModal';
 import { WantedDeleteConfirmationModal } from '@/components/wanted/WantedDeleteConfirmationModal';
 import { NotificationModal } from '@/components/common/NotificationModal';
-import { getStatusLabel, type ListingWithSeller } from '@/lib/types/listing';
+import { getStatusLabel, isAuctionListing, getAuctionTimeRemaining, formatCompactTimeRemaining, type Listing, type ListingWithSeller } from '@/lib/types/listing';
+import { formatPrice } from '@/lib/services/pricing';
 import { getWantedStatusLabel } from '@/lib/types/wanted-listing';
 import { OfflineError } from '@/components/common/OfflineError';
 import { useTranslations } from 'next-intl';
@@ -45,9 +46,16 @@ const WANTED_STATUS_COLORS = {
   cancelled: 'text-text-muted',
 };
 
+type AuctionStatusDisplay = {
+  Icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  color: string;
+};
+
 function MyListingsContent() {
   const t = useTranslations('MyListings');
   const tListings = useTranslations('Listings');
+  const tAuction = useTranslations('MyListings.auction');
 
   const {
     user,
@@ -96,6 +104,46 @@ function MyListingsContent() {
     savedError,
     refetchSavedListings,
   } = useMyListings();
+
+  // Determine auction-specific status display for seller's listing
+  const getAuctionStatusDisplay = (listing: Listing): AuctionStatusDisplay | null => {
+    if (!isAuctionListing(listing)) return null;
+
+    const now = new Date();
+    const isEnded = listing.auction_ends_at && new Date(listing.auction_ends_at) < now;
+
+    if (listing.status === 'sold') {
+      return { Icon: Package, label: tAuction('sold'), color: 'text-frost-ice' };
+    }
+
+    if (listing.status === 'removed') {
+      if ((listing.auction_bid_count ?? 0) > 0) {
+        return { Icon: XCircle, label: tAuction('paymentExpired'), color: 'text-aurora-red' };
+      }
+      return { Icon: XCircle, label: tAuction('noBids'), color: 'text-text-muted' };
+    }
+
+    if (listing.status === 'active') {
+      if (!isEnded && listing.auction_ends_at) {
+        const timeRemaining = getAuctionTimeRemaining(listing.auction_ends_at);
+        return {
+          Icon: Clock,
+          label: tAuction('active', { time: formatCompactTimeRemaining(timeRemaining) }),
+          color: timeRemaining.isEndingSoon ? 'text-aurora-red' : 'text-aurora-green',
+        };
+      }
+
+      if (listing.auction_winner_id) {
+        return { Icon: Clock, label: tAuction('awaitingPayment'), color: 'text-aurora-orange' };
+      }
+
+      // Ended but cron hasn't processed yet
+      return { Icon: Clock, label: tAuction('processing'), color: 'text-text-secondary' };
+    }
+
+    // Draft auction
+    return null;
+  };
 
   if (!user) {
     return (
@@ -277,31 +325,61 @@ function MyListingsContent() {
             {/* Listings List */}
             {!loading && !isOffline && filteredListings.length > 0 && (
               <div className="space-y-4">
-                {filteredListings.map((listing) => (
-                  <div key={listing.id}>
-                    {/* Status & Actions Header */}
-                    <div className="flex items-center justify-between mb-2 px-1">
-                      <div className={`px-3 py-1 rounded-full bg-bg-secondary flex items-center gap-1.5 ${STATUS_COLORS[listing.status]}`}>
-                        {(() => {
-                          const StatusIcon = STATUS_ICONS[listing.status];
-                          return <StatusIcon className="w-4 h-4" />;
-                        })()}
-                        <span className="text-xs font-medium">
-                          {getStatusLabel(listing.status)}
-                        </span>
+                {filteredListings.map((listing) => {
+                  const auctionStatus = getAuctionStatusDisplay(listing);
+
+                  return (
+                    <div key={listing.id}>
+                      {/* Status & Actions Header */}
+                      <div className="flex items-center justify-between mb-2 px-1">
+                        {auctionStatus ? (
+                          <div className={`px-3 py-1 rounded-full bg-bg-secondary flex items-center gap-1.5 ${auctionStatus.color}`}>
+                            <auctionStatus.Icon className="w-4 h-4" />
+                            <span className="text-xs font-medium">
+                              {auctionStatus.label}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className={`px-3 py-1 rounded-full bg-bg-secondary flex items-center gap-1.5 ${STATUS_COLORS[listing.status]}`}>
+                            {(() => {
+                              const StatusIcon = STATUS_ICONS[listing.status];
+                              return <StatusIcon className="w-4 h-4" />;
+                            })()}
+                            <span className="text-xs font-medium">
+                              {getStatusLabel(listing.status)}
+                            </span>
+                          </div>
+                        )}
+                        <ListingActionsMenu
+                          listingId={listing.id}
+                          bggGameId={listing.bgg_game_id}
+                          status={listing.status}
+                          isAuction={isAuctionListing(listing)}
+                          auctionBidCount={listing.auction_bid_count}
+                          onStatusChange={(newStatus) => handleStatusChangeRequest(listing, newStatus)}
+                          onDelete={() => handleDeleteRequest(listing)}
+                          onLinkCopied={() => setShowClipboardSuccess(true)}
+                        />
                       </div>
-                      <ListingActionsMenu
-                        listingId={listing.id}
-                        bggGameId={listing.bgg_game_id}
-                        status={listing.status}
-                        onStatusChange={(newStatus) => handleStatusChangeRequest(listing, newStatus)}
-                        onDelete={() => handleDeleteRequest(listing)}
-                        onLinkCopied={() => setShowClipboardSuccess(true)}
-                      />
+
+                      {/* Auction winner info for sellers */}
+                      {auctionStatus && listing.auction_winner_id && listing.status === 'active' && (
+                        <div className="px-1 mb-2 flex items-center gap-2 text-xs text-text-secondary">
+                          <span>{tAuction('winningBid', { amount: formatPrice(listing.auction_current_bid ?? 0) })}</span>
+                          {listing.auction_payment_deadline && (() => {
+                            const deadline = getAuctionTimeRemaining(listing.auction_payment_deadline);
+                            if (deadline.isEnded) return null;
+                            return (
+                              <span className="text-text-muted">· {tAuction('payBy', { time: formatCompactTimeRemaining(deadline) })}</span>
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      <OfferCard listing={listing as ListingWithSeller} />
                     </div>
-                    <OfferCard listing={listing as ListingWithSeller} />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </>

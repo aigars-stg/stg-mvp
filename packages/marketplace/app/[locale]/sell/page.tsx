@@ -209,6 +209,10 @@ function SellPageContent() {
   const editListingId = searchParams.get('edit');
   const isEditMode = !!editListingId;
 
+  // Re-list mode state (pre-fills form from existing listing, but creates a new one)
+  const relistListingId = searchParams.get('relist');
+  const isRelistMode = !!relistListingId && !isEditMode;
+
   // Pre-fill search query (from navbar search)
   const initialSearchQuery = searchParams.get('q');
 
@@ -523,6 +527,92 @@ function SellPageContent() {
     fetchListingForEdit();
   // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, [isEditMode, editListingId, user]);
+
+  // Fetch listing data for relist mode (pre-fills form but creates a new listing)
+  useEffect(() => {
+    async function fetchListingForRelist() {
+      if (!isRelistMode || !relistListingId || !user) return;
+
+      try {
+        setIsLoadingListing(true);
+        setLoadError('');
+
+        const response = await fetch(`/api/listings/${relistListingId}`);
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setLoadError('Listing not found');
+          } else {
+            setLoadError('Failed to load listing');
+          }
+          return;
+        }
+
+        const data = await response.json();
+        const listing = data.listing;
+
+        // Check if user owns this listing
+        if (listing.seller_id !== user.id) {
+          setLoadError('You do not have permission to re-list this item');
+          return;
+        }
+
+        // Derive transaction method and pricing format from listing data
+        const transactionMethod: TransactionMethod = listing.transaction_method
+          || (listing.listing_type === 'contact_seller' ? 'contact_seller' : 'instant_buy');
+        const pricingFormat: PricingFormat = listing.pricing_format
+          || (listing.listing_type === 'auction' ? 'auction' : 'fixed_price');
+
+        // Pre-populate form with listing data (same as edit, but termsAccepted = false)
+        setFormData({
+          transactionMethod,
+          pricingFormat,
+          selectedGame: {
+            id: listing.bgg_game_id,
+            name: listing.game_name,
+            yearPublished: listing.game_year || listing.edition_year,
+            thumbnail: listing.game?.thumbnail || null,
+            image: listing.game?.image || null,
+            playerCount: listing.game?.player_count || null,
+            minAge: listing.game?.min_age || null,
+            playingTime: listing.game?.playing_time || null,
+          },
+          selectedGameDisplayName: listing.game_name,
+          selectedVersion: {
+            id: 0,
+            isManual: true,
+            name: listing.version_name || '',
+            publishers: listing.publisher ? listing.publisher.split(', ') : [],
+            publisher: listing.publisher || '',
+            languages: listing.language ? listing.language.split(', ') : [],
+            language: listing.language || '',
+            yearPublished: listing.edition_year || null,
+            thumbnail: listing.game?.thumbnail || null,
+            image: listing.game?.image || null,
+          },
+          selectedExpansions: [],
+          photos: [],
+          condition: listing.condition,
+          conditionNotes: listing.condition_notes || '',
+          allComponentsPresent: listing.all_components_present,
+          missingComponents: listing.missing_components || '',
+          price: listing.price.toString(),
+          termsAccepted: false, // Must re-accept terms for new listing
+          auctionDurationDays: listing.auction_duration_days || 3,
+        });
+
+        // Carry over existing photos
+        setExistingPhotoUrls(listing.photo_urls || []);
+      } catch {
+        setLoadError('Failed to load listing');
+      } finally {
+        setIsLoadingListing(false);
+      }
+    }
+
+    fetchListingForRelist();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
+  }, [isRelistMode, relistListingId, user]);
 
   // Fetch wanted listing data when coming from "I have this" flow
   useEffect(() => {
@@ -962,8 +1052,8 @@ function SellPageContent() {
     );
   }
 
-  // Show loading state for edit mode
-  if (isEditMode && isLoadingListing) {
+  // Show loading state for edit/relist mode
+  if ((isEditMode || isRelistMode) && isLoadingListing) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center">
         <div className="text-center">
@@ -974,8 +1064,8 @@ function SellPageContent() {
     );
   }
 
-  // Show error state for edit mode
-  if (isEditMode && loadError) {
+  // Show error state for edit/relist mode
+  if ((isEditMode || isRelistMode) && loadError) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center px-4">
         <Card padding="lg" className="max-w-md w-full text-center">

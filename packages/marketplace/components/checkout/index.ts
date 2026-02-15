@@ -1,3 +1,4 @@
+export { PaymentMethodLogos } from './PaymentMethodLogos';
 export { ReservationTimer } from './ReservationTimer';
 export { TerminalSelector } from './TerminalSelector';
 export { TerminalSelectorWithMap } from './TerminalSelectorWithMap';

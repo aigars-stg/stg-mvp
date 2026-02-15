@@ -30,12 +30,13 @@ export async function POST(request: NextRequest) {
     // Parse request body
     const body = (await request.json()) as SubscribeRequest;
 
-    // Validate email
-    if (!body.email || !isValidEmail(body.email)) {
+    // Determine email: from body (anonymous/footer) or from auth session (settings toggle)
+    const rawEmail = body.email || user?.email;
+    if (!rawEmail || !isValidEmail(rawEmail)) {
       return handleValidationError('Please enter a valid email address', 'Subscribe');
     }
 
-    const email = normalizeEmail(body.email);
+    const email = normalizeEmail(rawEmail);
     const locale: NewsletterLocale = body.locale === 'lv' ? 'lv' : 'en';
     const source: NewsletterSource = body.source || 'footer';
 

@@ -31,6 +31,11 @@ export interface UserProfile {
   deletion_reason?: string | null;
   recovery_deadline?: string | null;
   original_email?: string | null;
+  // Preferred terminal
+  preferred_terminal_id?: string | null;
+  preferred_terminal_name?: string | null;
+  preferred_terminal_address?: string | null;
+  preferred_delivery_country?: string | null;
   // Onboarding tracking
   profile_banner_dismissed_until?: string | null;
   onboarding_email_step?: number;

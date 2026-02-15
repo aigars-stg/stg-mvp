@@ -5,9 +5,10 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@second-turn/design-system';
-import { Package, ArrowLeft, RefreshCw as Loader2, AlertCircle, Truck, User, Email as Mail, CreditCard, ShieldCheck, LocationPin as MapPin } from '@/lib/icons';
+import { Package, ArrowLeft, RefreshCw as Loader2, AlertCircle, User, Email as Mail, CreditCard, ShieldCheck, LocationPin as MapPin } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { TerminalSelectorWithMap } from '@/components/checkout/TerminalSelectorWithMap';
+import { PaymentMethodLogos } from '@/components/checkout/PaymentMethodLogos';
 import { PhoneInput } from '@/components/common/PhoneInput';
 import { isValidPhoneNumber } from '@/lib/phone-utils';
 import { ReservationTimer } from '@/components/checkout/ReservationTimer';
@@ -70,11 +71,13 @@ function CheckoutPageContent() {
   const [countryLoading, setCountryLoading] = useState<CountryCode | null>(null);
   const [detectedCountry, setDetectedCountry] = useState<string | null>(null);
 
-  // Section expansion state — only terminal starts expanded; others open via guided flow
-  const [shippingExpanded, setShippingExpanded] = useState(false);
+  // Preferred terminal auto-selection
+  const [isPreferredTerminal, setIsPreferredTerminal] = useState(false);
+  const [preferredTerminalLoaded, setPreferredTerminalLoaded] = useState(false);
+
+  // Section expansion state — only terminal starts expanded; contact opens via guided flow
   const [terminalExpanded, setTerminalExpanded] = useState(true);
   const [contactExpanded, setContactExpanded] = useState(false);
-  const [termsExpanded, setTermsExpanded] = useState(false);
 
   const profileCountry = profile?.country;
   const hasValidCountry = profileCountry && ['LV', 'LT', 'EE'].includes(profileCountry);
@@ -91,19 +94,13 @@ function CheckoutPageContent() {
   // Overall validation
   const isValid = basket && isTerminalComplete && isContactComplete && isTermsComplete;
 
-  // Auto-collapse contact when user moves to another section
-  const collapseContactIfComplete = useCallback(() => {
-    if (isContactComplete && contactExpanded) {
-      setContactExpanded(false);
-    }
-  }, [isContactComplete, contactExpanded]);
-
   // Unified country change handler
   const handleUnifiedCountryChange = useCallback((country: TerminalCountry) => {
     setSelectedCountry((prev) => {
       if (prev !== country) {
         // Reset terminal when country changes (terminals are country-specific)
         setSelectedTerminal(null);
+        setIsPreferredTerminal(false);
         setTerminalExpanded(true);
       }
       return country;
@@ -147,7 +144,10 @@ function CheckoutPageContent() {
   // Fetch basket and user profile
   useEffect(() => {
     const fetchData = async () => {
-      if (!basketId || !user) return;
+      if (!basketId || !user) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -213,6 +213,32 @@ function CheckoutPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [basketId, user, profile]);
 
+  // Auto-select preferred terminal from profile
+  useEffect(() => {
+    if (
+      preferredTerminalLoaded ||
+      loading ||
+      !basket ||
+      !profile?.preferred_terminal_id ||
+      !profile?.preferred_delivery_country
+    ) return;
+
+    setPreferredTerminalLoaded(true);
+    const country = profile.preferred_delivery_country as TerminalCountry;
+
+    fetch(`/api/shipping/terminals?country=${country}`)
+      .then((res) => res.json())
+      .then((data: { terminals: Terminal[] }) => {
+        const match = (data.terminals || []).find((term: Terminal) => term.id === profile.preferred_terminal_id);
+        if (match) {
+          setSelectedCountry(country);
+          setSelectedTerminal(match);
+          setIsPreferredTerminal(true);
+        }
+      })
+      .catch(() => {});
+  }, [loading, basket, profile, preferredTerminalLoaded]);
+
   // Validate phone when it changes
   useEffect(() => {
     if (receiverPhone) {
@@ -237,36 +263,15 @@ function CheckoutPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTerminal]);
 
-  // Terms: collapse after accepted (only when checkbox toggles)
-  useEffect(() => {
-    if (termsAccepted) {
-      const timer = setTimeout(() => setTermsExpanded(false), 500);
-      return () => clearTimeout(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [termsAccepted]);
-
   // --- Auto-expand effects (guided flow) ---
 
-  // After terminal collapses → expand next incomplete section
+  // After terminal collapses → expand contact if incomplete
   useEffect(() => {
-    if (isTerminalComplete && !terminalExpanded) {
-      if (!isContactComplete) {
-        setContactExpanded(true);
-      } else if (!isTermsComplete) {
-        setTermsExpanded(true);
-      }
+    if (isTerminalComplete && !terminalExpanded && !isContactComplete) {
+      setContactExpanded(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [terminalExpanded]);
-
-  // After contact collapses → expand terms if not accepted
-  useEffect(() => {
-    if (isContactComplete && !contactExpanded && !isTermsComplete) {
-      setTermsExpanded(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contactExpanded]);
 
   // Calculate pricing
   const itemsTotalCents = basket ? Math.round(basket.subtotal * 100) : 0;
@@ -395,7 +400,7 @@ function CheckoutPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary pb-24 lg:pb-8">
+    <div className="min-h-screen bg-bg-primary pb-28 lg:pb-8">
       {/* Header */}
       <div className="bg-frost-ice/5 border-b border-frost-ice/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -421,9 +426,9 @@ function CheckoutPageContent() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid lg:grid-cols-5 gap-6 sm:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-3 sm:space-y-4">
+          <div className="lg:col-span-3 space-y-3 sm:space-y-4">
             {/* Country Gate — shown when profile country is not set */}
             {!hasValidCountry && (
               <div className="bg-snow-white border-2 border-aurora-orange/30 rounded-xl p-4 sm:p-6">
@@ -473,26 +478,6 @@ function CheckoutPageContent() {
             {/* Rest of checkout form — hidden until country is set */}
             {!hasValidCountry ? null : (<>
 
-            {/* Shipping Info */}
-            <CheckoutSection
-              title={t('shipping.title')}
-              icon={<Truck className="w-5 h-5 sm:w-6 sm:h-6 text-frost-ice" />}
-              isExpanded={shippingExpanded}
-              onToggle={() => setShippingExpanded(!shippingExpanded)}
-              collapsedSummary={
-                <span>{t('shipping.summaryLine')} &mdash; {formatPrice(SHIPPING_COST_EUROS)}</span>
-              }
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-text-secondary">
-                  {t('shipping.description')}
-                </p>
-                <span className="font-bold text-polar-night text-lg flex-shrink-0 ml-4">
-                  {formatPrice(SHIPPING_COST_EUROS)}
-                </span>
-              </div>
-            </CheckoutSection>
-
             {/* Terminal Selection */}
             <CheckoutSection
               stepNumber={1}
@@ -500,7 +485,7 @@ function CheckoutPageContent() {
               icon={<MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-frost-ice" />}
               isComplete={isTerminalComplete}
               isExpanded={terminalExpanded}
-              onToggle={() => { if (!terminalExpanded) collapseContactIfComplete(); setTerminalExpanded(!terminalExpanded); }}
+              onToggle={() => setTerminalExpanded(!terminalExpanded)}
               required
               completeLabel={t('collapse.complete')}
               requiredLabel={t('collapse.required')}
@@ -508,6 +493,11 @@ function CheckoutPageContent() {
                 selectedTerminal ? (
                   <span>
                     {selectedTerminal.name} &mdash; {selectedTerminal.address}, {selectedTerminal.city}
+                    {isPreferredTerminal && (
+                      <span className="block text-xs text-frost-ice mt-0.5">
+                        {t('preferredTerminal.indicator')}
+                      </span>
+                    )}
                   </span>
                 ) : (
                   <span className="text-text-muted">{t('collapse.terminalPrompt')}</span>
@@ -518,7 +508,10 @@ function CheckoutPageContent() {
                 country={selectedCountry}
                 onCountryChange={handleUnifiedCountryChange}
                 selectedTerminal={selectedTerminal}
-                onSelect={setSelectedTerminal}
+                onSelect={(terminal) => {
+                  setSelectedTerminal(terminal);
+                  setIsPreferredTerminal(terminal.id === profile?.preferred_terminal_id);
+                }}
               />
             </CheckoutSection>
 
@@ -617,41 +610,21 @@ function CheckoutPageContent() {
               </div>
             </CheckoutSection>
 
-            {/* Terms & Conditions — EveryPay Req 19-20 */}
-            <CheckoutSection
-              stepNumber={3}
-              title={t('collapse.termsConsent')}
-              icon={<ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-frost-ice" />}
-              isComplete={isTermsComplete}
-              isExpanded={termsExpanded}
-              onToggle={() => { if (!termsExpanded) collapseContactIfComplete(); setTermsExpanded(!termsExpanded); }}
-              required
-              completeLabel={t('collapse.complete')}
-              requiredLabel={t('collapse.required')}
-              collapsedSummary={
-                termsAccepted ? (
-                  <span>{t('collapse.termsAccepted')}</span>
-                ) : (
-                  <span className="text-text-muted">{t('collapse.termsPrompt')}</span>
-                )
-              }
-            >
-              {/* Refund policy summary */}
-              <div className="mb-4 p-3 bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-lg">
-                <p className="text-sm font-medium text-polar-night mb-2">
-                  <ShieldCheck className="w-4 h-4 inline-block mr-1.5 -mt-0.5 text-aurora-yellow" />
+            {/* Mobile-only: Inline Terms & Conditions */}
+            <div className="lg:hidden bg-snow-white border border-border rounded-xl p-4">
+              <div className="mb-3 p-2.5 bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-lg">
+                <p className="text-xs font-medium text-polar-night mb-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5 text-aurora-yellow" />
                   {t('consent.refundSummaryTitle')}
                 </p>
-                <ul className="text-sm text-text-secondary space-y-1 list-disc list-inside ml-1">
+                <ul className="text-xs text-text-secondary space-y-0.5 list-disc list-inside ml-1">
                   <li>{t('consent.refundPoint1')}</li>
                   <li>{t('consent.refundPoint2')}</li>
                   <li>{t('consent.refundPoint3')}</li>
                   <li>{t('consent.refundPoint4')}</li>
                 </ul>
               </div>
-
-              {/* Consent checkbox */}
-              <label className="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-bg-elevated transition-colors">
+              <label className="flex items-start gap-3 cursor-pointer p-2 rounded-lg hover:bg-bg-elevated transition-colors">
                 <input
                   type="checkbox"
                   checked={termsAccepted}
@@ -659,7 +632,7 @@ function CheckoutPageContent() {
                   className="mt-0.5 w-6 h-6 rounded border-border text-frost-ice focus:ring-frost-ice focus:ring-offset-0"
                   aria-required="true"
                 />
-                <span className="text-sm text-polar-night">
+                <span className="text-xs text-polar-night">
                   {t('consent.checkboxPrefix')}{' '}
                   <Link href="/legal?section=terms" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
                     {t('consent.termsLink')}
@@ -670,12 +643,12 @@ function CheckoutPageContent() {
                   </Link>
                 </span>
               </label>
-            </CheckoutSection>
+            </div>
             </>)}
           </div>
 
           {/* Order Summary Sidebar (Desktop Only) */}
-          <div className="hidden lg:block lg:col-span-1">
+          <div className="hidden lg:block lg:col-span-2">
             <div className="sticky top-6">
               <div className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6">
                 <h3 className="font-semibold text-polar-night mb-4">
@@ -738,7 +711,7 @@ function CheckoutPageContent() {
                       </div>
                     </div>
 
-                    <div className="flex justify-between pt-4 pb-6">
+                    <div className="flex justify-between pt-4 pb-4">
                       <span className="font-semibold text-polar-night">{t('summary.total')}</span>
                       <span className="text-xl font-bold text-polar-night">
                         {formatCentsToCurrency(pricing.totalChargeCents)}
@@ -747,12 +720,38 @@ function CheckoutPageContent() {
                   </>
                 )}
 
-                {/* Merchant info — EveryPay Req 17 */}
-                <div className="text-xs text-text-muted pb-4 border-b border-border-subtle mb-4">
-                  <p className="font-medium text-text-secondary mb-0.5">{t('merchant.label')}</p>
-                  <p>Second Turn Games SIA</p>
-                  <p>Evalda Valtera 5-35, Riga, LV-1021, Latvia</p>
+                {/* Refund policy summary — compact */}
+                <div className="mb-3 p-2.5 bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-lg">
+                  <p className="text-xs font-medium text-polar-night mb-1">
+                    <ShieldCheck className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5 text-aurora-yellow" />
+                    {t('consent.refundSummaryTitle')}
+                  </p>
+                  <ul className="text-xs text-text-secondary space-y-0.5 list-disc list-inside ml-1">
+                    <li>{t('consent.refundPoint3')}</li>
+                    <li>{t('consent.refundPoint4')}</li>
+                  </ul>
                 </div>
+
+                {/* Terms checkbox — always visible */}
+                <label className="flex items-start gap-2.5 cursor-pointer p-2 rounded-lg hover:bg-bg-elevated transition-colors mb-4">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-0.5 w-5 h-5 rounded border-border text-frost-ice focus:ring-frost-ice focus:ring-offset-0"
+                    aria-required="true"
+                  />
+                  <span className="text-xs text-polar-night leading-relaxed">
+                    {t('consent.checkboxPrefix')}{' '}
+                    <Link href="/legal?section=terms" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                      {t('consent.termsLink')}
+                    </Link>
+                    {' '}{t('consent.and')}{' '}
+                    <Link href="/legal?section=buyer" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                      {t('consent.refundLink')}
+                    </Link>
+                  </span>
+                </label>
 
                 {/* Pay Button */}
                 <Button
@@ -774,6 +773,11 @@ function CheckoutPageContent() {
                   )}
                 </Button>
 
+                {/* Payment method logos */}
+                <div className="mt-3">
+                  <PaymentMethodLogos country={selectedCountry} />
+                </div>
+
                 <Link href="/cart" className="block mt-3">
                   <Button variant="ghost" fullWidth>
                     <ArrowLeft className="w-4 h-4 mr-2" />
@@ -781,8 +785,15 @@ function CheckoutPageContent() {
                   </Button>
                 </Link>
 
+                {/* Merchant info — EveryPay Req 17 */}
+                <div className="text-xs text-text-muted mt-4 pt-4 border-t border-border-subtle">
+                  <p className="font-medium text-text-secondary mb-0.5">{t('merchant.label')}</p>
+                  <p>Second Turn Games SIA</p>
+                  <p>Evalda Valtera 5-35, Riga, LV-1021, Latvia</p>
+                </div>
+
                 {/* Info */}
-                <div className="mt-4 p-3 bg-frost-ice/10 border border-frost-ice/20 rounded-lg">
+                <div className="mt-3 p-3 bg-frost-ice/10 border border-frost-ice/20 rounded-lg">
                   <div className="flex gap-2">
                     <AlertCircle className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
                     <div className="text-xs text-text-secondary">
@@ -837,6 +848,9 @@ function CheckoutPageContent() {
               </>
             )}
           </Button>
+          <div className="mt-2">
+            <PaymentMethodLogos country={selectedCountry} compact />
+          </div>
         </div>
       )}
     </div>
