@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { ConversationListItem } from './ConversationListItem';
-import { RefreshCw as Loader2, ChatBubble as MessageCircle, AlertCircle } from '@/lib/icons';
+import { ChatBubble as MessageCircle, AlertCircle } from '@/lib/icons';
 import type { ConversationListItem as ConversationListItemType } from '@/lib/types/message';
 
 interface ConversationListProps {
@@ -12,6 +13,7 @@ interface ConversationListProps {
 export function ConversationList({
   activeConversationId,
 }: ConversationListProps) {
+  const t = useTranslations('MessagesPage');
   const [conversations, setConversations] = useState<ConversationListItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,8 +51,20 @@ export function ConversationList({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-8 h-8 animate-spin text-frost-ice" />
+      <div className="divide-y divide-snow-storm">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="flex items-start gap-3 p-4 animate-pulse">
+            <div className="w-12 h-12 rounded-xl bg-bg-secondary flex-shrink-0" />
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex justify-between">
+                <div className="h-4 w-24 bg-bg-secondary rounded" />
+                <div className="h-3 w-12 bg-bg-secondary rounded" />
+              </div>
+              <div className="h-3 w-full bg-bg-secondary rounded" />
+              <div className="h-3 w-3/4 bg-bg-secondary rounded" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -59,7 +73,7 @@ export function ConversationList({
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
         <AlertCircle className="w-12 h-12 text-aurora-red" />
-        <p className="text-text-primary">{error}</p>
+        <p className="text-text">{error}</p>
       </div>
     );
   }
@@ -69,11 +83,11 @@ export function ConversationList({
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
         <MessageCircle className="w-16 h-16 text-text-muted mx-auto mb-4" />
         <div>
-          <h3 className="text-lg font-semibold text-text-primary mb-2">
-            No conversations yet
+          <h3 className="text-lg font-semibold text-text mb-2">
+            {t('noConversations')}
           </h3>
           <p className="text-text-secondary max-w-sm">
-            When you reach out about a listing - or someone reaches out to you - it&apos;ll show up here.
+            {t('noConversationsHint')}
           </p>
         </div>
       </div>
@@ -81,8 +95,8 @@ export function ConversationList({
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-background-primary">
-      <div className="divide-y divide-divider-subtle">
+    <div className="h-full overflow-y-auto bg-bg-elevated">
+      <div className="divide-y divide-snow-storm">
         {conversations.map((conversation) => (
           <ConversationListItem
             key={conversation.id}

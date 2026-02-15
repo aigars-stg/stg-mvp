@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { Home, Grid, Plus, ShoppingBasket as ShoppingCart, User } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
+import { useUnreadNotifications } from '@/lib/contexts/UnreadNotificationsContext';
 import { useCart } from '@/lib/contexts/CartContext';
 import { useTranslations } from 'next-intl';
 import { getInitials } from '@/lib/auth/utils';
@@ -24,6 +25,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const { user, profile } = useAuth();
   const { unreadCount } = useUnreadMessages();
+  const { unreadCount: unreadNotifications } = useUnreadNotifications();
   const { itemCount: cartCount } = useCart();
   const [sellSheetOpen, setSellSheetOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
@@ -77,7 +79,7 @@ export function BottomNav() {
       icon: User,
       path: null, // Opens bottom sheet instead
       active: isActive('/account') || isActive('/my-listings'),
-      hasNotification: unreadCount > 0, // Dot indicator for unread messages
+      hasNotification: unreadCount > 0 || unreadNotifications > 0, // Dot indicator for unread messages or notifications
     },
   ];
 

@@ -121,7 +121,7 @@ const text = {
 
 const messageBox = {
   backgroundColor: '#f8fafc',
-  border: '2px solid #8fbcbb',
+  border: '2px solid #88C0D0',
   borderRadius: '12px',
   margin: '24px 40px',
   padding: '24px',
@@ -154,7 +154,7 @@ const messagePreviewStyle = {
   padding: '12px 16px',
   backgroundColor: '#ffffff',
   borderRadius: '8px',
-  borderLeft: '3px solid #8fbcbb',
+  borderLeft: '3px solid #88C0D0',
 };
 
 const photoIndicator = {
@@ -185,7 +185,7 @@ const buttonContainer = {
 };
 
 const button = {
-  backgroundColor: '#8fbcbb',
+  backgroundColor: '#88C0D0',
   borderRadius: '8px',
   color: '#fff',
   fontSize: '16px',

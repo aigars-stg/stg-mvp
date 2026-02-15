@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Close } from '@/lib/icons';
 import type { Message } from '@/lib/types/message';
 import { formatMessageTime } from '@/lib/date-utils';
+import { Avatar } from '@/components/user';
 
 interface MessageBubbleProps {
   message: Message;
@@ -23,7 +24,7 @@ export function MessageBubble({
   if (message.is_system_message) {
     return (
       <div className="flex justify-center my-4">
-        <div className="bg-background-tertiary text-text-secondary text-sm px-4 py-2 rounded-full max-w-md text-center">
+        <div className="bg-bg-secondary text-text-secondary text-sm px-4 py-2 rounded-full max-w-md text-center">
           {message.content}
         </div>
       </div>
@@ -42,26 +43,18 @@ export function MessageBubble({
       >
         {/* Avatar (only show for other user's messages) */}
         {!isOwn && (
-          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-background-tertiary flex items-center justify-center text-text-secondary text-sm font-medium overflow-hidden">
-            {message.sender?.avatar_url ? (
-              <img
-                src={message.sender.avatar_url}
-                alt={message.sender.full_name || 'User'}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span>
-                {message.sender?.full_name?.[0]?.toUpperCase() || '?'}
-              </span>
-            )}
-          </div>
+          <Avatar
+            src={message.sender?.avatar_url}
+            name={message.sender?.full_name || 'User'}
+            size="sm"
+          />
         )}
 
         {/* Message bubble */}
         <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
           {/* Sender name (if shown) */}
           {showSender && !isOwn && message.sender?.full_name && (
-            <div className="text-xs text-text-tertiary mb-1 px-1">
+            <div className="text-xs text-text-muted mb-1 px-1">
               {message.sender.full_name}
             </div>
           )}
@@ -94,7 +87,7 @@ export function MessageBubble({
               className={`max-w-md px-4 py-2 rounded-2xl ${
                 isOwn
                   ? 'bg-frost-ice text-snow-storm rounded-br-sm'
-                  : 'bg-background-tertiary text-text-primary rounded-bl-sm'
+                  : 'bg-bg-secondary text-text rounded-bl-sm'
               }`}
             >
               <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
@@ -104,7 +97,7 @@ export function MessageBubble({
           )}
 
           {/* Timestamp */}
-          <div className="text-xs text-text-tertiary mt-1 px-1">
+          <div className="text-xs text-text-muted mt-1 px-1">
             {formatMessageTime(message.created_at)}
           </div>
         </div>

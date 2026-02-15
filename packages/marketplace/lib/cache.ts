@@ -2,6 +2,8 @@ import { getRedis } from './redis';
 
 // In-memory fallback for when Redis is unavailable
 const memoryFallback = new Map<string, { data: string; expiresAt: number }>();
+const MAX_MEMORY_CACHE_ENTRIES = 500;
+let cleanupCounter = 0;
 
 /**
  * Get a cached value. Tries Redis first, falls back to in-memory Map.
@@ -34,6 +36,20 @@ export async function cacheSet<T>(key: string, value: T, ttlSeconds: number): Pr
   const serialized = JSON.stringify(value);
 
   // Always write to in-memory (serves as L1 cache and fallback)
+  // Periodically purge expired entries to prevent unbounded growth
+  cleanupCounter++;
+  if (cleanupCounter >= 50) {
+    cleanupCounter = 0;
+    const now = Date.now();
+    for (const [k, v] of memoryFallback) {
+      if (v.expiresAt <= now) memoryFallback.delete(k);
+    }
+  }
+  // Evict oldest entry if at capacity
+  if (memoryFallback.size >= MAX_MEMORY_CACHE_ENTRIES) {
+    const oldestKey = memoryFallback.keys().next().value;
+    if (oldestKey !== undefined) memoryFallback.delete(oldestKey);
+  }
   memoryFallback.set(key, {
     data: serialized,
     expiresAt: Date.now() + ttlSeconds * 1000,

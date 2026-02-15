@@ -139,7 +139,7 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
                 ${
                   type === feedbackType
                     ? 'bg-frost-ice/10 border-frost-ice text-frost-ice'
-                    : 'bg-white border-gray-200 text-text hover:border-gray-300'
+                    : 'bg-bg-elevated border-snow-storm text-text hover:border-frost-ice/50'
                 }
               `}
             >
@@ -164,7 +164,7 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
           placeholder={placeholders[type]}
           rows={4}
           className="
-            w-full px-3 py-2 border border-gray-200 rounded-lg
+            w-full px-3 py-2 border border-snow-storm rounded-lg
             text-text placeholder:text-text-secondary
             focus:outline-none focus:ring-2 focus:ring-frost-ice focus:border-transparent
             resize-none
@@ -208,7 +208,7 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
             <img
               src={screenshotPreview}
               alt="Screenshot preview"
-              className="h-20 w-auto rounded-lg border border-gray-200"
+              className="h-20 w-auto rounded-lg border border-snow-storm"
             />
             <button
               type="button"
@@ -216,9 +216,9 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
               className="
                 absolute -top-2 -right-2
                 w-6 h-6 rounded-full
-                bg-gray-800 text-white
+                bg-polar-night text-snow-white
                 flex items-center justify-center
-                hover:bg-gray-700 transition-colors
+                hover:bg-polar-night/80 transition-colors
               "
               aria-label="Remove screenshot"
             >
@@ -231,9 +231,9 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
             onClick={() => fileInputRef.current?.click()}
             className="
               flex items-center gap-2 px-4 py-2
-              border border-dashed border-gray-300 rounded-lg
+              border border-dashed border-snow-storm rounded-lg
               text-sm text-text-secondary
-              hover:border-gray-400 hover:text-text transition-colors
+              hover:border-frost-ice/50 hover:text-text transition-colors
             "
           >
             <Camera className="w-4 h-4" />
@@ -252,7 +252,7 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
 
       {/* Validation error */}
       {validationError && (
-        <p className="text-sm text-red-600">{validationError}</p>
+        <p className="text-sm text-aurora-red">{validationError}</p>
       )}
 
       {/* Submit button */}

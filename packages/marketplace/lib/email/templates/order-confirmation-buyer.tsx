@@ -140,7 +140,7 @@ const text = {
 
 const orderBox = {
   backgroundColor: '#f8fafc',
-  border: '2px solid #8fbcbb',
+  border: '2px solid #88C0D0',
   borderRadius: '12px',
   margin: '24px 40px',
   padding: '24px',
@@ -179,7 +179,7 @@ const value = {
 
 const infoBox = {
   backgroundColor: '#e6f7ff',
-  border: '1px solid #8fbcbb',
+  border: '1px solid #88C0D0',
   borderRadius: '8px',
   margin: '24px 40px',
   padding: '20px',
@@ -205,7 +205,7 @@ const buttonContainer = {
 };
 
 const button = {
-  backgroundColor: '#8fbcbb',
+  backgroundColor: '#88C0D0',
   borderRadius: '8px',
   color: '#fff',
   fontSize: '16px',

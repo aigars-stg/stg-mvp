@@ -8,6 +8,7 @@ import { SavedListingsProvider } from '@/lib/contexts/SavedListingsContext';
 import { ConditionalAnalytics } from '@/components/ConditionalAnalytics';
 import { CookieConsent } from '@/components/CookieConsent';
 import { UnreadMessagesProvider } from '@/lib/contexts/UnreadMessagesContext';
+import { UnreadNotificationsProvider } from '@/lib/contexts/UnreadNotificationsContext';
 import { CartProvider } from '@/lib/contexts/CartContext';
 import { PathTracker } from '@/components/PathTracker';
 import { ToastProvider } from '@/components/common/Toast';
@@ -33,12 +34,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <ToastProvider>
           <SavedListingsProvider>
             <UnreadMessagesProvider>
+              <UnreadNotificationsProvider>
               <CartProvider>
                 <OnboardingProvider>
                   <PathTracker />
                   {children}
                 </OnboardingProvider>
               </CartProvider>
+              </UnreadNotificationsProvider>
             </UnreadMessagesProvider>
           </SavedListingsProvider>
         </ToastProvider>

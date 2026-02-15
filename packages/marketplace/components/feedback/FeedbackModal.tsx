@@ -63,8 +63,8 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
       {state === 'success' && (
         <div className="py-8 flex flex-col items-center text-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
-            <CheckCircle className="w-8 h-8 text-green-600" />
+          <div className="w-16 h-16 rounded-full bg-aurora-green/10 flex items-center justify-center mb-4">
+            <CheckCircle className="w-8 h-8 text-aurora-green" />
           </div>
           <h3 className="text-lg font-semibold text-text mb-2">
             {t('successTitle')}
@@ -75,7 +75,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
       {state === 'error' && (
         <div className="py-8 flex flex-col items-center text-center">
-          <p className="text-red-600 mb-4">{errorMessage || t('errorGeneric')}</p>
+          <p className="text-aurora-red mb-4">{errorMessage || t('errorGeneric')}</p>
           <button
             onClick={handleRetry}
             className="text-frost-ice hover:underline"

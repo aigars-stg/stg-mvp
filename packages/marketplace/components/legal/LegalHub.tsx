@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { LegalNav, type LegalSectionId } from './LegalNav';
 import { LegalSection } from './LegalSection';
 
@@ -17,6 +18,7 @@ interface LegalHubProps {
 
 function LegalHubInner({ documents }: LegalHubProps) {
   const searchParams = useSearchParams();
+  const t = useTranslations('Legal');
   const section = (searchParams.get('section') || 'overview') as LegalSectionId;
   const doc = documents[section];
 
@@ -36,7 +38,7 @@ function LegalHubInner({ documents }: LegalHubProps) {
   if (!doc) {
     return (
       <div className="text-text-secondary">
-        <p>Section not found.</p>
+        <p>{t('sectionNotFound')}</p>
       </div>
     );
   }

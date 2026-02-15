@@ -22,6 +22,7 @@ export function LegalNav() {
   const searchParams = useSearchParams();
   const activeSection = searchParams.get('section') || 'overview';
   const tCommon = useTranslations('Common');
+  const tLegal = useTranslations('Legal');
 
   return (
     <nav aria-label={tCommon('aria.legalSections')}>
@@ -42,7 +43,7 @@ export function LegalNav() {
                   }`}
                 >
                   <Icon size={16} className="shrink-0" />
-                  {section.label}
+                  {tLegal(section.labelKey)}
                 </Link>
               </li>
             );
@@ -66,7 +67,7 @@ export function LegalNav() {
               }`}
             >
               <Icon size={14} className="shrink-0" />
-              {section.label}
+              {tLegal(section.labelKey)}
             </Link>
           );
         })}

@@ -1,9 +1,10 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { formatDistanceToNow } from 'date-fns';
 import { Package } from '@/lib/icons';
+import { formatMessageTime } from '@/lib/date-utils';
 import type { ConversationListItem as ConversationListItemType } from '@/lib/types/message';
 import { Avatar } from '@/components/user';
 import { formatPrice } from '@/lib/services/pricing';
@@ -17,15 +18,8 @@ export function ConversationListItem({
   conversation,
   isActive = false,
 }: ConversationListItemProps) {
+  const t = useTranslations('MessagesPage');
   const { other_user, listing, last_message, unread_count } = conversation;
-
-  const formatTime = (timestamp: string) => {
-    try {
-      return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
-    } catch {
-      return '';
-    }
-  };
 
   const truncateMessage = (text: string, maxLength = 60) => {
     if (text.length <= maxLength) return text;
@@ -40,8 +34,8 @@ export function ConversationListItem({
   return (
     <Link
       href={href}
-      className={`block border-b border-divider-subtle hover:bg-background-tertiary transition-colors ${
-        isActive ? 'bg-background-tertiary' : 'bg-background-primary'
+      className={`block hover:bg-bg-secondary transition-colors ${
+        isActive ? 'bg-bg-secondary' : 'bg-bg-elevated'
       }`}
     >
       <div className="flex items-start gap-3 p-4">
@@ -66,15 +60,15 @@ export function ConversationListItem({
           <div className="flex items-start justify-between gap-2 mb-1">
             <h3
               className={`text-sm font-medium truncate ${
-                unread_count > 0 ? 'text-text-primary' : 'text-text-secondary'
+                unread_count > 0 ? 'text-text' : 'text-text-secondary'
               }`}
             >
-              {other_user.full_name || 'Unknown User'}
+              {other_user.full_name || t('unknownUser')}
             </h3>
 
             {last_message && (
-              <span className="text-xs text-text-tertiary flex-shrink-0">
-                {formatTime(last_message.created_at)}
+              <span className="text-xs text-text-muted flex-shrink-0">
+                {formatMessageTime(last_message.created_at)}
               </span>
             )}
           </div>
@@ -82,7 +76,7 @@ export function ConversationListItem({
           {/* Listing or order info */}
           {listing && (
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded bg-background-tertiary flex items-center justify-center overflow-hidden flex-shrink-0">
+              <div className="w-8 h-8 rounded bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
                 {listing.thumbnail ? (
                   <img
                     src={listing.thumbnail}
@@ -90,7 +84,7 @@ export function ConversationListItem({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <Package className="w-4 h-4 text-text-tertiary" />
+                  <Package className="w-4 h-4 text-text-muted" />
                 )}
               </div>
 
@@ -98,7 +92,7 @@ export function ConversationListItem({
                 <p className="text-xs text-text-secondary truncate">
                   {listing.title}
                 </p>
-                <p className="text-xs font-medium text-text-primary">
+                <p className="text-xs font-medium text-text">
                   {formatPrice(listing.price)}
                 </p>
               </div>
@@ -106,14 +100,14 @@ export function ConversationListItem({
           )}
           {!listing && conversation.order && (
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded bg-background-tertiary flex items-center justify-center overflow-hidden flex-shrink-0">
-                <Package className="w-4 h-4 text-text-tertiary" />
+              <div className="w-8 h-8 rounded bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
+                <Package className="w-4 h-4 text-text-muted" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-text-secondary truncate">
                   Order {conversation.order.order_number}
                 </p>
-                <p className="text-xs font-medium text-text-primary">
+                <p className="text-xs font-medium text-text">
                   {formatPrice(conversation.order.total_amount)}
                 </p>
               </div>
@@ -125,8 +119,8 @@ export function ConversationListItem({
             <p
               className={`text-sm truncate ${
                 unread_count > 0
-                  ? 'text-text-primary font-medium'
-                  : 'text-text-tertiary'
+                  ? 'text-text font-medium'
+                  : 'text-text-muted'
               }`}
             >
               {last_message.is_system_message ? (
@@ -138,7 +132,7 @@ export function ConversationListItem({
           )}
 
           {!last_message && (
-            <p className="text-sm text-text-tertiary italic">No messages yet</p>
+            <p className="text-sm text-text-muted italic">{t('noMessages')}</p>
           )}
         </div>
       </div>

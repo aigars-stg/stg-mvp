@@ -3,9 +3,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
-import { Package, Heart, Search, Settings, LogOut, Close, LogIn, ShoppingBag, Store, ChatBubble, Globe, Shield } from '@/lib/icons';
+import { Package, Heart, Search, Settings, LogOut, Close, LogIn, ShoppingBag, Store, ChatBubble, Globe, Shield, Notification as BellIcon } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
+import { useUnreadNotifications } from '@/lib/contexts/UnreadNotificationsContext';
 import { Button } from '@second-turn/design-system';
 import { getInitials } from '@/lib/auth/utils';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
@@ -20,6 +21,7 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
   const router = useRouter();
   const { user, profile, signOut } = useAuth();
   const { unreadCount } = useUnreadMessages();
+  const { unreadCount: unreadNotifications } = useUnreadNotifications();
   const [listingsCount, setListingsCount] = useState(0);
   const [savedCount, setSavedCount] = useState(0);
   const [wantedCount, setWantedCount] = useState(0);
@@ -213,7 +215,23 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                   My Activity
                 </div>
 
-                {/* Messages - First item with unread badge */}
+                {/* Notifications */}
+                <button
+                  onClick={() => handleNavigate('/notifications')}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <BellIcon className="w-5 h-5 text-aurora-orange" />
+                    <span className="text-polar-night font-medium">Notifications</span>
+                  </div>
+                  {unreadNotifications > 0 && (
+                    <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                      {unreadNotifications}
+                    </span>
+                  )}
+                </button>
+
+                {/* Messages */}
                 <button
                   onClick={() => handleNavigate('/messages')}
                   className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"

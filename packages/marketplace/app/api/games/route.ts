@@ -81,6 +81,8 @@ export async function GET(request: NextRequest) {
     const maxPlayTime = searchParams.get('maxPlayTime') ? parseInt(searchParams.get('maxPlayTime')!) : undefined;
     const sort = searchParams.get('sort') || 'newest';
     const includeExpansions = searchParams.get('includeExpansions') !== 'false';
+    const pricingFormat = searchParams.get('pricingFormat'); // 'fixed_price' | 'auction' | null
+    const includeEnded = searchParams.get('includeEnded') === 'true';
 
     const supabase = await createServerSupabase();
 
@@ -114,6 +116,17 @@ export async function GET(request: NextRequest) {
         )
       `)
       .eq('status', 'active');
+
+    // Filter by pricing format (For Sale vs Auctions tab)
+    if (pricingFormat === 'fixed_price') {
+      query = query.neq('pricing_format', 'auction');
+    } else if (pricingFormat === 'auction') {
+      query = query.eq('pricing_format', 'auction');
+      // By default, only include auctions that haven't ended
+      if (!includeEnded) {
+        query = query.gt('auction_ends_at', new Date().toISOString());
+      }
+    }
 
     // Apply search filter
     if (search) {
@@ -433,6 +446,18 @@ export async function GET(request: NextRequest) {
         break;
       case 'name':
         aggregatedGames.sort((a, b) => a.game_name.localeCompare(b.game_name));
+        break;
+      case 'ending_soon':
+        // Sort by soonest ending auction (for Auctions tab)
+        aggregatedGames.sort((a, b) => {
+          const endA = a.auction_soonest_ends_at || '';
+          const endB = b.auction_soonest_ends_at || '';
+          // Nulls last: games without active auctions go to the end
+          if (!endA && !endB) return 0;
+          if (!endA) return 1;
+          if (!endB) return -1;
+          return endA.localeCompare(endB);
+        });
         break;
       case 'newest':
       default:

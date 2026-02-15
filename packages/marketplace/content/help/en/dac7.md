@@ -28,14 +28,14 @@ The goal is tax transparency: helping tax authorities see income earned through 
 
 ## The Thresholds Explained
 
-We only report your information if you exceed **either** threshold in a calendar year:
+We only report your information if you exceed **at least one** of these thresholds in a calendar year:
 
 | Threshold | Amount | What it means |
 |-----------|--------|---------------|
 | **Sales count** | 30 or more | You have sold 30+ items |
 | **Total proceeds** | €2,000 or more | Your total sales add up to €2,000+ |
 
-### The key word is "either"
+### You only need to cross one threshold
 
 You only need to cross **one** threshold to be reported:
 

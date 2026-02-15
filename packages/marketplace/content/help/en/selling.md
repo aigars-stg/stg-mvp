@@ -13,7 +13,7 @@ description: "Complete guide to listing and selling pre-loved board games on Sec
 5. **Choose how to sell** → Instant Buy (we handle payment) or Contact Seller (you arrange)
 6. **Publish** → Your listing goes live immediately
 
-**What you will earn:** 100% of your listing price. Buyers pay our fees separately.
+**What you will earn:** 90% of your listing price. We deduct a 10% platform commission. Buyers pay no service fee.
 
 ---
 
@@ -26,11 +26,12 @@ description: "Complete guide to listing and selling pre-loved board games on Sec
 | Email address | Required | Required |
 | Verified email | Required | Required |
 | Phone number | Not required | Required |
-| Bank account (Stripe) | Not required | Required |
+| Identity verification | Not required | Required |
+| Bank account (IBAN) | Not required | At first withdrawal |
 
 **Contact Seller** listings are quicker to set up — you can start selling immediately and arrange payment directly with buyers.
 
-**Instant Buy** listings offer buyer protection and automatic payments, but require Stripe setup first.
+**Instant Buy** listings offer buyer protection and automatic payments, but require seller verification first.
 
 ---
 
@@ -88,7 +89,7 @@ For **Acceptable** condition, you must add notes explaining the issues. Be speci
 |---------|-----------|
 | "Some wear" | "Box corners worn, one card has small crease" |
 | "Missing pieces" | "Missing 2 red meeples, replaced with wooden cubes" |
-| "Used" | "Rulebook has coffee stain on cover, rules readable" |
+| "Some wear and tear" | "Rulebook has coffee stain on cover, rules readable" |
 
 **Golden rule:** When in doubt, grade lower. Buyers appreciate honesty, and you will avoid disputes.
 
@@ -201,7 +202,7 @@ Buyers purchase immediately. We handle payment, you ship via parcel terminal.
 - Buyer protection builds trust
 
 **Cons:**
-- Requires Stripe setup
+- Requires seller verification
 - Must ship within 2 business days
 - Limited to Baltic parcel terminals
 
@@ -209,12 +210,13 @@ Buyers purchase immediately. We handle payment, you ship via parcel terminal.
 
 ### Setting Up Instant Buy
 
-If you have not set up Stripe yet, you will see an "Upgrade to Instant Buy" prompt. The setup takes about 5 minutes:
+If you have not completed seller verification yet, you will see an "Upgrade to Instant Buy" prompt. The setup takes a few minutes:
 
-1. Click "Set Up Payouts"
-2. Complete Stripe's verification (ID, address, bank account)
-3. Return to Second Turn Games
-4. You are ready to list Instant Buy items
+1. Accept the Seller Agreement
+2. Complete identity verification (name, date of birth, address)
+3. You are ready to list Instant Buy items
+
+Your bank details (IBAN) will be collected when you request your first withdrawal — not during setup.
 
 ---
 
@@ -228,7 +230,7 @@ Before publishing, we verify:
 - All required fields completed
 - Email verified
 - Photos uploaded (if Acceptable condition)
-- Stripe setup complete (if Instant Buy)
+- Seller verification complete (if Instant Buy)
 
 If anything is missing, you will see a clear message explaining what to fix.
 
@@ -294,7 +296,7 @@ After confirming:
 4. Take it to any Unisend, Latvijas Pasts, or uDrop terminal
 5. Enter your code and place the parcel in the locker
 
-See also: [Shipping Guide](/help/shipping) for packing tips and terminal details
+See also: [Shipping Guide](/help?section=shipping) for packing tips and terminal details
 
 ### 4. Tracking Updates Automatically
 
@@ -302,9 +304,9 @@ We sync with the carrier — no need to manually mark as shipped.
 
 ### 5. Get Paid
 
-**2 days after delivery**, the order completes and funds are added to your balance.
+**2 days after delivery**, the order completes and your earnings (listing price minus 10% commission) are credited to your platform wallet.
 
-Payouts happen automatically when your balance reaches your threshold (default €20), or you can request a payout anytime from your dashboard.
+Withdraw to your bank account at any time from your dashboard — minimum €5, no fees, processed within 1-3 business days.
 
 See also: [Fees and Payouts](/legal?section=fees) for payout details
 
@@ -337,23 +339,62 @@ This is between you and the buyer. Common approaches:
 
 ## Auctions
 
+Auctions let the market decide the price. They work well for rare, out-of-print, or hard-to-price games where you suspect demand may exceed your estimate.
+
+### Setting Up an Auction
+
+| Setting | Options |
+|---------|---------|
+| **Starting bid** | Minimum €1.00 — this is the lowest the game can sell for |
+| **Duration** | 1, 3, 5, or 7 days |
+| **Bid increment** | €1.00 minimum — each new bid must be at least this much higher |
+
+There is no reserve price. The starting bid is effectively your minimum — set it at the lowest amount you would accept.
+
+:::plain-terms
+If you start an auction at €5 and only one person bids €5, that is the sale price. Set your starting bid at a number you are comfortable selling for.
+:::
+
+### How Bidding Works
+
+- Buyers place bids on the listing page
+- Each bid must be at least €1.00 higher than the current highest bid
+- The current bid amount and number of bids are visible to everyone
+- Bidders are notified when they are outbid
+
+### Anti-Snipe Protection
+
+If someone places a bid in the final **5 minutes** of an auction, the end time extends by **2-5 minutes**. This prevents last-second bidding ("sniping") and gives other bidders a fair chance to respond.
+
+The auction only ends when no new bids have been placed in the final 5 minutes.
+
 ### During the Auction
 
 - Current bid and bid count visible to all
 - You can answer questions via messages
 - Real-time updates as bids come in
+- You **cannot** cancel an auction that has bids
 
 ### When the Auction Ends
 
 **With bids:**
-1. Winner is notified
+1. The highest bidder wins and is notified immediately
 2. They have **48 hours** to complete payment
-3. If they do not pay, second-highest bidder gets a chance
-4. Once paid, proceed like any Instant Buy order
+3. If they do not pay within 48 hours, the second-highest bidder gets a chance (also 48 hours)
+4. Once paid, the order proceeds like any Instant Buy — you confirm, pack, and ship
 
 **Without bids:**
-- Auction ends with no winner
-- You can relist as fixed price or start a new auction
+- The auction ends with no winner
+- You can relist as a fixed-price listing or start a new auction
+- No fees are charged for auctions that receive no bids
+
+### Auction Tips
+
+- **Start low if you are confident in demand** — a low starting bid attracts more watchers and bids
+- **Start at your minimum if unsure** — remember, one bid at your starting price means a sale at that price
+- **7-day auctions** get the most exposure, but 3-day works well for popular games
+- **Good photos matter even more** — bidders need confidence to bid higher
+- **Mention the edition and language** — bidders want to know exactly what they are bidding on
 
 ---
 
@@ -399,7 +440,7 @@ This is a great way to find buyers for games you are about to list — they are 
 
 - **Pack carefully** — Damaged games mean unhappy buyers
 - **Ship promptly** — Within 2 days of confirming
-- **Use the right size** — See our [Shipping Guide](/help/shipping)
+- **Use the right size** — See our [Shipping Guide](/help?section=shipping)
 
 ---
 
@@ -409,10 +450,10 @@ Your **[Seller Dashboard](/seller/dashboard)** shows:
 
 | Section | What Is There |
 |---------|--------------|
-| **Balance** | Available funds, pending funds, payout button |
-| **Earnings Summary** | Total sales, last 30 days, payout history |
+| **Wallet** | Available balance, pending earnings, withdraw button |
+| **Earnings Summary** | Total sales, last 30 days, transaction history |
 | **Orders** | Filter by status, countdown timers for deadlines |
-| **Payout Settings** | Auto-payout threshold, Stripe dashboard link |
+| **Withdrawal Settings** | IBAN details, withdrawal history |
 
 ---
 
@@ -442,7 +483,9 @@ No. Listings stay active until sold or you remove them.
 
 ### What fees do I pay?
 
-None. Sellers receive 100% of their listing price. Buyers pay our service fee and shipping.
+A 10% platform commission is deducted from your item price for each Instant Buy sale. For a game listed at €25, you receive €22.50. Buyers pay the listed price plus €2 shipping — they pay no service fee.
+
+Contact Seller listings have no platform fees.
 
 See also: [Fees](/legal?section=fees)
 
@@ -470,11 +513,11 @@ See also: [Fees](/legal?section=fees)
 | Listings per day | 50 |
 | Minimum auction bid | €1.00 |
 
-### Payout Thresholds
+### Withdrawals
 
 | Setting | Value |
 |---------|-------|
-| Auto-payout default | €20 |
-| Auto-payout options | €10, €20, €50, €100 |
-| Minimum manual payout | €5 |
-| Payout fee | Free |
+| Minimum withdrawal | €5 |
+| Withdrawal fee | Free |
+| Processing time | 1-3 business days |
+| Method | IBAN bank transfer |

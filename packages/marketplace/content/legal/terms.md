@@ -173,7 +173,7 @@ No service fees or hidden costs. All costs are displayed at checkout before you 
 
 Your earnings are credited to your platform wallet after each completed sale. Current rates are on our [Fees page](/legal?section=fees).
 
-We may update our fees from time to time. Changes will be announced on the platform. Continued use after fee changes constitutes acceptance.
+We may update our fees from time to time. Changes will be announced on the platform **at least 30 days** in advance. Continued use after fee changes constitutes acceptance.
 
 ### 6.3 Payment Processing
 
@@ -310,6 +310,10 @@ You may NOT:
 - Impersonate others or misrepresent affiliations
 - Circumvent the platform to avoid service fees
 
+:::plain-terms
+Do not scam, harass, or deceive anyone. Do not list items you do not own. Do not create fake accounts or abuse our systems. Break these rules and you will lose your account.
+:::
+
 ---
 
 ## 10. Intellectual Property
@@ -399,6 +403,10 @@ For consumers in other EU member states, a directory of national dispute resolut
 
 Disputes between users are between those users. You may seek resolution through your payment provider, consumer protection agencies, or courts in your jurisdiction.
 
+:::plain-terms
+Latvian law applies. If you have a problem with us, email us first — we will try to sort it out. If we cannot, you can take it to PTAC (Latvia's consumer protection body) or the courts in Riga. Problems with another user? That is between you and them.
+:::
+
 ---
 
 ## 13. Changes to These Terms
@@ -406,6 +414,10 @@ Disputes between users are between those users. You may seek resolution through 
 We may update these Terms from time to time. Significant changes will be announced via email and/or notice on the Platform.
 
 Continued use of the Platform after changes constitutes acceptance. If you do not agree, you must stop using the Platform and delete your account.
+
+:::plain-terms
+If we change these terms, we will let you know by email. If you keep using the platform after that, you are agreeing to the new terms.
+:::
 
 ---
 
@@ -416,6 +428,10 @@ Continued use of the Platform after changes constitutes acceptance. If you do no
 - **No Waiver:** Our failure to enforce any right does not constitute a waiver.
 - **Assignment:** You may not transfer your account or these Terms. We may assign our rights to a successor entity.
 - **Language:** These Terms are provided in English. If translated, the English version prevails.
+
+:::plain-terms
+These terms plus the Privacy Policy and Seller Agreement are the whole deal. If a court strikes down one part, the rest still applies. The English version is the official one.
+:::
 
 ---
 

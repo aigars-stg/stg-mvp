@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from '@/i18n/navigation';
 
-type ListingType = 'sell' | 'wanted';
+type ListingType = 'sell' | 'auctions' | 'wanted';
 
 export interface BrowseFiltersState {
   // Listing type
@@ -21,6 +21,9 @@ export interface BrowseFiltersState {
   selectedPlayingTimes: Set<string>;
   priceMin: string;
   priceMax: string;
+
+  // Auction-specific filters
+  showEndedAuctions: boolean;
 
   // Wanted-specific filters
   acceptableConditions: Set<string>;
@@ -48,6 +51,9 @@ export interface BrowseFiltersActions {
   setSelectedPlayingTimes: (times: Set<string>) => void;
   setPriceMin: (price: string) => void;
   setPriceMax: (price: string) => void;
+
+  // Auction filter actions
+  setShowEndedAuctions: (show: boolean) => void;
 
   // Wanted filter actions
   setAcceptableConditions: (conditions: Set<string>) => void;
@@ -103,6 +109,9 @@ export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {})
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
 
+  // Auction-specific filter states
+  const [showEndedAuctions, setShowEndedAuctions] = useState(false);
+
   // Wanted-specific filter states
   const [acceptableConditions, setAcceptableConditions] = useState<Set<string>>(new Set());
   const [budgetMin, setBudgetMin] = useState('');
@@ -137,7 +146,12 @@ export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {})
     const expiring = searchParams.get('expiring');
 
     // Set listing type
-    if (type === 'wanted') setListingType('wanted');
+    if (type === 'auctions') setListingType('auctions');
+    else if (type === 'wanted') setListingType('wanted');
+
+    // Auction-specific params
+    const ended = searchParams.get('ended');
+    if (ended === 'true') setShowEndedAuctions(true);
 
     // General filters
     if (query) setSearchQuery(query);
@@ -171,10 +185,11 @@ export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {})
 
     // General filters
     if (searchQuery) params.set('q', searchQuery);
-    if (sortBy !== 'recent') params.set('sort', sortBy);
+    const defaultSort = listingType === 'auctions' ? 'ending-soon' : 'recent';
+    if (sortBy !== defaultSort) params.set('sort', sortBy);
 
-    // Sell-specific filters
-    if (listingType === 'sell') {
+    // Sell and auction shared filters (game metadata + price)
+    if (listingType === 'sell' || listingType === 'auctions') {
       if (selectedConditions.size > 0) params.set('conditions', Array.from(selectedConditions).join(','));
       if (selectedLanguages.size > 0) params.set('languages', Array.from(selectedLanguages).join(','));
       if (selectedPlayerCounts.size > 0) params.set('players', Array.from(selectedPlayerCounts).join(','));
@@ -182,6 +197,11 @@ export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {})
       if (selectedPlayingTimes.size > 0) params.set('times', Array.from(selectedPlayingTimes).join(','));
       if (priceMin) params.set('minPrice', priceMin);
       if (priceMax) params.set('maxPrice', priceMax);
+    }
+
+    // Auction-specific filters
+    if (listingType === 'auctions') {
+      if (showEndedAuctions) params.set('ended', 'true');
     }
 
     // Wanted-specific filters
@@ -210,6 +230,7 @@ export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {})
     budgetMax,
     locationFilter,
     showExpiringOnly,
+    showEndedAuctions,
     sortBy,
     filtersInitialized,
     urlSync,
@@ -334,6 +355,7 @@ export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {})
     setSelectedPlayingTimes(new Set());
     setPriceMin('');
     setPriceMax('');
+    setShowEndedAuctions(false);
     setAcceptableConditions(new Set());
     setBudgetMin('');
     setBudgetMax('');
@@ -343,15 +365,18 @@ export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {})
 
   // Active filters count
   const activeFiltersCount = useMemo(() => {
-    if (listingType === 'sell') {
-      return (
+    if (listingType === 'sell' || listingType === 'auctions') {
+      const base =
         selectedPlayerCounts.size +
         selectedMinAges.size +
         selectedPlayingTimes.size +
         selectedLanguages.size +
         selectedConditions.size +
-        (priceMin || priceMax ? 1 : 0)
-      );
+        (priceMin || priceMax ? 1 : 0);
+      if (listingType === 'auctions') {
+        return base + (showEndedAuctions ? 1 : 0);
+      }
+      return base;
     } else {
       return (
         acceptableConditions.size +
@@ -369,6 +394,7 @@ export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {})
     selectedConditions.size,
     priceMin,
     priceMax,
+    showEndedAuctions,
     acceptableConditions.size,
     budgetMin,
     budgetMax,
@@ -393,6 +419,7 @@ export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {})
     budgetMax,
     locationFilter,
     showExpiringOnly,
+    showEndedAuctions,
     filtersOpen,
     mobileFiltersOpen,
     filtersInitialized,
@@ -413,6 +440,7 @@ export function useBrowseFilters({ urlSync = true }: { urlSync?: boolean } = {})
     setBudgetMax,
     setLocationFilter,
     setShowExpiringOnly,
+    setShowEndedAuctions,
     setFiltersOpen,
     setMobileFiltersOpen,
 

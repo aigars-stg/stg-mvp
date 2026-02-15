@@ -61,7 +61,7 @@ Withdrawals are processed within 1-3 business days.
 
 ## Shipping Rates
 
-Flat-rate shipping via Unisend parcel terminals to any location in the Baltics:
+Flat-rate shipping via parcel terminals (Unisend, Latvijas Pasts, or uDrop) to any location in the Baltics:
 
 | Route | Price |
 |-------|-------|

@@ -21,12 +21,14 @@ export async function generateMetadata({
 
 const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8'] as const;
 
-function loadAllHelpDocuments() {
+function loadAllHelpDocuments(locale: string = 'en') {
   const slugMap: Record<string, string> = {
     overview: 'overview',
+    buying: 'buying',
     selling: 'selling',
     grading: 'grading-guide',
     shipping: 'shipping',
+    wallet: 'wallet',
     dac7: 'dac7',
   };
 
@@ -42,7 +44,7 @@ function loadAllHelpDocuments() {
   for (const section of HELP_SECTIONS) {
     const fileSlug = slugMap[section.id] || section.id;
     try {
-      documents[section.id] = getHelpDocument(fileSlug);
+      documents[section.id] = getHelpDocument(fileSlug, locale);
     } catch {
       documents[section.id] = {
         slug: fileSlug,
@@ -59,9 +61,13 @@ function loadAllHelpDocuments() {
   return documents;
 }
 
-export default async function HelpPage() {
+export default async function HelpPage({
+  params: { locale },
+}: {
+  params: { locale: string };
+}) {
   const t = await getTranslations('Help');
-  const documents = loadAllHelpDocuments();
+  const documents = loadAllHelpDocuments(locale);
 
   const faqJsonLd = {
     '@context': 'https://schema.org',

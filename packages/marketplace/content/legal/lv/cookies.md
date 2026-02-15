@@ -1,0 +1,156 @@
+---
+title: "Sīkfailu politika"
+lastUpdated: "January 2026"
+description: "Kā Second Turn Games izmanto sīkfailus un līdzīgas tehnoloģijas."
+---
+
+## 1. Ievads
+
+Šī Sīkfailu politika skaidro, kā Second Turn Games SIA ("mēs", "mūsu" vai "mūs") izmanto sīkfailus un līdzīgas tehnoloģijas mūsu platformā.
+
+:::plain-terms
+Mēs izmantojam nelielu skaitu sīkfailu, lai platforma darbotos un atcerētos jūsu preferences. Mēs lūdzam atļauju pirms sīkfailu iestatīšanas, kas izseko, kā jūs izmantojat vietu.
+:::
+
+---
+
+## 2. Kas ir sīkfaili?
+
+Sīkfaili ir nelieli teksta faili, kas tiek glabāti jūsu ierīcē, kad jūs apmeklējat vietni. Tie palīdz vietnēm atcerēties informāciju par jūsu vizīti, piemēram, jūsu valodas preferences vai pierakstīšanās stāvokli.
+
+**Līdzīgas tehnoloģijas, kuras mēs izmantojam:**
+- **Vietējā glabāšana** — Dati glabājas jūsu pārlūkā (piemēram, saglabātie meklējumi vai sludinājumu melnraksti)
+- **Sesijas glabāšana** — Pagaidu dati, kas tiek notīrīti, kad aizverat pārlūku
+
+---
+
+## 3. Sīkfaili, ko mēs izmantojam
+
+### 3.1 Būtisks sīkfails (obligāts)
+
+Šie sīkfaili ir nepieciešami platformai, lai funkcionētu. Jūs nevarat no tiem atteikties.
+
+| Sīkfails | Nolūks | Ilgums |
+|--------|---------|----------|
+| `sb-access-token` | Pasvēlē jūs pierakstījušus (Supabase autentifikācija) | Sesija |
+| `sb-refresh-token` | Atsvaidzina jūsu pierakstīšanās sesiju | 7 dienas |
+| `locale` | Atcerās jūsu valodas preference (EN/LV/LT/ET) | 1 gads |
+| `cookie-consent` | Atcerās jūsu sīkfailu preferences | 1 gads |
+| `cf_clearance` | Cloudflare bota aizsardzības verifikācija | Sesija |
+
+### 3.2 Funkcionāli sīkfaili (obligāts)
+
+Šie paaugstina jūsu pieredzi, bet neizstendē jūs visā vietnēs.
+
+| Sīkfails | Nolūks | Ilgums |
+|--------|---------|----------|
+| `recent-searches` | Atcerās jūsu neseno spēļu meklējumus | Vietējā glabāšana |
+| `listing-draft` | Glabā nepabeigtos sludinājumu melnrakstus | Vietējā glabāšana |
+| `terminal-preference` | Atcerās jūsu izvēlēto pakotnenes termināli | Vietējā glabāšana |
+
+### 3.3 Analītikas sīkfaili (jūsu izvēle)
+
+Šie palīdz mums saprast, kā cilvēki izmanto vietu, lai mēs varētu to uzlabot. **Mēs iestatam tikai tad, ja jūs piekrītat.**
+
+| Sīkfails | Nolūks | Sniedzējs | Ilgums |
+|--------|---------|----------|----------|
+| `va_*` | Lapas skati, sesijas ilgums, ierīces tips | Vercel Analītika | 1 gads |
+
+**Ko analītikas sīkfaili apkopo:**
+- Lapas, kuras jūs apmeklējat
+- Cik ilgi pavadāt lapas
+- Kādu ierīci/pārlūku izmantojat
+- No kuras valsts pārlūkojat
+
+**Ko viņi NEIZSAUCAS:**
+- Jūsu vārds vai e-pasts
+- Ko jūs pērkāt vai pārdodat
+- Jūsu ziņojumi vai sludinājuma saturs
+- Neko, kas personīgi jūs identificē
+
+---
+
+## 4. Trešo pušu sīkfaili
+
+Dažas funkcijas ietver trešo pušu pakalpojumus, kas var iestatīt savus sīkfailus:
+
+| Pakalpojums | Nolūks | Viņu Sīkfailu politika |
+|---------|---------|---------------------|
+| **EveryPay** | Maksājumu apstrāde (kad jūs kasos) | [every-pay.com/privacy-policy](https://every-pay.com/privacy-policy) |
+| **Cloudflare** | Drošība un bota aizsardzība | [cloudflare.com/cookie-policy](https://cloudflare.com/cookie-policy) |
+
+Mēs nekontrolējam šos sīkfailus. Pārbaudiet katra sniedzēja politiku detaļām.
+
+---
+
+## 5. Jūsu izvēle
+
+### 5.1 Sīkfailu piekrišanas baneris
+
+Kad pirmoreiz apmeklējat, mēs jautājam, vai jūs pieņemat analītikas sīkfailus. Jūsu izvēle tiek saglabāta un jūs netiks jautāti vēlreiz, ja vien neiztīrīsit savus sīkfailus.
+
+### 5.2 Preferenču maiņa
+
+Jūs jebkurā laikā varat mainīt sīkfailu preferences:
+
+1. Noklikšķiniet **sīkfailu ikonu** kājené
+2. Vai dodieties uz **Iestatījumi — Privātums — Sīkfailu preferences**
+
+### 5.3 Pārlūka iestatījumi
+
+Jūs varat arī kontrolēt sīkfailus, izmantojot savu pārlūku:
+
+| Pārlūks | Kā pārvaldīt sīkfailus |
+|---------|----------------------|
+| Chrome | Iestatījumi — Privātums un drošība — Sīkfaili |
+| Firefox | Iestatījumi — Privātums un drošība — Sīkfaili |
+| Safari | Preferences — Privātums — Vadības vietnes dati |
+| Edge | Iestatījumi — Privātums — Sīkfaili |
+
+**Piezīme:** Būtisku sīkfailu bloķēšana novērsīs pierakstīšanos un pamatfunkciju izmantošanu.
+
+### 5.4 Nepalaižu izsekošanu
+
+Mēs respektējam "Do Not Track" pārlūka iestatījumu. Ja tas ir iespējots, mēs neiestatīsim analītikas sīkfailus pat tad, ja iepriekš piekrītat.
+
+---
+
+## 6. Sīkfailu saglabāšana
+
+| Tips | Cik ilgi |
+|------|----------|
+| Sesijas sīkfaili | Izdzēsti, kad aizverat pārlūku |
+| Autentifikācija | 7 dienas (pēc tam jums būs jāpierakstās vēlreiz) |
+| Preferences | 1 gads |
+| Analītikas piekrišana | 1 gads |
+
+---
+
+## 7. Atjauninājumi šai politikai
+
+Mēs varam atjaunināt šo Sīkfailu politiku, kad pievienojam jaunas funkcijas vai mainām sniedzējus. Pārbaudiet "Pēdējoreiz atjaunināts" datumu augšpusē.
+
+Ievērojamas izmaiņas tiks paziņotas, izmantojot sīkfailu piekrišanas banneri.
+
+---
+
+## 8. Kontaktējiet mūs
+
+Jautājumi par mūsu sīkfailu praksēm?
+
+| | |
+|---|---|
+| **Privātuma jautājumi** | privacy@secondturn.games |
+| **Vispārīgs atbalsts** | info@secondturn.games |
+| **Adrese** | Second Turn Games SIA, Evalda Valtera 5-35, Rīga, LV-1021, Latvija |
+
+---
+
+## Ātrs kopsavilkums
+
+| Tips | Obligāts? | Vai jūs varat atteikties? |
+|------|-----------|------------------|
+| **Būtisks** (pierakstīšanās, drošība) | Jā | Nē |
+| **Funkcionāls** (preferences, melnraksti) | Jā | Nē |
+| **Analītika** (izmantošanas statistika) | Nē | Jā — mēs lūdzam vispirms |
+| **Trešo pušu** (EveryPay, Cloudflare) | Tikai jūs izmantojot šos funkcijas | Pārbaudiet viņu politiku |

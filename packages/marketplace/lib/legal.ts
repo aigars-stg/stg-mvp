@@ -40,25 +40,31 @@ function loadDocument(subdir: string, slug: string): Document {
 }
 
 /** Load a legal document (from content/legal/) */
-export function getLegalDocument(slug: string): Document {
-  // Try locale-based path first (content/legal/en/), fall back to flat (content/legal/)
-  const localePath = findContentFile('legal/en', slug);
-  if (localePath) {
-    const fileContents = fs.readFileSync(localePath, 'utf8');
-    const { data, content } = matter(fileContents);
-    return { slug, frontmatter: data as DocumentFrontmatter, content };
+export function getLegalDocument(slug: string, locale: string = 'en'): Document {
+  // Try requested locale first, then English, then flat directory
+  const localeOrder = locale === 'en' ? ['en'] : [locale, 'en'];
+  for (const loc of localeOrder) {
+    const localePath = findContentFile(`legal/${loc}`, slug);
+    if (localePath) {
+      const fileContents = fs.readFileSync(localePath, 'utf8');
+      const { data, content } = matter(fileContents);
+      return { slug, frontmatter: data as DocumentFrontmatter, content };
+    }
   }
   return loadDocument('legal', slug);
 }
 
 /** Load a help document (from content/help/en/) */
-export function getHelpDocument(slug: string): Document {
-  // Try locale-based path first, fall back to flat
-  const localePath = findContentFile('help/en', slug);
-  if (localePath) {
-    const fileContents = fs.readFileSync(localePath, 'utf8');
-    const { data, content } = matter(fileContents);
-    return { slug, frontmatter: data as DocumentFrontmatter, content };
+export function getHelpDocument(slug: string, locale: string = 'en'): Document {
+  // Try requested locale first, then English, then flat directory
+  const localeOrder = locale === 'en' ? ['en'] : [locale, 'en'];
+  for (const loc of localeOrder) {
+    const localePath = findContentFile(`help/${loc}`, slug);
+    if (localePath) {
+      const fileContents = fs.readFileSync(localePath, 'utf8');
+      const { data, content } = matter(fileContents);
+      return { slug, frontmatter: data as DocumentFrontmatter, content };
+    }
   }
   return loadDocument('help', slug);
 }

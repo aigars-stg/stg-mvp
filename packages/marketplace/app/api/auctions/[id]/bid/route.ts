@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { callEdgeFunction } from '@/lib/supabase/edge-functions';
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -74,9 +75,25 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // If there was a previous bidder, we could trigger outbid notification here
-    // For now, the cron job or Edge Function will handle notifications
+    // Trigger outbid notification for the previous bidder (fire-and-forget)
     const previousBidderId = result.previous_bidder_id;
+    if (previousBidderId) {
+      // Fetch listing info for the notification
+      const { data: listing } = await supabase
+        .from('listings')
+        .select('game_name, bgg_game_id')
+        .eq('id', listingId)
+        .single();
+
+      if (listing?.game_name) {
+        callEdgeFunction('send-outbid-notification', {
+          listing_id: listingId,
+          outbid_user_id: previousBidderId,
+          new_bid_amount: result.amount,
+          game_name: listing.game_name,
+        }).catch(err => console.error('Outbid notification failed:', err));
+      }
+    }
 
     return NextResponse.json({
       success: true,

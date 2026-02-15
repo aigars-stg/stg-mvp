@@ -3,16 +3,18 @@
 import { Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { HelpCircle, TrendUp, Star, Package, Calculator } from '@/lib/icons';
+import { HelpCircle, ShoppingBasket, TrendUp, Star, Package, Coins, Calculator } from '@/lib/icons';
 import { HELP_SECTIONS, type HelpSectionId } from './help-sections';
 
 export type { HelpSectionId } from './help-sections';
 
 const SECTION_ICONS: Record<HelpSectionId, React.ComponentType<{ size?: string | number; className?: string }>> = {
   overview: HelpCircle,
+  buying: ShoppingBasket,
   selling: TrendUp,
   grading: Star,
   shipping: Package,
+  wallet: Coins,
   dac7: Calculator,
 };
 
@@ -20,6 +22,7 @@ export function HelpNav() {
   const searchParams = useSearchParams();
   const activeSection = searchParams.get('section') || 'overview';
   const tCommon = useTranslations('Common');
+  const tHelp = useTranslations('Help');
 
   return (
     <nav aria-label={tCommon('aria.helpSections')}>
@@ -40,7 +43,7 @@ export function HelpNav() {
                   }`}
                 >
                   <Icon size={16} className="shrink-0" />
-                  {section.label}
+                  {tHelp(section.labelKey)}
                 </Link>
               </li>
             );
@@ -64,7 +67,7 @@ export function HelpNav() {
               }`}
             >
               <Icon size={14} className="shrink-0" />
-              {section.label}
+              {tHelp(section.labelKey)}
             </Link>
           );
         })}

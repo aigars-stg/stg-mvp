@@ -232,7 +232,6 @@ Every listing must include:
 
 | Condition | Description |
 |-----------|-------------|
-| **New** | Sealed, never opened |
 | **Like New** | Opened but unplayed or played once, all components present, no visible wear |
 | **Very Good** | Light use, all components present, minimal wear |
 | **Good** | Regular use, all components present, visible wear but fully playable |
@@ -258,7 +257,7 @@ You have full control over your listing price. Set prices that reflect the item'
 If you list a game for €25, you receive €22.50 when it sells (€25 minus 10% commission). The buyer pays €25 plus €2.00 shipping — they do not pay any service fee.
 :::
 
-We reserve the right to adjust the commission rate in the future. Any such changes will be announced in advance and you will have the opportunity to remove your listings before new rates take effect.
+We reserve the right to adjust the commission rate in the future. Any such changes will be announced **at least 30 days** in advance and you will have the opportunity to remove your listings before new rates take effect.
 
 ### 7.3 Buyer Costs
 
@@ -457,7 +456,7 @@ A healthy marketplace requires trust on both sides. We actively work to identify
 If you experience fraud, harassment, or abuse as a seller:
 
 1. Use the **"Report"** button on any user profile or message
-2. Or contact us at **info@secondturn.games**
+2. Or contact us at **safety@secondturn.games**
 3. Provide evidence: screenshots, transaction IDs, message history
 
 We investigate all seller reports and take appropriate action.

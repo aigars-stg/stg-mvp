@@ -179,7 +179,7 @@ export function MessageInput({
   const hasContent = content.trim().length > 0 || photos.length > 0;
 
   return (
-    <div className="border-t border-divider-subtle bg-background-primary p-4">
+    <div className="border-t border-snow-storm bg-bg-elevated p-4">
       {/* Photo previews */}
       {photos.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
@@ -188,7 +188,7 @@ export function MessageInput({
               <img
                 src={photo.previewUrl}
                 alt={`Attachment ${index + 1}`}
-                className="w-16 h-16 object-cover rounded-lg border border-divider-subtle"
+                className="w-16 h-16 object-cover rounded-lg border border-snow-storm"
               />
               <button
                 type="button"
@@ -239,8 +239,8 @@ export function MessageInput({
             className={`w-full resize-none rounded-lg border px-4 py-3 focus:outline-none focus:ring-2 transition-colors ${
               isOverLimit
                 ? 'border-aurora-red focus:ring-aurora-red'
-                : 'border-divider-subtle focus:ring-frost-ice focus:border-frost-ice'
-            } bg-background-primary text-text-primary placeholder:text-text-tertiary disabled:opacity-50 disabled:cursor-not-allowed`}
+                : 'border-snow-storm focus:ring-frost-ice focus:border-frost-ice'
+            } bg-bg-elevated text-text placeholder:text-text-muted disabled:opacity-50 disabled:cursor-not-allowed`}
             rows={1}
             style={{
               minHeight: '44px',
@@ -251,7 +251,7 @@ export function MessageInput({
           {showCounter && (
             <div
               className={`absolute right-2 bottom-2 text-xs ${
-                isOverLimit ? 'text-aurora-red' : 'text-text-tertiary'
+                isOverLimit ? 'text-aurora-red' : 'text-text-muted'
               }`}
             >
               {remainingChars}

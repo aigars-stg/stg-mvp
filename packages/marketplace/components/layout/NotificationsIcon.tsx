@@ -1,0 +1,42 @@
+'use client';
+
+import { Link, useRouter, usePathname } from '@/i18n/navigation';
+import { Notification as BellIcon } from '@/lib/icons';
+import { useAuth } from '@/lib/auth/AuthContext';
+import { useUnreadNotifications } from '@/lib/contexts/UnreadNotificationsContext';
+
+export function NotificationsIcon() {
+    const { user } = useAuth();
+    const { unreadCount } = useUnreadNotifications();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (!user) {
+            e.preventDefault();
+            router.push(`/auth?returnTo=${encodeURIComponent(pathname)}&prompt=notifications`);
+        }
+    };
+
+    return (
+        <Link
+            href={user ? '/notifications' : '#'}
+            onClick={handleClick}
+            className={`relative p-2 transition-all duration-200 ${
+                user
+                    ? 'text-text-secondary hover:text-text hover:scale-110'
+                    : 'text-text-secondary/40 cursor-default'
+            }`}
+            aria-label={`Notifications${user && unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+        >
+            <BellIcon className="w-6 h-6" />
+
+            {/* Badge - only show if logged in and there are unread notifications */}
+            {user && unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-aurora-orange text-snow-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-sm">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+            )}
+        </Link>
+    );
+}

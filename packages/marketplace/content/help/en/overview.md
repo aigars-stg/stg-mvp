@@ -8,9 +8,11 @@ Welcome to the Second Turn Games Help Centre. Here you will find guides and reso
 
 ## Getting started
 
+- **[How to Buy](/help?section=buying)** — Finding, purchasing, and receiving pre-loved board games
 - **[How to Sell](/help?section=selling)** — Complete guide to listing and selling your pre-loved board games
 - **[Condition Grading](/help?section=grading)** — How to accurately grade your games from Like New to Acceptable
 - **[Shipping](/help?section=shipping)** — Packing tips, parcel terminals, and everything about shipping
+- **[Wallet & Payments](/help?section=wallet)** — How payments, earnings, and withdrawals work
 - **[DAC7 & Taxes](/help?section=dac7)** — EU tax reporting thresholds explained in plain language
 
 ## Need more help?

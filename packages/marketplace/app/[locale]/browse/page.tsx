@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { Select, Button } from '@second-turn/design-system';
 import { Package, SettingsAdjustHorizontal as SlidersHorizontal } from '@/lib/icons';
@@ -72,6 +72,8 @@ export default function BrowsePage() {
     setLocationFilter,
     showExpiringOnly,
     setShowExpiringOnly,
+    showEndedAuctions,
+    setShowEndedAuctions,
     filtersOpen,
     setFiltersOpen,
     mobileFiltersOpen,
@@ -91,6 +93,13 @@ export default function BrowsePage() {
     activeFiltersCount,
   } = filters;
 
+  // Handle listing type change with sort reset
+  const handleListingTypeChange = useCallback((type: 'sell' | 'auctions' | 'wanted') => {
+    setListingType(type);
+    const defaultSort = type === 'auctions' ? 'ending-soon' : 'recent';
+    setSortBy(defaultSort);
+  }, [setListingType, setSortBy]);
+
   // Fetch aggregated games with pagination
   const fetchGames = async (page: number, append = false) => {
     try {
@@ -109,11 +118,20 @@ export default function BrowsePage() {
       if (priceMin) params.set('minPrice', priceMin);
       if (priceMax) params.set('maxPrice', priceMax);
 
+      // Filter by pricing format based on active tab
+      if (listingType === 'sell') {
+        params.set('pricingFormat', 'fixed_price');
+      } else if (listingType === 'auctions') {
+        params.set('pricingFormat', 'auction');
+        if (showEndedAuctions) params.set('includeEnded', 'true');
+      }
+
       // Map sortBy to API sort param
       const sortMap: Record<string, string> = {
         'recent': 'newest',
         'price-low': 'price_asc',
         'price-high': 'price_desc',
+        'ending-soon': 'ending_soon',
       };
       params.set('sort', sortMap[sortBy] || 'newest');
 
@@ -189,7 +207,7 @@ export default function BrowsePage() {
 
   // Initial fetch on mount
   useEffect(() => {
-    if (listingType === 'sell') {
+    if (listingType === 'sell' || listingType === 'auctions') {
       fetchGames(1, false);
     } else {
       fetchWantedListings();
@@ -199,15 +217,15 @@ export default function BrowsePage() {
 
   // Reset to page 1 when filters change
   useEffect(() => {
-    if (filtersInitialized && listingType === 'sell') {
+    if (filtersInitialized && (listingType === 'sell' || listingType === 'auctions')) {
       fetchGames(1, false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, selectedLanguages, priceMin, priceMax, sortBy, filtersInitialized, listingType]);
+  }, [searchQuery, selectedLanguages, priceMin, priceMax, sortBy, showEndedAuctions, filtersInitialized, listingType]);
 
   // Infinite scroll with Intersection Observer
   useEffect(() => {
-    if (!filtersInitialized || listingType !== 'sell') return;
+    if (!filtersInitialized || (listingType !== 'sell' && listingType !== 'auctions')) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -469,8 +487,8 @@ export default function BrowsePage() {
     <div>
       {/* Compact Unified Toolbar */}
       <div className={cn(
-        "border-b transition-colors sticky top-16 z-40 backdrop-blur-sm",
-        listingType === 'sell' ? "bg-snow-white/95 border-frost-ice/20" : "bg-snow-white/95 border-aurora-orange/20"
+        "border-b transition-colors sticky top-16 z-40 backdrop-blur-sm bg-snow-white/95",
+        listingType === 'sell' ? "border-frost-ice/20" : listingType === 'auctions' ? "border-aurora-purple/20" : "border-aurora-orange/20"
       )}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           {/* Desktop: Single row */}
@@ -480,7 +498,7 @@ export default function BrowsePage() {
               {/* Compact Tab Toggle */}
               <div className="inline-flex rounded-lg border border-border p-0.5 bg-snow-white/80 shadow-sm">
                 <button
-                  onClick={() => setListingType('sell')}
+                  onClick={() => handleListingTypeChange('sell')}
                   className={cn(
                     "px-4 py-1.5 rounded-md text-sm font-medium transition-all",
                     listingType === 'sell'
@@ -493,7 +511,20 @@ export default function BrowsePage() {
                   {t('tabs.forSale')}
                 </button>
                 <button
-                  onClick={() => setListingType('wanted')}
+                  onClick={() => handleListingTypeChange('auctions')}
+                  className={cn(
+                    "px-4 py-1.5 rounded-md text-sm font-medium transition-all",
+                    listingType === 'auctions'
+                      ? "bg-aurora-purple text-snow-white shadow-sm"
+                      : "text-text-secondary hover:text-text"
+                  )}
+                  aria-pressed={listingType === 'auctions'}
+                  aria-label={t('tabs.auctionsAria')}
+                >
+                  {t('tabs.auctions')}
+                </button>
+                <button
+                  onClick={() => handleListingTypeChange('wanted')}
                   className={cn(
                     "px-4 py-1.5 rounded-md text-sm font-medium transition-all",
                     listingType === 'wanted'
@@ -519,13 +550,20 @@ export default function BrowsePage() {
                         { value: 'price-low', label: t('sort.priceLowHigh') },
                         { value: 'price-high', label: t('sort.priceHighLow') },
                       ]
-                    : [
-                        { value: 'recent', label: t('sort.recentlyPosted') },
-                        { value: 'expiring', label: t('sort.expiringSoon') },
-                        { value: 'budget-high', label: t('sort.budgetHighLow') },
-                        { value: 'budget-low', label: t('sort.budgetLowHigh') },
-                        { value: 'popular', label: t('sort.mostResponses') },
-                      ]
+                    : listingType === 'auctions'
+                      ? [
+                          { value: 'ending-soon', label: t('sort.endingSoon') },
+                          { value: 'recent', label: t('sort.recentlyListed') },
+                          { value: 'price-low', label: t('sort.priceLowHigh') },
+                          { value: 'price-high', label: t('sort.priceHighLow') },
+                        ]
+                      : [
+                          { value: 'recent', label: t('sort.recentlyPosted') },
+                          { value: 'expiring', label: t('sort.expiringSoon') },
+                          { value: 'budget-high', label: t('sort.budgetHighLow') },
+                          { value: 'budget-low', label: t('sort.budgetLowHigh') },
+                          { value: 'popular', label: t('sort.mostResponses') },
+                        ]
                 }
                 value={sortBy}
                 onChange={setSortBy}
@@ -549,7 +587,7 @@ export default function BrowsePage() {
             {/* Row 1: Full-width tabs */}
             <div className="flex rounded-lg border border-border p-0.5 bg-snow-white/80">
               <button
-                onClick={() => setListingType('sell')}
+                onClick={() => handleListingTypeChange('sell')}
                 className={cn(
                   "flex-1 py-2 rounded-md text-sm font-medium transition-all",
                   listingType === 'sell'
@@ -562,7 +600,20 @@ export default function BrowsePage() {
                 {t('tabs.forSale')}
               </button>
               <button
-                onClick={() => setListingType('wanted')}
+                onClick={() => handleListingTypeChange('auctions')}
+                className={cn(
+                  "flex-1 py-2 rounded-md text-sm font-medium transition-all",
+                  listingType === 'auctions'
+                    ? "bg-aurora-purple text-snow-white"
+                    : "text-text-secondary"
+                )}
+                aria-pressed={listingType === 'auctions'}
+                aria-label={t('tabs.auctionsAria')}
+              >
+                {t('tabs.auctions')}
+              </button>
+              <button
+                onClick={() => handleListingTypeChange('wanted')}
                 className={cn(
                   "flex-1 py-2 rounded-md text-sm font-medium transition-all",
                   listingType === 'wanted'
@@ -588,13 +639,20 @@ export default function BrowsePage() {
                           { value: 'price-low', label: t('sort.priceLowHigh') },
                           { value: 'price-high', label: t('sort.priceHighLow') },
                         ]
-                      : [
-                          { value: 'recent', label: t('sort.recentlyPosted') },
-                          { value: 'expiring', label: t('sort.expiringSoon') },
-                          { value: 'budget-high', label: t('sort.budgetHighLow') },
-                          { value: 'budget-low', label: t('sort.budgetLowHigh') },
-                          { value: 'popular', label: t('sort.mostResponses') },
-                        ]
+                      : listingType === 'auctions'
+                        ? [
+                            { value: 'ending-soon', label: t('sort.endingSoon') },
+                            { value: 'recent', label: t('sort.recentlyListed') },
+                            { value: 'price-low', label: t('sort.priceLowHigh') },
+                            { value: 'price-high', label: t('sort.priceHighLow') },
+                          ]
+                        : [
+                            { value: 'recent', label: t('sort.recentlyPosted') },
+                            { value: 'expiring', label: t('sort.expiringSoon') },
+                            { value: 'budget-high', label: t('sort.budgetHighLow') },
+                            { value: 'budget-low', label: t('sort.budgetLowHigh') },
+                            { value: 'popular', label: t('sort.mostResponses') },
+                          ]
                   }
                   value={sortBy}
                   onChange={setSortBy}
@@ -629,31 +687,46 @@ export default function BrowsePage() {
           {filtersOpen && (
             <div className="hidden lg:block border border-border rounded-lg p-4 sm:p-6 bg-bg-elevated animate-in slide-in-from-top-2 duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {listingType === 'sell' ? (
-                  <SellFilters
-                    selectedPlayerCounts={selectedPlayerCounts}
-                    availablePlayerCounts={availableOptions.playerCounts}
-                    onTogglePlayerCount={togglePlayerCount}
-                    onClearPlayerCounts={() => setSelectedPlayerCounts(new Set())}
-                    selectedMinAges={selectedMinAges}
-                    availableMinAges={availableOptions.minAges}
-                    onToggleMinAge={toggleMinAge}
-                    onClearMinAges={() => setSelectedMinAges(new Set())}
-                    selectedPlayingTimes={selectedPlayingTimes}
-                    availablePlayingTimes={availableOptions.playingTimeRanges}
-                    onTogglePlayingTime={togglePlayingTime}
-                    onClearPlayingTimes={() => setSelectedPlayingTimes(new Set())}
-                    selectedLanguages={selectedLanguages}
-                    availableLanguages={availableOptions.languages}
-                    onToggleLanguage={toggleLanguage}
-                    onClearLanguages={() => setSelectedLanguages(new Set())}
-                    priceMin={priceMin}
-                    priceMax={priceMax}
-                    onPriceMinChange={setPriceMin}
-                    onPriceMaxChange={setPriceMax}
-                    onClearPrice={removePriceFilter}
-                    priceRange={availableOptions.priceRange}
-                  />
+                {listingType === 'sell' || listingType === 'auctions' ? (
+                  <>
+                    <SellFilters
+                      selectedPlayerCounts={selectedPlayerCounts}
+                      availablePlayerCounts={availableOptions.playerCounts}
+                      onTogglePlayerCount={togglePlayerCount}
+                      onClearPlayerCounts={() => setSelectedPlayerCounts(new Set())}
+                      selectedMinAges={selectedMinAges}
+                      availableMinAges={availableOptions.minAges}
+                      onToggleMinAge={toggleMinAge}
+                      onClearMinAges={() => setSelectedMinAges(new Set())}
+                      selectedPlayingTimes={selectedPlayingTimes}
+                      availablePlayingTimes={availableOptions.playingTimeRanges}
+                      onTogglePlayingTime={togglePlayingTime}
+                      onClearPlayingTimes={() => setSelectedPlayingTimes(new Set())}
+                      selectedLanguages={selectedLanguages}
+                      availableLanguages={availableOptions.languages}
+                      onToggleLanguage={toggleLanguage}
+                      onClearLanguages={() => setSelectedLanguages(new Set())}
+                      priceMin={priceMin}
+                      priceMax={priceMax}
+                      onPriceMinChange={setPriceMin}
+                      onPriceMaxChange={setPriceMax}
+                      onClearPrice={removePriceFilter}
+                      priceRange={availableOptions.priceRange}
+                    />
+                    {listingType === 'auctions' && (
+                      <div className="col-span-full">
+                        <label className="flex items-center gap-2 cursor-pointer text-sm text-text-secondary hover:text-polar-night transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={showEndedAuctions}
+                            onChange={(e) => setShowEndedAuctions(e.target.checked)}
+                            className="rounded border-border text-aurora-purple focus:ring-aurora-purple"
+                          />
+                          {t('filters.includeEnded')}
+                        </label>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <WantedFilters
                     acceptableConditions={acceptableConditions}
@@ -693,30 +766,74 @@ export default function BrowsePage() {
             onClearAll={clearFilters}
             activeFiltersCount={activeFiltersCount}
           >
-            <SellFilters
-              selectedPlayerCounts={selectedPlayerCounts}
-              availablePlayerCounts={availableOptions.playerCounts}
-              onTogglePlayerCount={togglePlayerCount}
-              onClearPlayerCounts={() => setSelectedPlayerCounts(new Set())}
-              selectedMinAges={selectedMinAges}
-              availableMinAges={availableOptions.minAges}
-              onToggleMinAge={toggleMinAge}
-              onClearMinAges={() => setSelectedMinAges(new Set())}
-              selectedPlayingTimes={selectedPlayingTimes}
-              availablePlayingTimes={availableOptions.playingTimeRanges}
-              onTogglePlayingTime={togglePlayingTime}
-              onClearPlayingTimes={() => setSelectedPlayingTimes(new Set())}
-              selectedLanguages={selectedLanguages}
-              availableLanguages={availableOptions.languages}
-              onToggleLanguage={toggleLanguage}
-              onClearLanguages={() => setSelectedLanguages(new Set())}
-              priceMin={priceMin}
-              priceMax={priceMax}
-              onPriceMinChange={setPriceMin}
-              onPriceMaxChange={setPriceMax}
-              onClearPrice={removePriceFilter}
-              priceRange={availableOptions.priceRange}
-            />
+            {listingType === 'wanted' ? (
+              <WantedFilters
+                acceptableConditions={acceptableConditions}
+                onToggleCondition={(condition) => {
+                  const newSet = new Set(acceptableConditions);
+                  if (newSet.has(condition)) {
+                    newSet.delete(condition);
+                  } else {
+                    newSet.add(condition);
+                  }
+                  setAcceptableConditions(newSet);
+                }}
+                onClearConditions={() => setAcceptableConditions(new Set())}
+                budgetMin={budgetMin}
+                budgetMax={budgetMax}
+                onBudgetMinChange={setBudgetMin}
+                onBudgetMaxChange={setBudgetMax}
+                onClearBudget={() => {
+                  setBudgetMin('');
+                  setBudgetMax('');
+                }}
+                locationFilter={locationFilter}
+                onLocationChange={setLocationFilter}
+                onClearLocation={() => setLocationFilter('')}
+                showExpiringOnly={showExpiringOnly}
+                onToggleExpiring={() => setShowExpiringOnly(!showExpiringOnly)}
+              />
+            ) : (
+              <>
+                <SellFilters
+                  selectedPlayerCounts={selectedPlayerCounts}
+                  availablePlayerCounts={availableOptions.playerCounts}
+                  onTogglePlayerCount={togglePlayerCount}
+                  onClearPlayerCounts={() => setSelectedPlayerCounts(new Set())}
+                  selectedMinAges={selectedMinAges}
+                  availableMinAges={availableOptions.minAges}
+                  onToggleMinAge={toggleMinAge}
+                  onClearMinAges={() => setSelectedMinAges(new Set())}
+                  selectedPlayingTimes={selectedPlayingTimes}
+                  availablePlayingTimes={availableOptions.playingTimeRanges}
+                  onTogglePlayingTime={togglePlayingTime}
+                  onClearPlayingTimes={() => setSelectedPlayingTimes(new Set())}
+                  selectedLanguages={selectedLanguages}
+                  availableLanguages={availableOptions.languages}
+                  onToggleLanguage={toggleLanguage}
+                  onClearLanguages={() => setSelectedLanguages(new Set())}
+                  priceMin={priceMin}
+                  priceMax={priceMax}
+                  onPriceMinChange={setPriceMin}
+                  onPriceMaxChange={setPriceMax}
+                  onClearPrice={removePriceFilter}
+                  priceRange={availableOptions.priceRange}
+                />
+                {listingType === 'auctions' && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm text-text-secondary hover:text-polar-night transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={showEndedAuctions}
+                        onChange={(e) => setShowEndedAuctions(e.target.checked)}
+                        className="rounded border-border text-aurora-purple focus:ring-aurora-purple"
+                      />
+                      {t('filters.includeEnded')}
+                    </label>
+                  </div>
+                )}
+              </>
+            )}
           </MobileFilterDrawer>
 
           {/* Active Filter Chips */}
@@ -754,7 +871,7 @@ export default function BrowsePage() {
         {isOffline && !loading && (
           <OfflineError
             onRetry={() => {
-              if (listingType === 'sell') {
+              if (listingType === 'sell' || listingType === 'auctions') {
                 fetchGames(1, false);
               } else {
                 fetchWantedListings();
@@ -779,20 +896,11 @@ export default function BrowsePage() {
         )}
 
         {/* Games Grid - Full Width, Responsive */}
-        {!loading && !error && !isOffline && (listingType === 'sell' ? filteredGames.length > 0 : filteredWantedListings.length > 0) && (
+        {!loading && !error && !isOffline && (listingType === 'wanted' ? filteredWantedListings.length > 0 : filteredGames.length > 0) && (
           <>
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-pl-4 sm:grid sm:grid-cols-2 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0 sm:snap-none lg:grid-cols-3 xl:grid-cols-4 sm:gap-6">
-              {listingType === 'sell'
-                ? filteredGames.map((game, index) => (
-                    <div key={game.bgg_game_id} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
-                      <AggregatedGameCard
-                        game={game}
-                        allGameIds={gameIds}
-                        index={index}
-                      />
-                    </div>
-                  ))
-                : filteredWantedListings.map((wantedListing) => (
+              {listingType === 'wanted'
+                ? filteredWantedListings.map((wantedListing) => (
                     <div key={wantedListing.id} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
                       <WantedListingCard
                         wantedListing={wantedListing}
@@ -801,25 +909,34 @@ export default function BrowsePage() {
                       />
                     </div>
                   ))
+                : filteredGames.map((game, index) => (
+                    <div key={game.bgg_game_id} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
+                      <AggregatedGameCard
+                        game={game}
+                        allGameIds={gameIds}
+                        index={index}
+                      />
+                    </div>
+                  ))
               }
 
               {/* Infinite scroll sentinel - inside container for both layouts */}
               {/* Mobile: thin element at end of horizontal scroll. Desktop: full-width row at bottom of grid */}
-              {listingType === 'sell' && hasMore && !loading && (
+              {(listingType === 'sell' || listingType === 'auctions') && hasMore && !loading && (
                 <div ref={loadMoreRef} className="flex-shrink-0 w-1 sm:w-full sm:col-span-full sm:h-1" aria-hidden="true" />
               )}
             </div>
 
-            {/* Loading More Indicator - Only for sell listings */}
-            {listingType === 'sell' && loadingMore && (
+            {/* Loading More Indicator - For sell and auction listings */}
+            {(listingType === 'sell' || listingType === 'auctions') && loadingMore && (
               <div className="text-center py-8">
                 <div className="w-8 h-8 border-4 border-frost-ice border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                 <p className="text-sm text-text-secondary">{t('messages.loadingMore')}</p>
               </div>
             )}
 
-            {/* No More Results - Only for sell listings */}
-            {listingType === 'sell' && !hasMore && !loadingMore && filteredGames.length > 0 && (
+            {/* No More Results - For sell and auction listings */}
+            {(listingType === 'sell' || listingType === 'auctions') && !hasMore && !loadingMore && filteredGames.length > 0 && (
               <div className="text-center py-8 border-t border-border-subtle space-y-4">
                 <p className="text-sm text-text-secondary">
                   {t('messages.reachedEnd', { totalCount })}
@@ -843,20 +960,27 @@ export default function BrowsePage() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && !isOffline && (listingType === 'sell' ? filteredGames.length === 0 : filteredWantedListings.length === 0) && (
+        {!loading && !error && !isOffline && (listingType === 'wanted' ? filteredWantedListings.length === 0 : filteredGames.length === 0) && (
           <div className="text-center py-16">
             <div className="flex justify-center mb-4">
               <Package className="w-16 h-16 text-text-muted" />
             </div>
             <h3 className="text-xl font-semibold text-polar-night mb-2">
-              {listingType === 'sell' ? t('emptyState.noGamesFound') : t('emptyState.noWantedListings')}
+              {listingType === 'auctions'
+                ? t('emptyState.noAuctions')
+                : listingType === 'sell'
+                  ? t('emptyState.noGamesFound')
+                  : t('emptyState.noWantedListings')
+              }
             </h3>
             <p className="text-text-secondary mb-6">
               {activeFiltersCount > 0
                 ? t('emptyState.tryAdjustingFilters')
-                : listingType === 'sell'
-                  ? t('emptyState.beFirstToList')
-                  : t('emptyState.beFirstToPost')
+                : listingType === 'auctions'
+                  ? t('emptyState.beFirstToAuction')
+                  : listingType === 'sell'
+                    ? t('emptyState.beFirstToList')
+                    : t('emptyState.beFirstToPost')
               }
             </p>
             {activeFiltersCount > 0 && (

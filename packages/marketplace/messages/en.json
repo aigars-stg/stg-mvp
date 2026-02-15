@@ -408,7 +408,25 @@
   },
   "MessagesPage": {
     "title": "Messages",
-    "subtitle": "Conversations with buyers and sellers"
+    "subtitle": "Conversations with buyers and sellers",
+    "noConversations": "No conversations yet",
+    "noConversationsHint": "When you reach out about a listing - or someone reaches out to you - it will show up here.",
+    "unknownUser": "Unknown User",
+    "noMessages": "No messages yet",
+    "conversationNotFound": "Conversation not found",
+    "backToMessages": "Back to Messages",
+    "seller": "Seller",
+    "buyer": "Buyer",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "startConversation": "Start the conversation by sending a message below.",
+    "archivedPlaceholder": "Unarchive to send messages"
+  },
+  "ListingStatus": {
+    "active": "Active",
+    "sold": "Sold",
+    "removed": "Removed",
+    "draft": "Draft"
   },
   "MessageInput": {
     "placeholder": "Type your message...",
@@ -990,8 +1008,10 @@
     },
     "tabs": {
       "forSale": "For Sale",
+      "auctions": "Auctions",
       "wanted": "Wanted",
       "forSaleAria": "Show games for sale",
+      "auctionsAria": "Show games with active auctions",
       "wantedAria": "Show wanted listings"
     },
     "sort": {
@@ -1002,7 +1022,8 @@
       "expiringSoon": "Expiring Soon",
       "budgetHighLow": "Budget: High to Low",
       "budgetLowHigh": "Budget: Low to High",
-      "mostResponses": "Most Responses"
+      "mostResponses": "Most Responses",
+      "endingSoon": "Ending Soon"
     },
     "filters": {
       "title": "Filters",
@@ -1023,7 +1044,8 @@
       "expiringToggle": "Show only listings expiring within 7 days",
       "searchLocationPlaceholder": "Search location...",
       "minPlaceholder": "Min",
-      "maxPlaceholder": "Max"
+      "maxPlaceholder": "Max",
+      "includeEnded": "Include ended auctions"
     },
     "playerCount": {
       "solo": "Solo",
@@ -1047,9 +1069,11 @@
     "emptyState": {
       "noGamesFound": "No games found",
       "noWantedListings": "No wanted listings yet",
+      "noAuctions": "No auctions found",
       "tryAdjustingFilters": "Try adjusting your filters or search query",
       "beFirstToList": "Be the first to list a game.",
       "beFirstToPost": "Be the first to post what you're looking for.",
+      "beFirstToAuction": "No active auctions right now. Check back soon or list your own game as an auction.",
       "clearAllFilters": "Clear all filters"
     }
   },
@@ -1157,7 +1181,24 @@
   },
   "Legal": {
     "lastUpdated": "Last updated: {date}",
-    "backToHome": "← Back to Home"
+    "backToHome": "← Back to Home",
+    "inPlainTerms": "In plain terms",
+    "sectionNotFound": "Section not found.",
+    "page": {
+      "title": "Legal",
+      "description": "Terms of service, privacy policy, seller agreement, and other legal documents for Second Turn Games.",
+      "breadcrumbHome": "Home",
+      "breadcrumbLegal": "Legal"
+    },
+    "nav": {
+      "overview": "Overview",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "seller": "Seller Agreement",
+      "buyer": "Buyer Guide",
+      "cookies": "Cookie Policy",
+      "fees": "Fees"
+    }
   },
   "Auction": {
     "title": "Auction",
@@ -2241,6 +2282,18 @@
       "noLongerAvailable": "This item is no longer available"
     }
   },
+  "Notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications yet",
+    "noNotificationsHint": "When something needs your attention, it will appear here.",
+    "loadMore": "Load more",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "thisWeek": "This week",
+    "earlier": "Earlier",
+    "loading": "Loading..."
+  },
   "MyListings": {
     "title": "My listings",
     "subtitle": "Games you're selling, seeking, and saving",
@@ -2746,6 +2799,16 @@
         "backToHome": "Back to home"
       }
     },
+    "sectionNotFound": "Section not found.",
+    "nav": {
+      "overview": "Help Centre",
+      "buying": "How to Buy",
+      "selling": "How to Sell",
+      "grading": "Condition Grading",
+      "shipping": "Shipping",
+      "wallet": "Wallet & Payments",
+      "dac7": "DAC7 & Taxes"
+    },
     "page": {
       "title": "Help Centre",
       "description": "Guides and resources for buying and selling pre-loved board games on Second Turn Games.",
@@ -2779,7 +2842,7 @@
       },
       "q7": {
         "question": "How do I get paid as a seller?",
-        "answer": "After a buyer confirms delivery (or after the automatic 2-day dispute window), your earnings (90% of item price) are credited to your platform wallet. You can request a withdrawal to your IBAN bank account at any time."
+        "answer": "Two days after delivery (or when the buyer confirms earlier), your earnings (90% of item price) are credited to your platform wallet. You can withdraw to your IBAN bank account at any time — no fees, no minimum waiting period."
       },
       "q8": {
         "question": "What board game conditions are accepted?",

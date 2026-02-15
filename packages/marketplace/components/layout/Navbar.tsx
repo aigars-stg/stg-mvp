@@ -28,6 +28,11 @@ const MessagesIcon = dynamic(() => import('./MessagesIcon').then(mod => ({ defau
   loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
 });
 
+const NotificationsIcon = dynamic(() => import('./NotificationsIcon').then(mod => ({ default: mod.NotificationsIcon })), {
+  ssr: false,
+  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
+});
+
 const NavbarSearch = dynamic(() => import('./NavbarSearch').then(mod => ({ default: mod.NavbarSearch })), {
   ssr: false,
   loading: () => <div className="w-64 lg:w-80 h-9 rounded-lg bg-bg-secondary animate-pulse" />,
@@ -98,6 +103,7 @@ export function Navbar() {
             <div className="flex items-center ml-2 border-l border-border-subtle pl-2 border-r pr-2 mr-2 gap-1">
               <CartIcon />
               <SavedGamesIcon />
+              <NotificationsIcon />
               <MessagesIcon />
             </div>
           )}

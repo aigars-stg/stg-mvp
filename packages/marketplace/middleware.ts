@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
@@ -47,41 +47,13 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
+        getAll() {
+          return request.cookies.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value);
+            response.cookies.set(name, value, options);
           });
         },
       },
@@ -89,27 +61,37 @@ export async function middleware(request: NextRequest) {
   );
 
   // Validate session with Supabase server (secure - prevents cookie forgery)
+  // During auth callbacks (?code= or ?token_hash=), skip cookie clearing to preserve
+  // the PKCE code verifier cookie needed for client-side code exchange
+  const isAuthCallback = pathname.includes('/auth/confirm')
+    || request.nextUrl.searchParams.has('code')
+    || request.nextUrl.searchParams.has('token_hash');
+
+  const supabaseProjectRef = process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0];
+  const authCookiePrefix = `sb-${supabaseProjectRef}-auth-token`;
+
+  const clearAuthCookies = () => {
+    if (isAuthCallback) return;
+    response.cookies.delete(authCookiePrefix);
+    for (const cookie of request.cookies.getAll()) {
+      if (cookie.name.startsWith(authCookiePrefix)) {
+        response.cookies.delete(cookie.name);
+      }
+    }
+  };
+
   let user = null;
   try {
     const { data, error } = await supabase.auth.getUser();
 
     if (error) {
-      // Handle stale/invalid refresh tokens
-      if (error.code === 'refresh_token_not_found' ||
-          error.code === 'invalid_refresh_token' ||
-          error.message?.includes('Refresh Token')) {
-        // Clear auth cookies silently
-        response.cookies.delete('sb-access-token');
-        response.cookies.delete('sb-refresh-token');
-        // Also try Supabase's default cookie names
-        response.cookies.delete(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`);
-      }
-      // Auth errors are handled silently - session missing is normal for anonymous users
+      clearAuthCookies();
     } else {
       user = data.user;
     }
   } catch {
-    // Auth errors handled silently
+    // Catches decode errors (e.g. Invalid UTF-8 from corrupted cookies)
+    clearAuthCookies();
   }
 
   // Step 2: Set locale cookie for next-intl based on user preference
@@ -139,7 +121,7 @@ export async function middleware(request: NextRequest) {
 
   // Protected routes that require authentication
   // Note: Must handle both /route and /[locale]/route patterns
-  const protectedRoutes = ['/sell', '/account', '/my-listings', '/seller'];
+  const protectedRoutes = ['/sell', '/account', '/my-listings', '/seller', '/messages', '/notifications'];
   const publicRoutes = ['/seller/terms'];
   const authRoutes = ['/auth/signin', '/auth/signup', '/auth'];
 

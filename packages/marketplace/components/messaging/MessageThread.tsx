@@ -1,7 +1,7 @@
-/* eslint-disable @next/next/no-img-element -- user avatars are external URLs */
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { MessageBubble } from './MessageBubble';
@@ -11,12 +11,14 @@ import { RefreshCw as Loader2, AlertCircle, Archive, ArrowLeft } from '@/lib/ico
 import { Button } from '@second-turn/design-system';
 import type { Message, Conversation } from '@/lib/types/message';
 import { Link } from '@/i18n/navigation';
+import { Avatar } from '@/components/user';
 
 interface MessageThreadProps {
   conversationId: string;
 }
 
 export function MessageThread({ conversationId }: MessageThreadProps) {
+  const t = useTranslations('MessagesPage');
   const { user } = useAuth();
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -265,11 +267,11 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
         <AlertCircle className="w-12 h-12 text-aurora-red" />
-        <p className="text-text-primary text-center">
-          {error || 'Conversation not found'}
+        <p className="text-text text-center">
+          {error || t('conversationNotFound')}
         </p>
         <Link href="/messages">
-          <Button variant="secondary">Back to Messages</Button>
+          <Button variant="secondary">{t('backToMessages')}</Button>
         </Link>
       </div>
     );
@@ -286,9 +288,9 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
       : !!conversation.seller_archived_at;
 
   return (
-    <div className="flex flex-col h-full bg-background-primary">
+    <div className="flex flex-col h-full bg-bg">
       {/* Header */}
-      <div className="border-b border-divider-subtle bg-background-secondary px-4 py-3 flex items-center justify-between">
+      <div className="border-b border-snow-storm bg-bg-elevated px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/messages" className="md:hidden">
             <Button variant="ghost" size="sm">
@@ -297,25 +299,18 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
           </Link>
 
           <div className="flex items-center gap-3">
-            {/* Other user avatar */}
-            <div className="w-10 h-10 rounded-full bg-background-tertiary flex items-center justify-center text-text-primary font-medium overflow-hidden">
-              {otherUser?.avatar_url ? (
-                <img
-                  src={otherUser.avatar_url}
-                  alt={otherUser.full_name || 'User'}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span>{otherUser?.full_name?.[0]?.toUpperCase() || '?'}</span>
-              )}
-            </div>
+            <Avatar
+              src={otherUser?.avatar_url}
+              name={otherUser?.full_name || t('unknownUser')}
+              size="md"
+            />
 
             <div>
-              <h2 className="text-base font-semibold text-text-primary">
-                {otherUser?.full_name || 'Unknown User'}
+              <h2 className="text-base font-semibold text-text">
+                {otherUser?.full_name || t('unknownUser')}
               </h2>
-              <p className="text-xs text-text-tertiary">
-                {conversation.buyer_id === user?.id ? 'Seller' : 'Buyer'}
+              <p className="text-xs text-text-muted">
+                {conversation.buyer_id === user?.id ? t('seller') : t('buyer')}
               </p>
             </div>
           </div>
@@ -328,7 +323,7 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
           disabled={archiving}
         >
           <Archive className="w-5 h-5 mr-2" />
-          {isArchived ? 'Unarchive' : 'Archive'}
+          {isArchived ? t('unarchive') : t('archive')}
         </Button>
       </div>
 
@@ -342,9 +337,9 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
       >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <p className="text-text-secondary">No messages yet</p>
-            <p className="text-text-tertiary text-sm mt-2">
-              Start the conversation by sending a message below.
+            <p className="text-text-secondary">{t('noMessages')}</p>
+            <p className="text-text-muted text-sm mt-2">
+              {t('startConversation')}
             </p>
           </div>
         ) : (
@@ -365,8 +360,8 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
         disabled={isArchived}
         placeholder={
           isArchived
-            ? 'Unarchive to send messages'
-            : 'Type your message...'
+            ? t('archivedPlaceholder')
+            : undefined
         }
       />
     </div>

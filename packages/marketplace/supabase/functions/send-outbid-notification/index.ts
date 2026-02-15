@@ -94,13 +94,28 @@ Deno.serve(async (req) => {
       ? `${appUrl}/game/${listing.bgg_game_id}`
       : `${appUrl}/browse`
 
+    // Deduplicate: check if outbid notification already sent for this listing+user+amount
+    const { count: existingCount } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', outbid_user_id)
+      .eq('type', 'outbid')
+      .contains('data', { listing_id, amount: new_bid_amount })
+
+    if (existingCount && existingCount > 0) {
+      console.log(`[Outbid] Already notified user ${outbid_user_id} for this bid amount`)
+      return new Response(JSON.stringify({ success: true, skipped: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     // Create in-app notification
     await supabase.from('notifications').insert({
       user_id: outbid_user_id,
       type: 'outbid',
       title: `You've been outbid on ${game_name}`,
-      body: `Current bid is now €${new_bid_amount.toFixed(2)}. Place a higher bid to stay in the running!`,
-      data: { listing_id, amount: new_bid_amount },
+      body: `Current bid is now €${new_bid_amount.toFixed(2)}. Place a higher bid to stay in the running.`,
+      data: { listing_id, amount: new_bid_amount, bgg_game_id: listing?.bgg_game_id },
     })
 
     // Send email notification
@@ -153,21 +168,21 @@ function generateOutbidEmailHtml(params: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <h1 style="color: #f59e0b; font-size: 24px; margin-bottom: 20px;">You've Been Outbid!</h1>
+  <h1 style="color: #D08770; font-size: 24px; margin-bottom: 20px;">You've been outbid</h1>
 
   <p>Hi ${userName},</p>
 
   <p>Someone has placed a higher bid on <strong>${gameName}</strong>.</p>
 
-  <div style="background: #f59e0b10; border: 2px solid #f59e0b30; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
+  <div style="background: #D0877010; border: 2px solid #D0877030; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
     <p style="margin: 0 0 8px 0; color: #666;">Current bid is now</p>
-    <p style="margin: 0; font-size: 28px; font-weight: bold; color: #f59e0b;">€${newBidAmount.toFixed(2)}</p>
+    <p style="margin: 0; font-size: 28px; font-weight: bold; color: #D08770;">€${newBidAmount.toFixed(2)}</p>
   </div>
 
-  <p>Still want this game? Place a higher bid to get back in the lead!</p>
+  <p>Still want this game? Place a higher bid to get back in the lead.</p>
 
   <div style="text-align: center; margin: 24px 0;">
-    <a href="${gameUrl}" style="display: inline-block; background: #9333ea; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: 600;">Place New Bid</a>
+    <a href="${gameUrl}" style="display: inline-block; background: #88C0D0; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: 600;">Place New Bid</a>
   </div>
 
   <p style="color: #666; font-size: 14px;">
@@ -175,10 +190,6 @@ function generateOutbidEmailHtml(params: {
   </p>
 
   <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-
-  <p style="color: #999; font-size: 12px;">
-    Don't want these notifications? Update your <a href="${gameUrl.split('/game')[0]}/settings/notifications" style="color: #999;">notification preferences</a>.
-  </p>
 
   <p style="color: #999; font-size: 12px;">
     Second Turn Games - Baltic's Board Game Marketplace

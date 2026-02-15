@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { HelpNav, type HelpSectionId } from './HelpNav';
 import { LegalSection } from '../legal/LegalSection';
 
@@ -17,6 +18,7 @@ interface HelpHubProps {
 
 function HelpHubInner({ documents }: HelpHubProps) {
   const searchParams = useSearchParams();
+  const t = useTranslations('Help');
   const section = (searchParams.get('section') || 'overview') as HelpSectionId;
   const doc = documents[section];
 
@@ -27,7 +29,7 @@ function HelpHubInner({ documents }: HelpHubProps) {
   if (!doc) {
     return (
       <div className="text-text-secondary">
-        <p>Section not found.</p>
+        <p>{t('sectionNotFound')}</p>
       </div>
     );
   }

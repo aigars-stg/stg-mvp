@@ -102,6 +102,21 @@ const gameDetailsCache = new Map<number, { data: BGGGame; timestamp: number }>()
 const versionCache = new Map<number, { data: BGGVersion[]; timestamp: number }>();
 const metadataCache = new Map<number, { data: BGGGameMetadata; timestamp: number }>();
 const CACHE_TTL_SECONDS = 86400; // 24 hours (for Redis)
+const MAX_CACHE_ENTRIES = 200;
+
+/**
+ * Set a cache entry with LRU-style eviction to prevent unbounded memory growth.
+ * Evicts oldest entries (by insertion order) when the cache exceeds MAX_CACHE_ENTRIES.
+ */
+function cacheSetWithEviction<K, V>(cache: Map<K, { data: V; timestamp: number }>, key: K, data: V) {
+  // Delete first so re-insertion moves key to end (most recent)
+  cache.delete(key);
+  if (cache.size >= MAX_CACHE_ENTRIES) {
+    const oldestKey = cache.keys().next().value;
+    if (oldestKey !== undefined) cache.delete(oldestKey);
+  }
+  cache.set(key, { data, timestamp: Date.now() });
+}
 
 // Parse XML helper
 const parser = new XMLParser({
@@ -267,7 +282,7 @@ export async function fetchGameMetadata(gameId: number): Promise<BGGGameMetadata
 
     // Cache result in Redis + in-memory (for stale fallback)
     await cacheSet(`bgg:meta:${gameId}`, metadata, CACHE_TTL_SECONDS);
-    metadataCache.set(gameId, { data: metadata, timestamp: Date.now() });
+    cacheSetWithEviction(metadataCache, gameId, metadata);
 
     return metadata;
   } catch (error: unknown) {
@@ -444,7 +459,7 @@ export async function searchGames(query: string): Promise<BGGGame[]> {
 
     // Cache results in Redis + in-memory (for stale fallback)
     await cacheSet(`bgg:search:${cacheKey}`, baseGames, CACHE_TTL_SECONDS);
-    searchCache.set(cacheKey, { data: baseGames, timestamp: Date.now() });
+    cacheSetWithEviction(searchCache, cacheKey, baseGames);
 
     return baseGames;
   } catch (error: unknown) {
@@ -553,7 +568,7 @@ export async function getGameDetails(gameId: number): Promise<BGGGame | null> {
 
     // Cache result in Redis + in-memory
     await cacheSet(`bgg:details:${gameId}`, game, CACHE_TTL_SECONDS);
-    gameDetailsCache.set(gameId, { data: game, timestamp: Date.now() });
+    cacheSetWithEviction(gameDetailsCache, gameId, game);
 
     return game;
   } catch (error: unknown) {
@@ -630,7 +645,7 @@ export async function getGameVersions(gameId: number): Promise<BGGVersion[]> {
 
     // Cache results in Redis + in-memory
     await cacheSet(`bgg:versions:${gameId}`, versions, CACHE_TTL_SECONDS);
-    versionCache.set(gameId, { data: versions, timestamp: Date.now() });
+    cacheSetWithEviction(versionCache, gameId, versions);
 
     return versions;
   } catch (error: unknown) {

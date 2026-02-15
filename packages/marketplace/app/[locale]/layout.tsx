@@ -212,11 +212,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-muted">
                   <p>{tFooter('copyright', { year: currentYear })}</p>
                   <div className="flex items-center gap-3">
-                    <span className="sr-only">{tFooter('compliance.paymentMethods')}</span>
-                    <Image src="/images/payments/mastercard.svg" alt="Mastercard" width={152} height={108} className="h-7 w-auto" />
-                    <Image src="/images/payments/visa.svg" alt="Visa" width={262} height={85} className="h-4 w-auto" />
                     <nav aria-label="Payment compliance" className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-1">
-                      <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
                       <Link href="/legal#contact" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('compliance.contactUs')}</Link>
                       <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
                       <Link href="/legal?section=terms" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.termsOfService')}</Link>

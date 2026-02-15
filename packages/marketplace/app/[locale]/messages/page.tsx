@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import { ConversationList } from '@/components/messaging/ConversationList';
-import { ChatBubble as MessageCircle } from '@/lib/icons';
 import { Card } from '@second-turn/design-system';
 import { getTranslations } from 'next-intl/server';
 
@@ -13,24 +12,17 @@ export default async function MessagesPage() {
   const t = await getTranslations('MessagesPage');
 
   return (
-    <div className="min-h-screen bg-bg py-6 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Page header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3">
-            <MessageCircle className="w-8 h-8 text-frost-ice" />
-            <h1 className="text-3xl font-bold text-text-primary">{t('title')}</h1>
-          </div>
-          <p className="text-text-secondary mt-2">
-            {t('subtitle')}
-          </p>
-        </div>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+      <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-1">
+        {t('title')}
+      </h1>
+      <p className="text-sm text-text-secondary mb-6">
+        {t('subtitle')}
+      </p>
 
-        {/* Conversation list */}
-        <Card className="h-[calc(100vh-16rem)] overflow-hidden" padding="none">
-          <ConversationList />
-        </Card>
-      </div>
+      <Card className="h-[calc(100vh-16rem)] overflow-hidden" padding="none">
+        <ConversationList />
+      </Card>
     </div>
   );
 }

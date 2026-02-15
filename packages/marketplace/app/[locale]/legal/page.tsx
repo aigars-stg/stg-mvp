@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { getLegalDocument } from '@/lib/legal';
 import { LegalHub } from '@/components/legal/LegalHub';
 import { LEGAL_SECTIONS } from '@/components/legal/legal-sections';
@@ -6,13 +7,19 @@ import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.secondturn.games';
 
-export const metadata: Metadata = {
-  title: 'Legal',
-  description:
-    'Terms of service, privacy policy, seller agreement, and other legal documents for Second Turn Games.',
-};
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: 'Legal.page' });
+  return {
+    title: t('title'),
+    description: t('description'),
+  };
+}
 
-function loadAllLegalDocuments() {
+function loadAllLegalDocuments(locale: string = 'en') {
   const slugMap: Record<string, string> = {
     overview: 'overview',
     terms: 'terms',
@@ -35,7 +42,7 @@ function loadAllLegalDocuments() {
   for (const section of LEGAL_SECTIONS) {
     const fileSlug = slugMap[section.id] || section.id;
     try {
-      documents[section.id] = getLegalDocument(fileSlug);
+      documents[section.id] = getLegalDocument(fileSlug, locale);
     } catch {
       // Section content file not yet created — provide placeholder
       documents[section.id] = {
@@ -53,14 +60,19 @@ function loadAllLegalDocuments() {
   return documents;
 }
 
-export default function LegalPage() {
-  const documents = loadAllLegalDocuments();
+export default async function LegalPage({
+  params: { locale },
+}: {
+  params: { locale: string };
+}) {
+  const t = await getTranslations('Legal.page');
+  const documents = loadAllLegalDocuments(locale);
 
   return (
     <>
       <BreadcrumbSchema items={[
-        { name: 'Home', url: baseUrl },
-        { name: 'Legal', url: `${baseUrl}/legal` },
+        { name: t('breadcrumbHome'), url: baseUrl },
+        { name: t('breadcrumbLegal'), url: `${baseUrl}/legal` },
       ]} />
       <LegalHub documents={documents} />
     </>

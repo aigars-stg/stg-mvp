@@ -408,7 +408,25 @@
   },
   "MessagesPage": {
     "title": "Ziņojumi",
-    "subtitle": "Sarunas ar pircējiem un pārdevējiem"
+    "subtitle": "Sarunas ar pircējiem un pārdevējiem",
+    "noConversations": "Pagaidām nav sarunu",
+    "noConversationsHint": "Kad tu sazināsies par sludinājumu - vai kāds sazināsies ar tevi - tas parādīsies šeit.",
+    "unknownUser": "Nezināms lietotājs",
+    "noMessages": "Pagaidām nav ziņojumu",
+    "conversationNotFound": "Saruna nav atrasta",
+    "backToMessages": "Atpakaļ uz ziņojumiem",
+    "seller": "Pārdevējs",
+    "buyer": "Pircējs",
+    "archive": "Arhivēt",
+    "unarchive": "Atarhivēt",
+    "startConversation": "Sāc sarunu, nosūtot ziņojumu zemāk.",
+    "archivedPlaceholder": "Atarhivē, lai sūtītu ziņojumus"
+  },
+  "ListingStatus": {
+    "active": "Aktīvs",
+    "sold": "Pārdots",
+    "removed": "Noņemts",
+    "draft": "Melnraksts"
   },
   "MessageInput": {
     "placeholder": "Raksti ziņojumu...",
@@ -990,8 +1008,10 @@
     },
     "tabs": {
       "forSale": "Pārdošanā",
+      "auctions": "Izsoles",
       "wanted": "Meklē",
       "forSaleAria": "Rādīt spēles pārdošanā",
+      "auctionsAria": "Rādīt spēles ar aktīvām izsolēm",
       "wantedAria": "Rādīt meklētos sludinājumus"
     },
     "sort": {
@@ -1002,7 +1022,8 @@
       "expiringSoon": "Drīz beigsies",
       "budgetHighLow": "Budžets: no augstākā",
       "budgetLowHigh": "Budžets: no zemākā",
-      "mostResponses": "Visvairāk atbilžu"
+      "mostResponses": "Visvairāk atbilžu",
+      "endingSoon": "Drīz beidzas"
     },
     "filters": {
       "title": "Filtri",
@@ -1023,7 +1044,8 @@
       "expiringToggle": "Rādīt tikai sludinājumus, kas beidzas 7 dienu laikā",
       "searchLocationPlaceholder": "Meklēt atrašanās vietu...",
       "minPlaceholder": "Min",
-      "maxPlaceholder": "Maks"
+      "maxPlaceholder": "Maks",
+      "includeEnded": "Iekļaut beigtās izsoles"
     },
     "playerCount": {
       "solo": "Solo",
@@ -1047,9 +1069,11 @@
     "emptyState": {
       "noGamesFound": "Spēles nav atrastas",
       "noWantedListings": "Vēl nav meklēto sludinājumu",
+      "noAuctions": "Izsoles nav atrastas",
       "tryAdjustingFilters": "Mēģini pielāgot filtrus vai meklēšanas vaicājumu",
       "beFirstToList": "Esi pirmais, kas pievieno spēli.",
       "beFirstToPost": "Esi pirmais, kas publicē, ko meklē.",
+      "beFirstToAuction": "Pašlaik nav aktīvu izsoļu. Atgriezies drīz vai izveido savu izsoli.",
       "clearAllFilters": "Notīrīt visus filtrus"
     }
   },
@@ -1157,7 +1181,24 @@
   },
   "Legal": {
     "lastUpdated": "Pēdējoreiz atjaunināts: {date}",
-    "backToHome": "← Atpakaļ uz sākumlapu"
+    "backToHome": "← Atpakaļ uz sākumlapu",
+    "inPlainTerms": "Vienkāršiem vārdiem",
+    "sectionNotFound": "Sadaļa nav atrasta.",
+    "page": {
+      "title": "Juridiskie dokumenti",
+      "description": "Lietošanas noteikumi, privātuma politika, pārdevēja līgums un citi Second Turn Games juridiskie dokumenti.",
+      "breadcrumbHome": "Sākums",
+      "breadcrumbLegal": "Juridiskie dokumenti"
+    },
+    "nav": {
+      "overview": "Pārskats",
+      "terms": "Lietošanas noteikumi",
+      "privacy": "Privātuma politika",
+      "seller": "Pārdevēja līgums",
+      "buyer": "Pircēja ceļvedis",
+      "cookies": "Sīkdatņu politika",
+      "fees": "Maksas"
+    }
   },
   "Auction": {
     "title": "Izsole",
@@ -2241,6 +2282,18 @@
       "noLongerAvailable": "Šī prece vairs nav pieejama"
     }
   },
+  "Notifications": {
+    "title": "Paziņojumi",
+    "markAllRead": "Atzīmēt visus kā lasītus",
+    "noNotifications": "Pagaidām nav paziņojumu",
+    "noNotificationsHint": "Kad kaut kas prasīs tavu uzmanību, tas parādīsies šeit.",
+    "loadMore": "Ielādēt vairāk",
+    "today": "Šodien",
+    "yesterday": "Vakar",
+    "thisWeek": "Šonedēļ",
+    "earlier": "Agrāk",
+    "loading": "Ielādē..."
+  },
   "MyListings": {
     "title": "Mani sludinājumi",
     "subtitle": "Spēles, ko pārdod, meklē un saglabā",
@@ -2751,6 +2804,16 @@
         "backToHome": "Atpakaļ uz sākumu"
       }
     },
+    "sectionNotFound": "Sadaļa nav atrasta.",
+    "nav": {
+      "overview": "Palīdzības centrs",
+      "buying": "Kā pirkt",
+      "selling": "Kā pārdot",
+      "grading": "Stāvokļa novērtēšana",
+      "shipping": "Piegāde",
+      "wallet": "Maks un maksājumi",
+      "dac7": "DAC7 un nodokļi"
+    },
     "page": {
       "title": "Palīdzības centrs",
       "description": "Ceļveži un resursi galda spēļu pirkšanai un pārdošanai platformā Second Turn Games.",
@@ -2784,7 +2847,7 @@
       },
       "q7": {
         "question": "Kā es saņemu samaksu kā pārdevējs?",
-        "answer": "Pēc tam, kad pircējs apstiprina piegādi (vai pēc automātiskā 2 dienu strīdu perioda), tavi ieņēmumi (90% no preces cenas) tiek ieskaitīti platformas makā. Tu vari pieprasīt izmaksu uz savu IBAN bankas kontu jebkurā laikā."
+        "answer": "Divas dienas pēc piegādes (vai kad pircējs apstiprina ātrāk), tavi ieņēmumi (90% no preces cenas) tiek ieskaitīti platformas makā. Tu vari izņemt naudu uz savu IBAN bankas kontu jebkurā laikā — bez maksas, bez minimālā gaidīšanas perioda."
       },
       "q8": {
         "question": "Kādi galda spēļu stāvokļi tiek pieņemti?",

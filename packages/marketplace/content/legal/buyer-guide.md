@@ -99,7 +99,7 @@ Since you cannot return items just because you changed your mind, check these be
 
 | Check | Why It Matters |
 |-------|----------------|
-| **Condition rating** | New, Like New, Very Good, Good, or Acceptable |
+| **Condition rating** | Like New, Very Good, Good, or Acceptable |
 | **Photos** | Look for wear, damage, missing pieces |
 | **Description** | Read for disclosed defects or missing components |
 | **Edition and language** | Make sure it is the version you want |
@@ -276,7 +276,7 @@ If your order has not arrived within the maximum delivery time, contact us at in
 
 Once the seller ships, you will receive tracking information. Check your order page for updates.
 
-### 8.4 If Your Parcel Does Not Arrive
+### 8.5 If Your Parcel Does Not Arrive
 
 - Check tracking status on your order page
 - If tracking shows "delivered" but you did not receive it, report it within 2 days

@@ -339,5 +339,5 @@ Before every shipment:
 ## Related Help
 
 - [Condition Grading Guide](/help?section=grading) — How to grade your games accurately
-- [Selling Guide](/help/selling) — Complete guide to selling on Second Turn Games
-- [DAC7 Tax Reporting](/help/dac7) — Tax reporting thresholds for sellers
+- [Selling Guide](/help?section=selling) — Complete guide to selling on Second Turn Games
+- [DAC7 Tax Reporting](/help?section=dac7) — Tax reporting thresholds for sellers

@@ -4,9 +4,9 @@ lastUpdated: "January 2026"
 description: "Overview of legal documents and policies for Second Turn Games marketplace."
 ---
 
-We know — not exactly a page-turner. But these documents explain how Second Turn Games works, what we do with your information, and what is expected from everyone in our community.
+These documents explain how Second Turn Games works, what we do with your information, and what everyone in our community can expect.
 
-We have organised everything into sections you can jump between. And where the legal language gets dense, you will find explanations like this:
+We have kept things as clear as we can — and where the legal language gets dense, you will find explanations like this:
 
 :::plain-terms
 These boxes explain what the legal text actually means for you. They are not part of the binding agreement — just here to help.

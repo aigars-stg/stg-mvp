@@ -35,7 +35,7 @@ export function FeedbackButton() {
         className={`
           fixed bottom-6 right-6 z-40
           flex items-center gap-2
-          bg-white border border-gray-200 shadow-lg
+          bg-bg-elevated border border-snow-storm shadow-lg
           rounded-full
           transition-all duration-200 ease-out
           hover:bg-frost-ice/10 hover:border-frost-ice
