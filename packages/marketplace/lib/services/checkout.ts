@@ -236,7 +236,7 @@ export async function createCheckoutSession(
   } catch (err) {
     const message = err instanceof Error ? err.message : 'EveryPay payment creation failed';
     console.error('EveryPay createPayment failed:', message);
-    return { type: 'error', error: message, status: 502 };
+    return { type: 'error', error: message, status: 422 };
   }
 }
 
@@ -409,6 +409,6 @@ export async function createAuctionCheckoutSession(
   } catch (err) {
     const message = err instanceof Error ? err.message : 'EveryPay payment creation failed';
     console.error('EveryPay createPayment failed:', message);
-    return { type: 'error', error: message, status: 502 };
+    return { type: 'error', error: message, status: 422 };
   }
 }
