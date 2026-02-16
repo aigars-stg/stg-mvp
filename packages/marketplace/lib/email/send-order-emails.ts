@@ -14,7 +14,12 @@ import { DisputeOpenedSellerEmail } from './templates/dispute-opened-seller';
 import { DisputeResolvedEmail } from './templates/dispute-resolved';
 import { loggers } from '../logger';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? (() => {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('NEXT_PUBLIC_APP_URL must be set in production');
+  }
+  return 'http://localhost:3001';
+})();
 
 interface OrderEmailData {
   orderNumber: string;
