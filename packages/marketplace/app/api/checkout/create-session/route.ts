@@ -61,7 +61,11 @@ export async function POST(request: NextRequest) {
     const input = parsed.data;
 
     // Fetch cart to get basket
-    const cartResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart`, {
+    // Use VERCEL_URL for internal self-fetches to bypass Cloudflare proxy
+    const internalOrigin = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_APP_URL;
+    const cartResponse = await fetch(`${internalOrigin}/api/cart`, {
       headers: {
         cookie: request.headers.get('cookie') || '',
       },
