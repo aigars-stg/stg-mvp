@@ -14,9 +14,10 @@ import { useCart, type ExpiredCartItem } from '@/lib/contexts/CartContext';
 interface ExpiredItemCardProps {
   item: ExpiredCartItem;
   onDismiss: (listingId: string) => void;
+  onReAdd?: () => void;
 }
 
-export function ExpiredItemCard({ item, onDismiss }: ExpiredItemCardProps) {
+export function ExpiredItemCard({ item, onDismiss, onReAdd }: ExpiredItemCardProps) {
   const t = useTranslations('Cart');
   const { addToCart, dismissExpiredItem } = useCart();
   const [isAdding, setIsAdding] = useState(false);
@@ -31,6 +32,7 @@ export function ExpiredItemCard({ item, onDismiss }: ExpiredItemCardProps) {
     try {
       await addToCart(item.listing_id);
       dismissExpiredItem(item.listing_id);
+      onReAdd?.();
     } catch {
       setError(t('expiredItems.noLongerAvailable'));
       setTimeout(() => {

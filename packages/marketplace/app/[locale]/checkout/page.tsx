@@ -1,11 +1,11 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@second-turn/design-system';
-import { Package, ArrowLeft, RefreshCw as Loader2, AlertCircle, User, Email as Mail, CreditCard, ShieldCheck, LocationPin as MapPin } from '@/lib/icons';
+import { Package, ArrowLeft, RefreshCw as Loader2, AlertCircle, User, Email as Mail, CreditCard, Truck, LocationPin as MapPin } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { TerminalSelectorWithMap } from '@/components/checkout/TerminalSelectorWithMap';
 import { PaymentMethodLogos } from '@/components/checkout/PaymentMethodLogos';
@@ -13,6 +13,7 @@ import { PhoneInput } from '@/components/common/PhoneInput';
 import { isValidPhoneNumber } from '@/lib/phone-utils';
 import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 import { CheckoutSection } from '@/components/checkout/CheckoutSection';
+import { UserInfoCard } from '@/components/user/UserInfoCard';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import type { CountryCode } from '@/lib/country-utils';
@@ -27,9 +28,17 @@ interface CartItem {
   game_name: string;
   price: number;
   photo_url: string | null;
+  photo_urls: string[];
   condition: string;
   expires_at: string;
   is_expired: boolean;
+  language: string | null;
+  version_name: string | null;
+  publisher: string | null;
+  edition_year: number | null;
+  game_thumbnail: string | null;
+  is_expansion: boolean;
+  all_components_present: boolean;
 }
 
 interface CartBasket {
@@ -37,6 +46,10 @@ interface CartBasket {
   seller_id: string;
   seller_name: string;
   seller_country: string | null;
+  seller_avatar_url: string | null;
+  seller_rating: number;
+  seller_review_count: number;
+  seller_total_sales: number;
   items: CartItem[];
   item_count: number;
   subtotal: number;
@@ -54,9 +67,10 @@ function CheckoutPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [canExtendReservation, setCanExtendReservation] = useState(true);
+  const [isExtending, setIsExtending] = useState(false);
 
-  // Unified country context
-  const [selectedCountry, setSelectedCountry] = useState<TerminalCountry>('LT');
+  // Terminal selection (country derived from terminal or profile)
   const [selectedTerminal, setSelectedTerminal] = useState<Terminal | null>(null);
 
   // Contact info
@@ -74,6 +88,7 @@ function CheckoutPageContent() {
   // Preferred terminal auto-selection
   const [isPreferredTerminal, setIsPreferredTerminal] = useState(false);
   const [preferredTerminalLoaded, setPreferredTerminalLoaded] = useState(false);
+  const terminalRestored = useRef(false);
 
   // Section expansion state — only terminal starts expanded; contact opens via guided flow
   const [terminalExpanded, setTerminalExpanded] = useState(true);
@@ -81,6 +96,13 @@ function CheckoutPageContent() {
 
   const profileCountry = profile?.country;
   const hasValidCountry = profileCountry && ['LV', 'LT', 'EE'].includes(profileCountry);
+
+  // Derive default country for terminal selector and payment logos
+  const defaultCountry: TerminalCountry = (
+    hasValidCountry ? profileCountry
+    : detectedCountry && ['LT', 'LV', 'EE'].includes(detectedCountry) ? detectedCountry
+    : 'LV'
+  ) as TerminalCountry;
 
   // Completion criteria
   const isTerminalComplete = selectedTerminal !== null;
@@ -94,18 +116,35 @@ function CheckoutPageContent() {
   // Overall validation
   const isValid = basket && isTerminalComplete && isContactComplete && isTermsComplete;
 
-  // Unified country change handler
-  const handleUnifiedCountryChange = useCallback((country: TerminalCountry) => {
-    setSelectedCountry((prev) => {
-      if (prev !== country) {
-        // Reset terminal when country changes (terminals are country-specific)
-        setSelectedTerminal(null);
-        setIsPreferredTerminal(false);
-        setTerminalExpanded(true);
+  // Single basket-level reservation timer (earliest expiry across all items)
+  const earliestExpiry = basket?.items.reduce<string | null>((earliest, item) => {
+    if (!earliest) return item.expires_at;
+    return new Date(item.expires_at) < new Date(earliest) ? item.expires_at : earliest;
+  }, null) ?? null;
+
+  // Restore terminal selection from sessionStorage (survives page navigation)
+  useEffect(() => {
+    if (terminalRestored.current || !basketId) return;
+    terminalRestored.current = true;
+    try {
+      const stored = sessionStorage.getItem(`checkout_terminal_${basketId}`);
+      if (stored) {
+        const terminal = JSON.parse(stored) as Terminal;
+        setSelectedTerminal(terminal);
+        setPreferredTerminalLoaded(true); // skip preferred auto-select, user already chose
       }
-      return country;
-    });
-  }, []);
+    } catch { /* ignore parse errors */ }
+  }, [basketId]);
+
+  // Persist terminal selection to sessionStorage
+  useEffect(() => {
+    if (!basketId) return;
+    if (selectedTerminal) {
+      try {
+        sessionStorage.setItem(`checkout_terminal_${basketId}`, JSON.stringify(selectedTerminal));
+      } catch { /* ignore quota errors */ }
+    }
+  }, [basketId, selectedTerminal]);
 
   // Geo-detect country if profile country is missing
   useEffect(() => {
@@ -126,9 +165,6 @@ function CheckoutPageContent() {
     setCountryLoading(country);
     try {
       await updateProfile({ country });
-      if (['LT', 'LV', 'EE'].includes(country)) {
-        setSelectedCountry(country as TerminalCountry);
-      }
     } catch {
       setCountryLoading(null);
     }
@@ -185,12 +221,6 @@ function CheckoutPageContent() {
           setReceiverEmail(email);
           setReceiverPhone(phone);
 
-          // Set default country from user profile
-          const userCountry = profile.country;
-          if (userCountry && ['LT', 'LV', 'EE'].includes(userCountry)) {
-            setSelectedCountry(userCountry as TerminalCountry);
-          }
-
           // If contact info is pre-filled and valid, start section collapsed
           const contactPrefilled =
             name.trim().length > 0 &&
@@ -231,7 +261,6 @@ function CheckoutPageContent() {
       .then((data: { terminals: Terminal[] }) => {
         const match = (data.terminals || []).find((term: Terminal) => term.id === profile.preferred_terminal_id);
         if (match) {
-          setSelectedCountry(country);
           setSelectedTerminal(match);
           setIsPreferredTerminal(true);
         }
@@ -254,9 +283,9 @@ function CheckoutPageContent() {
 
   // --- Auto-collapse effects (500ms delay) ---
 
-  // Terminal: collapse after selection (only when terminal value changes)
+  // Terminal: collapse after selection on mobile only (desktop stays expanded for map view)
   useEffect(() => {
-    if (selectedTerminal) {
+    if (selectedTerminal && window.innerWidth < 1024) {
       const timer = setTimeout(() => setTerminalExpanded(false), 500);
       return () => clearTimeout(timer);
     }
@@ -296,10 +325,20 @@ function CheckoutPageContent() {
         }
       }
 
+      // Save terminal as preferred if user doesn't have one yet
+      if (!profile?.preferred_terminal_id) {
+        updateProfile({
+          preferred_terminal_id: selectedTerminal.id,
+          preferred_terminal_name: selectedTerminal.name,
+          preferred_terminal_address: `${selectedTerminal.address}, ${selectedTerminal.city}`,
+          preferred_delivery_country: selectedTerminal.countryCode,
+        }).catch(() => {}); // fire-and-forget
+      }
+
       const sessionData = {
         basketId: basket.basket_id,
         shippingMethod: 't2t',
-        destinationCountry: selectedCountry,
+        destinationCountry: selectedTerminal.countryCode,
         destinationTerminalId: selectedTerminal.id,
         destinationTerminalName: selectedTerminal.name,
         destinationTerminalAddress: selectedTerminal.address,
@@ -337,38 +376,44 @@ function CheckoutPageContent() {
   // Extend reservation for the basket
   const handleExtendReservation = async () => {
     if (!basket) return;
-    const response = await fetch('/api/cart/extend', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ basketId: basket.basket_id }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || 'Failed to extend reservation');
-    }
-
-    // Re-fetch basket to get updated expiry times
-    const cartResponse = await fetch('/api/cart');
-    const cartData = await cartResponse.json();
-    const updatedBasket = cartData.baskets?.find(
-      (b: CartBasket) => b.basket_id === basketId
-    );
-    if (updatedBasket) {
-      setBasket(updatedBasket);
-    }
-  };
-
-  // Handle expired item
-  const handleItemExpired = async (listingId: string) => {
+    setIsExtending(true);
     try {
-      await fetch(`/api/cart?listingId=${listingId}`, { method: 'DELETE' });
-      router.push('/cart');
+      const response = await fetch('/api/cart/extend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ basketId: basket.basket_id }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        if (data.error === 'No items can be extended') {
+          setCanExtendReservation(false);
+        } else {
+          console.error('Failed to extend reservation:', data.error);
+        }
+        return;
+      }
+
+      // Re-fetch basket to get updated expiry times
+      const cartResponse = await fetch('/api/cart');
+      const cartData = await cartResponse.json();
+      const updatedBasket = cartData.baskets?.find(
+        (b: CartBasket) => b.basket_id === basketId
+      );
+      if (updatedBasket) {
+        setBasket(updatedBasket);
+      }
     } catch (err) {
-      console.error('Error removing expired item:', err);
-      router.push('/cart');
+      console.error('Error extending reservation:', err);
+    } finally {
+      setIsExtending(false);
     }
   };
+
+  // Handle expired item — redirect to cart which handles cleanup
+  const handleItemExpired = useCallback(() => {
+    router.push('/cart');
+  }, [router]);
 
   // Loading state
   if (authLoading || loading) {
@@ -413,22 +458,13 @@ function CheckoutPageContent() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">{t('title')}</h1>
-          <p className="text-text-secondary mt-1 text-sm sm:text-base">
-            {t('orderFrom', { sellerName: basket.seller_name })}
-            {basket.seller_country && (
-              <span
-                className={`${getCountryFlag(basket.seller_country)} ml-2`}
-                title={getCountryName(basket.seller_country)}
-              />
-            )}
-          </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="grid lg:grid-cols-5 gap-6 sm:gap-8">
+        <div className="grid lg:grid-cols-7 gap-6 sm:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-3 sm:space-y-4">
+          <div className="lg:col-span-4 space-y-3 sm:space-y-4">
             {/* Country Gate — shown when profile country is not set */}
             {!hasValidCountry && (
               <div className="bg-snow-white border-2 border-aurora-orange/30 rounded-xl p-4 sm:p-6">
@@ -480,15 +516,12 @@ function CheckoutPageContent() {
 
             {/* Terminal Selection */}
             <CheckoutSection
-              stepNumber={1}
               title={t('collapse.selectTerminal')}
-              icon={<MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-frost-ice" />}
+              icon={<Truck className="w-5 h-5 sm:w-6 sm:h-6 text-frost-ice" />}
               isComplete={isTerminalComplete}
               isExpanded={terminalExpanded}
               onToggle={() => setTerminalExpanded(!terminalExpanded)}
-              required
               completeLabel={t('collapse.complete')}
-              requiredLabel={t('collapse.required')}
               collapsedSummary={
                 selectedTerminal ? (
                   <span>
@@ -504,9 +537,13 @@ function CheckoutPageContent() {
                 )
               }
             >
+              {!selectedTerminal && (
+                <p className="text-sm text-text-secondary mb-3">
+                  {t('collapse.terminalHint')}
+                </p>
+              )}
               <TerminalSelectorWithMap
-                country={selectedCountry}
-                onCountryChange={handleUnifiedCountryChange}
+                defaultCountry={defaultCountry}
                 selectedTerminal={selectedTerminal}
                 onSelect={(terminal) => {
                   setSelectedTerminal(terminal);
@@ -517,15 +554,12 @@ function CheckoutPageContent() {
 
             {/* Contact Information */}
             <CheckoutSection
-              stepNumber={2}
               title={t('collapse.contactInfo')}
               icon={<User className="w-5 h-5 sm:w-6 sm:h-6 text-frost-ice" />}
               isComplete={isContactComplete}
               isExpanded={contactExpanded}
               onToggle={() => setContactExpanded(!contactExpanded)}
-              required
               completeLabel={t('collapse.complete')}
-              requiredLabel={t('collapse.required')}
               collapsedSummary={
                 isContactComplete ? (
                   <span>{receiverName} &middot; {receiverEmail} &middot; {receiverPhone}</span>
@@ -610,20 +644,98 @@ function CheckoutPageContent() {
               </div>
             </CheckoutSection>
 
+            {/* Mobile-only: Order Summary */}
+            <div className="lg:hidden bg-snow-white border border-border rounded-xl overflow-hidden">
+              {/* Header: seller + timer */}
+              <div className="p-4 border-b border-border-subtle">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-medium text-text-muted uppercase tracking-wide">
+                    {t('summary.sellerLabel')}
+                  </p>
+                  {earliestExpiry && (
+                    <ReservationTimer
+                      expiresAt={earliestExpiry}
+                      onExpire={handleItemExpired}
+                      onExtend={handleExtendReservation}
+                      canExtend={canExtendReservation}
+                      isExtending={isExtending}
+                      size="sm"
+                    />
+                  )}
+                </div>
+                <UserInfoCard
+                  user={{
+                    id: basket.seller_id,
+                    name: basket.seller_name,
+                    avatarUrl: basket.seller_avatar_url,
+                    country: basket.seller_country,
+                  }}
+                  seller={{
+                    totalSales: basket.seller_total_sales,
+                    averageRating: basket.seller_rating,
+                    totalReviews: basket.seller_review_count,
+                  }}
+                  size="sm"
+                  compact
+                  linkToProfile
+                />
+              </div>
+
+              {/* Items */}
+              <div className="p-4 space-y-3">
+                {basket.items.map((item) => {
+                  const displayImage = item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
+                  return (
+                    <div key={item.item_id} className="flex gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {displayImage ? (
+                          <img
+                            src={displayImage}
+                            alt={item.game_name}
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        ) : (
+                          <Package className="w-5 h-5 text-text-muted" aria-hidden="true" />
+                        )}
+                      </div>
+                      <div className="flex-grow min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-medium text-polar-night line-clamp-1">
+                            {item.game_name}
+                          </p>
+                          <span className="text-sm font-semibold text-polar-night flex-shrink-0">
+                            {formatPrice(item.price)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Pricing */}
+              {pricing && (
+                <div className="px-4 pb-4 space-y-1.5">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-secondary">
+                      {t('summary.subtotal', { count: basket.item_count })}
+                    </span>
+                    <span className="font-medium">
+                      {formatCentsToCurrency(pricing.itemsTotalCents)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-secondary">{t('summary.shipping')}</span>
+                    <span className="font-medium">
+                      {formatCentsToCurrency(pricing.shippingCostCents)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Mobile-only: Inline Terms & Conditions */}
             <div className="lg:hidden bg-snow-white border border-border rounded-xl p-4">
-              <div className="mb-3 p-2.5 bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-lg">
-                <p className="text-xs font-medium text-polar-night mb-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5 text-aurora-yellow" />
-                  {t('consent.refundSummaryTitle')}
-                </p>
-                <ul className="text-xs text-text-secondary space-y-0.5 list-disc list-inside ml-1">
-                  <li>{t('consent.refundPoint1')}</li>
-                  <li>{t('consent.refundPoint2')}</li>
-                  <li>{t('consent.refundPoint3')}</li>
-                  <li>{t('consent.refundPoint4')}</li>
-                </ul>
-              </div>
               <label className="flex items-start gap-3 cursor-pointer p-2 rounded-lg hover:bg-bg-elevated transition-colors">
                 <input
                   type="checkbox"
@@ -637,9 +749,13 @@ function CheckoutPageContent() {
                   <Link href="/legal?section=terms" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
                     {t('consent.termsLink')}
                   </Link>
+                  {', '}
+                  <Link href="/legal?section=buyer#8-shipping-and-delivery" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                    {t('consent.deliveryLink')}
+                  </Link>
                   {' '}{t('consent.and')}{' '}
-                  <Link href="/legal?section=buyer" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
-                    {t('consent.refundLink')}
+                  <Link href="/legal?section=buyer#10-returns-exchanges--refunds" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                    {t('consent.returnsLink')}
                   </Link>
                 </span>
               </label>
@@ -648,47 +764,87 @@ function CheckoutPageContent() {
           </div>
 
           {/* Order Summary Sidebar (Desktop Only) */}
-          <div className="hidden lg:block lg:col-span-2">
-            <div className="sticky top-6">
+          <div className="hidden lg:block lg:col-span-3">
+            <div>
               <div className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6">
-                <h3 className="font-semibold text-polar-night mb-4">
-                  {t('summary.title')}
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-polar-night">
+                    {t('summary.title')}
+                  </h3>
+                  {earliestExpiry && (
+                    <ReservationTimer
+                      expiresAt={earliestExpiry}
+                      onExpire={handleItemExpired}
+                      onExtend={handleExtendReservation}
+                      canExtend={canExtendReservation}
+                      isExtending={isExtending}
+                      size="sm"
+                    />
+                  )}
+                </div>
+
+                {/* Seller Profile */}
+                <div className="pb-3 mb-3 border-b border-border-subtle">
+                  <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-2">
+                    {t('summary.sellerLabel')}
+                  </p>
+                  <UserInfoCard
+                    user={{
+                      id: basket.seller_id,
+                      name: basket.seller_name,
+                      avatarUrl: basket.seller_avatar_url,
+                      country: basket.seller_country,
+                    }}
+                    seller={{
+                      totalSales: basket.seller_total_sales,
+                      averageRating: basket.seller_rating,
+                      totalReviews: basket.seller_review_count,
+                    }}
+                    size="md"
+                    linkToProfile
+                  />
+                </div>
 
                 {/* Items */}
                 <div className="space-y-3 pb-4 border-b border-border-subtle">
-                  {basket.items.map((item) => (
-                    <div key={item.item_id} className="flex gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                        {item.photo_url ? (
-                          <img
-                            src={item.photo_url}
-                            alt={item.game_name}
-                            className="max-w-full max-h-full object-contain"
-                          />
-                        ) : (
-                          <Package className="w-5 h-5 text-text-muted" aria-hidden="true" />
-                        )}
-                      </div>
-                      <div className="flex-grow min-w-0">
-                        <p className="text-sm font-medium text-polar-night line-clamp-1">
-                          {item.game_name}
-                        </p>
-                        <p className="text-sm text-text-secondary">
-                          {formatPrice(item.price)}
-                        </p>
-                        <div className="mt-1">
-                          <ReservationTimer
-                            expiresAt={item.expires_at}
-                            onExpire={() => handleItemExpired(item.listing_id)}
-                            onExtend={handleExtendReservation}
-                            canExtend
-                            size="sm"
-                          />
+                  {basket.items.map((item) => {
+                    const displayImage = item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
+                    const metaParts = [
+                      item.language?.replace(/, /g, ' / '),
+                      item.edition_year,
+                    ].filter(Boolean);
+
+                    return (
+                      <div key={item.item_id} className="flex gap-3">
+                        <div className="w-16 h-16 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {displayImage ? (
+                            <img
+                              src={displayImage}
+                              alt={item.game_name}
+                              className="max-w-full max-h-full object-contain p-1"
+                            />
+                          ) : (
+                            <Package className="w-6 h-6 text-text-muted" aria-hidden="true" />
+                          )}
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm font-medium text-polar-night line-clamp-1">
+                              {item.game_name}
+                            </p>
+                            <span className="text-sm font-semibold text-polar-night flex-shrink-0">
+                              {formatPrice(item.price)}
+                            </span>
+                          </div>
+                          {metaParts.length > 0 && (
+                            <p className="text-xs text-text-secondary mt-0.5">
+                              {metaParts.join(', ')}
+                            </p>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Pricing */}
@@ -720,18 +876,6 @@ function CheckoutPageContent() {
                   </>
                 )}
 
-                {/* Refund policy summary — compact */}
-                <div className="mb-3 p-2.5 bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-lg">
-                  <p className="text-xs font-medium text-polar-night mb-1">
-                    <ShieldCheck className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5 text-aurora-yellow" />
-                    {t('consent.refundSummaryTitle')}
-                  </p>
-                  <ul className="text-xs text-text-secondary space-y-0.5 list-disc list-inside ml-1">
-                    <li>{t('consent.refundPoint3')}</li>
-                    <li>{t('consent.refundPoint4')}</li>
-                  </ul>
-                </div>
-
                 {/* Terms checkbox — always visible */}
                 <label className="flex items-start gap-2.5 cursor-pointer p-2 rounded-lg hover:bg-bg-elevated transition-colors mb-4">
                   <input
@@ -746,9 +890,13 @@ function CheckoutPageContent() {
                     <Link href="/legal?section=terms" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
                       {t('consent.termsLink')}
                     </Link>
+                    {', '}
+                    <Link href="/legal?section=buyer#8-shipping-and-delivery" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                      {t('consent.deliveryLink')}
+                    </Link>
                     {' '}{t('consent.and')}{' '}
-                    <Link href="/legal?section=buyer" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
-                      {t('consent.refundLink')}
+                    <Link href="/legal?section=buyer#10-returns-exchanges--refunds" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                      {t('consent.returnsLink')}
                     </Link>
                   </span>
                 </label>
@@ -775,7 +923,7 @@ function CheckoutPageContent() {
 
                 {/* Payment method logos */}
                 <div className="mt-3">
-                  <PaymentMethodLogos country={selectedCountry} />
+                  <PaymentMethodLogos country={defaultCountry} />
                 </div>
 
                 <Link href="/cart" className="block mt-3">
@@ -785,28 +933,11 @@ function CheckoutPageContent() {
                   </Button>
                 </Link>
 
-                {/* Merchant info — EveryPay Req 17 */}
+                {/* Platform operator info — EveryPay Req 17 */}
                 <div className="text-xs text-text-muted mt-4 pt-4 border-t border-border-subtle">
                   <p className="font-medium text-text-secondary mb-0.5">{t('merchant.label')}</p>
-                  <p>Second Turn Games SIA</p>
-                  <p>Evalda Valtera 5-35, Riga, LV-1021, Latvia</p>
-                </div>
-
-                {/* Info */}
-                <div className="mt-3 p-3 bg-frost-ice/10 border border-frost-ice/20 rounded-lg">
-                  <div className="flex gap-2">
-                    <AlertCircle className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
-                    <div className="text-xs text-text-secondary">
-                      <p>
-                        <strong className="text-polar-night">
-                          {t('info.sellerDeadline')}
-                        </strong>
-                      </p>
-                      <p className="mt-1">
-                        {t('info.refundPolicy')}
-                      </p>
-                    </div>
-                  </div>
+                  <p>{t('merchant.name')}</p>
+                  <p>{t('merchant.address')}</p>
                 </div>
               </div>
             </div>
@@ -849,7 +980,7 @@ function CheckoutPageContent() {
             )}
           </Button>
           <div className="mt-2">
-            <PaymentMethodLogos country={selectedCountry} compact />
+            <PaymentMethodLogos country={defaultCountry} compact />
           </div>
         </div>
       )}

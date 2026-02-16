@@ -700,7 +700,8 @@
       "terminalPrompt": "Choose a parcel locker",
       "contactPrompt": "We'll send tracking info here",
       "complete": "Complete",
-      "required": "Required"
+      "required": "Required",
+      "terminalHint": "Use the locate button to find nearby terminals, search by name or address, or browse the full list"
     },
     "country": {
       "title": "Where are you based?",
@@ -728,6 +729,7 @@
     },
     "summary": {
       "title": "Order Summary",
+      "sellerLabel": "Seller",
       "subtotal": "Subtotal ({count, plural, one {# item} other {# items}})",
       "shipping": "Shipping",
       "total": "Total"
@@ -738,7 +740,9 @@
       "backToCart": "Back to Cart"
     },
     "merchant": {
-      "label": "Merchant"
+      "label": "Platform operator",
+      "name": "Second Turn Games SIA",
+      "address": "Evalda Valtera 5-35, Riga, LV-1021, Latvia"
     },
     "consent": {
       "refundSummaryTitle": "Refund policy summary",
@@ -747,9 +751,10 @@
       "refundPoint3": "Report problems within 2 days of delivery to request a refund",
       "refundPoint4": "After order completion, sales are final",
       "checkboxPrefix": "By checking this box, I confirm I have read and agree to the",
-      "termsLink": "Terms & Conditions",
-      "and": "and the",
-      "refundLink": "Returns & Refunds policy",
+      "termsLink": "Terms of Service",
+      "deliveryLink": "Delivery",
+      "and": "and",
+      "returnsLink": "Returns",
       "pleaseAccept": "Please accept the terms to continue"
     },
     "info": {
@@ -842,7 +847,10 @@
       "selected": "Selected:",
       "clickToChange": "Click to change terminal",
       "map": "Map",
-      "list": "List"
+      "list": "List",
+      "allTerminals": "All Terminals",
+      "showAllTerminals": "Show all terminals",
+      "hideList": "Hide list"
     }
   },
   "Game": {

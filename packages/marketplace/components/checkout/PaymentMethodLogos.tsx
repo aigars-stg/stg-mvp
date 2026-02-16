@@ -68,7 +68,7 @@ export function PaymentMethodLogos({ country, compact }: PaymentMethodLogosProps
             <img
               src={method.logo_url}
               alt={method.display_name}
-              className={`${compact ? 'h-5' : 'h-6'} w-auto opacity-60 hover:opacity-100 transition-opacity`}
+              className={`${compact ? 'h-7' : 'h-10'} w-auto opacity-60 hover:opacity-100 transition-opacity`}
               onError={() => handleImageError(method.source)}
             />
           </div>

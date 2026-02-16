@@ -19,9 +19,6 @@ export function PreferredTerminalSection() {
   const { profile, updateProfile, refreshProfile } = useAuth();
 
   const [isSelecting, setIsSelecting] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState<TerminalCountry>(
-    (profile?.preferred_delivery_country as TerminalCountry) || 'LV'
-  );
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -122,7 +119,6 @@ export function PreferredTerminalSection() {
               variant="secondary"
               size="sm"
               onClick={() => {
-                setSelectedCountry((profile.preferred_delivery_country as TerminalCountry) || 'LV');
                 setIsSelecting(true);
                 setSuccess('');
               }}
@@ -175,8 +171,7 @@ export function PreferredTerminalSection() {
             </button>
           </div>
           <TerminalSelectorWithMap
-            country={selectedCountry}
-            onCountryChange={setSelectedCountry}
+            defaultCountry={(profile?.preferred_delivery_country as TerminalCountry) || (profile?.country as TerminalCountry) || 'LV'}
             selectedTerminal={null}
             onSelect={handleSelect}
           />

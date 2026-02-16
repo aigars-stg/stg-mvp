@@ -29,9 +29,10 @@ interface CartBasketProps {
   removingItemId?: string | null;
   onCheckout: () => void;
   isCheckingOut?: boolean;
-  onItemExpired?: (item: CartItemData) => void;
+  onItemExpired?: () => void;
   onExtend?: () => Promise<void>;
   canExtend?: boolean;
+  isExtending?: boolean;
 }
 
 export function CartBasket({
@@ -43,6 +44,7 @@ export function CartBasket({
   onItemExpired,
   onExtend,
   canExtend = false,
+  isExtending = false,
 }: CartBasketProps) {
   const t = useTranslations('Cart');
 
@@ -102,16 +104,11 @@ export function CartBasket({
               <ReservationTimer
                 expiresAt={earliestExpiry}
                 onExpire={() => {
-                  // Only remove items whose expiry has actually passed
-                  const now = new Date();
-                  basket.items.forEach(item => {
-                    if (onItemExpired && new Date(item.expires_at) <= now) {
-                      onItemExpired(item);
-                    }
-                  });
+                  onItemExpired?.();
                 }}
                 onExtend={onExtend}
                 canExtend={canExtend}
+                isExtending={isExtending}
                 size="sm"
               />
             </div>

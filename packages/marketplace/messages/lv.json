@@ -596,7 +596,7 @@
     "card": {
       "expansion": "Papildinājums",
       "auction": "Izsole",
-      "parcelLocker": "Paku termināls",
+      "parcelLocker": "Pakomāts",
       "pickupOnly": "Tikai saņemšana klātienē",
       "missingComponents": "Trūkst komponentes",
       "contactSeller": "Sazināties",
@@ -695,23 +695,24 @@
     "title": "Norēķināšanās",
     "orderFrom": "Pasūtījums no {sellerName}",
     "collapse": {
-      "selectTerminal": "Izvēlies saņemšanas termināli",
+      "selectTerminal": "Izvēlies pakomātu spēļu saņemšanai",
       "contactInfo": "Kontaktinformācija",
       "terminalPrompt": "Izvēlies pakomātu",
       "contactPrompt": "Nosūtīsim izsekošanas informāciju šeit",
       "complete": "Pabeigts",
-      "required": "Obligāts"
+      "required": "Obligāts",
+      "terminalHint": "Izmanto atrašanās pogu kartē, lai atrastu tuvākos pakomātus, meklē pēc nosaukuma vai adreses, vai pārlūko visu sarakstu"
     },
     "country": {
       "title": "Kur Tu atrodies?",
-      "subtitle": "Tas palīdz mums parādīt piemērotus termināļus, bankas un tālruņa formātu",
+      "subtitle": "Tas palīdz mums parādīt piemērotus pakomātus, apmaksas iespējas un tālruņa formātu",
       "detected": "noteikts"
     },
     "payment": {
       "weAccept": "Mēs pieņemam"
     },
     "preferredTerminal": {
-      "indicator": "Jūsu iecienītais terminālis",
+      "indicator": "Tavs iecienītais pakomāts",
       "changeForThisOrder": "Mainīt šim pasūtījumam"
     },
     "form": {
@@ -728,7 +729,8 @@
     },
     "summary": {
       "title": "Pasūtījuma kopsavilkums",
-      "subtotal": "Starpsumma ({count, plural, one {# prece} other {# preces}})",
+      "sellerLabel": "Pārdevējs",
+      "subtotal": "Starpsumma ({count, plural, one {# spēle} other {# spēles}})",
       "shipping": "Piegāde",
       "total": "Kopā"
     },
@@ -738,18 +740,21 @@
       "backToCart": "Atpakaļ uz grozu"
     },
     "merchant": {
-      "label": "Tirgotājs"
+      "label": "Platformas operators",
+      "name": "Second Turn Games SIA",
+      "address": "Ēvalda Valtera iela 5-35, Rīga, LV-1021, Latvija"
     },
     "consent": {
       "refundSummaryTitle": "Naudas atmaksas politikas kopsavilkums",
       "refundPoint1": "Visi pārdevēji ir privātpersonas, nevis uzņēmumi",
-      "refundPoint2": "Nav 14 dienu atgriešanas tiesību — preci nevar atgriezt, ja vienkārši pārdomājāt",
+      "refundPoint2": "Nav 14 dienu atgriešanas tiesību — spēli nevar atgriezt, ja vienkārši pārdomājāt",
       "refundPoint3": "Ziņojiet par problēmām 2 dienu laikā pēc piegādes, lai pieprasītu atmaksu",
       "refundPoint4": "Pēc pasūtījuma pabeigšanas darījumi ir galīgi",
-      "checkboxPrefix": "Ieliekot atzīmi, es apstiprinu, ka esmu iepazinies/-usies un piekrītu",
-      "termsLink": "Noteikumiem un nosacījumiem",
+      "checkboxPrefix": "Ieliekot atzīmi, es apstiprinu, ka piekrītu",
+      "termsLink": "Lietošanas noteikumiem",
+      "deliveryLink": "Piegādes",
       "and": "un",
-      "refundLink": "Preču atgriešanas un naudas atmaksas nosacījumiem",
+      "returnsLink": "Atgriešanas noteikumiem",
       "pleaseAccept": "Lūdzu, pieņemiet noteikumus, lai turpinātu"
     },
     "info": {
@@ -757,7 +762,7 @@
       "refundPolicy": "Ja pārdevējs neatbild, tu saņemsi pilnu atmaksu automātiski."
     },
     "errors": {
-      "expiredItems": "Dažas preces tavā grozā ir beigušās derīguma termiņš. Lūdzu, atgriezies pie groza.",
+      "expiredItems": "Tavam grozam ir beidzies rezervācijas termiņš. Lūdzu, atgriezies pie groza.",
       "basketNotFound": "Grozs nav atrasts",
       "fetchCartFailed": "Neizdevās ielādēt grozu",
       "createSessionFailed": "Neizdevās izveidot norēķināšanās sesiju",
@@ -780,7 +785,7 @@
       "orderSummary": {
         "title": "Pasūtījuma kopsavilkums",
         "soldBy": "Pārdod {seller}",
-        "items": "Preces",
+        "items": "Spēles",
         "shipping": "Piegāde",
         "total": "Kopā",
         "deliveryTo": "Piegāde uz",
@@ -794,7 +799,7 @@
         "step2Title": "Piegāde tiek organizēta",
         "step2Description": "Pēc pieņemšanas pārdevējs organizēs piegādi vai saskaņos saņemšanas detaļas ar tevi, izmantojot ziņojumapmaiņu.",
         "step3Title": "Saņem savas spēles",
-        "step3Description": "Paņem savas spēles no termināļa vai satiec pārdevēju. Baudi savas jaunās galda spēles."
+        "step3Description": "Paņem savas spēles no pakomāta vai satiec pārdevēju. Baudi savas jaunās galda spēles."
       },
       "email": {
         "title": "Pasūtījuma apstiprinājums nosūtīts",
@@ -826,23 +831,26 @@
       "extendButton": "+5 min"
     },
     "TerminalMap": {
-      "selectTerminal": "Izvēlēties šo termināli",
-      "terminalCount": "{count} termināļi"
+      "selectTerminal": "Izvēlēties šo pakomātu",
+      "terminalCount": "{count} pakomāti"
     },
     "TerminalSelector": {
       "deliveryCountry": "Piegādes valsts",
-      "findTerminal": "Atrast termināli",
+      "findTerminal": "Atrast pakomātu",
       "searchPlaceholder": "Meklēt pēc nosaukuma, adreses vai pilsētas...",
-      "loadingTerminals": "Ielādē termināļus...",
+      "loadingTerminals": "Ielādē pakomātus...",
       "loadingMap": "Ielādē karti...",
       "tryAgain": "Mēģināt vēlreiz",
-      "noTerminalsFound": "Nav atrasts neviens terminālis, kas atbilst meklējumam",
-      "noTerminalsAvailable": "Nav pieejamu termināļu",
-      "selectedTerminal": "Izvēlētais terminālis",
+      "noTerminalsFound": "Nav atrasts neviens pakomāts, kas atbilst meklējumam",
+      "noTerminalsAvailable": "Nav pieejamu pakomātu",
+      "selectedTerminal": "Izvēlētais pakomāts",
       "selected": "Izvēlēts:",
-      "clickToChange": "Noklikšķini, lai mainītu termināli",
+      "clickToChange": "Noklikšķini, lai mainītu pakomātu",
       "map": "Karte",
-      "list": "Saraksts"
+      "list": "Saraksts",
+      "allTerminals": "Visi pakomāti",
+      "showAllTerminals": "Rādīt visus pakomātus",
+      "hideList": "Paslēpt sarakstu"
     }
   },
   "Game": {
@@ -904,7 +912,7 @@
       "viewAll": "Skatīt visu",
       "scrollLeft": "Ritināt pa kreisi",
       "scrollRight": "Ritināt pa labi",
-      "priceDisclaimer": "Tikai preces cenas. Pilnā cena tiek parādīta pirms apmaksas.",
+      "priceDisclaimer": "Tikai spēles cena. Pilnā cena tiek parādīta pirms apmaksas.",
       "recently_listed": {
         "title": "Tikko pievienots",
         "subtitle": "Jaunākie piedāvājumi no Baltijas spēlmaņiem"
@@ -1412,7 +1420,7 @@
     },
     "PhotoUpload": {
       "guidelines": {
-        "requiredTitle": "Fotogrāfijas ir obligātas Pieņemama stāvokļa precēm",
+        "requiredTitle": "Fotogrāfijas ir obligātas Pieņemama stāvokļa spēlēm",
         "optionalTitle": "Fotogrāfijas palīdz veidot pircēju uzticību (pēc izvēles)",
         "tip1": "Nofotografē kasti, sastāvdaļas",
         "tip2": "Parādi jebkādus bojājumus vai nolietojumu"
@@ -1454,8 +1462,8 @@
           "locationPlaceholder": "piem., Rīga, Vecrīga vai pie Centrāltirgus"
         },
         "parcelLocker": {
-          "title": "Paku termināļi",
-          "description": "Omniva, DPD vai līdzīgi",
+          "title": "Pakomāti",
+          "description": "Unisend, Latvijas Pasts, uDrop",
           "paymentLabel": "Kas maksā par piegādi?",
           "sellerPays": "Es sedzu piegādes izmaksas",
           "sellerPaysDescription": "Bezmaksas piegāde pircējam",
@@ -2054,15 +2062,15 @@
       "privacyPolicy": "Privātuma politikā"
     },
     "preferredTerminal": {
-      "title": "Iecienītais terminālis",
-      "description": "Saglabā savu iecienīto termināli ātrākai norēķināšanās un sūtīšanai.",
-      "choose": "Izvēlēties termināli",
+      "title": "Iecienītais pakomāts",
+      "description": "Saglabā savu iecienīto pakomātu.",
+      "choose": "Izvēlēties pakomātu",
       "change": "Mainīt",
       "remove": "Noņemt",
-      "updated": "Iecienītais terminālis atjaunināts",
-      "removed": "Iecienītais terminālis noņemts",
-      "errorUpdate": "Neizdevās atjaunināt iecienīto termināli",
-      "errorRemove": "Neizdevās noņemt iecienīto termināli"
+      "updated": "Iecienītais pakomāts atjaunināts",
+      "removed": "Iecienītais pakomāts noņemts",
+      "errorUpdate": "Neizdevās atjaunināt iecienīto pakomātu",
+      "errorRemove": "Neizdevās noņemt iecienīto pakomātu"
     }
   },
   "LoginActivity": {
@@ -2113,7 +2121,7 @@
     "activeListings": "Aktīvie sludinājumi",
     "reviews": "Atsauksmes",
     "loadMore": "Ielādēt vēl ({current} no {total})",
-    "notSelling": "Šis lietotājs pašlaik nepārdod preces."
+    "notSelling": "Šis lietotājs pašlaik nepārdod spēles."
   },
   "Home": {
     "FeaturedGames": {
@@ -2238,7 +2246,7 @@
     "title": "Grozs",
     "loading": "Ielādē tavu grozu...",
     "summary": {
-      "itemsFromSellers": "{totalItems, plural, one {# prece} other {# preces}} no {basketCount, plural, one {# pārdevēja} other {# pārdevējiem}}"
+      "itemsFromSellers": "{totalItems, plural, one {# spēle} other {# spēles}} no {basketCount, plural, one {# pārdevēja} other {# pārdevējiem}}"
     },
     "error": {
       "title": "Kļūda ielādējot grozu",
@@ -2257,9 +2265,9 @@
     "reviews": "atsauksmes",
     "basket": {
       "number": "Grozs {index}/{total}",
-      "items": "{count, plural, one {# prece} other {# preces}}",
+      "items": "{count, plural, one {# spēle} other {# spēles}}",
       "subtotal": "Starpsumma",
-      "subtotalItems": "Starpsumma ({count, plural, one {# prece} other {# preces}})",
+      "subtotalItems": "Starpsumma ({count, plural, one {# spēle} other {# spēles}})",
       "shipping": "Piegāde",
       "total": "Kopā",
       "shippingNote": "+ piegāde (aprēķināta pie norēķināšanās)",
@@ -2267,7 +2275,7 @@
     },
     "orderSummary": {
       "title": "Pasūtījuma kopsavilkums",
-      "totalItems": "Kopā preces",
+      "totalItems": "Spēles kopā",
       "fromSellers": "No pārdevējiem",
       "subtotalAll": "Starpsumma (visi grozi)",
       "separateCheckout": "Katrs grozs tiek norēķināts un apmaksāts atsevišķi",
@@ -2275,11 +2283,11 @@
     },
     "expiredItems": {
       "title": "Iepriekš tavā grozā",
-      "description": "Šīs preces vairs nav rezervētas, bet joprojām ir pieejamas.",
+      "description": "Šīs spēles vairs nav rezervētas, bet joprojām ir pieejamas.",
       "dismissAll": "Noņemt visas",
       "addAgain": "Pievienot grozam vēlreiz",
       "adding": "Pievieno...",
-      "noLongerAvailable": "Šī prece vairs nav pieejama"
+      "noLongerAvailable": "Šī spēle vairs nav pieejama"
     }
   },
   "Notifications": {
@@ -2480,9 +2488,9 @@
       },
       "tips": {
         "title": "Veido savu reputāciju",
-        "tip1": "Sūti preces ātri",
+        "tip1": "Nosūti spēles ātri",
         "tip2": "Atbildi uz ziņojumiem ātri",
-        "tip3": "Apraksti preces precīzi"
+        "tip3": "Apraksti spēles precīzi"
       }
     },
     "SellerReviewsList": {
@@ -2556,10 +2564,10 @@
       "seller": "Pārdevējs: {name}",
       "ordered": "Pasūtīts {date}",
       "total": "Kopā",
-      "items": "{count, plural, one {# prece} other {# preces}}",
+      "items": "{count, plural, one {# spēle} other {# spēles}}",
       "sellerDeadlineExpired": "Pārdevēja termiņš beidzies - Notiek atmaksa",
       "sellerTimeRemaining": "Pārdevējam ir {hours}h {minutes}min, lai atbildētu",
-      "terminalPickup": "Saņemšana terminālī",
+      "terminalPickup": "Saņemšana pakomātā",
       "localPickup": "Saņemšana klātienē"
     },
     "detail": {
@@ -2610,7 +2618,7 @@
         "contactSoon": "Mūsu komanda sazināsies ar tevi 24 stundu laikā"
       },
       "items": {
-        "title": "Preces ({count})"
+        "title": "Spēles ({count})"
       },
       "shipping": {
         "deliveryTitle": "Piegādes informācija",
@@ -2629,7 +2637,7 @@
       },
       "summary": {
         "title": "Pasūtījuma kopsavilkums",
-        "items": "Preces",
+        "items": "Spēles",
         "shipping": "Piegāde",
         "totalPaid": "Kopā samaksāts",
         "free": "Bezmaksas"
@@ -2706,7 +2714,7 @@
           },
           "step3": {
             "title": "Jūs nosūtāt spēli",
-            "description": "Pēc apstiprināšanas Jūs saņemsiet Unisend skapīša kodu. Iepakojiet spēli, dodieties uz jebkuru no 500+ Unisend termināļiem (ieskaitot Latvijas Pastu un uDrop vietas), ievadiet kodu un ielieciet sūtījumu."
+            "description": "Pēc apstiprināšanas Jūs saņemsiet Unisend skapīša kodu. Iepakojiet spēli, dodieties uz jebkuru no 500+ Unisend pakomātiem (ieskaitot Latvijas Pastu un uDrop vietas), ievadiet kodu un ielieciet sūtījumu."
           },
           "step4": {
             "title": "Pircējs to saņem",
@@ -2787,7 +2795,7 @@
         },
         "q3": {
           "question": "Kas ietilpst 500+ pakomātos?",
-          "answer": "Mūsu Unisend integrācija ietver termināļus no vairākiem tīkliem: Unisend paša vietas, kā arī Latvijas Pasta un uDrop termināļus. Jūs varat nodot sūtījumu tajā, kas Jums ērtākais."
+          "answer": "Mūsu Unisend integrācija ietver pakomātus no vairākiem tīkliem: Unisend, kā arī Latvijas Pasta un uDrop pakomātus. Jūs varat nodot sūtījumu tajā, kas Jums ērtākais."
         },
         "q4": {
           "question": "Kāpēc Tūlītējā pirkšana nav pieejama Lietuvā un Igaunijā?",
@@ -2835,7 +2843,7 @@
       },
       "q4": {
         "question": "Kādas ir maksas Second Turn Games?",
-        "answer": "Pircēji maksā preces cenu plus fiksētu €2.00 piegādes maksu (bez pakalpojuma maksas). Pārdevēji maksā 10% komisiju no preces cenas, kas tiek ieturēta automātiski. Sludinājuma izvietošana ir bezmaksas."
+        "answer": "Pircēji maksā spēles cenu un fiksētu €2.00 piegādes maksu (bez pakalpojuma maksas). Pārdevēji maksā 10% komisiju no spēles cenas, kas tiek ieturēta automātiski. Sludinājuma izvietošana ir bezmaksas."
       },
       "q5": {
         "question": "Kā darbojas pārdošana Second Turn Games?",
@@ -2847,7 +2855,7 @@
       },
       "q7": {
         "question": "Kā es saņemu samaksu kā pārdevējs?",
-        "answer": "Divas dienas pēc piegādes (vai kad pircējs apstiprina ātrāk), tavi ieņēmumi (90% no preces cenas) tiek ieskaitīti platformas makā. Tu vari izņemt naudu uz savu IBAN bankas kontu jebkurā laikā — bez maksas, bez minimālā gaidīšanas perioda."
+        "answer": "Divas dienas pēc piegādes (vai kad pircējs apstiprina ātrāk), tavi ieņēmumi (90% no spēles cenas) tiek ieskaitīti platformas makā. Tu vari izņemt naudu uz savu IBAN bankas kontu jebkurā laikā — bez maksas, bez minimālā gaidīšanas perioda."
       },
       "q8": {
         "question": "Kādi galda spēļu stāvokļi tiek pieņemti?",
@@ -3043,14 +3051,14 @@
       "buyer": "Pircējs: {name}",
       "expired": "Beidzies",
       "timeRemaining": "{hours}h {minutes}m atlicis",
-      "items": "Preces ({count})"
+      "items": "Spēles ({count})"
     },
     "shipping": {
       "terminalPickup": "Pakomāts:",
       "localPickup": "Personīgi:"
     },
     "pricing": {
-      "items": "Preces:",
+      "items": "Spēles:",
       "shipping": "Piegāde:",
       "commission": "Komisija (10%):",
       "youReceive": "Jūs saņemat:"
@@ -3064,7 +3072,7 @@
     "declineModal": {
       "title": "Noraidīt pasūtījumu",
       "description": "Lūdzu, norādiet iemeslu pasūtījuma noraidīšanai. Pircējam tiks automātiski atgriezta nauda.",
-      "placeholder": "piem., Prece vairs nav pieejama",
+      "placeholder": "piem., Spēle vairs nav pieejama",
       "cancel": "Atcelt",
       "confirmDecline": "Apstiprināt noraidīšanu",
       "declining": "Noraida..."
@@ -3098,7 +3106,7 @@
       "title": "Noraidīt pasūtījumu",
       "description": "Vai tiešām vēlaties noraidīt šo pasūtījumu? Pircējam tiks automātiski atgriezta nauda.",
       "reasonLabel": "Iemesls (neobligāts)",
-      "reasonPlaceholder": "piem., Prece vairs nav pieejama, bojāta, utt.",
+      "reasonPlaceholder": "piem., Spēle vairs nav pieejama, bojāta, utt.",
       "declineAndRefund": "Noraidīt un atgriezt naudu",
       "cancel": "Atcelt",
       "processing": "Apstrādā..."
@@ -3128,7 +3136,7 @@
       "buyerContact": "Pircēja kontakti:"
     },
     "trackingHistory": "Izsekošanas vēsture",
-    "orderItems": "Pasūtījuma preces ({count})",
+    "orderItems": "Pasūtījumā iekļautās spēles ({count})",
     "pricingSummary": {
       "title": "Cenu kopsavilkums",
       "itemsTotal": "Preču summa:",

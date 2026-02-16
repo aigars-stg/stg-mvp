@@ -16,7 +16,7 @@ export default function SignUpPage() {
   const t = useTranslations('Auth');
 
   // Check if site is in "coming soon" mode
-  const isComingSoon = false;
+  const isComingSoon = process.env.NEXT_PUBLIC_COMING_SOON === 'true';
 
   useEffect(() => {
     // Don't redirect in coming soon mode - show the lockout screen instead

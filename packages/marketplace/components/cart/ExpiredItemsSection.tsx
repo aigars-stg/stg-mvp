@@ -6,7 +6,11 @@ import { useCart } from '@/lib/contexts/CartContext';
 import { ExpiredItemCard } from './ExpiredItemCard';
 import { useTranslations } from 'next-intl';
 
-export function ExpiredItemsSection() {
+interface ExpiredItemsSectionProps {
+  onReAdd?: () => void;
+}
+
+export function ExpiredItemsSection({ onReAdd }: ExpiredItemsSectionProps) {
   const t = useTranslations('Cart');
   const { expiredItems, dismissExpiredItem, clearExpiredItems } = useCart();
   const [unavailableIds, setUnavailableIds] = useState<Set<string>>(new Set());
@@ -106,6 +110,7 @@ export function ExpiredItemsSection() {
             key={item.listing_id}
             item={item}
             onDismiss={dismissExpiredItem}
+            onReAdd={onReAdd}
           />
         ))}
       </div>

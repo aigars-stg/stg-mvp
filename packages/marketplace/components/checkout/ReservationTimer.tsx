@@ -9,6 +9,7 @@ interface ReservationTimerProps {
   onExpire?: () => void;
   onExtend?: () => Promise<void>;
   canExtend?: boolean;
+  isExtending?: boolean;
   showLabel?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -18,6 +19,7 @@ export function ReservationTimer({
   onExpire,
   onExtend,
   canExtend = false,
+  isExtending = false,
   showLabel = true,
   size = 'md',
 }: ReservationTimerProps) {
@@ -34,13 +36,23 @@ export function ReservationTimer({
       return Math.floor(diff / 1000);
     };
 
-    setTimeLeft(calculateTimeLeft());
+    const remaining = calculateTimeLeft();
+    setTimeLeft(remaining);
+
+    // Reset expired state if we received a new future expiry time
+    // (e.g., after first item in basket expires and timer recalculates to next item)
+    if (remaining > 0 && isExpired) {
+      setIsExpired(false);
+      return; // Let the next effect cycle start a clean timer
+    }
 
     const timer = setInterval(() => {
       const remaining = calculateTimeLeft();
       setTimeLeft(remaining);
 
       if (remaining <= 0 && !isExpired) {
+        // Suppress expiry while extend API call is in flight
+        if (extending || isExtending) return;
         setIsExpired(true);
         onExpire?.();
         clearInterval(timer);
@@ -48,7 +60,7 @@ export function ReservationTimer({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [expiresAt, onExpire, isExpired]);
+  }, [expiresAt, onExpire, isExpired, extending, isExtending]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { LocationPin as MapPin } from '@/lib/icons';
 import {
   Map,
@@ -10,6 +10,7 @@ import {
   MapControls,
   MapClusterLayer,
 } from '@/components/ui/map';
+import { useMap } from '@/components/ui/map/context';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
 import { useTranslations } from 'next-intl';
 
@@ -54,6 +55,22 @@ function terminalsToGeoJSON(terminals: Terminal[]): GeoJSON.FeatureCollection<Ge
 // Find terminal by ID from list
 function findTerminalById(terminals: Terminal[], id: string): Terminal | undefined {
   return terminals.find((t) => t.id === id);
+}
+
+// Inner component that flies to selected terminal (needs map context)
+function FlyToHandler({ selectedTerminal }: { selectedTerminal: Terminal | null }) {
+  const { map, isLoaded } = useMap();
+
+  useEffect(() => {
+    if (!map || !isLoaded || !selectedTerminal) return;
+    map.flyTo({
+      center: [parseFloat(selectedTerminal.longitude), parseFloat(selectedTerminal.latitude)],
+      zoom: 14,
+      duration: 1500,
+    });
+  }, [map, isLoaded, selectedTerminal]);
+
+  return null;
 }
 
 export function TerminalMap({
@@ -106,13 +123,16 @@ export function TerminalMap({
   }, []);
 
   return (
-    <div className={`relative w-full h-[500px] rounded-lg overflow-hidden border border-border ${className || ''}`}>
+    <div className={`relative w-full h-[420px] rounded-lg overflow-hidden border border-border ${className || ''}`}>
       <Map
         center={[center.lng, center.lat]}
         zoom={center.zoom}
         minZoom={5}
         maxZoom={18}
       >
+        {/* Fly to selected terminal */}
+        <FlyToHandler selectedTerminal={selectedTerminal} />
+
         {/* Cluster layer for all terminals */}
         <MapClusterLayer
           data={geojsonData}
@@ -198,7 +218,7 @@ export function TerminalMap({
       </Map>
 
       {/* Terminal count indicator */}
-      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-sm border border-border">
+      <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-sm border border-border">
         <span className="text-xs font-medium text-polar-night">
           {t('terminalCount', { count: terminals.length })}
         </span>

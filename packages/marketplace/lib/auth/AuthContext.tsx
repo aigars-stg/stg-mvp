@@ -251,7 +251,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         options: {
           emailRedirectTo: confirmUrl,
-          shouldCreateUser: true, // Creates account if doesn't exist
+          shouldCreateUser: process.env.NEXT_PUBLIC_COMING_SOON !== 'true',
           data: {
             full_name: emailPrefix,
             preferred_locale: redirectLocale,

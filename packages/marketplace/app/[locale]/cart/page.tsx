@@ -30,11 +30,15 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [removingItem, setRemovingItem] = useState<string | null>(null);
+  const [maxedBasketIds, setMaxedBasketIds] = useState<Set<string>>(new Set());
+  const [extendingBasketId, setExtendingBasketId] = useState<string | null>(null);
 
   // Fetch cart data and clean up expired items
   const fetchCart = async () => {
     try {
-      setLoading(true);
+      if (baskets.length === 0) {
+        setLoading(true);
+      }
       setError(null);
 
       const response = await fetch('/api/cart');
@@ -100,6 +104,22 @@ export default function CartPage() {
     }
   }, [user]);
 
+  // Refresh cart when user returns to this tab (catches cron-cleaned items)
+  useEffect(() => {
+    if (!user) return;
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchCart();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
+
   // Remove item from cart
   const handleRemoveItem = async (listingId: string) => {
     try {
@@ -125,37 +145,39 @@ export default function CartPage() {
     }
   };
 
-  // Handle expired item - capture to expired state, then remove from cart
-  const handleItemExpired = async (item: CartItemData) => {
-    captureExpiredItems([item]);
-    try {
-      await fetch(`/api/cart?listingId=${item.listing_id}`, {
-        method: 'DELETE',
-      });
-      await fetchCart();
-      refreshCartContext();
-    } catch (err) {
-      console.error('Error removing expired item:', err);
-      await fetchCart();
-      refreshCartContext();
-    }
+  // Handle expired items - fetchCart batch-detects, captures, and deletes all expired items
+  const handleItemExpired = async () => {
+    await fetchCart();
+    refreshCartContext();
   };
 
   // Extend reservation for a basket
   const handleExtendReservation = async (basketId: string) => {
-    const response = await fetch('/api/cart/extend', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ basketId }),
-    });
+    setExtendingBasketId(basketId);
+    try {
+      const response = await fetch('/api/cart/extend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ basketId }),
+      });
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || 'Failed to extend reservation');
+      if (!response.ok) {
+        const data = await response.json();
+        if (data.error === 'No items can be extended') {
+          setMaxedBasketIds(prev => new Set(prev).add(basketId));
+        } else {
+          console.error('Failed to extend reservation:', data.error);
+        }
+        return;
+      }
+
+      // Re-fetch cart to get updated expiry times
+      await fetchCart();
+    } catch (err) {
+      console.error('Error extending reservation:', err);
+    } finally {
+      setExtendingBasketId(null);
     }
-
-    // Re-fetch cart to get updated expiry times
-    await fetchCart();
   };
 
   // Proceed to checkout
@@ -232,7 +254,7 @@ export default function CartPage() {
             {/* Expired items shown above empty cart message */}
             {expiredItems.length > 0 && (
               <div className="mb-6">
-                <ExpiredItemsSection />
+                <ExpiredItemsSection onReAdd={fetchCart} />
               </div>
             )}
 
@@ -265,12 +287,13 @@ export default function CartPage() {
                 onCheckout={() => handleCheckout(basket.basket_id)}
                 onItemExpired={handleItemExpired}
                 onExtend={() => handleExtendReservation(basket.basket_id)}
-                canExtend
+                canExtend={!maxedBasketIds.has(basket.basket_id)}
+                isExtending={extendingBasketId === basket.basket_id}
               />
             ))}
 
             {/* Expired items section */}
-            {expiredItems.length > 0 && <ExpiredItemsSection />}
+            {expiredItems.length > 0 && <ExpiredItemsSection onReAdd={fetchCart} />}
 
             {/* Multi-seller Summary */}
             {summary && baskets.length > 1 && (
