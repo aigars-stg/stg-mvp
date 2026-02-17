@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { getPaymentStatus } from '@/lib/everypay/client';
+import { getPaymentStatus, voidPayment, refundPayment } from '@/lib/everypay/client';
 import { SUCCESSFUL_STATES, FAILED_STATES } from '@/lib/everypay/types';
 import { classifyPaymentError } from '@/lib/everypay/classify-error';
+import { determineReleaseAction } from '@/lib/services/payment-capture';
 import { postOrderCreatedMessage } from '@/lib/transactions';
 import * as Sentry from '@sentry/nextjs';
 import { loggers } from '@/lib/logger';
@@ -97,18 +98,75 @@ export async function GET(request: NextRequest) {
       // 4. Create order based on type
       const metadata = checkoutEvent.payload as Record<string, unknown>;
       const orderRef = checkoutEvent.order_reference as string;
-
-      let orderId: string;
       const actualPaymentState = paymentStatus.payment_state;
 
-      if (orderRef.startsWith('BASKET-')) {
-        orderId = await processBasketPayment(supabase, metadata, paymentReference, actualPaymentState);
-      } else if (orderRef.startsWith('AUCTION-')) {
-        orderId = await processAuctionPayment(supabase, metadata, paymentReference, actualPaymentState);
-      } else {
-        log.error({ orderRef }, 'Unknown order_reference type');
+      let orderId: string;
+
+      try {
+        if (orderRef.startsWith('BASKET-')) {
+          orderId = await processBasketPayment(supabase, metadata, paymentReference, actualPaymentState);
+        } else if (orderRef.startsWith('AUCTION-')) {
+          orderId = await processAuctionPayment(supabase, metadata, paymentReference, actualPaymentState);
+        } else {
+          log.error({ orderRef }, 'Unknown order_reference type');
+          return NextResponse.redirect(
+            `${appUrl}/checkout/success?error=unknown_type`
+          );
+        }
+      } catch (orderError) {
+        // Order creation failed — auto-refund the EveryPay charge to avoid orphaned money
+        log.error({ orderError, paymentReference }, 'Order creation failed after successful payment — initiating auto-refund');
+        Sentry.captureException(orderError, {
+          tags: { action: 'order_creation_failed' },
+          extra: { paymentReference, orderRef, paymentState: actualPaymentState },
+        });
+
+        const refundAmountCents = Math.round(parseFloat(paymentStatus.amount || '0') * 100);
+        try {
+          const releaseAction = determineReleaseAction(actualPaymentState, paymentReference, 1);
+          if (releaseAction === 'void') {
+            try {
+              await voidPayment(paymentReference);
+              log.info({ paymentReference }, 'Auto-voided EveryPay payment after order creation failure');
+            } catch {
+              await refundPayment(paymentReference, refundAmountCents);
+              log.info({ paymentReference }, 'Auto-refunded EveryPay payment after order creation failure (void failed)');
+            }
+          } else {
+            await refundPayment(paymentReference, refundAmountCents);
+            log.info({ paymentReference }, 'Auto-refunded EveryPay payment after order creation failure');
+          }
+        } catch (refundError) {
+          log.error({ refundError, paymentReference }, 'Auto-refund ALSO failed — manual intervention needed');
+          Sentry.captureException(refundError, {
+            tags: { action: 'auto_refund_failed', critical: 'true' },
+            extra: { paymentReference, amount: paymentStatus.amount },
+          });
+        }
+
+        // Mark event as failed so it won't be retried
+        await supabase
+          .from('everypay_webhook_events')
+          .update({
+            processed_at: new Date().toISOString(),
+            event_type: 'order_creation_failed',
+            payload: {
+              ...metadata,
+              payment_state: actualPaymentState,
+              order_error: orderError instanceof Error ? orderError.message : String(orderError),
+            },
+          })
+          .eq('id', checkoutEvent.id);
+
+        // Build redirect with retry context
+        const failParams = new URLSearchParams({ error: 'order_creation_failed' });
+        if (orderRef.startsWith('BASKET-')) {
+          const basketId = metadata.basket_id as string;
+          if (basketId) failParams.set('basket_id', basketId);
+        }
+
         return NextResponse.redirect(
-          `${appUrl}/checkout/success?error=unknown_type`
+          `${appUrl}/checkout/success?${failParams.toString()}`
         );
       }
 
@@ -195,9 +253,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Still pending (3DS, processing, etc.) — redirect with pending indicator
+    // Still pending (3DS, processing, etc.) — redirect with session_id to trigger polling
     return NextResponse.redirect(
-      `${appUrl}/checkout/success?payment_reference=${paymentReference}&pending=true`
+      `${appUrl}/checkout/success?session_id=${paymentReference}`
     );
   } catch (error) {
     log.error({ error }, 'EveryPay callback failed');

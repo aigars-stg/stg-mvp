@@ -789,6 +789,7 @@
         "missing_reference": "Payment reference is missing. Please try checking out again.",
         "unknown_payment": "We could not find this payment. Please try checking out again.",
         "verification_failed": "We could not verify your payment status. Please check your orders or try again.",
+        "order_creation_failed": "Your payment was received but we could not complete the order. A refund has been initiated automatically. Please try again.",
         "unknown_type": "An unexpected error occurred during checkout. Please contact support.",
         "timeout": "Order processing is taking longer than expected. Please check your orders page or contact support."
       },

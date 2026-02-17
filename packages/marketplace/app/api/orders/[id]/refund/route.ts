@@ -161,9 +161,8 @@ export async function POST(request: NextRequest, { params }: Params) {
 
       if (walletError) {
         log.error({ walletError, orderId }, 'Wallet refund failed');
-        // If EveryPay refund already succeeded, we have a partial refund problem
-        // Log it but continue to update order status
         if (everyPayRefundState) {
+          // EveryPay refund succeeded but wallet failed — partial refund
           log.error(
             { orderId, everyPayRefundState },
             'EveryPay refund succeeded but wallet refund failed — manual intervention needed'
@@ -183,6 +182,8 @@ export async function POST(request: NextRequest, { params }: Params) {
     // -----------------------------------------------------------------------
     // 3. Update order status to refunded
     // -----------------------------------------------------------------------
+    const walletRefundFailed = order.buyer_wallet_debit_cents > 0 && !walletRefunded;
+
     const { error: updateError } = await adminSupabase
       .from('orders')
       .update({
@@ -190,6 +191,9 @@ export async function POST(request: NextRequest, { params }: Params) {
         refund_reason: reason,
         refunded_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        ...(walletRefundFailed && {
+          refund_note: `Wallet refund of ${order.buyer_wallet_debit_cents} cents failed — manual credit needed`,
+        }),
       })
       .eq('id', orderId);
 
@@ -203,6 +207,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       orderNumber: order.order_number,
       ...(everyPayRefundState && { everyPayRefundState }),
       ...(walletRefunded && { walletRefundedCents: order.buyer_wallet_debit_cents }),
+      ...(walletRefundFailed && { walletRefundFailed: true }),
     });
   } catch (error) {
     return handleApiError(error, 'Process refund');
