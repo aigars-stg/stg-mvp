@@ -51,22 +51,23 @@ function SuccessPageContent() {
     try {
       const response = await fetch(`/api/orders/${orderId}`);
       const data = await response.json();
+      const o = data?.order;
 
-      if (response.ok && data) {
+      if (response.ok && o) {
         setOrder({
-          order_id: data.id,
-          order_number: data.order_number,
-          seller_name: data.seller_name || 'Seller',
-          shipping_method: data.shipping_method,
-          destination: data.shipping_method === 't2t'
-            ? data.destination_terminal_name
-            : data.pickup_city,
-          items_total: data.items_total,
-          shipping_cost: data.shipping_cost,
-          total_amount: data.total_amount,
-          wallet_debit_cents: data.wallet_debit_cents || 0,
-          seller_response_deadline: data.seller_response_deadline,
-          items: (data.order_items || []).map((item: { id: string; game_name: string; price: number; photo_url: string | null }) => ({
+          order_id: o.id,
+          order_number: o.order_number,
+          seller_name: o.seller_profile?.name || 'Seller',
+          shipping_method: o.shipping_method,
+          destination: o.shipping_method === 't2t'
+            ? o.destination_terminal_name
+            : o.pickup_city,
+          items_total: o.items_total,
+          shipping_cost: o.shipping_cost,
+          total_amount: o.total_amount,
+          wallet_debit_cents: o.buyer_wallet_debit_cents || 0,
+          seller_response_deadline: o.seller_response_deadline,
+          items: (o.order_items || []).map((item: { id: string; game_name: string; price: number; photo_url: string | null }) => ({
             id: item.id,
             game_name: item.game_name,
             price: item.price,
