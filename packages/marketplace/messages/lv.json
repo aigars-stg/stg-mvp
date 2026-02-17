@@ -789,6 +789,7 @@
         "missing_reference": "Trūkst maksājuma atsauces. Lūdzu, mēģini norēķināties vēlreiz.",
         "unknown_payment": "Mēs nevarējām atrast šo maksājumu. Lūdzu, mēģini norēķināties vēlreiz.",
         "verification_failed": "Mēs nevarējām pārbaudīt tava maksājuma statusu. Lūdzu, pārbaudi savus pasūtījumus vai mēģini vēlreiz.",
+        "order_creation_failed": "Tavs maksājums tika saņemts, bet mēs nevarējām izveidot pasūtījumu. Atmaksa ir automātiski uzsākta. Lūdzu, mēģini vēlreiz.",
         "unknown_type": "Norēķināšanās laikā radās neparedzēta kļūda. Lūdzu, sazinies ar atbalstu.",
         "timeout": "Pasūtījuma apstrāde aizņem ilgāku laiku nekā paredzēts. Lūdzu, pārbaudi savu pasūtījumu lapu vai sazinies ar atbalsta dienestu."
       },
