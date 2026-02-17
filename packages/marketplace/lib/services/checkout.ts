@@ -182,7 +182,7 @@ export async function createCheckoutSession(
 
   // 4. EveryPay payment (full or partial with wallet)
   // Include short timestamp suffix so retries don't hit EveryPay uniqueness constraint
-  const orderReference = `BASKET_${basketId}_${Date.now().toString(36)}`;
+  const orderReference = `BASKET-${basketId}-${Date.now().toString(36)}`;
   const customerUrl = `${appUrl}/api/webhooks/everypay/callback?basket_id=${basketId}`;
 
   try {
@@ -286,7 +286,7 @@ export async function createAuctionCheckoutSession(
   // 2. For auctions, we don't use create_order_from_basket.
   //    The webhook handler will create the order directly.
   // Include short timestamp suffix so retries don't hit EveryPay uniqueness constraint
-  const orderReference = `AUCTION_${listingId}_${Date.now().toString(36)}`;
+  const orderReference = `AUCTION-${listingId}-${Date.now().toString(36)}`;
 
   if (pricing.everypayChargeCents === 0) {
     // Wallet-only: create auction order immediately
