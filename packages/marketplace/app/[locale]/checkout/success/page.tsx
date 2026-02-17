@@ -220,7 +220,10 @@ function SuccessPageContent() {
 
   // Error state
   if (error || (!sessionId && !orderId)) {
-    const errorMessage = error === 'timeout' ? t('processingTimeout') : (error || t('errorDescription'));
+    const errorKey = error ? `errors.${error}` : null;
+    const errorMessage = errorKey && t.has(errorKey)
+      ? t(errorKey)
+      : (error || t('errorDescription'));
 
     return (
       <div className="min-h-screen flex items-center justify-center">

@@ -779,6 +779,14 @@
       "errorTitle": "Order Processing Issue",
       "errorDescription": "We couldn't load your order details. Please check your email for confirmation.",
       "processingTimeout": "Order processing is taking longer than expected. Please check your orders page or contact support.",
+      "errors": {
+        "payment_failed": "Your payment could not be processed. Please try again or use a different payment method.",
+        "missing_reference": "Payment reference is missing. Please try checking out again.",
+        "unknown_payment": "We could not find this payment. Please try checking out again.",
+        "verification_failed": "We could not verify your payment status. Please check your orders or try again.",
+        "unknown_type": "An unexpected error occurred during checkout. Please contact support.",
+        "timeout": "Order processing is taking longer than expected. Please check your orders page or contact support."
+      },
       "title": "Payment Successful",
       "subtitle": "Your order has been placed and payment confirmed",
       "orderNumber": "Order",

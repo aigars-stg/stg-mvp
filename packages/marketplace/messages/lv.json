@@ -779,6 +779,14 @@
       "errorTitle": "Pasūtījuma apstrādes problēma",
       "errorDescription": "Mēs nevarējām ielādēt tava pasūtījuma detaļas. Lūdzu, pārbaudi savu e-pastu apstiprinājumam.",
       "processingTimeout": "Pasūtījuma apstrāde aizņem ilgāku laiku nekā paredzēts. Lūdzu, pārbaudi savu pasūtījumu lapu vai sazinies ar atbalsta dienestu.",
+      "errors": {
+        "payment_failed": "Tavu maksājumu nevarēja apstrādāt. Lūdzu, mēģini vēlreiz vai izmanto citu maksājuma metodi.",
+        "missing_reference": "Trūkst maksājuma atsauces. Lūdzu, mēģini norēķināties vēlreiz.",
+        "unknown_payment": "Mēs nevarējām atrast šo maksājumu. Lūdzu, mēģini norēķināties vēlreiz.",
+        "verification_failed": "Mēs nevarējām pārbaudīt tava maksājuma statusu. Lūdzu, pārbaudi savus pasūtījumus vai mēģini vēlreiz.",
+        "unknown_type": "Norēķināšanās laikā radās neparedzēta kļūda. Lūdzu, sazinies ar atbalstu.",
+        "timeout": "Pasūtījuma apstrāde aizņem ilgāku laiku nekā paredzēts. Lūdzu, pārbaudi savu pasūtījumu lapu vai sazinies ar atbalsta dienestu."
+      },
       "title": "Maksājums veiksmīgs",
       "subtitle": "Tavs pasūtījums ir veikts un maksājums apstiprināts",
       "orderNumber": "Pasūtījums",

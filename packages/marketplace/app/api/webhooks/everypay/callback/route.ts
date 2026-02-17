@@ -80,6 +80,18 @@ export async function GET(request: NextRequest) {
     // 3. Verify payment status with EveryPay
     const paymentStatus = await getPaymentStatus(paymentReference);
 
+    log.info(
+      {
+        paymentReference,
+        paymentState: paymentStatus.payment_state,
+        orderReference: checkoutEvent.order_reference,
+        amount: paymentStatus.amount,
+        currency: paymentStatus.currency,
+        ...(paymentStatus.error && { everypayError: paymentStatus.error }),
+      },
+      'EveryPay payment status received'
+    );
+
     if (SUCCESSFUL_STATES.has(paymentStatus.payment_state)) {
       // 4. Create order based on type
       const metadata = checkoutEvent.payload as Record<string, unknown>;
@@ -120,7 +132,18 @@ export async function GET(request: NextRequest) {
     }
 
     if (FAILED_STATES.has(paymentStatus.payment_state)) {
-      // Mark as failed
+      log.warn(
+        {
+          paymentReference,
+          paymentState: paymentStatus.payment_state,
+          orderReference: checkoutEvent.order_reference,
+          ...(paymentStatus.error && { everypayError: paymentStatus.error }),
+          ...(paymentStatus.cc_details && { cardType: paymentStatus.cc_details.type, lastFour: paymentStatus.cc_details.last_four_digits }),
+        },
+        'Payment failed at EveryPay'
+      );
+
+      // Mark as failed — include EveryPay error details for debugging
       await supabase
         .from('everypay_webhook_events')
         .update({
@@ -129,6 +152,8 @@ export async function GET(request: NextRequest) {
           payload: {
             ...(checkoutEvent.payload as Record<string, unknown>),
             payment_state: paymentStatus.payment_state,
+            ...(paymentStatus.error && { everypay_error: paymentStatus.error }),
+            ...(paymentStatus.cc_details && { cc_type: paymentStatus.cc_details.type, cc_last_four: paymentStatus.cc_details.last_four_digits }),
           },
         })
         .eq('id', checkoutEvent.id);
