@@ -92,7 +92,18 @@ async function request<T>(
     init.body = JSON.stringify(body);
   }
 
-  const res = await fetch(url, init);
+  let res: Response;
+  try {
+    res = await fetch(url, init);
+  } catch (fetchErr) {
+    // Node.js native fetch wraps the real error in .cause
+    const cause = fetchErr instanceof Error && 'cause' in fetchErr
+      ? (fetchErr.cause as Error)?.message || String(fetchErr.cause)
+      : 'unknown';
+    throw new EveryPayError(
+      `EveryPay API unreachable (${method} ${url.replace(/\?.*$/, '')}): ${cause}`
+    );
+  }
   const data = await res.json();
 
   if (data?.error) {
