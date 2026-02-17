@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { handleApiError } from '@/lib/api/error-handler';
 import { loggers } from '@/lib/logger';
+import { calculateEverypayPortionCents, determineReleaseAction } from '@/lib/services/payment-capture';
 
 const log = loggers.cron;
 
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
       log.info({ count: refundsNeeded.length }, 'Processing refunds');
 
       // Import EveryPay client, wallet service, email, and transaction message functions
-      const { refundPayment } = await import('@/lib/everypay/client');
+      const { refundPayment, voidPayment } = await import('@/lib/everypay/client');
       const { refundToWallet } = await import('@/lib/services/wallet');
       const { sendOrderCancelledToBuyer } = await import('@/lib/email/send-order-emails');
       const { postOrderCancelledMessage } = await import('@/lib/transactions');
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
           // Fetch order details for EveryPay reference and wallet debit
           const { data: order, error: orderError } = await supabase
             .from('orders')
-            .select('everypay_payment_reference, buyer_wallet_debit_cents, total_amount')
+            .select('everypay_payment_reference, everypay_payment_state, buyer_wallet_debit_cents, total_amount')
             .eq('id', order_id)
             .single();
 
@@ -94,13 +95,22 @@ export async function GET(request: NextRequest) {
             continue;
           }
 
-          const totalAmountCents = Math.round(order.total_amount * 100);
+          const everypayPortionCents = calculateEverypayPortionCents(order.total_amount, order.buyer_wallet_debit_cents);
           const walletDebitCents = order.buyer_wallet_debit_cents || 0;
-          const everypayPortionCents = totalAmountCents - walletDebitCents;
+          const releaseAction = determineReleaseAction(order.everypay_payment_state, order.everypay_payment_reference, everypayPortionCents);
 
-          // 1. Refund EveryPay portion (card payment)
-          if (everypayPortionCents > 0 && order.everypay_payment_reference) {
-            await refundPayment(order.everypay_payment_reference, everypayPortionCents);
+          // 1. Release EveryPay funds: void if pre-authorised, refund if already settled
+          if (releaseAction === 'void') {
+            try {
+              await voidPayment(order.everypay_payment_reference!);
+              log.info({ orderId: order_id }, 'EveryPay authorization voided');
+            } catch {
+              // If void fails (e.g., auto-captured), fall back to refund
+              await refundPayment(order.everypay_payment_reference!, everypayPortionCents);
+              log.info({ orderId: order_id, amountCents: everypayPortionCents }, 'EveryPay refund processed (void failed)');
+            }
+          } else if (releaseAction === 'refund') {
+            await refundPayment(order.everypay_payment_reference!, everypayPortionCents);
             log.info({ orderId: order_id, amountCents: everypayPortionCents }, 'EveryPay refund processed');
           }
 

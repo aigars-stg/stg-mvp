@@ -42,11 +42,11 @@ export default function CardPage() {
           <Card variant="elevated">
             <CardHeader>
               <CardTitle>Featured Game</CardTitle>
-              <CardDescription>Editor's Pick</CardDescription>
+              <CardDescription>Editor&apos;s Pick</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
               <p className="text-text-secondary">
-                This week's featured listing with excellent condition and rare expansion.
+                This week&apos;s featured listing with excellent condition and rare expansion.
               </p>
             </CardContent>
           </Card>
@@ -211,17 +211,17 @@ export default function CardPage() {
 
           <div className="bg-bg-elevated rounded-lg p-6 border border-border-subtle">
             <h3 className="font-semibold text-polar-night mb-2">
-              ✓ Use padding="none" for image cards
+              ✓ Use padding=&quot;none&quot; for image cards
             </h3>
             <p className="text-text-secondary">
-              When cards contain images, use padding="none" and apply padding only to the text
+              When cards contain images, use padding=&quot;none&quot; and apply padding only to the text
               content section. This lets images extend to card edges for visual impact.
             </p>
           </div>
 
           <div className="bg-bg-elevated rounded-lg p-6 border border-border-subtle">
             <h3 className="font-semibold text-polar-night mb-2">
-              ✗ Don't nest cards inside cards
+              ✗ Don&apos;t nest cards inside cards
             </h3>
             <p className="text-text-secondary">
               Card nesting creates confusing hierarchy and breaks the elevation system. Use
@@ -270,7 +270,7 @@ function GameCard({ game }) {
           <div>
             <h3 className="font-semibold text-polar-night mb-2">Interactive Cards</h3>
             <p className="text-text-secondary">
-              When using variant="interactive", ensure the entire card is keyboard accessible.
+              When using variant=&quot;interactive&quot;, ensure the entire card is keyboard accessible.
               Wrap in a button or link, or add tabIndex and keyboard handlers.
             </p>
           </div>
@@ -279,7 +279,7 @@ function GameCard({ game }) {
             <h3 className="font-semibold text-polar-night mb-2">Semantic Structure</h3>
             <p className="text-text-secondary">
               CardTitle uses an h3 element by default. This creates proper heading hierarchy
-              when cards appear in lists. Use semantic HTML—don't rely on styling alone.
+              when cards appear in lists. Use semantic HTML—don&apos;t rely on styling alone.
             </p>
           </div>
 

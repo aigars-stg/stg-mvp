@@ -149,6 +149,38 @@ export interface EveryPayRefundResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Capture Request (for pre-authorised payments)
+// ---------------------------------------------------------------------------
+
+export interface CapturePaymentRequest {
+  /** API username */
+  api_username: string;
+  /** Amount to capture as string, e.g. "12.50" (can be ≤ authorised amount) */
+  amount: string;
+  /** EveryPay payment reference of the authorised payment */
+  payment_reference: string;
+  /** Unique nonce */
+  nonce: string;
+  /** ISO 8601 timestamp */
+  timestamp: string;
+}
+
+// ---------------------------------------------------------------------------
+// Void Request (cancel a pre-authorised payment without capturing)
+// ---------------------------------------------------------------------------
+
+export interface VoidPaymentRequest {
+  /** API username */
+  api_username: string;
+  /** EveryPay payment reference of the authorised payment */
+  payment_reference: string;
+  /** Unique nonce */
+  nonce: string;
+  /** ISO 8601 timestamp */
+  timestamp: string;
+}
+
+// ---------------------------------------------------------------------------
 // Callback (webhook) payload
 // ---------------------------------------------------------------------------
 

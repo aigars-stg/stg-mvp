@@ -13,12 +13,14 @@
  */
 
 import type {
+  CapturePaymentRequest,
   CreatePaymentRequest,
   EveryPayPaymentMethod,
   EveryPayPaymentResponse,
   EveryPayProcessingAccountResponse,
   EveryPayRefundResponse,
   RefundPaymentRequest,
+  VoidPaymentRequest,
 } from './types';
 
 // ---------------------------------------------------------------------------
@@ -218,6 +220,61 @@ export async function refundPayment(
   return request<EveryPayRefundResponse>(
     'POST',
     `${config.apiUrl}/payments/refund`,
+    config,
+    body
+  );
+}
+
+/**
+ * Capture a pre-authorised payment (full or partial).
+ * Must be called within the capture window (typically 7 days).
+ *
+ * @param paymentReference  The payment_reference of the authorised payment
+ * @param amountCents  Amount to capture in cents (can be ≤ authorised amount)
+ */
+export async function capturePayment(
+  paymentReference: string,
+  amountCents: number
+): Promise<EveryPayPaymentResponse> {
+  const config = getConfig();
+
+  const body: CapturePaymentRequest = {
+    api_username: config.apiUsername,
+    payment_reference: paymentReference,
+    amount: (amountCents / 100).toFixed(2),
+    nonce: nonce(),
+    timestamp: timestamp(),
+  };
+
+  return request<EveryPayPaymentResponse>(
+    'POST',
+    `${config.apiUrl}/payments/capture`,
+    config,
+    body
+  );
+}
+
+/**
+ * Void a pre-authorised payment (cancel without capturing).
+ * Releases the hold on the customer's funds immediately.
+ *
+ * @param paymentReference  The payment_reference of the authorised payment
+ */
+export async function voidPayment(
+  paymentReference: string
+): Promise<EveryPayPaymentResponse> {
+  const config = getConfig();
+
+  const body: VoidPaymentRequest = {
+    api_username: config.apiUsername,
+    payment_reference: paymentReference,
+    nonce: nonce(),
+    timestamp: timestamp(),
+  };
+
+  return request<EveryPayPaymentResponse>(
+    'POST',
+    `${config.apiUrl}/payments/void`,
     config,
     body
   );

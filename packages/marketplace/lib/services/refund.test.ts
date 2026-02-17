@@ -6,12 +6,13 @@ import {
 } from './refund';
 
 describe('REFUNDABLE_STATUSES', () => {
-  it('includes all pre-completion statuses', () => {
+  it('includes all pre-completion statuses and disputed', () => {
     expect(REFUNDABLE_STATUSES).toEqual([
       'pending_seller',
       'confirmed',
       'shipped',
       'delivered',
+      'disputed',
     ]);
   });
 
@@ -29,6 +30,7 @@ describe('isRefundableStatus', () => {
     expect(isRefundableStatus('confirmed')).toBe(true);
     expect(isRefundableStatus('shipped')).toBe(true);
     expect(isRefundableStatus('delivered')).toBe(true);
+    expect(isRefundableStatus('disputed')).toBe(true);
   });
 
   it('returns false for completed orders', () => {
@@ -41,10 +43,6 @@ describe('isRefundableStatus', () => {
 
   it('returns false for cancelled orders', () => {
     expect(isRefundableStatus('cancelled')).toBe(false);
-  });
-
-  it('returns false for disputed orders', () => {
-    expect(isRefundableStatus('disputed')).toBe(false);
   });
 
   it('returns false for unknown statuses', () => {

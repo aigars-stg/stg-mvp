@@ -10,7 +10,7 @@ export default function Home() {
         </h1>
         <p className="text-xl text-text-secondary max-w-3xl mb-8">
           A Nordic-minimalist design system for the Baltic board game marketplace.
-          Built on the philosophy that <span className="font-semibold text-frost-ice">"Every game deserves a second turn."</span>
+          Built on the philosophy that <span className="font-semibold text-frost-ice">&quot;Every game deserves a second turn.&quot;</span>
         </p>
         <div className="flex gap-4">
           <Button variant="primary" size="lg">
@@ -106,8 +106,8 @@ export default function Home() {
             once, correctly, so you can focus on building great experiences.
           </p>
           <p className="text-lg text-text leading-relaxed">
-            The <span className="font-semibold">Nordic aesthetic</span> isn't cold minimalism—it's warm
-            minimalism that respects users' time and intelligence. Every pixel serves purpose. Every component
+            The <span className="font-semibold">Nordic aesthetic</span> isn&apos;t cold minimalism—it&apos;s warm
+            minimalism that respects users&apos; time and intelligence. Every pixel serves purpose. Every component
             earns its place. Every pattern solves real problems.
           </p>
         </div>

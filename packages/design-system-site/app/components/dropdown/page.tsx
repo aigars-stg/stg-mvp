@@ -21,7 +21,7 @@ export default function DropdownPage() {
         <h1 className="text-4xl font-bold text-polar-night mb-4">Dropdown</h1>
         <p className="text-lg text-polar-nightMedium max-w-3xl leading-relaxed">
           Dropdowns display a list of actions or options when triggered.
-          They're perfect for menus, settings, and contextual actions.
+          They&apos;re perfect for menus, settings, and contextual actions.
         </p>
       </section>
 

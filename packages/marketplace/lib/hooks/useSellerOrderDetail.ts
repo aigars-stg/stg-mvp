@@ -30,12 +30,10 @@ export interface SellerOrder {
   buyer_email: string;
   buyer_phone: string;
   status: string;
-  shipping_method: 't2t' | 'local_pickup';
+  shipping_method: 't2t';
   destination_terminal_name?: string;
   destination_terminal_address?: string;
   destination_country?: string;
-  pickup_city?: string;
-  pickup_notes?: string;
   receiver_name?: string;
   receiver_phone?: string;
   receiver_email?: string;

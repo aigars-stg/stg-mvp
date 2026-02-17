@@ -157,7 +157,7 @@ export default function InputPage() {
               ✓ Use helper text for formatting guidance
             </h3>
             <p className="text-text-secondary">
-              Tell users upfront what format you expect. "At least 8 characters" beats showing an
+              Tell users upfront what format you expect. &quot;At least 8 characters&quot; beats showing an
               error after they submit. Nordic design values clarity over surprise.
             </p>
           </div>
@@ -174,7 +174,7 @@ export default function InputPage() {
 
           <div className="bg-bg-elevated rounded-lg p-6 border border-border-subtle">
             <h3 className="font-semibold text-polar-night mb-2">
-              ✗ Don't use inputs for actions
+              ✗ Don&apos;t use inputs for actions
             </h3>
             <p className="text-text-secondary">
               If clicking should trigger an action (like search), use a button. Inputs are for
@@ -235,8 +235,8 @@ function ListGameForm() {
           <div>
             <h3 className="font-semibold text-polar-night mb-2">Error Indication</h3>
             <p className="text-text-secondary">
-              aria-invalid is set when errors are present. Don't rely on red color alone—the
-              text explicitly states what's wrong.
+              aria-invalid is set when errors are present. Don&apos;t rely on red color alone—the
+              text explicitly states what&apos;s wrong.
             </p>
           </div>
 

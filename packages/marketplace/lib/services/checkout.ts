@@ -11,7 +11,7 @@
  * Order creation happens either immediately (wallet-only) or after EveryPay callback.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createPayment as createEveryPayPayment } from '@/lib/everypay/client';
 import { calculateCheckoutPricingFromEuros, calculateOrderPricing } from './pricing';
 import { getWalletBalance } from './wallet';
@@ -82,6 +82,31 @@ export type CheckoutResult =
   | { type: 'wallet_only'; orderId: string; redirect: string }
   | { type: 'everypay'; paymentLink: string; paymentReference: string }
   | { type: 'error'; error: string; status: number };
+
+// ---------------------------------------------------------------------------
+// Seller notification helper (uses service role for cross-user insert)
+// ---------------------------------------------------------------------------
+
+async function notifySellerNewOrder(
+  sellerId: string,
+  orderId: string,
+  orderNumber: string
+): Promise<void> {
+  const adminSupabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  const { error } = await adminSupabase.from('notifications').insert({
+    user_id: sellerId,
+    type: 'new_order',
+    title: `New order ${orderNumber}`,
+    body: 'Respond within 24 hours to confirm this order.',
+    data: { order_id: orderId },
+  });
+  if (error) {
+    console.error('Failed to create seller notification:', error);
+  }
+}
 
 // ==============================================
 // BASKET CHECKOUT
@@ -172,6 +197,9 @@ export async function createCheckoutSession(
         seller_wallet_credit_cents: orderPricing.walletCreditCents,
       })
       .eq('id', orderId);
+
+    // Notify seller about new order (non-blocking)
+    notifySellerNewOrder(sellerId, orderId, result.order_number).catch(() => {});
 
     return {
       type: 'wallet_only',
@@ -292,12 +320,13 @@ export async function createAuctionCheckoutSession(
     // Wallet-only: create auction order immediately
     // TODO: Create a dedicated RPC for auction orders, or use direct insert
     // For now, create the order directly via insert
+    const auctionOrderNumber = `A-${Date.now()}`;
     const { data: order, error } = await supabase
       .from('orders')
       .insert({
         buyer_id: buyerId,
         seller_id: sellerId,
-        order_number: `A-${Date.now()}`,
+        order_number: auctionOrderNumber,
         shipping_method: shippingMethod,
         destination_country: input.destinationCountry || null,
         destination_terminal_id: input.destinationTerminalId || null,
@@ -348,6 +377,9 @@ export async function createAuctionCheckoutSession(
       game_name: input.gameName,
       price: winningBidEuros,
     });
+
+    // Notify seller about new order (non-blocking)
+    notifySellerNewOrder(sellerId, order.id, auctionOrderNumber).catch(() => {});
 
     return {
       type: 'wallet_only',

@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
-import { Button } from '@second-turn/design-system';
+import { Button, ResultPage } from '@second-turn/design-system';
 import { Package, ArrowLeft, RefreshCw as Loader2, AlertCircle, User, Email as Mail, CreditCard, Truck, LocationPin as MapPin } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { TerminalSelectorWithMap } from '@/components/checkout/TerminalSelectorWithMap';
@@ -430,17 +430,17 @@ function CheckoutPageContent() {
   // Error state
   if (!user || !basket || error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-aurora-red mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-polar-night mb-2">
-            {error || t('errorTitle')}
-          </h2>
-          <Link href="/cart">
-            <Button variant="primary">{t('returnToCart')}</Button>
+      <ResultPage
+        variant="error"
+        icon={<AlertCircle className="w-8 h-8 sm:w-10 sm:h-10" />}
+        title={error || t('errorTitle')}
+      >
+        <ResultPage.Actions>
+          <Link href="/cart" className="block">
+            <Button variant="primary" fullWidth>{t('returnToCart')}</Button>
           </Link>
-        </div>
-      </div>
+        </ResultPage.Actions>
+      </ResultPage>
     );
   }
 

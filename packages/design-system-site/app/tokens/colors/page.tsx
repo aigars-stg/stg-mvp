@@ -173,7 +173,7 @@ export default function ColorsPage() {
           {/* Guideline 4 */}
           <div className="bg-bg-elevated rounded-lg p-6 border border-border-subtle">
             <h3 className="font-semibold text-polar-night mb-2">
-              ✗ Don't use multiple primary colors together
+              ✗ Don&apos;t use multiple primary colors together
             </h3>
             <p className="text-text-secondary mb-4">
               Mixing frost.ice with aurora colors creates visual confusion. Choose one primary action per context.

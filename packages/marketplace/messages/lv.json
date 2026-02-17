@@ -779,6 +779,19 @@
       "errorTitle": "Pasūtījuma apstrādes problēma",
       "errorDescription": "Mēs nevarējām ielādēt tava pasūtījuma detaļas. Lūdzu, pārbaudi savu e-pastu apstiprinājumam.",
       "processingTimeout": "Pasūtījuma apstrāde aizņem ilgāku laiku nekā paredzēts. Lūdzu, pārbaudi savu pasūtījumu lapu vai sazinies ar atbalsta dienestu.",
+      "errors": {
+        "payment_failed": "Tavu maksājumu nevarēja apstrādāt. Lūdzu, mēģini vēlreiz vai izmanto citu maksājuma metodi.",
+        "fraud_declined": "Tavu maksājumu nevarēja apstrādāt. Lūdzu, mēģini citu maksājuma metodi vai sazinies ar savu banku.",
+        "card_declined": "Tava banka noraidīja tavu karti. Lūdzu, mēģini citu karti vai maksājuma metodi.",
+        "auth_failed": "Maksājuma autentifikācija netika pabeigta. Lūdzu, mēģini vēlreiz un pabeidz verifikācijas soli.",
+        "technical_error": "Īslaicīga problēma neļāva apstrādāt tavu maksājumu. Lūdzu, uzgaidi brīdi un mēģini vēlreiz.",
+        "user_cancelled": "Tavs maksājums netika pabeigts. Tavs grozs joprojām ir pieejams, ja vēlies mēģināt vēlreiz.",
+        "missing_reference": "Trūkst maksājuma atsauces. Lūdzu, mēģini norēķināties vēlreiz.",
+        "unknown_payment": "Mēs nevarējām atrast šo maksājumu. Lūdzu, mēģini norēķināties vēlreiz.",
+        "verification_failed": "Mēs nevarējām pārbaudīt tava maksājuma statusu. Lūdzu, pārbaudi savus pasūtījumus vai mēģini vēlreiz.",
+        "unknown_type": "Norēķināšanās laikā radās neparedzēta kļūda. Lūdzu, sazinies ar atbalstu.",
+        "timeout": "Pasūtījuma apstrāde aizņem ilgāku laiku nekā paredzēts. Lūdzu, pārbaudi savu pasūtījumu lapu vai sazinies ar atbalsta dienestu."
+      },
       "title": "Maksājums veiksmīgs",
       "subtitle": "Tavs pasūtījums ir veikts un maksājums apstiprināts",
       "orderNumber": "Pasūtījums",
@@ -809,7 +822,46 @@
         "title": "Automātiskā atmaksas aizsardzība",
         "description": "Ja pārdevējs neatbild 24 stundu laikā vai noraida tavu pasūtījumu, tu saņemsi automātisku pilnu atmaksu uz savu maksājuma metodi."
       },
+      "errorTitles": {
+        "card_declined": "Maksājums noraidīts",
+        "fraud_declined": "Maksājumu nevarēja apstrādāt",
+        "auth_failed": "Autentifikācija nav pabeigta",
+        "technical_error": "Īslaicīga problēma",
+        "user_cancelled": "Maksājums nav pabeigts",
+        "payment_failed": "Maksājuma problēma"
+      },
+      "suggestions": {
+        "title": "Ko tu vari darīt",
+        "card_declined": {
+          "1": "Izmēģini citu karti vai bankas saiti",
+          "2": "Pārbaudi ar savu banku, vai nav ierobežojumu"
+        },
+        "fraud_declined": {
+          "1": "Izmēģini citu maksājuma metodi",
+          "2": "Sazinies ar savu banku, ja problēma turpinās"
+        },
+        "auth_failed": {
+          "1": "Mēģini vēlreiz un pabeidz bankas verifikāciju",
+          "2": "Sagatavo bankas lietotni apstiprinājumam"
+        },
+        "technical_error": {
+          "1": "Uzgaidi brīdi un mēģini vēlreiz",
+          "2": "Problēma ir īslaicīga, tā nav tavā pusē"
+        },
+        "user_cancelled": {
+          "1": "Tavs grozs joprojām gaida tevi"
+        },
+        "payment_failed": {
+          "1": "Mēģini vēlreiz vai izmanto citu maksājuma metodi"
+        }
+      },
+      "reassurance": {
+        "title": "Nauda netika iekasēta",
+        "description": "Tavs maksājums netika apstrādāts. Tava groza preces joprojām ir rezervētas tev."
+      },
       "actions": {
+        "tryAgain": "Mēģināt vēlreiz",
+        "backToCart": "Atpakaļ uz grozu",
         "viewOrders": "Skatīt manus pasūtījumus",
         "continueShopping": "Turpināt iepirkties"
       },
@@ -2381,6 +2433,12 @@
       "addButton": "Pievienot bankas kontu",
       "updateLink": "Atjaunināt bankas kontu"
     },
+    "pendingAlert": {
+      "title": "Jums ir {count, plural, one {# pasūtījums} other {# pasūtījumi}}, kas gaida",
+      "description": "Lūdzu, pārskatiet un atbildiet uz gaidošajiem pasūtījumiem 24 stundu laikā.",
+      "urgentDescription": "Dažiem pasūtījumiem drīz beigsies termiņš. Lūdzu, atbildiet pēc iespējas ātrāk.",
+      "reviewOrders": "Pārskatīt pasūtījumus"
+    },
     "quickActions": {
       "createListing": {
         "title": "Izveidot sludinājumu",
@@ -3068,6 +3126,14 @@
       "accepting": "Pieņem...",
       "decline": "Noraidīt",
       "viewDetails": "Skatīt detaļas"
+    },
+    "acceptModal": {
+      "title": "Pieņemt pasūtījumu",
+      "parcelSizeLabel": "Izvēlieties sūtījuma izmēru",
+      "parcelSizeHelp": "Izvēlieties izmēru, kas atbilst jūsu iepakotajai spēlei(-ēm). Tas ir nepieciešams piegādes uzlīmes ģenerēšanai.",
+      "confirmAccept": "Apstiprināt pieņemšanu",
+      "cancel": "Atcelt",
+      "processing": "Pieņem..."
     },
     "declineModal": {
       "title": "Noraidīt pasūtījumu",

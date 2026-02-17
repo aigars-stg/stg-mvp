@@ -405,8 +405,8 @@ function OfferForm({ listing }) {
           <div>
             <h3 className="font-semibold text-polar-night mb-2">ARIA Attributes</h3>
             <p className="text-polar-nightMedium">
-              Uses role="dialog" and aria-modal="true". Title is linked via aria-labelledby.
-              Backdrop has aria-hidden="true".
+              Uses role=&quot;dialog&quot; and aria-modal=&quot;true&quot;. Title is linked via aria-labelledby.
+              Backdrop has aria-hidden=&quot;true&quot;.
             </p>
           </div>
         </div>

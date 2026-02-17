@@ -1,15 +1,18 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
-import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User } from '@/lib/icons';
+import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { formatPrice, formatCentsToCurrency } from '@/lib/services/pricing';
 import { SELLER_COMMISSION_RATE } from '@/lib/pricing/constants';
+import { PARCEL_SIZES } from '@/lib/hooks/useSellerOrderDetail';
+
+type ParcelSize = 'XS' | 'S' | 'M' | 'L';
 
 interface OrderItem {
   id: string;
@@ -25,9 +28,8 @@ interface Order {
   buyer_id: string;
   buyer_name: string;
   status: string;
-  shipping_method: 't2t' | 'local_pickup';
+  shipping_method: 't2t';
   destination_terminal_name?: string;
-  pickup_city?: string;
   items_total: number;
   shipping_cost: number;
   total_amount: number;
@@ -60,10 +62,19 @@ export default function SellerOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<FilterTab>('pending');
+
+  // Accept modal state
+  const [showAcceptModal, setShowAcceptModal] = useState<string | null>(null);
+  const [selectedParcelSize, setSelectedParcelSize] = useState<ParcelSize>('M');
   const [acceptingOrder, setAcceptingOrder] = useState<string | null>(null);
+  const [acceptError, setAcceptError] = useState<string | null>(null);
+
+  // Decline modal state
+  const [showDeclineModal, setShowDeclineModal] = useState<string | null>(null);
   const [decliningOrder, setDecliningOrder] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState('');
-  const [showDeclineModal, setShowDeclineModal] = useState<string | null>(null);
+  const [declineError, setDeclineError] = useState<string | null>(null);
+
   const t = useTranslations('SellerOrders');
 
   // Redirect if not authenticated
@@ -101,19 +112,65 @@ export default function SellerOrdersPage() {
     }
   }, [user]);
 
-  // Handle accept order
+  // Silent refresh for background polling (no loading spinner)
+  const fetchOrdersSilent = useCallback(async () => {
+    try {
+      const response = await fetch('/api/seller/orders');
+      const data = await response.json();
+      if (response.ok) {
+        setOrders(data.orders || []);
+        setSummary(data.summary || null);
+      }
+    } catch {
+      // Silent fail for background refresh
+    }
+  }, []);
+
+  // Auto-refresh with visibility-aware polling (30s)
+  useEffect(() => {
+    if (!user) return;
+
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const startPolling = () => {
+      intervalId = setInterval(fetchOrdersSilent, 30000);
+    };
+
+    const stopPolling = () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopPolling();
+      } else {
+        fetchOrdersSilent();
+        startPolling();
+      }
+    };
+
+    startPolling();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      stopPolling();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user, fetchOrdersSilent]);
+
+  // Handle accept order (called from modal)
   const handleAcceptOrder = async (orderId: string) => {
     try {
       setAcceptingOrder(orderId);
+      setAcceptError(null);
 
       const response = await fetch(`/api/seller/orders/${orderId}/accept`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          parcelSize: 'M', // Default to M for now, TODO: Add size selector
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ parcelSize: selectedParcelSize }),
       });
 
       const data = await response.json();
@@ -122,11 +179,12 @@ export default function SellerOrdersPage() {
         throw new Error(data.error || 'Failed to accept order');
       }
 
-      // Refresh orders
+      // Close modal and refresh
+      setShowAcceptModal(null);
+      setSelectedParcelSize('M');
       await fetchOrders();
     } catch (err) {
-      console.error('Error accepting order:', err);
-      alert(err instanceof Error ? err.message : 'Failed to accept order');
+      setAcceptError(err instanceof Error ? err.message : 'Failed to accept order');
     } finally {
       setAcceptingOrder(null);
     }
@@ -136,15 +194,12 @@ export default function SellerOrdersPage() {
   const handleDeclineOrder = async (orderId: string) => {
     try {
       setDecliningOrder(orderId);
+      setDeclineError(null);
 
       const response = await fetch(`/api/seller/orders/${orderId}/decline`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          reason: declineReason || 'Seller declined',
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: declineReason || 'Seller declined' }),
       });
 
       const data = await response.json();
@@ -158,8 +213,7 @@ export default function SellerOrdersPage() {
       setDeclineReason('');
       await fetchOrders();
     } catch (err) {
-      console.error('Error declining order:', err);
-      alert(err instanceof Error ? err.message : 'Failed to decline order');
+      setDeclineError(err instanceof Error ? err.message : 'Failed to decline order');
     } finally {
       setDecliningOrder(null);
     }
@@ -287,8 +341,8 @@ export default function SellerOrdersPage() {
                 key={order.id}
                 className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6"
               >
-                {/* Order Header */}
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-4 border-b border-border-subtle">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="text-lg font-semibold text-polar-night">
@@ -314,7 +368,7 @@ export default function SellerOrdersPage() {
                   {/* Time Remaining for Pending Orders */}
                   {order.status === 'pending_seller' && order.time_remaining_ms !== null && (
                     <div
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg flex-shrink-0 ${
                         order.is_expired
                           ? 'bg-aurora-red/10 text-aurora-red'
                           : order.time_remaining_ms < 3600000
@@ -332,66 +386,56 @@ export default function SellerOrdersPage() {
                   )}
                 </div>
 
-                {/* Order Items */}
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-polar-night mb-2">
+                {/* Items — checkout sidebar style */}
+                <div className="py-4 border-b border-border-subtle">
+                  <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-3">
                     {t('card.items', { count: order.order_items.length })}
                   </p>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {order.order_items.map((item) => (
                       <div key={item.id} className="flex gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <div className="w-16 h-16 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
                           {item.photo_url ? (
                             <img
                               src={item.photo_url}
                               alt={item.game_name}
-                              className="max-w-full max-h-full object-contain"
+                              className="max-w-full max-h-full object-contain p-1"
                             />
                           ) : (
-                            <Package className="w-5 h-5 text-text-muted" />
+                            <Package className="w-6 h-6 text-text-muted" />
                           )}
                         </div>
                         <div className="flex-grow min-w-0">
-                          <p className="text-sm font-medium text-polar-night line-clamp-1">
-                            {item.game_name}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant={item.condition as ListingCondition} size="sm">
-                              {getConditionLabel(item.condition as ListingCondition)}
-                            </Badge>
-                            <span className="text-sm font-medium text-polar-night">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm font-medium text-polar-night line-clamp-1">
+                              {item.game_name}
+                            </p>
+                            <span className="text-sm font-semibold text-polar-night flex-shrink-0">
                               {formatPrice(item.price)}
                             </span>
                           </div>
+                          <Badge variant={item.condition as ListingCondition} size="sm" className="mt-1">
+                            {getConditionLabel(item.condition as ListingCondition)}
+                          </Badge>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Shipping Method */}
-                <div className="mb-4 p-3 bg-bg-elevated rounded-lg">
+                {/* Shipping */}
+                <div className="py-4 border-b border-border-subtle">
                   <div className="flex items-center gap-2 text-sm">
-                    {order.shipping_method === 't2t' ? (
-                      <>
-                        <Truck className="w-4 h-4 text-frost-ice" />
-                        <span className="font-medium">{t('shipping.terminalPickup')}</span>
-                        <span className="text-text-secondary">
-                          {order.destination_terminal_name}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <User className="w-4 h-4 text-frost-ice" />
-                        <span className="font-medium">{t('shipping.localPickup')}</span>
-                        <span className="text-text-secondary">{order.pickup_city}</span>
-                      </>
-                    )}
+                    <Truck className="w-4 h-4 text-frost-ice" />
+                    <span className="font-medium">{t('shipping.terminalPickup')}</span>
+                    <span className="text-text-secondary">
+                      {order.destination_terminal_name}
+                    </span>
                   </div>
                 </div>
 
-                {/* Pricing */}
-                <div className="mb-4 space-y-1 text-sm">
+                {/* Pricing — seller perspective */}
+                <div className="py-4 border-b border-border-subtle space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-text-secondary">{t('pricing.items')}</span>
                     <span className="font-medium">{formatPrice(order.items_total)}</span>
@@ -408,58 +452,133 @@ export default function SellerOrdersPage() {
                   </div>
                   <div className="flex justify-between pt-2 border-t border-border-subtle">
                     <span className="font-semibold text-polar-night">{t('pricing.youReceive')}</span>
-                    <span className="text-lg font-bold text-aurora-green">
+                    <span className="text-xl font-bold text-aurora-green">
                       {formatCentsToCurrency(order.seller_wallet_credit_cents ?? Math.round(order.items_total * (1 - SELLER_COMMISSION_RATE) * 100))}
                     </span>
                   </div>
                 </div>
 
                 {/* Actions */}
-                {order.status === 'pending_seller' && !order.is_expired && (
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button
-                      variant="primary"
-                      fullWidth
-                      onClick={() => handleAcceptOrder(order.id)}
-                      disabled={acceptingOrder === order.id}
-                    >
-                      {acceptingOrder === order.id ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          {t('actions.accepting')}
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle2 className="w-4 h-4 mr-2" />
-                          {t('actions.acceptOrder')}
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      fullWidth
-                      onClick={() => setShowDeclineModal(order.id)}
-                      disabled={decliningOrder === order.id}
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      {t('actions.decline')}
-                    </Button>
-                  </div>
-                )}
-
-                {order.status !== 'pending_seller' && (
+                <div className="pt-4 space-y-3">
+                  {order.status === 'pending_seller' && !order.is_expired && (
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        variant="primary"
+                        fullWidth
+                        onClick={() => {
+                          setShowAcceptModal(order.id);
+                          setSelectedParcelSize('M');
+                          setAcceptError(null);
+                        }}
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        {t('actions.acceptOrder')}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        fullWidth
+                        onClick={() => {
+                          setShowDeclineModal(order.id);
+                          setDeclineError(null);
+                        }}
+                      >
+                        <XCircle className="w-4 h-4 mr-2" />
+                        {t('actions.decline')}
+                      </Button>
+                    </div>
+                  )}
                   <Link href={`/seller/orders/${order.id}`}>
                     <Button variant="secondary" fullWidth>
                       {t('actions.viewDetails')}
                       <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
-                )}
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Accept Modal */}
+      {showAcceptModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-snow-white rounded-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-semibold text-polar-night mb-2">
+              {t('acceptModal.title')}
+            </h3>
+            <p className="text-sm text-text-secondary mb-4">
+              {t('acceptModal.parcelSizeHelp')}
+            </p>
+
+            {/* Parcel Size Selector */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                {t('acceptModal.parcelSizeLabel')}
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {PARCEL_SIZES.map((size) => (
+                  <button
+                    key={size.value}
+                    type="button"
+                    onClick={() => setSelectedParcelSize(size.value)}
+                    className={`p-3 rounded-lg border-2 text-left transition-all ${
+                      selectedParcelSize === size.value
+                        ? 'border-frost-ice bg-frost-ice/10'
+                        : 'border-border hover:border-frost-ice/50'
+                    }`}
+                  >
+                    <span className="block font-semibold text-polar-night">
+                      {size.label}
+                    </span>
+                    <span className="block text-xs text-text-muted">{size.dimensions}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Error banner */}
+            {acceptError && (
+              <div className="mb-4 p-3 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-aurora-red flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-aurora-red">{acceptError}</p>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                fullWidth
+                onClick={() => {
+                  setShowAcceptModal(null);
+                  setAcceptError(null);
+                }}
+                disabled={acceptingOrder === showAcceptModal}
+              >
+                {t('acceptModal.cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={() => handleAcceptOrder(showAcceptModal)}
+                disabled={acceptingOrder === showAcceptModal}
+              >
+                {acceptingOrder === showAcceptModal ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t('acceptModal.processing')}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    {t('acceptModal.confirmAccept')}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Decline Modal */}
       {showDeclineModal && (
@@ -475,6 +594,15 @@ export default function SellerOrdersPage() {
               placeholder={t('declineModal.placeholder')}
               className="w-full p-3 border border-border rounded-lg mb-4 min-h-[100px] focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
             />
+
+            {/* Error banner */}
+            {declineError && (
+              <div className="mb-4 p-3 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-aurora-red flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-aurora-red">{declineError}</p>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <Button
                 variant="ghost"
@@ -482,6 +610,7 @@ export default function SellerOrdersPage() {
                 onClick={() => {
                   setShowDeclineModal(null);
                   setDeclineReason('');
+                  setDeclineError(null);
                 }}
                 disabled={decliningOrder === showDeclineModal}
               >

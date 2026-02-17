@@ -11,7 +11,7 @@ export default function BadgePage() {
           Badges communicate status, condition, and trust signals. Our badge system uses carefully
           designed color combinations that make used game conditions feel approachable rather than
           inferior. The 24px pill shape creates friendly warmth within Nordic minimalism.
-        </p>
+</p>
       </section>
 
       {/* Condition Badges */}
@@ -19,7 +19,7 @@ export default function BadgePage() {
         <h2 className="text-2xl font-semibold text-polar-night mb-6">Condition Grades</h2>
         <p className="text-text-secondary mb-6">
           These are the most important badges in the marketplace. Each condition uses colors that
-          feel friendly and non-judgmental—we're describing used games, not grading exams.
+          feel friendly and non-judgmental—we&apos;re describing used games, not grading exams.
         </p>
 
         <ComponentDemo title="All Condition Grades" description="Use emojis to add warmth and visual recognition.">
@@ -170,14 +170,14 @@ export default function BadgePage() {
               ✓ Limit badge usage to avoid clutter
             </h3>
             <p className="text-text-secondary">
-              Don't badge everything. 2-3 badges per card is plenty. More than that creates visual
+              Don&apos;t badge everything. 2-3 badges per card is plenty. More than that creates visual
               noise and dilutes their meaning. Every badge should communicate something important.
             </p>
           </div>
 
           <div className="bg-bg-elevated rounded-lg p-6 border border-border-subtle">
             <h3 className="font-semibold text-polar-night mb-2">
-              ✗ Don't use green for sustainability messaging
+              ✗ Don&apos;t use green for sustainability messaging
             </h3>
             <p className="text-text-secondary">
               Reserve aurora green for success states only. The circular economy speaks through
@@ -235,9 +235,9 @@ function GameCard({ game, seller }) {
           </div>
 
           <div>
-            <h3 className="font-semibold text-polar-night mb-2">Don't Rely on Color Alone</h3>
+            <h3 className="font-semibold text-polar-night mb-2">Don&apos;t Rely on Color Alone</h3>
             <p className="text-text-secondary">
-              Icons and text labels supplement color. Screen reader users hear "Like New" not just
+              Icons and text labels supplement color. Screen reader users hear &quot;Like New&quot; not just
               a color. Emojis provide visual reinforcement beyond hue.
             </p>
           </div>
@@ -245,7 +245,7 @@ function GameCard({ game, seller }) {
           <div>
             <h3 className="font-semibold text-polar-night mb-2">Non-Interactive</h3>
             <p className="text-text-secondary">
-              Badges are informational, not interactive. They don't receive keyboard focus or
+              Badges are informational, not interactive. They don&apos;t receive keyboard focus or
               trigger actions. Use buttons if clicking should do something.
             </p>
           </div>

@@ -27,6 +27,7 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
   const [wantedCount, setWantedCount] = useState(0);
   const [ordersCount, setOrdersCount] = useState(0);
   const [salesCount, setSalesCount] = useState(0);
+  const [pendingSalesCount, setPendingSalesCount] = useState(0);
   const [signOutLoading, setSignOutLoading] = useState(false);
 
   // Check if user is an active seller
@@ -73,6 +74,7 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
         if (salesRes.ok) {
           const data = await salesRes.json();
           setSalesCount(data.orders?.length || 0);
+          setPendingSalesCount(data.summary?.pending || 0);
         }
       } catch {
         // Silently fail - counts are non-critical UI elements
@@ -271,11 +273,15 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                       <Store className="w-5 h-5 text-aurora-green" />
                       <span className="text-polar-night font-medium">Sales Dashboard</span>
                     </div>
-                    {salesCount > 0 && (
+                    {pendingSalesCount > 0 ? (
+                      <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                        {pendingSalesCount}
+                      </span>
+                    ) : salesCount > 0 ? (
                       <span className="bg-aurora-green/10 text-aurora-green text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
                         {salesCount}
                       </span>
-                    )}
+                    ) : null}
                   </button>
                 )}
 

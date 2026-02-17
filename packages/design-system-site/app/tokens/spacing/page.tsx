@@ -28,7 +28,7 @@ export default function SpacingPage() {
             <p className="text-text-secondary">
               When everything aligns to the same underlying structure, the result feels ordered and
               calm. Like the golden ratio in classical architecture, the 8-point grid creates
-              rhythm users feel but don't consciously notice.
+              rhythm users feel but don&apos;t consciously notice.
             </p>
           </div>
 
@@ -329,7 +329,7 @@ export default function SpacingPage() {
 
           <div className="bg-bg-elevated rounded-lg p-6 border border-border-subtle">
             <h3 className="font-semibold text-polar-night mb-2">
-              ✗ Don't cram content without breathing room
+              ✗ Don&apos;t cram content without breathing room
             </h3>
             <p className="text-text-secondary mb-4">
               Nordic minimalism requires generous spacing. If elements feel cramped, increase the

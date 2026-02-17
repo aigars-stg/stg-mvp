@@ -779,6 +779,19 @@
       "errorTitle": "Order Processing Issue",
       "errorDescription": "We couldn't load your order details. Please check your email for confirmation.",
       "processingTimeout": "Order processing is taking longer than expected. Please check your orders page or contact support.",
+      "errors": {
+        "payment_failed": "Your payment could not be processed. Please try again or use a different payment method.",
+        "fraud_declined": "Your payment could not be processed. Please try a different payment method or contact your bank.",
+        "card_declined": "Your card was declined by your bank. Please try a different card or payment method.",
+        "auth_failed": "Payment authentication was not completed. Please try again and complete the verification step.",
+        "technical_error": "A temporary issue prevented your payment. Please wait a moment and try again.",
+        "user_cancelled": "Your payment was not completed. Your cart is still available if you'd like to try again.",
+        "missing_reference": "Payment reference is missing. Please try checking out again.",
+        "unknown_payment": "We could not find this payment. Please try checking out again.",
+        "verification_failed": "We could not verify your payment status. Please check your orders or try again.",
+        "unknown_type": "An unexpected error occurred during checkout. Please contact support.",
+        "timeout": "Order processing is taking longer than expected. Please check your orders page or contact support."
+      },
       "title": "Payment Successful",
       "subtitle": "Your order has been placed and payment confirmed",
       "orderNumber": "Order",
@@ -809,7 +822,46 @@
         "title": "Automatic Refund Protection",
         "description": "If the seller doesn't respond within 24 hours or declines your order, you'll receive an automatic full refund to your payment method."
       },
+      "errorTitles": {
+        "card_declined": "Payment Declined",
+        "fraud_declined": "Payment Could Not Be Processed",
+        "auth_failed": "Authentication Incomplete",
+        "technical_error": "Temporary Issue",
+        "user_cancelled": "Payment Not Completed",
+        "payment_failed": "Payment Issue"
+      },
+      "suggestions": {
+        "title": "What you can do",
+        "card_declined": {
+          "1": "Try a different card or bank link",
+          "2": "Check with your bank if restrictions apply"
+        },
+        "fraud_declined": {
+          "1": "Try a different payment method",
+          "2": "Contact your bank if the issue persists"
+        },
+        "auth_failed": {
+          "1": "Try again and complete the bank verification",
+          "2": "Have your bank app ready for confirmation"
+        },
+        "technical_error": {
+          "1": "Wait a moment and try again",
+          "2": "The issue is temporary, not on your end"
+        },
+        "user_cancelled": {
+          "1": "Your cart is still waiting for you"
+        },
+        "payment_failed": {
+          "1": "Try again or use a different payment method"
+        }
+      },
+      "reassurance": {
+        "title": "No money was charged",
+        "description": "Your payment was not processed. Your cart items are still reserved for you."
+      },
       "actions": {
+        "tryAgain": "Try Again",
+        "backToCart": "Back to Cart",
         "viewOrders": "View My Orders",
         "continueShopping": "Continue Shopping"
       },
@@ -2381,6 +2433,12 @@
       "addButton": "Add Bank Account",
       "updateLink": "Update bank account"
     },
+    "pendingAlert": {
+      "title": "You have {count, plural, one {# order} other {# orders}} waiting",
+      "description": "Please review and respond to pending orders within 24 hours.",
+      "urgentDescription": "Some orders are expiring soon. Please respond as soon as possible.",
+      "reviewOrders": "Review Orders"
+    },
     "quickActions": {
       "createListing": {
         "title": "Create Listing",
@@ -3063,6 +3121,14 @@
       "accepting": "Accepting...",
       "decline": "Decline",
       "viewDetails": "View Details"
+    },
+    "acceptModal": {
+      "title": "Accept Order",
+      "parcelSizeLabel": "Select Parcel Size",
+      "parcelSizeHelp": "Choose the size that fits your packaged game(s). This is required for generating the shipping label.",
+      "confirmAccept": "Confirm Accept",
+      "cancel": "Cancel",
+      "processing": "Accepting..."
     },
     "declineModal": {
       "title": "Decline Order",

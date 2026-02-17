@@ -25,7 +25,7 @@ export default function TabsPage() {
           <ul className="space-y-2 text-polar-nightMedium">
             <li className="flex gap-2">
               <span className="text-frost-ice mt-1">-</span>
-              <span><strong>Browse page:</strong> Toggle between "For Sale" and "Wanted" listings</span>
+              <span><strong>Browse page:</strong> Toggle between &quot;For Sale&quot; and &quot;Wanted&quot; listings</span>
             </li>
             <li className="flex gap-2">
               <span className="text-frost-ice mt-1">-</span>
@@ -192,7 +192,7 @@ export default function TabsPage() {
           <div>
             <h3 className="font-semibold text-polar-night mb-2">Uncontrolled (defaultValue)</h3>
             <p className="text-polar-nightMedium">
-              Use <code className="bg-bg-secondary px-1 rounded">defaultValue</code> when you don't need to track the active tab externally.
+              Use <code className="bg-bg-secondary px-1 rounded">defaultValue</code> when you don&apos;t need to track the active tab externally.
               The component manages its own state.
             </p>
           </div>

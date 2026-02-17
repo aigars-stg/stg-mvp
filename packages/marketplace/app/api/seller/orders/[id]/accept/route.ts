@@ -4,7 +4,11 @@ import { generateShippingLabel, updateOrderWithShippingData, updateOrderLabelErr
 import { postOrderAcceptedMessage } from '@/lib/transactions';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { UnisendValidationError, getUserFriendlyFieldName } from '@/lib/unisend/types';
+import { UnisendValidationError } from '@/lib/unisend/types';
+import { formatLabelError } from '@/lib/unisend/format-label-error';
+import { detectPhoneCountry, composePhoneNumber, isValidPhoneNumber } from '@/lib/phone-utils';
+import { capturePayment } from '@/lib/everypay/client';
+import { calculateEverypayPortionCents, needsCapture } from '@/lib/services/payment-capture';
 
 interface AcceptOrderBody {
   parcelSize?: 'XS' | 'S' | 'M' | 'L'; // Required for T2T orders
@@ -58,6 +62,34 @@ export async function POST(
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
+    // Capture pre-authorised EveryPay payment if applicable
+    {
+      const { data: paymentOrder } = await supabase
+        .from('orders')
+        .select('everypay_payment_reference, everypay_payment_state, total_amount, buyer_wallet_debit_cents')
+        .eq('id', orderId)
+        .single();
+
+      if (paymentOrder) {
+        const everypayAmountCents = calculateEverypayPortionCents(
+          paymentOrder.total_amount,
+          paymentOrder.buyer_wallet_debit_cents
+        );
+        if (needsCapture(paymentOrder.everypay_payment_state, paymentOrder.everypay_payment_reference, everypayAmountCents)) {
+          try {
+            await capturePayment(paymentOrder.everypay_payment_reference!, everypayAmountCents);
+            await supabase
+              .from('orders')
+              .update({ everypay_payment_state: 'settled' })
+              .eq('id', orderId);
+          } catch (captureErr) {
+            console.error('❌ [Accept Order] Payment capture failed:', captureErr);
+            // Order is already accepted — payment may auto-capture within the delay window
+          }
+        }
+      }
+    }
+
     // Post system message to transaction conversation (non-blocking)
     postOrderAcceptedMessage(orderId, (result.shipping_method || 't2t') as 't2t' | 'local_pickup');
 
@@ -104,22 +136,43 @@ export async function POST(
         if (order.shipping_method === 't2t') {
           // Use receiver info from order (provided during checkout) with fallback to buyer profile
           const receiverName = order.receiver_name || buyerProfile.full_name;
-          const receiverPhone = order.receiver_phone || buyerProfile.phone || '';
+          const rawReceiverPhone = order.receiver_phone || buyerProfile.phone || '';
+          const rawSellerPhone = sellerProfile.phone || '';
+
+          // Normalize phones — legacy profiles may store local numbers without country prefix
+          const sellerPhoneParsed = detectPhoneCountry(rawSellerPhone);
+          const normalizedSellerPhone = composePhoneNumber(sellerPhoneParsed.country, sellerPhoneParsed.localNumber);
+          const receiverPhoneParsed = detectPhoneCountry(rawReceiverPhone);
+          const normalizedReceiverPhone = composePhoneNumber(receiverPhoneParsed.country, receiverPhoneParsed.localNumber);
+
+          // Validate phones before attempting label generation
+          if (normalizedSellerPhone && !isValidPhoneNumber(normalizedSellerPhone)) {
+            console.error(`❌ [Accept Order] Invalid seller phone: ${rawSellerPhone} → ${normalizedSellerPhone}`);
+            await updateOrderLabelError(orderId, `Invalid seller phone number. Please update your phone in Account Settings.`);
+            return NextResponse.json({
+              success: true,
+              orderId,
+              shippingMethod: result.shipping_method,
+              labelGenerated: false,
+              labelError: 'Invalid seller phone number. Please update your phone in Account Settings.',
+              message: 'Order accepted, but label generation failed due to invalid seller phone number.',
+            });
+          }
 
           try {
             console.log(`📦 [Accept Order] Generating shipping label for order ${orderId}...`);
-            console.log(`📦 [Accept Order] Sender: ${sellerProfile.full_name}, Phone: ${sellerProfile.phone || '(empty)'}, Country: ${sellerProfile.country || 'LT'}`);
-            console.log(`📦 [Accept Order] Receiver: ${receiverName}, Phone: ${receiverPhone || '(empty)'}, Country: ${order.destination_country || 'LT'}`);
+            console.log(`📦 [Accept Order] Sender: ${sellerProfile.full_name}, Phone: ${rawSellerPhone} → ${normalizedSellerPhone}, Country: ${sellerProfile.country || 'LT'}`);
+            console.log(`📦 [Accept Order] Receiver: ${receiverName}, Phone: ${rawReceiverPhone} → ${normalizedReceiverPhone}, Country: ${order.destination_country || 'LT'}`);
             console.log(`📦 [Accept Order] Terminal: ${order.destination_terminal_id || '(empty)'}, Parcel Size: ${order.parcel_size || 'M'}`);
 
             const labelResult = await generateShippingLabel({
               orderId,
               orderNumber: order.order_number,
               senderName: sellerProfile.full_name,
-              senderPhone: sellerProfile.phone || '',
+              senderPhone: normalizedSellerPhone,
               senderCountry: (sellerProfile.country || 'LT') as 'LT' | 'LV' | 'EE',
               receiverName,
-              receiverPhone,
+              receiverPhone: normalizedReceiverPhone,
               receiverCountry: (order.destination_country || 'LT') as 'LT' | 'LV' | 'EE',
               destinationTerminalId: order.destination_terminal_id || '',
               parcelSize: (order.parcel_size || 'M') as 'XS' | 'S' | 'M' | 'L',
@@ -162,18 +215,9 @@ export async function POST(
           } catch (error) {
             console.error('❌ [Accept Order] Label generation failed:', error);
 
-            // Extract detailed validation errors
+            labelError = formatLabelError(error);
             if (error instanceof UnisendValidationError) {
-              const fieldErrors = error.validationErrors.map((e) => {
-                const fieldName = getUserFriendlyFieldName(e.field);
-                return `${fieldName}: ${e.error_description || e.error}`;
-              });
-              labelError = fieldErrors.length > 0
-                ? `Validation failed: ${fieldErrors.join('; ')}`
-                : 'Validation failed - please check all shipping details';
               console.error('❌ [Accept Order] Validation errors:', error.validationErrors);
-            } else {
-              labelError = error instanceof Error ? error.message : 'Unknown error generating shipping label';
             }
 
             // Store the detailed error in the database (uses service role to bypass RLS)

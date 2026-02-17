@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { Button, Badge } from '@second-turn/design-system';
+import { Button, Badge, ResultPage } from '@second-turn/design-system';
 import {
   Package, Users, User as Baby, Time as Clock,
   LinkExternal as ExternalLink, ArrowLeft,
@@ -198,20 +198,18 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   // Error state
   if (error || !game) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-primary">
-        <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-aurora-red mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-polar-night mb-2">
-            {error || t('errors.gameNotFound')}
-          </h2>
-          <p className="text-text-secondary mb-4">
-            {t('errors.noActiveListings')}
-          </p>
-          <Link href="/browse">
-            <Button variant="primary">{t('errors.browseGames')}</Button>
+      <ResultPage
+        variant="error"
+        icon={<AlertCircle className="w-8 h-8 sm:w-10 sm:h-10" />}
+        title={error || t('errors.gameNotFound')}
+        description={t('errors.noActiveListings')}
+      >
+        <ResultPage.Actions>
+          <Link href="/browse" className="block">
+            <Button variant="primary" fullWidth>{t('errors.browseGames')}</Button>
           </Link>
-        </div>
-      </div>
+        </ResultPage.Actions>
+      </ResultPage>
     );
   }
 

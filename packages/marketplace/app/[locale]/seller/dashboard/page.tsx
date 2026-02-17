@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, Chat as MessageSquare } from '@/lib/icons';
+import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, Chat as MessageSquare, AlertCircle, Time as Clock } from '@/lib/icons';
 import { Link, useRouter } from '@/i18n/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { BankAccountCard } from '@/components/seller/BankAccountCard';
@@ -30,6 +30,8 @@ export default function SellerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showBankForm, setShowBankForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [hasUrgentOrders, setHasUrgentOrders] = useState(false);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -73,6 +75,24 @@ export default function SellerDashboardPage() {
       if (profileData?.seller_status !== 'active') {
         router.push('/seller/onboard');
         return;
+      }
+
+      // Fetch pending orders count
+      try {
+        const ordersRes = await fetch('/api/seller/orders');
+        if (ordersRes.ok) {
+          const ordersData = await ordersRes.json();
+          const pending = ordersData.summary?.pending || 0;
+          setPendingCount(pending);
+          // Check if any pending order has < 2 hours remaining
+          const urgent = (ordersData.orders || []).some(
+            (o: { status: string; time_remaining_ms: number | null }) =>
+              o.status === 'pending_seller' && o.time_remaining_ms !== null && o.time_remaining_ms < 7200000
+          );
+          setHasUrgentOrders(urgent);
+        }
+      } catch {
+        // Non-critical — don't block dashboard
       }
     };
 
@@ -157,6 +177,42 @@ export default function SellerDashboardPage() {
 
         {/* Main Content */}
         <div className="space-y-6">
+          {/* Pending Orders Alert */}
+          {pendingCount > 0 && (
+            <div className={`border-2 rounded-xl p-6 ${
+              hasUrgentOrders
+                ? 'bg-aurora-red/10 border-aurora-red/30'
+                : 'bg-aurora-yellow/10 border-aurora-yellow/30'
+            }`}>
+              <div className="flex items-start gap-4">
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  hasUrgentOrders ? 'bg-aurora-red/20' : 'bg-aurora-yellow/20'
+                }`}>
+                  {hasUrgentOrders
+                    ? <AlertCircle className="w-6 h-6 text-aurora-red" />
+                    : <Clock className="w-6 h-6 text-aurora-yellow" />
+                  }
+                </div>
+                <div className="flex-grow">
+                  <h3 className="text-lg font-semibold text-polar-night mb-1">
+                    {t('pendingAlert.title', { count: pendingCount })}
+                  </h3>
+                  <p className="text-sm text-text-secondary mb-4">
+                    {hasUrgentOrders
+                      ? t('pendingAlert.urgentDescription')
+                      : t('pendingAlert.description')
+                    }
+                  </p>
+                  <Link href="/seller/orders">
+                    <Button variant="primary">
+                      {t('pendingAlert.reviewOrders')}
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Quick Actions Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link
@@ -183,8 +239,13 @@ export default function SellerDashboardPage() {
 
             <Link
               href="/seller/orders"
-              className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group"
+              className="bg-snow-white border-2 border-border rounded-xl p-6 hover:border-frost-ice transition-colors group relative"
             >
+              {pendingCount > 0 && (
+                <span className="absolute top-4 right-4 bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                  {pendingCount}
+                </span>
+              )}
               <div className="w-12 h-12 bg-frost-ice/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-frost-ice/20 transition-colors">
                 <MessageSquare className="w-6 h-6 text-frost-ice" />
               </div>

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendOrderCancelledToBuyer } from '@/lib/email/send-order-emails';
-import { refundPayment } from '@/lib/everypay/client';
+import { refundPayment, voidPayment } from '@/lib/everypay/client';
 import { postOrderDeclinedMessage } from '@/lib/transactions';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { calculateEverypayPortionCents, determineReleaseAction } from '@/lib/services/payment-capture';
 
 interface DeclineOrderBody {
   reason?: string;
@@ -69,7 +70,7 @@ export async function POST(
         const { data: orderForRefund } = await supabase
           .from('orders')
           .select(
-            'buyer_id, everypay_payment_reference, buyer_wallet_debit_cents, total_amount'
+            'buyer_id, everypay_payment_reference, everypay_payment_state, buyer_wallet_debit_cents, total_amount'
           )
           .eq('id', orderId)
           .single();
@@ -78,19 +79,24 @@ export async function POST(
           const {
             buyer_id: buyerId,
             everypay_payment_reference: everypayRef,
+            everypay_payment_state: everypayState,
             buyer_wallet_debit_cents: walletDebitCents,
             total_amount: totalAmount,
           } = orderForRefund;
 
-          // Refund EveryPay card payment if one exists
-          if (everypayRef) {
-            // Calculate the EveryPay portion: total minus any wallet debit
-            const everypayAmountCents = Math.round(
-              totalAmount * 100 - (walletDebitCents || 0)
-            );
-            if (everypayAmountCents > 0) {
-              await refundPayment(everypayRef, everypayAmountCents);
+          // Release EveryPay funds: void if pre-authorised, refund if already settled
+          const everypayAmountCents = calculateEverypayPortionCents(totalAmount, walletDebitCents);
+          const releaseAction = determineReleaseAction(everypayState, everypayRef, everypayAmountCents);
+
+          if (releaseAction === 'void') {
+            try {
+              await voidPayment(everypayRef!);
+            } catch {
+              // If void fails (e.g., auto-captured), fall back to refund
+              await refundPayment(everypayRef!, everypayAmountCents);
             }
+          } else if (releaseAction === 'refund') {
+            await refundPayment(everypayRef!, everypayAmountCents);
           }
 
           // Refund wallet debit back to buyer's wallet

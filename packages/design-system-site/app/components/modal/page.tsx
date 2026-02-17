@@ -328,7 +328,7 @@ export default function ModalPage() {
 
         <div className="bg-snow-white shadow-sm rounded-lg p-6 border border-border">
           <p className="text-polar-nightMedium leading-relaxed mb-4">
-            Modals use our 300ms "slow" timing for overlays, creating a calm, deliberate feel:
+            Modals use our 300ms &quot;slow&quot; timing for overlays, creating a calm, deliberate feel:
           </p>
           <ul className="space-y-2 text-polar-nightMedium">
             <li className="flex gap-2">
@@ -346,7 +346,7 @@ export default function ModalPage() {
           </ul>
           <p className="text-sm text-polar-nightMedium mt-4 italic">
             The slower 300ms timing (vs our standard 200ms) gives users time to orient to the
-            modal's appearance rather than feeling jarred by sudden UI changes.
+            modal&apos;s appearance rather than feeling jarred by sudden UI changes.
           </p>
         </div>
       </section>
@@ -360,7 +360,7 @@ export default function ModalPage() {
             <h3 className="font-semibold text-polar-night mb-2">Focus Trap</h3>
             <p className="text-polar-nightMedium">
               When a modal opens, keyboard focus moves to the first interactive element inside.
-              Tab navigation cycles only through modal elements - you can't accidentally tab to
+              Tab navigation cycles only through modal elements - you can&apos;t accidentally tab to
               elements behind the modal. This prevents confusion and maintains context.
             </p>
           </div>
@@ -386,7 +386,7 @@ export default function ModalPage() {
             <h3 className="font-semibold text-polar-night mb-2">Body Scroll Prevention</h3>
             <p className="text-polar-nightMedium">
               When a modal is open, scrolling on the body element is prevented. This ensures
-              users don't accidentally scroll the page behind the modal, which breaks immersion
+              users don&apos;t accidentally scroll the page behind the modal, which breaks immersion
               and can cause confusion.
             </p>
           </div>
@@ -428,7 +428,7 @@ export default function ModalPage() {
           <div className="border-2 border-error rounded-lg p-6">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 bg-error rounded-full flex items-center justify-center text-white text-sm font-bold">✗</div>
-              <h3 className="text-lg font-semibold text-polar-night">Don't</h3>
+              <h3 className="text-lg font-semibold text-polar-night">Don&apos;t</h3>
             </div>
             <ul className="space-y-3 text-polar-nightMedium">
               <li className="flex gap-2">
@@ -519,7 +519,7 @@ function PurchaseButton() {
           <div>
             <h3 className="font-semibold text-polar-night mb-2">ARIA Dialog Pattern</h3>
             <p className="text-polar-nightMedium">
-              Modal uses role="dialog" and aria-modal="true" to announce its presence to
+              Modal uses role=&quot;dialog&quot; and aria-modal=&quot;true&quot; to announce its presence to
               assistive technology. The title is linked via aria-labelledby for context.
             </p>
           </div>
@@ -535,8 +535,8 @@ function PurchaseButton() {
           <div>
             <h3 className="font-semibold text-polar-night mb-2">Backdrop Accessibility</h3>
             <p className="text-polar-nightMedium">
-              The backdrop has aria-hidden="true" since it's purely visual. Clicking the
-              backdrop closes the modal, but this isn't announced - it's discovered naturally.
+              The backdrop has aria-hidden=&quot;true&quot; since it&apos;s purely visual. Clicking the
+              backdrop closes the modal, but this isn&apos;t announced - it&apos;s discovered naturally.
             </p>
           </div>
 
