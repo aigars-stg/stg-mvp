@@ -13,7 +13,6 @@ import {
   AlertCircle,
   ArrowLeft,
   Truck,
-  User,
   FileText,
   LinkExternal as ExternalLink,
   Chat as MessageSquare,
@@ -223,12 +222,6 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
                       </div>
                     )}
 
-                    {order.shipping_method === 'local_pickup' && (
-                      <p className="text-sm text-text-secondary mb-4">
-                        {t('acceptModal.localPickupConfirm', { city: order.pickup_city ?? '' })}
-                      </p>
-                    )}
-
                     <div className="flex gap-3">
                       <Button
                         variant="primary"
@@ -434,52 +427,28 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
         <div className="bg-snow-white border border-border rounded-xl p-6">
           <h2 className="text-lg font-semibold text-polar-night mb-4">{t('shippingInfo.title')}</h2>
           <div className="space-y-3">
-            {order.shipping_method === 't2t' ? (
-              <>
-                <div className="flex items-start gap-3">
-                  <Truck className="w-5 h-5 text-frost-ice mt-0.5" />
-                  <div>
-                    <p className="font-medium text-polar-night">{t('shippingInfo.terminalShipping')}</p>
-                    <p className="text-sm text-text-secondary mt-1">
-                      {order.destination_terminal_name}
-                    </p>
-                    <p className="text-sm text-text-muted">{order.destination_terminal_address}</p>
-                    {order.parcel_size && (
-                      <p className="text-sm text-text-secondary mt-2">
-                        {t('shippingInfo.parcelSize', { size: order.parcel_size })}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="pl-8 space-y-2 text-sm">
-                  <div>
-                    <p className="text-text-secondary">{t('shippingInfo.receiver')}</p>
-                    <p className="font-medium">{order.receiver_name}</p>
-                    <p className="text-text-secondary">{order.receiver_phone}</p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex items-start gap-3">
-                  <User className="w-5 h-5 text-frost-ice mt-0.5" />
-                  <div>
-                    <p className="font-medium text-polar-night">{t('shippingInfo.localPickup')}</p>
-                    <p className="text-sm text-text-secondary mt-1">{order.pickup_city}</p>
-                    {order.pickup_notes && (
-                      <p className="text-sm text-text-muted mt-2">{order.pickup_notes}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="pl-8 space-y-2 text-sm">
-                  <div>
-                    <p className="text-text-secondary">{t('shippingInfo.buyerContact')}</p>
-                    <p className="font-medium">{order.buyer_name}</p>
-                    <p className="text-text-secondary">{order.buyer_phone}</p>
-                  </div>
-                </div>
-              </>
-            )}
+            <div className="flex items-start gap-3">
+              <Truck className="w-5 h-5 text-frost-ice mt-0.5" />
+              <div>
+                <p className="font-medium text-polar-night">{t('shippingInfo.terminalShipping')}</p>
+                <p className="text-sm text-text-secondary mt-1">
+                  {order.destination_terminal_name}
+                </p>
+                <p className="text-sm text-text-muted">{order.destination_terminal_address}</p>
+                {order.parcel_size && (
+                  <p className="text-sm text-text-secondary mt-2">
+                    {t('shippingInfo.parcelSize', { size: order.parcel_size })}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="pl-8 space-y-2 text-sm">
+              <div>
+                <p className="text-text-secondary">{t('shippingInfo.receiver')}</p>
+                <p className="font-medium">{order.receiver_name}</p>
+                <p className="text-text-secondary">{order.receiver_phone}</p>
+              </div>
+            </div>
           </div>
         </div>
 

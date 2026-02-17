@@ -127,7 +127,7 @@ export default function CheckboxPage() {
           description="Typical listing form section where sellers document what's included."
         >
           <div className="bg-snow-white shadow-sm rounded-lg p-6 max-w-md">
-            <h3 className="text-lg font-semibold text-polar-night mb-4">What's Included?</h3>
+            <h3 className="text-lg font-semibold text-polar-night mb-4">What&apos;s Included?</h3>
             <p className="text-sm text-polar-nightMedium mb-4">
               Be honest about completeness to build trust with buyers.
             </p>
@@ -206,7 +206,7 @@ export default function CheckboxPage() {
               </li>
               <li className="flex gap-2">
                 <span className="text-success mt-1">•</span>
-                <span>Use checkboxes for independent choices that don't exclude each other</span>
+                <span>Use checkboxes for independent choices that don&apos;t exclude each other</span>
               </li>
               <li className="flex gap-2">
                 <span className="text-success mt-1">•</span>
@@ -223,7 +223,7 @@ export default function CheckboxPage() {
           <div className="border-2 border-error rounded-lg p-6">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 bg-error rounded-full flex items-center justify-center text-white text-sm font-bold">✗</div>
-              <h3 className="text-lg font-semibold text-polar-night">Don't</h3>
+              <h3 className="text-lg font-semibold text-polar-night">Don&apos;t</h3>
             </div>
             <ul className="space-y-3 text-polar-nightMedium">
               <li className="flex gap-2">
@@ -236,7 +236,7 @@ export default function CheckboxPage() {
               </li>
               <li className="flex gap-2">
                 <span className="text-error mt-1">•</span>
-                <span>Use negative phrasing like "Don't include original box" - confusing</span>
+                <span>Use negative phrasing like &quot;Don&apos;t include original box&quot; - confusing</span>
               </li>
               <li className="flex gap-2">
                 <span className="text-error mt-1">•</span>

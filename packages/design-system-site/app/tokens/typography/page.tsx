@@ -39,7 +39,7 @@ export default function TypographyPage() {
                 Monospace (JetBrains Mono, Fira Code)
               </p>
               <p className="text-xl font-mono text-polar-night mb-2">
-                const game = &#123; title: "Catan", price: 25 &#125;;
+                const game = &#123; title: &quot;Catan&quot;, price: 25 &#125;;
               </p>
               <p className="text-sm text-text-secondary font-mono">
                 {typography.fontFamily.mono}
@@ -283,7 +283,7 @@ export default function TypographyPage() {
 
           <div className="bg-bg-elevated rounded-lg p-6 border border-border-subtle">
             <h3 className="font-semibold text-polar-night mb-2">
-              ✗ Don't use too many font weights
+              ✗ Don&apos;t use too many font weights
             </h3>
             <p className="text-text-secondary mb-4">
               Stick to regular (400) for body, medium (500) for subtle emphasis, semibold (600) for

@@ -5,8 +5,8 @@ import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { Button } from '@second-turn/design-system';
-import { CheckCircleAlt01 as CheckCircle2, Package, Time as Clock, ArrowRight, RefreshCw as Loader2, AlertCircle, Email as Mail, Truck as TruckIcon } from '@/lib/icons';
+import { Button, ResultPage } from '@second-turn/design-system';
+import { CheckCircleAlt01 as CheckCircle2, Package, Time as Clock, ArrowRight, RefreshCw as Loader2, AlertCircle, Email as Mail, Truck as TruckIcon, Shield, LightbulbOn, ShoppingBasket } from '@/lib/icons';
 import { formatPrice } from '@/lib/services/pricing';
 
 interface OrderDetails {
@@ -36,6 +36,7 @@ function SuccessPageContent() {
   const sessionId = searchParams.get('session_id');
   const orderId = searchParams.get('order_id');
   const errorParam = searchParams.get('error');
+  const basketId = searchParams.get('basket_id');
   const t = useTranslations('Checkout.success');
 
   const [loading, setLoading] = useState(true);
@@ -225,248 +226,305 @@ function SuccessPageContent() {
       ? t(errorKey)
       : (error || t('errorDescription'));
 
+    const retryableErrors = new Set([
+      'payment_failed', 'fraud_declined', 'card_declined',
+      'auth_failed', 'technical_error', 'user_cancelled',
+    ]);
+    const isRetryable = error ? retryableErrors.has(error) : false;
+    const retryHref = basketId ? `/checkout?basket=${basketId}` : '/cart';
+
+    // Error-specific title (falls back to generic errorTitle for non-retryable)
+    const titleKey = error ? `errorTitles.${error}` : null;
+    const errorTitle = titleKey && t.has(titleKey) ? t(titleKey) : t('errorTitle');
+
+    // Suggestions (1-2 per error category)
+    const suggestion1Key = error ? `suggestions.${error}.1` : null;
+    const suggestion2Key = error ? `suggestions.${error}.2` : null;
+    const hasSuggestions = suggestion1Key && t.has(suggestion1Key);
+
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <AlertCircle className="w-12 h-12 text-aurora-red mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-polar-night mb-2">
-            {t('errorTitle')}
-          </h2>
-          <p className="text-text-secondary mb-6">
-            {errorMessage}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center">
-            <Link href="/orders" className="block">
-              <Button variant="primary" fullWidth>
-                <Package className="w-4 h-4 mr-2" />
-                {t('actions.viewOrders')}
-              </Button>
-            </Link>
-            <Link href="/browse" className="block">
-              <Button variant="secondary" fullWidth>{t('actions.continueShopping')}</Button>
-            </Link>
-          </div>
-        </div>
-      </div>
+      <ResultPage
+        variant="error"
+        icon={<AlertCircle className="w-8 h-8 sm:w-10 sm:h-10" />}
+        title={errorTitle}
+        description={errorMessage}
+      >
+        <ResultPage.Content>
+          {/* What You Can Do */}
+          {isRetryable && hasSuggestions && (
+            <section className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
+                <LightbulbOn className="w-5 h-5 text-frost-ice" />
+                {t('suggestions.title')}
+              </h2>
+              <ol className="space-y-3 list-none p-0">
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-frost-ice text-snow-white flex items-center justify-center text-sm font-bold">1</span>
+                  <p className="text-text-secondary pt-0.5">{t(suggestion1Key)}</p>
+                </li>
+                {suggestion2Key && t.has(suggestion2Key) && (
+                  <li className="flex gap-3">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-bg-secondary text-text-secondary flex items-center justify-center text-sm font-bold">2</span>
+                    <p className="text-text-secondary pt-0.5">{t(suggestion2Key)}</p>
+                  </li>
+                )}
+              </ol>
+            </section>
+          )}
+
+          {/* Reassurance banner */}
+          {isRetryable && (
+            <div className="bg-frost-ice/5 border border-frost-ice/20 rounded-lg p-4">
+              <div className="flex gap-3">
+                <Shield className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-polar-night">{t('reassurance.title')}</p>
+                  <p className="text-sm text-text-secondary mt-1">{t('reassurance.description')}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </ResultPage.Content>
+
+        <ResultPage.Actions>
+          {isRetryable ? (
+            <>
+              <Link href={retryHref} className="block">
+                <Button variant="primary" fullWidth>
+                  {t('actions.tryAgain')}
+                </Button>
+              </Link>
+              <Link href="/cart" className="block">
+                <Button variant="secondary" fullWidth>
+                  <ShoppingBasket className="w-4 h-4 mr-2" />
+                  {t('actions.backToCart')}
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/orders" className="block">
+                <Button variant="primary" fullWidth>
+                  <Package className="w-4 h-4 mr-2" />
+                  {t('actions.viewOrders')}
+                </Button>
+              </Link>
+              <Link href="/browse" className="block">
+                <Button variant="secondary" fullWidth>
+                  {t('actions.continueShopping')}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </>
+          )}
+        </ResultPage.Actions>
+      </ResultPage>
     );
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary">
-      {/* Success Header */}
-      <div className="bg-aurora-green/5 border-b border-aurora-green/20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-aurora-green/20 mb-4 sm:mb-6">
-            <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-aurora-green" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">
-            {t('title')}
-          </h1>
-          <p className="text-base sm:text-lg text-text-secondary">
-            {t('subtitle')}
-          </p>
-          {order && (
-            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-aurora-green/10 rounded-lg">
-              <span className="text-sm text-text-secondary">{t('orderNumber')}:</span>
-              <span className="font-mono font-bold text-aurora-green">{order.order_number}</span>
-            </div>
-          )}
+    <ResultPage
+      variant="success"
+      icon={<CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10" />}
+      title={t('title')}
+      description={t('subtitle')}
+      badge={order ? (
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-aurora-green/10 rounded-lg">
+          <span className="text-sm text-text-secondary">{t('orderNumber')}:</span>
+          <span className="font-mono font-bold text-aurora-green">{order.order_number}</span>
         </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <div className="space-y-4 sm:space-y-6">
-          {/* Order Summary */}
-          {order && (
-            <section className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
-                <Package className="w-5 h-5 text-frost-ice" />
-                {t('orderSummary.title')}
-              </h2>
-
-              {/* Items */}
-              <div className="space-y-3 mb-4">
-                {order.items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3">
-                    {item.photo_url && (
-                      <img
-                        src={item.photo_url}
-                        alt={item.game_name}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
-                    )}
-                    <div className="flex-grow min-w-0">
-                      <p className="font-medium text-polar-night truncate">
-                        {item.game_name}
-                      </p>
-                      <p className="text-sm text-text-secondary">
-                        {t('orderSummary.soldBy', { seller: order.seller_name })}
-                      </p>
-                    </div>
-                    <p className="font-medium text-polar-night">
-                      {formatPrice(item.price)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Totals */}
-              <div className="border-t border-border pt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-secondary">{t('orderSummary.items')}</span>
-                  <span className="text-polar-night">{formatPrice(order.items_total)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-secondary">{t('orderSummary.shipping')}</span>
-                  <span className="text-polar-night">{formatPrice(order.shipping_cost)}</span>
-                </div>
-                {order.wallet_debit_cents > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-text-secondary">{t('orderSummary.walletCredit') || 'Wallet credit'}</span>
-                    <span className="text-aurora-green">-{formatPrice(order.wallet_debit_cents / 100)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between font-semibold pt-2 border-t border-border">
-                  <span className="text-polar-night">{t('orderSummary.total')}</span>
-                  <span className="text-frost-ice">{formatPrice(order.total_amount)}</span>
-                </div>
-              </div>
-
-              {/* Destination */}
-              {order.destination && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <div className="flex items-start gap-2">
-                    <TruckIcon className="w-4 h-4 text-frost-ice mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-polar-night">
-                        {order.shipping_method === 't2t' ? t('orderSummary.deliveryTo') : t('orderSummary.pickupAt')}
-                      </p>
-                      <p className="text-sm text-text-secondary">{order.destination}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </section>
-          )}
-
-          {/* What Happens Next */}
-          <section className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6" aria-labelledby="next-steps-heading">
-            <h2 id="next-steps-heading" className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-frost-ice" aria-hidden="true" />
-              {t('nextSteps.title')}
+      ) : undefined}
+    >
+      <ResultPage.Content>
+        {/* Order Summary */}
+        {order && (
+          <section className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6">
+            <h2 className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
+              <Package className="w-5 h-5 text-frost-ice" />
+              {t('orderSummary.title')}
             </h2>
 
-            <ol className="space-y-4" style={{ counterReset: 'step-counter', listStyleType: 'none', padding: 0 }}>
-              {/* Step 1 */}
-              <li className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-frost-ice text-snow-white flex items-center justify-center font-bold text-sm" aria-hidden="true">
-                    1
+            {/* Items */}
+            <div className="space-y-3 mb-4">
+              {order.items.map((item) => (
+                <div key={item.id} className="flex items-center gap-3">
+                  {item.photo_url && (
+                    <img
+                      src={item.photo_url}
+                      alt={item.game_name}
+                      className="w-12 h-12 object-cover rounded-lg"
+                    />
+                  )}
+                  <div className="flex-grow min-w-0">
+                    <p className="font-medium text-polar-night truncate">
+                      {item.game_name}
+                    </p>
+                    <p className="text-sm text-text-secondary">
+                      {t('orderSummary.soldBy', { seller: order.seller_name })}
+                    </p>
                   </div>
-                </div>
-                <div className="flex-grow">
-                  <h3 className="font-medium text-polar-night mb-1">
-                    {t('nextSteps.step1Title')}
-                  </h3>
-                  <p className="text-sm text-text-secondary">
-                    {t('nextSteps.step1Description')}
+                  <p className="font-medium text-polar-night">
+                    {formatPrice(item.price)}
                   </p>
-                  <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-frost-ice/10 rounded-lg">
-                    <Clock className="w-4 h-4 text-frost-ice" aria-hidden="true" />
-                    <span className="text-sm font-medium text-frost-ice">
-                      {t('nextSteps.step1Deadline')}
-                    </span>
-                  </div>
                 </div>
-              </li>
+              ))}
+            </div>
 
-              {/* Step 2 */}
-              <li className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-bg-secondary text-text-secondary flex items-center justify-center font-bold text-sm" aria-hidden="true">
-                    2
-                  </div>
+            {/* Totals */}
+            <div className="border-t border-border pt-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-text-secondary">{t('orderSummary.items')}</span>
+                <span className="text-polar-night">{formatPrice(order.items_total)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-text-secondary">{t('orderSummary.shipping')}</span>
+                <span className="text-polar-night">{formatPrice(order.shipping_cost)}</span>
+              </div>
+              {order.wallet_debit_cents > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-secondary">{t('orderSummary.walletCredit') || 'Wallet credit'}</span>
+                  <span className="text-aurora-green">-{formatPrice(order.wallet_debit_cents / 100)}</span>
                 </div>
-                <div className="flex-grow">
-                  <h3 className="font-medium text-polar-night mb-1">{t('nextSteps.step2Title')}</h3>
-                  <p className="text-sm text-text-secondary">
-                    {t('nextSteps.step2Description')}
-                  </p>
-                </div>
-              </li>
+              )}
+              <div className="flex justify-between font-semibold pt-2 border-t border-border">
+                <span className="text-polar-night">{t('orderSummary.total')}</span>
+                <span className="text-frost-ice">{formatPrice(order.total_amount)}</span>
+              </div>
+            </div>
 
-              {/* Step 3 */}
-              <li className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-bg-secondary text-text-secondary flex items-center justify-center font-bold text-sm" aria-hidden="true">
-                    3
+            {/* Destination */}
+            {order.destination && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <div className="flex items-start gap-2">
+                  <TruckIcon className="w-4 h-4 text-frost-ice mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-polar-night">
+                      {order.shipping_method === 't2t' ? t('orderSummary.deliveryTo') : t('orderSummary.pickupAt')}
+                    </p>
+                    <p className="text-sm text-text-secondary">{order.destination}</p>
                   </div>
                 </div>
-                <div className="flex-grow">
-                  <h3 className="font-medium text-polar-night mb-1">{t('nextSteps.step3Title')}</h3>
-                  <p className="text-sm text-text-secondary">
-                    {t('nextSteps.step3Description')}
-                  </p>
-                </div>
-              </li>
-            </ol>
+              </div>
+            )}
           </section>
+        )}
 
-          {/* Email Confirmation */}
-          <div className="bg-frost-ice/5 border border-frost-ice/20 rounded-lg p-4">
-            <div className="flex gap-3">
-              <Mail className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
+        {/* What Happens Next */}
+        <section className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6" aria-labelledby="next-steps-heading">
+          <h2 id="next-steps-heading" className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-frost-ice" aria-hidden="true" />
+            {t('nextSteps.title')}
+          </h2>
+
+          <ol className="space-y-4" style={{ counterReset: 'step-counter', listStyleType: 'none', padding: 0 }}>
+            {/* Step 1 */}
+            <li className="flex gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-frost-ice text-snow-white flex items-center justify-center font-bold text-sm" aria-hidden="true">
+                  1
+                </div>
+              </div>
               <div className="flex-grow">
-                <p className="font-medium text-polar-night">{t('email.title')}</p>
-                <p className="text-sm text-text-secondary mt-1">
-                  {t('email.description')}
+                <h3 className="font-medium text-polar-night mb-1">
+                  {t('nextSteps.step1Title')}
+                </h3>
+                <p className="text-sm text-text-secondary">
+                  {t('nextSteps.step1Description')}
+                </p>
+                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-frost-ice/10 rounded-lg">
+                  <Clock className="w-4 h-4 text-frost-ice" aria-hidden="true" />
+                  <span className="text-sm font-medium text-frost-ice">
+                    {t('nextSteps.step1Deadline')}
+                  </span>
+                </div>
+              </div>
+            </li>
+
+            {/* Step 2 */}
+            <li className="flex gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-bg-secondary text-text-secondary flex items-center justify-center font-bold text-sm" aria-hidden="true">
+                  2
+                </div>
+              </div>
+              <div className="flex-grow">
+                <h3 className="font-medium text-polar-night mb-1">{t('nextSteps.step2Title')}</h3>
+                <p className="text-sm text-text-secondary">
+                  {t('nextSteps.step2Description')}
                 </p>
               </div>
-            </div>
-          </div>
+            </li>
 
-          {/* Refund Policy */}
-          <div className="bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-lg p-4">
-            <div className="flex gap-3">
-              <AlertCircle className="w-5 h-5 text-aurora-yellow flex-shrink-0 mt-0.5" />
+            {/* Step 3 */}
+            <li className="flex gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-bg-secondary text-text-secondary flex items-center justify-center font-bold text-sm" aria-hidden="true">
+                  3
+                </div>
+              </div>
               <div className="flex-grow">
-                <p className="font-medium text-polar-night">{t('refund.title')}</p>
-                <p className="text-sm text-text-secondary mt-1">
-                  {t('refund.description')}
+                <h3 className="font-medium text-polar-night mb-1">{t('nextSteps.step3Title')}</h3>
+                <p className="text-sm text-text-secondary">
+                  {t('nextSteps.step3Description')}
                 </p>
               </div>
-            </div>
-          </div>
+            </li>
+          </ol>
+        </section>
 
-          {/* Actions */}
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Link href="/orders" className="block">
-              <Button variant="primary" fullWidth>
-                <Package className="w-4 h-4 mr-2" />
-                {t('actions.viewOrders')}
-              </Button>
-            </Link>
-            <Link href="/browse" className="block">
-              <Button variant="secondary" fullWidth>
-                {t('actions.continueShopping')}
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </div>
-
-          {/* Reference for debugging */}
-          {(sessionId || orderId) && (
-            <div className="text-center">
-              <p className="text-xs text-text-muted">
-                {sessionId
-                  ? t('sessionId', { sessionId })
-                  : `Order: ${orderId}`}
+        {/* Email Confirmation */}
+        <div className="bg-frost-ice/5 border border-frost-ice/20 rounded-lg p-4">
+          <div className="flex gap-3">
+            <Mail className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
+            <div className="flex-grow">
+              <p className="font-medium text-polar-night">{t('email.title')}</p>
+              <p className="text-sm text-text-secondary mt-1">
+                {t('email.description')}
               </p>
             </div>
-          )}
+          </div>
         </div>
-      </div>
-    </div>
+
+        {/* Refund Policy */}
+        <div className="bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-lg p-4">
+          <div className="flex gap-3">
+            <AlertCircle className="w-5 h-5 text-aurora-yellow flex-shrink-0 mt-0.5" />
+            <div className="flex-grow">
+              <p className="font-medium text-polar-night">{t('refund.title')}</p>
+              <p className="text-sm text-text-secondary mt-1">
+                {t('refund.description')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Reference for debugging */}
+        {(sessionId || orderId) && (
+          <div className="text-center">
+            <p className="text-xs text-text-muted">
+              {sessionId
+                ? t('sessionId', { sessionId })
+                : `Order: ${orderId}`}
+            </p>
+          </div>
+        )}
+      </ResultPage.Content>
+
+      <ResultPage.Actions>
+        <Link href="/orders" className="block">
+          <Button variant="primary" fullWidth>
+            <Package className="w-4 h-4 mr-2" />
+            {t('actions.viewOrders')}
+          </Button>
+        </Link>
+        <Link href="/browse" className="block">
+          <Button variant="secondary" fullWidth>
+            {t('actions.continueShopping')}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </Link>
+      </ResultPage.Actions>
+    </ResultPage>
   );
 }
 

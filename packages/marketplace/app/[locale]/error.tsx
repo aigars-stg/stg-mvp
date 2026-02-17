@@ -3,13 +3,12 @@
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { AlertTriangle } from '@/lib/icons';
-import { Button } from '@second-turn/design-system';
+import { Button, ResultPage } from '@second-turn/design-system';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 
 /**
  * Locale-scoped error boundary — renders inside the locale layout (navbar, footer visible).
- * Follows the same visual pattern as the offline page.
  */
 export default function Error({
   error,
@@ -25,44 +24,31 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center px-4">
-      <div className="max-w-md w-full text-center space-y-6">
-        {/* Icon */}
-        <div className="flex justify-center">
-          <div className="w-20 h-20 rounded-full bg-aurora-red/10 flex items-center justify-center">
-            <AlertTriangle className="w-10 h-10 text-aurora-red" />
-          </div>
-        </div>
-
-        {/* Title */}
-        <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
-            {t('title')}
-          </h1>
-          <p className="text-text-secondary">
-            {t('description')}
-          </p>
-        </div>
-
-        {/* Actions */}
-        <div className="space-y-3 pt-4">
-          <Button variant="primary" size="lg" fullWidth onClick={reset}>
-            {t('tryAgain')}
+    <ResultPage
+      variant="error"
+      icon={<AlertTriangle className="w-8 h-8 sm:w-10 sm:h-10" />}
+      title={t('title')}
+      description={t('description')}
+      fullHeight={false}
+    >
+      <ResultPage.Actions>
+        <Button variant="primary" fullWidth onClick={reset}>
+          {t('tryAgain')}
+        </Button>
+        <Link href="/" className="block">
+          <Button variant="secondary" fullWidth>
+            {t('goHome')}
           </Button>
-          <Link href="/">
-            <Button variant="ghost" size="md" fullWidth>
-              {t('goHome')}
-            </Button>
-          </Link>
-        </div>
+        </Link>
+      </ResultPage.Actions>
 
-        {/* Error digest */}
-        {error.digest && (
+      {error.digest && (
+        <div className="text-center pb-6">
           <p className="text-xs text-text-muted opacity-60">
             {t('referenceCode', { code: error.digest })}
           </p>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </ResultPage>
   );
 }

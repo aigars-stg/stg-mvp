@@ -7,12 +7,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { refundToWallet } from './wallet';
 
-// Statuses that allow refunds (before seller wallet credit)
+// Statuses that allow refunds (before seller wallet credit, plus disputed)
 export const REFUNDABLE_STATUSES = [
   'pending_seller',
   'confirmed',
   'shipped',
   'delivered',
+  'disputed',
 ] as const;
 
 export type RefundableStatus = (typeof REFUNDABLE_STATUSES)[number];

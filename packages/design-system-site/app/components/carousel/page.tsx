@@ -349,7 +349,7 @@ const [index, setIndex] = useState(0);
             <h3 className="font-semibold text-polar-night mb-2">Image Click</h3>
             <p className="text-polar-nightMedium">
               Pass onImageClick to handle clicks (e.g., open lightbox).
-              Navigation clicks don't trigger this callback.
+              Navigation clicks don&apos;t trigger this callback.
             </p>
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
-import { Button, Card } from '@second-turn/design-system';
+import { Button, Card, ResultPage } from '@second-turn/design-system';
 import { ArrowLeft, RefreshCw as Loader2, User, Star, Package, ShoppingBag, Chat as MessageSquare } from '@/lib/icons';
 import { SellerReviewsList } from '@/components/seller/SellerReviewsList';
 import { BadgeTierPill } from '@/components/seller/SellerTrustBadge';
@@ -197,28 +197,24 @@ export default function ProfilePage() {
   // Error state
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-bg-secondary py-6 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-          <Link
-            href="/browse"
-            className="inline-flex items-center gap-2 text-text-secondary hover:text-polar-night mb-6"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t('backToBrowse')}
+      <ResultPage
+        variant="info"
+        icon={<User className="w-8 h-8 sm:w-10 sm:h-10" />}
+        title={t('userNotFound')}
+        description={error || t('profileNotFound')}
+      >
+        <ResultPage.Actions>
+          <Link href="/browse" className="block">
+            <Button variant="primary" fullWidth>{t('browseListings')}</Button>
           </Link>
-
-          <Card className="p-8 text-center">
-            <User className="w-16 h-16 text-text-muted mx-auto mb-4 opacity-50" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">{t('userNotFound')}</h1>
-            <p className="text-text-secondary mb-6">
-              {error || t('profileNotFound')}
-            </p>
-            <Link href="/browse">
-              <Button variant="accent">{t('browseListings')}</Button>
-            </Link>
-          </Card>
-        </div>
-      </div>
+          <Link href="/" className="block">
+            <Button variant="secondary" fullWidth>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t('backToBrowse')}
+            </Button>
+          </Link>
+        </ResultPage.Actions>
+      </ResultPage>
     );
   }
 

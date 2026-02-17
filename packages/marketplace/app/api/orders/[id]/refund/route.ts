@@ -6,6 +6,8 @@ import { refundPayment } from '@/lib/everypay/client';
 import { EveryPayError } from '@/lib/everypay/client';
 import { createServiceClient } from '@/lib/supabase/client';
 import { loggers } from '@/lib/logger';
+import { isRefundableStatus } from '@/lib/services/refund';
+import { calculateEverypayPortionCents } from '@/lib/services/payment-capture';
 
 const log = loggers.payments;
 
@@ -22,8 +24,6 @@ interface RefundBody {
   reason: string;
 }
 
-// Statuses that can be refunded
-const REFUNDABLE_STATUSES = ['pending_seller', 'confirmed', 'shipped', 'delivered', 'disputed'];
 
 /**
  * POST /api/orders/[id]/refund
@@ -97,17 +97,9 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
 
     // Check if order is in a refundable status
-    if (!REFUNDABLE_STATUSES.includes(order.status)) {
+    if (!isRefundableStatus(order.status)) {
       return NextResponse.json(
         { error: `Order cannot be refunded (status: ${order.status})` },
-        { status: 400 }
-      );
-    }
-
-    // Check if already refunded
-    if (order.status === 'refunded') {
-      return NextResponse.json(
-        { error: 'Order has already been refunded' },
         { status: 400 }
       );
     }
@@ -123,9 +115,10 @@ export async function POST(request: NextRequest, { params }: Params) {
       log.info({ paymentRef: order.everypay_payment_reference }, 'Refunding EveryPay payment');
 
       // Calculate the EveryPay portion: total minus any wallet debit
-      const walletDebitCents = order.buyer_wallet_debit_cents ?? 0;
-      const totalCents = Math.round(order.total_amount * 100);
-      const everyPayAmountCents = totalCents - walletDebitCents;
+      const everyPayAmountCents = calculateEverypayPortionCents(
+        order.total_amount,
+        order.buyer_wallet_debit_cents
+      );
 
       if (everyPayAmountCents > 0) {
         try {

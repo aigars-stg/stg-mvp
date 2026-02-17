@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getPaymentStatus } from '@/lib/everypay/client';
 import { SUCCESSFUL_STATES, FAILED_STATES } from '@/lib/everypay/types';
+import { classifyPaymentError } from '@/lib/everypay/classify-error';
 import { postOrderCreatedMessage } from '@/lib/transactions';
 import * as Sentry from '@sentry/nextjs';
 import { loggers } from '@/lib/logger';
@@ -98,11 +99,12 @@ export async function GET(request: NextRequest) {
       const orderRef = checkoutEvent.order_reference as string;
 
       let orderId: string;
+      const actualPaymentState = paymentStatus.payment_state;
 
       if (orderRef.startsWith('BASKET-')) {
-        orderId = await processBasketPayment(supabase, metadata, paymentReference);
+        orderId = await processBasketPayment(supabase, metadata, paymentReference, actualPaymentState);
       } else if (orderRef.startsWith('AUCTION-')) {
-        orderId = await processAuctionPayment(supabase, metadata, paymentReference);
+        orderId = await processAuctionPayment(supabase, metadata, paymentReference, actualPaymentState);
       } else {
         log.error({ orderRef }, 'Unknown order_reference type');
         return NextResponse.redirect(
@@ -132,11 +134,17 @@ export async function GET(request: NextRequest) {
     }
 
     if (FAILED_STATES.has(paymentStatus.payment_state)) {
+      const errorCategory = classifyPaymentError(
+        paymentStatus.payment_state,
+        paymentStatus.error
+      );
+
       log.warn(
         {
           paymentReference,
           paymentState: paymentStatus.payment_state,
           orderReference: checkoutEvent.order_reference,
+          errorCategory,
           ...(paymentStatus.error && { everypayError: paymentStatus.error }),
           ...(paymentStatus.cc_details && { cardType: paymentStatus.cc_details.type, lastFour: paymentStatus.cc_details.last_four_digits }),
         },
@@ -152,14 +160,38 @@ export async function GET(request: NextRequest) {
           payload: {
             ...(checkoutEvent.payload as Record<string, unknown>),
             payment_state: paymentStatus.payment_state,
+            error_category: errorCategory,
             ...(paymentStatus.error && { everypay_error: paymentStatus.error }),
             ...(paymentStatus.cc_details && { cc_type: paymentStatus.cc_details.type, cc_last_four: paymentStatus.cc_details.last_four_digits }),
           },
         })
         .eq('id', checkoutEvent.id);
 
+      // Release auction listing reservation on payment failure
+      const orderRef = checkoutEvent.order_reference as string;
+      if (orderRef.startsWith('AUCTION-')) {
+        const metadata = checkoutEvent.payload as Record<string, unknown>;
+        const listingId = metadata.listing_id as string;
+        if (listingId) {
+          await supabase
+            .from('listings')
+            .update({ reserved_by: null })
+            .eq('id', listingId);
+          log.info({ listingId }, 'Released auction listing reservation after payment failure');
+        }
+      }
+
+      // Build redirect URL with error category and retry context
+      const redirectParams = new URLSearchParams({ error: errorCategory });
+      if (orderRef.startsWith('BASKET-')) {
+        const metadata = checkoutEvent.payload as Record<string, unknown>;
+        if (metadata.basket_id) {
+          redirectParams.set('basket_id', metadata.basket_id as string);
+        }
+      }
+
       return NextResponse.redirect(
-        `${appUrl}/checkout/success?error=payment_failed`
+        `${appUrl}/checkout/success?${redirectParams.toString()}`
       );
     }
 
@@ -183,7 +215,8 @@ export async function GET(request: NextRequest) {
 async function processBasketPayment(
   supabase: AdminClient,
   metadata: Record<string, unknown>,
-  paymentReference: string
+  paymentReference: string,
+  paymentState: string
 ): Promise<string> {
   const basketId = metadata.basket_id as string;
   const shippingMethod = metadata.shipping_method as string;
@@ -230,11 +263,22 @@ async function processBasketPayment(
       locale,
       platform_commission_cents: commissionCents,
       seller_wallet_credit_cents: walletCreditCents,
-      everypay_payment_state: 'settled',
+      everypay_payment_state: paymentState,
     })
     .eq('id', orderId);
 
   log.info({ orderNumber: result.order_number, orderId }, 'Basket order created');
+
+  // Notify seller about new order (non-blocking)
+  supabase.from('notifications').insert({
+    user_id: metadata.seller_id as string,
+    type: 'new_order',
+    title: `New order ${result.order_number}`,
+    body: 'Respond within 24 hours to confirm this order.',
+    data: { order_id: orderId },
+  }).then(({ error: notifError }) => {
+    if (notifError) log.error({ notifError, orderId }, 'Failed to create seller notification');
+  });
 
   return orderId;
 }
@@ -246,7 +290,8 @@ async function processBasketPayment(
 async function processAuctionPayment(
   supabase: AdminClient,
   metadata: Record<string, unknown>,
-  paymentReference: string
+  paymentReference: string,
+  paymentState: string
 ): Promise<string> {
   const listingId = metadata.listing_id as string;
   const buyerId = metadata.buyer_id as string;
@@ -293,7 +338,24 @@ async function processAuctionPayment(
     throw new Error(`Auction order creation failed: ${result.error}`);
   }
 
-  log.info({ orderId: result.order_id, orderNumber: result.order_number, listingId }, 'Auction order created');
+  // Store actual payment state (authorised for pre-auth cards, settled for bank links)
+  await supabase
+    .from('orders')
+    .update({ everypay_payment_state: paymentState })
+    .eq('id', result.order_id);
+
+  log.info({ orderId: result.order_id, orderNumber: result.order_number, listingId, paymentState }, 'Auction order created');
+
+  // Notify seller about new order (non-blocking)
+  supabase.from('notifications').insert({
+    user_id: metadata.seller_id as string,
+    type: 'new_order',
+    title: `New order ${result.order_number}`,
+    body: 'Respond within 24 hours to confirm this order.',
+    data: { order_id: result.order_id },
+  }).then(({ error: notifError }) => {
+    if (notifError) log.error({ notifError, orderId: result.order_id }, 'Failed to create seller notification');
+  });
 
   return result.order_id as string;
 }

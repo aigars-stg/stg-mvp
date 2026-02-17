@@ -3,7 +3,8 @@ import { sendShippingLabelToSeller } from '@/lib/email/send-order-emails';
 import { generateShippingLabel, updateOrderWithShippingData, updateOrderLabelError } from '@/lib/unisend/label-service';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { UnisendValidationError, getUserFriendlyFieldName } from '@/lib/unisend/types';
+import { UnisendValidationError } from '@/lib/unisend/types';
+import { formatLabelError } from '@/lib/unisend/format-label-error';
 
 /**
  * POST /api/seller/orders/[id]/retry-label
@@ -168,21 +169,9 @@ export async function POST(
     } catch (error) {
       console.error('❌ [Retry Label] Label generation failed:', error);
 
-      let errorMessage: string;
-      let fieldErrors: string[] = [];
-
-      // Extract detailed validation errors
+      const errorMessage = formatLabelError(error);
       if (error instanceof UnisendValidationError) {
-        fieldErrors = error.validationErrors.map((e) => {
-          const fieldName = getUserFriendlyFieldName(e.field);
-          return `${fieldName}: ${e.error_description || e.error}`;
-        });
-        errorMessage = fieldErrors.length > 0
-          ? `Validation failed: ${fieldErrors.join('; ')}`
-          : 'Validation failed - please check all shipping details';
         console.error('❌ [Retry Label] Validation errors:', error.validationErrors);
-      } else {
-        errorMessage = error instanceof Error ? error.message : 'Unknown error generating shipping label';
       }
 
       // Store the detailed error in the database (uses service role to bypass RLS)
@@ -193,7 +182,6 @@ export async function POST(
           success: false,
           error: 'Label generation failed',
           details: errorMessage,
-          fieldErrors: fieldErrors.length > 0 ? fieldErrors : undefined,
         },
         { status: 500 }
       );

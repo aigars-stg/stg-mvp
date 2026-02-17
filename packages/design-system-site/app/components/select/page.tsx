@@ -263,7 +263,7 @@ export default function SelectPage() {
               </li>
               <li className="flex gap-2">
                 <span className="text-success mt-1">•</span>
-                <span>Provide clear, descriptive labels that explain what's being selected</span>
+                <span>Provide clear, descriptive labels that explain what&apos;s being selected</span>
               </li>
               <li className="flex gap-2">
                 <span className="text-success mt-1">•</span>
@@ -280,7 +280,7 @@ export default function SelectPage() {
           <div className="border-2 border-error rounded-lg p-6">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 bg-error rounded-full flex items-center justify-center text-white text-sm font-bold">✗</div>
-              <h3 className="text-lg font-semibold text-polar-night">Don't</h3>
+              <h3 className="text-lg font-semibold text-polar-night">Don&apos;t</h3>
             </div>
             <ul className="space-y-3 text-polar-nightMedium">
               <li className="flex gap-2">
@@ -373,7 +373,7 @@ function GameListingForm() {
           <div>
             <h3 className="font-semibold text-polar-night mb-2">Error Announcements</h3>
             <p className="text-polar-nightMedium">
-              Error messages are linked via aria-describedby and role="alert" so screen
+              Error messages are linked via aria-describedby and role=&quot;alert&quot; so screen
               readers announce validation feedback immediately.
             </p>
           </div>

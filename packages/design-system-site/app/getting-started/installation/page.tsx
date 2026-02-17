@@ -325,7 +325,7 @@ import { colors, spacing } from '@second-turn/design-system/tokens';`}
       <section>
         <h2 className="text-2xl font-semibold text-polar-night mb-6">Quick Start Example</h2>
         <p className="text-polar-nightMedium mb-4">
-          Here's a complete minimal example to get you started:
+          Here&apos;s a complete minimal example to get you started:
         </p>
         <div className="bg-polar-night rounded-lg p-4 overflow-x-auto">
           <pre className="text-snow-stormLightest text-sm">
@@ -366,12 +366,12 @@ export default function Home() {
         <div className="space-y-4">
           <details className="bg-snow-white shadow-sm rounded-lg border border-border">
             <summary className="p-4 cursor-pointer font-medium text-polar-night hover:bg-snow-stormLight transition-colors">
-              Tailwind classes aren't working
+              Tailwind classes aren&apos;t working
             </summary>
             <div className="px-4 pb-4 text-sm text-polar-nightMedium space-y-2">
               <p><strong>Solution:</strong> Ensure your Tailwind config includes the design system source files in the content array:</p>
               <code className="block px-3 py-2 bg-polar-nightDark/5 rounded text-xs mt-2">
-                './node_modules/@second-turn/design-system/src/**/*.{'{'}js,ts,jsx,tsx{'}'}',
+                &apos;./node_modules/@second-turn/design-system/src/**/*.{'{'}js,ts,jsx,tsx{'}'},&apos;
               </code>
               <p className="mt-2">This tells Tailwind to scan design system components and generate CSS for all classes they use.</p>
             </div>
@@ -379,7 +379,7 @@ export default function Home() {
 
           <details className="bg-snow-white shadow-sm rounded-lg border border-border">
             <summary className="p-4 cursor-pointer font-medium text-polar-night hover:bg-snow-stormLight transition-colors">
-              Fonts aren't loading correctly
+              Fonts aren&apos;t loading correctly
             </summary>
             <div className="px-4 pb-4 text-sm text-polar-nightMedium space-y-2">
               <p><strong>Solution:</strong> Verify your font import is correct for your framework:</p>
@@ -407,12 +407,12 @@ export default function Home() {
 
           <details className="bg-snow-white shadow-sm rounded-lg border border-border">
             <summary className="p-4 cursor-pointer font-medium text-polar-night hover:bg-snow-stormLight transition-colors">
-              Components using hooks show 'use client' errors in Next.js
+              Components using hooks show &apos;use client&apos; errors in Next.js
             </summary>
             <div className="px-4 pb-4 text-sm text-polar-nightMedium space-y-2">
-              <p><strong>Solution:</strong> The design system components that use hooks (Select, Modal) already have 'use client' directives. If you see this error:</p>
+              <p><strong>Solution:</strong> The design system components that use hooks (Select, Modal) already have &apos;use client&apos; directives. If you see this error:</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>Ensure you're importing from the built package, not source files</li>
+                <li>Ensure you&apos;re importing from the built package, not source files</li>
                 <li>Rebuild the design system: <code className="px-1 py-0.5 bg-polar-nightDark/10 rounded text-xs">pnpm build:ds</code></li>
                 <li>Clear Next.js cache: <code className="px-1 py-0.5 bg-polar-nightDark/10 rounded text-xs">rm -rf .next</code></li>
               </ul>

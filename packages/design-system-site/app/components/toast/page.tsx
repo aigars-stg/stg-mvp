@@ -28,19 +28,19 @@ export default function ToastPage() {
           <ul className="space-y-2 text-polar-nightMedium">
             <li className="flex gap-2">
               <span className="text-frost-ice mt-1">-</span>
-              <span><strong>Success:</strong> "Listing saved" / "Offer sent" / "Item added to cart"</span>
+              <span><strong>Success:</strong> &quot;Listing saved&quot; / &quot;Offer sent&quot; / &quot;Item added to cart&quot;</span>
             </li>
             <li className="flex gap-2">
               <span className="text-frost-ice mt-1">-</span>
-              <span><strong>Error:</strong> "Failed to save changes" / "Network error"</span>
+              <span><strong>Error:</strong> &quot;Failed to save changes&quot; / &quot;Network error&quot;</span>
             </li>
             <li className="flex gap-2">
               <span className="text-frost-ice mt-1">-</span>
-              <span><strong>Warning:</strong> "Low stock - only 1 left" / "Session expiring soon"</span>
+              <span><strong>Warning:</strong> &quot;Low stock - only 1 left&quot; / &quot;Session expiring soon&quot;</span>
             </li>
             <li className="flex gap-2">
               <span className="text-frost-ice mt-1">-</span>
-              <span><strong>Info:</strong> "New message received" / "Price updated"</span>
+              <span><strong>Info:</strong> &quot;New message received&quot; / &quot;Price updated&quot;</span>
             </li>
           </ul>
         </div>
@@ -245,14 +245,14 @@ function SaveButton() {
           <div>
             <h3 className="font-semibold text-polar-night mb-2">ARIA Live Region</h3>
             <p className="text-polar-nightMedium">
-              Toast container uses role="region" with aria-label="Notifications" so screen readers
+              Toast container uses role=&quot;region&quot; with aria-label=&quot;Notifications&quot; so screen readers
               announce new toasts automatically.
             </p>
           </div>
           <div>
             <h3 className="font-semibold text-polar-night mb-2">Dismiss Button</h3>
             <p className="text-polar-nightMedium">
-              Each toast includes a close button with aria-label="Dismiss notification"
+              Each toast includes a close button with aria-label=&quot;Dismiss notification&quot;
               for keyboard and screen reader users.
             </p>
           </div>

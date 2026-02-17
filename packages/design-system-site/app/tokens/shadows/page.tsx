@@ -30,7 +30,7 @@ export default function ShadowsPage() {
             </div>
             <p className="text-polar-nightMedium mb-4">
               Flat elements with no shadow, sitting directly on the background.
-              Use for inline content that doesn't need visual separation.
+              Use for inline content that doesn&apos;t need visual separation.
             </p>
             <div className="bg-snow-stormLightest p-8 rounded-lg">
               <div className="bg-snow-white p-6 rounded-lg max-w-md">
@@ -183,7 +183,7 @@ export default function ShadowsPage() {
           <div className="border-2 border-error rounded-lg p-6">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 bg-error rounded-full flex items-center justify-center text-white text-sm font-bold">✗</div>
-              <h3 className="text-lg font-semibold text-polar-night">Don't</h3>
+              <h3 className="text-lg font-semibold text-polar-night">Don&apos;t</h3>
             </div>
             <ul className="space-y-3 text-polar-nightMedium">
               <li className="flex gap-2">

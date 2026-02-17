@@ -162,7 +162,7 @@ export default function ButtonPage() {
 
           <div className="bg-bg-elevated rounded-lg p-6 border border-border-subtle">
             <h3 className="font-semibold text-polar-night mb-2">
-              ✗ Don't use multiple primary buttons together
+              ✗ Don&apos;t use multiple primary buttons together
             </h3>
             <p className="text-text-secondary">
               If you have multiple actions, use primary for the main action and secondary for alternatives.
@@ -171,10 +171,10 @@ export default function ButtonPage() {
 
           <div className="bg-bg-elevated rounded-lg p-6 border border-border-subtle">
             <h3 className="font-semibold text-polar-night mb-2">
-              ✗ Don't make buttons too small
+              ✗ Don&apos;t make buttons too small
             </h3>
             <p className="text-text-secondary">
-              Always use at least 'md' size (44px) for touch targets. Use 'sm' only in dense interfaces where touch isn't primary.
+              Always use at least &apos;md&apos; size (44px) for touch targets. Use &apos;sm&apos; only in dense interfaces where touch isn&apos;t primary.
             </p>
           </div>
         </div>

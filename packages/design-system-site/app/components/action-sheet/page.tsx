@@ -38,7 +38,7 @@ export default function ActionSheetPage() {
           <ul className="space-y-2 text-polar-nightMedium">
             <li className="flex gap-2">
               <span className="text-frost-ice mt-1">-</span>
-              <span><strong>Sell menu:</strong> Choose between "Sell a Game" or "Post Wanted"</span>
+              <span><strong>Sell menu:</strong> Choose between &quot;Sell a Game&quot; or &quot;Post Wanted&quot;</span>
             </li>
             <li className="flex gap-2">
               <span className="text-frost-ice mt-1">-</span>
@@ -319,7 +319,7 @@ export default function ActionSheetPage() {
           <div>
             <h3 className="font-semibold text-polar-night mb-2">Modal Dialog</h3>
             <p className="text-polar-nightMedium">
-              Uses role="dialog" and aria-modal="true" for proper screen reader announcement.
+              Uses role=&quot;dialog&quot; and aria-modal=&quot;true&quot; for proper screen reader announcement.
             </p>
           </div>
           <div>
