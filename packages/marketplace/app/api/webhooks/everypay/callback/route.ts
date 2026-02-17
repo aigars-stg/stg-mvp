@@ -19,7 +19,7 @@ type AdminClient = SupabaseClient;
  *
  * Query params from EveryPay:
  *   - payment_reference: EveryPay's reference for this payment
- *   - order_reference: Our reference (BASKET_xxx or AUCTION_xxx)
+ *   - order_reference: Our reference (BASKET-xxx or AUCTION-xxx)
  *
  * Query params we appended to customer_url:
  *   - basket_id (for basket checkouts)
@@ -87,9 +87,9 @@ export async function GET(request: NextRequest) {
 
       let orderId: string;
 
-      if (orderRef.startsWith('BASKET_')) {
+      if (orderRef.startsWith('BASKET-')) {
         orderId = await processBasketPayment(supabase, metadata, paymentReference);
-      } else if (orderRef.startsWith('AUCTION_')) {
+      } else if (orderRef.startsWith('AUCTION-')) {
         orderId = await processAuctionPayment(supabase, metadata, paymentReference);
       } else {
         log.error({ orderRef }, 'Unknown order_reference type');
