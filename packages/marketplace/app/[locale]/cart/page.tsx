@@ -102,7 +102,7 @@ export default function CartPage() {
     if (user) {
       fetchCart();
     }
-  }, [user]);
+  }, [user, fetchCart]);
 
   // Refresh cart when user returns to this tab (catches cron-cleaned items)
   useEffect(() => {
@@ -118,7 +118,7 @@ export default function CartPage() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [user]);
+  }, [user, fetchCart]);
 
   // Remove item from cart
   const handleRemoveItem = async (listingId: string) => {

@@ -53,7 +53,6 @@ export function TerminalSelectorWithMap({
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [showTerminalList, setShowTerminalList] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const searchRef = useRef<HTMLInputElement>(null);
   const allTerminalsLoaded = useRef(false);
@@ -125,7 +124,6 @@ export function TerminalSelectorWithMap({
     onSelect(terminal);
     setShowTerminalList(false);
     setSearchQuery('');
-    setIsSearchFocused(false);
   }, [country, onSelect]);
 
   // Filter terminals by search — search across ALL countries
@@ -324,8 +322,6 @@ export function TerminalSelectorWithMap({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 placeholder={t('searchPlaceholder')}
                 aria-label={t('searchPlaceholder')}
                 className="w-full pl-9 pr-8 py-2.5 rounded-lg border border-border bg-white/95 backdrop-blur-sm text-sm text-polar-night placeholder-text-muted focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none transition-all shadow-sm"
@@ -400,8 +396,6 @@ export function TerminalSelectorWithMap({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 placeholder={t('searchPlaceholder')}
                 aria-label={t('searchPlaceholder')}
                 className="w-full pl-9 pr-8 py-2.5 rounded-lg border border-border bg-white/95 backdrop-blur-sm text-sm text-polar-night placeholder-text-muted focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none transition-all shadow-sm"
