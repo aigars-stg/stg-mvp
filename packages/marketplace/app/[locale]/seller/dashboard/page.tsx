@@ -14,9 +14,8 @@ import type { Dac7ComplianceStatus } from '@/lib/types/seller';
 
 interface SellerProfile {
   seller_status: string;
-  has_bank_account: boolean;
-  bank_account_last4: string | null;
-  bank_account_bank_name: string | null;
+  payout_iban: string | null;
+  payout_account_holder_name: string | null;
   // DAC7 fields
   dac7_compliance_status: Dac7ComplianceStatus | null;
   dac7_annual_transaction_count: number;
@@ -52,9 +51,8 @@ export default function SellerDashboardPage() {
         .from('seller_profiles')
         .select(`
           seller_status,
-          has_bank_account,
-          bank_account_last4,
-          bank_account_bank_name,
+          payout_iban,
+          payout_account_holder_name,
           dac7_compliance_status,
           dac7_annual_transaction_count,
           dac7_annual_sales_total
@@ -259,12 +257,12 @@ export default function SellerDashboardPage() {
 
           {/* Bank Account Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {profile?.has_bank_account ? (
+            {profile?.payout_iban ? (
               <div className="bg-snow-white border-2 border-border rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-polar-night mb-4">{t('bankAccount.title')}</h3>
                 <BankAccountCard
-                  last4={profile.bank_account_last4 || '****'}
-                  bankName={profile.bank_account_bank_name || 'Bank'}
+                  last4={profile.payout_iban.slice(-4)}
+                  bankName={profile.payout_account_holder_name || 'Bank'}
                 />
                 <button
                   onClick={() => setShowBankForm(true)}
@@ -299,7 +297,7 @@ export default function SellerDashboardPage() {
           />
           <div className="relative bg-snow-white rounded-xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-semibold text-polar-night mb-4">
-              {profile?.has_bank_account ? t('bankAccountModal.updateTitle') : t('bankAccountModal.addTitle')}
+              {profile?.payout_iban ? t('bankAccountModal.updateTitle') : t('bankAccountModal.addTitle')}
             </h2>
             <BankAccountForm
               onSuccess={handleBankAccountAdded}
