@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Chat as MessageSquare } from '@/lib/icons';
+import { Star, Chat as MessageSquare, AlertTriangle } from '@/lib/icons';
 import { Button, Card } from '@second-turn/design-system';
 import { cn } from '@/lib/utils';
 import { UserInfoCard } from '@/components/user';
@@ -19,6 +19,7 @@ interface Review {
   buyer_avatar: string | null;
   buyer_country: string | null;
   order_number: string | null;
+  reported_at: string | null;
 }
 
 interface SellerReviewsListProps {
@@ -34,6 +35,9 @@ interface SellerReviewsListProps {
   /** Seller can respond to reviews */
   canRespond?: boolean;
   onRespond?: (reviewId: string, response: string) => Promise<void>;
+  /** Buyer can report reviews */
+  canReport?: boolean;
+  onReport?: (reviewId: string, reason: string) => Promise<void>;
 }
 
 /**
@@ -50,6 +54,8 @@ export function SellerReviewsList({
   showBreakdown = true,
   canRespond = false,
   onRespond,
+  canReport = false,
+  onReport,
 }: SellerReviewsListProps) {
   const t = useTranslations('SellerDashboard.SellerReviewsList');
   return (
@@ -73,6 +79,8 @@ export function SellerReviewsList({
               review={review}
               canRespond={canRespond}
               onRespond={onRespond}
+              canReport={canReport}
+              onReport={onReport}
             />
           ))}
 
@@ -187,15 +195,23 @@ function ReviewCard({
   review,
   canRespond = false,
   onRespond,
+  canReport = false,
+  onReport,
 }: {
   review: Review;
   canRespond?: boolean;
   onRespond?: (reviewId: string, response: string) => Promise<void>;
+  canReport?: boolean;
+  onReport?: (reviewId: string, reason: string) => Promise<void>;
 }) {
   const t = useTranslations('SellerDashboard.SellerReviewsList');
   const [showResponseForm, setShowResponseForm] = useState(false);
   const [responseText, setResponseText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
 
   const handleSubmitResponse = async () => {
     if (!onRespond || !responseText.trim()) return;
@@ -209,6 +225,21 @@ function ReviewCard({
       console.error('Failed to submit response:', error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleReport = async () => {
+    if (!onReport || !reportReason.trim()) return;
+    setIsReporting(true);
+    try {
+      await onReport(review.id, reportReason.trim());
+      setReportSuccess(true);
+      setShowReportForm(false);
+      setReportReason('');
+    } catch (error) {
+      console.error('Failed to report review:', error);
+    } finally {
+      setIsReporting(false);
     }
   };
 
@@ -327,6 +358,56 @@ function ReviewCard({
           )}
         </div>
       )}
+
+      {/* Report section */}
+      {reportSuccess ? (
+        <p className="text-xs text-aurora-green mt-3">{t('reportSuccess')}</p>
+      ) : review.reported_at ? (
+        <span className="text-xs text-text-muted mt-3 flex items-center gap-1">
+          <AlertTriangle className="w-3 h-3" />
+          {t('reported')}
+        </span>
+      ) : canReport && !showReportForm ? (
+        <button
+          onClick={() => setShowReportForm(true)}
+          className="text-xs text-text-muted hover:text-aurora-red flex items-center gap-1 mt-3"
+        >
+          <AlertTriangle className="w-3 h-3" />
+          {t('reportReview')}
+        </button>
+      ) : canReport && showReportForm ? (
+        <div className="mt-3 space-y-2">
+          <label className="text-xs font-medium text-text-secondary">
+            {t('reportReason')}
+          </label>
+          <textarea
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value)}
+            placeholder={t('reportReasonPlaceholder')}
+            rows={2}
+            maxLength={500}
+            className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice focus:border-transparent resize-none text-sm"
+          />
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => { setShowReportForm(false); setReportReason(''); }}
+              disabled={isReporting}
+            >
+              {t('cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleReport}
+              disabled={isReporting || !reportReason.trim()}
+            >
+              {t('reportSubmit')}
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </Card>
   );
 }

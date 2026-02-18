@@ -14,6 +14,7 @@ import {
   Chat as MessageSquare,
   CheckCircleAlt01 as CheckCircle,
   AlertTriangle,
+  Star,
 } from '@/lib/icons';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { ListingThumbnail } from '@/components/common/ListingThumbnail';
@@ -65,6 +66,7 @@ export default function OrderDetailPage() {
     setActionError,
     actionSuccess,
     getTimeRemainingMs,
+    hasReview,
   } = useOrderDetail();
 
   // Loading state
@@ -372,6 +374,40 @@ export default function OrderDetailPage() {
                 actionSuccess={actionSuccess}
                 onClearError={() => setActionError(null)}
               />
+            )}
+
+            {/* Review CTA */}
+            {current_user.role === 'buyer' &&
+              (order.status === 'delivered' || order.status === 'completed') && (
+              <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
+                {hasReview === false ? (
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Star className="w-5 h-5 text-amber-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-polar-night">
+                          {t('review.title')}
+                        </h3>
+                        <p className="text-sm text-text-secondary">
+                          {t('review.description')}
+                        </p>
+                      </div>
+                    </div>
+                    <Link href={`/orders/${order.id}/review`}>
+                      <Button variant="accent" size="sm">
+                        {t('review.button')}
+                      </Button>
+                    </Link>
+                  </div>
+                ) : hasReview === true ? (
+                  <div className="flex items-center gap-3 text-text-secondary">
+                    <CheckCircle className="w-5 h-5 text-aurora-green flex-shrink-0" />
+                    <span className="text-sm">{t('review.alreadyReviewed')}</span>
+                  </div>
+                ) : null}
+              </div>
             )}
 
             {/* Messages Section */}

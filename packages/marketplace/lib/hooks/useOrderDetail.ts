@@ -114,6 +114,9 @@ export interface UseOrderDetailReturn {
   actionSuccess: string | null;
   setActionSuccess: (value: string | null) => void;
 
+  // Review
+  hasReview: boolean | null;
+
   // Helpers
   fetchData: () => Promise<void>;
   getTimeRemainingMs: () => number | null;
@@ -143,6 +146,7 @@ export function useOrderDetail(): UseOrderDetailReturn {
   const [issueDescription, setIssueDescription] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [hasReview, setHasReview] = useState<boolean | null>(null);
 
   // Scroll to bottom of messages
   const scrollToBottom = useCallback((smooth = true) => {
@@ -172,6 +176,21 @@ export function useOrderDetail(): UseOrderDetailReturn {
       }
 
       setData(result);
+
+      // Check if buyer has already reviewed this order
+      if (result.current_user.role === 'buyer' &&
+          (result.order.status === 'delivered' || result.order.status === 'completed')) {
+        try {
+          const reviewRes = await fetch(`/api/reviews?order_id=${orderId}`);
+          if (reviewRes.ok) {
+            const reviewData = await reviewRes.json();
+            setHasReview(reviewData.reviews?.length > 0);
+          }
+        } catch {
+          // Non-critical — don't block order page
+        }
+      }
+
       setTimeout(() => scrollToBottom(false), 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load order');
@@ -443,6 +462,9 @@ export function useOrderDetail(): UseOrderDetailReturn {
     setActionError,
     actionSuccess,
     setActionSuccess,
+
+    // Review
+    hasReview,
 
     // Helpers
     fetchData,

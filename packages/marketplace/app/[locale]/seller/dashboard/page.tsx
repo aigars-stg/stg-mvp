@@ -2,15 +2,30 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@second-turn/design-system';
-import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, Chat as MessageSquare, AlertCircle, Time as Clock } from '@/lib/icons';
+import { Settings, ArrowLeft, RefreshCw, Package, ShoppingBag, Chat as MessageSquare, AlertCircle, Time as Clock, Star } from '@/lib/icons';
 import { Link, useRouter } from '@/i18n/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { BankAccountCard } from '@/components/seller/BankAccountCard';
 import { BankAccountForm } from '@/components/seller/BankAccountForm';
 import { Dac7WarningBanner } from '@/components/seller/Dac7WarningBanner';
+import { SellerReviewsList } from '@/components/seller/SellerReviewsList';
 import { WalletBalance } from '@/components/wallet/WalletBalance';
 import { useTranslations } from 'next-intl';
 import type { Dac7ComplianceStatus } from '@/lib/types/seller';
+
+interface Review {
+  id: string;
+  rating: number;
+  review_text: string | null;
+  seller_response: string | null;
+  seller_responded_at: string | null;
+  created_at: string;
+  buyer_name: string;
+  buyer_avatar: string | null;
+  buyer_country: string | null;
+  order_number: string | null;
+  reported_at: string | null;
+}
 
 interface SellerProfile {
   seller_status: string;
@@ -31,6 +46,8 @@ export default function SellerDashboardPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const [hasUrgentOrders, setHasUrgentOrders] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewStats, setReviewStats] = useState<{ total: number; average: number; positive: number } | null>(null);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -91,6 +108,24 @@ export default function SellerDashboardPage() {
         }
       } catch {
         // Non-critical — don't block dashboard
+      }
+
+      // Fetch recent reviews
+      try {
+        const reviewsRes = await fetch(`/api/reviews?seller_id=${user.id}&limit=3`);
+        if (reviewsRes.ok) {
+          const reviewsData = await reviewsRes.json();
+          setReviews(reviewsData.reviews || []);
+          if (reviewsData.trust_summary) {
+            setReviewStats({
+              total: reviewsData.trust_summary.total_reviews || 0,
+              average: reviewsData.trust_summary.average_rating || 0,
+              positive: reviewsData.trust_summary.positive_rating_percent || 0,
+            });
+          }
+        }
+      } catch {
+        // Non-critical
       }
     };
 
@@ -254,6 +289,49 @@ export default function SellerDashboardPage() {
 
           {/* Wallet Balance */}
           <WalletBalance showLink />
+
+          {/* Recent Reviews */}
+          <div className="bg-snow-white border-2 border-border rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-polar-night">
+                {t('recentReviews.title')}
+              </h3>
+              {reviews.length > 0 && (
+                <Link
+                  href="/seller/reviews"
+                  className="text-sm text-frost-ice hover:text-frost-ice/80 transition-colors"
+                >
+                  {t('recentReviews.viewAll')}
+                </Link>
+              )}
+            </div>
+            {reviews.length > 0 ? (
+              <SellerReviewsList
+                reviews={reviews}
+                totalReviews={reviewStats?.total || 0}
+                averageRating={reviewStats?.average || 0}
+                positivePercent={reviewStats?.positive || 0}
+                hasMore={false}
+                showBreakdown={false}
+                canRespond={true}
+                onRespond={async (reviewId, response) => {
+                  const res = await fetch(`/api/reviews/${reviewId}/respond`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ response }),
+                  });
+                  if (!res.ok) throw new Error('Failed to respond');
+                  setRefreshKey(prev => prev + 1);
+                }}
+              />
+            ) : (
+              <div className="text-center py-6 text-text-secondary">
+                <Star className="w-10 h-10 mx-auto mb-2 text-text-muted opacity-50" />
+                <p className="text-sm">{t('recentReviews.noReviews')}</p>
+                <p className="text-xs text-text-muted mt-1">{t('recentReviews.noReviewsHint')}</p>
+              </div>
+            )}
+          </div>
 
           {/* Bank Account Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

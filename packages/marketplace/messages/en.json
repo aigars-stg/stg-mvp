@@ -2471,6 +2471,12 @@
       "addTitle": "Add Bank Account",
       "updateTitle": "Update Bank Account"
     },
+    "recentReviews": {
+      "title": "Recent Reviews",
+      "viewAll": "View all reviews",
+      "noReviews": "No reviews yet",
+      "noReviewsHint": "Reviews from buyers will appear here after your first completed sale"
+    },
     "BalanceCard": {
       "title": "Wallet Balance",
       "tryAgain": "Try Again",
@@ -2552,7 +2558,13 @@
       "noReviews": "No reviews yet",
       "noReviewsHint": "Buyer reviews will appear here after completed orders",
       "respond": "Respond to review",
-      "response": "Your response"
+      "response": "Your response",
+      "reportReview": "Report review",
+      "reportReason": "Why are you reporting this review?",
+      "reportReasonPlaceholder": "Describe why this review is inappropriate...",
+      "reportSubmit": "Report",
+      "reportSuccess": "Review reported. Our team will review it.",
+      "reported": "Reported"
     },
     "Dac7": {
       "cardTitle": "Tax Compliance",
@@ -2702,6 +2714,12 @@
       "help": {
         "title": "Need Help?",
         "description": "Contact support if you have any issues with your order."
+      },
+      "review": {
+        "title": "How was your experience?",
+        "description": "Share your feedback to help other buyers",
+        "button": "Leave a review",
+        "alreadyReviewed": "You reviewed this order"
       }
     }
   },

@@ -2471,6 +2471,12 @@
       "addTitle": "Pievienot bankas kontu",
       "updateTitle": "Atjaunināt bankas kontu"
     },
+    "recentReviews": {
+      "title": "Jaunākās atsauksmes",
+      "viewAll": "Skatīt visas atsauksmes",
+      "noReviews": "Vēl nav atsauksmju",
+      "noReviewsHint": "Pircēju atsauksmes parādīsies šeit pēc pirmā pabeigta pirkuma"
+    },
     "BalanceCard": {
       "title": "Tavs atlikums",
       "tryAgain": "Mēģināt vēlreiz",
@@ -2557,7 +2563,13 @@
       "noReviews": "Vēl nav atsauksmju",
       "noReviewsHint": "Pircēju atsauksmes parādīsies šeit pēc pabeigtiem pasūtījumiem",
       "respond": "Atbildēt uz atsauksmi",
-      "response": "Tava atbilde"
+      "response": "Tava atbilde",
+      "reportReview": "Ziņot par atsauksmi",
+      "reportReason": "Kāpēc tu ziņo par šo atsauksmi?",
+      "reportReasonPlaceholder": "Apraksti, kāpēc šī atsauksme ir neatbilstoša...",
+      "reportSubmit": "Ziņot",
+      "reportSuccess": "Atsauksme ir ziņota. Mūsu komanda to izskatīs.",
+      "reported": "Ziņots"
     },
     "Dac7": {
       "cardTitle": "Nodokļu atbilstība",
@@ -2707,6 +2719,12 @@
       "help": {
         "title": "Vajadzīga palīdzība?",
         "description": "Sazinies ar atbalsta dienestu, ja tev ir kādas problēmas ar pasūtījumu."
+      },
+      "review": {
+        "title": "Kā bija tava pieredze?",
+        "description": "Dalies ar atsauksmi, lai palīdzētu citiem pircējiem",
+        "button": "Atstāt atsauksmi",
+        "alreadyReviewed": "Tu esi novērtējis šo pasūtījumu"
       }
     }
   },

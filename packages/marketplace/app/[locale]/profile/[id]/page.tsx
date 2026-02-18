@@ -41,6 +41,7 @@ interface Review {
   buyer_avatar: string | null;
   buyer_country: string | null;
   order_number: string | null;
+  reported_at: string | null;
 }
 
 interface ProfileData {

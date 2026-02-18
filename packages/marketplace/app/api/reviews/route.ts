@@ -7,9 +7,10 @@ import { checkRateLimit } from '@/lib/ratelimit';
 /**
  * GET /api/reviews
  *
- * Get reviews for a seller
+ * Get reviews for a seller or a specific order
  * Query params:
- * - seller_id: required - UUID of the seller
+ * - seller_id: UUID of the seller (required if order_id not provided)
+ * - order_id: UUID of the order (required if seller_id not provided)
  * - limit: optional - number of reviews to return (default 10)
  * - offset: optional - offset for pagination (default 0)
  */
@@ -19,22 +20,33 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const sellerId = searchParams.get('seller_id');
+    const orderId = searchParams.get('order_id');
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const offset = parseInt(searchParams.get('offset') || '0', 10);
 
-    if (!sellerId) {
+    if (!sellerId && !orderId) {
       return NextResponse.json(
-        { error: 'seller_id is required' },
+        { error: 'seller_id or order_id is required' },
         { status: 400 }
       );
     }
 
-    // Fetch reviews using the view that includes buyer info
-    const { data: reviews, error: reviewsError, count } = await supabase
+    // Build query
+    let query = supabase
       .from('seller_reviews_with_buyer')
       .select('*', { count: 'exact' })
-      .eq('seller_id', sellerId)
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (orderId) {
+      query = query.eq('order_id', orderId);
+    } else {
+      query = query.eq('seller_id', sellerId!);
+    }
+
+    // Exclude hidden reviews from public results
+    query = query.eq('is_hidden', false);
+
+    const { data: reviews, error: reviewsError, count } = await query
       .range(offset, offset + limit - 1);
 
     if (reviewsError) {
@@ -44,18 +56,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get seller trust summary
-    const { data: trustSummary, error: trustError } = await supabase
-      .rpc('get_seller_trust_summary', { p_seller_id: sellerId });
+    // Get seller trust summary (only relevant for seller-based lookups)
+    let trustSummary = null;
+    if (sellerId) {
+      const { data: trustData, error: trustError } = await supabase
+        .rpc('get_seller_trust_summary', { p_seller_id: sellerId });
 
-    if (trustError) {
-      // Non-blocking error - continue without trust summary
+      if (!trustError) {
+        trustSummary = trustData;
+      }
     }
 
     return NextResponse.json({
       reviews: reviews || [],
       total: count || 0,
-      trust_summary: trustSummary || null,
+      trust_summary: trustSummary,
     });
   } catch (error) {
     return handleApiError(error, 'Fetch reviews');

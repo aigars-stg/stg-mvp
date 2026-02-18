@@ -1504,8 +1504,12 @@ export type Database = {
           buyer_id: string
           created_at: string | null
           id: string
+          is_hidden: boolean
           order_id: string
           rating: number
+          report_reason: string | null
+          reported_at: string | null
+          reported_by: string | null
           review_text: string | null
           seller_id: string
           seller_responded_at: string | null
@@ -1516,8 +1520,12 @@ export type Database = {
           buyer_id: string
           created_at?: string | null
           id?: string
+          is_hidden?: boolean
           order_id: string
           rating: number
+          report_reason?: string | null
+          reported_at?: string | null
+          reported_by?: string | null
           review_text?: string | null
           seller_id: string
           seller_responded_at?: string | null
@@ -1528,8 +1536,12 @@ export type Database = {
           buyer_id?: string
           created_at?: string | null
           id?: string
+          is_hidden?: boolean
           order_id?: string
           rating?: number
+          report_reason?: string | null
+          reported_at?: string | null
+          reported_by?: string | null
           review_text?: string | null
           seller_id?: string
           seller_responded_at?: string | null
