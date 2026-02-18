@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { ShoppingBasket as ShoppingCart, AlertCircle } from '@/lib/icons';
@@ -33,12 +33,12 @@ export default function CartPage() {
   const [maxedBasketIds, setMaxedBasketIds] = useState<Set<string>>(new Set());
   const [extendingBasketId, setExtendingBasketId] = useState<string | null>(null);
 
+  const hasLoadedRef = useRef(false);
+
   // Fetch cart data and clean up expired items
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
-      if (baskets.length === 0) {
-        setLoading(true);
-      }
+      if (!hasLoadedRef.current) setLoading(true);
       setError(null);
 
       const response = await fetch('/api/cart');
@@ -87,8 +87,9 @@ export default function CartPage() {
       setError(err instanceof Error ? err.message : 'Failed to load cart');
     } finally {
       setLoading(false);
+      hasLoadedRef.current = true;
     }
-  };
+  }, [captureExpiredItems]);
 
   // Redirect if not authenticated
   useEffect(() => {
