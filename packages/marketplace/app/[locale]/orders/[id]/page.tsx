@@ -5,7 +5,6 @@ import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Badge, Button } from '@second-turn/design-system';
 import {
-  Package,
   Time as Clock,
   CloseCircle as XCircle,
   RefreshCw as Loader2,
