@@ -52,7 +52,8 @@ export async function GET(
         id,
         game_name,
         price,
-        photo_url
+        photo_url,
+        game_thumbnail
       )
     `;
 

@@ -31,6 +31,7 @@ export interface CartItemData {
   publisher: string | null;
   edition_year: number | null;
   game_thumbnail: string | null;
+  game_image: string | null;
 }
 
 interface CartItemCardProps {
@@ -44,14 +45,14 @@ export function CartItemCard({ item, onRemove, isRemoving = false }: CartItemCar
   const tListings = useTranslations('Listings');
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  // Collect all available images (BGG thumbnail first, then user photos)
+  // Collect all available images (BGG image first, then user photos)
   const allImages = [
-    ...(item.game_thumbnail ? [item.game_thumbnail] : []),
-    ...item.photo_urls,
+    ...(item.game_image ? [item.game_image] : []),
+    ...(item.photo_urls || []),
   ].filter(Boolean);
 
-  // Display image: BGG thumbnail preferred, then first user photo
-  const displayImage = item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
+  // Display image: BGG image preferred, then user photos, then legacy fallback
+  const displayImage = item.game_image || item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
 
   const conditionVariant = getConditionBadgeVariant(item.condition);
 

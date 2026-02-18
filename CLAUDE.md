@@ -105,7 +105,7 @@ English (default), Latvian (lv), Lithuanian (lt), Estonian (et)
 
 ### Order Status State Machine
 ```
-pending_seller → confirmed → shipped → delivered → completed
+pending_seller → accepted → shipped → delivered → completed
                     ↓           ↓          ↓
                 cancelled   cancelled   disputed → resolved (completed OR refunded)
 ```

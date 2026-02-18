@@ -37,6 +37,7 @@ interface CartItem {
   publisher: string | null;
   edition_year: number | null;
   game_thumbnail: string | null;
+  game_image: string | null;
   is_expansion: boolean;
   all_components_present: boolean;
 }
@@ -684,7 +685,7 @@ function CheckoutPageContent() {
               {/* Items */}
               <div className="p-4 space-y-3">
                 {basket.items.map((item) => {
-                  const displayImage = item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
+                  const displayImage = item.game_image || item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
                   return (
                     <div key={item.item_id} className="flex gap-3">
                       <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -808,7 +809,7 @@ function CheckoutPageContent() {
                 {/* Items */}
                 <div className="space-y-3 pb-4 border-b border-border-subtle">
                   {basket.items.map((item) => {
-                    const displayImage = item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
+                    const displayImage = item.game_image || item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
                     const metaParts = [
                       item.language?.replace(/, /g, ' / '),
                       item.edition_year,

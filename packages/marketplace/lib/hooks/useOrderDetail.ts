@@ -18,6 +18,7 @@ export interface OrderItem {
   price: number;
   condition: string;
   photo_url: string | null;
+  game_thumbnail: string | null;
 }
 
 export interface UserProfile {

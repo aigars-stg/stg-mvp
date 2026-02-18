@@ -17,6 +17,7 @@ interface OrderItem {
   price: number;
   condition: string;
   photo_url: string | null;
+  game_thumbnail: string | null;
 }
 
 interface Order {
@@ -279,9 +280,9 @@ export default function OrdersPage() {
                             key={item.id}
                             className="flex-shrink-0 w-16 h-16 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden"
                           >
-                            {item.photo_url ? (
+                            {(item.game_thumbnail || item.photo_url) ? (
                               <img
-                                src={item.photo_url}
+                                src={(item.game_thumbnail || item.photo_url)!}
                                 alt={item.game_name}
                                 className="max-w-full max-h-full object-contain"
                               />
