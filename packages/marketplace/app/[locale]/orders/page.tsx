@@ -10,6 +10,8 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';
 import { formatDate } from '@/lib/date-utils';
 import { formatPrice } from '@/lib/services/pricing';
+import { ListingThumbnail } from '@/components/common/ListingThumbnail';
+import { resolveListingImage } from '@/lib/utils/listing-image';
 
 interface OrderItem {
   id: string;
@@ -276,20 +278,12 @@ export default function OrdersPage() {
                     <div className="mb-4">
                       <div className="flex gap-2 overflow-x-auto pb-2">
                         {order.order_items.slice(0, 3).map((item) => (
-                          <div
+                          <ListingThumbnail
                             key={item.id}
-                            className="flex-shrink-0 w-16 h-16 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden"
-                          >
-                            {(item.game_thumbnail || item.photo_url) ? (
-                              <img
-                                src={(item.game_thumbnail || item.photo_url)!}
-                                alt={item.game_name}
-                                className="max-w-full max-h-full object-contain"
-                              />
-                            ) : (
-                              <Package className="w-6 h-6 text-text-muted" />
-                            )}
-                          </div>
+                            src={resolveListingImage({ gameThumbnail: item.game_thumbnail, photoUrl: item.photo_url })}
+                            alt={item.game_name}
+                            size="md"
+                          />
                         ))}
                         {order.order_items.length > 3 && (
                           <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-bg-secondary flex items-center justify-center">

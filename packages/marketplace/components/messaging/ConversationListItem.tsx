@@ -1,9 +1,9 @@
-/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Package } from '@/lib/icons';
+import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import { formatMessageTime } from '@/lib/date-utils';
 import type { ConversationListItem as ConversationListItemType } from '@/lib/types/message';
 import { Avatar } from '@/components/user';
@@ -76,17 +76,13 @@ export function ConversationListItem({
           {/* Listing or order info */}
           {listing && (
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                {listing.thumbnail ? (
-                  <img
-                    src={listing.thumbnail}
-                    alt={listing.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Package className="w-4 h-4 text-text-muted" />
-                )}
-              </div>
+              <ListingThumbnail
+                src={listing.thumbnail}
+                alt={listing.title}
+                size="xs"
+                objectFit="cover"
+                className="rounded"
+              />
 
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-text-secondary truncate">

@@ -1,9 +1,9 @@
-/* eslint-disable @next/next/no-img-element -- listing thumbnails are external URLs */
 'use client';
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { LinkExternal as ExternalLink, Package } from '@/lib/icons';
+import { LinkExternal as ExternalLink } from '@/lib/icons';
+import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import type { Conversation } from '@/lib/types/message';
 import { formatPrice } from '@/lib/services/pricing';
 
@@ -37,17 +37,12 @@ export function ListingContext({ conversation }: ListingContextProps) {
         className="flex items-center gap-3 p-4 hover:bg-bg-secondary transition-colors group"
       >
         {/* Listing thumbnail */}
-        <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-bg-secondary overflow-hidden flex items-center justify-center">
-          {listing.photos?.[0] ? (
-            <img
-              src={listing.photos[0]}
-              alt={listing.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <Package className="w-8 h-8 text-text-muted" />
-          )}
-        </div>
+        <ListingThumbnail
+          src={listing.photos?.[0] || null}
+          alt={listing.title}
+          size="md"
+          objectFit="cover"
+        />
 
         {/* Listing details */}
         <div className="flex-1 min-w-0">

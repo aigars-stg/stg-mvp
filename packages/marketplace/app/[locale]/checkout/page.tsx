@@ -5,7 +5,9 @@ import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Button, ResultPage } from '@second-turn/design-system';
-import { Package, ArrowLeft, RefreshCw as Loader2, AlertCircle, User, Email as Mail, CreditCard, Truck, LocationPin as MapPin } from '@/lib/icons';
+import { ArrowLeft, RefreshCw as Loader2, AlertCircle, User, Email as Mail, CreditCard, Truck, LocationPin as MapPin } from '@/lib/icons';
+import { ListingThumbnail } from '@/components/common/ListingThumbnail';
+import { resolveListingImage } from '@/lib/utils/listing-image';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { TerminalSelectorWithMap } from '@/components/checkout/TerminalSelectorWithMap';
 import { PaymentMethodLogos } from '@/components/checkout/PaymentMethodLogos';
@@ -685,20 +687,15 @@ function CheckoutPageContent() {
               {/* Items */}
               <div className="p-4 space-y-3">
                 {basket.items.map((item) => {
-                  const displayImage = item.game_image || item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
+                  const displayImage = resolveListingImage({
+                    gameImage: item.game_image,
+                    gameThumbnail: item.game_thumbnail,
+                    photoUrls: item.photo_urls,
+                    photoUrl: item.photo_url,
+                  });
                   return (
                     <div key={item.item_id} className="flex gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                        {displayImage ? (
-                          <img
-                            src={displayImage}
-                            alt={item.game_name}
-                            className="max-w-full max-h-full object-contain"
-                          />
-                        ) : (
-                          <Package className="w-5 h-5 text-text-muted" aria-hidden="true" />
-                        )}
-                      </div>
+                      <ListingThumbnail src={displayImage} alt={item.game_name} size="sm" />
                       <div className="flex-grow min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-sm font-medium text-polar-night line-clamp-1">
@@ -809,7 +806,12 @@ function CheckoutPageContent() {
                 {/* Items */}
                 <div className="space-y-3 pb-4 border-b border-border-subtle">
                   {basket.items.map((item) => {
-                    const displayImage = item.game_image || item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
+                    const displayImage = resolveListingImage({
+                      gameImage: item.game_image,
+                      gameThumbnail: item.game_thumbnail,
+                      photoUrls: item.photo_urls,
+                      photoUrl: item.photo_url,
+                    });
                     const metaParts = [
                       item.language?.replace(/, /g, ' / '),
                       item.edition_year,
@@ -817,17 +819,7 @@ function CheckoutPageContent() {
 
                     return (
                       <div key={item.item_id} className="flex gap-3">
-                        <div className="w-16 h-16 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {displayImage ? (
-                            <img
-                              src={displayImage}
-                              alt={item.game_name}
-                              className="max-w-full max-h-full object-contain p-1"
-                            />
-                          ) : (
-                            <Package className="w-6 h-6 text-text-muted" aria-hidden="true" />
-                          )}
-                        </div>
+                        <ListingThumbnail src={displayImage} alt={item.game_name} size="md" />
                         <div className="flex-grow min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-sm font-medium text-polar-night line-clamp-1">

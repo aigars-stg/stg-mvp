@@ -16,6 +16,8 @@ import {
   AlertTriangle,
 } from '@/lib/icons';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
+import { ListingThumbnail } from '@/components/common/ListingThumbnail';
+import { resolveListingImage } from '@/lib/utils/listing-image';
 import { MessageBubble } from '@/components/messaging/MessageBubble';
 import { MessageInput } from '@/components/messaging/MessageInput';
 import { UserInfoCard } from '@/components/user';
@@ -295,17 +297,11 @@ export default function OrderDetailPage() {
               <div className="space-y-4">
                 {order_items.map((item) => (
                   <div key={item.id} className="flex gap-4">
-                    <div className="w-20 h-20 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {(item.game_thumbnail || item.photo_url) ? (
-                        <img
-                          src={(item.game_thumbnail || item.photo_url)!}
-                          alt={item.game_name}
-                          className="max-w-full max-h-full object-contain"
-                        />
-                      ) : (
-                        <Package className="w-6 h-6 text-text-muted" />
-                      )}
-                    </div>
+                    <ListingThumbnail
+                      src={resolveListingImage({ gameThumbnail: item.game_thumbnail, photoUrl: item.photo_url })}
+                      alt={item.game_name}
+                      size="lg"
+                    />
                     <div className="flex-grow min-w-0">
                       <Link
                         href={`/game/${item.game_bgg_id}`}

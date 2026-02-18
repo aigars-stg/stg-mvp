@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { Link } from '@/i18n/navigation';
-import Image from 'next/image';
 import { Badge } from '@second-turn/design-system';
-import { Package, AlertCircle, PuzzlePiece as Puzzle, TrashAlt as Trash2, RefreshCw as Loader2 } from '@/lib/icons';
+import { AlertCircle, PuzzlePiece as Puzzle, TrashAlt as Trash2, RefreshCw as Loader2 } from '@/lib/icons';
 import { ImageLightbox } from '@/components/listing/ImageLightbox';
+import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import { SwipeToDelete } from '@/components/common/SwipeToDelete';
+import { resolveListingImage, resolveListingImages } from '@/lib/utils/listing-image';
 import { OfferCardVersionInfo } from '@/components/game/OfferCardVersionInfo';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { getConditionBadgeVariant } from '@/lib/utils/condition-utils';
@@ -45,14 +46,13 @@ export function CartItemCard({ item, onRemove, isRemoving = false }: CartItemCar
   const tListings = useTranslations('Listings');
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  // Collect all available images (BGG image first, then user photos)
-  const allImages = [
-    ...(item.game_image ? [item.game_image] : []),
-    ...(item.photo_urls || []),
-  ].filter(Boolean);
-
-  // Display image: BGG image preferred, then user photos, then legacy fallback
-  const displayImage = item.game_image || item.game_thumbnail || item.photo_urls?.[0] || item.photo_url;
+  const allImages = resolveListingImages({ gameImage: item.game_image, photoUrls: item.photo_urls });
+  const displayImage = resolveListingImage({
+    gameImage: item.game_image,
+    gameThumbnail: item.game_thumbnail,
+    photoUrls: item.photo_urls,
+    photoUrl: item.photo_url,
+  });
 
   const conditionVariant = getConditionBadgeVariant(item.condition);
 
@@ -81,30 +81,14 @@ export function CartItemCard({ item, onRemove, isRemoving = false }: CartItemCar
       <div className="sm:hidden p-4">
         <div className="flex gap-3">
           {/* Thumbnail */}
-          <button
+          <ListingThumbnail
+            src={displayImage}
+            alt={item.game_name}
+            size="lg"
+            imageCount={allImages.length}
             onClick={handleImageClick}
-            className="flex-shrink-0 cursor-pointer"
-          >
-            <div className="relative w-20 h-20 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-frost-ice/50 transition-all">
-              {displayImage ? (
-                <Image
-                  src={displayImage}
-                  alt={item.game_name}
-                  fill
-                  className="object-contain p-1"
-                  sizes="80px"
-                  unoptimized
-                />
-              ) : (
-                <Package className="w-8 h-8 text-text-muted" />
-              )}
-              {allImages.length > 1 && (
-                <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-polar-night/80 backdrop-blur-sm rounded text-[10px] text-snow-white font-medium z-10">
-                  {allImages.length}
-                </div>
-              )}
-            </div>
-          </button>
+            className="hover:ring-2 hover:ring-frost-ice/50 transition-all"
+          />
 
           {/* Content */}
           <div className="flex-grow min-w-0">
@@ -155,30 +139,14 @@ export function CartItemCard({ item, onRemove, isRemoving = false }: CartItemCar
       {/* Desktop Layout - Grid */}
       <div className="hidden sm:grid sm:grid-cols-[100px_1fr_auto] gap-4 p-4 sm:p-5">
         {/* Thumbnail */}
-        <button
+        <ListingThumbnail
+          src={displayImage}
+          alt={item.game_name}
+          size="xl"
+          imageCount={allImages.length}
           onClick={handleImageClick}
-          className="flex-shrink-0 cursor-pointer"
-        >
-          <div className="relative w-[100px] h-[100px] rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-frost-ice/50 transition-all">
-            {displayImage ? (
-              <Image
-                src={displayImage}
-                alt={item.game_name}
-                fill
-                className="object-contain p-2"
-                sizes="100px"
-                unoptimized
-              />
-            ) : (
-              <Package className="w-10 h-10 text-text-muted" />
-            )}
-            {allImages.length > 1 && (
-              <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-polar-night/80 backdrop-blur-sm rounded text-[10px] text-snow-white font-medium z-10">
-                {allImages.length}
-              </div>
-            )}
-          </div>
-        </button>
+          className="hover:ring-2 hover:ring-frost-ice/50 transition-all"
+        />
 
         {/* Content */}
         <div className="flex flex-col justify-center min-w-0">

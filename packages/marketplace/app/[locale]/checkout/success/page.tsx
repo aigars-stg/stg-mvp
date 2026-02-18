@@ -8,6 +8,8 @@ import { useTranslations } from 'next-intl';
 import { Button, ResultPage } from '@second-turn/design-system';
 import { CheckCircleAlt01 as CheckCircle2, Package, Time as Clock, ArrowRight, RefreshCw as Loader2, AlertCircle, Email as Mail, Truck as TruckIcon, Shield, LightbulbOn, ShoppingBasket } from '@/lib/icons';
 import { formatPrice } from '@/lib/services/pricing';
+import { ListingThumbnail } from '@/components/common/ListingThumbnail';
+import { resolveListingImage } from '@/lib/utils/listing-image';
 
 interface OrderDetails {
   order_id: string;
@@ -350,17 +352,11 @@ function SuccessPageContent() {
             <div className="space-y-3 mb-4">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3">
-                  {(item.game_thumbnail || item.photo_url) ? (
-                    <img
-                      src={(item.game_thumbnail || item.photo_url)!}
-                      alt={item.game_name}
-                      className="w-12 h-12 object-cover rounded-lg"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center flex-shrink-0">
-                      <Package className="w-5 h-5 text-text-muted" />
-                    </div>
-                  )}
+                  <ListingThumbnail
+                    src={resolveListingImage({ gameThumbnail: item.game_thumbnail, photoUrl: item.photo_url })}
+                    alt={item.game_name}
+                    size="sm"
+                  />
                   <div className="flex-grow min-w-0">
                     <p className="font-medium text-polar-night truncate">
                       {item.game_name}

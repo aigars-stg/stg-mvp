@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { Link } from '@/i18n/navigation';
-import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
-import { Package, X, RefreshCw as Loader2, ShoppingBasket as ShoppingCart } from '@/lib/icons';
+import { X, RefreshCw as Loader2, ShoppingBasket as ShoppingCart } from '@/lib/icons';
+import { ListingThumbnail } from '@/components/common/ListingThumbnail';
+import { resolveListingImage } from '@/lib/utils/listing-image';
 import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { getConditionBadgeVariant } from '@/lib/utils/condition-utils';
 import { useTranslations } from 'next-intl';
@@ -23,7 +24,7 @@ export function ExpiredItemCard({ item, onDismiss, onReAdd }: ExpiredItemCardPro
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const displayImage = item.game_thumbnail || item.photo_url;
+  const displayImage = resolveListingImage({ gameThumbnail: item.game_thumbnail, photoUrl: item.photo_url });
   const conditionVariant = getConditionBadgeVariant(item.condition);
 
   const handleReAdd = async () => {
@@ -56,20 +57,12 @@ export function ExpiredItemCard({ item, onDismiss, onReAdd }: ExpiredItemCardPro
 
       <div className="flex gap-3">
         {/* Thumbnail */}
-        <div className="relative w-16 h-16 rounded-md bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-          {displayImage ? (
-            <Image
-              src={displayImage}
-              alt={item.game_name}
-              fill
-              className="object-contain p-1"
-              sizes="64px"
-              unoptimized
-            />
-          ) : (
-            <Package className="w-6 h-6 text-text-muted" />
-          )}
-        </div>
+        <ListingThumbnail
+          src={displayImage}
+          alt={item.game_name}
+          size="md"
+          className="rounded-md"
+        />
 
         {/* Content */}
         <div className="flex-grow min-w-0 pr-4">

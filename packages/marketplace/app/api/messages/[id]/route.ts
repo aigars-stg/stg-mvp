@@ -60,21 +60,24 @@ export async function GET(
     }
 
     // Get listing details (only if conversation has a listing)
-    let listing: {
+    type ListingData = {
       id: string;
       game_name: string;
       price: number;
       status: string;
       photo_urls: string[];
       bgg_game_id: number;
-    } | null = null;
+      game_image: string | null;
+      game_thumbnail: string | null;
+    };
+    let listing: ListingData | null = null;
     if (conversation.listing_id) {
       const { data } = await supabase
-        .from('listings')
-        .select('id, game_name, price, status, photo_urls, bgg_game_id')
+        .from('listings_with_details')
+        .select('id, game_name, price, status, photo_urls, bgg_game_id, game_image, game_thumbnail')
         .eq('id', conversation.listing_id)
         .single();
-      listing = data;
+      listing = data as ListingData | null;
     }
 
     // Get other user's profile
@@ -151,7 +154,7 @@ export async function GET(
         title: listing.game_name,
         price: listing.price,
         status: listing.status,
-        photos: listing.photo_urls || [],
+        photos: [listing.game_image, ...(listing.photo_urls || [])].filter(Boolean) as string[],
         game_id: listing.bgg_game_id,
         game_name: listing.game_name,
       } : undefined,

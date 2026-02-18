@@ -11,6 +11,8 @@ import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 import { formatPrice, formatCentsToCurrency } from '@/lib/services/pricing';
 import { SELLER_COMMISSION_RATE } from '@/lib/pricing/constants';
 import { PARCEL_SIZES } from '@/lib/hooks/useSellerOrderDetail';
+import { ListingThumbnail } from '@/components/common/ListingThumbnail';
+import { resolveListingImage } from '@/lib/utils/listing-image';
 
 type ParcelSize = 'XS' | 'S' | 'M' | 'L';
 
@@ -395,17 +397,11 @@ export default function SellerOrdersPage() {
                   <div className="space-y-3">
                     {order.order_items.map((item) => (
                       <div key={item.id} className="flex gap-3">
-                        <div className="w-16 h-16 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {(item.game_thumbnail || item.photo_url) ? (
-                            <img
-                              src={(item.game_thumbnail || item.photo_url)!}
-                              alt={item.game_name}
-                              className="max-w-full max-h-full object-contain p-1"
-                            />
-                          ) : (
-                            <Package className="w-6 h-6 text-text-muted" />
-                          )}
-                        </div>
+                        <ListingThumbnail
+                          src={resolveListingImage({ gameThumbnail: item.game_thumbnail, photoUrl: item.photo_url })}
+                          alt={item.game_name}
+                          size="md"
+                        />
                         <div className="flex-grow min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-sm font-medium text-polar-night line-clamp-1">

@@ -70,8 +70,8 @@ export async function GET(request: NextRequest) {
     // Fetch all listings data
     const { data: listings } = listingIds.length > 0
       ? await supabase
-          .from('listings')
-          .select('id, game_name, price, status, photo_urls')
+          .from('listings_with_details')
+          .select('id, game_name, price, status, photo_urls, game_image, game_thumbnail')
           .in('id', listingIds)
       : { data: [] };
 
@@ -147,11 +147,11 @@ export async function GET(request: NextRequest) {
           avatar_url: otherUserProfile?.avatar_url || null,
         },
         listing: listing ? {
-          id: listing.id,
+          id: listing.id!,
           title: listing.game_name || 'Unknown Listing',
           price: listing.price || 0,
           status: listing.status || 'unknown',
-          thumbnail: listing.photo_urls?.[0] || null,
+          thumbnail: listing.game_image || listing.game_thumbnail || listing.photo_urls?.[0] || null,
         } : null,
         order: order ? {
           id: order.id,

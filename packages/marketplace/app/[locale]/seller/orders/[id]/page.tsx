@@ -22,6 +22,8 @@ import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
 // Badge variant type for proper typing
 type BadgeVariant = 'trust' | 'likeNew' | 'veryGood' | 'good' | 'acceptable' | 'forParts' | 'success' | 'warning' | 'error' | 'default' | 'outline';
 import { TrackingEventsTimeline } from '@/components/shipping';
+import { ListingThumbnail } from '@/components/common/ListingThumbnail';
+import { resolveListingImage } from '@/lib/utils/listing-image';
 import { useSellerOrderDetail, PARCEL_SIZES } from '@/lib/hooks/useSellerOrderDetail';
 import { formatDateTime } from '@/lib/date-utils';
 import { formatPrice, formatCentsToCurrency } from '@/lib/services/pricing';
@@ -470,17 +472,11 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
           <div className="space-y-4">
             {order.order_items.map((item) => (
               <div key={item.id} className="flex gap-4 pb-4 border-b border-border-subtle last:border-0 last:pb-0">
-                <div className="w-16 h-16 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {(item.game_thumbnail || item.photo_url) ? (
-                    <img
-                      src={(item.game_thumbnail || item.photo_url)!}
-                      alt={item.game_name}
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  ) : (
-                    <Package className="w-6 h-6 text-text-muted" />
-                  )}
-                </div>
+                <ListingThumbnail
+                  src={resolveListingImage({ gameThumbnail: item.game_thumbnail, photoUrl: item.photo_url })}
+                  alt={item.game_name}
+                  size="md"
+                />
                 <div className="flex-grow">
                   <h3 className="font-medium text-polar-night mb-2">{item.game_name}</h3>
                   <div className="flex items-center gap-3">
