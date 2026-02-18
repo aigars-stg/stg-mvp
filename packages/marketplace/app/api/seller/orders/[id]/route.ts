@@ -110,7 +110,7 @@ export async function GET(
     // Fetch order items
     const { data: orderItems } = await supabase
       .from('order_items')
-      .select('id, game_name, price, condition, photo_url')
+      .select('id, game_name, price, condition, photo_url, game_thumbnail')
       .eq('order_id', orderId);
 
     // Fetch tracking events for T2T orders

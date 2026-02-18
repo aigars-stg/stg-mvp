@@ -296,9 +296,9 @@ export default function OrderDetailPage() {
                 {order_items.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="w-20 h-20 rounded-lg bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {item.photo_url ? (
+                      {(item.game_thumbnail || item.photo_url) ? (
                         <img
-                          src={item.photo_url}
+                          src={(item.game_thumbnail || item.photo_url)!}
                           alt={item.game_name}
                           className="max-w-full max-h-full object-contain"
                         />

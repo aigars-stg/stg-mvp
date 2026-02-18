@@ -25,6 +25,7 @@ interface OrderDetails {
     game_name: string;
     price: number;
     photo_url: string | null;
+    game_thumbnail: string | null;
   }[];
 }
 
@@ -68,11 +69,12 @@ function SuccessPageContent() {
           total_amount: o.total_amount,
           wallet_debit_cents: o.buyer_wallet_debit_cents || 0,
           seller_response_deadline: o.seller_response_deadline,
-          items: (o.order_items || []).map((item: { id: string; game_name: string; price: number; photo_url: string | null }) => ({
+          items: (o.order_items || []).map((item: { id: string; game_name: string; price: number; photo_url: string | null; game_thumbnail: string | null }) => ({
             id: item.id,
             game_name: item.game_name,
             price: item.price,
             photo_url: item.photo_url,
+            game_thumbnail: item.game_thumbnail,
           })),
         });
         setLoading(false);
@@ -348,12 +350,16 @@ function SuccessPageContent() {
             <div className="space-y-3 mb-4">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3">
-                  {item.photo_url && (
+                  {(item.game_thumbnail || item.photo_url) ? (
                     <img
-                      src={item.photo_url}
+                      src={(item.game_thumbnail || item.photo_url)!}
                       alt={item.game_name}
                       className="w-12 h-12 object-cover rounded-lg"
                     />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center flex-shrink-0">
+                      <Package className="w-5 h-5 text-text-muted" />
+                    </div>
                   )}
                   <div className="flex-grow min-w-0">
                     <p className="font-medium text-polar-night truncate">

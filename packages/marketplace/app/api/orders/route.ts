@@ -26,7 +26,8 @@ export async function GET(_request: NextRequest) {
           bgg_game_id,
           price,
           condition,
-          photo_url
+          photo_url,
+          game_thumbnail
         )
       `)
       .eq('buyer_id', user.id)

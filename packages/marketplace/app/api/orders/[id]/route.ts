@@ -41,7 +41,8 @@ export async function GET(
           bgg_game_id,
           price,
           condition,
-          photo_url
+          photo_url,
+          game_thumbnail
         )
       `)
       .eq('id', orderId)
