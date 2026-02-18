@@ -21,6 +21,13 @@ const validPickupCheckout = {
   useWallet: false,
 };
 
+/** Helper to omit keys from an object (avoids unused-var lint warnings from destructuring) */
+function omit<T extends Record<string, unknown>, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> {
+  const copy = { ...obj };
+  for (const key of keys) delete copy[key];
+  return copy;
+}
+
 describe('checkoutSessionSchema', () => {
   it('accepts valid t2t checkout', () => {
     const result = checkoutSessionSchema.safeParse(validT2tCheckout);
@@ -28,13 +35,13 @@ describe('checkoutSessionSchema', () => {
   });
 
   it('rejects t2t checkout missing receiver fields', () => {
-    const { receiverName: _rn, receiverPhone: _rp, receiverEmail: _re, ...incomplete } = validT2tCheckout;
+    const incomplete = omit(validT2tCheckout, 'receiverName', 'receiverPhone', 'receiverEmail');
     const result = checkoutSessionSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
 
   it('rejects t2t checkout missing terminal', () => {
-    const { destinationTerminalId: _tid, destinationTerminalName: _tn, ...incomplete } = validT2tCheckout;
+    const incomplete = omit(validT2tCheckout, 'destinationTerminalId', 'destinationTerminalName');
     const result = checkoutSessionSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
@@ -45,13 +52,13 @@ describe('checkoutSessionSchema', () => {
   });
 
   it('rejects local pickup missing city', () => {
-    const { pickupCity: _pc, ...incomplete } = validPickupCheckout;
+    const incomplete = omit(validPickupCheckout, 'pickupCity');
     const result = checkoutSessionSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
 
   it('defaults useWallet to true when omitted', () => {
-    const { useWallet: _uw, ...withoutWallet } = validT2tCheckout;
+    const withoutWallet = omit(validT2tCheckout, 'useWallet');
     const result = checkoutSessionSchema.safeParse(withoutWallet);
     expect(result.success).toBe(true);
     if (result.success) {
