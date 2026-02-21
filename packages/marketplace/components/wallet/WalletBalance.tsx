@@ -76,7 +76,7 @@ export function WalletBalance({ compact = false, showLink = false }: WalletBalan
         </div>
 
         {!loading && (balanceCents || 0) > 0 && (
-          <Link href="/seller/settings/payouts">
+          <Link href="/seller/dashboard?tab=earnings">
             <Button variant="primary" size="sm">
               <ArrowUp className="w-4 h-4 mr-1.5" />
               Withdraw
@@ -87,7 +87,7 @@ export function WalletBalance({ compact = false, showLink = false }: WalletBalan
 
       {showLink && (
         <Link
-          href="/seller/settings/payouts"
+          href="/seller/dashboard?tab=earnings"
           className="text-sm text-frost-ice hover:underline font-medium"
         >
           View wallet & transactions →

@@ -16,10 +16,11 @@ import { PhoneInput } from '@/components/common/PhoneInput';
 import { getCountryFlag, getCountryName, type CountryCode } from '@/lib/country-utils';
 import { formatDate } from '@/lib/date-utils';
 import { PreferredTerminalSection } from '@/components/account/PreferredTerminalSection';
+import { SellerCTACard } from '@/components/account/SellerCTACard';
 
 export default function AccountSettingsPage() {
   const t = useTranslations('AccountSettings');
-  const { user, profile, updateProfile, refreshProfile, signOut } = useAuth();
+  const { user, profile, updateProfile, refreshProfile, signOut, isProfileComplete } = useAuth();
 
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
@@ -30,6 +31,15 @@ export default function AccountSettingsPage() {
   const [isChangingCountry, setIsChangingCountry] = useState(false);
   const [isChangingName, setIsChangingName] = useState(false);
   const [isChangingPhone, setIsChangingPhone] = useState(false);
+  const [profileBannerDismissed, setProfileBannerDismissed] = useState(false);
+
+  // Check sessionStorage for profile banner dismissal
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem('profileBannerDismissed');
+    if (dismissed === 'true') {
+      setProfileBannerDismissed(true);
+    }
+  }, []);
 
   // Update local state when profile changes
   useEffect(() => {
@@ -247,6 +257,31 @@ export default function AccountSettingsPage() {
       <div className="mb-6">
         <EmailVerificationBanner dismissible />
       </div>
+
+      {/* Profile Completion Banner */}
+      {!isProfileComplete && !profileBannerDismissed && (
+        <div className="mb-6 p-4 bg-frost-ice/5 border border-frost-ice/20 rounded-lg flex items-start gap-3">
+          <User className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-polar-night">
+              {t('profileBanner.title')}
+            </p>
+            <p className="text-sm text-text-secondary mt-0.5">
+              {t('profileBanner.subtitle')}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              sessionStorage.setItem('profileBannerDismissed', 'true');
+              setProfileBannerDismissed(true);
+            }}
+            className="p-1 text-text-muted hover:text-polar-night transition-colors flex-shrink-0"
+            aria-label="Dismiss"
+          >
+            <Close className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* LEFT COLUMN - Profile Information */}
@@ -560,6 +595,11 @@ export default function AccountSettingsPage() {
               </p>
             </div>
           </Card>
+
+          {/* Seller CTA (non-sellers only) */}
+          {profile.seller_status !== 'active' && (
+            <SellerCTACard />
+          )}
 
           {/* Newsletter Subscription */}
           <NewsletterSettings />

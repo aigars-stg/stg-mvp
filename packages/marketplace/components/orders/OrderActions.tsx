@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
@@ -8,6 +9,20 @@ import {
   AlertTriangle,
   Check,
 } from '@/lib/icons';
+
+const BASE_ISSUE_TYPES = [
+  'not_received',
+  'damaged',
+  'wrong_item',
+  'not_as_described',
+  'shipping_delay',
+  'payment_issue',
+] as const;
+
+const ROLE_SPECIFIC_TYPES: Record<'buyer' | 'seller', readonly string[]> = {
+  buyer: ['seller_unresponsive'],
+  seller: ['buyer_unresponsive'],
+};
 
 interface OrderActionsProps {
   orderStatus: string;
@@ -50,6 +65,8 @@ export function OrderActions({
   actionSuccess,
   onClearError,
 }: OrderActionsProps) {
+  const t = useTranslations('Orders.detail.actions');
+
   const showActionBar =
     orderStatus === 'delivered' ||
     ['accepted', 'shipped', 'in_transit'].includes(orderStatus);
@@ -86,12 +103,12 @@ export function OrderActions({
             {confirmingReceipt ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Confirming...
+                {t('confirming')}
               </>
             ) : (
               <>
                 <Check className="w-4 h-4 mr-2" />
-                Confirm Receipt
+                {t('confirmReceipt')}
               </>
             )}
           </Button>
@@ -105,7 +122,7 @@ export function OrderActions({
             onClick={() => onShowReportIssue(true)}
           >
             <AlertTriangle className="w-4 h-4 mr-2" />
-            Report Issue
+            {t('reportIssue')}
           </Button>
         )}
       </div>
@@ -114,50 +131,47 @@ export function OrderActions({
       {showReportIssue && (
         <div className="mt-3 p-4 bg-snow-white border border-border rounded-lg">
           <h4 className="text-sm font-semibold text-polar-night mb-3">
-            Report an Issue
+            {t('reportIssueTitle')}
           </h4>
 
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-text-secondary mb-1">
-                Issue Type
+                {t('issueTypeLabel')}
               </label>
               <select
                 value={issueType}
                 onChange={(e) => onIssueTypeChange(e.target.value)}
                 className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night focus:outline-none focus:ring-2 focus:ring-frost-ice/50"
               >
-                <option value="">Select an issue type...</option>
-                <option value="not_received">Package not received</option>
-                <option value="damaged">Item arrived damaged</option>
-                <option value="wrong_item">Wrong item received</option>
-                <option value="not_as_described">Item not as described</option>
-                <option value="shipping_delay">Shipping delay</option>
-                {currentUserRole === 'buyer' && (
-                  <option value="seller_unresponsive">
-                    Seller unresponsive
+                <option value="">{t('issueTypePlaceholder')}</option>
+                {BASE_ISSUE_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {t(`issueTypes.${type}`)}
                   </option>
-                )}
-                {currentUserRole === 'seller' && (
-                  <option value="buyer_unresponsive">Buyer unresponsive</option>
-                )}
-                <option value="other">Other</option>
+                ))}
+                {ROLE_SPECIFIC_TYPES[currentUserRole].map((type) => (
+                  <option key={type} value={type}>
+                    {t(`issueTypes.${type}`)}
+                  </option>
+                ))}
+                <option value="other">{t('issueTypes.other')}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-xs font-medium text-text-secondary mb-1">
-                Description (minimum 10 characters)
+                {t('descriptionLabel')}
               </label>
               <textarea
                 value={issueDescription}
                 onChange={(e) => onIssueDescriptionChange(e.target.value)}
-                placeholder="Describe the issue in detail..."
+                placeholder={t('descriptionPlaceholder')}
                 rows={3}
                 className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-snow-white text-polar-night placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-frost-ice/50 resize-none"
               />
               <p className="text-xs text-text-muted mt-1">
-                {issueDescription.length}/2000 characters
+                {t('characterCount', { length: issueDescription.length })}
               </p>
             </div>
 
@@ -173,10 +187,10 @@ export function OrderActions({
                 {reportingIssue ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Submitting...
+                    {t('submitting')}
                   </>
                 ) : (
-                  'Submit Issue'
+                  t('submitIssue')
                 )}
               </Button>
               <Button
@@ -189,7 +203,7 @@ export function OrderActions({
                   onClearError();
                 }}
               >
-                Cancel
+                {t('cancel')}
               </Button>
             </div>
           </div>

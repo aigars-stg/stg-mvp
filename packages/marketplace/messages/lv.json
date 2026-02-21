@@ -506,12 +506,31 @@
       "sellerDashboard": "Pārdevēja panelis",
       "myOrders": "Mani pasūtījumi",
       "myListings": "Mani sludinājumi",
-      "accountSettings": "Konta iestatījumi",
+      "savedAndWanted": "Saglabātās un meklētās",
+      "startSelling": "Sāc pārdot",
       "staffDashboard": "Darbinieku panelis",
       "dac7Compliance": "DAC7 atbilstība",
       "signOut": "Iziet",
       "signOutError": "Neizdevās iziet. Mēģini vēlreiz.",
       "join": "Pievienoties"
+    },
+    "profileSheet": {
+      "title": "Profils",
+      "guestTitle": "Konts",
+      "accountSettings": "Konta iestatījumi",
+      "sectionActivity": "Mana aktivitāte",
+      "notifications": "Paziņojumi",
+      "messages": "Ziņojumi",
+      "savedListings": "Saglabātie sludinājumi",
+      "wantedGames": "Meklētās spēles",
+      "sectionLanguage": "Valoda",
+      "signingOut": "Iziet...",
+      "guest": {
+        "title": "Piesakies, lai turpinātu",
+        "description": "Piekļūsti saviem sludinājumiem, saglabātajām spēlēm un ziņojumiem",
+        "signIn": "Pieteikties",
+        "createAccount": "Izveidot kontu"
+      }
     },
     "sellActionSheet": {
       "title": "Ko vēlies darīt?",
@@ -523,8 +542,8 @@
   },
   "Auth": {
     "emailEntry": {
-      "title": "Ienāc sistēmā",
-      "subtitle": "Ievadi savu e-pastu, lai turpinātu",
+      "title": "Sveiciens",
+      "subtitle": "Pieraksties, lai turpinātu",
       "emailLabel": "E-pasts",
       "emailPlaceholder": "tavs.epasts@piemers.lv",
       "continueButton": "Turpināt",
@@ -540,24 +559,24 @@
       "subtitle": "Izveido kontu droši, bez nepieciešamības atcerēties vēl vienu paroli.",
       "changeEmail": "Mainīt",
       "magicLinkTitle": "Kas ir maģiskā saite?",
-      "magicLinkDescription": "Tā ir droša saite, ko nosūtām uz tavu e-pastu. Noklikšķini uz tās, lai uzreiz pieteiktos. Nav jāizveido vai jāatceras parole.",
+      "magicLinkDescription": "Tā ir droša saite, ko nosūtīsim uz tavu e-pastu. Noklikšķini uz tās, lai pieteiktos. Nav jāizveido vai jāatceras parole.",
       "sendMagicLink": "Nosūtīt maģisko saiti",
       "sending": "Nosūta...",
-      "termsPrefix": "Turpinot, tu piekrīti mūsu",
-      "termsOfService": "Pakalpojumu noteikumiem",
+      "termsPrefix": "Turpinot tu piekrīti mūsu",
+      "termsOfService": "Lietošanas noteikumiem",
       "termsAnd": "un",
       "privacyPolicy": "Privātuma politikai"
     },
     "existingUser": {
-      "welcomeBack": "Sveiks atkal",
-      "readyForAnotherTurn": "Gatavs vēl vienai partijai?",
+      "welcomeBack": "Sveiciens",
+      "readyForAnotherTurn": "Priecājamies tevi atkal redzēt",
       "usuallySignInWith": "Parasti tu piesakies ar {provider}.",
       "changeEmail": "Mainīt",
       "signInWithGoogle": "Pierakstīties ar Google",
       "signInWithFacebook": "Pierakstīties ar Facebook",
       "divider": "vai",
       "sendMagicLink": "Nosūtīt maģisko saiti",
-      "magicLinkDescription": "Nosūtīsim tev saiti, lai uzreiz pieteiktos — nav nepieciešama parole.",
+      "magicLinkDescription": "Nosūtīsim tev saiti, lai ti vari pieteikties — nav nepieciešama parole.",
       "sending": "Nosūta..."
     },
     "magicLinkSent": {
@@ -573,7 +592,7 @@
       "useDifferentEmail": "Izmantot citu e-pastu"
     },
     "errors": {
-      "tooManyAttempts": "Pārāk daudz mēģinājumu — uztaisīsim pauzi. Mēģini vēlreiz pēc dažām minūtēm.",
+      "tooManyAttempts": "Pārāk daudz mēģinājumu — uztaisi pauzi. Mēģini vēlreiz pēc dažām minūtēm.",
       "captchaFailed": "Verifikācija neizdevās. Lūdzu, mēģini vēlreiz."
     },
     "comingSoon": {
@@ -732,10 +751,15 @@
       "sellerLabel": "Pārdevējs",
       "subtotal": "Starpsumma ({count, plural, one {# spēle} other {# spēles}})",
       "shipping": "Piegāde",
-      "total": "Kopā"
+      "walletCredit": "Maka kredīts",
+      "walletBalance": "Tavs maciņš: {balance}",
+      "cardPayment": "Karšu maksājums",
+      "total": "Kopā",
+      "toPay": "Apmaksai"
     },
     "actions": {
       "paySecurely": "Apstiprināt un maksāt",
+      "payWithWallet": "Maksāt ar maku",
       "processing": "Apstrādā...",
       "backToCart": "Atpakaļ uz grozu"
     },
@@ -801,6 +825,7 @@
         "soldBy": "Pārdod {seller}",
         "items": "Spēles",
         "shipping": "Piegāde",
+        "walletCredit": "Maka kredīts",
         "total": "Kopā",
         "deliveryTo": "Piegāde uz",
         "pickupAt": "Saņemšana"
@@ -2060,6 +2085,10 @@
   "AccountSettings": {
     "title": "Konta iestatījumi",
     "subtitle": "Tavs profils un preferences",
+    "profileBanner": {
+      "title": "Aizpildi savu profilu",
+      "subtitle": "Pievieno savu vārdu un valsti, lai citi zina, ar ko viņi darbojas"
+    },
     "profileInfo": "Profila informācija",
     "loading": "Ielādē...",
     "profileError": {
@@ -2251,11 +2280,6 @@
     "notSelling": "Pašlaik nepārdod"
   },
   "Dashboard": {
-    "Header": {
-      "welcomeBack": "Laipni lūgts atpakaļ, {firstName}",
-      "letsSetUp": "Iestatīsim tevi",
-      "quickSteps": "Tikai daži ātri soļi, lai sāktu"
-    },
     "ProfileCompletion": {
       "title": "Nedaudz par tevi",
       "subtitle": "Palīdzi citiem zināt, ar ko viņi darbojas",
@@ -2281,18 +2305,6 @@
       "title": "Sāc pārdot",
       "subtitle": "Pārvērt gaidošās spēles kāda nākamajā piedzīvojumā. Tikai 10% komisija no pārdošanas.",
       "startSelling": "Sāc pārdot"
-    },
-    "PlatformFeatures": {
-      "title": "Kā tas darbojas",
-      "subtitle": "Tava uzticamā tirgus vieta lietotām galda spēlēm",
-      "features": {
-        "browse": "Pārlūko spēles no pārdevējiem Baltijā",
-        "negotiate": "Veido piedāvājumus un sarunājies ar pārdevējiem",
-        "secure": "Droši maksājumi aizsargā gan pircēju, gan pārdevēju",
-        "shipping": "Ērta piegāde caur pakomātiem"
-      },
-      "browseGames": "Pārlūkot spēles",
-      "learnMore": "Uzzināt vairāk"
     }
   },
   "Cart": {
@@ -2358,6 +2370,12 @@
   "MyListings": {
     "title": "Mani sludinājumi",
     "subtitle": "Spēles, ko pārdod, meklē un saglabā",
+    "buyerTitle": "Saglabātās un meklētās",
+    "buyerSubtitle": "Spēles, ko meklē un saglabā",
+    "sellerCTA": {
+      "message": "Ir spēles, kas krāj putekļus?",
+      "action": "Sāc pārdot"
+    },
     "loading": "Ielādē...",
     "buttons": {
       "requestGame": "Meklēt spēli",
@@ -2425,6 +2443,24 @@
     "subtitle": {
       "payoutsEnabled": "Pārvaldi savus ienākumus, maku un izņemšanu",
       "contactOnly": "Pārvaldi savus sludinājumus un sazinies ar pircējiem"
+    },
+    "tabs": {
+      "orders": "Pasūtījumi",
+      "earnings": "Ieņēmumi",
+      "reviews": "Atsauksmes"
+    },
+    "earnings": {
+      "withdraw": "Izņemt",
+      "requestWithdrawal": "Pieprasīt izņemšanu",
+      "withdrawalRequests": "Izņemšanas pieprasījumi",
+      "transactionHistory": "Darījumu vēsture",
+      "howItWorks": "Kā darbojas ieņēmumi",
+      "step1": "Kad pārdošana ir pabeigta, Jūsu ieņēmumi (spēles cena mīnus 10% komisija) tiek ieskaitīti Jūsu makā",
+      "step2": "Jūs varat izņemt savu atlikumu uz bankas kontu jebkurā laikā",
+      "step3": "Izņemšana tiek apstrādāta ar bankas pārskaitījumu 1-3 darba dienu laikā"
+    },
+    "reviews": {
+      "loading": "Ielādē atsauksmes..."
     },
     "refresh": "Atjaunot",
     "settings": "Iestatījumi",
@@ -2725,6 +2761,43 @@
         "description": "Dalies ar atsauksmi, lai palīdzētu citiem pircējiem",
         "button": "Atstāt atsauksmi",
         "alreadyReviewed": "Tu esi novērtējis šo pasūtījumu"
+      },
+      "actions": {
+        "confirmReceipt": "Apstiprināt saņemšanu",
+        "confirming": "Apstiprina...",
+        "confirmReceiptSuccess": "Saņemšana apstiprināta. Pasūtījums ir pabeigts.",
+        "confirmReceiptError": "Neizdevās apstiprināt saņemšanu",
+        "reportIssue": "Ziņot par problēmu",
+        "reportIssueTitle": "Ziņot par problēmu",
+        "issueTypeLabel": "Problēmas veids",
+        "issueTypePlaceholder": "Izvēlēties problēmas veidu...",
+        "descriptionLabel": "Apraksts (vismaz 10 rakstzīmes)",
+        "descriptionPlaceholder": "Detalizēti aprakstiet problēmu...",
+        "characterCount": "{length}/2000 rakstzīmes",
+        "submitIssue": "Iesniegt",
+        "submitting": "Iesniedz...",
+        "cancel": "Atcelt",
+        "reportIssueSuccess": "Problēma veiksmīgi ziņota. Mūsu komanda to izskatīs un atbildēs.",
+        "reportIssueError": "Neizdevās ziņot par problēmu",
+        "issueTypes": {
+          "not_received": "Sūtījums nav saņemts",
+          "damaged": "Spēle saņemta bojāta",
+          "wrong_item": "Saņemta nepareiza spēle",
+          "not_as_described": "Spēle neatbilst aprakstam",
+          "shipping_delay": "Piegādes kavēšanās",
+          "seller_unresponsive": "Pārdevējs nereaģē",
+          "buyer_unresponsive": "Pircējs nereaģē",
+          "payment_issue": "Maksājuma problēma",
+          "other": "Cita problēma"
+        }
+      },
+      "messages": {
+        "title": "Ziņas",
+        "empty": "Ziņu vēl nav",
+        "startConversation": "Sāc sarunu ar {name}"
+      },
+      "buyer": {
+        "title": "Pircējs"
       }
     }
   },
@@ -3170,7 +3243,6 @@
       "orderNotFound": "Pasūtījums nav atrasts"
     },
     "backToOrders": "Atpakaļ uz pasūtījumiem",
-    "viewOrderAndMessages": "Skatīt pasūtījumu un ziņas",
     "buyer": "Pircējs: {name}",
     "actionRequired": {
       "title": "Nepieciešama darbība",
@@ -3220,6 +3292,8 @@
       "receiver": "Saņēmējs:",
       "buyerContact": "Pircēja kontakti:"
     },
+    "buyerInfo": "Pircējs",
+    "messages": "Saruna",
     "trackingHistory": "Izsekošanas vēsture",
     "orderItems": "Pasūtījumā iekļautās spēles ({count})",
     "pricingSummary": {

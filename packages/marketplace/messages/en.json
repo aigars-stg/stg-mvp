@@ -506,12 +506,31 @@
       "sellerDashboard": "Seller dashboard",
       "myOrders": "My orders",
       "myListings": "My listings",
-      "accountSettings": "Account settings",
+      "savedAndWanted": "Saved & wanted",
+      "startSelling": "Start selling",
       "staffDashboard": "Staff dashboard",
       "dac7Compliance": "DAC7 Compliance",
       "signOut": "Sign out",
       "signOutError": "Failed to sign out. Please try again.",
       "join": "Join"
+    },
+    "profileSheet": {
+      "title": "Profile",
+      "guestTitle": "Account",
+      "accountSettings": "Account settings",
+      "sectionActivity": "My Activity",
+      "notifications": "Notifications",
+      "messages": "Messages",
+      "savedListings": "Saved listings",
+      "wantedGames": "Wanted games",
+      "sectionLanguage": "Language",
+      "signingOut": "Signing out...",
+      "guest": {
+        "title": "Sign in to continue",
+        "description": "Access your listings, saved games, and messages",
+        "signIn": "Sign in",
+        "createAccount": "Create account"
+      }
     },
     "sellActionSheet": {
       "title": "What would you like to do?",
@@ -732,10 +751,15 @@
       "sellerLabel": "Seller",
       "subtotal": "Subtotal ({count, plural, one {# item} other {# items}})",
       "shipping": "Shipping",
-      "total": "Total"
+      "walletCredit": "Wallet credit",
+      "walletBalance": "Your wallet: {balance}",
+      "cardPayment": "Card payment",
+      "total": "Total",
+      "toPay": "To pay"
     },
     "actions": {
       "paySecurely": "Confirm and Pay",
+      "payWithWallet": "Pay with Wallet",
       "processing": "Processing...",
       "backToCart": "Back to Cart"
     },
@@ -801,6 +825,7 @@
         "soldBy": "Sold by {seller}",
         "items": "Items",
         "shipping": "Shipping",
+        "walletCredit": "Wallet credit",
         "total": "Total",
         "deliveryTo": "Delivery to",
         "pickupAt": "Pickup at"
@@ -2060,6 +2085,10 @@
   "AccountSettings": {
     "title": "Account settings",
     "subtitle": "Your profile and preferences",
+    "profileBanner": {
+      "title": "Complete your profile",
+      "subtitle": "Add your name and country so others know who they're dealing with"
+    },
     "profileInfo": "Profile information",
     "loading": "Loading...",
     "profileError": {
@@ -2251,11 +2280,6 @@
     "notSelling": "Not currently selling"
   },
   "Dashboard": {
-    "Header": {
-      "welcomeBack": "Welcome back, {firstName}",
-      "letsSetUp": "Let's get you set up",
-      "quickSteps": "Just a few quick steps to get started"
-    },
     "ProfileCompletion": {
       "title": "A bit about you",
       "subtitle": "Help others know who they're dealing with",
@@ -2281,18 +2305,6 @@
       "title": "Start selling",
       "subtitle": "Turn waiting games into someone's next adventure. Just a 10% commission on sales.",
       "startSelling": "Start selling"
-    },
-    "PlatformFeatures": {
-      "title": "How it works",
-      "subtitle": "Your trusted marketplace for pre-loved board games",
-      "features": {
-        "browse": "Browse games from sellers in the Baltics",
-        "negotiate": "Make offers and negotiate with sellers",
-        "secure": "Secure payments protect both buyer and seller",
-        "shipping": "Convenient shipping via parcel terminals"
-      },
-      "browseGames": "Browse games",
-      "learnMore": "Learn more"
     }
   },
   "Cart": {
@@ -2358,6 +2370,12 @@
   "MyListings": {
     "title": "My listings",
     "subtitle": "Games you're selling, seeking, and saving",
+    "buyerTitle": "Saved & wanted",
+    "buyerSubtitle": "Games you're seeking and saving",
+    "sellerCTA": {
+      "message": "Have pre-loved games gathering dust?",
+      "action": "Start selling"
+    },
     "loading": "Loading...",
     "buttons": {
       "requestGame": "Request a game",
@@ -2425,6 +2443,24 @@
     "subtitle": {
       "payoutsEnabled": "Manage your earnings, wallet, and withdrawals",
       "contactOnly": "Manage your listings and connect with buyers"
+    },
+    "tabs": {
+      "orders": "Orders",
+      "earnings": "Earnings",
+      "reviews": "Reviews"
+    },
+    "earnings": {
+      "withdraw": "Withdraw",
+      "requestWithdrawal": "Request Withdrawal",
+      "withdrawalRequests": "Withdrawal Requests",
+      "transactionHistory": "Transaction History",
+      "howItWorks": "How Earnings Work",
+      "step1": "When a sale completes, your earnings (item price minus 10% commission) are credited to your wallet",
+      "step2": "You can withdraw your balance to your bank account at any time",
+      "step3": "Withdrawals are processed via bank transfer within 1-3 business days"
+    },
+    "reviews": {
+      "loading": "Loading reviews..."
     },
     "refresh": "Refresh",
     "settings": "Settings",
@@ -2720,6 +2756,43 @@
         "description": "Share your feedback to help other buyers",
         "button": "Leave a review",
         "alreadyReviewed": "You reviewed this order"
+      },
+      "actions": {
+        "confirmReceipt": "Confirm Receipt",
+        "confirming": "Confirming...",
+        "confirmReceiptSuccess": "Receipt confirmed. Order is now complete.",
+        "confirmReceiptError": "Failed to confirm receipt",
+        "reportIssue": "Report Issue",
+        "reportIssueTitle": "Report an Issue",
+        "issueTypeLabel": "Issue Type",
+        "issueTypePlaceholder": "Select an issue type...",
+        "descriptionLabel": "Description (minimum 10 characters)",
+        "descriptionPlaceholder": "Describe the issue in detail...",
+        "characterCount": "{length}/2000 characters",
+        "submitIssue": "Submit Issue",
+        "submitting": "Submitting...",
+        "cancel": "Cancel",
+        "reportIssueSuccess": "Issue reported successfully. Our team will review and respond.",
+        "reportIssueError": "Failed to report issue",
+        "issueTypes": {
+          "not_received": "Package not received",
+          "damaged": "Item arrived damaged",
+          "wrong_item": "Wrong item received",
+          "not_as_described": "Item not as described",
+          "shipping_delay": "Shipping delay",
+          "seller_unresponsive": "Seller unresponsive",
+          "buyer_unresponsive": "Buyer unresponsive",
+          "payment_issue": "Payment issue",
+          "other": "Other"
+        }
+      },
+      "messages": {
+        "title": "Messages",
+        "empty": "No messages yet",
+        "startConversation": "Start the conversation with {name}"
+      },
+      "buyer": {
+        "title": "Buyer"
       }
     }
   },
@@ -3165,7 +3238,6 @@
       "orderNotFound": "Order not found"
     },
     "backToOrders": "Back to Orders",
-    "viewOrderAndMessages": "View Order & Messages",
     "buyer": "Buyer: {name}",
     "actionRequired": {
       "title": "Action Required",
@@ -3215,6 +3287,8 @@
       "receiver": "Receiver:",
       "buyerContact": "Buyer Contact:"
     },
+    "buyerInfo": "Buyer",
+    "messages": "Conversation",
     "trackingHistory": "Tracking History",
     "orderItems": "Order Items ({count})",
     "pricingSummary": {

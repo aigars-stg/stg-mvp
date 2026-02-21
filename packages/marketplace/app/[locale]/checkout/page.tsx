@@ -19,7 +19,7 @@ import { UserInfoCard } from '@/components/user/UserInfoCard';
 import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import type { CountryCode } from '@/lib/country-utils';
-import { calculateBuyerPricing, formatCentsToCurrency, formatPrice } from '@/lib/services/pricing';
+import { calculateCheckoutPricing, formatCentsToCurrency, formatPrice } from '@/lib/services/pricing';
 import { SHIPPING_COST_EUROS } from '@/lib/pricing/constants';
 import { useTranslations } from 'next-intl';
 
@@ -83,6 +83,9 @@ function CheckoutPageContent() {
   const [savePhone, setSavePhone] = useState(false);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
+
+  // Wallet
+  const [walletBalanceCents, setWalletBalanceCents] = useState(0);
 
   // Country gate
   const [countryLoading, setCountryLoading] = useState<CountryCode | null>(null);
@@ -162,6 +165,17 @@ function CheckoutPageContent() {
       })
       .catch(() => {});
   }, [hasValidCountry, authLoading]);
+
+  // Fetch wallet balance
+  useEffect(() => {
+    if (!user) return;
+    fetch('/api/wallet/balance')
+      .then(res => res.json())
+      .then(data => {
+        if (data.balanceCents > 0) setWalletBalanceCents(data.balanceCents);
+      })
+      .catch(() => {});
+  }, [user]);
 
   const handleCountrySelect = async (country: CountryCode) => {
     if (countryLoading) return;
@@ -305,11 +319,11 @@ function CheckoutPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [terminalExpanded]);
 
-  // Calculate pricing
+  // Calculate pricing (with wallet applied)
   const itemsTotalCents = basket ? Math.round(basket.subtotal * 100) : 0;
   const shippingCostCents = Math.round(SHIPPING_COST_EUROS * 100);
   const pricing = basket
-    ? calculateBuyerPricing(itemsTotalCents, shippingCostCents)
+    ? calculateCheckoutPricing(itemsTotalCents, shippingCostCents, walletBalanceCents)
     : null;
 
   // Handle payment
@@ -728,6 +742,14 @@ function CheckoutPageContent() {
                       {formatCentsToCurrency(pricing.shippingCostCents)}
                     </span>
                   </div>
+                  {pricing.walletDebitCents > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text-secondary">{t('summary.walletCredit')}</span>
+                      <span className="font-medium text-aurora-green">
+                        -{formatCentsToCurrency(pricing.walletDebitCents)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -858,12 +880,22 @@ function CheckoutPageContent() {
                           {formatCentsToCurrency(pricing.shippingCostCents)}
                         </span>
                       </div>
+                      {pricing.walletDebitCents > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-text-secondary">{t('summary.walletCredit')}</span>
+                          <span className="font-medium text-aurora-green">
+                            -{formatCentsToCurrency(pricing.walletDebitCents)}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex justify-between pt-4 pb-4">
-                      <span className="font-semibold text-polar-night">{t('summary.total')}</span>
+                      <span className="font-semibold text-polar-night">
+                        {pricing.walletDebitCents > 0 ? t('summary.toPay') : t('summary.total')}
+                      </span>
                       <span className="text-xl font-bold text-polar-night">
-                        {formatCentsToCurrency(pricing.totalChargeCents)}
+                        {formatCentsToCurrency(pricing.walletDebitCents > 0 ? pricing.everypayChargeCents : pricing.totalChargeCents)}
                       </span>
                     </div>
                   </>
@@ -906,6 +938,8 @@ function CheckoutPageContent() {
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       {t('actions.processing')}
                     </>
+                  ) : pricing?.everypayChargeCents === 0 ? (
+                    t('actions.payWithWallet')
                   ) : (
                     <>
                       <CreditCard className="w-4 h-4 mr-2" />
@@ -914,10 +948,12 @@ function CheckoutPageContent() {
                   )}
                 </Button>
 
-                {/* Payment method logos */}
-                <div className="mt-3">
-                  <PaymentMethodLogos country={defaultCountry} />
-                </div>
+                {/* Payment method logos — hide when paying entirely from wallet */}
+                {(!pricing || pricing.everypayChargeCents > 0) && (
+                  <div className="mt-3">
+                    <PaymentMethodLogos country={defaultCountry} />
+                  </div>
+                )}
 
                 <Link href="/cart" className="block mt-3">
                   <Button variant="ghost" fullWidth>
@@ -942,10 +978,12 @@ function CheckoutPageContent() {
       {hasValidCountry && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-snow-white border-t-2 border-border p-4 z-50 shadow-lg safe-area-inset-bottom">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-text-secondary">{t('summary.total')}</span>
+            <span className="text-sm text-text-secondary">
+              {pricing && pricing.walletDebitCents > 0 ? t('summary.toPay') : t('summary.total')}
+            </span>
             {pricing && (
               <span className="text-xl font-bold text-polar-night">
-                {formatCentsToCurrency(pricing.totalChargeCents)}
+                {formatCentsToCurrency(pricing.walletDebitCents > 0 ? pricing.everypayChargeCents : pricing.totalChargeCents)}
               </span>
             )}
           </div>
@@ -965,6 +1003,8 @@ function CheckoutPageContent() {
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 {t('actions.processing')}
               </>
+            ) : pricing?.everypayChargeCents === 0 ? (
+              t('actions.payWithWallet')
             ) : (
               <>
                 <CreditCard className="w-4 h-4 mr-2" />
@@ -973,7 +1013,9 @@ function CheckoutPageContent() {
             )}
           </Button>
           <div className="mt-2">
-            <PaymentMethodLogos country={defaultCountry} compact />
+            {(!pricing || pricing.everypayChargeCents > 0) && (
+              <PaymentMethodLogos country={defaultCountry} compact />
+            )}
           </div>
         </div>
       )}

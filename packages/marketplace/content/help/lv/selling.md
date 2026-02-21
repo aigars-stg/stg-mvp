@@ -246,7 +246,7 @@ Ja kaut kas trūkst, jūs redzēsit skaidru ziņojumu, kas izskaidro, ko labot.
 
 ### Sludinājumu atrašana
 
-Dodieties uz **[Informācijas panelis](/account/dashboard)** → **Mani sludinājumi**, lai redzētu visus savus aktīvos sludinājumus.
+Dodieties uz **[Mani sludinājumi](/my-listings)**, lai redzētu visus savus aktīvos sludinājumus.
 
 ### Sludinājuma rediģēšana
 

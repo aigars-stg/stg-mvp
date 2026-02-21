@@ -5,7 +5,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { Email as Mail, Check, Sparks as Sparkles } from '@/lib/icons';
+import { Email as Mail, Check, Sparks as Sparkles, HandWaving } from '@/lib/icons';
 import { mapAuthError } from '@/lib/auth/errors';
 import type { AuthFlowState } from '@/lib/auth/types';
 import { useTranslations } from 'next-intl';
@@ -227,6 +227,9 @@ export default function AuthPage() {
     <>
       {/* Header */}
       <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-aurora-orange/15 to-aurora-orange/5 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-aurora-orange/10">
+          <HandWaving className="w-8 h-8 text-aurora-orange" />
+        </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">
           {tEmailEntry('title')}
         </h1>
@@ -701,7 +704,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-bg flex justify-center px-4 pt-16 sm:pt-24 pb-12">
       <div className="max-w-md w-full">{renderContent()}</div>
     </div>
   );

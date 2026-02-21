@@ -182,13 +182,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "blocked_users_blocked_id_fkey"
-            columns: ["blocked_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles_full"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "blocked_users_blocker_id_fkey"
             columns: ["blocker_id"]
             isOneToOne: false
@@ -200,13 +193,6 @@ export type Database = {
             columns: ["blocker_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "blocked_users_blocker_id_fkey"
-            columns: ["blocker_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles_full"
             referencedColumns: ["id"]
           },
         ]
@@ -264,13 +250,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "conversations_buyer_id_fkey"
-            columns: ["buyer_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles_full"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "conversations_listing_id_fkey"
             columns: ["listing_id"]
             isOneToOne: false
@@ -310,13 +289,6 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_seller_id_fkey"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles_full"
             referencedColumns: ["id"]
           },
         ]
@@ -690,13 +662,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "listings_seller_id_fkey"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles_full"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "listings_source_wanted_listing_id_fkey"
             columns: ["source_wanted_listing_id"]
             isOneToOne: false
@@ -842,13 +807,6 @@ export type Database = {
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles_full"
-            referencedColumns: ["id"]
-          },
         ]
       }
       newsletter_subscribers: {
@@ -992,6 +950,7 @@ export type Database = {
           condition: string
           created_at: string | null
           game_name: string
+          game_thumbnail: string | null
           id: string
           listing_id: string
           order_id: string
@@ -1003,6 +962,7 @@ export type Database = {
           condition: string
           created_at?: string | null
           game_name: string
+          game_thumbnail?: string | null
           id?: string
           listing_id: string
           order_id: string
@@ -1014,6 +974,7 @@ export type Database = {
           condition?: string
           created_at?: string | null
           game_name?: string
+          game_thumbnail?: string | null
           id?: string
           listing_id?: string
           order_id?: string
@@ -1072,6 +1033,7 @@ export type Database = {
           dispute_resolution_note: string | null
           dispute_resolved_at: string | null
           dispute_resolved_by: string | null
+          dispute_seller_deadline: string | null
           dispute_seller_responded_at: string | null
           dispute_seller_response: string | null
           dispute_status: string | null
@@ -1094,6 +1056,7 @@ export type Database = {
           receiver_name: string | null
           receiver_phone: string | null
           refund_amount: number | null
+          refund_note: string | null
           refund_reason: string | null
           refunded_at: string | null
           seller_decline_reason: string | null
@@ -1132,6 +1095,7 @@ export type Database = {
           dispute_resolution_note?: string | null
           dispute_resolved_at?: string | null
           dispute_resolved_by?: string | null
+          dispute_seller_deadline?: string | null
           dispute_seller_responded_at?: string | null
           dispute_seller_response?: string | null
           dispute_status?: string | null
@@ -1154,6 +1118,7 @@ export type Database = {
           receiver_name?: string | null
           receiver_phone?: string | null
           refund_amount?: number | null
+          refund_note?: string | null
           refund_reason?: string | null
           refunded_at?: string | null
           seller_decline_reason?: string | null
@@ -1192,6 +1157,7 @@ export type Database = {
           dispute_resolution_note?: string | null
           dispute_resolved_at?: string | null
           dispute_resolved_by?: string | null
+          dispute_seller_deadline?: string | null
           dispute_seller_responded_at?: string | null
           dispute_seller_response?: string | null
           dispute_status?: string | null
@@ -1214,6 +1180,7 @@ export type Database = {
           receiver_name?: string | null
           receiver_phone?: string | null
           refund_amount?: number | null
+          refund_note?: string | null
           refund_reason?: string | null
           refunded_at?: string | null
           seller_decline_reason?: string | null
@@ -1488,13 +1455,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "seller_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "user_profiles_full"
             referencedColumns: ["id"]
           },
         ]
@@ -1895,13 +1855,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "wanted_listing_responses_seller_id_fkey"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles_full"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "wanted_listing_responses_wanted_listing_id_fkey"
             columns: ["wanted_listing_id"]
             isOneToOne: false
@@ -2022,13 +1975,6 @@ export type Database = {
             columns: ["buyer_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "wanted_listings_buyer_id_fkey"
-            columns: ["buyer_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles_full"
             referencedColumns: ["id"]
           },
         ]
@@ -2218,13 +2164,6 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "listings_seller_id_fkey"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles_full"
             referencedColumns: ["id"]
           },
         ]
@@ -2426,13 +2365,6 @@ export type Database = {
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "seller_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "user_profiles_full"
-            referencedColumns: ["id"]
-          },
         ]
       }
       seller_reviews_with_buyer: {
@@ -2444,9 +2376,11 @@ export type Database = {
           created_at: string | null
           game_name: string | null
           id: string | null
+          is_hidden: boolean | null
           order_id: string | null
           order_number: string | null
           rating: number | null
+          reported_at: string | null
           review_text: string | null
           seller_id: string | null
           seller_responded_at: string | null
@@ -2482,38 +2416,6 @@ export type Database = {
           median_sold_price: number | null
           min_sold_price: number | null
           refreshed_at: string | null
-        }
-        Relationships: []
-      }
-      user_profiles_full: {
-        Row: {
-          avatar_url: string | null
-          country: string | null
-          created_at: string | null
-          dac7_annual_sales_total: number | null
-          dac7_annual_transaction_count: number | null
-          dac7_reporting_year: number | null
-          dac7_tax_id: string | null
-          dac7_tax_id_type: string | null
-          deleted_at: string | null
-          deletion_reason: string | null
-          email: string | null
-          full_name: string | null
-          id: string | null
-          is_staff: boolean | null
-          original_email: string | null
-          payout_account_holder_name: string | null
-          payout_iban: string | null
-          phone: string | null
-          preferred_delivery_country: string | null
-          preferred_terminal_address: string | null
-          preferred_terminal_id: string | null
-          preferred_terminal_name: string | null
-          recovery_deadline: string | null
-          seller_status: string | null
-          seller_terms_accepted_at: string | null
-          seller_terms_version: string | null
-          updated_at: string | null
         }
         Relationships: []
       }
@@ -2588,25 +2490,45 @@ export type Database = {
         }
         Returns: Json
       }
-      create_order_from_basket: {
-        Args: {
-          p_basket_id: string
-          p_buyer_wallet_debit_cents?: number
-          p_destination_country?: string
-          p_destination_terminal_address?: string
-          p_destination_terminal_id?: string
-          p_destination_terminal_name?: string
-          p_everypay_payment_reference?: string
-          p_pickup_city?: string
-          p_pickup_notes?: string
-          p_receiver_email?: string
-          p_receiver_name?: string
-          p_receiver_phone?: string
-          p_shipping_cost?: number
-          p_shipping_method: string
-        }
-        Returns: Json
-      }
+      create_order_from_basket:
+        | {
+            Args: {
+              p_basket_id: string
+              p_buyer_wallet_debit_cents?: number
+              p_destination_country?: string
+              p_destination_terminal_address?: string
+              p_destination_terminal_id?: string
+              p_destination_terminal_name?: string
+              p_everypay_payment_reference?: string
+              p_pickup_city?: string
+              p_pickup_notes?: string
+              p_receiver_email?: string
+              p_receiver_name?: string
+              p_receiver_phone?: string
+              p_shipping_cost?: number
+              p_shipping_method: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_basket_id: string
+              p_destination_country?: string
+              p_destination_terminal_address?: string
+              p_destination_terminal_id?: string
+              p_destination_terminal_name?: string
+              p_pickup_city?: string
+              p_pickup_notes?: string
+              p_receiver_email?: string
+              p_receiver_name?: string
+              p_receiver_phone?: string
+              p_service_fee?: number
+              p_shipping_cost?: number
+              p_shipping_method: string
+              p_stripe_payment_intent_id?: string
+            }
+            Returns: Json
+          }
       create_withdrawal_request: {
         Args: {
           p_account_holder_name: string

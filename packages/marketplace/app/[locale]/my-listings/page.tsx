@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { Button, Card } from '@second-turn/design-system';
-import { Package, Time as Clock, CheckCircle, CloseCircle as XCircle, Plus, Search, Heart, Layout as LayoutDashboard } from '@/lib/icons';
+import { Package, Time as Clock, CheckCircle, CloseCircle as XCircle, Plus, Search, Heart, Layout as LayoutDashboard, Store } from '@/lib/icons';
 import { Link } from '@/i18n/navigation';
 import { OfferCard } from '@/components/game/OfferCard';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
@@ -59,6 +59,7 @@ function MyListingsContent() {
 
   const {
     user,
+    isActiveSeller,
     mainTab,
     setMainTab,
     listings,
@@ -162,11 +163,17 @@ function MyListingsContent() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-6 sm:mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <LayoutDashboard className="w-8 h-8 text-frost-ice" />
-              <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">{t('title')}</h1>
+              {isActiveSeller ? (
+                <LayoutDashboard className="w-8 h-8 text-frost-ice" />
+              ) : (
+                <Heart className="w-8 h-8 text-aurora-red" />
+              )}
+              <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
+                {isActiveSeller ? t('title') : t('buyerTitle')}
+              </h1>
             </div>
             <p className="text-sm sm:text-base text-text-secondary">
-              {t('subtitle')}
+              {isActiveSeller ? t('subtitle') : t('buyerSubtitle')}
             </p>
           </div>
           <div className="hidden sm:flex sm:flex-row gap-2 sm:gap-3">
@@ -175,26 +182,30 @@ function MyListingsContent() {
                 {t('buttons.requestGame')}
               </Button>
             </Link>
-            <Link href="/sell" className="w-full sm:w-auto">
-              <Button variant="primary" size="lg" fullWidth className="sm:w-auto">
-                {t('buttons.sellGame')}
-              </Button>
-            </Link>
+            {isActiveSeller && (
+              <Link href="/sell" className="w-full sm:w-auto">
+                <Button variant="primary" size="lg" fullWidth className="sm:w-auto">
+                  {t('buttons.sellGame')}
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
         {/* Main Tabs */}
         <div className="mb-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <button
-            onClick={() => setMainTab('selling')}
-            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${mainTab === 'selling'
-              ? 'bg-frost-ice text-snow-white shadow-md'
-              : 'bg-snow-white text-polar-night hover:bg-bg-secondary border border-border'
-              }`}
-          >
-            <Package className="w-5 h-5 inline mr-2" />
-            {t('tabs.selling')} ({listings.length})
-          </button>
+          {isActiveSeller && (
+            <button
+              onClick={() => setMainTab('selling')}
+              className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${mainTab === 'selling'
+                ? 'bg-frost-ice text-snow-white shadow-md'
+                : 'bg-snow-white text-polar-night hover:bg-bg-secondary border border-border'
+                }`}
+            >
+              <Package className="w-5 h-5 inline mr-2" />
+              {t('tabs.selling')} ({listings.length})
+            </button>
+          )}
           <button
             onClick={() => setMainTab('wanted')}
             className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all shadow-sm flex-1 sm:flex-initial ${mainTab === 'wanted'
@@ -216,6 +227,21 @@ function MyListingsContent() {
             {t('tabs.saved')} ({savedListings.length})
           </button>
         </div>
+
+        {/* Seller CTA for non-sellers */}
+        {!isActiveSeller && (
+          <div className="mb-6 p-3 bg-aurora-green/5 border border-aurora-green/20 rounded-lg flex items-center gap-3">
+            <Store className="w-5 h-5 text-aurora-green flex-shrink-0" />
+            <p className="text-sm text-text-secondary flex-1">
+              {t('sellerCTA.message')}
+            </p>
+            <Link href="/seller/onboard" className="flex-shrink-0">
+              <Button variant="secondary" size="sm">
+                {t('sellerCTA.action')}
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {/* Status Tabs - Selling */}
         {mainTab === 'selling' && (

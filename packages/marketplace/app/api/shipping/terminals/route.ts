@@ -9,13 +9,11 @@ import { handleApiError } from '@/lib/api/error-handler';
  * Fetch available Unisend terminals for a country
  * Query params:
  *   - country: LT | LV | EE (required)
- *   - search: optional search query for terminal name/address/city
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const country = searchParams.get('country') as TerminalCountry;
-    const search = searchParams.get('search') || undefined;
 
     // Validate country
     if (!country || !['LT', 'LV', 'EE'].includes(country)) {
@@ -25,11 +23,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(`📍 [Terminals] Fetching terminals for ${country}${search ? ` (search: "${search}")` : ''}`);
-
-    const terminals = await getTerminals(country, search);
-
-    console.log(`✅ [Terminals] Found ${terminals.length} terminals`);
+    const terminals = await getTerminals(country);
 
     return NextResponse.json({
       terminals,

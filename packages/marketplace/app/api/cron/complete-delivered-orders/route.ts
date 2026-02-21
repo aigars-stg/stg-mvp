@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { postOrderCompletedMessage } from '@/lib/transactions';
 import { handleApiError } from '@/lib/api/error-handler';
+import { creditSellerWallet } from '@/lib/services/wallet';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -86,6 +87,23 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ [Cron] Completed ${ordersToComplete.length} orders`);
 
+    // Credit seller wallets for each completed order
+    let walletSuccessCount = 0;
+    let walletFailCount = 0;
+    for (const order of ordersToComplete) {
+      const walletResult = await creditSellerWallet(supabase, order.id);
+      if (walletResult.success) {
+        walletSuccessCount++;
+      } else {
+        walletFailCount++;
+        console.error(`[Cron] Wallet credit failed for order ${order.id}: ${walletResult.error}`);
+      }
+    }
+
+    if (walletFailCount > 0) {
+      console.warn(`[Cron] Wallet credits: ${walletSuccessCount} succeeded, ${walletFailCount} failed`);
+    }
+
     // Post system messages for each completed order (non-blocking)
     for (const order of ordersToComplete) {
       postOrderCompletedMessage(order.id);
@@ -95,6 +113,7 @@ export async function GET(request: NextRequest) {
       success: true,
       completedCount: ordersToComplete.length,
       completedOrders: ordersToComplete.map((o) => o.order_number),
+      walletCredits: { succeeded: walletSuccessCount, failed: walletFailCount },
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {

@@ -217,10 +217,11 @@ export async function GET(
         id,
         listing_id,
         game_name,
-        game_bgg_id,
+        bgg_game_id,
         price,
         condition,
-        photo_url
+        photo_url,
+        game_thumbnail
       `)
       .eq('order_id', orderId);
 

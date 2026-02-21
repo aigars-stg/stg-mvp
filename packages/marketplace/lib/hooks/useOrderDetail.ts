@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { supabase } from '@/lib/supabase/client';
+import { useOrderMessages } from './useOrderMessages';
 import type { User } from '@supabase/supabase-js';
 import type { Message } from '@/lib/types/message';
 import type { TrackingEvent, ShippingDestination, TrackingData } from '@/components/shipping';
@@ -14,7 +15,7 @@ export interface OrderItem {
   id: string;
   listing_id: string;
   game_name: string;
-  game_bgg_id?: number;
+  bgg_game_id?: number;
   price: number;
   condition: string;
   photo_url: string | null;
@@ -88,6 +89,7 @@ export interface UseOrderDetailReturn {
   orderId: string;
 
   // Message handling
+  messages: Message[];
   sendingMessage: boolean;
   handleSendMessage: (content: string, photoUrls?: string[]) => Promise<void>;
   messagesEndRef: React.RefObject<HTMLDivElement>;
@@ -127,16 +129,20 @@ export function useOrderDetail(): UseOrderDetailReturn {
   const params = useParams();
   const orderId = params.id as string;
   const { user, loading: authLoading } = useAuth();
+  const t = useTranslations('Orders.detail.actions');
 
   // Core data state
   const [data, setData] = useState<TransactionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Message state
-  const [sendingMessage, setSendingMessage] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  // Messaging (delegated to useOrderMessages)
+  const messaging = useOrderMessages({
+    conversationId: data?.conversation.id ?? null,
+    currentUserId: user?.id ?? null,
+    buyerProfile: data?.buyer ?? null,
+    sellerProfile: data?.seller ?? null,
+  });
 
   // Action states
   const [confirmingReceipt, setConfirmingReceipt] = useState(false);
@@ -147,13 +153,6 @@ export function useOrderDetail(): UseOrderDetailReturn {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [hasReview, setHasReview] = useState<boolean | null>(null);
-
-  // Scroll to bottom of messages
-  const scrollToBottom = useCallback((smooth = true) => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: smooth ? 'smooth' : 'auto',
-    });
-  }, []);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -176,6 +175,7 @@ export function useOrderDetail(): UseOrderDetailReturn {
       }
 
       setData(result);
+      messaging.setMessages(result.messages);
 
       // Check if buyer has already reviewed this order
       if (result.current_user.role === 'buyer' &&
@@ -191,13 +191,14 @@ export function useOrderDetail(): UseOrderDetailReturn {
         }
       }
 
-      setTimeout(() => scrollToBottom(false), 100);
+      setTimeout(() => messaging.scrollToBottom(false), 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load order');
     } finally {
       setLoading(false);
     }
-  }, [orderId, scrollToBottom]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- messaging.setMessages and messaging.scrollToBottom are stable refs
+  }, [orderId]);
 
   // Initial data fetch
   useEffect(() => {
@@ -205,131 +206,6 @@ export function useOrderDetail(): UseOrderDetailReturn {
       fetchData();
     }
   }, [user, orderId, fetchData]);
-
-  // Subscribe to realtime message updates
-  useEffect(() => {
-    if (!data?.conversation) return;
-
-    const channel = supabase
-      .channel(`order:${data.conversation.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${data.conversation.id}`,
-        },
-        (payload: { new: Message }) => {
-          const newMessage = payload.new as Message;
-
-          setData((prev) => {
-            if (!prev) return prev;
-            const exists = prev.messages.some((m) => m.id === newMessage.id);
-            if (exists) return prev;
-
-            // Add sender info
-            const messageWithSender = {
-              ...newMessage,
-              sender:
-                newMessage.sender_id === prev.buyer?.id
-                  ? prev.buyer
-                  : newMessage.sender_id === prev.seller?.id
-                    ? prev.seller
-                    : null,
-            };
-
-            return {
-              ...prev,
-              messages: [...prev.messages, messageWithSender],
-            };
-          });
-
-          setTimeout(() => scrollToBottom(true), 100);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [data?.conversation, scrollToBottom]);
-
-  // Handle sending messages
-  const handleSendMessage = useCallback(async (content: string, photoUrls?: string[]) => {
-    if (!user || !data) return;
-
-    setSendingMessage(true);
-
-    // Optimistic update
-    const optimisticMessage: Message = {
-      id: `temp-${Date.now()}`,
-      conversation_id: data.conversation.id,
-      sender_id: user.id,
-      content,
-      is_system_message: false,
-      photo_urls: photoUrls || [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      deleted_at: null,
-      sender: {
-        id: user.id,
-        full_name:
-          data.current_user.role === 'buyer'
-            ? data.buyer?.full_name || null
-            : data.seller?.full_name || null,
-        avatar_url:
-          data.current_user.role === 'buyer'
-            ? data.buyer?.avatar_url || null
-            : data.seller?.avatar_url || null,
-      },
-    };
-
-    setData((prev) =>
-      prev ? { ...prev, messages: [...prev.messages, optimisticMessage] } : prev
-    );
-    setTimeout(() => scrollToBottom(true), 50);
-
-    try {
-      const response = await fetch(`/api/messages/${data.conversation.id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, photo_urls: photoUrls }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to send message');
-      }
-
-      const result = await response.json();
-
-      // Replace optimistic message with real one
-      setData((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          messages: prev.messages.map((msg) =>
-            msg.id === optimisticMessage.id ? result.message : msg
-          ),
-        };
-      });
-    } catch (err) {
-      console.error('Failed to send message:', err);
-      // Remove optimistic message on error
-      setData((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          messages: prev.messages.filter(
-            (msg) => msg.id !== optimisticMessage.id
-          ),
-        };
-      });
-      throw err;
-    } finally {
-      setSendingMessage(false);
-    }
-  }, [user, data, scrollToBottom]);
 
   // Handle confirm receipt
   const handleConfirmReceipt = useCallback(async () => {
@@ -353,7 +229,7 @@ export function useOrderDetail(): UseOrderDetailReturn {
         throw new Error(result.error || 'Failed to confirm receipt');
       }
 
-      setActionSuccess(result.message);
+      setActionSuccess(t('confirmReceiptSuccess'));
       // Update local state
       setData((prev) =>
         prev
@@ -364,12 +240,12 @@ export function useOrderDetail(): UseOrderDetailReturn {
       setTimeout(() => fetchData(), 1000);
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : 'Failed to confirm receipt'
+        err instanceof Error ? err.message : t('confirmReceiptError')
       );
     } finally {
       setConfirmingReceipt(false);
     }
-  }, [user, data, orderId, fetchData]);
+  }, [user, data, orderId, fetchData, t]);
 
   // Handle report issue
   const handleReportIssue = useCallback(async () => {
@@ -398,7 +274,7 @@ export function useOrderDetail(): UseOrderDetailReturn {
         throw new Error(result.error || 'Failed to report issue');
       }
 
-      setActionSuccess(result.message);
+      setActionSuccess(t('reportIssueSuccess'));
       setShowReportIssue(false);
       setIssueType('');
       setIssueDescription('');
@@ -406,12 +282,12 @@ export function useOrderDetail(): UseOrderDetailReturn {
       setTimeout(() => fetchData(), 1000);
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : 'Failed to report issue'
+        err instanceof Error ? err.message : t('reportIssueError')
       );
     } finally {
       setReportingIssue(false);
     }
-  }, [user, data, orderId, issueType, issueDescription, fetchData]);
+  }, [user, data, orderId, issueType, issueDescription, fetchData, t]);
 
   // Calculate time remaining
   const getTimeRemainingMs = useCallback(() => {
@@ -437,11 +313,12 @@ export function useOrderDetail(): UseOrderDetailReturn {
     orderId,
 
     // Message handling
-    sendingMessage,
-    handleSendMessage,
-    messagesEndRef,
-    messagesContainerRef,
-    scrollToBottom,
+    messages: messaging.messages,
+    sendingMessage: messaging.sendingMessage,
+    handleSendMessage: messaging.handleSendMessage,
+    messagesEndRef: messaging.messagesEndRef,
+    messagesContainerRef: messaging.messagesContainerRef,
+    scrollToBottom: messaging.scrollToBottom,
 
     // Actions
     confirmingReceipt,

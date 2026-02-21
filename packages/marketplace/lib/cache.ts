@@ -30,6 +30,22 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
 }
 
 /**
+ * Delete a cached value from both Redis and in-memory fallback.
+ */
+export async function cacheDel(key: string): Promise<void> {
+  memoryFallback.delete(key);
+
+  const redis = getRedis();
+  if (redis) {
+    try {
+      await redis.del(key);
+    } catch (error) {
+      console.warn(`[Cache] Redis del failed for ${key}:`, error);
+    }
+  }
+}
+
+/**
  * Set a cached value. Writes to Redis and in-memory fallback.
  */
 export async function cacheSet<T>(key: string, value: T, ttlSeconds: number): Promise<void> {

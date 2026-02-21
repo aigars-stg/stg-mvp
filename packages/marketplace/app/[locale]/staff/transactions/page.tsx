@@ -21,6 +21,7 @@ import {
 import { formatPrice } from '@/lib/services/pricing';
 import { getDac7StatusLabel, type Dac7ComplianceStatus } from '@/lib/types/seller';
 import { formatDate } from '@/lib/date-utils';
+import { getStatusConfig } from '@/components/shipping';
 import type { FeedbackType, FeedbackStatus, FeedbackListResponse } from '@/lib/types/feedback';
 
 interface OrderSummary {
@@ -112,18 +113,6 @@ const dac7StatusOptions = [
   { value: 'exempt', label: 'Exempt' },
 ];
 
-const statusConfig: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'error' | 'trust' }> = {
-  pending_payment: { label: 'Pending Payment', variant: 'warning' },
-  pending_seller: { label: 'Pending Seller', variant: 'warning' },
-  accepted: { label: 'Accepted', variant: 'trust' },
-  shipped: { label: 'Shipped', variant: 'trust' },
-  in_transit: { label: 'In Transit', variant: 'trust' },
-  delivered: { label: 'Delivered', variant: 'success' },
-  completed: { label: 'Completed', variant: 'success' },
-  cancelled: { label: 'Cancelled', variant: 'error' },
-  refunded: { label: 'Refunded', variant: 'error' },
-  disputed: { label: 'Disputed', variant: 'error' },
-};
 
 const statusOptions = [
   { value: 'all', label: 'All Statuses' },
@@ -1028,7 +1017,7 @@ function StaffTransactionsContent() {
               </thead>
               <tbody className="divide-y divide-divider-subtle">
                 {data?.orders.map((order) => {
-                  const statusInfo = statusConfig[order.status] || { label: order.status, variant: 'default' as const };
+                  const statusInfo = getStatusConfig(order.status);
 
                   return (
                     <tr
@@ -1100,7 +1089,7 @@ function StaffTransactionsContent() {
                 </thead>
                 <tbody className="divide-y divide-divider-subtle">
                   {data?.orders.map((order) => {
-                    const statusInfo = statusConfig[order.status] || { label: order.status, variant: 'default' as const };
+                    const statusInfo = getStatusConfig(order.status);
                     const platformFee = extractVatFromGross(order.platform_commission_cents / 100);
                     const shipping = extractVatFromGross(order.shipping_cost);
                     const totalVat = platformFee.vat + shipping.vat;

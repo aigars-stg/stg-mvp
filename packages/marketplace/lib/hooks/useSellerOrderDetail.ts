@@ -60,18 +60,6 @@ export interface SellerOrder {
   is_expired: boolean;
 }
 
-export const statusConfig = {
-  pending_payment: { label: 'Pending Payment', color: 'default', icon: 'Clock' },
-  pending_seller: { label: 'Waiting for Your Response', color: 'warning', icon: 'Clock' },
-  accepted: { label: 'Accepted', color: 'trust', icon: 'CheckCircle2' },
-  shipped: { label: 'Shipped', color: 'success', icon: 'Truck' },
-  in_transit: { label: 'In Transit', color: 'info', icon: 'Truck' },
-  delivered: { label: 'Delivered', color: 'success', icon: 'Package' },
-  completed: { label: 'Completed', color: 'default', icon: 'CheckCircle2' },
-  cancelled: { label: 'Cancelled', color: 'danger', icon: 'XCircle' },
-  disputed: { label: 'Disputed', color: 'danger', icon: 'AlertCircle' },
-} as const;
-
 export interface UseSellerOrderDetailReturn {
   // Data
   order: SellerOrder | null;
@@ -106,8 +94,6 @@ export interface UseSellerOrderDetailReturn {
   handleRetryLabel: () => Promise<void>;
   fetchOrder: () => Promise<void>;
 
-  // Helpers
-  getStatusConfig: (status: string) => typeof statusConfig[keyof typeof statusConfig];
 }
 
 export function useSellerOrderDetail(orderId: string): UseSellerOrderDetailReturn {
@@ -252,7 +238,7 @@ export function useSellerOrderDetail(orderId: string): UseSellerOrderDetailRetur
       }
 
       // Redirect to orders list after declining
-      router.push('/seller/orders');
+      router.push('/seller/dashboard?tab=orders');
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to decline order');
       setActionLoading(false);
@@ -284,11 +270,6 @@ export function useSellerOrderDetail(orderId: string): UseSellerOrderDetailRetur
       setRetryingLabel(false);
     }
   }, [orderId, fetchOrder]);
-
-  // Get status config
-  const getStatusConfig = useCallback((status: string) => {
-    return statusConfig[status as keyof typeof statusConfig] || statusConfig.pending_payment;
-  }, []);
 
   return {
     // Data
@@ -323,8 +304,5 @@ export function useSellerOrderDetail(orderId: string): UseSellerOrderDetailRetur
     handleDeclineOrder,
     handleRetryLabel,
     fetchOrder,
-
-    // Helpers
-    getStatusConfig,
   };
 }

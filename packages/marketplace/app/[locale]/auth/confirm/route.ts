@@ -13,7 +13,7 @@ export async function GET(
   const token_hash = searchParams.get('token_hash');
   const type = searchParams.get('type');
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/account/dashboard';
+  const next = searchParams.get('next') ?? '/';
   const locale = params.locale || 'en';
 
   const cookieStore = cookies();

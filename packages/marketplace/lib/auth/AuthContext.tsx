@@ -73,18 +73,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Fetch user profile from database (uses view that includes seller data)
+  // Fetch user profile from database (queries user_profiles + seller_profiles separately)
   const fetchProfile = useCallback(async (userId: string, retryCount = 0): Promise<UserProfile | null> => {
     try {
-      const { data, error } = await supabase
-        .from('user_profiles_full')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      const [profileResult, sellerResult] = await Promise.all([
+        supabase
+          .from('user_profiles')
+          .select('id, full_name, email, phone, avatar_url, country, preferred_locale, created_at, updated_at, deleted_at, deletion_reason, recovery_deadline, original_email, preferred_terminal_id, preferred_terminal_name, preferred_terminal_address, preferred_delivery_country, profile_banner_dismissed_until, onboarding_email_step, last_onboarding_email_at, is_staff')
+          .eq('id', userId)
+          .single(),
+        supabase
+          .from('seller_profiles')
+          .select('seller_status')
+          .eq('user_id', userId)
+          .maybeSingle(),
+      ]);
 
-      if (error) {
+      if (profileResult.error) {
         // If profile doesn't exist (PGRST116), try to create it or retry
-        if (error.code === 'PGRST116') {
+        if (profileResult.error.code === 'PGRST116') {
           // If we haven't retried enough, wait and try again (trigger might be slow)
           if (retryCount < 3) {
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -95,11 +102,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return await createMissingProfile(userId);
         }
 
-        log.error({ code: error.code, message: error.message }, 'Profile fetch error');
+        log.error({ code: profileResult.error.code, message: profileResult.error.message }, 'Profile fetch error');
         return null;
       }
 
-      return data as unknown as UserProfile;
+      return {
+        ...profileResult.data,
+        seller_status: sellerResult.data?.seller_status ?? 'not_started',
+      } as unknown as UserProfile;
     } catch (error: unknown) {
       log.error({ error: error instanceof Error ? error.message : 'Unknown error' }, 'Profile fetch exception');
       return null;

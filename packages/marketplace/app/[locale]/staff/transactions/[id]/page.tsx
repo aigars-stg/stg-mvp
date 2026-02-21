@@ -5,37 +5,46 @@ import Image from 'next/image';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import { Button, Badge } from '@second-turn/design-system';
-import { RefreshCw as Loader2, AlertCircle, Shield, ArrowLeft, User, Package, LocationPin as MapPin, LinkExternal as ExternalLink, Chat as MessageSquare, AlertTriangle, CheckCircleAlt01 as CheckCircle2, Time as Clock, Phone, Email as Mail, Beaker as Flask } from '@/lib/icons';
-import { useAuth } from '@/lib/auth/AuthContext';
-import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
-import { MessageBubble } from '@/components/messaging/MessageBubble';
-import type { Message } from '@/lib/types/message';
 import {
-  TrackingEventsTimeline,
-  type TrackingEvent,
-  type OrderIssue,
+  RefreshCw as Loader2,
+  AlertCircle,
+  Shield,
+  ArrowLeft,
+  User,
+  Phone,
+  Email as Mail,
+  Beaker as Flask,
+  AlertTriangle,
+  CheckCircleAlt01 as CheckCircle2,
+} from '@/lib/icons';
+import { useAuth } from '@/lib/auth/AuthContext';
+import {
+  getStatusConfig,
   issueTypeLabels,
   issueStatusConfig,
 } from '@/components/shipping';
+import type { TrackingEvent, OrderIssue } from '@/components/shipping';
+import type { Message } from '@/lib/types/message';
+import type { OrderDetailOrder, OrderDetailItem } from '@/lib/types/order-detail';
+import {
+  OrderDetailHeader,
+  OrderStatusNotice,
+  OrderItemsList,
+  OrderPricingSummary,
+  OrderTimeline,
+  OrderShippingSection,
+  ConversationPanel,
+} from '@/components/order-detail';
 import { formatDateTime } from '@/lib/date-utils';
 import { formatPrice, formatCentsToCurrency } from '@/lib/services/pricing';
 
-// Simulation types
+// --- Staff-specific types ---
+
 type SimulationAction = 'label_printed' | 'set_barcode' | 'shipped' | 'in_transit' | 'delivered';
 
 interface SimulationOption {
   action: SimulationAction;
   description: string;
-}
-
-interface OrderItem {
-  id: string;
-  listing_id: string;
-  game_name: string;
-  game_bgg_id?: number;
-  price: number;
-  condition: string;
-  photo_url: string | null;
 }
 
 interface UserProfile {
@@ -46,81 +55,16 @@ interface UserProfile {
   phone?: string;
 }
 
-interface OrderData {
-  id: string;
-  order_number: string;
-  status: string;
-  shipping_method: string;
-  total_amount: number;
-  items_total: number;
-  shipping_cost: number;
-  destination?: {
-    country?: string;
-    terminal_id?: string;
-    terminal_name?: string;
-    terminal_address?: string;
-    receiver_name?: string;
-    receiver_phone?: string;
-    receiver_email?: string;
-    city?: string;
-    notes?: string;
-  };
-  tracking?: {
-    barcode?: string;
-    tracking_url?: string;
-    label_url?: string;
-  };
-  payment?: {
-    everypay_payment_reference?: string;
-    everypay_payment_state?: string;
-    buyer_wallet_debit_cents?: number;
-    platform_commission_cents?: number;
-    seller_wallet_credit_cents?: number;
-    wallet_credited_at?: string;
-  };
-  refund_amount?: number | null;
-  refund_reason?: string | null;
-  timestamps: {
-    created_at: string;
-    paid_at?: string;
-    seller_response_deadline?: string;
-    seller_responded_at?: string;
-    label_generated_at?: string;
-    cancelled_at?: string;
-    refunded_at?: string;
-  };
-}
-
 interface StaffTransactionData {
-  conversation: {
-    id: string;
-    order_id: string | null;
-    listing_id: string | null;
-    buyer_id: string;
-    seller_id: string;
-    created_at: string;
-  };
+  conversation: { id: string; buyer_id: string; seller_id: string };
   messages: Message[];
-  order: OrderData;
-  order_items: OrderItem[];
+  order: OrderDetailOrder;
+  order_items: OrderDetailItem[];
   tracking_events: TrackingEvent[];
   issues: OrderIssue[];
   buyer: UserProfile | null;
   seller: UserProfile | null;
 }
-
-const statusConfig: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'error' | 'trust' }> = {
-  pending_payment: { label: 'Pending Payment', variant: 'warning' },
-  pending_seller: { label: 'Pending Seller', variant: 'warning' },
-  accepted: { label: 'Accepted', variant: 'trust' },
-  shipped: { label: 'Shipped', variant: 'trust' },
-  in_transit: { label: 'In Transit', variant: 'trust' },
-  delivered: { label: 'Delivered', variant: 'success' },
-  completed: { label: 'Completed', variant: 'success' },
-  cancelled: { label: 'Cancelled', variant: 'error' },
-  refunded: { label: 'Refunded', variant: 'error' },
-  disputed: { label: 'Disputed', variant: 'error' },
-};
 
 export default function StaffTransactionPage() {
   const router = useRouter();
@@ -138,19 +82,16 @@ export default function StaffTransactionPage() {
   const [simulationLoading, setSimulationLoading] = useState(false);
   const [simulationMessage, setSimulationMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
       router.push(`/auth/signin?redirect=/staff/transactions/${orderId}`);
     }
   }, [user, authLoading, router, orderId]);
 
-  // Fetch transaction
   const fetchTransaction = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const response = await fetch(`/api/staff/transactions/${orderId}`);
       const result = await response.json();
 
@@ -159,10 +100,7 @@ export default function StaffTransactionPage() {
         setError('Staff access required');
         return;
       }
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch transaction');
-      }
+      if (!response.ok) throw new Error(result.error || 'Failed to fetch transaction');
 
       setIsStaff(true);
       setData(result);
@@ -173,7 +111,6 @@ export default function StaffTransactionPage() {
     }
   };
 
-  // Fetch simulation options
   const fetchSimulationOptions = useCallback(async () => {
     try {
       const response = await fetch(`/api/staff/orders/${orderId}/simulate-shipping`);
@@ -186,23 +123,18 @@ export default function StaffTransactionPage() {
     }
   }, [orderId]);
 
-  // Execute simulation action
   const executeSimulation = async (action: SimulationAction) => {
     setSimulationLoading(true);
     setSimulationMessage(null);
-
     try {
       const response = await fetch(`/api/staff/orders/${orderId}/simulate-shipping`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
       });
-
       const result = await response.json();
-
       if (response.ok) {
         setSimulationMessage({ type: 'success', text: result.message });
-        // Refresh data
         await fetchTransaction();
         await fetchSimulationOptions();
       } else {
@@ -215,39 +147,26 @@ export default function StaffTransactionPage() {
     }
   };
 
-  useEffect(() => {
-    if (user && orderId) {
-      fetchTransaction();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, orderId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (user && orderId) fetchTransaction(); }, [user, orderId]);
 
-  // Fetch simulation options when data loads
   useEffect(() => {
-    if (data?.order?.shipping_method === 't2t' && isStaff) {
-      fetchSimulationOptions();
-    }
+    if (data?.order?.shipping_method === 't2t' && isStaff) fetchSimulationOptions();
   }, [data?.order?.shipping_method, isStaff, fetchSimulationOptions]);
 
-  // Not staff check
   if (isStaff === false) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-primary">
         <div className="text-center max-w-md px-4">
           <Shield className="w-16 h-16 text-aurora-red mx-auto mb-4" />
           <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">Staff Access Required</h1>
-          <p className="text-text-secondary mb-6">
-            This page is only accessible to staff members.
-          </p>
-          <Link href="/">
-            <Button variant="accent">Go Home</Button>
-          </Link>
+          <p className="text-text-secondary mb-6">This page is only accessible to staff members.</p>
+          <Link href="/"><Button variant="accent">Go Home</Button></Link>
         </div>
       </div>
     );
   }
 
-  // Loading
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-primary">
@@ -259,16 +178,13 @@ export default function StaffTransactionPage() {
     );
   }
 
-  // Error
   if (error || !data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-primary">
         <div className="text-center max-w-md px-4">
           <AlertCircle className="w-12 h-12 text-aurora-red mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-polar-night mb-2">{error || 'Transaction not found'}</h2>
-          <Link href="/staff/transactions">
-            <Button variant="accent">Back to Dashboard</Button>
-          </Link>
+          <Link href="/staff/transactions"><Button variant="accent">Back to Dashboard</Button></Link>
         </div>
       </div>
     );
@@ -277,217 +193,91 @@ export default function StaffTransactionPage() {
   if (!user) return null;
 
   const { order, order_items, tracking_events, issues, buyer, seller, messages } = data;
-  const statusInfo = statusConfig[order.status] || { label: order.status, variant: 'default' as const };
 
   return (
     <div className="min-h-screen bg-bg-primary">
-      {/* Header */}
-      <div className="bg-frost-ice/5 border-b border-frost-ice/20 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <Link
-            href="/staff/transactions"
-            className="inline-flex items-center gap-2 text-text-secondary hover:text-frost-ice mb-3 transition-colors text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Staff Dashboard
-          </Link>
-
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <Shield className="w-5 h-5 text-frost-ice" />
-                <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
-                  {order.order_number}
-                </h1>
-                <Badge variant={statusInfo.variant} size="sm">
-                  {statusInfo.label}
-                </Badge>
-                {issues.some((i) => i.status === 'open') && (
-                  <Badge variant="error" size="sm">
-                    <AlertTriangle className="w-3 h-3 mr-1" />
-                    Open Issues
-                  </Badge>
-                )}
-              </div>
-              <p className="text-sm text-text-secondary mt-1">
-                Staff view • Created {formatDateTime(order.timestamps.created_at)}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <OrderDetailHeader
+        orderNumber={order.order_number}
+        status={order.status}
+        subtitle={`Staff view • Created ${formatDateTime(order.timestamps.created_at)}`}
+        backHref="/staff/transactions"
+        backLabel="Back to Staff Dashboard"
+        extraBadges={
+          <>
+            <Badge variant="default" size="sm">
+              <Shield className="w-3 h-3 mr-1" />
+              Staff
+            </Badge>
+            {issues.some((i) => i.status === 'open') && (
+              <Badge variant="error" size="sm">
+                <AlertTriangle className="w-3 h-3 mr-1" />
+                Open Issues
+              </Badge>
+            )}
+          </>
+        }
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left column - Order details */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Buyer & Seller */}
-            <div className="bg-snow-white border border-border rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-polar-night mb-4">Participants</h3>
+          {/* Sidebar */}
+          <div className="lg:col-span-1 space-y-6 order-2 lg:order-1">
+            <OrderPricingSummary order={order} viewerRole="staff" />
 
-              {/* Buyer */}
-              <div className="mb-4 pb-4 border-b border-divider-subtle">
+            {/* Participants (staff-specific: emails/phones) */}
+            <div className="bg-snow-white border border-border rounded-xl p-4">
+              <h3 className="text-sm font-semibold text-polar-night mb-4">Participants</h3>
+              <div className="mb-4 pb-4 border-b border-border-subtle">
                 <div className="flex items-center gap-2 text-xs text-text-muted mb-2">
-                  <User className="w-3 h-3" />
-                  BUYER
+                  <User className="w-3 h-3" />BUYER
                 </div>
                 <p className="font-medium text-polar-night">{buyer?.full_name || 'Unknown'}</p>
                 {buyer?.email && (
                   <div className="flex items-center gap-1 text-sm text-text-secondary mt-1">
-                    <Mail className="w-3 h-3" />
-                    {buyer.email}
+                    <Mail className="w-3 h-3" />{buyer.email}
                   </div>
                 )}
                 {buyer?.phone && (
                   <div className="flex items-center gap-1 text-sm text-text-secondary mt-1">
-                    <Phone className="w-3 h-3" />
-                    {buyer.phone}
+                    <Phone className="w-3 h-3" />{buyer.phone}
                   </div>
                 )}
               </div>
-
-              {/* Seller */}
               <div>
                 <div className="flex items-center gap-2 text-xs text-text-muted mb-2">
-                  <User className="w-3 h-3" />
-                  SELLER
+                  <User className="w-3 h-3" />SELLER
                 </div>
                 <p className="font-medium text-polar-night">{seller?.full_name || 'Unknown'}</p>
                 {seller?.email && (
                   <div className="flex items-center gap-1 text-sm text-text-secondary mt-1">
-                    <Mail className="w-3 h-3" />
-                    {seller.email}
+                    <Mail className="w-3 h-3" />{seller.email}
                   </div>
                 )}
                 {seller?.phone && (
                   <div className="flex items-center gap-1 text-sm text-text-secondary mt-1">
-                    <Phone className="w-3 h-3" />
-                    {seller.phone}
+                    <Phone className="w-3 h-3" />{seller.phone}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Order Items */}
-            <div className="bg-snow-white border border-border rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-polar-night mb-3">Items</h3>
-              <div className="space-y-3">
-                {order_items.map((item) => (
-                  <div key={item.id} className="flex gap-3">
-                    <div className="relative w-12 h-12 rounded bg-bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {item.photo_url ? (
-                        <Image src={item.photo_url} alt={item.game_name} fill className="object-cover" sizes="48px" />
-                      ) : (
-                        <Package className="w-5 h-5 text-text-muted" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-polar-night truncate">{item.game_name}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <Badge variant={item.condition as ListingCondition} size="sm">
-                          {getConditionLabel(item.condition as ListingCondition)}
-                        </Badge>
-                        <span className="text-sm font-semibold text-polar-night">{formatPrice(item.price)}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <OrderShippingSection
+              order={order}
+              trackingEvents={tracking_events}
+              trackingMaxHeight="max-h-40"
+            />
 
-              {/* Totals */}
-              <div className="border-t border-divider-subtle mt-4 pt-4 space-y-1 text-sm">
-                <div className="flex justify-between text-text-secondary">
-                  <span>Items</span>
-                  <span>{formatPrice(order.items_total)}</span>
-                </div>
-                <div className="flex justify-between text-text-secondary">
-                  <span>Shipping</span>
-                  <span>{order.shipping_cost === 0 ? 'Free' : formatPrice(order.shipping_cost)}</span>
-                </div>
-                <div className="flex justify-between font-semibold text-polar-night pt-1">
-                  <span>Total</span>
-                  <span>{formatPrice(order.total_amount)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Shipping/Tracking */}
-            <div className="bg-snow-white border border-border rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-polar-night mb-3">
-                {order.shipping_method === 't2t' ? 'Shipping' : 'Pickup'}
-              </h3>
-
-              {order.shipping_method === 't2t' ? (
-                <div className="space-y-3">
-                  {order.destination?.terminal_name && (
-                    <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-polar-night">
-                          {order.destination.terminal_name}
-                        </p>
-                        {order.destination.terminal_address && (
-                          <p className="text-xs text-text-secondary">{order.destination.terminal_address}</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {order.tracking?.barcode && (
-                    <div className="p-3 bg-frost-ice/10 border border-frost-ice/20 rounded-lg">
-                      <p className="text-xs text-text-secondary mb-1">Tracking</p>
-                      <p className="font-mono text-sm font-bold text-frost-ice">{order.tracking.barcode}</p>
-                      {order.tracking.tracking_url && (
-                        <a
-                          href={order.tracking.tracking_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-frost-ice hover:underline mt-2"
-                        >
-                          Track Package
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Tracking Events */}
-                  {tracking_events.length > 0 && (
-                    <TrackingEventsTimeline
-                      events={tracking_events}
-                      title="Tracking History"
-                      maxHeight="max-h-40"
-                      className="pt-2"
-                    />
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-polar-night">
-                      Pickup in {order.destination?.city || 'TBD'}
-                    </p>
-                    {order.destination?.notes && (
-                      <p className="text-xs text-text-secondary mt-1">{order.destination.notes}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Shipping Simulation (Test Environment Only) */}
+            {/* Shipping Simulation (Test Environment) */}
             {order.shipping_method === 't2t' && simulationOptions.length > 0 && (
-              <div className="bg-aurora-purple/5 border border-aurora-purple/30 rounded-lg p-4">
+              <div className="bg-aurora-purple/5 border border-aurora-purple/30 rounded-xl p-4">
                 <h3 className="text-sm font-semibold text-polar-night mb-3 flex items-center gap-2">
                   <Flask className="w-4 h-4 text-aurora-purple" />
                   Shipping Simulation
                   <Badge variant="warning" size="sm">Test Only</Badge>
                 </h3>
                 <p className="text-xs text-text-secondary mb-4">
-                  Simulate shipping events for testing. This feature is only available in the test environment.
+                  Simulate shipping events for testing.
                 </p>
-
                 {simulationMessage && (
                   <div className={`p-3 rounded-lg mb-4 text-sm ${
                     simulationMessage.type === 'success'
@@ -495,16 +285,13 @@ export default function StaffTransactionPage() {
                       : 'bg-aurora-red/10 text-aurora-red border border-aurora-red/30'
                   }`}>
                     <div className="flex items-center gap-2">
-                      {simulationMessage.type === 'success' ? (
-                        <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                      )}
+                      {simulationMessage.type === 'success'
+                        ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                        : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
                       {simulationMessage.text}
                     </div>
                   </div>
                 )}
-
                 <div className="space-y-2">
                   {simulationOptions.map((option) => (
                     <button
@@ -519,20 +306,18 @@ export default function StaffTransactionPage() {
                         </p>
                         <p className="text-xs text-text-secondary">{option.description}</p>
                       </div>
-                      {simulationLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-aurora-purple" />
-                      ) : (
-                        <ArrowLeft className="w-4 h-4 text-aurora-purple rotate-180" />
-                      )}
+                      {simulationLoading
+                        ? <Loader2 className="w-4 h-4 animate-spin text-aurora-purple" />
+                        : <ArrowLeft className="w-4 h-4 text-aurora-purple rotate-180" />}
                     </button>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Payment Info */}
+            {/* Payment Info (staff-only) */}
             {order.payment && (order.payment.everypay_payment_reference || order.payment.buyer_wallet_debit_cents) && (
-              <div className="bg-snow-white border border-border rounded-lg p-4">
+              <div className="bg-snow-white border border-border rounded-xl p-4">
                 <h3 className="text-sm font-semibold text-polar-night mb-3">Payment Info</h3>
                 <div className="space-y-2 text-xs">
                   {order.payment.everypay_payment_reference && (
@@ -568,10 +353,10 @@ export default function StaffTransactionPage() {
                   {order.payment.wallet_credited_at && (
                     <div>
                       <span className="text-text-muted">Credited At:</span>
-                      <p className="text-polar-night">{new Date(order.payment.wallet_credited_at).toLocaleString()}</p>
+                      <p className="text-polar-night">{formatDateTime(order.payment.wallet_credited_at)}</p>
                     </div>
                   )}
-                  {order.refund_amount && (
+                  {order.refund_amount != null && order.refund_amount > 0 && (
                     <div>
                       <span className="text-text-muted">Refund Amount:</span>
                       <p className="font-medium text-aurora-red">{formatPrice(order.refund_amount)}</p>
@@ -588,27 +373,27 @@ export default function StaffTransactionPage() {
             )}
           </div>
 
-          {/* Right column - Issues and Messages */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Issues */}
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6 order-1 lg:order-2">
+            <OrderStatusNotice order={order} viewerRole="staff" />
+
+            {/* Issues (staff-only) */}
             {issues.length > 0 && (
-              <div className="bg-snow-white border border-border rounded-lg p-4">
+              <div className="bg-snow-white border border-border rounded-xl p-4">
                 <h3 className="text-sm font-semibold text-polar-night mb-4 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-aurora-red" />
                   Issues ({issues.length})
                 </h3>
-
                 <div className="space-y-4">
                   {issues.map((issue) => {
                     const issueStatusInfo = issueStatusConfig[issue.status] || { label: issue.status, variant: 'default' as const };
-
                     return (
                       <div
                         key={issue.id}
                         className={`p-4 rounded-lg border ${
                           issue.status === 'open' || issue.status === 'investigating'
                             ? 'border-aurora-red/30 bg-aurora-red/5'
-                            : 'border-border-subtle bg-background-secondary'
+                            : 'border-border-subtle bg-bg-secondary'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3 mb-2">
@@ -622,32 +407,22 @@ export default function StaffTransactionPage() {
                               </Badge>
                             </div>
                             <p className="text-xs text-text-muted mt-1">
-                              Reported by {issue.reporter_role} •{' '}
-                              {formatDateTime(issue.created_at)}
+                              Reported by {issue.reporter_role} • {formatDateTime(issue.created_at)}
                             </p>
                           </div>
                         </div>
-
                         <p className="text-sm text-text-secondary mt-2">{issue.description}</p>
-
                         {issue.photo_urls && issue.photo_urls.length > 0 && (
                           <div className="flex gap-2 mt-3">
                             {issue.photo_urls.map((url, idx) => (
-                              <a
-                                key={idx}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="relative w-16 h-16 rounded overflow-hidden border border-border"
-                              >
+                              <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="relative w-16 h-16 rounded overflow-hidden border border-border">
                                 <Image src={url} alt={`Evidence ${idx + 1}`} fill className="object-cover" sizes="64px" />
                               </a>
                             ))}
                           </div>
                         )}
-
                         {issue.resolution_notes && (
-                          <div className="mt-3 pt-3 border-t border-divider-subtle">
+                          <div className="mt-3 pt-3 border-t border-border-subtle">
                             <p className="text-xs text-text-muted">Resolution Notes:</p>
                             <p className="text-sm text-text-secondary">{issue.resolution_notes}</p>
                           </div>
@@ -659,86 +434,17 @@ export default function StaffTransactionPage() {
               </div>
             )}
 
-            {/* Messages */}
-            <div className="bg-snow-white border border-border rounded-lg overflow-hidden">
-              <div className="px-4 py-3 border-b border-divider-subtle bg-background-secondary">
-                <h3 className="text-sm font-semibold text-polar-night flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-frost-ice" />
-                  Conversation ({messages.length} messages)
-                </h3>
-              </div>
+            <OrderItemsList items={order_items} title={`Items (${order_items.length})`} />
 
-              <div className="p-4 max-h-[600px] overflow-y-auto">
-                {messages.length === 0 ? (
-                  <div className="text-center py-8">
-                    <MessageSquare className="w-12 h-12 text-text-muted mx-auto mb-3" />
-                    <p className="text-text-secondary">No messages in this conversation</p>
-                  </div>
-                ) : (
-                  messages.map((message) => (
-                    <div key={message.id} className="mb-2">
-                      {/* Show who sent the message for staff context */}
-                      {!message.is_system_message && (
-                        <div className={`text-xs text-text-muted mb-1 px-1 ${
-                          message.sender_id === buyer?.id ? 'text-left' : 'text-right'
-                        }`}>
-                          {message.sender_id === buyer?.id ? '(Buyer)' : '(Seller)'}
-                        </div>
-                      )}
-                      <MessageBubble
-                        message={message}
-                        isOwn={false}
-                      />
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            <ConversationPanel
+              messages={messages}
+              currentUserId={null}
+              buyerId={data.conversation.buyer_id}
+              readOnly
+              title={`Conversation (${messages.length} messages)`}
+            />
 
-            {/* Timestamps */}
-            <div className="bg-snow-white border border-border rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-polar-night mb-3 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-frost-ice" />
-                Timeline
-              </h3>
-
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">Created</span>
-                  <span className="text-polar-night">{formatDateTime(order.timestamps.created_at)}</span>
-                </div>
-                {order.timestamps.paid_at && (
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Paid</span>
-                    <span className="text-polar-night">{formatDateTime(order.timestamps.paid_at)}</span>
-                  </div>
-                )}
-                {order.timestamps.seller_responded_at && (
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Seller Responded</span>
-                    <span className="text-polar-night">{formatDateTime(order.timestamps.seller_responded_at)}</span>
-                  </div>
-                )}
-                {order.timestamps.label_generated_at && (
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Label Generated</span>
-                    <span className="text-polar-night">{formatDateTime(order.timestamps.label_generated_at)}</span>
-                  </div>
-                )}
-                {order.timestamps.cancelled_at && (
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Cancelled</span>
-                    <span className="text-aurora-red">{formatDateTime(order.timestamps.cancelled_at)}</span>
-                  </div>
-                )}
-                {order.timestamps.refunded_at && (
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Refunded</span>
-                    <span className="text-aurora-red">{formatDateTime(order.timestamps.refunded_at)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            <OrderTimeline timestamps={order.timestamps} />
           </div>
         </div>
       </div>
