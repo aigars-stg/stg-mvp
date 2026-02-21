@@ -13,6 +13,7 @@ export type MainTab = 'selling' | 'wanted' | 'saved';
 export interface UseMyListingsReturn {
   // Auth
   user: ReturnType<typeof useAuth>['user'];
+  isActiveSeller: boolean;
 
   // Main tab
   mainTab: MainTab;
@@ -72,18 +73,21 @@ export interface UseMyListingsReturn {
 }
 
 export function useMyListings(): UseMyListingsReturn {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const searchParams = useSearchParams();
 
-  // Main tab state
-  const [mainTab, setMainTab] = useState<MainTab>('selling');
+  const isActiveSeller = profile?.seller_status === 'active';
+
+  // Main tab state — non-sellers default to 'saved' instead of 'selling'
+  const [mainTab, setMainTab] = useState<MainTab>('saved');
 
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab === 'wanted') setMainTab('wanted');
+    if (tab === 'selling' && isActiveSeller) setMainTab('selling');
+    else if (tab === 'wanted') setMainTab('wanted');
     else if (tab === 'saved') setMainTab('saved');
-    else setMainTab('selling');
-  }, [searchParams]);
+    else setMainTab(isActiveSeller ? 'selling' : 'saved');
+  }, [searchParams, isActiveSeller]);
 
   // Selling (regular listings) state
   const [listings, setListings] = useState<Listing[]>([]);
@@ -129,9 +133,12 @@ export function useMyListings(): UseMyListingsReturn {
   const [wantedActionLoading, setWantedActionLoading] = useState(false);
   const [wantedSuccessMessage, setWantedSuccessMessage] = useState('');
 
-  // Fetch regular listings
+  // Fetch regular listings (skip for non-sellers)
   useEffect(() => {
-    if (!user) return;
+    if (!user || !isActiveSeller) {
+      setLoading(false);
+      return;
+    }
 
     const fetchListings = async () => {
       try {
@@ -161,7 +168,7 @@ export function useMyListings(): UseMyListingsReturn {
     };
 
     fetchListings();
-  }, [user]);
+  }, [user, isActiveSeller]);
 
   // Fetch wanted listings
   useEffect(() => {
@@ -410,6 +417,7 @@ export function useMyListings(): UseMyListingsReturn {
   return {
     // Auth
     user,
+    isActiveSeller,
 
     // Main tab
     mainTab,

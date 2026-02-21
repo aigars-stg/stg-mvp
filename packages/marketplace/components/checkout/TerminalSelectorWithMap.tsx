@@ -44,69 +44,53 @@ export function TerminalSelectorWithMap({
   const t = useTranslations('Checkout.TerminalSelector');
   // Internal country state (auto-switches on cross-country terminal selection)
   const [country, setCountry] = useState<TerminalCountry>(defaultCountry);
-  // Per-country terminals (shown on map and in list)
-  const [terminals, setTerminals] = useState<Terminal[]>([]);
-  // All terminals across all countries (for cross-country search)
+  // All terminals across all countries
   const [allTerminals, setAllTerminals] = useState<Terminal[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  // Independent search states for map and list
+  const [mapSearchQuery, setMapSearchQuery] = useState('');
+  const [listSearchQuery, setListSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [showTerminalList, setShowTerminalList] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const searchRef = useRef<HTMLInputElement>(null);
-  const allTerminalsLoaded = useRef(false);
+  const fetchStarted = useRef(false);
 
-  // Fetch all terminals from all countries on mount (for cross-country search)
+  // Fetch all terminals from all countries on mount (single API call)
   useEffect(() => {
-    if (allTerminalsLoaded.current) return;
-    allTerminalsLoaded.current = true;
+    if (fetchStarted.current && retryCount === 0) return;
+    fetchStarted.current = true;
 
-    const fetchAllTerminals = async () => {
-      try {
-        const countries: TerminalCountry[] = ['LT', 'LV', 'EE'];
-        const results = await Promise.all(
-          countries.map(async (c) => {
-            const response = await fetch(`/api/shipping/terminals?country=${c}`);
-            if (!response.ok) return [];
-            const data = await response.json();
-            return (data.terminals || []) as Terminal[];
-          })
-        );
-        setAllTerminals(results.flat());
-      } catch {
-        // Non-critical — search will fall back to current country terminals
-      }
-    };
-
-    fetchAllTerminals();
-  }, []);
-
-  // Fetch terminals for the selected country (for map display and list)
-  useEffect(() => {
     const fetchTerminals = async () => {
       setLoading(true);
       setFetchError(null);
 
       try {
-        const response = await fetch(`/api/shipping/terminals?country=${country}`);
+        const response = await fetch('/api/shipping/terminals/all');
         const data = await response.json();
 
         if (!response.ok) {
           throw new Error(data.error || 'Failed to fetch terminals');
         }
 
-        setTerminals(data.terminals || []);
+        setAllTerminals(data.terminals || []);
       } catch (err) {
         setFetchError(err instanceof Error ? err.message : 'Failed to load terminals');
-        setTerminals([]);
+        setAllTerminals([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchTerminals();
-  }, [country, retryCount]);
+  }, [retryCount]);
+
+  // Derive per-country terminals for map display
+  const terminals = useMemo(
+    () => allTerminals.filter((t) => t.countryCode === country),
+    [allTerminals, country]
+  );
 
   // Sync internal country when selectedTerminal changes externally (e.g., preferred terminal)
   useEffect(() => {
@@ -123,37 +107,38 @@ export function TerminalSelectorWithMap({
     }
     onSelect(terminal);
     setShowTerminalList(false);
-    setSearchQuery('');
+    setMapSearchQuery('');
+    setListSearchQuery('');
   }, [country, onSelect]);
 
-  // Filter terminals by search — search across ALL countries
+  // Map search: search across ALL countries (for map overlay dropdown)
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) return [];
+    if (!mapSearchQuery.trim()) return [];
 
-    const query = searchQuery.toLowerCase();
-    const source = allTerminals.length > 0 ? allTerminals : terminals;
+    const query = mapSearchQuery.toLowerCase();
+    return allTerminals.filter(
+      (t) =>
+        t.name.toLowerCase().includes(query) ||
+        t.address.toLowerCase().includes(query) ||
+        t.city.toLowerCase().includes(query)
+    );
+  }, [allTerminals, mapSearchQuery]);
+
+  // List search: filter across ALL countries (for full list view)
+  const filteredTerminals = useMemo(() => {
+    const source = allTerminals;
+    if (!listSearchQuery.trim()) return source;
+
+    const query = listSearchQuery.toLowerCase();
     return source.filter(
       (t) =>
         t.name.toLowerCase().includes(query) ||
         t.address.toLowerCase().includes(query) ||
         t.city.toLowerCase().includes(query)
     );
-  }, [allTerminals, terminals, searchQuery]);
+  }, [allTerminals, listSearchQuery]);
 
-  // Filter current-country terminals for list view
-  const filteredTerminals = useMemo(() => {
-    if (!searchQuery.trim()) return terminals;
-
-    const query = searchQuery.toLowerCase();
-    return terminals.filter(
-      (t) =>
-        t.name.toLowerCase().includes(query) ||
-        t.address.toLowerCase().includes(query) ||
-        t.city.toLowerCase().includes(query)
-    );
-  }, [terminals, searchQuery]);
-
-  // Group terminals by city (for full list view)
+  // Group terminals by city (for full list view) — flat across all countries
   const terminalsByCity = useMemo(() => {
     const grouped: Record<string, Terminal[]> = {};
     filteredTerminals.forEach((terminal) => {
@@ -165,10 +150,9 @@ export function TerminalSelectorWithMap({
     return Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b));
   }, [filteredTerminals]);
 
-  // Search results dropdown (shared between desktop and mobile)
-  // Searches across ALL countries and shows country flags
+  // Search results dropdown (for map overlay search)
   const SearchDropdown = () => {
-    if (!searchQuery.trim() || searchResults.length === 0) return null;
+    if (!mapSearchQuery.trim() || searchResults.length === 0) return null;
     return (
       <div className="absolute left-0 right-0 mt-1 bg-white/95 backdrop-blur-sm border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto z-30">
         {searchResults.slice(0, 8).map((terminal) => (
@@ -193,7 +177,7 @@ export function TerminalSelectorWithMap({
     );
   };
 
-  // Full terminal list component (current country only)
+  // Full terminal list component (all countries, grouped by city)
   const TerminalList = ({ maxHeight = '350px' }: { maxHeight?: string }) => (
     <div className="space-y-2">
       {loading ? (
@@ -214,7 +198,7 @@ export function TerminalSelectorWithMap({
         </div>
       ) : filteredTerminals.length === 0 ? (
         <div className="text-center py-8 text-text-secondary" role="status">
-          {searchQuery
+          {listSearchQuery
             ? t('noTerminalsFound')
             : t('noTerminalsAvailable')}
         </div>
@@ -244,6 +228,7 @@ export function TerminalSelectorWithMap({
                       <MapPin className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
                       <div className="flex-grow min-w-0">
                         <div className="flex items-center gap-2">
+                          <span className={`${COUNTRY_FLAGS[terminal.countryCode as TerminalCountry]} text-sm flex-shrink-0`} aria-hidden="true" />
                           <span className="font-medium text-polar-night">
                             {terminal.name}
                           </span>
@@ -320,16 +305,16 @@ export function TerminalSelectorWithMap({
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" aria-hidden="true" />
               <input
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={mapSearchQuery}
+                onChange={(e) => setMapSearchQuery(e.target.value)}
                 placeholder={t('searchPlaceholder')}
                 aria-label={t('searchPlaceholder')}
                 className="w-full pl-9 pr-8 py-2.5 rounded-lg border border-border bg-white/95 backdrop-blur-sm text-sm text-polar-night placeholder-text-muted focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none transition-all shadow-sm"
               />
-              {searchQuery && (
+              {mapSearchQuery && (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => setMapSearchQuery('')}
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-polar-night"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -365,8 +350,8 @@ export function TerminalSelectorWithMap({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" aria-hidden="true" />
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={listSearchQuery}
+              onChange={(e) => setListSearchQuery(e.target.value)}
               placeholder={t('searchPlaceholder')}
               aria-label={t('searchPlaceholder')}
               className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-bg-primary text-polar-night placeholder-text-muted focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none transition-all min-h-[48px]"
@@ -394,16 +379,16 @@ export function TerminalSelectorWithMap({
               <input
                 ref={searchRef}
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={mapSearchQuery}
+                onChange={(e) => setMapSearchQuery(e.target.value)}
                 placeholder={t('searchPlaceholder')}
                 aria-label={t('searchPlaceholder')}
                 className="w-full pl-9 pr-8 py-2.5 rounded-lg border border-border bg-white/95 backdrop-blur-sm text-sm text-polar-night placeholder-text-muted focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none transition-all shadow-sm"
               />
-              {searchQuery && (
+              {mapSearchQuery && (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => setMapSearchQuery('')}
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-polar-night"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -469,8 +454,8 @@ export function TerminalSelectorWithMap({
                 <input
                   id="terminal-search-full"
                   type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={listSearchQuery}
+                  onChange={(e) => setListSearchQuery(e.target.value)}
                   placeholder={t('searchPlaceholder')}
                   aria-label={t('searchPlaceholder')}
                   className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-bg-primary text-polar-night placeholder-text-muted focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none transition-all"

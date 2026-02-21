@@ -46,24 +46,6 @@ export interface UserProfile {
   is_staff?: boolean;
 }
 
-/**
- * Combined user profile with seller data (from user_profiles_full view)
- * Use this during the migration period for backward compatibility
- */
-export interface UserProfileFull extends UserProfile {
-  // Seller fields (from seller_profiles via view)
-  seller_status: SellerStatus;
-  seller_terms_accepted_at: string | null;
-  seller_terms_version: string;
-  payout_iban: string | null;
-  payout_account_holder_name: string | null;
-  dac7_annual_transaction_count: number;
-  dac7_annual_sales_total: number;
-  dac7_reporting_year: number | null;
-  dac7_tax_id: string | null;
-  dac7_tax_id_type: string | null;
-}
-
 // Re-export seller types for convenience
 export type { SellerProfile, SellerStatus };
 

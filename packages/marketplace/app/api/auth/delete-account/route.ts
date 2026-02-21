@@ -67,7 +67,7 @@ export async function DELETE(_request: NextRequest) {
       .from('orders')
       .select('id')
       .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
-      .in('status', ['pending_seller', 'confirmed', 'shipped', 'delivered', 'disputed'])
+      .in('status', ['pending_seller', 'accepted', 'shipped', 'delivered', 'disputed'])
       .limit(1);
 
     if (activeOrders && activeOrders.length > 0) {

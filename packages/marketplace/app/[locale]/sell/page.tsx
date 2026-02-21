@@ -1173,7 +1173,7 @@ function SellPageContent() {
                 transactionMethod: method,
               }))}
               canUseInstantBuy={sellerCapabilities.canCreateInstantBuy}
-              onUpgradeClick={() => router.push('/seller/settings/payouts')}
+              onUpgradeClick={() => router.push('/seller/dashboard?tab=earnings')}
               hasPhone={hasPhone}
               phoneValue={sellerPhone || ''}
               onPhoneChange={(phone) => setSellerPhone(phone)}

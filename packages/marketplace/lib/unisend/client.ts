@@ -40,12 +40,8 @@ let tokenCache: {
   expiresAt: number;
 } | null = null;
 
-// Terminal cache (1 hour TTL)
-const terminalCache: Map<
-  TerminalCountry,
-  { terminals: Terminal[]; expiresAt: number }
-> = new Map();
-const TERMINAL_CACHE_TTL = 60 * 60 * 1000; // 1 hour
+// Terminal cache TTL
+const TERMINAL_CACHE_TTL_SECONDS = 60 * 60; // 1 hour
 
 // ============================================
 // Token Management
@@ -234,62 +230,44 @@ async function handleApiError(response: Response): Promise<never> {
 
 /**
  * Get available terminals for a country
- * Results are cached for 1 hour
+ * Results are cached in Redis (+ in-memory fallback) for 1 hour
  */
 export async function getTerminals(
-  countryCode: TerminalCountry,
-  searchQuery?: string
+  countryCode: TerminalCountry
 ): Promise<Terminal[]> {
-  // Check cache first
-  const cached = terminalCache.get(countryCode);
-  if (cached && cached.expiresAt > Date.now()) {
-    const terminals = cached.terminals;
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return terminals.filter(
-        (t) =>
-          t.name.toLowerCase().includes(query) ||
-          t.address.toLowerCase().includes(query) ||
-          t.city.toLowerCase().includes(query)
-      );
-    }
-    return terminals;
-  }
+  const cacheKey = `unisend:terminals:${countryCode}`;
+
+  // Check cache first (Redis with in-memory fallback)
+  const cached = await cacheGet<Terminal[]>(cacheKey);
+  if (cached) return cached;
 
   // Fetch from API
   const params = new URLSearchParams({ receiverCountryCode: countryCode });
-
   const terminals = await apiRequest<Terminal[]>(`/api/v2/terminal?${params}`);
 
   // Cache the results
-  terminalCache.set(countryCode, {
-    terminals,
-    expiresAt: Date.now() + TERMINAL_CACHE_TTL,
-  });
-
-  // Filter if search query provided
-  if (searchQuery) {
-    const query = searchQuery.toLowerCase();
-    return terminals.filter(
-      (t) =>
-        t.name.toLowerCase().includes(query) ||
-        t.address.toLowerCase().includes(query) ||
-        t.city.toLowerCase().includes(query)
-    );
-  }
+  await cacheSet(cacheKey, terminals, TERMINAL_CACHE_TTL_SECONDS).catch(() => {});
 
   return terminals;
 }
 
 /**
- * Get a specific terminal by ID
+ * Get all terminals across all countries (LT, LV, EE)
+ * Results are cached in Redis for 1 hour
  */
-export async function getTerminal(
-  countryCode: TerminalCountry,
-  terminalId: string
-): Promise<Terminal | null> {
-  const terminals = await getTerminals(countryCode);
-  return terminals.find((t) => t.id === terminalId) || null;
+export async function getAllTerminals(): Promise<Terminal[]> {
+  const cacheKey = 'unisend:terminals:all';
+
+  const cached = await cacheGet<Terminal[]>(cacheKey);
+  if (cached) return cached;
+
+  const countries: TerminalCountry[] = ['LT', 'LV', 'EE'];
+  const results = await Promise.all(countries.map((c) => getTerminals(c)));
+  const all = results.flat();
+
+  await cacheSet(cacheKey, all, TERMINAL_CACHE_TTL_SECONDS).catch(() => {});
+
+  return all;
 }
 
 /**
@@ -441,8 +419,13 @@ export async function createAndShipParcel(
 /**
  * Clear terminal cache (useful for testing or manual refresh)
  */
-export function clearTerminalCache(): void {
-  terminalCache.clear();
+export async function clearTerminalCache(): Promise<void> {
+  const { cacheDel } = await import('@/lib/cache');
+  const countries: TerminalCountry[] = ['LT', 'LV', 'EE'];
+  await Promise.all([
+    ...countries.map((c) => cacheDel(`unisend:terminals:${c}`)),
+    cacheDel('unisend:terminals:all'),
+  ]).catch(() => {});
 }
 
 /**
@@ -458,7 +441,7 @@ export function clearTokenCache(): void {
 
 const unisendClient = {
   getTerminals,
-  getTerminal,
+  getAllTerminals,
   createParcel,
   initiateShipping,
   getBarcodes,

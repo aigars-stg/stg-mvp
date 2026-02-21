@@ -4,14 +4,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { Button, Badge, Card } from '@second-turn/design-system';
-import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User, ShoppingBag } from '@/lib/icons';
+import { Package, Time as Clock, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User, ShoppingBag } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
-// ListingCondition type available via @/lib/types/listing if needed
 import { useTranslations } from 'next-intl';
 import { formatDate } from '@/lib/date-utils';
 import { formatPrice } from '@/lib/services/pricing';
 import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import { resolveListingImage } from '@/lib/utils/listing-image';
+import { getStatusConfig } from '@/components/shipping';
 
 interface OrderItem {
   id: string;
@@ -42,18 +42,6 @@ interface Order {
 }
 
 type FilterTab = 'all' | 'pending' | 'accepted' | 'shipped' | 'completed' | 'cancelled';
-
-const statusConfig = {
-  pending_payment: { label: 'Pending Payment', color: 'default', icon: Clock },
-  pending_seller: { label: 'Waiting for Seller', color: 'warning', icon: Clock },
-  accepted: { label: 'Accepted', color: 'trust', icon: CheckCircle2 },
-  shipped: { label: 'Shipped', color: 'success', icon: Truck },
-  in_transit: { label: 'In Transit', color: 'info', icon: Truck },
-  delivered: { label: 'Delivered', color: 'success', icon: Package },
-  completed: { label: 'Completed', color: 'default', icon: CheckCircle2 },
-  cancelled: { label: 'Cancelled', color: 'danger', icon: XCircle },
-  disputed: { label: 'Disputed', color: 'danger', icon: AlertCircle },
-};
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -118,11 +106,6 @@ export default function OrdersPage() {
     shipped: orders.filter((o) => ['shipped', 'in_transit'].includes(o.status)).length,
     completed: orders.filter((o) => o.status === 'completed').length,
     cancelled: orders.filter((o) => o.status === 'cancelled').length,
-  };
-
-  // Get status config
-  const getStatusConfig = (status: string) => {
-    return statusConfig[status as keyof typeof statusConfig] || statusConfig.pending_payment;
   };
 
   // Loading state
@@ -225,7 +208,7 @@ export default function OrdersPage() {
                           <h3 className="text-lg font-semibold text-polar-night">
                             {order.order_number}
                           </h3>
-                          <Badge variant={statusInfo.color as 'default' | 'warning' | 'trust' | 'success' | 'error'}>
+                          <Badge variant={statusInfo.variant}>
                             <StatusIcon className="w-3 h-3 mr-1" />
                             {statusInfo.label}
                           </Badge>

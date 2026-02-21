@@ -10,7 +10,7 @@ import { refundToWallet } from './wallet';
 // Statuses that allow refunds (before seller wallet credit, plus disputed)
 export const REFUNDABLE_STATUSES = [
   'pending_seller',
-  'confirmed',
+  'accepted',
   'shipped',
   'delivered',
   'disputed',

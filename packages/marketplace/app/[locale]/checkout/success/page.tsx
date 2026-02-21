@@ -384,7 +384,7 @@ function SuccessPageContent() {
               </div>
               {order.wallet_debit_cents > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-text-secondary">{t('orderSummary.walletCredit') || 'Wallet credit'}</span>
+                  <span className="text-text-secondary">{t('orderSummary.walletCredit')}</span>
                   <span className="text-aurora-green">-{formatPrice(order.wallet_debit_cents / 100)}</span>
                 </div>
               )}

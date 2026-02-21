@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import {  LogOut, ShoppingBag, Store, Settings, ChevronRight, Layout as LayoutDashboard, Shield  } from '@/lib/icons';
+import { LogOut, ShoppingBag, Store, ChevronRight, Layout as LayoutDashboard, Heart, Shield } from '@/lib/icons';
 import { getInitials } from '@/lib/auth/utils';
 import { useTranslations } from 'next-intl';
 
@@ -104,9 +104,9 @@ export function UserMenu() {
       {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-64 bg-snow-white rounded-lg shadow-lg border border-border py-2 z-50">
-          {/* User Info Header - Clickable */}
+          {/* User Info Header - Links to Account Settings */}
           <Link
-            href="/account/dashboard"
+            href="/account/settings"
             onClick={() => setIsOpen(false)}
             className="block px-4 py-3 border-b border-border-subtle hover:bg-bg-secondary transition-colors group relative"
           >
@@ -126,7 +126,7 @@ export function UserMenu() {
 
           {/* Menu Items */}
           <div className="py-1">
-            {/* 1. Seller Dashboard (if active seller) */}
+            {/* Seller Dashboard (sellers only) */}
             {isActiveSeller && (
               <Link
                 href="/seller/dashboard"
@@ -138,7 +138,7 @@ export function UserMenu() {
               </Link>
             )}
 
-            {/* 2. My Orders */}
+            {/* My Orders */}
             <Link
               href="/orders"
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
@@ -148,27 +148,33 @@ export function UserMenu() {
               {t('userMenu.myOrders')}
             </Link>
 
-            {/* 3. My Listings */}
+            {/* My Listings / Saved & Wanted (conditional label) */}
             <Link
               href="/my-listings"
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <LayoutDashboard className="w-4 h-4 text-frost-ice" />
-              {t('userMenu.myListings')}
+              {isActiveSeller ? (
+                <LayoutDashboard className="w-4 h-4 text-frost-ice" />
+              ) : (
+                <Heart className="w-4 h-4 text-aurora-red" />
+              )}
+              {isActiveSeller ? t('userMenu.myListings') : t('userMenu.savedAndWanted')}
             </Link>
 
-            {/* 4. Account Settings */}
-            <Link
-              href="/account/settings"
-              className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <Settings className="w-4 h-4 text-frost-ice" />
-              {t('userMenu.accountSettings')}
-            </Link>
+            {/* Start selling (non-sellers only) */}
+            {!isActiveSeller && (
+              <Link
+                href="/seller/onboard"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                <Store className="w-4 h-4 text-aurora-green" />
+                {t('userMenu.startSelling')}
+              </Link>
+            )}
 
-            {/* 5. Staff Dashboard (if staff) */}
+            {/* Staff Dashboard (staff only) */}
             {isStaff && (
               <Link
                 href="/staff/transactions"

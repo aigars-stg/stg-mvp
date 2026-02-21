@@ -246,7 +246,7 @@ If anything is missing, you will see a clear message explaining what to fix.
 
 ### Finding Your Listings
 
-Go to **[Dashboard](/account/dashboard)** → **My Listings** to see all your active listings.
+Go to **[My Listings](/my-listings)** to see all your active listings.
 
 ### Editing a Listing
 

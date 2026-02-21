@@ -113,7 +113,7 @@ export default function SellerOnboardingCompletePage() {
                 <Button
                   variant="secondary"
                   size="md"
-                  onClick={() => router.push('/seller/orders')}
+                  onClick={() => router.push('/seller/dashboard?tab=orders')}
                 >
                   {t('complete.whatYouCanDo.manageSales.button')}
                 </Button>
@@ -184,7 +184,7 @@ export default function SellerOnboardingCompletePage() {
                 ))}
               </ul>
               <Link
-                href="/seller/settings/payouts"
+                href="/seller/dashboard?tab=earnings"
                 className="text-sm text-frost-ice hover:underline font-medium"
               >
                 {t('complete.earnings.viewWallet')}

@@ -27,8 +27,7 @@ export type BadgeVariant =
   | 'success'
   | 'warning'
   | 'error'
-  | 'trust'
-  | 'info';
+  | 'trust';
 
 // Status configuration interface
 export interface StatusConfig {
@@ -61,7 +60,7 @@ export const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
   },
   in_transit: {
     label: 'In Transit',
-    variant: 'info',
+    variant: 'trust',
     icon: Truck,
   },
   delivered: {

@@ -65,7 +65,18 @@ export default function ReviewOrderPage() {
           throw new Error(data.error || 'Failed to fetch order');
         }
         const orderData = await orderRes.json();
-        setOrder(orderData.order);
+        const apiOrder = orderData.order;
+        setOrder({
+          id: apiOrder.id,
+          order_number: apiOrder.order_number,
+          seller_id: apiOrder.seller_id,
+          seller_name: apiOrder.seller_profile?.name || 'Seller',
+          status: apiOrder.status,
+          items: (apiOrder.order_items || []).map((item: { game_name: string; photo_url: string | null; game_thumbnail: string | null }) => ({
+            game_name: item.game_name,
+            photo_url: item.photo_url || item.game_thumbnail || null,
+          })),
+        });
 
         // Check eligibility to review
         // We'll use the server-side check via the API

@@ -9,7 +9,7 @@ describe('REFUNDABLE_STATUSES', () => {
   it('includes all pre-completion statuses and disputed', () => {
     expect(REFUNDABLE_STATUSES).toEqual([
       'pending_seller',
-      'confirmed',
+      'accepted',
       'shipped',
       'delivered',
       'disputed',
@@ -27,7 +27,7 @@ describe('REFUNDABLE_STATUSES', () => {
 describe('isRefundableStatus', () => {
   it('returns true for all refundable statuses', () => {
     expect(isRefundableStatus('pending_seller')).toBe(true);
-    expect(isRefundableStatus('confirmed')).toBe(true);
+    expect(isRefundableStatus('accepted')).toBe(true);
     expect(isRefundableStatus('shipped')).toBe(true);
     expect(isRefundableStatus('delivered')).toBe(true);
     expect(isRefundableStatus('disputed')).toBe(true);

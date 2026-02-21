@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { postReceiptConfirmedMessage, postOrderCompletedMessage } from '@/lib/transactions';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { creditSellerWallet } from '@/lib/services/wallet';
+
+const adminSupabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 /**
  * POST /api/transactions/[orderId]/confirm-receipt
@@ -14,13 +21,13 @@ export async function POST(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const { response, user, supabase } = await requireAuth();
+    const { response, user } = await requireAuth();
     if (response) return response;
 
     const orderId = params.orderId;
 
-    // Fetch order and verify access
-    const { data: order, error: orderError } = await supabase
+    // Fetch order (use admin client to bypass RLS)
+    const { data: order, error: orderError } = await adminSupabase
       .from('orders')
       .select(`
         id,
@@ -55,8 +62,8 @@ export async function POST(
       );
     }
 
-    // Update order to completed
-    const { error: updateError } = await supabase
+    // Update order to completed (admin client bypasses RLS)
+    const { error: updateError } = await adminSupabase
       .from('orders')
       .update({
         status: 'completed',
@@ -69,6 +76,12 @@ export async function POST(
         { error: 'Failed to confirm receipt' },
         { status: 500 }
       );
+    }
+
+    // Credit seller wallet (order is completed, release funds)
+    const walletResult = await creditSellerWallet(adminSupabase, orderId);
+    if (!walletResult.success) {
+      console.error(`[confirm-receipt] Wallet credit failed for order ${orderId}: ${walletResult.error}`);
     }
 
     // Post system messages (non-blocking)

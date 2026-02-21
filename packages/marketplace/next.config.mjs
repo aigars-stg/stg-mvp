@@ -105,7 +105,7 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               // Scripts: self + Sentry + Cloudflare Turnstile + Vercel Analytics
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://browser.sentry-cdn.com https://va.vercel-scripts.com https://vercel.live",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://browser.sentry-cdn.com https://va.vercel-scripts.com https://vercel.live",
               // Workers: self + blob (for MapLibre GL web workers)
               "worker-src 'self' blob:",
               // Styles: self + inline (for CSS-in-JS)
