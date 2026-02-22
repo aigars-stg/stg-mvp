@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -21,7 +21,7 @@ import { PreferredTerminalSection } from '@/components/account/PreferredTerminal
 
 type SettingsTab = 'profile' | 'preferences' | 'privacy';
 
-export default function AccountSettingsPage() {
+function AccountSettingsContent() {
   const t = useTranslations('AccountSettings');
   const { user, profile, updateProfile, refreshProfile, signOut, isProfileComplete } = useAuth();
   const searchParams = useSearchParams();
@@ -570,5 +570,13 @@ export default function AccountSettingsPage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+export default function AccountSettingsPage() {
+  return (
+    <Suspense>
+      <AccountSettingsContent />
+    </Suspense>
   );
 }
