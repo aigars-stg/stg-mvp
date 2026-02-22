@@ -149,6 +149,11 @@ export function SellerTrustCompact({
   const t = useTranslations('SellerDashboard.SellerTrustBadge');
   const tier = badgeTier || getSellerBadgeTier(totalSales, averageRating);
 
+  // Nothing to show for sellers with no sales and no reviews
+  if (totalSales === 0 && totalReviews === 0) {
+    return null;
+  }
+
   return (
     <div className={cn('flex items-center gap-1 text-xs text-text-muted', className)}>
       {totalReviews > 0 && (
@@ -157,7 +162,9 @@ export function SellerTrustCompact({
           <span className="font-medium text-text-secondary">{averageRating.toFixed(1)}</span>
         </>
       )}
-      <span>{totalSales === 0 ? t('newSeller') : `(${totalSales} ${totalSales === 1 ? t('sale') : t('sales')})`}</span>
+      {totalSales > 0 && (
+        <span>({totalSales} {totalSales === 1 ? t('sale') : t('sales')})</span>
+      )}
       {tier !== 'new_seller' && (
         <BadgeTierPill tier={tier} size="sm" />
       )}

@@ -20,7 +20,7 @@ interface PhotoUploadProps {
   onExistingPhotosChange?: (urls: string[]) => void; // For edit mode
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
 
 export function PhotoUpload({

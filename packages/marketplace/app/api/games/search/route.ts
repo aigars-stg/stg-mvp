@@ -57,20 +57,49 @@ export async function GET(request: NextRequest) {
     // This balances performance with getting all relevant exact matches
     const fetchLimit = Math.min(limit * 3, 300); // Cap at 300 to prevent timeouts
 
-    // Search in primary name first (fast index-based search)
-    let nameQuery = supabase
+    const selectCols = 'id, name, yearpublished, thumbnail, bayesaverage, is_expansion, alternate_names' as const;
+
+    // Run two queries in parallel:
+    // 1. "starts with" query — catches exact matches and prefix matches that
+    //    would otherwise be drowned out by thousands of substring hits
+    //    (e.g. searching "TEN" matches 2000+ games containing "ten")
+    // 2. "contains" query — broader substring search
+    let prefixQuery = supabase
       .from('games')
-      .select('id, name, yearpublished, thumbnail, bayesaverage, is_expansion, alternate_names')
+      .select(selectCols)
+      .ilike('name', `${query}%`);
+
+    let substringQuery = supabase
+      .from('games')
+      .select(selectCols)
       .ilike('name', `%${query}%`);
 
     if (baseGamesOnly) {
-      nameQuery = nameQuery.eq('is_expansion', false);
+      prefixQuery = prefixQuery.eq('is_expansion', false);
+      substringQuery = substringQuery.eq('is_expansion', false);
     }
 
-    const { data: nameMatches, error: nameError } = await nameQuery.limit(fetchLimit);
+    const [prefixResult, substringResult] = await Promise.all([
+      prefixQuery.limit(fetchLimit),
+      substringQuery.limit(fetchLimit),
+    ]);
 
-    if (nameError) {
-      throw new Error(`Search failed: ${nameError.message}`);
+    if (prefixResult.error) {
+      throw new Error(`Search failed: ${prefixResult.error.message}`);
+    }
+    if (substringResult.error) {
+      throw new Error(`Search failed: ${substringResult.error.message}`);
+    }
+
+    // Merge results, prefix matches first, deduplicating
+    const seenIds = new Set<number>();
+    const nameMatches: NonNullable<typeof prefixResult.data> = [];
+
+    for (const game of [...(prefixResult.data || []), ...(substringResult.data || [])]) {
+      if (!seenIds.has(game.id)) {
+        seenIds.add(game.id);
+        nameMatches.push(game);
+      }
     }
 
     // Also search in alternate names (slower, client-side filtering)

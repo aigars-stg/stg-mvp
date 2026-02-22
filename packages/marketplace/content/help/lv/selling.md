@@ -113,7 +113,7 @@ Fotogrāfijas palīdz jūsu sludinājumam izcelties un pircējiem pārliecībai.
 ### Fotogrāfiju ierobežojumi
 
 - **Maksimums:** 8 fotogrāfijas per sludinājums
-- **Faila lielums:** Līdz 5MB katru
+- **Faila lielums:** Līdz 10MB katru
 - **Formāti:** JPEG, PNG, WebP, AVIF
 
 ### Ko fotografēt
@@ -507,7 +507,7 @@ Skatīt arī: [Maksas](/legal?section=fees)
 | Ierobežojums | Vērtība |
 |-------|-------|
 | Fotogrāfijas per sludinājums | 8 |
-| Fotogrāfijas faila lielums | 5MB |
+| Fotogrāfijas faila lielums | 10MB |
 | Stāvokļa piezīmes | 500 rakstzīmes |
 | Trūkstošo komponentu teksts | 500 rakstzīmes |
 | Sludinājumi dienā | 50 |

@@ -113,7 +113,7 @@ Photos help your listing stand out and give buyers confidence.
 ### Photo Limits
 
 - **Maximum:** 8 photos per listing
-- **File size:** Up to 5MB each
+- **File size:** Up to 10MB each
 - **Formats:** JPEG, PNG, WebP, AVIF
 
 ### What to Photograph
@@ -507,7 +507,7 @@ See also: [Fees](/legal?section=fees)
 | Limit | Value |
 |-------|-------|
 | Photos per listing | 8 |
-| Photo file size | 5MB |
+| Photo file size | 10MB |
 | Condition notes | 500 characters |
 | Missing components text | 500 characters |
 | Listings per day | 50 |

@@ -8,6 +8,7 @@
     "confirm": "Apstiprināt",
     "delete": "Dzēst",
     "edit": "Labot",
+    "complete": "Pabeigts",
     "aria": {
       "previousImage": "Iepriekšējais attēls",
       "nextImage": "Nākamais attēls",
@@ -576,7 +577,7 @@
       "signInWithFacebook": "Pierakstīties ar Facebook",
       "divider": "vai",
       "sendMagicLink": "Nosūtīt maģisko saiti",
-      "magicLinkDescription": "Nosūtīsim tev saiti, lai ti vari pieteikties — nav nepieciešama parole.",
+      "magicLinkDescription": "Nosūtīsim tev saiti, lai tu vari pieteikties - nav nepieciešama parole.",
       "sending": "Nosūta..."
     },
     "magicLinkSent": {
@@ -592,7 +593,7 @@
       "useDifferentEmail": "Izmantot citu e-pastu"
     },
     "errors": {
-      "tooManyAttempts": "Pārāk daudz mēģinājumu — uztaisi pauzi. Mēģini vēlreiz pēc dažām minūtēm.",
+      "tooManyAttempts": "Pārāk daudz mēģinājumu - uztaisi pauzi. Mēģini vēlreiz pēc dažām minūtēm.",
       "captchaFailed": "Verifikācija neizdevās. Lūdzu, mēģini vēlreiz."
     },
     "comingSoon": {
@@ -688,9 +689,14 @@
       "contactSeller": "Sazināties ar pārdevēju",
       "sold": "Pārdots",
       "reserved": "Rezervēts",
-      "reservedTooltip": "Kāds norēķinās — drīzumā pieejams, ja viņi nepabeigs"
+      "reservedTooltip": "Kāds norēķinās - drīzumā pieejams, ja viņi nepabeigs"
     },
-    "contactSellerWarning": "Šis sludinājums netiek apstrādāts caur mūsu maksājumu sistēmu. Vienojies par maksājumu tieši ar pārdevēju. Mēs nevaram nodrošināt pircēja aizsardzību šim darījumam.",
+    "sellerLabel": "Pārdevējs",
+    "privateSeller": {
+      "notice": "Pārdod privātpersona - ES patērētāju atgriešanas tiesības un garantijas uz šo piedāvājumu neattiecas.",
+      "learnMore": "Uzzināt vairāk",
+      "contactNotice": "Šis ir tiešais sludinājums - sazinies ar pārdevēju, lai vienotos par maksājumu un piegādi."
+    },
     "auction": {
       "badge": "Izsole",
       "ended": "Izsole beigusies",
@@ -771,7 +777,7 @@
     "consent": {
       "refundSummaryTitle": "Naudas atmaksas politikas kopsavilkums",
       "refundPoint1": "Visi pārdevēji ir privātpersonas, nevis uzņēmumi",
-      "refundPoint2": "Nav 14 dienu atgriešanas tiesību — spēli nevar atgriezt, ja vienkārši pārdomājāt",
+      "refundPoint2": "Nav 14 dienu atgriešanas tiesību - spēli nevar atgriezt, ja vienkārši pārdomājāt",
       "refundPoint3": "Ziņojiet par problēmām 2 dienu laikā pēc piegādes, lai pieprasītu atmaksu",
       "refundPoint4": "Pēc pasūtījuma pabeigšanas darījumi ir galīgi",
       "checkboxPrefix": "Ieliekot atzīmi, es apstiprinu, ka piekrītu",
@@ -1322,7 +1328,7 @@
     },
     "bidHistory": {
       "title": "Likmju vēsture",
-      "noBidsYet": "Vēl nav likmju — esi pirmais.",
+      "noBidsYet": "Vēl nav likmju - esi pirmais.",
       "winning": "Uzvarošā",
       "extendedAuction": "Šī likme pagarināja izsoli",
       "showMore": "Rādīt vēl {count} likmes",
@@ -1367,7 +1373,16 @@
       "game": {
         "title": "Atrodi savu spēli",
         "subtitle": "Sāc rakstīt, lai meklētu tūkstošiem galda spēļu",
-        "subtitleWithGame": "{gameName}"
+        "subtitleWithGame": "{gameName}",
+        "changeVersion": "Mainīt versiju",
+        "changeName": "Mainīt nosaukumu"
+      },
+      "gameNameSelector": {
+        "hint": "Izvēlies nosaukumu, kas redzams uz spēles kastes",
+        "primary": "Pamata",
+        "other": "Citi",
+        "otherScripts": "Izvēlies no citiem nosaukumiem:",
+        "changeName": "Mainīt nosaukumu"
       },
       "expansions": {
         "title": "Iekļaut papildinājumus",
@@ -1381,7 +1396,7 @@
       },
       "condition": {
         "title": "Stāvoklis un detaļas",
-        "subtitle": "Esi godīgs — pircēji novērtē caurredzamību"
+        "subtitle": "Esi godīgs - pircēji novērtē caurredzamību"
       },
       "photos": {
         "title": "Augšupielādēt fotoattēlus",
@@ -1409,10 +1424,34 @@
       "preview": "Priekšskatījums"
     },
     "preview": {
-      "title": "Tiešraides priekšskatījums — kā pircēji redzēs tavu piedāvājumu",
-      "selectGame": "Izvēlies spēli, lai redzētu priekšskatījumu",
-      "mobileTitle": "Tiešraides priekšskatījums",
-      "mobileSubtitle": "Tā pircēji redzēs tavu piedāvājumu"
+      "title": "Tiešraides priekšskatījums",
+      "selectGame": "Izvēlies spēli, lai redzētu sludinājuma priekšskatījumu",
+      "mobileTitle": "Sludinājuma priekšskatījums",
+      "mobileSubtitle": "Pārskatiet sludinājuma informāciju",
+      "sections": {
+        "game": "Spēle",
+        "condition": "Stāvoklis",
+        "photos": "Fotogrāfijas",
+        "expansions": "Iekļautie papildinājumi",
+        "pricing": "Tavi ieņēmumi",
+        "saleType": "Pārdošanas veids",
+        "seller": "Pārdevējs"
+      },
+      "pricingBreakdown": {
+        "price": "Sludinājuma cena",
+        "startingBid": "Sākuma likme",
+        "fee": "Platformas maksa (10%)",
+        "youReceive": "Tu saņem"
+      },
+      "noPhotos": "Vēl nav fotogrāfiju",
+      "photoCount": "{count} fotogrāfija",
+      "photoCount_other": "{count} fotogrāfijas",
+      "allComponents": "Visas sastāvdaļas klāt",
+      "missingComponents": "Dažas sastāvdaļas trūkst",
+      "instantBuy": "Pirkt uzreiz",
+      "contactSeller": "Sazināties ar pārdevēju",
+      "auction": "Izsole",
+      "fixedPrice": "Fiksēta cena"
     },
     "successModal": {
       "title": "Sludinājums publicēts",
@@ -1506,7 +1545,7 @@
       "upload": {
         "clickOrDrag": "Noklikšķini vai velc fotogrāfijas šeit",
         "formats": "JPEG, PNG, WebP vai AVIF",
-        "maxSize": "Maks. 5MB vienam attēlam",
+        "maxSize": "Maks. 10MB vienam attēlam",
         "uploaded": "{current}/{max} augšupielādētas",
         "photoCount": "{count} fotogrāfija",
         "photoCount_other": "{count} fotogrāfijas",
@@ -1514,7 +1553,7 @@
       },
       "errors": {
         "invalidType": "{filename}: Atļauti tikai JPEG, PNG, WebP un AVIF attēli",
-        "tooLarge": "{filename}: Faila lielums jābūt mazākam par 5MB (pašreizējais: {size}MB)",
+        "tooLarge": "{filename}: Faila lielums jābūt mazākam par 10MB (pašreizējais: {size}MB)",
         "maxPhotos": "Maksimums {max} fotogrāfijas atļautas. Tu vari augšupielādēt vēl {remaining}."
       },
       "grid": {
@@ -1809,8 +1848,8 @@
       "title": "Kā vēlies pārdot?",
       "subtitle": "Izvēlies, kā sazināsies ar pircēju.",
       "contactSeller": {
-        "label": "Sazināties ar pārdevēju",
-        "description": "Sarakstieties ar pircēju, lai vienotos par maksājumu un piegādi"
+        "label": "Sazināties ar pircēju",
+        "description": "Pircēji tev rakstīs, lai vienotos par maksājumu un piegādi."
       },
       "instantBuy": {
         "label": "Pirkt uzreiz",
@@ -1823,7 +1862,9 @@
           "placeholder": "+371 12345678"
         }
       },
-      "helpLink": "Kāda ir atšķirība?"
+      "helpLink": "Kāda ir atšķirība?",
+      "countryUnavailable": "Tiešsaistes maksājumi drīzumā būs pieejami tavā valstī. Pagaidām vienojies par maksājumu tieši ar pircēju caur ziņojumiem.",
+      "instantBuyBanner": "Pircēji maksā, izmantojot platformu. Tu saņem līdzekļus savā maciņā pēc piegādes."
     },
     "pricingFormat": {
       "title": "Cenas formāts",
@@ -1833,21 +1874,27 @@
       },
       "auction": {
         "label": "Izsole",
-        "description": "Ļauj pircējiem solīties — augstākā likme uzvar"
+        "description": "Ļauj pircējiem solīties - augstākā likme uzvar"
       }
     },
     "price": {
       "label": "Cena",
       "labelAuction": "Sākuma likme",
-      "helperAuction": "Minimālā summa, ko pieņemsi"
+      "helperAuction": "Minimālā summa, ko pieņemsi",
+      "commission": {
+        "fixedNote": "10% platformas maksa tiek ieturēta, kad tavs priekšmets tiek pārdots",
+        "auctionNote": "10% platformas maksa tiek ieturēta no uzvarošās likmes",
+        "platformFee": "Platformas maksa (10%)",
+        "youReceive": "Tu saņem"
+      }
     },
     "listingType": {
       "title": "Kā vēlies pārdot?",
-      "subtitle": "Izvēlies, kā vēlies sazināties ar pircējiem.",
+      "subtitle": "Izvēlies, vai vēlies sazināties ar pircējiem.",
       "instantBuy": {
         "title": "Pirkt uzreiz",
-        "description": "Pircēji maksā uzreiz caur mūsu drošo sistēmu. Nauda nonāk tieši tavā bankas kontā.",
-        "disabled": "Pabeigz maksājumu iestatīšanu, lai aktivizētu",
+        "description": "Pircēji maksā, izmantojot platformu. Tu saņem līdzekļus savā maciņā pēc piegādes.",
+        "disabled": "Pabeidz maksājumu iestatīšanu, lai aktivizētu",
         "upgrade": "Iestatīt maksājumus"
       },
       "contactSeller": {
@@ -1948,7 +1995,7 @@
   "SellerOnboard": {
     "header": {
       "title": "Kļūsti par pārdevēju",
-      "subtitle": "Pārvērt savas spēles naudā. Ātra iestatīšana — sāc pārdot mazāk nekā minūtē."
+      "subtitle": "Pārvērt savas spēles naudā. Ātra iestatīšana - sāc pārdot mazāk nekā minūtē."
     },
     "step1": {
       "title": "1. solis: Pieņem pārdevēja noteikumus",
@@ -1956,7 +2003,7 @@
       "description": "Pārskati un pieņem mūsu pārdevēja noteikumus, lai apstiprinātu, ka pārdod kā privātpersona.",
       "keyPoints": {
         "title": "Galvenie punkti:",
-        "zeroFees": "<strong>Bez sludinājumu maksas</strong> — bezmaksas spēļu izvietošana",
+        "zeroFees": "<strong>Bez sludinājumu maksas</strong> - bezmaksas spēļu izvietošana",
         "ageRequirement": "Tev jābūt vismaz <strong>16 gadus vecam</strong>",
         "personalItems": "Tu pārdod <strong>personīgas lietas</strong>, nevis darbojies kā uzņēmums",
         "accurateDescriptions": "Tu esi atbildīgs par <strong>precīziem aprakstiem</strong> savām spēlēm"
@@ -2027,9 +2074,9 @@
       "earnings": {
         "title": "Par taviem ieņēmumiem",
         "subtitle": "Tavi ieņēmumi tiek ieskaitīti platformas makā pēc katras pabeigtas pārdošanas.",
-        "commission": "<strong>90% no sludinājuma cenas</strong> — Tiek ieturēta 10% platformas komisija",
-        "withdraw": "<strong>Izņem jebkurā laikā</strong> — Pieprasi bankas pārskaitījumu kad vēlies",
-        "track": "<strong>Seko līdzi panelī</strong> — Skati maka atlikumu un darījumu vēsturi",
+        "commission": "<strong>90% no sludinājuma cenas</strong> - Tiek ieturēta 10% platformas komisija",
+        "withdraw": "<strong>Izņem jebkurā laikā</strong> - Pieprasi bankas pārskaitījumu kad vēlies",
+        "track": "<strong>Seko līdzi panelī</strong> - Skati maka atlikumu un darījumu vēsturi",
         "viewWallet": "Skatīt maku un izmaksas →"
       },
       "completeSupport": {
@@ -2084,7 +2131,12 @@
   },
   "AccountSettings": {
     "title": "Konta iestatījumi",
-    "subtitle": "Tavs profils un preferences",
+    "subtitle": "Tavs profils un iestatījumi",
+    "tabs": {
+      "profile": "Profils",
+      "preferences": "Iestatījumi",
+      "privacy": "Privātums"
+    },
     "profileBanner": {
       "title": "Aizpildi savu profilu",
       "subtitle": "Pievieno savu vārdu un valsti, lai citi zina, ar ko viņi darbojas"
@@ -2276,7 +2328,7 @@
     }
   },
   "UserCard": {
-    "memberSince": "Dalībnieks kopš {year}. gada",
+    "memberSince": "Pievienojās {date}",
     "notSelling": "Pašlaik nepārdod"
   },
   "Dashboard": {
@@ -2319,7 +2371,7 @@
     },
     "emptyCart": {
       "title": "Tavs grozs ir tukšs",
-      "description": "Tava nākamā mīļākā spēle gaida — mēs to paturēsim šeit, kad atradīsi.",
+      "description": "Tava nākamā mīļākā spēle gaida - mēs to paturēsim šeit, kad atradīsi.",
       "browseButton": "Pārlūkot spēles"
     },
     "item": {
@@ -2836,7 +2888,7 @@
           "howBuyersPay": "Caur Second Turn Games",
           "howShippingWorks": "€2 vienota likme caur Unisend skapjiem",
           "yourEarnings": "90% no Jūsu prasītās cenas (10% komisija)",
-          "buyerProtection": "Jā — mēs turam maksājumu līdz piegādei",
+          "buyerProtection": "Jā - mēs turam maksājumu līdz piegādei",
           "setupRequired": "Pieņemt pārdevēja noteikumus (1 min)",
           "availability": "Tikai Latvijā"
         },
@@ -3005,7 +3057,7 @@
       },
       "q7": {
         "question": "Kā es saņemu samaksu kā pārdevējs?",
-        "answer": "Divas dienas pēc piegādes (vai kad pircējs apstiprina ātrāk), tavi ieņēmumi (90% no spēles cenas) tiek ieskaitīti platformas makā. Tu vari izņemt naudu uz savu IBAN bankas kontu jebkurā laikā — bez maksas, bez minimālā gaidīšanas perioda."
+        "answer": "Divas dienas pēc piegādes (vai kad pircējs apstiprina ātrāk), tavi ieņēmumi (90% no spēles cenas) tiek ieskaitīti platformas makā. Tu vari izņemt naudu uz savu IBAN bankas kontu jebkurā laikā - bez maksas, bez minimālā gaidīšanas perioda."
       },
       "q8": {
         "question": "Kādi galda spēļu stāvokļi tiek pieņemti?",

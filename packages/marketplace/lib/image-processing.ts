@@ -13,8 +13,8 @@ export const IMAGE_CONFIG = {
   effort: 4,
   /** Maximum dimension (longest edge) in pixels. Images larger than this will be resized */
   maxDimension: 2048,
-  /** Maximum input file size in bytes (5MB) */
-  maxInputSizeBytes: 5 * 1024 * 1024,
+  /** Maximum input file size in bytes (10MB) */
+  maxInputSizeBytes: 10 * 1024 * 1024,
 } as const;
 
 /**

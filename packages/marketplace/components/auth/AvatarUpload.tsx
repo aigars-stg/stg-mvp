@@ -13,17 +13,21 @@ interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
   onUploadComplete?: (url: string) => void;
   size?: 'default' | 'large';
+  /** Custom size class override — when provided, ignores `size` prop */
+  sizeClass?: string;
+  /** Custom initials font size override */
+  initialsSizeClass?: string;
 }
 
-export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'default' }: AvatarUploadProps) {
+export function AvatarUpload({ currentAvatarUrl, onUploadComplete, size = 'default', sizeClass, initialsSizeClass }: AvatarUploadProps) {
   const t = useTranslations('AvatarUpload');
   const { user, profile } = useAuth();
 
-  // Size classes based on prop
-  const avatarSizeClasses = size === 'large'
+  // Size classes based on prop (sizeClass overrides size)
+  const avatarSizeClasses = sizeClass ?? (size === 'large'
     ? 'w-28 h-28 sm:w-32 sm:h-32'
-    : 'w-20 h-20 sm:w-24 sm:h-24';
-  const initialsFontSize = size === 'large' ? 'text-4xl' : 'text-3xl';
+    : 'w-20 h-20 sm:w-24 sm:h-24');
+  const initialsFontSize = initialsSizeClass ?? (size === 'large' ? 'text-4xl' : 'text-3xl');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState<string | null>(currentAvatarUrl || null);

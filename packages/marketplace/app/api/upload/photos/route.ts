@@ -3,11 +3,11 @@ import { randomUUID } from 'crypto';
 import { processImageForUpload } from '@/lib/image-processing';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { checkRateLimit } from '@/lib/ratelimit';
+import { checkRateLimit, getRateLimitAction } from '@/lib/ratelimit';
 import type { TypedSupabase } from '@/lib/supabase/query-types';
 
 const BUCKET_NAME = 'listing-photos';
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 
 export async function POST(request: NextRequest) {
@@ -15,8 +15,16 @@ export async function POST(request: NextRequest) {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;
 
-    // Rate limit: 10 uploads per hour (buyer default)
-    const rateLimitResult = await checkRateLimit('upload-buyer', user.id);
+    // Check seller status for rate limit tier
+    const { data: profile } = await (supabase as TypedSupabase)
+      .from('seller_profiles')
+      .select('seller_status')
+      .eq('id', user.id)
+      .single();
+    const isSeller = profile?.seller_status === 'active';
+
+    // Rate limit: 100/hour for sellers, 10/hour for buyers
+    const rateLimitResult = await checkRateLimit(getRateLimitAction('upload', isSeller), user.id);
     if (!rateLimitResult.success) {
       return NextResponse.json(
         { error: rateLimitResult.error, reset: rateLimitResult.reset },
@@ -40,7 +48,7 @@ export async function POST(request: NextRequest) {
     for (const file of files) {
       if (file.size > MAX_FILE_SIZE) {
         return NextResponse.json(
-          { error: `File ${file.name} exceeds maximum size of 5MB` },
+          { error: `File ${file.name} exceeds maximum size of 10MB` },
           { status: 400 }
         );
       }

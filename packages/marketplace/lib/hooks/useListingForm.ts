@@ -25,7 +25,7 @@ export interface ListingFormData {
 }
 
 export const INITIAL_FORM_DATA: ListingFormData = {
-  transactionMethod: 'contact_seller',
+  transactionMethod: 'instant_buy',
   pricingFormat: 'fixed_price',
   selectedGame: null,
   selectedGameDisplayName: null,

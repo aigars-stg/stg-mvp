@@ -8,6 +8,7 @@
     "confirm": "Confirm",
     "delete": "Delete",
     "edit": "Edit",
+    "complete": "Complete",
     "aria": {
       "previousImage": "Previous image",
       "nextImage": "Next image",
@@ -576,7 +577,7 @@
       "signInWithFacebook": "Sign in with Facebook",
       "divider": "or",
       "sendMagicLink": "Send magic link",
-      "magicLinkDescription": "We'll email you a link to sign in instantly — no password needed.",
+      "magicLinkDescription": "We'll email you a link to sign in instantly - no password needed.",
       "sending": "Sending..."
     },
     "magicLinkSent": {
@@ -592,7 +593,7 @@
       "useDifferentEmail": "Use a different email"
     },
     "errors": {
-      "tooManyAttempts": "Too many attempts — let's take a breather. Try again in a few minutes.",
+      "tooManyAttempts": "Too many attempts - let's take a breather. Try again in a few minutes.",
       "captchaFailed": "Verification failed. Please try again."
     },
     "comingSoon": {
@@ -688,9 +689,14 @@
       "contactSeller": "Contact Seller",
       "sold": "Sold",
       "reserved": "Reserved",
-      "reservedTooltip": "Someone is checking out — available soon if they don't complete"
+      "reservedTooltip": "Someone is checking out - available soon if they don't complete"
     },
-    "contactSellerWarning": "This listing is not processed through our payment system. Arrange payment directly with the seller. We cannot provide buyer protection for this transaction.",
+    "sellerLabel": "Seller",
+    "privateSeller": {
+      "notice": "Sold by a private individual - EU consumer return rights and guarantees do not apply.",
+      "learnMore": "Learn more",
+      "contactNotice": "This is a direct listing - message the seller to agree on payment and delivery."
+    },
     "auction": {
       "badge": "Auction",
       "ended": "Auction Ended",
@@ -771,7 +777,7 @@
     "consent": {
       "refundSummaryTitle": "Refund policy summary",
       "refundPoint1": "All sellers are private individuals, not businesses",
-      "refundPoint2": "No 14-day return right — you cannot return an item because you changed your mind",
+      "refundPoint2": "No 14-day return right - you cannot return an item because you changed your mind",
       "refundPoint3": "Report problems within 2 days of delivery to request a refund",
       "refundPoint4": "After order completion, sales are final",
       "checkboxPrefix": "By checking this box, I confirm I have read and agree to the",
@@ -1322,7 +1328,7 @@
     },
     "bidHistory": {
       "title": "Bid History",
-      "noBidsYet": "No bids yet — be the first.",
+      "noBidsYet": "No bids yet - be the first.",
       "winning": "Winning",
       "extendedAuction": "This bid extended the auction",
       "showMore": "Show {count} more bids",
@@ -1367,7 +1373,16 @@
       "game": {
         "title": "Find your game",
         "subtitle": "Start typing to search thousands of board games",
-        "subtitleWithGame": "{gameName}"
+        "subtitleWithGame": "{gameName}",
+        "changeVersion": "Change version",
+        "changeName": "Change name"
+      },
+      "gameNameSelector": {
+        "hint": "Choose the localized name that matches your physical box for better discoverability",
+        "primary": "Primary",
+        "other": "Other",
+        "otherScripts": "Select from other scripts:",
+        "changeName": "Change Name"
       },
       "expansions": {
         "title": "Include Expansions",
@@ -1409,10 +1424,34 @@
       "preview": "Preview"
     },
     "preview": {
-      "title": "Live preview — how buyers will see your offer",
-      "selectGame": "Select a game to preview",
-      "mobileTitle": "Live Preview",
-      "mobileSubtitle": "This is how buyers will see your offer"
+      "title": "Live preview",
+      "selectGame": "Select a game to see your listing preview",
+      "mobileTitle": "Listing Preview",
+      "mobileSubtitle": "Review your listing details",
+      "sections": {
+        "game": "Game",
+        "condition": "Condition",
+        "photos": "Photos",
+        "expansions": "Included expansions",
+        "pricing": "Your earnings",
+        "saleType": "Sale type",
+        "seller": "Seller"
+      },
+      "pricingBreakdown": {
+        "price": "Listing price",
+        "startingBid": "Starting bid",
+        "fee": "Platform fee (10%)",
+        "youReceive": "You receive"
+      },
+      "noPhotos": "No photos yet",
+      "photoCount": "{count} photo",
+      "photoCount_other": "{count} photos",
+      "allComponents": "All components present",
+      "missingComponents": "Some components missing",
+      "instantBuy": "Instant Buy",
+      "contactSeller": "Contact Seller",
+      "auction": "Auction",
+      "fixedPrice": "Fixed Price"
     },
     "successModal": {
       "title": "Listing published",
@@ -1506,7 +1545,7 @@
       "upload": {
         "clickOrDrag": "Click or drag photos here",
         "formats": "JPEG, PNG, WebP, or AVIF",
-        "maxSize": "Max 5MB per image",
+        "maxSize": "Max 10MB per image",
         "uploaded": "{current}/{max} uploaded",
         "photoCount": "{count} photo",
         "photoCount_other": "{count} photos",
@@ -1514,7 +1553,7 @@
       },
       "errors": {
         "invalidType": "{filename}: Only JPEG, PNG, WebP, and AVIF images are allowed",
-        "tooLarge": "{filename}: File size must be less than 5MB (current: {size}MB)",
+        "tooLarge": "{filename}: File size must be less than 10MB (current: {size}MB)",
         "maxPhotos": "Maximum {max} photos allowed. You can upload {remaining} more."
       },
       "grid": {
@@ -1823,7 +1862,9 @@
           "placeholder": "+371 12345678"
         }
       },
-      "helpLink": "What's the difference?"
+      "helpLink": "What's the difference?",
+      "countryUnavailable": "Online payments are coming soon to your country. For now, arrange payment directly with your buyer through messaging.",
+      "instantBuyBanner": "Buyers pay securely online. You receive funds in your wallet after delivery."
     },
     "pricingFormat": {
       "title": "Pricing",
@@ -1833,13 +1874,19 @@
       },
       "auction": {
         "label": "Auction",
-        "description": "Let buyers bid — highest offer wins"
+        "description": "Let buyers bid - highest offer wins"
       }
     },
     "price": {
       "label": "Price",
       "labelAuction": "Starting bid",
-      "helperAuction": "The minimum amount you'll accept"
+      "helperAuction": "The minimum amount you'll accept",
+      "commission": {
+        "fixedNote": "A 10% platform fee is deducted when your item sells",
+        "auctionNote": "A 10% platform fee is deducted from the winning bid",
+        "platformFee": "Platform fee (10%)",
+        "youReceive": "You receive"
+      }
     },
     "listingType": {
       "title": "How do you want to sell?",
@@ -1948,7 +1995,7 @@
   "SellerOnboard": {
     "header": {
       "title": "Become a seller",
-      "subtitle": "Turn your games into cash. Quick setup — start selling in under a minute."
+      "subtitle": "Turn your games into cash. Quick setup - start selling in under a minute."
     },
     "step1": {
       "title": "Step 1: Accept seller terms",
@@ -1956,7 +2003,7 @@
       "description": "Review and accept our seller terms to confirm you're selling as a private individual.",
       "keyPoints": {
         "title": "Key points:",
-        "zeroFees": "<strong>Zero listing fees</strong> — free to list your games",
+        "zeroFees": "<strong>Zero listing fees</strong> - free to list your games",
         "ageRequirement": "You must be at least <strong>16 years old</strong>",
         "personalItems": "You're selling <strong>personal items</strong>, not operating a business",
         "accurateDescriptions": "You're responsible for <strong>accurate descriptions</strong> of your games"
@@ -2027,9 +2074,9 @@
       "earnings": {
         "title": "About Your Earnings",
         "subtitle": "Your earnings are credited to your platform wallet after each completed sale.",
-        "commission": "<strong>90% of listing price</strong> — A 10% platform commission is deducted",
-        "withdraw": "<strong>Withdraw anytime</strong> — Request a bank transfer whenever you like",
-        "track": "<strong>Track in dashboard</strong> — View your wallet balance and transaction history",
+        "commission": "<strong>90% of listing price</strong> - A 10% platform commission is deducted",
+        "withdraw": "<strong>Withdraw anytime</strong> - Request a bank transfer whenever you like",
+        "track": "<strong>Track in dashboard</strong> - View your wallet balance and transaction history",
         "viewWallet": "View wallet & withdrawals →"
       },
       "completeSupport": {
@@ -2085,6 +2132,11 @@
   "AccountSettings": {
     "title": "Account settings",
     "subtitle": "Your profile and preferences",
+    "tabs": {
+      "profile": "Profile",
+      "preferences": "Preferences",
+      "privacy": "Privacy"
+    },
     "profileBanner": {
       "title": "Complete your profile",
       "subtitle": "Add your name and country so others know who they're dealing with"
@@ -2276,7 +2328,7 @@
     }
   },
   "UserCard": {
-    "memberSince": "Member since {year}",
+    "memberSince": "Joined {date}",
     "notSelling": "Not currently selling"
   },
   "Dashboard": {
@@ -2831,7 +2883,7 @@
           "howBuyersPay": "Through Second Turn Games",
           "howShippingWorks": "€2 flat-rate via Unisend lockers",
           "yourEarnings": "90% of your asking price (10% commission)",
-          "buyerProtection": "Yes — we hold payment until delivery",
+          "buyerProtection": "Yes - we hold payment until delivery",
           "setupRequired": "Accept seller terms (1 min)",
           "availability": "Latvia only"
         },
@@ -2936,7 +2988,7 @@
         },
         "q2": {
           "question": "Who pays the fees?",
-          "answer": "Buyers pay the listed price plus €2 shipping — no service fees. As a seller, a 10% platform commission is deducted from your earnings. If you list a game for €20, you earn €18."
+          "answer": "Buyers pay the listed price plus €2 shipping - no service fees. As a seller, a 10% platform commission is deducted from your earnings. If you list a game for €20, you earn €18."
         },
         "q3": {
           "question": "What's included in the 500+ parcel terminals?",
@@ -3000,7 +3052,7 @@
       },
       "q7": {
         "question": "How do I get paid as a seller?",
-        "answer": "Two days after delivery (or when the buyer confirms earlier), your earnings (90% of item price) are credited to your platform wallet. You can withdraw to your IBAN bank account at any time — no fees, no minimum waiting period."
+        "answer": "Two days after delivery (or when the buyer confirms earlier), your earnings (90% of item price) are credited to your platform wallet. You can withdraw to your IBAN bank account at any time - no fees, no minimum waiting period."
       },
       "q8": {
         "question": "What board game conditions are accepted?",

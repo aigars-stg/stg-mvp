@@ -18,116 +18,27 @@ import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/Exp
 import { TransactionMethodSelector } from '@/components/sell/TransactionMethodSelector';
 import type { CountryCode } from '@/lib/country-utils';
 import { PricingFormatSelector } from '@/components/sell/PricingFormatSelector';
-import { OfferCard } from '@/components/game/OfferCard';
-import { PuzzlePiece as Dices, PhotoCamera as Camera, ClipboardCheck, CurrencyEuro as Euro, InfoCircle as Info, Close, CheckCircleAlt01 as CheckCircle2, RefreshCw, AlertCircle, PuzzlePiece as Puzzle, Package, RefreshCw as Loader2 } from '@/lib/icons';
+import { ListingPreviewSidebar } from '@/components/sell/ListingPreviewSidebar';
+import { SELLER_COMMISSION_RATE } from '@/lib/pricing/constants';
+import { PuzzlePiece as Dices, PhotoCamera as Camera, ClipboardCheck, CurrencyEuro as Euro, InfoCircle as Info, Close, CheckCircleAlt01 as CheckCircle2, RefreshCw, AlertCircle, PuzzlePiece as Puzzle, RefreshCw as Loader2 } from '@/lib/icons';
 import { Card } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
-import type { ListingWithSeller, TransactionMethod, PricingFormat } from '@/lib/types/listing';
-import type { User } from '@supabase/supabase-js';
-import type { UserProfile } from '@/lib/auth/types';
+import type { TransactionMethod, PricingFormat } from '@/lib/types/listing';
 
-// Profile type for preview that includes optional seller stats fields
-interface PreviewProfile extends UserProfile {
-  total_completed_sales?: number;
-  average_rating?: number;
-  total_reviews?: number;
-}
+
 // AuctionSettings available via @/components/sell/AuctionSettings when auctions are enabled
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { NotificationModal } from '@/components/common/NotificationModal';
 import { PricingAssistant } from '@/components/sell/PricingAssistant';
 import { WantedListingContextBanner } from '@/components/sell/WantedListingContextBanner';
 import { useTranslations } from 'next-intl';
-import { useListingForm, INITIAL_FORM_DATA, type ListingFormData } from '@/lib/hooks/useListingForm';
+import { useListingForm, INITIAL_FORM_DATA } from '@/lib/hooks/useListingForm';
 import { formatDate } from '@/lib/date-utils';
 import { formatPrice } from '@/lib/services/pricing';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
-
-// Helper function to convert form data to listing preview format
-function createPreviewListing(
-  formData: ListingFormData,
-  user: User | null,
-  profile: PreviewProfile | null,
-  existingPhotoUrls: string[] = []
-): ListingWithSeller {
-  // Convert new photos to blob URLs
-  const newPhotoUrls = formData.photos.map(photo => URL.createObjectURL(photo.file));
-  // Combine existing photos with new photos
-  const allPhotoUrls = [...existingPhotoUrls, ...newPhotoUrls];
-
-  return {
-    id: 'preview',
-    bgg_game_id: formData.selectedGame?.id || 0,
-    game_name: formData.selectedGameDisplayName || formData.selectedGame?.name || 'Select a game to preview',
-    game_year: formData.selectedGame?.yearPublished || null,
-    version_source: 'bgg',
-    bgg_version_id: null,
-    version_name: formData.selectedVersion?.name || null,
-    publisher: formData.selectedVersion?.publishers?.join(', ') || formData.selectedVersion?.publisher || null,
-    language: formData.selectedVersion?.languages?.join(', ') || formData.selectedVersion?.language || null,
-    edition_year: formData.selectedVersion?.yearPublished || null,
-    photo_urls: allPhotoUrls, // Existing + new photos
-    condition: formData.condition || 'good',
-    condition_notes: formData.conditionNotes || null,
-    all_components_present: formData.allComponentsPresent,
-    missing_components: formData.missingComponents || null,
-    price: parseFloat(formData.price) || 0,
-    previous_price: null, // Preview listings don't have price history
-    shipping_local_pickup: false,
-    shipping_parcel_locker: true,
-    shipping_notes: null,
-    included_expansions: formData.selectedExpansions.map((exp) => ({
-      bgg_id: exp.bgg_id,
-      name: exp.displayName, // Use localized display name
-      year: exp.selectedVersion.yearPublished || exp.year, // Prefer version year
-      version_source: 'bgg' as const,
-      bgg_version_id: exp.selectedVersion.id || null,
-      version_name: exp.selectedVersion.name || null,
-      language: exp.selectedVersion.languages?.join(', ') || exp.selectedVersion.language || null,
-      publisher: exp.selectedVersion.publishers?.join(', ') || exp.selectedVersion.publisher || null,
-      thumbnail: exp.thumbnail,
-      image: exp.image,
-    })),
-    seller_id: user?.id || 'preview-seller',
-    status: 'active',
-    // New 2-dimensional model
-    transaction_method: formData.transactionMethod,
-    pricing_format: formData.pricingFormat,
-    // Keep listing_type for backwards compatibility during transition
-    listing_type: formData.pricingFormat === 'auction'
-      ? 'auction'
-      : formData.transactionMethod,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    sold_at: null,
-    removed_at: null,
-    reserved_by: null,
-    reserved_until: null,
-    game: {
-      thumbnail: formData.selectedVersion?.thumbnail || formData.selectedGame?.thumbnail || null,
-      // Priority: 1) Version image, 2) Base game image, 3) User photos (in photo_urls)
-      image: formData.selectedVersion?.image || formData.selectedGame?.image || null,
-      player_count: formData.selectedGame?.playerCount || null,
-      min_age: formData.selectedGame?.minAge || null,
-      playing_time: formData.selectedGame?.playingTime || null,
-      is_expansion: formData.selectedGame?.isExpansion || false,
-    },
-    seller: {
-      id: user?.id || 'preview-seller',
-      full_name: profile?.full_name || 'Your Name',
-      email: profile?.email || user?.email || 'you@example.com',
-      avatar_url: profile?.avatar_url || null,
-      country: profile?.country || null,
-      member_since: profile?.created_at || new Date().toISOString(),
-      total_completed_sales: profile?.total_completed_sales ?? 0,
-      average_rating: profile?.average_rating ?? 0,
-      total_reviews: profile?.total_reviews ?? 0,
-    },
-  };
-}
 
 function SellPageContent() {
   // Translations
@@ -413,12 +324,13 @@ function SellPageContent() {
             isLoading: false,
           });
 
-          // Default to instant_buy if available, otherwise contact_seller (only on first load)
+          // Default to instant_buy if available and in a supported country, otherwise contact_seller
           if (!hasSetInitialListingType.current) {
             hasSetInitialListingType.current = true;
+            const isInstantBuyCountry = profile?.country === 'LV' || !profile?.country;
             setFormData((prev) => ({
               ...prev,
-              transactionMethod: canCreateInstantBuy ? 'instant_buy' : 'contact_seller',
+              transactionMethod: (canCreateInstantBuy && isInstantBuyCountry) ? 'instant_buy' : 'contact_seller',
             }));
           }
         } else {
@@ -1173,6 +1085,7 @@ function SellPageContent() {
                 transactionMethod: method,
               }))}
               canUseInstantBuy={sellerCapabilities.canCreateInstantBuy}
+              sellerCountry={profile?.country}
               onUpgradeClick={() => router.push('/seller/dashboard?tab=earnings')}
               hasPhone={hasPhone}
               phoneValue={sellerPhone || ''}
@@ -1319,7 +1232,7 @@ function SellPageContent() {
                         className="px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
                       >
                         <RefreshCw className="w-4 h-4" />
-                        Change version
+                        {tSections('game.changeVersion')}
                       </button>
                     )}
                     {showChangeName && (
@@ -1328,7 +1241,7 @@ function SellPageContent() {
                         className="px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
                       >
                         <RefreshCw className="w-4 h-4" />
-                        Change name
+                        {tSections('game.changeName')}
                       </button>
                     )}
                   </div>
@@ -1534,6 +1447,32 @@ function SellPageContent() {
                   className="pl-14"
                 />
               </div>
+
+              {/* Commission Note */}
+              <div className="mt-3 p-3 bg-bg-secondary rounded-lg">
+                <p className="text-xs text-text-secondary">
+                  {formData.pricingFormat === 'auction'
+                    ? tPrice('commission.auctionNote')
+                    : tPrice('commission.fixedNote')
+                  }
+                </p>
+                {formData.price && parseFloat(formData.price) > 0 && !isNaN(parseFloat(formData.price)) && (
+                  <div className="mt-2 pt-2 border-t border-border-subtle">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-text-secondary">{tPrice('commission.platformFee')}</span>
+                      <span className="text-text-secondary">
+                        -{formatPrice(parseFloat(formData.price) * SELLER_COMMISSION_RATE)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="font-medium text-polar-night">{tPrice('commission.youReceive')}</span>
+                      <span className="font-semibold text-aurora-green">
+                        {formatPrice(parseFloat(formData.price) * (1 - SELLER_COMMISSION_RATE))}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </CollapsibleSection>
@@ -1627,25 +1566,13 @@ function SellPageContent() {
 
         {/* Right Column: Live Preview (4 cols on desktop, hidden on mobile/tablet) */}
         <div className="hidden lg:block lg:col-span-4">
-          <div className="sticky top-8 space-y-3">
-            {/* Live Preview Header */}
-            <div className="px-3 py-2 bg-frost-ice/10 border border-frost-ice/30 rounded-lg">
-              <span className="text-sm font-semibold text-frost-ice">{tPreview('title')}</span>
-            </div>
-            {/* OfferCard Preview - Force mobile layout via CSS overrides */}
-            {formData.selectedGame ? (
-              <div className="[&_.sm\:grid]:!hidden [&_.sm\:hidden]:!flex [&_.sm\:hidden]:!flex-col [&_.hidden.sm\:flex]:!hidden [&_.hidden.sm\:block]:!hidden">
-                <OfferCard
-                  listing={createPreviewListing(formData, user, profile, existingPhotoUrls)}
-                  isAddingToCart={false}
-                />
-              </div>
-            ) : (
-              <Card className="p-8 text-center border-2 border-dashed border-border">
-                <Package className="w-12 h-12 text-text-muted mx-auto mb-3" />
-                <p className="text-text-muted">{tPreview('selectGame')}</p>
-              </Card>
-            )}
+          <div className="sticky top-8">
+            <ListingPreviewSidebar
+              formData={formData}
+              user={user}
+              profile={profile}
+              existingPhotoUrls={existingPhotoUrls}
+            />
           </div>
         </div>
         {/* End Right Column */}
@@ -1716,9 +1643,11 @@ function SellPageContent() {
       >
         <div className="max-h-[70vh] overflow-y-auto pb-4">
           <p className="text-xs text-text-secondary mb-3">{tPreview('mobileSubtitle')}</p>
-          <OfferCard
-            listing={createPreviewListing(formData, user, profile, existingPhotoUrls)}
-            isAddingToCart={false}
+          <ListingPreviewSidebar
+            formData={formData}
+            user={user}
+            profile={profile}
+            existingPhotoUrls={existingPhotoUrls}
           />
         </div>
       </Modal>

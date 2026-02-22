@@ -41,6 +41,7 @@ interface SellerIdentity {
   full_name: string | null;
   avatar_url: string | null;
   country: string | null;
+  created_at: string | null;
 }
 
 // Type for wanted listing from database
@@ -250,7 +251,7 @@ export async function GET(
       // 2. Fetch Identity (Name, Avatar, Country)
       const { data: sellerIdentity, error: identityError } = await supabase
         .from('public_profiles')
-        .select('id, full_name, avatar_url, country')
+        .select('id, full_name, avatar_url, country, created_at')
         .in('id', sellerIds);
 
       if (identityError) {
@@ -324,7 +325,7 @@ export async function GET(
           total_reviews: sellerTrust?.total_reviews ?? 0,
           average_rating: sellerTrust?.average_rating ?? 0,
           total_completed_sales: sellerTrust?.total_completed_sales ?? 0,
-          member_since: sellerTrust?.member_since ?? null,
+          member_since: sellerTrust?.member_since ?? sellerIdentity?.created_at ?? null,
         },
         game: {
           // Use version-specific image if available, then expansion/base game image

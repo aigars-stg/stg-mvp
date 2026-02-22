@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
-import { Package, AlertCircle, AlertTriangle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare } from '@/lib/icons';
+import { Package, AlertCircle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Handshake, User } from '@/lib/icons';
 import { OfferCardPricing } from './OfferCardPricing';
 import { OfferCardVersionInfo } from './OfferCardVersionInfo';
 
@@ -20,7 +21,7 @@ import { ConditionInfoModal } from '@/components/common/ConditionInfoModal';
 import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 import { CollapsibleDetails } from '@/components/game/CollapsibleDetails';
 import { ListingQuestionsDrawer } from '@/components/game/ListingQuestionsDrawer';
-import { getConditionBadgeVariant } from '@/lib/utils/condition-utils';
+
 import { DotCarousel } from '@/components/common/ImageCarousel';
 import { AuctionBidPanel } from '@/components/auction/AuctionBidPanel';
 import { useTranslations, useLocale } from 'next-intl';
@@ -150,7 +151,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
   const allImagesWithExpansions = [...allImages, ...expansionImages];
 
   // Get condition badge variant using shared utility
-  const conditionVariant = getConditionBadgeVariant(listing.condition);
+
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -328,24 +329,9 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                 </a>
               </div>
 
-              {/* Condition Badges - product description */}
-              <div className="flex items-center gap-2 flex-wrap mb-2">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowConditionInfo(true);
-                  }}
-                  className="cursor-pointer hover:ring-2 hover:ring-frost-ice/30 rounded-lg transition-all"
-                  aria-label={t('listing.learnConditionAria', { condition: tListings(`conditions.${listing.condition}`) })}
-                  title={t('listing.conditionGradesTooltip')}
-                >
-                  <Badge variant={conditionVariant} size="sm">
-                    {tListings(`conditions.${listing.condition}`)}
-                  </Badge>
-                </button>
-                {listing.game?.is_expansion && (
+              {/* Expansion badge */}
+              {listing.game?.is_expansion && (
+                <div className="mb-2">
                   <Badge
                     variant="default"
                     size="sm"
@@ -353,14 +339,8 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                   >
                     {t('listing.expansion')}
                   </Badge>
-                )}
-                {!listing.all_components_present && (
-                  <span className="flex items-center gap-1 text-xs text-aurora-red">
-                    <AlertCircle className="w-3 h-3" />
-                    {t('listing.missingParts')}
-                  </span>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Version Info */}
               <OfferCardVersionInfo
@@ -371,12 +351,32 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
 
               </div>
 
-            {/* RIGHT COLUMN: Price */}
-            <div className="flex flex-col items-end gap-2 min-w-[140px]">
+            {/* RIGHT COLUMN: Price + Condition */}
+            <div className="flex flex-col items-end gap-1 min-w-[140px]">
               <OfferCardPricing
                 listing={listing}
                 variant="desktop"
               />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowConditionInfo(true);
+                }}
+                className="flex items-center gap-1 text-sm text-text-secondary hover:text-frost-ice transition-colors"
+                aria-label={t('listing.learnConditionAria', { condition: tListings(`conditions.${listing.condition}`) })}
+                title={t('listing.conditionGradesTooltip')}
+              >
+                {tListings(`conditions.${listing.condition}`)}
+                <Info className="w-3.5 h-3.5" />
+              </button>
+              {!listing.all_components_present && (
+                <span className="flex items-center gap-1 text-xs text-aurora-red">
+                  <AlertCircle className="w-3 h-3" />
+                  {t('listing.missingParts')}
+                </span>
+              )}
             </div>
           </div>
 
@@ -427,13 +427,12 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                         e.stopPropagation();
                         setShowConditionInfo(true);
                       }}
-                      className="cursor-pointer hover:ring-2 hover:ring-frost-ice/30 rounded-lg transition-all self-start"
+                      className="flex items-center gap-1 text-sm text-text-secondary hover:text-frost-ice transition-colors self-start"
                       aria-label={t('listing.learnConditionAria', { condition: tListings(`conditions.${listing.condition}`) })}
                       title={t('listing.conditionGradesTooltip')}
                     >
-                      <Badge variant={conditionVariant}>
-                        {tListings(`conditions.${listing.condition}`)}
-                      </Badge>
+                      {tListings(`conditions.${listing.condition}`)}
+                      <Info className="w-3.5 h-3.5" />
                     </button>
                     {listing.game?.is_expansion && (
                       <Badge
@@ -624,24 +623,11 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
           )
         )}
 
-        {/* Contact Seller Warning Banner (Legal Requirement) - Desktop */}
-        {isContactSellerListing(listing) && (
-          <div className="hidden sm:block border-t border-border-subtle">
-            <div className="bg-aurora-yellow/10 border-b border-aurora-yellow/30 px-4 py-2.5">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-aurora-yellow flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-text-secondary leading-relaxed">
-                  {t('contactSellerWarning')}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* FOOTER: Seller info + actions (desktop and mobile) */}
-        <div className={`hidden sm:flex items-center justify-between gap-4 px-3 sm:px-4 py-3 ${!isContactSellerListing(listing) ? 'border-t border-border-subtle' : ''}`}>
+        <div className="hidden sm:flex items-center justify-between gap-4 px-3 sm:px-4 py-3 border-t border-border-subtle">
           {/* Left: Seller Info */}
           <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">{t('sellerLabel')}</p>
             <UserInfoCard
               user={{
                 id: listing.seller.id,
@@ -658,6 +644,8 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                   listing.seller.average_rating ?? 0
                 ),
               }}
+              memberSince={listing.seller.member_since}
+              showMemberSince
               size="sm"
               compact
             />
@@ -761,6 +749,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
 
         {/* Mobile Seller Info */}
         <div className="sm:hidden border-t border-border-subtle px-3 py-2.5">
+          <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">{t('sellerLabel')}</p>
           <div className="flex items-center gap-2.5">
             <div className="flex-1 min-w-0">
               <UserInfoCard
@@ -779,6 +768,8 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                     listing.seller.average_rating ?? 0
                   ),
                 }}
+                memberSince={listing.seller.member_since}
+                showMemberSince
                 size="xs"
                 compact
               />
@@ -790,23 +781,36 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
           </div>
         </div>
 
-        {/* Contact Seller Warning Banner (Legal Requirement) - Mobile */}
-        {isContactSellerListing(listing) && (
-          <div className="sm:hidden border-t border-border-subtle">
-            <div className="bg-aurora-yellow/10 px-3 py-2">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-aurora-yellow flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-text-secondary leading-relaxed">
-                  {t('contactSellerWarning')}
-                </p>
-              </div>
+        {/* Private Seller / Transaction Notice — bottom of card */}
+        <div className="border-t border-border-subtle px-3 sm:px-4 py-2">
+          {isContactSellerListing(listing) ? (
+            <div className="flex items-center gap-1.5">
+              <Handshake className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+              <span className="text-xs text-text-muted">
+                {t('privateSeller.contactNotice')}
+              </span>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <User className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+              <span className="text-xs text-text-muted">
+                {t('privateSeller.notice')}
+              </span>
+              <span className="text-text-muted text-xs">&middot;</span>
+              <Link
+                href="/legal/buyer-guide"
+                className="text-xs text-frost-ice hover:underline"
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              >
+                {t('privateSeller.learnMore')}
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Mobile Footer: Actions - Not shown for auctions (bid panel is above) */}
         {!isOwnListing && !isAuctionListing(listing) && (
-          <div className={`sm:hidden sticky bottom-0 left-0 right-0 bg-snow-white ${!isContactSellerListing(listing) ? 'border-t border-border-subtle' : ''} p-3 shadow-lg`}>
+          <div className="sm:hidden sticky bottom-0 left-0 right-0 bg-snow-white border-t border-border-subtle p-3 shadow-lg">
             <div className="flex items-center justify-between gap-2">
               {/* Price */}
               <div className="flex-shrink-0">

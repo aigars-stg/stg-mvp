@@ -41,7 +41,7 @@ export function Avatar({ src, name, size = 'md', className }: AvatarProps) {
   return (
     <div
       className={cn(
-        'rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center',
+        'rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center',
         'bg-frost-100',
         styles.container,
         className

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Badge } from '@second-turn/design-system';
+import { useTranslations } from 'next-intl';
 import type { VersionSelection } from '@/lib/bgg-types';
 import { RefreshCw, InfoCircle as Info, ChevronDown } from '@/lib/icons';
 
@@ -45,6 +46,8 @@ export function GameNameSelector({
   hideChangeNameButton,
   matchedAlternateName,
 }: GameNameSelectorProps) {
+  const t = useTranslations('Sell.sections.gameNameSelector');
+
   // Track if the "Other" (non-Latin) panel is expanded
   const [showOtherNames, setShowOtherNames] = useState(false);
 
@@ -143,7 +146,7 @@ export function GameNameSelector({
         className="w-full px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
       >
         <RefreshCw className="w-4 h-4" />
-        Change Name
+        {t('changeName')}
       </button>
     );
   }
@@ -171,7 +174,7 @@ export function GameNameSelector({
       <div className="bg-frost-ice/5 border border-frost-ice/20 rounded-lg p-3 flex items-start gap-2">
         <Info className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
         <p className="text-sm text-text-secondary">
-          Choose the localized name that matches your physical box for better discoverability
+          {t('hint')}
         </p>
       </div>
 
@@ -185,7 +188,7 @@ export function GameNameSelector({
           >
             {option.label}
             {option.isPrimary && (
-              <span className="ml-1 text-xs opacity-70">(Primary)</span>
+              <span className="ml-1 text-xs opacity-70">({t('primary')})</span>
             )}
           </Badge>
         ))}
@@ -197,7 +200,7 @@ export function GameNameSelector({
             className="cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
             onClick={() => setShowOtherNames(!showOtherNames)}
           >
-            Other
+            {t('other')}
             <ChevronDown className={`w-3 h-3 transition-transform ${showOtherNames ? 'rotate-180' : ''}`} />
           </Badge>
         )}
@@ -206,7 +209,7 @@ export function GameNameSelector({
       {/* Show non-Latin names when "Other" is expanded */}
       {nonLatinNames.length > 0 && showOtherNames && (
         <div className="p-4 bg-bg-elevated border-2 border-border rounded-lg space-y-2 animate-in slide-in-from-top-2 duration-300">
-          <p className="text-sm font-medium text-polar-night">Select from other scripts:</p>
+          <p className="text-sm font-medium text-polar-night">{t('otherScripts')}</p>
           <div className="flex flex-wrap gap-2">
             {nonLatinNames.map((name) => (
               <Badge
