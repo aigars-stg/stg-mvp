@@ -5,6 +5,7 @@ import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { isToday, isYesterday, subDays, isAfter } from 'date-fns';
 import { Notification as BellIcon, AlertCircle } from '@/lib/icons';
+import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { useUnreadNotifications } from '@/lib/contexts/UnreadNotificationsContext';
 import { NotificationCard, type NotificationData } from './NotificationCard';
 
@@ -156,8 +157,8 @@ export function NotificationsList() {
   if (notifications.length === 0) {
     return (
       <div className="text-center py-16">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-bg-secondary flex items-center justify-center">
-          <BellIcon className="w-8 h-8 text-text-muted" />
+        <div className="flex justify-center mb-4">
+          <EmptyStateIcon icon={BellIcon} color="frost-ice" />
         </div>
         <p className="text-text-secondary">{t('noNotifications')}</p>
         <p className="text-text-muted text-sm mt-2">{t('noNotificationsHint')}</p>
@@ -181,27 +182,29 @@ export function NotificationsList() {
         </div>
       )}
 
-      {/* Grouped notification list */}
-      {groupOrder.map(group => {
-        const items = groupedNotifications[group];
-        if (items.length === 0) return null;
-        return (
-          <div key={group} className="mb-6">
-            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider px-4 mb-2">
-              {t(group)}
-            </h3>
-            <div className="space-y-1">
-              {items.map(notification => (
-                <NotificationCard
-                  key={notification.id}
-                  notification={notification}
-                  onClick={handleNotificationClick}
-                />
-              ))}
+      {/* Grouped notification list in card container */}
+      <div className="bg-snow-white border border-border rounded-xl overflow-hidden">
+        {groupOrder.map(group => {
+          const items = groupedNotifications[group];
+          if (items.length === 0) return null;
+          return (
+            <div key={group} className="mb-2 last:mb-0">
+              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider px-4 pt-4 mb-2">
+                {t(group)}
+              </h3>
+              <div>
+                {items.map(notification => (
+                  <NotificationCard
+                    key={notification.id}
+                    notification={notification}
+                    onClick={handleNotificationClick}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
       {/* Load more */}
       {notifications.length < total && (

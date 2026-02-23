@@ -250,18 +250,15 @@ export function WantedCollection({
 function WantedCardSkeleton() {
   return (
     <div className="bg-snow-white border border-border rounded-xl overflow-hidden h-full animate-pulse">
-      {/* Image placeholder */}
-      <div className="h-64 bg-bg-elevated" />
-      {/* Content */}
+      <div className="h-40 sm:h-44 lg:h-48 bg-bg-elevated" />
       <div className="p-4 space-y-3">
         <div className="h-6 bg-bg-elevated rounded w-3/4" />
-        <div className="h-4 bg-bg-elevated rounded w-1/2" />
-        <div className="h-8 bg-bg-elevated rounded w-1/3" />
         <div className="flex gap-2">
-          <div className="h-6 bg-bg-elevated rounded w-16" />
-          <div className="h-6 bg-bg-elevated rounded w-16" />
+          <div className="h-4 bg-bg-elevated rounded w-12" />
+          <div className="h-4 bg-bg-elevated rounded w-10" />
+          <div className="h-4 bg-bg-elevated rounded w-14" />
         </div>
-        <div className="h-4 bg-bg-elevated rounded w-full" />
+        <div className="h-8 bg-bg-elevated rounded w-1/3" />
       </div>
     </div>
   );

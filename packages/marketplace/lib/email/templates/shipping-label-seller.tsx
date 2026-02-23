@@ -33,7 +33,7 @@ export const ShippingLabelSellerEmail = ({
   parcelId = '4703389',
   barcode: _barcode,
   trackingUrl = 'https://tracking.example.com',
-  orderUrl = 'https://secondturn.games/seller/orders/123',
+  orderUrl = 'https://secondturn.games/orders/123',
 }: ShippingLabelSellerEmailProps) => {
   const previewText = `Ready to ship - Order #${orderNumber}`;
 

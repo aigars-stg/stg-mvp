@@ -6,12 +6,10 @@ import { Button } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
   AlertCircle,
-  CheckCircleAlt01 as CheckCircle,
-  Star,
 } from '@/lib/icons';
 import { UserInfoCard } from '@/components/user';
 import { OrderActions } from '@/components/orders';
-import { useOrderDetail } from '@/lib/hooks/useOrderDetail';
+import { useUnifiedOrderDetail } from '@/lib/hooks/useUnifiedOrderDetail';
 import { StatusTimeline, isCancelledStatus } from '@/components/shipping';
 import {
   OrderDetailHeader,
@@ -21,24 +19,32 @@ import {
   OrderTimeline,
   OrderShippingSection,
   ConversationPanel,
+  SellerAcceptDecline,
+  SellerLabelFailed,
+  SellerReadyToShip,
+  BuyerReviewCTA,
 } from '@/components/order-detail';
 import type { OrderDetailOrder, OrderDetailItem } from '@/lib/types/order-detail';
 import { formatDate, formatTime } from '@/lib/date-utils';
 
 export default function OrderDetailPage() {
   const t = useTranslations('Orders.detail');
+  const tSeller = useTranslations('SellerOrderDetail');
 
   const {
     data,
+    viewerRole,
     loading,
     error,
     authLoading,
     user,
+    // Messages
     messages,
     sendingMessage,
     handleSendMessage,
     messagesEndRef,
     messagesContainerRef,
+    // Buyer actions
     confirmingReceipt,
     handleConfirmReceipt,
     showReportIssue,
@@ -49,12 +55,29 @@ export default function OrderDetailPage() {
     issueDescription,
     setIssueDescription,
     handleReportIssue,
+    hasReview,
+    // Seller actions
+    showAcceptModal,
+    setShowAcceptModal,
+    showDeclineModal,
+    setShowDeclineModal,
+    selectedParcelSize,
+    setSelectedParcelSize,
+    declineReason,
+    setDeclineReason,
+    actionLoading,
+    handleAcceptOrder,
+    handleDeclineOrder,
+    retryingLabel,
+    retryError,
+    handleRetryLabel,
+    // Shared
     actionError,
     setActionError,
     actionSuccess,
     getTimeRemainingMs,
-    hasReview,
-  } = useOrderDetail();
+    timeRemaining,
+  } = useUnifiedOrderDetail();
 
   if (authLoading || loading) {
     return (
@@ -85,19 +108,26 @@ export default function OrderDetailPage() {
 
   if (!user) return null;
 
-  const { order, order_items, tracking_events, seller, current_user, conversation } = data;
+  const { order, order_items, tracking_events, buyer, seller, conversation } = data;
+  const isBuyer = viewerRole === 'buyer';
+  const isSeller = viewerRole === 'seller';
   const isCancelled = isCancelledStatus(order.status);
   const timeRemainingMs = getTimeRemainingMs();
+  const otherParty = isBuyer ? seller : buyer;
 
   return (
     <div className="min-h-screen bg-bg-primary">
       <OrderDetailHeader
         orderNumber={t('orderTitle', { orderNumber: order.order_number })}
         status={order.status}
-        subtitle={t('placedAt', {
-          date: formatDate(order.timestamps.created_at),
-          time: formatTime(order.timestamps.created_at),
-        })}
+        subtitle={
+          isSeller
+            ? tSeller('buyer', { name: buyer?.full_name || 'Unknown' })
+            : t('placedAt', {
+                date: formatDate(order.timestamps.created_at),
+                time: formatTime(order.timestamps.created_at),
+              })
+        }
         backHref="/orders"
         backLabel={t('backToOrders')}
       />
@@ -108,20 +138,20 @@ export default function OrderDetailPage() {
           <div className="lg:col-span-1 space-y-6 order-2 lg:order-1">
             <OrderPricingSummary
               order={order as OrderDetailOrder}
-              viewerRole="buyer"
-              title={t('summary.title')}
+              viewerRole={viewerRole || 'buyer'}
+              title={isSeller ? tSeller('pricingSummary.title') : t('summary.title')}
             />
 
-            {seller && (
+            {otherParty && (
               <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
                 <h3 className="text-sm font-semibold text-polar-night mb-3">
-                  {t('seller.title')}
+                  {isSeller ? tSeller('buyerInfo') : t('seller.title')}
                 </h3>
                 <UserInfoCard
                   user={{
-                    id: seller.id,
-                    name: seller.full_name || 'Unknown',
-                    avatarUrl: seller.avatar_url,
+                    id: otherParty.id,
+                    name: otherParty.full_name || 'Unknown',
+                    avatarUrl: otherParty.avatar_url,
                     country: null,
                   }}
                   size="md"
@@ -133,27 +163,29 @@ export default function OrderDetailPage() {
             <OrderShippingSection
               order={order as OrderDetailOrder}
               trackingEvents={tracking_events}
-              title={t('shipping.deliveryTitle')}
+              title={isSeller ? tSeller('shippingInfo.title') : t('shipping.deliveryTitle')}
             />
 
             <OrderTimeline timestamps={order.timestamps} />
 
-            <div className="bg-frost-ice/10 border border-frost-ice/20 rounded-lg p-4">
-              <div className="flex gap-2">
-                <AlertCircle className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-polar-night mb-1">
-                    {t('help.title')}
-                  </p>
-                  <p className="text-text-secondary">{t('help.description')}</p>
+            {isBuyer && (
+              <div className="bg-frost-ice/10 border border-frost-ice/20 rounded-lg p-4">
+                <div className="flex gap-2">
+                  <AlertCircle className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-polar-night mb-1">
+                      {t('help.title')}
+                    </p>
+                    <p className="text-text-secondary">{t('help.description')}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6 order-1 lg:order-2">
-            {!isCancelled && (
+            {isBuyer && !isCancelled && (
               <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
                 <StatusTimeline
                   currentStatus={order.status}
@@ -165,20 +197,61 @@ export default function OrderDetailPage() {
 
             <OrderStatusNotice
               order={order as OrderDetailOrder}
-              viewerRole="buyer"
+              viewerRole={viewerRole || 'buyer'}
               timeRemainingMs={timeRemainingMs}
             />
 
+            {/* Seller: Accept/Decline */}
+            {isSeller && order.status === 'pending_seller' && (
+              <SellerAcceptDecline
+                shippingMethod={order.shipping_method}
+                timeRemaining={timeRemaining}
+                showAcceptModal={showAcceptModal}
+                setShowAcceptModal={setShowAcceptModal}
+                showDeclineModal={showDeclineModal}
+                setShowDeclineModal={setShowDeclineModal}
+                selectedParcelSize={selectedParcelSize}
+                setSelectedParcelSize={setSelectedParcelSize}
+                declineReason={declineReason}
+                setDeclineReason={setDeclineReason}
+                actionLoading={actionLoading}
+                actionError={actionError}
+                setActionError={setActionError}
+                handleAcceptOrder={handleAcceptOrder}
+                handleDeclineOrder={handleDeclineOrder}
+              />
+            )}
+
+            {/* Seller: Label generation failed */}
+            {isSeller && order.shipping_method === 't2t' && order.status === 'accepted' && !order.tracking.label_url && (
+              <SellerLabelFailed
+                labelError={order.label_error}
+                retryError={retryError}
+                retryingLabel={retryingLabel}
+                handleRetryLabel={handleRetryLabel}
+              />
+            )}
+
+            {/* Seller: Ready to ship */}
+            {isSeller && order.shipping_method === 't2t' && order.status === 'accepted' && order.tracking.label_url && (
+              <SellerReadyToShip
+                unisendParcelId={order.tracking.parcel_id}
+                labelUrl={order.tracking.label_url}
+                barcode={order.tracking.barcode}
+                trackingUrl={order.tracking.tracking_url}
+              />
+            )}
+
             <OrderItemsList
               items={order_items as OrderDetailItem[]}
-              showGameLinks
+              showGameLinks={isBuyer}
               title={t('items.title', { count: order_items.length })}
             />
 
-            {!isCancelled && (
+            {isBuyer && !isCancelled && (
               <OrderActions
                 orderStatus={order.status}
-                currentUserRole={current_user.role}
+                currentUserRole="buyer"
                 confirmingReceipt={confirmingReceipt}
                 onConfirmReceipt={handleConfirmReceipt}
                 showReportIssue={showReportIssue}
@@ -195,49 +268,20 @@ export default function OrderDetailPage() {
               />
             )}
 
-            {current_user.role === 'buyer' &&
-              (order.status === 'delivered' || order.status === 'completed') && (
-              <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
-                {hasReview === false ? (
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Star className="w-5 h-5 text-amber-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-polar-night">
-                          {t('review.title')}
-                        </h3>
-                        <p className="text-sm text-text-secondary">
-                          {t('review.description')}
-                        </p>
-                      </div>
-                    </div>
-                    <Link href={`/orders/${order.id}/review`}>
-                      <Button variant="accent" size="sm">
-                        {t('review.button')}
-                      </Button>
-                    </Link>
-                  </div>
-                ) : hasReview === true ? (
-                  <div className="flex items-center gap-3 text-text-secondary">
-                    <CheckCircle className="w-5 h-5 text-aurora-green flex-shrink-0" />
-                    <span className="text-sm">{t('review.alreadyReviewed')}</span>
-                  </div>
-                ) : null}
-              </div>
+            {isBuyer && (order.status === 'delivered' || order.status === 'completed') && (
+              <BuyerReviewCTA orderId={order.id} hasReview={hasReview} />
             )}
 
             <ConversationPanel
               messages={messages}
               currentUserId={user.id}
-              otherUserName={seller?.full_name || undefined}
+              otherUserName={otherParty?.full_name || undefined}
               onSend={handleSendMessage}
               sendingMessage={sendingMessage}
               conversationId={conversation.id}
               messagesEndRef={messagesEndRef}
               messagesContainerRef={messagesContainerRef}
-              title={t('messages.title')}
+              title={isSeller ? tSeller('messages') : t('messages.title')}
             />
           </div>
         </div>

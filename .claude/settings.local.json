@@ -59,7 +59,21 @@
       "mcp__filesystem__write_file",
       "mcp__supabase__get_edge_function",
       "mcp__supabase__deploy_edge_function",
-      "mcp__filesystem__directory_tree"
+      "mcp__filesystem__directory_tree",
+      "Bash(pnpm build:marketplace:*)",
+      "Bash(brew list:*)",
+      "Bash(pnpm build:ds:*)",
+      "mcp__claude_ai_Vercel__get_deployment_build_logs",
+      "mcp__claude_ai_Vercel__get_deployment",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "mcp__context7__resolve-library-id",
+      "Bash(pnpm add:*)",
+      "Bash(git -C /Users/secondturn/stg-mvp diff --stat)",
+      "Bash(git -C /Users/secondturn/stg-mvp log --oneline -5)",
+      "Bash(git -C /Users/secondturn/stg-mvp add:*)"
     ],
     "deny": [
       "Bash(git push --force:*)",

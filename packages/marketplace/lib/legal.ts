@@ -1,6 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { serialize } from 'next-mdx-remote/serialize';
+import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
+import remarkGfm from 'remark-gfm';
+import rehypeSlug from 'rehype-slug';
+
+export type { MDXRemoteSerializeResult };
 
 interface DocumentFrontmatter {
   title: string;
@@ -8,25 +14,32 @@ interface DocumentFrontmatter {
   description?: string;
 }
 
-interface Document {
+export interface Document {
   slug: string;
   frontmatter: DocumentFrontmatter;
   content: string;
 }
 
 function findContentFile(subdir: string, slug: string): string | undefined {
-  const possiblePaths = [
-    path.join(process.cwd(), `content/${subdir}`, `${slug}.md`),
-    path.join(process.cwd(), `packages/marketplace/content/${subdir}`, `${slug}.md`),
+  const extensions = ['.mdx', '.md'];
+  const bases = [
+    path.join(process.cwd(), `content/${subdir}`),
+    path.join(process.cwd(), `packages/marketplace/content/${subdir}`),
   ];
-  return possiblePaths.find((p) => fs.existsSync(p));
+  for (const base of bases) {
+    for (const ext of extensions) {
+      const fullPath = path.join(base, `${slug}${ext}`);
+      if (fs.existsSync(fullPath)) return fullPath;
+    }
+  }
+  return undefined;
 }
 
 function loadDocument(subdir: string, slug: string): Document {
   const fullPath = findContentFile(subdir, slug);
 
   if (!fullPath) {
-    throw new Error(`Document not found: ${subdir}/${slug}.md`);
+    throw new Error(`Document not found: ${subdir}/${slug}`);
   }
 
   const fileContents = fs.readFileSync(fullPath, 'utf8');
@@ -52,6 +65,16 @@ export function getLegalDocument(slug: string, locale: string = 'en'): Document 
     }
   }
   return loadDocument('legal', slug);
+}
+
+/** Serialize MDX content with remark/rehype plugins */
+export async function serializeMdx(content: string): Promise<MDXRemoteSerializeResult> {
+  return serialize(content, {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [rehypeSlug],
+    },
+  });
 }
 
 /** Load a help document (from content/help/en/) */
@@ -83,9 +106,9 @@ export function listHelpDocuments(): Document[] {
 
   return fs
     .readdirSync(dir)
-    .filter((f) => f.endsWith('.md'))
+    .filter((f) => f.endsWith('.md') || f.endsWith('.mdx'))
     .map((f) => {
-      const slug = f.replace(/\.md$/, '');
+      const slug = f.replace(/\.(mdx|md)$/, '');
       const fileContents = fs.readFileSync(path.join(dir, f), 'utf8');
       const { data, content } = matter(fileContents);
       return { slug, frontmatter: data as DocumentFrontmatter, content };

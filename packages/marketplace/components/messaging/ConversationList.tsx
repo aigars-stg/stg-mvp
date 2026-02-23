@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { ConversationListItem } from './ConversationListItem';
 import { ChatBubble as MessageCircle, AlertCircle } from '@/lib/icons';
+import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import type { ConversationListItem as ConversationListItemType } from '@/lib/types/message';
 
 interface ConversationListProps {
@@ -81,7 +82,7 @@ export function ConversationList({
   if (conversations.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
-        <MessageCircle className="w-16 h-16 text-text-muted mx-auto mb-4" />
+        <EmptyStateIcon icon={MessageCircle} color="frost-ice" />
         <div>
           <h3 className="text-lg font-semibold text-text mb-2">
             {t('noConversations')}

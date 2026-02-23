@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { getLegalDocument } from '@/lib/legal';
+import { getLegalDocument, serializeMdx } from '@/lib/legal';
+import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { LegalHub } from '@/components/legal/LegalHub';
 import { LEGAL_SECTIONS } from '@/components/legal/legal-sections';
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema';
@@ -19,7 +20,7 @@ export async function generateMetadata({
   };
 }
 
-function loadAllLegalDocuments(locale: string = 'en') {
+async function loadAllLegalDocuments(locale: string = 'en') {
   const slugMap: Record<string, string> = {
     overview: 'overview',
     terms: 'terms',
@@ -35,16 +36,23 @@ function loadAllLegalDocuments(locale: string = 'en') {
     {
       slug: string;
       frontmatter: { title: string; lastUpdated: string; description?: string };
-      content: string;
+      serialized: MDXRemoteSerializeResult;
     }
   > = {};
 
   for (const section of LEGAL_SECTIONS) {
     const fileSlug = slugMap[section.id] || section.id;
     try {
-      documents[section.id] = getLegalDocument(fileSlug, locale);
+      const doc = getLegalDocument(fileSlug, locale);
+      const serialized = await serializeMdx(doc.content);
+      documents[section.id] = {
+        slug: doc.slug,
+        frontmatter: doc.frontmatter,
+        serialized,
+      };
     } catch {
       // Section content file not yet created — provide placeholder
+      const serialized = await serializeMdx('This section is coming soon.');
       documents[section.id] = {
         slug: fileSlug,
         frontmatter: {
@@ -52,7 +60,7 @@ function loadAllLegalDocuments(locale: string = 'en') {
           lastUpdated: '',
           description: '',
         },
-        content: `This section is coming soon.`,
+        serialized,
       };
     }
   }
@@ -66,7 +74,7 @@ export default async function LegalPage({
   params: { locale: string };
 }) {
   const t = await getTranslations('Legal.page');
-  const documents = loadAllLegalDocuments(locale);
+  const documents = await loadAllLegalDocuments(locale);
 
   return (
     <>

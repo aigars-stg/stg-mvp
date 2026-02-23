@@ -226,11 +226,31 @@
         "updateWantedListing": "Update Wanted Listing",
         "posting": "Posting...",
         "updating": "Updating...",
-        "backToListings": "Back to My Listings"
+        "backToListings": "Back to My Listings",
+        "preview": "Preview",
+        "saveDraft": "Save Draft"
       },
       "preview": {
         "title": "Live Preview",
-        "selectGame": "Select a game to see preview"
+        "selectGame": "Select a game to see preview",
+        "wantedBadge": "WANTED",
+        "sections": {
+          "game": "Game",
+          "budget": "Budget",
+          "notes": "Notes",
+          "buyer": "Buyer"
+        },
+        "budgetDisplay": "Up to {price}",
+        "readyToPost": "Ready to post",
+        "mobileTitle": "Wanted Listing Preview",
+        "mobileSubtitle": "Review your wanted listing details"
+      },
+      "draftBanner": {
+        "title": "You have a saved draft",
+        "subtitle": "Would you like to continue where you left off?",
+        "loadButton": "Load Draft",
+        "startFreshButton": "Start Fresh",
+        "dismiss": "Dismiss"
       },
       "loading": {
         "listing": "Loading wanted listing...",
@@ -265,7 +285,8 @@
       "budget": "Budget",
       "maxResponsesReached": "Max responses reached",
       "viewOnBGG": "View on BoardGameGeek",
-      "additionalNotes": "Additional notes"
+      "additionalNotes": "Additional notes",
+      "wantedCount": "{count, plural, one {# wanted} other {# wanted}}"
     },
     "ExistingSalesBanner": {
       "title": "This game is already for sale",
@@ -505,7 +526,7 @@
     "language": "Language",
     "userMenu": {
       "sellerDashboard": "Seller dashboard",
-      "myOrders": "My orders",
+      "myOrders": "My purchases",
       "myListings": "My listings",
       "savedAndWanted": "Saved & wanted",
       "startSelling": "Start selling",
@@ -1167,6 +1188,10 @@
       "beFirstToPost": "Be the first to post what you're looking for.",
       "beFirstToAuction": "No active auctions right now. Check back soon or list your own game as an auction.",
       "clearAllFilters": "Clear all filters"
+    },
+    "wantedCta": {
+      "description": "Looking for a specific game? Let sellers know what you want.",
+      "button": "Post a wanted listing"
     }
   },
   "GameDetail": {
@@ -2409,6 +2434,7 @@
   },
   "Notifications": {
     "title": "Notifications",
+    "subtitle": "Keep track of your auctions, orders, and wanted matches",
     "markAllRead": "Mark all as read",
     "noNotifications": "No notifications yet",
     "noNotificationsHint": "When something needs your attention, it will appear here.",
@@ -2497,7 +2523,7 @@
       "contactOnly": "Manage your listings and connect with buyers"
     },
     "tabs": {
-      "orders": "Orders",
+      "orders": "My sales",
       "earnings": "Earnings",
       "reviews": "Reviews"
     },
@@ -2682,7 +2708,7 @@
     }
   },
   "Orders": {
-    "title": "My orders",
+    "title": "My purchases",
     "subtitle": "Games heading your way",
     "loading": "Loading your orders...",
     "error": {
@@ -3218,7 +3244,7 @@
     }
   },
   "SellerOrders": {
-    "title": "Seller Orders",
+    "title": "My sales",
     "subtitle": "Manage your orders and respond to buyers",
     "loading": "Loading your orders...",
     "error": {

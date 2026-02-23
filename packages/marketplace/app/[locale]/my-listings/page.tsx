@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { Button, Card } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircle, CloseCircle as XCircle, Plus, Search, Heart, Layout as LayoutDashboard, Store } from '@/lib/icons';
+import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { Link } from '@/i18n/navigation';
 import { OfferCard } from '@/components/game/OfferCard';
 import { WantedListingCard } from '@/components/wanted/WantedListingCard';
@@ -326,7 +327,9 @@ function MyListingsContent() {
             {/* Empty State */}
             {!loading && !isOffline && filteredListings.length === 0 && (
               <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
-                <Package className="w-16 h-16 text-text-muted mx-auto mb-4" />
+                <div className="mb-4">
+                  <EmptyStateIcon icon={Package} color="aurora-orange" />
+                </div>
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
                   {activeTab === 'all'
                     ? t('selling.emptyAll.title')
@@ -439,7 +442,9 @@ function MyListingsContent() {
             {/* Empty State */}
             {!wantedLoading && !wantedIsOffline && filteredWantedListings.length === 0 && (
               <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
-                <Search className="w-16 h-16 text-text-muted mx-auto mb-4" />
+                <div className="mb-4">
+                  <EmptyStateIcon icon={Search} color="aurora-orange" />
+                </div>
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
                   {wantedActiveTab === 'all'
                     ? t('wanted.emptyAll.title')
@@ -529,7 +534,9 @@ function MyListingsContent() {
             {/* Empty State */}
             {!savedLoading && savedListings.length === 0 && (
               <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
-                <Heart className="w-16 h-16 text-text-muted mx-auto mb-4" />
+                <div className="mb-4">
+                  <EmptyStateIcon icon={Heart} color="aurora-red" />
+                </div>
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
                   {t('saved.empty.title')}
                 </h3>

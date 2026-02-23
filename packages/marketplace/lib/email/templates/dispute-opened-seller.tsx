@@ -27,7 +27,7 @@ export const DisputeOpenedSellerEmail = ({
   gameName = 'Board Game',
   buyerReason = 'Item not as described',
   deadlineHours = 48,
-  respondUrl = 'https://secondturn.games/seller/orders/123/dispute',
+  respondUrl = 'https://secondturn.games/orders/123',
 }: DisputeOpenedSellerEmailProps) => {
   const previewText = `Action required: Dispute opened for Order #${orderNumber}`;
 

@@ -10,20 +10,22 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { GameSearch } from '@/components/sell/GameSearch';
 import { LanguageVersionSelector } from '@/components/sell/LanguageVersionSelector';
 import { GameNameSelector } from '@/components/sell/GameNameSelector';
-import { WantedOfferCard } from '@/components/wanted/WantedOfferCard';
+import { WantedPreviewSidebar } from '@/components/wanted/WantedPreviewSidebar';
 import { BudgetAssistant } from '@/components/wanted/BudgetAssistant';
 import { ExistingSalesBanner } from '@/components/wanted/ExistingSalesBanner';
 import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
-import { useWantedListingForm, DEFAULT_ACCEPTABLE_CONDITIONS } from '@/lib/hooks/useWantedListingForm';
+import { useWantedListingForm, DEFAULT_ACCEPTABLE_CONDITIONS, WANTED_DRAFT_KEY } from '@/lib/hooks/useWantedListingForm';
 import type { BGGGame, VersionSelection } from '@/lib/bgg-types';
-import { PuzzlePiece as Dices, CurrencyEuro as Euro, FileText as NotesIcon, LightbulbOn as Lightbulb, RefreshCw, AlertCircle, Check, Package } from '@/lib/icons';
+import { PuzzlePiece as Dices, CurrencyEuro as Euro, FileText as NotesIcon, LightbulbOn as Lightbulb, RefreshCw, AlertCircle, Check, InfoCircle as Info, Close } from '@/lib/icons';
 
 function CreateWantedListingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const tSuccess = useTranslations('Wanted.SuccessModal');
   const t = useTranslations('Wanted.CreatePage');
+  const tDraft = useTranslations('Wanted.CreatePage.draftBanner');
+  const tPreview = useTranslations('Wanted.CreatePage.preview');
 
   // Pre-fill search query (from navbar search)
   const initialSearchQuery = searchParams.get('q');
@@ -52,10 +54,15 @@ function CreateWantedListingPageContent() {
     existingSales,
     setExistingSaleListings,
     setSalesBannerDismissed,
+    showDraftBanner,
+    setShowDraftBanner,
+    hasDraft,
+    setHasDraft,
+    showMobilePreview,
+    setShowMobilePreview,
     isGameSectionComplete,
     isBudgetSectionComplete,
     canPublish,
-    createPreviewWantedListing,
     resetForm,
   } = useWantedListingForm();
 
@@ -142,6 +149,74 @@ function CreateWantedListingPageContent() {
     fetchWantedListingForEdit();
   // eslint-disable-next-line react-hooks/exhaustive-deps -- state setters are stable
   }, [isEditMode, editListingId, user]);
+
+  // Check for existing draft on mount
+  useEffect(() => {
+    if (isEditMode) return;
+    const draft = localStorage.getItem(WANTED_DRAFT_KEY);
+    if (draft) {
+      setHasDraft(true);
+      setShowDraftBanner(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount
+  }, [isEditMode]);
+
+  // Auto-save draft on form changes (debounced)
+  useEffect(() => {
+    if (isEditMode || !selectedGame) return;
+
+    const timer = setTimeout(() => {
+      const draftData = {
+        selectedGame,
+        selectedVersion,
+        selectedGameDisplayName,
+        maxPrice,
+        notes,
+      };
+      localStorage.setItem(WANTED_DRAFT_KEY, JSON.stringify(draftData));
+      setHasDraft(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional deps for auto-save
+  }, [isEditMode, selectedGame, selectedVersion, selectedGameDisplayName, maxPrice, notes]);
+
+  const handleLoadDraft = () => {
+    const draft = localStorage.getItem(WANTED_DRAFT_KEY);
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        if (parsed.selectedGame) setSelectedGame(parsed.selectedGame);
+        if (parsed.selectedVersion) setSelectedVersion(parsed.selectedVersion);
+        if (parsed.selectedGameDisplayName) setSelectedGameDisplayName(parsed.selectedGameDisplayName);
+        if (parsed.maxPrice) setMaxPrice(parsed.maxPrice);
+        if (parsed.notes) setNotes(parsed.notes);
+        setExpandedSections({ game: true, budget: true, notes: true });
+        setShowDraftBanner(false);
+      } catch {
+        setError('Failed to load draft');
+      }
+    }
+  };
+
+  const handleDismissDraft = () => {
+    setShowDraftBanner(false);
+    localStorage.removeItem(WANTED_DRAFT_KEY);
+    setHasDraft(false);
+  };
+
+  const handleSaveDraft = () => {
+    if (!selectedGame) return;
+    const draftData = {
+      selectedGame,
+      selectedVersion,
+      selectedGameDisplayName,
+      maxPrice,
+      notes,
+    };
+    localStorage.setItem(WANTED_DRAFT_KEY, JSON.stringify(draftData));
+    setHasDraft(true);
+  };
 
   const handleGameSelect = useCallback(async (game: BGGGame | null) => {
     setSelectedGame(game);
@@ -284,8 +359,10 @@ function CreateWantedListingPageContent() {
           throw new Error(data.error || 'Failed to create wanted listing');
         }
 
-        // Show success modal
+        // Show success modal and clear draft
         setShowSuccessModal(true);
+        localStorage.removeItem(WANTED_DRAFT_KEY);
+        setHasDraft(false);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -333,6 +410,44 @@ function CreateWantedListingPageContent() {
               ? t('pageSubtitleEdit')
               : t('pageSubtitle')}
           </p>
+        </div>
+      )}
+
+      {/* Draft Recovery Banner */}
+      {showDraftBanner && hasDraft && !isEditMode && !isLoadingListing && !loadError && (
+        <div className="mb-6 p-4 bg-aurora-orange/10 border border-aurora-orange/30 rounded-lg">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-aurora-orange flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold text-polar-night mb-1">
+                {tDraft('title')}
+              </p>
+              <p className="text-sm text-text-secondary mb-3">
+                {tDraft('subtitle')}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleLoadDraft}
+                  className="px-4 py-2 bg-aurora-orange text-snow-white rounded-lg hover:bg-aurora-orange/90 transition-colors text-sm font-medium"
+                >
+                  {tDraft('loadButton')}
+                </button>
+                <button
+                  onClick={handleDismissDraft}
+                  className="px-4 py-2 bg-bg-secondary text-text rounded-lg hover:bg-border transition-colors text-sm font-medium"
+                >
+                  {tDraft('startFreshButton')}
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={handleDismissDraft}
+              className="p-1 hover:bg-bg-secondary rounded transition-colors"
+              title={tDraft('dismiss')}
+            >
+              <Close className="w-4 h-4 text-text-muted" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -578,15 +693,46 @@ function CreateWantedListingPageContent() {
                   ? (isEditMode ? t('buttons.updating') : t('buttons.posting'))
                   : (isEditMode ? t('buttons.updateWantedListing') : t('buttons.postWantedGame'))}
               </Button>
+
+              <Button
+                variant="secondary"
+                onClick={() => setShowMobilePreview(true)}
+                size="lg"
+                fullWidth
+              >
+                {t('buttons.preview')}
+              </Button>
+
+              {!isEditMode && (
+                <Button
+                  variant="ghost"
+                  onClick={handleSaveDraft}
+                  size="lg"
+                  fullWidth
+                >
+                  {t('buttons.saveDraft')}
+                </Button>
+              )}
             </div>
 
             {/* Desktop: Regular button row */}
-            <div className="hidden sm:flex sm:items-center sm:justify-end sm:gap-4">
+            <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-4">
+              {!isEditMode && (
+                <Button
+                  variant="ghost"
+                  onClick={handleSaveDraft}
+                  size="lg"
+                >
+                  {t('buttons.saveDraft')}
+                </Button>
+              )}
+
               <Button
                 variant="primary"
                 onClick={handlePublish}
                 disabled={!canPublish || submitting}
                 size="lg"
+                className={isEditMode ? 'ml-auto' : ''}
               >
                 {submitting
                   ? (isEditMode ? t('buttons.updating') : t('buttons.posting'))
@@ -599,25 +745,12 @@ function CreateWantedListingPageContent() {
 
         {/* Right Column: Live Preview (4 cols on desktop, hidden on mobile/tablet) */}
         <div className="hidden lg:block lg:col-span-4">
-          <div className="sticky top-8 space-y-3">
-            {/* Live Preview Header - Orange themed */}
-            <div className="px-3 py-2 bg-aurora-orange/10 border border-aurora-orange/30 rounded-lg">
-              <span className="text-sm font-semibold text-aurora-orange">{t('preview.title')}</span>
-            </div>
-            {/* WantedOfferCard Preview - Force mobile layout via CSS overrides like sell page */}
-            {selectedGame ? (
-              <div className="[&_.sm\:grid]:!hidden [&_.sm\:hidden]:!flex [&_.sm\:hidden]:!flex-col [&_.hidden.sm\:flex]:!hidden [&_.hidden.sm\:block]:!hidden">
-                <WantedOfferCard
-                  wantedListing={createPreviewWantedListing()}
-                  isPreview={true}
-                />
-              </div>
-            ) : (
-              <Card className="p-8 text-center border-2 border-dashed border-border">
-                <Package className="w-12 h-12 text-text-muted mx-auto mb-3" />
-                <p className="text-text-muted">{t('preview.selectGame')}</p>
-              </Card>
-            )}
+          <div className="sticky top-8">
+            <WantedPreviewSidebar
+              formData={formData}
+              user={user}
+              profile={profile}
+            />
           </div>
         </div>
         {/* End Right Column */}
@@ -677,6 +810,23 @@ function CreateWantedListingPageContent() {
               {tSuccess('browseListings')}
             </Button>
           </div>
+        </div>
+      </Modal>
+
+      {/* Mobile Preview Modal */}
+      <Modal
+        open={showMobilePreview}
+        onClose={() => setShowMobilePreview(false)}
+        title={tPreview('mobileTitle')}
+        size="lg"
+      >
+        <div className="max-h-[70vh] overflow-y-auto pb-4">
+          <p className="text-xs text-text-secondary mb-3">{tPreview('mobileSubtitle')}</p>
+          <WantedPreviewSidebar
+            formData={formData}
+            user={user}
+            profile={profile}
+          />
         </div>
       </Modal>
     </div>
