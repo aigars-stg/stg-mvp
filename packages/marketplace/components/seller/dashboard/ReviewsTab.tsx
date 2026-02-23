@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Star, RefreshCw as Loader2 } from '@/lib/icons';
+import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { SellerReviewsList } from '@/components/seller/SellerReviewsList';
 import { useTranslations } from 'next-intl';
@@ -116,7 +117,9 @@ export function ReviewsTab() {
   if (reviews.length === 0) {
     return (
       <div className="text-center py-16">
-        <Star className="w-16 h-16 text-text-muted mx-auto mb-4 opacity-50" />
+        <div className="flex justify-center mb-4">
+          <EmptyStateIcon icon={Star} color="aurora-orange" />
+        </div>
         <h2 className="text-xl font-semibold text-polar-night mb-2">
           {t('recentReviews.noReviews')}
         </h2>

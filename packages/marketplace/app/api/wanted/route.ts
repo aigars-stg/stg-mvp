@@ -100,7 +100,6 @@ export async function POST(request: NextRequest) {
       // Metadata
       buyer_id: buyerId,
       status: 'active',
-      // expires_at defaults to NOW() + 30 days (set in DB)
     };
 
     // Insert wanted listing into database

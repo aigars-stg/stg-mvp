@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { getHelpDocument } from '@/lib/legal';
+import { getHelpDocument, serializeMdx } from '@/lib/legal';
+import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { HelpHub } from '@/components/help/HelpHub';
 import { HELP_SECTIONS } from '@/components/help/help-sections';
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema';
@@ -21,7 +22,7 @@ export async function generateMetadata({
 
 const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8'] as const;
 
-function loadAllHelpDocuments(locale: string = 'en') {
+async function loadAllHelpDocuments(locale: string = 'en') {
   const slugMap: Record<string, string> = {
     overview: 'overview',
     buying: 'buying',
@@ -37,15 +38,22 @@ function loadAllHelpDocuments(locale: string = 'en') {
     {
       slug: string;
       frontmatter: { title: string; lastUpdated: string; description?: string };
-      content: string;
+      serialized: MDXRemoteSerializeResult;
     }
   > = {};
 
   for (const section of HELP_SECTIONS) {
     const fileSlug = slugMap[section.id] || section.id;
     try {
-      documents[section.id] = getHelpDocument(fileSlug, locale);
+      const doc = getHelpDocument(fileSlug, locale);
+      const serialized = await serializeMdx(doc.content);
+      documents[section.id] = {
+        slug: doc.slug,
+        frontmatter: doc.frontmatter,
+        serialized,
+      };
     } catch {
+      const serialized = await serializeMdx('This section is coming soon.');
       documents[section.id] = {
         slug: fileSlug,
         frontmatter: {
@@ -53,7 +61,7 @@ function loadAllHelpDocuments(locale: string = 'en') {
           lastUpdated: '',
           description: '',
         },
-        content: 'This section is coming soon.',
+        serialized,
       };
     }
   }
@@ -67,7 +75,7 @@ export default async function HelpPage({
   params: { locale: string };
 }) {
   const t = await getTranslations('Help');
-  const documents = loadAllHelpDocuments(locale);
+  const documents = await loadAllHelpDocuments(locale);
 
   const faqJsonLd = {
     '@context': 'https://schema.org',

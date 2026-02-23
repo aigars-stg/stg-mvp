@@ -2,14 +2,15 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useRouter } from '@/i18n/navigation';
+import { useRouter, Link } from '@/i18n/navigation';
 import { Select, Button } from '@second-turn/design-system';
-import { Package, SettingsAdjustHorizontal as SlidersHorizontal } from '@/lib/icons';
+import { Package, SettingsAdjustHorizontal as SlidersHorizontal, Search, Plus, SearchPlus } from '@/lib/icons';
+import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { AggregatedGameCard, SellFilters, WantedFilters, MobileFilterDrawer, ActiveFilterChips } from '@/components/browse';
+import { AggregatedWantedGameCard } from '@/components/browse/AggregatedWantedGameCard';
 import { ListingCardSkeleton } from '@/components/listing/ListingCardSkeleton';
-import { WantedListingCard } from '@/components/wanted/WantedListingCard';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
-import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
+import type { WantedListingWithDetails, AggregatedWantedGame } from '@/lib/types/wanted-listing';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { CountryPrompt } from '@/components/onboarding';
 import { cn } from '@/lib/utils';
@@ -394,16 +395,6 @@ export default function BrowsePage() {
     return filtered;
   }, [games, selectedPlayerCounts, selectedMinAges, selectedPlayingTimes]);
 
-  // Handle "I Have This" click for wanted listings
-  // Redirects to sell page with wanted listing context
-  const handleIHaveThis = (wantedListingId: string) => {
-    if (!user) {
-      router.push(`/auth/signin?redirect=/sell?wantedListingId=${wantedListingId}`);
-      return;
-    }
-    router.push(`/sell?wantedListingId=${wantedListingId}`);
-  };
-
   // Filter wanted listings
   const filteredWantedListings = useMemo(() => {
     let filtered = [...wantedListings];
@@ -443,23 +434,8 @@ export default function BrowsePage() {
       );
     }
 
-    // Expiring soon filter (< 7 days)
-    if (showExpiringOnly) {
-      const sevenDaysFromNow = new Date();
-      sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-      filtered = filtered.filter((listing) => {
-        if (!listing.expires_at) return false;
-        return new Date(listing.expires_at) < sevenDaysFromNow;
-      });
-    }
-
     // Sorting
     switch (sortBy) {
-      case 'expiring':
-        filtered.sort((a, b) =>
-          new Date(a.expires_at || 0).getTime() - new Date(b.expires_at || 0).getTime()
-        );
-        break;
       case 'budget-high':
         filtered.sort((a, b) => (b.max_price || 0) - (a.max_price || 0));
         break;
@@ -476,7 +452,40 @@ export default function BrowsePage() {
     }
 
     return filtered;
-  }, [wantedListings, searchQuery, acceptableConditions, budgetMin, budgetMax, locationFilter, showExpiringOnly, sortBy]);
+  }, [wantedListings, searchQuery, acceptableConditions, budgetMin, budgetMax, locationFilter, sortBy]);
+
+  // Aggregate wanted listings by game for browse view
+  const aggregatedWantedGames = useMemo((): AggregatedWantedGame[] => {
+    const gameMap = new Map<number, WantedListingWithDetails[]>();
+    for (const wl of filteredWantedListings) {
+      if (!gameMap.has(wl.bgg_game_id)) gameMap.set(wl.bgg_game_id, []);
+      gameMap.get(wl.bgg_game_id)!.push(wl);
+    }
+
+    const games = Array.from(gameMap.entries()).map(([id, listings]) => ({
+      bgg_game_id: id,
+      game_name: listings[0].game_name,
+      game_year: listings[0].game_year,
+      image: listings[0].game?.image || null,
+      thumbnail: listings[0].game?.thumbnail || null,
+      player_count: listings[0].game?.player_count || null,
+      min_age: listings[0].game?.min_age || null,
+      playing_time: listings[0].game?.playing_time || null,
+      is_expansion: listings[0].game?.is_expansion || null,
+      wanted_count: listings.length,
+      budget_max: Math.max(...listings.map(l => l.max_price)),
+      newest_date: listings[0].created_at,
+    }));
+
+    // Sort aggregated games
+    switch (sortBy) {
+      case 'budget-high': games.sort((a, b) => b.budget_max - a.budget_max); break;
+      case 'budget-low': games.sort((a, b) => a.budget_max - b.budget_max); break;
+      case 'popular': games.sort((a, b) => b.wanted_count - a.wanted_count); break;
+      default: break; // 'recent' — already ordered from API
+    }
+    return games;
+  }, [filteredWantedListings, sortBy]);
 
   // Memoized array of game IDs for navigation context
   const gameIds = useMemo(() => {
@@ -559,7 +568,6 @@ export default function BrowsePage() {
                         ]
                       : [
                           { value: 'recent', label: t('sort.recentlyPosted') },
-                          { value: 'expiring', label: t('sort.expiringSoon') },
                           { value: 'budget-high', label: t('sort.budgetHighLow') },
                           { value: 'budget-low', label: t('sort.budgetLowHigh') },
                           { value: 'popular', label: t('sort.mostResponses') },
@@ -895,18 +903,32 @@ export default function BrowsePage() {
           </div>
         )}
 
+        {/* Wanted CTA Banner */}
+        {listingType === 'wanted' && !loading && !error && !isOffline && aggregatedWantedGames.length > 0 && (
+          <div className="flex items-center gap-3 px-4 py-3 mb-4 bg-aurora-orange/5 border border-aurora-orange/20 rounded-lg">
+            <div className="w-8 h-8 bg-aurora-orange/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <Search className="w-4 h-4 text-aurora-orange" />
+            </div>
+            <p className="text-sm text-text-secondary flex-grow">
+              {t('wantedCta.description')}
+            </p>
+            <Link href="/wanted/new">
+              <Button variant="primary" size="sm">
+                <Plus className="w-4 h-4 mr-1.5" />
+                {t('wantedCta.button')}
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {/* Games Grid - Full Width, Responsive */}
-        {!loading && !error && !isOffline && (listingType === 'wanted' ? filteredWantedListings.length > 0 : filteredGames.length > 0) && (
+        {!loading && !error && !isOffline && (listingType === 'wanted' ? aggregatedWantedGames.length > 0 : filteredGames.length > 0) && (
           <>
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-pl-4 sm:grid sm:grid-cols-2 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0 sm:snap-none lg:grid-cols-3 xl:grid-cols-4 sm:gap-6">
               {listingType === 'wanted'
-                ? filteredWantedListings.map((wantedListing) => (
-                    <div key={wantedListing.id} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
-                      <WantedListingCard
-                        wantedListing={wantedListing}
-                        onIHaveThis={handleIHaveThis}
-                        showBuyer={true}
-                      />
+                ? aggregatedWantedGames.map((game) => (
+                    <div key={game.bgg_game_id} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
+                      <AggregatedWantedGameCard game={game} />
                     </div>
                   ))
                 : filteredGames.map((game, index) => (
@@ -960,10 +982,13 @@ export default function BrowsePage() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && !isOffline && (listingType === 'wanted' ? filteredWantedListings.length === 0 : filteredGames.length === 0) && (
+        {!loading && !error && !isOffline && (listingType === 'wanted' ? aggregatedWantedGames.length === 0 : filteredGames.length === 0) && (
           <div className="text-center py-16">
             <div className="flex justify-center mb-4">
-              <Package className="w-16 h-16 text-text-muted" />
+              <EmptyStateIcon
+                icon={listingType === 'wanted' ? SearchPlus : Package}
+                color={listingType === 'wanted' ? 'aurora-orange' : 'frost-ice'}
+              />
             </div>
             <h3 className="text-xl font-semibold text-polar-night mb-2">
               {listingType === 'auctions'
@@ -980,14 +1005,20 @@ export default function BrowsePage() {
                   ? t('emptyState.beFirstToAuction')
                   : listingType === 'sell'
                     ? t('emptyState.beFirstToList')
-                    : t('emptyState.beFirstToPost')
+                    : t('wantedCta.description')
               }
             </p>
-            {activeFiltersCount > 0 && (
+            {activeFiltersCount > 0 ? (
               <Button variant="accent" onClick={clearFilters}>
                 {t('emptyState.clearAllFilters')}
               </Button>
-            )}
+            ) : listingType === 'wanted' ? (
+              <Link href="/wanted/new">
+                <Button variant="primary">
+                  {t('wantedCta.button')}
+                </Button>
+              </Link>
+            ) : null}
           </div>
         )}
 

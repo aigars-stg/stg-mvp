@@ -69,7 +69,7 @@ export function CookieConsent() {
               {t('description')}
               <br />
               <Link
-                href="/privacy#cookies"
+                href="/legal?section=cookies"
                 className="text-frost-ice underline hover:text-frost-sky"
               >
                 {t('learnMore')}

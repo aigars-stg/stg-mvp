@@ -226,11 +226,31 @@
         "updateWantedListing": "Atjaunināt meklējumu",
         "posting": "Publicē...",
         "updating": "Atjaunina...",
-        "backToListings": "Atpakaļ uz maniem sludinājumiem"
+        "backToListings": "Atpakaļ uz maniem sludinājumiem",
+        "preview": "Priekšskatījums",
+        "saveDraft": "Saglabāt melnrakstu"
       },
       "preview": {
         "title": "Priekšskatījums",
-        "selectGame": "Izvēlies spēli, lai redzētu priekšskatījumu"
+        "selectGame": "Izvēlies spēli, lai redzētu priekšskatījumu",
+        "wantedBadge": "MEKLĒ",
+        "sections": {
+          "game": "Spēle",
+          "budget": "Budžets",
+          "notes": "Piezīmes",
+          "buyer": "Pircējs"
+        },
+        "budgetDisplay": "Līdz {price}",
+        "readyToPost": "Gatavs publicēšanai",
+        "mobileTitle": "Meklējuma priekšskatījums",
+        "mobileSubtitle": "Pārskatiet sava meklējuma detaļas"
+      },
+      "draftBanner": {
+        "title": "Tev ir saglabāts melnraksts",
+        "subtitle": "Vai vēlies turpināt no vietas, kur apstājies?",
+        "loadButton": "Ielādēt melnrakstu",
+        "startFreshButton": "Sākt no jauna",
+        "dismiss": "Noraidīt"
       },
       "loading": {
         "listing": "Ielādē meklējumu...",
@@ -265,7 +285,8 @@
       "budget": "Budžets",
       "maxResponsesReached": "Sasniegts maksimālais atbilžu skaits",
       "viewOnBGG": "Skatīt BoardGameGeek",
-      "additionalNotes": "Papildu piezīmes"
+      "additionalNotes": "Papildu piezīmes",
+      "wantedCount": "{count, plural, one {# vēlas} other {# vēlas}}"
     },
     "ExistingSalesBanner": {
       "title": "Šī spēle jau ir pārdošanā",
@@ -505,7 +526,7 @@
     "language": "Valoda",
     "userMenu": {
       "sellerDashboard": "Pārdevēja panelis",
-      "myOrders": "Mani pasūtījumi",
+      "myOrders": "Mani pirkumi",
       "myListings": "Mani sludinājumi",
       "savedAndWanted": "Saglabātās un meklētās",
       "startSelling": "Sāc pārdot",
@@ -1167,6 +1188,10 @@
       "beFirstToPost": "Esi pirmais, kas publicē, ko meklē.",
       "beFirstToAuction": "Pašlaik nav aktīvu izsoļu. Atgriezies drīz vai izveido savu izsoli.",
       "clearAllFilters": "Notīrīt visus filtrus"
+    },
+    "wantedCta": {
+      "description": "Meklē konkrētu spēli? Paziņo pārdevējiem, ko tu vēlies.",
+      "button": "Publicēt meklēšanas sludinājumu"
     }
   },
   "GameDetail": {
@@ -2409,6 +2434,7 @@
   },
   "Notifications": {
     "title": "Paziņojumi",
+    "subtitle": "Seko līdzi savām izsolēm, pasūtījumiem un meklēšanas atbilstībām",
     "markAllRead": "Atzīmēt visus kā lasītus",
     "noNotifications": "Pagaidām nav paziņojumu",
     "noNotificationsHint": "Kad kaut kas prasīs tavu uzmanību, tas parādīsies šeit.",
@@ -2497,7 +2523,7 @@
       "contactOnly": "Pārvaldi savus sludinājumus un sazinies ar pircējiem"
     },
     "tabs": {
-      "orders": "Pasūtījumi",
+      "orders": "Mani pārdošanas darījumi",
       "earnings": "Ieņēmumi",
       "reviews": "Atsauksmes"
     },
@@ -2687,7 +2713,7 @@
     }
   },
   "Orders": {
-    "title": "Mani pasūtījumi",
+    "title": "Mani pirkumi",
     "subtitle": "Spēles, kas dodas pie tevis",
     "loading": "Ielādē tavus pasūtījumus...",
     "error": {
@@ -3223,7 +3249,7 @@
     }
   },
   "SellerOrders": {
-    "title": "Pārdevēja pasūtījumi",
+    "title": "Mani pārdošanas darījumi",
     "subtitle": "Pārvaldiet savus pasūtījumus un atbildiet pircējiem",
     "loading": "Ielādē pasūtījumus...",
     "error": {

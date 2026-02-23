@@ -126,3 +126,5 @@ export { CookieIcon as Cookie } from '@phosphor-icons/react/ssr';
 export { GavelIcon as Gavel } from '@phosphor-icons/react/ssr';
 export { HandshakeIcon as Handshake } from '@phosphor-icons/react/ssr';
 export { HandWavingIcon as HandWaving } from '@phosphor-icons/react/ssr';
+export { WalletIcon as Wallet } from '@phosphor-icons/react/ssr';
+export { ChatTextIcon as ChatText } from '@phosphor-icons/react/ssr';

@@ -52,7 +52,7 @@ export async function sendOrderPlacedToSeller(data: OrderEmailData) {
         buyerName,
         shippingMethod,
         destinationInfo,
-        orderUrl: `${APP_URL}/seller/orders/${orderId}`,
+        orderUrl: `${APP_URL}/orders/${orderId}`,
         deadlineHours: 24,
       }),
     });
@@ -208,7 +208,7 @@ export async function sendShippingLabelToSeller(params: {
         parcelId,
         barcode,
         trackingUrl,
-        orderUrl: `${APP_URL}/seller/orders/${orderId}`,
+        orderUrl: `${APP_URL}/orders/${orderId}`,
       }),
     });
 
@@ -291,7 +291,7 @@ export async function sendDisputeOpenedToSeller(params: {
         gameName,
         buyerReason,
         deadlineHours: 48,
-        respondUrl: `${APP_URL}/seller/orders/${orderId}/dispute`,
+        respondUrl: `${APP_URL}/orders/${orderId}`,
       }),
     });
 

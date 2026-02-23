@@ -104,6 +104,22 @@ export interface WantedListingResponseWithSeller extends WantedListingResponse {
   };
 }
 
+// Aggregated wanted game for browse view (mirrors AggregatedGame pattern)
+export interface AggregatedWantedGame {
+  bgg_game_id: number;
+  game_name: string;
+  game_year: number | null;
+  image: string | null;
+  thumbnail: string | null;
+  player_count: string | null;
+  min_age: number | null;
+  playing_time: string | null;
+  is_expansion: boolean | null;
+  wanted_count: number;
+  budget_max: number;
+  newest_date: string;
+}
+
 // For browse/listing view - lightweight version
 export interface WantedListingCard {
   id: string;

@@ -3,13 +3,14 @@
 import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { HelpNav, type HelpSectionId } from './HelpNav';
 import { LegalSection } from '../legal/LegalSection';
 
 interface HelpDocument {
   slug: string;
   frontmatter: { title: string; lastUpdated: string; description?: string };
-  content: string;
+  serialized: MDXRemoteSerializeResult;
 }
 
 interface HelpHubProps {
@@ -50,7 +51,7 @@ function HelpHubInner({ documents }: HelpHubProps) {
             <LegalSection
               title={doc.frontmatter.title}
               lastUpdated={doc.frontmatter.lastUpdated}
-              content={doc.content}
+              serialized={doc.serialized}
             />
           </main>
         </div>

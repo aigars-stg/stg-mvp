@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { Button, Badge, Card } from '@second-turn/design-system';
 import { Package, Time as Clock, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User, ShoppingBag } from '@/lib/icons';
+import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';
 import { formatDate } from '@/lib/date-utils';
@@ -179,7 +180,9 @@ export default function OrdersPage() {
         {/* Orders List */}
         {filteredOrders.length === 0 ? (
           <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
-            <Package className="w-16 h-16 text-text-muted mx-auto mb-4" />
+            <div className="mb-4">
+              <EmptyStateIcon icon={Package} color="frost-ice" />
+            </div>
             <h2 className="text-xl font-semibold text-polar-night mb-2">{t('emptyState.title')}</h2>
             <p className="text-text-secondary mb-6">
               {activeTab === 'all'

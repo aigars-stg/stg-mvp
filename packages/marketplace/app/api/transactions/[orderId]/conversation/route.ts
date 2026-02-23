@@ -70,7 +70,12 @@ export async function GET(
         cancelled_at,
         refunded_at,
         disputed_at,
-        refund_amount
+        refund_amount,
+        platform_commission_cents,
+        seller_wallet_credit_cents,
+        parcel_size,
+        unisend_parcel_id,
+        label_error
       `)
       .eq('id', orderId)
       .single();
@@ -268,7 +273,16 @@ export async function GET(
           barcode: order.barcode,
           tracking_url: order.tracking_url,
           label_url: order.label_url,
+          ...(isSeller && { parcel_id: order.unisend_parcel_id }),
         },
+        ...(isSeller && {
+          parcel_size: order.parcel_size,
+          label_error: order.label_error,
+          payment: {
+            platform_commission_cents: order.platform_commission_cents,
+            seller_wallet_credit_cents: order.seller_wallet_credit_cents,
+          },
+        }),
         timestamps: {
           created_at: order.created_at,
           paid_at: order.paid_at,

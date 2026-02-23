@@ -553,7 +553,7 @@ function AccountSettingsContent() {
                   </div>
                   <p className="text-xs text-text-secondary">
                     {t('yourData.gdprNote')}{' '}
-                    <a href="/privacy#your-rights" className="text-frost-ice hover:underline">{t('yourData.privacyPolicy')}</a>.
+                    <a href="/legal?section=privacy#your-rights" className="text-frost-ice hover:underline">{t('yourData.privacyPolicy')}</a>.
                   </p>
                 </div>
               </Card>

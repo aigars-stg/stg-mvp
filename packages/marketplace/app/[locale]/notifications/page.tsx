@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useRouter } from '@/i18n/navigation';
 import { useEffect } from 'react';
+import { Notification as BellIcon } from '@/lib/icons';
 import { NotificationsList } from '@/components/notifications/NotificationsList';
 
 export default function NotificationsPage() {
@@ -19,23 +20,34 @@ export default function NotificationsPage() {
 
   if (loading || !user) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-        <div className="h-8 w-48 bg-bg-secondary rounded animate-pulse mb-6" />
-        <div className="space-y-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-20 bg-bg-secondary rounded-lg animate-pulse" />
-          ))}
+      <div className="min-h-screen bg-bg py-6 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <div className="h-8 w-48 bg-bg-secondary rounded animate-pulse mb-2" />
+            <div className="h-4 w-72 bg-bg-secondary rounded animate-pulse" />
+          </div>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-20 bg-bg-secondary rounded-lg animate-pulse" />
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-      <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-6">
-        {t('title')}
-      </h1>
-      <NotificationsList />
+    <div className="min-h-screen bg-bg py-6 px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <BellIcon className="w-8 h-8 text-frost-ice" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">{t('title')}</h1>
+          </div>
+          <p className="text-text-secondary">{t('subtitle')}</p>
+        </div>
+        <NotificationsList />
+      </div>
     </div>
   );
 }

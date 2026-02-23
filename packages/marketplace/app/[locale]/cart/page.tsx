@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { ShoppingBasket as ShoppingCart, AlertCircle } from '@/lib/icons';
+import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useCart } from '@/lib/contexts/CartContext';
 import { CountryPrompt } from '@/components/onboarding';
@@ -260,7 +261,9 @@ export default function CartPage() {
             )}
 
             <Card padding="lg" className={`text-center flex flex-col justify-center items-center ${expiredItems.length > 0 ? 'min-h-[30vh]' : 'min-h-[60vh]'}`}>
-              <ShoppingCart className="w-16 h-16 text-text-muted mx-auto mb-4" />
+              <div className="mb-4">
+                <EmptyStateIcon icon={ShoppingCart} color="frost-ice" />
+              </div>
               <h2 className="text-xl font-semibold text-polar-night mb-2">
                 {t('emptyCart.title')}
               </h2>

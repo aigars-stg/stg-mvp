@@ -5,8 +5,9 @@ import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight } from '@/lib/icons';
+import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { PARCEL_SIZES } from '@/lib/hooks/useSellerOrderDetail';
+import { PARCEL_SIZES } from '@/components/shipping';
 import { getStatusConfig } from '@/components/shipping/ShippingStatusConfig';
 import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import { resolveListingImage } from '@/lib/utils/listing-image';
@@ -280,7 +281,9 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
       {/* Orders List */}
       {filteredOrders.length === 0 ? (
         <div className="text-center py-16">
-          <Package className="w-16 h-16 text-text-muted mx-auto mb-4" />
+          <div className="flex justify-center mb-4">
+            <EmptyStateIcon icon={Package} color="frost-ice" />
+          </div>
           <h2 className="text-xl font-semibold text-polar-night mb-2">{t('noOrders.title')}</h2>
           <p className="text-text-secondary">
             {activeTab === 'pending'
@@ -297,7 +300,7 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
               ?? Math.round(order.items_total * (1 - SELLER_COMMISSION_RATE) * 100);
 
             return (
-              <Link key={order.id} href={`/seller/orders/${order.id}`}>
+              <Link key={order.id} href={`/orders/${order.id}`}>
                 <div className="bg-snow-white border border-border rounded-xl p-3 sm:p-4 hover:border-frost-ice transition-colors cursor-pointer">
                   {/* Line 1: Thumbnails + Order # + Status + Time remaining */}
                   <div className="flex items-center gap-3">

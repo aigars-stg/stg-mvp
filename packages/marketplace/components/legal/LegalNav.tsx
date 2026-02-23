@@ -27,8 +27,8 @@ export function LegalNav() {
   return (
     <nav aria-label={tCommon('aria.legalSections')}>
       {/* Desktop: sticky sidebar */}
-      <div className="hidden rounded-lg border border-border-subtle bg-white/60 p-2 lg:block">
-        <ul className="flex flex-col gap-1">
+      <div className="hidden rounded-lg border border-border p-1 bg-snow-white shadow-sm lg:block">
+        <ul className="flex flex-col gap-0.5">
           {LEGAL_SECTIONS.map((section) => {
             const Icon = SECTION_ICONS[section.id];
             return (
@@ -36,10 +36,10 @@ export function LegalNav() {
                 <Link
                   href={section.href}
                   scroll={false}
-                  className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
+                  className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-all ${
                     activeSection === section.id
-                      ? 'bg-frost-ice/10 font-medium text-frost-ice'
-                      : 'text-text-secondary hover:bg-bg-elevated hover:text-text'
+                      ? 'bg-frost-ice text-snow-white shadow-sm'
+                      : 'text-text-secondary hover:text-text'
                   }`}
                 >
                   <Icon size={16} className="shrink-0" />

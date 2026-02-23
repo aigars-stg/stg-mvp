@@ -10,6 +10,8 @@ import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 // Default acceptable conditions (all conditions)
 export const DEFAULT_ACCEPTABLE_CONDITIONS: ListingCondition[] = ['likeNew', 'veryGood', 'good', 'acceptable'];
 
+export const WANTED_DRAFT_KEY = 'wanted-listing-draft';
+
 export interface WantedFormData {
   selectedGame: BGGGame | null;
   selectedGameDisplayName: string | null;
@@ -80,6 +82,16 @@ export interface UseWantedListingFormReturn {
   setExistingSaleListings: (listings: ListingWithSeller[]) => void;
   setSalesBannerDismissed: (value: boolean) => void;
 
+  // Draft state
+  showDraftBanner: boolean;
+  setShowDraftBanner: (value: boolean) => void;
+  hasDraft: boolean;
+  setHasDraft: (value: boolean) => void;
+
+  // Mobile preview
+  showMobilePreview: boolean;
+  setShowMobilePreview: (value: boolean) => void;
+
   // Computed values
   isGameSectionComplete: boolean;
   isBudgetSectionComplete: boolean;
@@ -127,6 +139,13 @@ export function useWantedListingForm(): UseWantedListingFormReturn {
   // Existing sales state
   const [existingSaleListings, setExistingSaleListings] = useState<ListingWithSeller[]>([]);
   const [salesBannerDismissed, setSalesBannerDismissed] = useState(false);
+
+  // Draft state
+  const [showDraftBanner, setShowDraftBanner] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+
+  // Mobile preview state
+  const [showMobilePreview, setShowMobilePreview] = useState(false);
 
   // Toggle section helper
   const toggleSection = useCallback((section: keyof typeof expandedSections) => {
@@ -209,8 +228,7 @@ export function useWantedListingForm(): UseWantedListingFormReturn {
       // Response tracking
       response_count: 0,
 
-      // Expiration
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      expires_at: null,
 
       // Metadata
       created_at: new Date().toISOString(),
@@ -251,6 +269,8 @@ export function useWantedListingForm(): UseWantedListingFormReturn {
       budget: false,
       notes: false,
     });
+    localStorage.removeItem(WANTED_DRAFT_KEY);
+    setHasDraft(false);
   }, []);
 
   return {
@@ -308,6 +328,16 @@ export function useWantedListingForm(): UseWantedListingFormReturn {
     },
     setExistingSaleListings,
     setSalesBannerDismissed,
+
+    // Draft state
+    showDraftBanner,
+    setShowDraftBanner,
+    hasDraft,
+    setHasDraft,
+
+    // Mobile preview
+    showMobilePreview,
+    setShowMobilePreview,
 
     // Computed values
     isGameSectionComplete,
