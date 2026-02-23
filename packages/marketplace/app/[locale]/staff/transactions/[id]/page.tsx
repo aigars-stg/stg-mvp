@@ -19,7 +19,6 @@ import {
 } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {
-  getStatusConfig,
   issueTypeLabels,
   issueStatusConfig,
 } from '@/components/shipping';

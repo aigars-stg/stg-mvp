@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useRouter, Link } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
 import { Select, Button } from '@second-turn/design-system';
 import { Package, SettingsAdjustHorizontal as SlidersHorizontal, Search, Plus, SearchPlus } from '@/lib/icons';
 import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
@@ -20,7 +20,6 @@ import { useTranslations } from 'next-intl';
 import { useBrowseFilters } from '@/lib/hooks/useBrowseFilters';
 
 export default function BrowsePage() {
-  const router = useRouter();
   const { user, profile } = useAuth();
   const t = useTranslations('Browse');
 
