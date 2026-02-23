@@ -95,7 +95,7 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
     };
 
     fetchCounts();
-  }, [user, isOpen, profile?.seller_status]);
+  }, [user, isOpen, profile?.seller_status, isActiveSeller]);
 
   // Close on escape key
   useEffect(() => {
