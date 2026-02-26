@@ -23,7 +23,12 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     // Parse request body
-    const body = (await request.json()) as SubmitFeedbackRequest;
+    let body: SubmitFeedbackRequest;
+    try {
+      body = (await request.json()) as SubmitFeedbackRequest;
+    } catch {
+      return handleValidationError('Invalid request body', 'Submit feedback');
+    }
 
     // Validate request
     const validation = validateFeedbackRequest(body);

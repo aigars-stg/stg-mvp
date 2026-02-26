@@ -23,6 +23,13 @@ export function validateDescription(description: string): {
   valid: boolean;
   error?: string;
 } {
+  if (!description || typeof description !== 'string') {
+    return {
+      valid: false,
+      error: `Description must be at least ${FEEDBACK_CONSTRAINTS.DESCRIPTION_MIN_LENGTH} characters`,
+    };
+  }
+
   const trimmed = description.trim();
 
   if (trimmed.length < FEEDBACK_CONSTRAINTS.DESCRIPTION_MIN_LENGTH) {

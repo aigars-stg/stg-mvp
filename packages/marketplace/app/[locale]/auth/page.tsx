@@ -66,7 +66,7 @@ export default function AuthPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirectTo');
-    if (redirect) {
+    if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
       setRedirectTo(redirect);
     }
   }, []);

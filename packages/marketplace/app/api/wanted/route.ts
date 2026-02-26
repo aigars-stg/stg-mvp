@@ -147,9 +147,13 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
 
+    // Clamp pagination values
+    const safePage = Math.max(1, isNaN(page) ? 1 : page);
+    const safeLimit = Math.min(100, Math.max(1, isNaN(limit) ? 20 : limit));
+
     // Calculate offset for pagination
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
+    const from = (safePage - 1) * safeLimit;
+    const to = from + safeLimit - 1;
     const supabase = await createServerSupabase();
 
     // Build query with buyer profile join
@@ -170,7 +174,11 @@ export async function GET(request: NextRequest) {
 
     // Apply filters
     if (gameId) {
-      query = query.eq('bgg_game_id', parseInt(gameId));
+      const gameIdNum = parseInt(gameId, 10);
+      if (isNaN(gameIdNum) || gameIdNum < 0 || gameIdNum > 2147483647) {
+        return NextResponse.json({ wantedListings: [], pagination: { page: safePage, limit: safeLimit, total: 0, hasMore: false } });
+      }
+      query = query.eq('bgg_game_id', gameIdNum);
     }
 
     if (buyerId) {
@@ -236,8 +244,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       wantedListings: wantedListings || [],
       pagination: {
-        page,
-        limit,
+        page: safePage,
+        limit: safeLimit,
         total,
         hasMore,
       },

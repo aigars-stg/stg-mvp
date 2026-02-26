@@ -590,7 +590,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                 badge={!listing.all_components_present ? (
                   <span className="text-xs text-aurora-red font-medium">{t('listing.missingParts')}</span>
                 ) : undefined}
-                subtitle={listing.condition_notes?.slice(0, 60) + (listing.condition_notes && listing.condition_notes.length > 60 ? '...' : '')}
+                subtitle={listing.condition_notes ? listing.condition_notes.slice(0, 60) + (listing.condition_notes.length > 60 ? '...' : '') : undefined}
               >
                 <div className="space-y-2 text-sm">
                   {!listing.all_components_present && listing.missing_components && (

@@ -28,7 +28,12 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     // Parse request body
-    const body = (await request.json()) as SubscribeRequest;
+    let body: SubscribeRequest;
+    try {
+      body = (await request.json()) as SubscribeRequest;
+    } catch {
+      return handleValidationError('Invalid request body', 'Subscribe');
+    }
 
     // Determine email: from body (anonymous/footer) or from auth session (settings toggle)
     const rawEmail = body.email || user?.email;
@@ -37,6 +42,9 @@ export async function POST(request: NextRequest) {
     }
 
     const email = normalizeEmail(rawEmail);
+    if (email.length > 254) {
+      return handleValidationError('Email address is too long', 'Subscribe');
+    }
     const locale: NewsletterLocale = body.locale === 'lv' ? 'lv' : 'en';
     const source: NewsletterSource = body.source || 'footer';
 

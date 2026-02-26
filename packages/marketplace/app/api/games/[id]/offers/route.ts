@@ -174,6 +174,14 @@ export async function GET(
       .select('id, name, thumbnail, image, versions')
       .eq('parent_bgg_id', bggId);
 
+    // If game doesn't exist in DB and has no expansion data, return 404
+    if (!enrichedGameData) {
+      return NextResponse.json(
+        { error: 'Game not found' },
+        { status: 404 }
+      );
+    }
+
     const expansionIds = childExpansions?.map(g => g.id) || [];
     const allGameIds = [bggId, ...expansionIds];
 

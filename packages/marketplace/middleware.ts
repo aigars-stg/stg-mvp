@@ -121,7 +121,7 @@ export async function middleware(request: NextRequest) {
 
   // Protected routes that require authentication
   // Note: Must handle both /route and /[locale]/route patterns
-  const protectedRoutes = ['/sell', '/account', '/my-listings', '/seller', '/messages', '/notifications'];
+  const protectedRoutes = ['/sell', '/account', '/my-listings', '/seller', '/messages', '/notifications', '/checkout', '/orders', '/wanted/new'];
   const publicRoutes = ['/seller/terms'];
   const authRoutes = ['/auth/signin', '/auth/signup', '/auth'];
 
@@ -153,7 +153,8 @@ export async function middleware(request: NextRequest) {
   // Redirect away from auth pages if already logged in
   // Preserve locale in redirect URL
   if (isAuthRoute && user) {
-    const redirectTo = request.nextUrl.searchParams.get('redirectTo') || '/';
+    const rawRedirectTo = request.nextUrl.searchParams.get('redirectTo') || '/';
+    const redirectTo = (rawRedirectTo.startsWith('/') && !rawRedirectTo.startsWith('//')) ? rawRedirectTo : '/';
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = redirectTo;
     redirectUrl.searchParams.delete('redirectTo');

@@ -50,6 +50,11 @@ export async function GET(
 ) {
   try {
     const { id: gameId } = params;
+    const bggId = parseInt(gameId, 10);
+    if (isNaN(bggId) || bggId < 0 || bggId > 2147483647) {
+      return NextResponse.json({ listings: [] });
+    }
+
     const { searchParams } = new URL(request.url);
     const excludeListingId = searchParams.get('excludeListing');
     const excludeSellerId = searchParams.get('excludeSeller');
@@ -68,7 +73,7 @@ export async function GET(
           avatar_url
         )
       `)
-      .eq('bgg_game_id', parseInt(gameId))
+      .eq('bgg_game_id', bggId)
       .eq('status', 'active')
       .order('price', { ascending: true }) // Sort by price for comparison
       .limit(10);
@@ -100,7 +105,7 @@ export async function GET(
       const { data: game } = await supabase
         .from('games')
         .select('id, thumbnail, image, player_count, min_age, playing_time, versions, is_expansion')
-        .eq('id', parseInt(gameId))
+        .eq('id', bggId)
         .single();
 
       if (game) {

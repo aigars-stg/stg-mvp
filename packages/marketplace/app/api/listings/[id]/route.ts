@@ -43,6 +43,11 @@ export async function GET(
 ) {
   try {
     const { id } = params;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
+    }
+
     const supabase = await createServerSupabase();
 
     // Fetch listing with seller profile
