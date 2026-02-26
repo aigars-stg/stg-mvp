@@ -199,6 +199,6 @@ Uzreiz atjaunot savu konta informāciju. Precīzi dati jūs sargā. Ja mēs jau 
 
 ## Saistītie dokumenti
 
-- [Pārdevēja nolīgums](/legal?section=seller) — Pilnīgi pārdevēja noteikumi tostarp DAC7 sadaļu
-- [Privātuma politika](/legal?section=privacy) — Kā mēs apstrādājam jūsu datus, tostarp nodokļu ziņošanu
-- [Pakalpojuma noteikumi](/legal?section=terms) — Vispārīgie platformas noteikumi
+- [Pārdevēja nolīgums](/legal/seller) — Pilnīgi pārdevēja noteikumi tostarp DAC7 sadaļu
+- [Privātuma politika](/legal/privacy) — Kā mēs apstrādājam jūsu datus, tostarp nodokļu ziņošanu
+- [Pakalpojuma noteikumi](/legal/terms) — Vispārīgie platformas noteikumi

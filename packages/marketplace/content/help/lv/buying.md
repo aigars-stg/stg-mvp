@@ -60,7 +60,7 @@ Katrs sludinājums izmanto vienu no četriem novērtējumiem. Pārdevēji gradi�
 
 Ja sludinājums ir novērtēts kā Pieņemams, pārdevējam ir jāapraksta precīzi, kas ir nepareizi — trūkstošie gabali, kastītes bojājumi vai citas problēmas. Foto ir obligātas pieņemamajos sludinājumos.
 
-Skatīt arī: [Stāvokļa novērtējuma ceļvedis](/help?section=grading) detalizētiem aprakstiem ar piemēriem
+Skatīt arī: [Stāvokļa novērtējuma ceļvedis](/help/grading) detalizētiem aprakstiem ar piemēriem
 
 ### Tūlītējais pirkums vs. Sazinieties ar pārdevēju
 
@@ -342,8 +342,8 @@ Ja jūsu izvēlētajā termināļa nav pieejamo slēgu, kad kurjers nonāk, parc
 
 ## Saistītie ceļveži
 
-- [Kā pārdot](/help?section=selling) — Domājat par savu spēļu pārdošanu?
-- [Stāvokļa novērtējums](/help?section=grading) — Ko novērtējumi nozīmē detalizēti
-- [Piegāde](/help?section=shipping) — Kā darbojas parceļu termināļi
-- [Maksas](/legal?section=fees) — Pilns maksas sadalījums
-- [Pircēja ceļvedis (juridiski)](/legal?section=buyer) — Jūsu tiesības un aizsardzība
+- [Kā pārdot](/help/selling) — Domājat par savu spēļu pārdošanu?
+- [Stāvokļa novērtējums](/help/grading) — Ko novērtējumi nozīmē detalizēti
+- [Piegāde](/help/shipping) — Kā darbojas parceļu termināļi
+- [Maksas](/legal/fees) — Pilns maksas sadalījums
+- [Pircēja ceļvedis (juridiski)](/legal/terms) — Jūsu tiesības un aizsardzība

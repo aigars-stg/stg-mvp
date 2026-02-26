@@ -93,7 +93,7 @@ Pieņemamam stāvokļam, jūs jāpievieno piezīmes, kas izskaidro problēmas. E
 
 **Zeltains noteikums:** Ja jūs dvīņi, izvēlieties zemo novērtējumu. Pircēji augsti novērtē godīgumu, un jūs izvairīsieties no strīdiem.
 
-Skatīt arī: [Stāvokļa novērtējuma ceļvedis](/help?section=grading) detalizētiem piemēriem
+Skatīt arī: [Stāvokļa novērtējuma ceļvedis](/help/grading) detalizētiem piemēriem
 
 ---
 
@@ -296,7 +296,7 @@ Pēc apstiprinājuma:
 4. Paņemiet uz jebkura Unisend, Latvijas Pasts vai uDrop termināļi
 5. Ievadiet kodu un novietojiet parceļu slēgā
 
-Skatīt arī: [Piegādes ceļvedis](/help?section=shipping) iepakošanas pamatnoteikumiem un termināļa detaļām
+Skatīt arī: [Piegādes ceļvedis](/help/shipping) iepakošanas pamatnoteikumiem un termināļa detaļām
 
 ### 4. Izsekošana automātiski atjauninās
 
@@ -308,7 +308,7 @@ Mēs sinhronizējamies ar kurjeri — nav nepieciešams manuāli marķēt kā no
 
 Izņemiet uz savu bankas kontu jebkurā laikā no jūsu informācijas paneļa — minimums €5, bez maksas, apstrādāts 1-3 darba dienu laikā.
 
-Skatīt arī: [Maksas un izmaksas](/legal?section=fees) izmaksu detaļām
+Skatīt arī: [Maksas un izmaksas](/legal/fees) izmaksu detaļām
 
 ---
 
@@ -440,7 +440,7 @@ Tas ir lielisks veids, kā atrast pircējus spēlēm, kuras jūs gatavojaties uz
 
 - **Iepakot uzmanīgi** — Bojātas spēles nozīmē nelaimīgus pircējus
 - **Sūtiet ātri** — 2 dienu laikā pēc apstiprinājuma
-- **Izmantojiet pareizo lielumu** — Skatīt mūsu [Piegādes ceļvedis](/help?section=shipping)
+- **Izmantojiet pareizo lielumu** — Skatīt mūsu [Piegādes ceļvedis](/help/shipping)
 
 ---
 
@@ -487,7 +487,7 @@ Nē. Sludinājumi paliek aktīvi, līdz pārdoti vai noņemt.
 
 Sazinieties ar pārdevēju sludinājumiem, nav platformas maksas.
 
-Skatīt arī: [Maksas](/legal?section=fees)
+Skatīt arī: [Maksas](/legal/fees)
 
 ---
 
