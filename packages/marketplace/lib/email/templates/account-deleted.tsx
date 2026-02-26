@@ -43,7 +43,9 @@ export const AccountDeletedEmail = ({
                             You can recover your account until <strong>{recoveryDate}</strong>.
                         </Text>
                         <Text style={warningText}>
-                            To cancel the deletion and restore your account, simply log in to Second Turn before this date. After {recoveryDate}, your account and all associated data will be <strong>permanently deleted</strong> and cannot be recovered.
+                            To cancel the deletion and restore your account, email us at{' '}
+                            <a href="mailto:info@secondturn.games" style={{ color: '#5e81ac' }}>info@secondturn.games</a>{' '}
+                            before this date. After {recoveryDate}, your account and all associated data will be <strong>permanently deleted</strong> and cannot be recovered.
                         </Text>
                     </Section>
 
@@ -62,7 +64,7 @@ export const AccountDeletedEmail = ({
 
                     <Section style={buttonContainer}>
                         <Button style={button} href={supportUrl}>
-                            Contact Support
+                            Contact Us to Recover
                         </Button>
                     </Section>
 

@@ -280,7 +280,7 @@ export function GradingGuidePanel({
         {/* Link to full guide */}
         <div className="pt-4 border-t border-border">
           <Link
-            href="/help?section=grading"
+            href="/help/grading"
             target="_blank"
             className="flex items-center justify-center gap-2 text-frost-ice hover:text-aurora-blue text-sm font-medium transition-colors"
           >

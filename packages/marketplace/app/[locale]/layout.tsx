@@ -215,13 +215,13 @@ export default async function LocaleLayout({ children, params }: Props) {
                     <nav aria-label="Payment compliance" className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-1">
                       <Link href="/legal#contact" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('compliance.contactUs')}</Link>
                       <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
-                      <Link href="/legal?section=terms" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.termsOfService')}</Link>
+                      <Link href="/legal/terms" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.termsOfService')}</Link>
                       <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
-                      <Link href="/legal?section=buyer#8-shipping-and-delivery" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('compliance.delivery')}</Link>
+                      <Link href="/help/shipping" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('compliance.delivery')}</Link>
                       <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
-                      <Link href="/legal?section=buyer#10-returns-exchanges--refunds" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('compliance.returns')}</Link>
+                      <Link href="/legal/terms#6-disputes-returns-and-refunds" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('compliance.returns')}</Link>
                       <span className="hidden sm:inline text-border-subtle" aria-hidden="true">|</span>
-                      <Link href="/legal?section=privacy" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.privacyPolicy')}</Link>
+                      <Link href="/legal/privacy" className="hover:text-text-secondary px-1.5 py-0.5">{tFooter('links.privacyPolicy')}</Link>
                     </nav>
                   </div>
                 </div>

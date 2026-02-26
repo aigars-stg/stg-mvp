@@ -34,44 +34,107 @@ const nextConfig = {
   // Redirect old seller profile URLs to new unified profile URLs
   async redirects() {
     return [
+      // Seller profile URL migration
       {
         source: '/sellers/:id',
         destination: '/profile/:id',
-        permanent: true, // 301 redirect for SEO
+        permanent: true,
       },
+      // Legacy standalone legal URLs
       {
         source: '/:locale/terms',
-        destination: '/:locale/legal?section=terms',
+        destination: '/:locale/legal/terms',
         permanent: true,
       },
       {
         source: '/:locale/privacy',
-        destination: '/:locale/legal?section=privacy',
+        destination: '/:locale/legal/privacy',
         permanent: true,
       },
       {
         source: '/:locale/seller/terms',
-        destination: '/:locale/legal?section=seller',
+        destination: '/:locale/legal/seller',
         permanent: true,
       },
-      {
-        source: '/:locale/help/selling',
-        destination: '/:locale/help?section=selling',
-        permanent: true,
-      },
+      // Legacy help slug (grading-guide → grading)
       {
         source: '/:locale/help/grading-guide',
-        destination: '/:locale/help?section=grading',
+        destination: '/:locale/help/grading',
+        permanent: true,
+      },
+      // Buyer guide absorbed into terms
+      {
+        source: '/:locale/legal',
+        has: [{ type: 'query', key: 'section', value: 'buyer' }],
+        destination: '/:locale/legal/terms',
+        permanent: true,
+      },
+      // Legacy ?section= → clean URL redirects (Legal)
+      {
+        source: '/:locale/legal',
+        has: [{ type: 'query', key: 'section', value: 'terms' }],
+        destination: '/:locale/legal/terms',
         permanent: true,
       },
       {
-        source: '/:locale/help/shipping',
-        destination: '/:locale/help?section=shipping',
+        source: '/:locale/legal',
+        has: [{ type: 'query', key: 'section', value: 'privacy' }],
+        destination: '/:locale/legal/privacy',
         permanent: true,
       },
       {
-        source: '/:locale/help/dac7',
-        destination: '/:locale/help?section=dac7',
+        source: '/:locale/legal',
+        has: [{ type: 'query', key: 'section', value: 'seller' }],
+        destination: '/:locale/legal/seller',
+        permanent: true,
+      },
+      {
+        source: '/:locale/legal',
+        has: [{ type: 'query', key: 'section', value: 'cookies' }],
+        destination: '/:locale/legal/cookies',
+        permanent: true,
+      },
+      {
+        source: '/:locale/legal',
+        has: [{ type: 'query', key: 'section', value: 'fees' }],
+        destination: '/:locale/legal/fees',
+        permanent: true,
+      },
+      // Legacy ?section= → clean URL redirects (Help)
+      {
+        source: '/:locale/help',
+        has: [{ type: 'query', key: 'section', value: 'buying' }],
+        destination: '/:locale/help/buying',
+        permanent: true,
+      },
+      {
+        source: '/:locale/help',
+        has: [{ type: 'query', key: 'section', value: 'selling' }],
+        destination: '/:locale/help/selling',
+        permanent: true,
+      },
+      {
+        source: '/:locale/help',
+        has: [{ type: 'query', key: 'section', value: 'grading' }],
+        destination: '/:locale/help/grading',
+        permanent: true,
+      },
+      {
+        source: '/:locale/help',
+        has: [{ type: 'query', key: 'section', value: 'shipping' }],
+        destination: '/:locale/help/shipping',
+        permanent: true,
+      },
+      {
+        source: '/:locale/help',
+        has: [{ type: 'query', key: 'section', value: 'wallet' }],
+        destination: '/:locale/help/wallet',
+        permanent: true,
+      },
+      {
+        source: '/:locale/help',
+        has: [{ type: 'query', key: 'section', value: 'dac7' }],
+        destination: '/:locale/help/dac7',
         permanent: true,
       },
     ];

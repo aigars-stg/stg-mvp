@@ -766,15 +766,15 @@ function CheckoutPageContent() {
                 />
                 <span className="text-xs text-polar-night">
                   {t('consent.checkboxPrefix')}{' '}
-                  <Link href="/legal?section=terms" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                  <Link href="/legal/terms" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
                     {t('consent.termsLink')}
                   </Link>
                   {', '}
-                  <Link href="/legal?section=buyer#8-shipping-and-delivery" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                  <Link href="/help/shipping" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
                     {t('consent.deliveryLink')}
                   </Link>
                   {' '}{t('consent.and')}{' '}
-                  <Link href="/legal?section=buyer#10-returns-exchanges--refunds" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                  <Link href="/legal/terms#6-disputes-returns-and-refunds" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
                     {t('consent.returnsLink')}
                   </Link>
                 </span>
@@ -912,15 +912,15 @@ function CheckoutPageContent() {
                   />
                   <span className="text-xs text-polar-night leading-relaxed">
                     {t('consent.checkboxPrefix')}{' '}
-                    <Link href="/legal?section=terms" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                    <Link href="/legal/terms" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
                       {t('consent.termsLink')}
                     </Link>
                     {', '}
-                    <Link href="/legal?section=buyer#8-shipping-and-delivery" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                    <Link href="/help/shipping" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
                       {t('consent.deliveryLink')}
                     </Link>
                     {' '}{t('consent.and')}{' '}
-                    <Link href="/legal?section=buyer#10-returns-exchanges--refunds" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
+                    <Link href="/legal/terms#6-disputes-returns-and-refunds" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
                       {t('consent.returnsLink')}
                     </Link>
                   </span>

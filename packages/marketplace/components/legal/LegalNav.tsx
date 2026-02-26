@@ -1,9 +1,8 @@
 'use client';
 
-import { Link } from '@/i18n/navigation';
-import { useSearchParams } from 'next/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { Home, FileText, Lock, Briefcase, BookOpen, Settings, Coins } from '@/lib/icons';
+import { Home, FileText, Lock, Briefcase, Settings, Coins } from '@/lib/icons';
 import { LEGAL_SECTIONS, type LegalSectionId } from './legal-sections';
 
 export type { LegalSectionId } from './legal-sections';
@@ -13,14 +12,15 @@ const SECTION_ICONS: Record<LegalSectionId, React.ComponentType<{ size?: string 
   terms: FileText,
   privacy: Lock,
   seller: Briefcase,
-  buyer: BookOpen,
   cookies: Settings,
   fees: Coins,
 };
 
 export function LegalNav() {
-  const searchParams = useSearchParams();
-  const activeSection = searchParams.get('section') || 'overview';
+  const pathname = usePathname();
+  const segments = pathname.split('/');
+  const lastSegment = segments[segments.length - 1];
+  const activeSection = lastSegment === 'legal' ? 'overview' : lastSegment;
   const tCommon = useTranslations('Common');
   const tLegal = useTranslations('Legal');
 
@@ -35,7 +35,6 @@ export function LegalNav() {
               <li key={section.id}>
                 <Link
                   href={section.href}
-                  scroll={false}
                   className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-all ${
                     activeSection === section.id
                       ? 'bg-frost-ice text-snow-white shadow-sm'
@@ -59,7 +58,6 @@ export function LegalNav() {
             <Link
               key={section.id}
               href={section.href}
-              scroll={false}
               className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors ${
                 activeSection === section.id
                   ? 'bg-frost-ice text-white'

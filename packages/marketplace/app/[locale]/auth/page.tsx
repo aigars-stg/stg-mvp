@@ -480,11 +480,11 @@ export default function AuthPage() {
         {/* Implicit consent */}
         <p className="text-xs text-text-muted text-center mt-5">
           {tNewUser('termsPrefix')}{' '}
-          <Link href="/legal?section=terms" className="text-frost-ice hover:underline" target="_blank">
+          <Link href="/legal/terms" className="text-frost-ice hover:underline" target="_blank">
             {tNewUser('termsOfService')}
           </Link>{' '}
           {tNewUser('termsAnd')}{' '}
-          <Link href="/legal?section=privacy" className="text-frost-ice hover:underline" target="_blank">
+          <Link href="/legal/privacy" className="text-frost-ice hover:underline" target="_blank">
             {tNewUser('privacyPolicy')}
           </Link>
         </p>
