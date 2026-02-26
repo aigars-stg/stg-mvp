@@ -119,6 +119,22 @@ if (redis) {
       prefix: '@upstash/ratelimit/review-create',
     }),
 
+    // Feedback submission (IP-based, supports anonymous)
+    feedback: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '1 h'), // 5 submissions per hour per IP
+      analytics: true,
+      prefix: '@upstash/ratelimit/feedback',
+    }),
+
+    // Newsletter subscribe (IP-based, supports anonymous)
+    newsletterSubscribe: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '1 h'), // 5 subscriptions per hour per IP
+      analytics: true,
+      prefix: '@upstash/ratelimit/newsletter-subscribe',
+    }),
+
     // Global limit per IP (DoS protection)
     global: new Ratelimit({
       redis,
@@ -144,6 +160,8 @@ export type RateLimitAction =
   | 'upload-buyer'
   | 'upload-seller'
   | 'reviewCreate'
+  | 'feedback'
+  | 'newsletterSubscribe'
   | 'global';
 
 /**

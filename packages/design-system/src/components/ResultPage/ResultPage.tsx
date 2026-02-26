@@ -30,7 +30,7 @@ const headerVariants = cva(
 );
 
 const iconCircleVariants = cva(
-  'w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-4 sm:mb-5',
+  'w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mb-4 sm:mb-5',
   {
     variants: {
       variant: {
@@ -148,7 +148,7 @@ const ResultPageActions = React.forwardRef<
   <div
     ref={ref}
     className={clsx(
-      'w-full max-w-4xl mx-auto px-4 sm:px-6 pb-8 grid sm:grid-cols-2 gap-3',
+      'w-full max-w-md mx-auto px-4 sm:px-6 pb-8 grid sm:grid-cols-2 gap-3',
       className
     )}
     {...props}

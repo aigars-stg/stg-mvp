@@ -21,27 +21,27 @@ interface NewsletterWelcomeEmailProps {
 
 const translations = {
   en: {
-    preview: 'Welcome to the Second Turn community',
-    heading: 'Welcome to the community',
+    preview: 'Welcome to the Second Turn Games',
+    heading: 'Welcome to the marketplace',
     greeting: 'Thanks for joining',
     paragraph1:
       "You'll hear from us when we have something worth sharing. New features, community updates, and the occasional good find.",
     paragraph2:
       "We're building a marketplace where pre-loved board games find new homes. Your support means a lot.",
     cta: 'Browse the marketplace',
-    footer: 'Second Turn - Board Game Marketplace',
+    footer: 'Second Turn Games - Board Game Marketplace',
     unsubscribe: 'Unsubscribe',
   },
   lv: {
-    preview: 'Laipni lūgti Second Turn kopienā',
-    heading: 'Laipni lūgti kopienā',
+    preview: 'Laipni lūgti Second Turn Games',
+    heading: 'Laipni lūgti',
     greeting: 'Paldies, ka pievienojies',
     paragraph1:
-      'Rakstīsim, kad būs ko interesantu pastāstīt. Jaunas funkcijas, kopienas jaunumi un reizēm kāds labs atradums.',
+      'Ziņosim, kad mums būs ko pastāstīt. Jaunas iespējas, jaunumi un reizēm kāds labs atradums.',
     paragraph2:
-      'Mēs veidojam tirguvietu, kur iepriekš mīlētas galda spēles atrod jaunas mājas. Tavs atbalsts mums ļoti nozīmē.',
-    cta: 'Pārlūkot tirguvietu',
-    footer: 'Second Turn - Galda spēļu tirguvieta',
+      'Mēs veidojam tirdziņu, kur  galda spēles atrod jaunas mājas. Tavs atbalsts mums ļoti palīdz.',
+    cta: 'Pārlūkot spēles',
+    footer: 'Second Turn Games - galda spēļu tirdziņš',
     unsubscribe: 'Atteikties no jaunumiem',
   },
 };

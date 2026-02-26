@@ -5,13 +5,13 @@
 
 import { sendEmail } from './resend';
 import { NewsletterWelcomeEmail } from './templates/newsletter-welcome';
-import type { NewsletterLocale } from '@/lib/newsletter';
+import type { NewsletterLocale, NewsletterSource } from '@/lib/newsletter';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://secondturn.games';
 
 const subjects = {
-  en: 'Welcome to the Second Turn community',
-  lv: 'Laipni lūgti Second Turn kopienā',
+  en: 'Welcome to the Second Turn Games',
+  lv: 'Laipni lūgti Second Turn Games',
 };
 
 /**
@@ -42,5 +42,36 @@ export async function sendNewsletterWelcomeEmail(params: {
   } catch (error) {
     console.error('❌ [Email] Failed to send newsletter welcome email:', error);
     return { success: false, error };
+  }
+}
+
+const STAFF_EMAIL = 'info@secondturn.games';
+
+/**
+ * Notify staff about a new newsletter subscriber (fire-and-forget)
+ */
+export async function notifyStaffNewSubscriber(params: {
+  email: string;
+  source: NewsletterSource;
+  locale: NewsletterLocale;
+}) {
+  const { email, source, locale } = params;
+
+  try {
+    await sendEmail({
+      to: STAFF_EMAIL,
+      subject: `New newsletter subscriber: ${email}`,
+      html: `
+        <p><strong>New newsletter signup</strong></p>
+        <ul>
+          <li>Email: ${email}</li>
+          <li>Source: ${source}</li>
+          <li>Locale: ${locale}</li>
+        </ul>
+        <p><a href="${BASE_URL}/staff/newsletter">View all subscribers</a></p>
+      `,
+    });
+  } catch (error) {
+    console.error('❌ [Email] Failed to notify staff of new subscriber:', error);
   }
 }

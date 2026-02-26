@@ -122,10 +122,10 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-3">
       {/* Type selector */}
       <div>
-        <label className="block text-sm font-medium text-text mb-2">
+        <label className="block text-sm font-medium text-text mb-1.5">
           {t('typeLabel')}
         </label>
         <div className="grid grid-cols-3 gap-2">
@@ -153,7 +153,7 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
       <div>
         <label
           htmlFor="feedback-description"
-          className="block text-sm font-medium text-text mb-2"
+          className="block text-sm font-medium text-text mb-1.5"
         >
           {t('descriptionLabel')}
         </label>
@@ -162,7 +162,7 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder={placeholders[type]}
-          rows={4}
+          rows={3}
           className="
             w-full px-3 py-2 border border-snow-storm rounded-lg
             text-text placeholder:text-text-secondary
@@ -183,7 +183,7 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
         <div>
           <label
             htmlFor="feedback-email"
-            className="block text-sm font-medium text-text mb-2"
+            className="block text-sm font-medium text-text mb-1.5"
           >
             {t('emailLabel')}
           </label>
@@ -199,23 +199,20 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
       )}
 
       {/* Screenshot upload */}
-      <div>
-        <label className="block text-sm font-medium text-text mb-2">
-          {t('screenshotLabel')}
-        </label>
+      <div className="flex items-center gap-3">
         {screenshotPreview ? (
-          <div className="relative inline-block">
+          <div className="relative">
             <img
               src={screenshotPreview}
               alt="Screenshot preview"
-              className="h-20 w-auto rounded-lg border border-snow-storm"
+              className="h-12 w-auto rounded border border-snow-storm"
             />
             <button
               type="button"
               onClick={removeScreenshot}
               className="
-                absolute -top-2 -right-2
-                w-6 h-6 rounded-full
+                absolute -top-1.5 -right-1.5
+                w-5 h-5 rounded-full
                 bg-polar-night text-snow-white
                 flex items-center justify-center
                 hover:bg-polar-night/80 transition-colors
@@ -230,7 +227,7 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="
-              flex items-center gap-2 px-4 py-2
+              flex items-center gap-2 px-3 py-1.5
               border border-dashed border-snow-storm rounded-lg
               text-sm text-text-secondary
               hover:border-frost-ice/50 hover:text-text transition-colors
@@ -247,7 +244,6 @@ export function FeedbackForm({ onSuccess, onError }: FeedbackFormProps) {
           onChange={handleScreenshotChange}
           className="hidden"
         />
-        <p className="mt-1 text-xs text-text-secondary">{t('screenshotHelper')}</p>
       </div>
 
       {/* Validation error */}

@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- feedback screenshots are user-uploaded URLs */
 'use client';
 
-import { useState, useEffect, use, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import {
@@ -71,9 +71,9 @@ const statusOptions: FeedbackStatus[] = [
 export default function StaffFeedbackDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const id = params.id;
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 

@@ -974,8 +974,8 @@ function StaffTransactionsContent() {
           </>
         )}
 
-        {/* Transactions Tables (Operations & Bookkeeping) - only show when NOT in dac7 mode */}
-        {viewMode !== 'dac7' && data && data.orders.length === 0 && (
+        {/* Transactions Tables (Operations & Bookkeeping) - empty state */}
+        {(viewMode === 'operations' || viewMode === 'bookkeeping') && data && data.orders.length === 0 && (
           <div className="text-center py-12">
             <Package className="w-12 h-12 text-text-muted mx-auto mb-4" />
             <h3 className="text-lg font-medium text-polar-night mb-2">No transactions found</h3>

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/client';
 import { handleApiError, handleValidationError } from '@/lib/api/error-handler';
-import { sendNewsletterWelcomeEmail } from '@/lib/email/send-newsletter-emails';
+import { sendNewsletterWelcomeEmail, notifyStaffNewSubscriber } from '@/lib/email/send-newsletter-emails';
+import { checkRateLimit, getClientIP } from '@/lib/ratelimit';
 import {
   isValidEmail,
   normalizeEmail,
@@ -18,6 +19,16 @@ import {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit by IP (supports anonymous submissions)
+    const ip = getClientIP(request.headers);
+    const rateLimit = await checkRateLimit('newsletterSubscribe', ip);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: rateLimit.error, reset: rateLimit.reset },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createServerSupabase();
     // Use service client for operations that need to bypass RLS
     const serviceClient = createServiceClient();
@@ -114,6 +125,9 @@ export async function POST(request: NextRequest) {
         unsubscribeToken: newSubscription.unsubscribe_token,
       });
     }
+
+    // Notify staff (fire-and-forget, don't block response)
+    void notifyStaffNewSubscriber({ email, source, locale });
 
     return NextResponse.json({ success: true });
   } catch (error) {

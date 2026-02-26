@@ -73,7 +73,10 @@
       "Bash(pnpm add:*)",
       "Bash(git -C /Users/secondturn/stg-mvp diff --stat)",
       "Bash(git -C /Users/secondturn/stg-mvp log --oneline -5)",
-      "Bash(git -C /Users/secondturn/stg-mvp add:*)"
+      "Bash(git -C /Users/secondturn/stg-mvp add:*)",
+      "Bash(gh api:*)",
+      "mcp__playwright__browser_run_code",
+      "mcp__playwright__browser_close"
     ],
     "deny": [
       "Bash(git push --force:*)",

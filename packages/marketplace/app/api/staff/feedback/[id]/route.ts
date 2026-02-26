@@ -74,7 +74,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         .from('user_profiles')
         .select('id, full_name, email')
         .eq('id', feedback.user_id)
-        .single();
+        .maybeSingle();
       userProfile = profile;
     }
 
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         .from('user_profiles')
         .select('id, full_name')
         .eq('id', feedback.reviewed_by)
-        .single();
+        .maybeSingle();
       reviewerProfile = profile;
     }
 

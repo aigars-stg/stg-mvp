@@ -40,7 +40,7 @@ export default function GlobalError({
             style={{
               width: 72,
               height: 72,
-              borderRadius: '50%',
+              borderRadius: 16,
               backgroundColor: 'rgba(191, 97, 106, 0.1)',
               display: 'flex',
               alignItems: 'center',
@@ -86,7 +86,7 @@ export default function GlobalError({
             homepage.
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 360, width: '100%' }}>
             <button
               onClick={reset}
               style={{
@@ -105,11 +105,16 @@ export default function GlobalError({
             <a
               href="/"
               style={{
+                display: 'block',
                 padding: '12px 24px',
                 fontSize: 15,
                 fontWeight: 500,
-                color: '#5E81AC',
+                color: '#2E3440',
                 textDecoration: 'none',
+                border: '1px solid #D8DEE9',
+                borderRadius: 8,
+                textAlign: 'center',
+                backgroundColor: '#FEFEFE',
               }}
             >
               Go to homepage

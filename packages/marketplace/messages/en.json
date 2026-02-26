@@ -3121,14 +3121,14 @@
     "tryAgain": "Try again"
   },
   "Newsletter": {
-    "description": "New features, community updates, and the occasional good find. No spam.",
+    "description": "New features, updates, and the occasional good find. No spam.",
     "placeholder": "Your email",
     "subscribe": "Join",
     "success": "You're in. Welcome to the community.",
     "error": "Something went wrong. Try again?",
     "errorInvalidEmail": "Please enter a valid email address",
     "settingsTitle": "Newsletter",
-    "settingsDescription": "Hear about new features and community updates",
+    "settingsDescription": "Hear about new features and updates",
     "settingsLoading": "Loading...",
     "settingsError": "Something went wrong. Try again?",
     "settingsSubscribe": "Subscribe to newsletter",

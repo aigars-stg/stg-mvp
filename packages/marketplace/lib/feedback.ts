@@ -92,10 +92,12 @@ export function validateScreenshot(base64: string): {
 
 /**
  * Validate complete feedback submission request
+ * Returns decoded screenshot data when valid to avoid double base64 decoding
  */
 export function validateFeedbackRequest(request: SubmitFeedbackRequest): {
   valid: boolean;
   errors: string[];
+  screenshotData?: { mimeType: string; buffer: Buffer };
 } {
   const errors: string[] = [];
 
@@ -115,17 +117,24 @@ export function validateFeedbackRequest(request: SubmitFeedbackRequest): {
     errors.push('Invalid email address');
   }
 
-  // Validate screenshot if provided
+  // Validate screenshot if provided, keep decoded data for reuse
+  let screenshotData: { mimeType: string; buffer: Buffer } | undefined;
   if (request.screenshotBase64) {
     const screenshotValidation = validateScreenshot(request.screenshotBase64);
     if (!screenshotValidation.valid && screenshotValidation.error) {
       errors.push(screenshotValidation.error);
+    } else if (screenshotValidation.mimeType && screenshotValidation.buffer) {
+      screenshotData = {
+        mimeType: screenshotValidation.mimeType,
+        buffer: screenshotValidation.buffer,
+      };
     }
   }
 
   return {
     valid: errors.length === 0,
     errors,
+    screenshotData,
   };
 }
 

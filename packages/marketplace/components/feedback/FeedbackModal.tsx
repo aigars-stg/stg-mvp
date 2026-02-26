@@ -56,6 +56,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       onClose={onClose}
       title={state === 'success' ? '' : t('title')}
       size="md"
+      contentClassName="!max-h-[75vh] !p-4 sm:!p-6"
     >
       {state === 'form' && (
         <FeedbackForm onSuccess={handleSuccess} onError={handleError} />
