@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { TrashAlt as Trash2 } from '@/lib/icons';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface SwipeToDeleteProps {
   /** Child content to wrap */
@@ -29,6 +30,8 @@ export function SwipeToDelete({
   velocityThreshold = 0.5,
   disabled = false,
 }: SwipeToDeleteProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   const [translateX, setTranslateX] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
   const [isSwiping, setIsSwiping] = useState(false);
@@ -177,7 +180,7 @@ export function SwipeToDelete({
         className="relative bg-bg"
         style={{
           transform: `translateX(${translateX}px)`,
-          transition: isSwiping ? 'none' : 'transform 0.2s ease-out',
+          transition: isSwiping || prefersReducedMotion ? 'none' : 'transform 0.2s ease-out',
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useRef } from 'react';
+import { useFocusTrap } from '@second-turn/design-system';
 import { useRouter } from '@/i18n/navigation';
 import { Package, Search, Close } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -15,24 +16,8 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
   const router = useRouter();
   const { user } = useAuth();
   const t = useTranslations('Navigation.sellActionSheet');
-
-  // Close on escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when sheet is open
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(isOpen, sheetRef, onClose);
 
   const handleSellGame = () => {
     if (!user) {
@@ -60,10 +45,14 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
       <div
         className="fixed inset-0 bg-polar-night/50 backdrop-blur-sm z-50 lg:hidden animate-in fade-in duration-200"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Bottom Sheet */}
       <div
+        ref={sheetRef}
+        role="dialog"
+        aria-modal="true"
         className="fixed inset-x-0 bottom-0 z-50 lg:hidden bg-snow-white rounded-t-2xl shadow-xl animate-in slide-in-from-bottom-full duration-300"
         style={{
           paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',

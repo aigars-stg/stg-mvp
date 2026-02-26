@@ -62,7 +62,7 @@ export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }
                   unoptimized
                 />
               ) : (
-                <Package className="w-10 h-10 text-text-muted" />
+                <Package className="w-10 h-10 text-text-muted" aria-hidden="true" />
               )}
             </div>
           </div>
@@ -82,7 +82,7 @@ export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }
                 className="flex-shrink-0 p-1 text-text-muted hover:text-aurora-orange transition-colors"
                 title={t('viewOnBGG')}
               >
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
               </a>
             </div>
 
@@ -92,7 +92,7 @@ export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }
                 <Badge
                   variant="default"
                   size="sm"
-                  icon={<Puzzle className="w-3 h-3" />}
+                  icon={<Puzzle className="w-3 h-3" aria-hidden="true" />}
                 >
                   {t('expansion')}
                 </Badge>
@@ -104,19 +104,19 @@ export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }
               <div className="text-sm text-text-secondary mb-2 space-y-0.5">
                 {formattedEdition && (
                   <p className="flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                    <Globe className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
                     {formattedEdition}
                   </p>
                 )}
                 {wantedListing.language && (
                   <p className="flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                    <BookOpen className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
                     <span>{wantedListing.language.replace(/ \| /g, ' / ')}</span>
                   </p>
                 )}
                 {wantedListing.publisher && (
                   <p className="flex items-center gap-1.5">
-                    <Building className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                    <Building className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
                     <span>{wantedListing.publisher.replace(/ \| /g, ' / ')}</span>
                   </p>
                 )}
@@ -154,7 +154,7 @@ export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }
                     unoptimized
                   />
                 ) : (
-                  <Package className="w-8 h-8 text-text-muted" />
+                  <Package className="w-8 h-8 text-text-muted" aria-hidden="true" />
                 )}
               </div>
             </div>
@@ -164,7 +164,7 @@ export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-col gap-1">
                   {wantedListing.game?.is_expansion && (
-                    <Badge variant="default" size="sm" icon={<Puzzle className="w-3 h-3" />}>
+                    <Badge variant="default" size="sm" icon={<Puzzle className="w-3 h-3" aria-hidden="true" />}>
                       {t('expansion')}
                     </Badge>
                   )}
@@ -192,7 +192,7 @@ export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }
               className="flex-shrink-0 p-1 text-text-muted hover:text-aurora-orange transition-colors"
               title={t('viewOnBGG')}
             >
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-3 h-3" aria-hidden="true" />
             </a>
           </div>
 
@@ -201,19 +201,19 @@ export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }
             <div className="text-sm text-text-secondary space-y-0.5">
               {formattedEdition && (
                 <p className="flex items-center gap-1.5">
-                  <Globe className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                  <Globe className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
                   {formattedEdition}
                 </p>
               )}
               {wantedListing.language && (
                 <p className="flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                  <BookOpen className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
                   <span>{wantedListing.language.replace(/ \| /g, ' / ')}</span>
                 </p>
               )}
               {wantedListing.publisher && (
                 <p className="flex items-center gap-1.5">
-                  <Building className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                  <Building className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
                   <span>{wantedListing.publisher.replace(/ \| /g, ' / ')}</span>
                 </p>
               )}
@@ -227,7 +227,7 @@ export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }
         <div className="border-t border-border-subtle">
           <CollapsibleDetails
             title={t('additionalNotes')}
-            icon={<Info className="w-4 h-4" />}
+            icon={<Info className="w-4 h-4" aria-hidden="true" />}
             isExpanded={notesExpanded}
             onToggle={() => setNotesExpanded(!notesExpanded)}
             subtitle={wantedListing.notes.slice(0, 60) + (wantedListing.notes.length > 60 ? '...' : '')}
@@ -272,7 +272,7 @@ export function WantedOfferCard({ wantedListing, isPreview: _isPreview = false }
 
         {/* Listed Date */}
         <div className="flex items-center gap-1.5 text-xs text-text-muted">
-          <Calendar className="w-3.5 h-3.5" />
+          <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
           <span>{t('listed', { date: formattedDate })}</span>
         </div>
       </div>

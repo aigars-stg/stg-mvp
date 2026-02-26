@@ -205,7 +205,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
         )}
       </div>
 
-      {/* Add custom CSS for pulse-border animation */}
+      {/* Add custom CSS for pulse-border animation (respects prefers-reduced-motion via globals.css) */}
       <style jsx>{`
         @keyframes pulse-border {
           0%, 100% {
@@ -218,6 +218,12 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
         .animate-pulse-border {
           animation: pulse-border 2s ease-in-out infinite;
           border-radius: 0.5rem;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-pulse-border {
+            animation: none;
+            box-shadow: 0 0 0 2px rgba(136, 192, 208, 0.3);
+          }
         }
       `}</style>
 

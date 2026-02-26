@@ -295,7 +295,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                       unoptimized
                     />
                   ) : (
-                    <Package className="w-10 h-10 text-text-muted" />
+                    <Package className="w-10 h-10 text-text-muted" aria-hidden="true" />
                   )}
                 </div>
               </button>
@@ -325,7 +325,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                   className="flex-shrink-0 p-1 text-text-muted hover:text-frost-ice transition-colors"
                   title={t('listing.viewOnBGG')}
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
                 </a>
               </div>
 
@@ -335,7 +335,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                   <Badge
                     variant="default"
                     size="sm"
-                    icon={<Puzzle className="w-3 h-3" />}
+                    icon={<Puzzle className="w-3 h-3" aria-hidden="true" />}
                   >
                     {t('listing.expansion')}
                   </Badge>
@@ -369,11 +369,11 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                 title={t('listing.conditionGradesTooltip')}
               >
                 {tListings(`conditions.${listing.condition}`)}
-                <Info className="w-3.5 h-3.5" />
+                <Info className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
               {!listing.all_components_present && (
                 <span className="flex items-center gap-1 text-xs text-aurora-red">
-                  <AlertCircle className="w-3 h-3" />
+                  <AlertCircle className="w-3 h-3" aria-hidden="true" />
                   {t('listing.missingParts')}
                 </span>
               )}
@@ -405,7 +405,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                       unoptimized
                     />
                   ) : (
-                    <Package className="w-8 h-8 text-text-muted" />
+                    <Package className="w-8 h-8 text-text-muted" aria-hidden="true" />
                   )}
                   {/* Photo count badge */}
                   {allImages.length > 1 && (
@@ -432,20 +432,20 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                       title={t('listing.conditionGradesTooltip')}
                     >
                       {tListings(`conditions.${listing.condition}`)}
-                      <Info className="w-3.5 h-3.5" />
+                      <Info className="w-3.5 h-3.5" aria-hidden="true" />
                     </button>
                     {listing.game?.is_expansion && (
                       <Badge
                         variant="default"
                         size="sm"
-                        icon={<Puzzle className="w-3 h-3" />}
+                        icon={<Puzzle className="w-3 h-3" aria-hidden="true" />}
                       >
                         {t('listing.expansion')}
                       </Badge>
                     )}
                     {!listing.all_components_present && (
                       <span className="flex items-center gap-1 text-xs text-aurora-red">
-                        <AlertCircle className="w-3 h-3" />
+                        <AlertCircle className="w-3 h-3" aria-hidden="true" />
                         {t('listing.missingParts')}
                       </span>
                     )}
@@ -474,7 +474,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                 className="flex-shrink-0 p-1 text-text-muted hover:text-frost-ice transition-colors"
                 title={t('listing.viewOnBGG')}
               >
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="w-3 h-3" aria-hidden="true" />
               </a>
             </div>
 
@@ -494,7 +494,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
             {listing.included_expansions && listing.included_expansions.length > 0 && (
               <CollapsibleDetails
                 title={t('expansions.title', { count: listing.included_expansions.length })}
-                icon={<Puzzle className="w-4 h-4 text-aurora-green" />}
+                icon={<Puzzle className="w-4 h-4 text-aurora-green" aria-hidden="true" />}
                 isExpanded={expandedSections.has('expansions')}
                 onToggle={() => toggleSection('expansions')}
                 subtitle={
@@ -542,7 +542,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                                 unoptimized
                               />
                             ) : (
-                              <Package className="w-5 h-5 text-text-muted" />
+                              <Package className="w-5 h-5 text-text-muted" aria-hidden="true" />
                             )}
                           </div>
                         </button>
@@ -567,7 +567,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                             className="flex-shrink-0 p-1.5 text-text-muted hover:text-frost-ice transition-colors"
                             title={t('listing.viewOnBGG')}
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
                           </a>
                         </div>
                       </div>
@@ -582,8 +582,8 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
               <CollapsibleDetails
                 title={t('conditionDetails.title')}
                 icon={!listing.all_components_present
-                  ? <AlertCircle className="w-4 h-4 text-aurora-red" />
-                  : <Info className="w-4 h-4" />
+                  ? <AlertCircle className="w-4 h-4 text-aurora-red" aria-hidden="true" />
+                  : <Info className="w-4 h-4" aria-hidden="true" />
                 }
                 isExpanded={expandedSections.has('condition')}
                 onToggle={() => toggleSection('condition')}
@@ -667,7 +667,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                 aria-label={isSaved ? t('actions.unsaveAria') : t('actions.saveAria')}
                 title={isSaved ? t('actions.unsaveTooltip') : t('actions.saveTooltip')}
               >
-                <Heart className={`w-5 h-5 ${isSaved ? 'text-aurora-red' : 'text-text-muted hover:text-aurora-red'}`} weight={isSaved ? 'fill' : 'regular'} />
+                <Heart className={`w-5 h-5 ${isSaved ? 'text-aurora-red' : 'text-text-muted hover:text-aurora-red'}`} weight={isSaved ? 'fill' : 'regular'} aria-hidden="true" />
               </button>
             )}
 
@@ -683,7 +683,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                 aria-label={t('actions.askQuestion')}
                 title={t('actions.askQuestion')}
               >
-                <MessageSquare className="w-5 h-5 text-text-muted hover:text-frost-ice" />
+                <MessageSquare className="w-5 h-5 text-text-muted hover:text-frost-ice" aria-hidden="true" />
                 {questionCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-frost-ice text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                     {questionCount > 99 ? '99+' : questionCount}
@@ -721,7 +721,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <>
-                        <MessageSquare className="w-4 h-4 mr-1.5" />
+                        <MessageSquare className="w-4 h-4 mr-1.5" aria-hidden="true" />
                         {t('actions.contactSeller')}
                       </>
                     )}
@@ -785,14 +785,14 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
         <div className="border-t border-border-subtle px-3 sm:px-4 py-2">
           {isContactSellerListing(listing) ? (
             <div className="flex items-center gap-1.5">
-              <Handshake className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+              <Handshake className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
               <span className="text-xs text-text-muted">
                 {t('privateSeller.contactNotice')}
               </span>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 flex-wrap">
-              <User className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+              <User className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
               <span className="text-xs text-text-muted">
                 {t('privateSeller.notice')}
               </span>
@@ -826,7 +826,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                   className="p-2 rounded-md hover:bg-bg-secondary transition-colors disabled:opacity-50"
                   aria-label={isSaved ? t('actions.unsaveAria') : t('actions.saveAria')}
                 >
-                  <Heart className={`w-5 h-5 ${isSaved ? 'text-aurora-red' : 'text-text-muted'}`} weight={isSaved ? 'fill' : 'regular'} />
+                  <Heart className={`w-5 h-5 ${isSaved ? 'text-aurora-red' : 'text-text-muted'}`} weight={isSaved ? 'fill' : 'regular'} aria-hidden="true" />
                 </button>
 
                 {/* Message Button */}
@@ -839,7 +839,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                   className="p-2 rounded-md hover:bg-bg-secondary transition-colors relative"
                   aria-label={t('actions.askQuestion')}
                 >
-                  <MessageSquare className="w-5 h-5 text-text-muted" />
+                  <MessageSquare className="w-5 h-5 text-text-muted" aria-hidden="true" />
                   {questionCount > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 bg-frost-ice text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                       {questionCount > 99 ? '99+' : questionCount}
@@ -868,7 +868,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <>
-                        <MessageSquare className="w-4 h-4 mr-1.5" />
+                        <MessageSquare className="w-4 h-4 mr-1.5" aria-hidden="true" />
                         {t('actions.contactSeller')}
                       </>
                     )}

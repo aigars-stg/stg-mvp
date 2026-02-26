@@ -25,6 +25,7 @@ export default defineConfig({
           'Dropdown',
           'ImageCarousel',
           'Avatar',
+          'useFocusTrap',
         ];
         for (const chunk of Object.values(bundle)) {
           if (chunk.type === 'chunk') {

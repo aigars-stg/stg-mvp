@@ -1,6 +1,7 @@
 'use client';
 
-import { Button, Badge } from '@second-turn/design-system';
+import { useRef } from 'react';
+import { Button, Badge, useFocusTrap } from '@second-turn/design-system';
 import { Close } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
@@ -20,6 +21,8 @@ export function MobileFilterDrawer({
   children,
 }: MobileFilterDrawerProps) {
   const t = useTranslations('Browse');
+  const drawerRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(isOpen, drawerRef, onClose);
 
   if (!isOpen) return null;
 
@@ -29,10 +32,16 @@ export function MobileFilterDrawer({
       <div
         className="fixed inset-0 bg-polar-night/50 backdrop-blur-sm z-40 lg:hidden"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Drawer */}
-      <div className="fixed inset-x-0 bottom-0 bg-snow-white rounded-t-2xl shadow-xl z-50 max-h-[85vh] flex flex-col lg:hidden animate-in slide-in-from-bottom-full duration-300">
+      <div
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        className="fixed inset-x-0 bottom-0 bg-snow-white rounded-t-2xl shadow-xl z-50 max-h-[85vh] flex flex-col lg:hidden animate-in slide-in-from-bottom-full duration-300"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border-subtle">
           <h2 className="text-lg font-semibold text-polar-night">{t('filters.title')}</h2>

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { clsx } from 'clsx';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export interface ModalProps {
   /**
@@ -88,79 +89,7 @@ export const Modal: React.FC<ModalProps> = ({
   contentClassName,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  const previousActiveElement = useRef<HTMLElement | null>(null);
-
-  // Store previously focused element and restore on close
-  useEffect(() => {
-    if (open) {
-      previousActiveElement.current = document.activeElement as HTMLElement;
-    } else if (previousActiveElement.current) {
-      previousActiveElement.current.focus();
-    }
-  }, [open]);
-
-  // Handle Escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [open, onClose]);
-
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (open) {
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.paddingRight = '';
-      document.body.style.overflow = '';
-    }
-
-    return () => {
-      document.body.style.paddingRight = '';
-      document.body.style.overflow = '';
-    };
-  }, [open]);
-
-  // Trap focus within modal
-  useEffect(() => {
-    if (!open || !modalRef.current) return;
-
-    const modal = modalRef.current;
-    const focusableElements = modal.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements[focusableElements.length - 1];
-
-    const handleTab = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-
-      if (e.shiftKey) {
-        if (document.activeElement === firstElement) {
-          lastElement?.focus();
-          e.preventDefault();
-        }
-      } else {
-        if (document.activeElement === lastElement) {
-          firstElement?.focus();
-          e.preventDefault();
-        }
-      }
-    };
-
-    modal.addEventListener('keydown', handleTab);
-    firstElement?.focus();
-
-    return () => modal.removeEventListener('keydown', handleTab);
-  }, [open]);
+  useFocusTrap(open, modalRef, onClose);
 
   if (!open) return null;
 

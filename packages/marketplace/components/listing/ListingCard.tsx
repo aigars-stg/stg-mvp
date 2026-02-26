@@ -129,7 +129,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
           imageClassName="object-contain"
           currentIndex={currentImageIndex}
           onIndexChange={setCurrentImageIndex}
-          placeholderIcon={<Package className="w-16 h-16 text-text-muted" />}
+          placeholderIcon={<Package className="w-16 h-16 text-text-muted" aria-hidden="true" />}
           ariaLabels={{
             prevImage: t('card.prevImageAria'),
             nextImage: t('card.nextImageAria'),
@@ -145,6 +145,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
               aria-label={isSaved ? t('card.unsaveAria') : t('card.saveAria')}
             >
               <Heart
+                aria-hidden="true"
                 className={`w-4 h-4 transition-all ${
                   isSaved
                     ? 'fill-aurora-red text-aurora-red'
@@ -173,7 +174,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
           {/* Contact Seller badge - bottom left */}
           {isContactSellerListing(listing) && (
             <div className="absolute bottom-3 left-3 px-2 py-1 bg-polar-night/80 backdrop-blur-sm rounded-md text-xs text-snow-white font-medium flex items-center gap-1">
-              <MessageSquare className="w-3 h-3" />
+              <MessageSquare className="w-3 h-3" aria-hidden="true" />
               {t('card.contactSeller')}
             </div>
           )}
@@ -190,7 +191,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
 
             {/* Expansion Badge */}
             {listing.game?.is_expansion && (
-              <Badge variant="default" size="sm" icon={<Puzzle className="w-3 h-3" />}>
+              <Badge variant="default" size="sm" icon={<Puzzle className="w-3 h-3" aria-hidden="true" />}>
                 {t('card.expansion')}
               </Badge>
             )}
@@ -198,14 +199,14 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
             {/* Auction Badge + Timer */}
             {isAuction && (
               <div className="flex items-center gap-2">
-                <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" />} className="border-aurora-purple/50 text-aurora-purple">
+                <Badge variant="outline" size="sm" icon={<Gavel className="w-3 h-3" aria-hidden="true" />} className="border-aurora-purple/50 text-aurora-purple">
                   {t('auction.badge')}
                 </Badge>
                 {showAuctionTimer && auctionTimeRemaining && (
                   <span className={`text-xs flex items-center gap-1 ${
                     auctionTimeRemaining.isEndingSoon ? 'text-aurora-red font-medium' : 'text-text-muted'
                   }`}>
-                    <Clock className="w-3 h-3" />
+                    <Clock className="w-3 h-3" aria-hidden="true" />
                     {formatCompactTimeRemaining(auctionTimeRemaining)}
                   </span>
                 )}
@@ -217,19 +218,19 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
               <div className="flex flex-wrap gap-2 text-xs text-text-secondary items-center">
                 {listing.game?.player_count && (
                   <span className="flex items-center gap-0.5">
-                    <Users className="w-3.5 h-3.5" />
+                    <Users className="w-3.5 h-3.5" aria-hidden="true" />
                     {listing.game.player_count}
                   </span>
                 )}
                 {listing.game?.min_age && (
                   <span className="flex items-center gap-0.5">
-                    <Baby className="w-3.5 h-3.5" />
+                    <Baby className="w-3.5 h-3.5" aria-hidden="true" />
                     {listing.game.min_age}+
                   </span>
                 )}
                 {listing.game?.playing_time && (
                   <span className="flex items-center gap-0.5">
-                    <Clock className="w-3.5 h-3.5" />
+                    <Clock className="w-3.5 h-3.5" aria-hidden="true" />
                     {listing.game.playing_time}
                   </span>
                 )}
@@ -238,7 +239,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
                     className="flex items-center gap-0.5 text-aurora-green"
                     title={listing.included_expansions.map(e => e.name).join(', ')}
                   >
-                    <Puzzle className="w-3.5 h-3.5" />
+                    <Puzzle className="w-3.5 h-3.5" aria-hidden="true" />
                     +{listing.included_expansions.length}
                   </span>
                 )}
@@ -253,13 +254,13 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
                     className="flex items-center gap-1 line-clamp-1"
                     title={listing.language.split(/,\s*/).length > 4 ? listing.language : undefined}
                   >
-                    <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
+                    <BookOpen className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
                     {formatLanguages(listing.language)}
                   </span>
                 )}
                 {!listing.all_components_present && (
                   <span title={t('card.missingComponents')} className="flex-shrink-0">
-                    <AlertCircle className="w-4 h-4 text-aurora-red" />
+                    <AlertCircle className="w-4 h-4 text-aurora-red" aria-hidden="true" />
                   </span>
                 )}
               </div>
@@ -311,12 +312,12 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
                     <span className="text-text-muted">•</span>
                     {listing.shipping_parcel_locker ? (
                       <span className="flex items-center gap-1">
-                        <Package className="w-3.5 h-3.5" />
+                        <Package className="w-3.5 h-3.5" aria-hidden="true" />
                         {t('card.parcelLocker')}
                       </span>
                     ) : listing.shipping_local_pickup ? (
                       <span className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5" />
+                        <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
                         {t('card.pickupOnly')}
                       </span>
                     ) : null}

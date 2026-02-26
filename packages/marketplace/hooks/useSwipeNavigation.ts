@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useReducedMotion } from './useReducedMotion';
 
 interface UseSwipeNavigationProps {
   onSwipeLeft: () => void;
@@ -38,15 +39,17 @@ export function useSwipeNavigation({
     deltaY: 0,
   });
 
+  const prefersReducedMotion = useReducedMotion();
+
   const touchHistory = useRef<Array<{ x: number; timestamp: number }>>([]);
   const isHorizontalSwipe = useRef<boolean | null>(null);
 
-  // Haptic feedback helper
+  // Haptic feedback helper (skip when user prefers reduced motion)
   const triggerHaptic = useCallback((duration: number) => {
-    if ('vibrate' in navigator) {
+    if (!prefersReducedMotion && 'vibrate' in navigator) {
       navigator.vibrate(duration);
     }
-  }, []);
+  }, [prefersReducedMotion]);
 
   // Calculate velocity from touch history
   const calculateVelocity = useCallback(() => {
@@ -237,7 +240,7 @@ export function useSwipeNavigation({
       transform: gestureState.isDragging && isHorizontalSwipe.current
         ? `translateX(${translateX}px)`
         : 'translateX(0)',
-      transition: gestureState.isDragging ? 'none' : 'transform 0.3s ease-out',
+      transition: gestureState.isDragging || prefersReducedMotion ? 'none' : 'transform 0.3s ease-out',
     },
     isSwiping: gestureState.isDragging && isHorizontalSwipe.current === true,
   };

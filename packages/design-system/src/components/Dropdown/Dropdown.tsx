@@ -216,19 +216,62 @@ export function DropdownContent({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, closeOnClickOutside, setIsOpen, triggerId]);
 
-  // Close on Escape
+  // Close on Escape and keyboard navigation
   useEffect(() => {
-    if (!isOpen || !closeOnEscape) return;
+    if (!isOpen) return;
 
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const content = contentRef.current;
+      if (!content) return;
+
+      if (e.key === 'Escape' && closeOnEscape) {
         setIsOpen(false);
+        document.getElementById(triggerId)?.focus();
+        e.preventDefault();
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        setIsOpen(false);
+        return;
+      }
+
+      const items = Array.from(
+        content.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])')
+      );
+      if (items.length === 0) return;
+
+      const currentIndex = items.indexOf(document.activeElement as HTMLElement);
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+        items[next]?.focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+        items[prev]?.focus();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        items[0]?.focus();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        items[items.length - 1]?.focus();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, closeOnEscape, setIsOpen]);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, closeOnEscape, setIsOpen, triggerId]);
+
+  // Focus first item when dropdown opens
+  useEffect(() => {
+    if (!isOpen || !contentRef.current) return;
+    const firstItem = contentRef.current.querySelector<HTMLElement>(
+      '[role="menuitem"]:not([disabled])'
+    );
+    firstItem?.focus();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

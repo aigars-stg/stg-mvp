@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useFocusTrap } from '@second-turn/design-system';
 import {  Close, ChevronLeft, ChevronRight, SearchPlus as ZoomIn, SearchMinus as ZoomOut  } from '@/lib/icons';
 
 interface ImageLightboxProps {
@@ -25,6 +26,10 @@ export function ImageLightbox({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
+  const lightboxRef = useRef<HTMLDivElement>(null);
+
+  // Focus trap handles: Escape key, body scroll lock, Tab boundary wrapping
+  useFocusTrap(isOpen, lightboxRef, onClose);
 
   // Reset state when opening/closing or changing index
   useEffect(() => {
@@ -34,19 +39,6 @@ export function ImageLightbox({
       setZoomPosition({ x: 0, y: 0 });
     }
   }, [isOpen, initialIndex]);
-
-  // Prevent body scroll when lightbox is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
 
   // Navigation handlers
   const handlePrevious = useCallback(() => {
@@ -61,27 +53,18 @@ export function ImageLightbox({
     setZoomPosition({ x: 0, y: 0 });
   }, [images.length]);
 
-  // Keyboard navigation
+  // Arrow key navigation (Escape handled by useFocusTrap)
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'Escape':
-          onClose();
-          break;
-        case 'ArrowLeft':
-          handlePrevious();
-          break;
-        case 'ArrowRight':
-          handleNext();
-          break;
-      }
+      if (e.key === 'ArrowLeft') handlePrevious();
+      else if (e.key === 'ArrowRight') handleNext();
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, handlePrevious, handleNext]);
+  }, [isOpen, handlePrevious, handleNext]);
 
   // Zoom toggle
   const handleZoomToggle = () => {
@@ -173,6 +156,7 @@ export function ImageLightbox({
 
   return (
     <div
+      ref={lightboxRef}
       className="fixed inset-0 z-50 flex items-center justify-center bg-polar-night/95 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();

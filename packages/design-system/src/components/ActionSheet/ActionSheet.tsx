@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useCallback, ReactNode } from 'react';
+import { useRef, ReactNode } from 'react';
 import { clsx } from 'clsx';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 // ============================================================================
 // Icons
@@ -90,26 +91,8 @@ export function ActionSheet({
   maxHeightVh = 85,
   className,
 }: ActionSheetProps) {
-  // Close on escape key
-  const handleEscape = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    },
-    [onClose]
-  );
-
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when sheet is open
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, handleEscape]);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(isOpen, sheetRef, onClose);
 
   if (!isOpen) return null;
 
@@ -124,6 +107,7 @@ export function ActionSheet({
 
       {/* Bottom Sheet */}
       <div
+        ref={sheetRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'action-sheet-title' : undefined}
