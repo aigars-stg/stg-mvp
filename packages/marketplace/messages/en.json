@@ -1011,7 +1011,9 @@
         "title": "Can't find it?",
         "description": "Stop refreshing. Post what you're hunting and we'll alert you when it appears.",
         "button": "Tell us what you want"
-      }
+      },
+      "comingSoonBanner": "We're launching soon. Sign up to be the first to know.",
+      "comingSoonButton": "Coming soon"
     },
     "collections": {
       "viewAll": "View all",

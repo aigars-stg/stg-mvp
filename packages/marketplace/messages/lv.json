@@ -1011,7 +1011,9 @@
         "title": "Nevari atrast?",
         "description": "Beidz atjaunot lapu. Publicē, ko meklē, un mēs tevi informēsim, kad tā parādīsies.",
         "button": "Pastāsti, ko vēlies"
-      }
+      },
+      "comingSoonBanner": "Mēs drīz atvērsimies. Pierakstieties, lai uzzinātu pirmie.",
+      "comingSoonButton": "Drīzumā"
     },
     "collections": {
       "viewAll": "Skatīt visu",

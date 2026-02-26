@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { Checkerboard, HandDeposit, SearchPlus } from '@/lib/icons';
+import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup';
 import { useTranslations } from 'next-intl';
 
 type ColorVariant = 'frost-ice' | 'frost-polar' | 'aurora-orange';
@@ -38,44 +39,64 @@ interface MiniActionCardProps {
   description: string;
   buttonText: string;
   color: ColorVariant;
+  disabled?: boolean;
 }
 
-function MiniActionCard({ href, icon, title, description, buttonText, color }: MiniActionCardProps) {
+function MiniActionCard({ href, icon, title, description, buttonText, color, disabled }: MiniActionCardProps) {
   const styles = colorStyles[color];
+
+  const content = (
+    <div
+      className={`relative h-full p-4 sm:p-5 rounded-xl border transition-all duration-200 bg-snow-white ${
+        disabled
+          ? 'border-border opacity-75 cursor-default'
+          : `border-border ${styles.border} hover:shadow-md cursor-pointer group`
+      }`}
+    >
+      <div className="flex items-center gap-3 mb-3">
+        <div
+          className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${styles.iconBg} ${styles.iconText} ${disabled ? '' : styles.iconHover}`}
+        >
+          {icon}
+        </div>
+        <h3 className="text-base sm:text-lg font-semibold text-polar-night">
+          {title}
+        </h3>
+      </div>
+
+      <p className="text-sm text-text-secondary mb-3 leading-relaxed">
+        {description}
+      </p>
+
+      <div
+        className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+          disabled
+            ? 'bg-bg-secondary text-text-muted'
+            : `${styles.button} text-snow-white group-hover:shadow-sm`
+        }`}
+      >
+        {buttonText}
+        {!disabled && (
+          <span className="transition-transform group-hover:translate-x-0.5">→</span>
+        )}
+      </div>
+    </div>
+  );
+
+  if (disabled) {
+    return <div className="block h-full">{content}</div>;
+  }
 
   return (
     <Link href={href} className="block h-full">
-      <div
-        className={`relative h-full p-4 sm:p-5 rounded-xl border transition-all duration-200 bg-snow-white border-border ${styles.border} hover:shadow-md cursor-pointer group`}
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <div
-            className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${styles.iconBg} ${styles.iconText} ${styles.iconHover}`}
-          >
-            {icon}
-          </div>
-          <h3 className="text-base sm:text-lg font-semibold text-polar-night">
-            {title}
-          </h3>
-        </div>
-
-        <p className="text-sm text-text-secondary mb-3 leading-relaxed">
-          {description}
-        </p>
-
-        <div
-          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${styles.button} text-snow-white group-hover:shadow-sm`}
-        >
-          {buttonText}
-          <span className="transition-transform group-hover:translate-x-0.5">→</span>
-        </div>
-      </div>
+      {content}
     </Link>
   );
 }
 
 export function CompactHero() {
   const t = useTranslations('HomePage.hero');
+  const isComingSoon = process.env.NEXT_PUBLIC_COMING_SOON === 'true';
 
   return (
     <section className="relative overflow-hidden">
@@ -95,6 +116,14 @@ export function CompactHero() {
 
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
+        {isComingSoon && (
+          <div className="mb-4 rounded-lg bg-frost-ice/10 border border-frost-ice/20 px-4 py-3 text-center">
+            <p className="text-sm text-frost-700 font-medium">
+              {t('comingSoonBanner')}
+            </p>
+          </div>
+        )}
+
         <div className="text-center mb-5">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-polar-night mb-2 tracking-tight">
             <span className="text-frost-ice">{t('discover')}</span>{' '}
@@ -106,6 +135,12 @@ export function CompactHero() {
           </p>
         </div>
 
+        {isComingSoon && (
+          <div className="max-w-md mx-auto mb-5">
+            <NewsletterSignup />
+          </div>
+        )}
+
         {/* Mini Action Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 max-w-5xl mx-auto">
           <MiniActionCard
@@ -113,24 +148,27 @@ export function CompactHero() {
             icon={<Checkerboard className="w-5 h-5" />}
             title={t('browseCard.title')}
             description={t('browseCard.description')}
-            buttonText={t('browseCard.button')}
+            buttonText={isComingSoon ? t('comingSoonButton') : t('browseCard.button')}
             color="frost-ice"
+            disabled={isComingSoon}
           />
           <MiniActionCard
             href="/sell"
             icon={<HandDeposit className="w-5 h-5" />}
             title={t('sellCard.title')}
             description={t('sellCard.description')}
-            buttonText={t('sellCard.button')}
+            buttonText={isComingSoon ? t('comingSoonButton') : t('sellCard.button')}
             color="frost-polar"
+            disabled={isComingSoon}
           />
           <MiniActionCard
             href="/wanted/new"
             icon={<SearchPlus className="w-5 h-5" />}
             title={t('wantedCard.title')}
             description={t('wantedCard.description')}
-            buttonText={t('wantedCard.button')}
+            buttonText={isComingSoon ? t('comingSoonButton') : t('wantedCard.button')}
             color="aurora-orange"
+            disabled={isComingSoon}
           />
         </div>
       </div>
