@@ -22,7 +22,7 @@ export async function GET(_request: NextRequest) {
       // If the function fails, try fetching directly from seller_profiles
       const { data: profile, error: profileError } = await supabase
         .from('seller_profiles')
-        .select('total_reviews, average_rating, positive_rating_percent, total_completed_sales, member_since')
+        .select('total_reviews, average_rating, positive_rating_percent, total_completed_sales, member_since, is_founding_seller')
         .eq('user_id', user.id)
         .single();
 
@@ -35,6 +35,7 @@ export async function GET(_request: NextRequest) {
           total_completed_sales: 0,
           member_since: null,
           badge_tier: 'new_seller',
+          is_founding_seller: false,
         });
       }
 

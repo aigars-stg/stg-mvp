@@ -1370,6 +1370,7 @@ export type Database = {
           dac7_tax_id: string | null
           dac7_tax_id_type: string | null
           dac7_tax_residency_country: string | null
+          is_founding_seller: boolean | null
           member_since: string | null
           payout_account_holder_name: string | null
           payout_iban: string | null
@@ -1400,6 +1401,7 @@ export type Database = {
           dac7_tax_id?: string | null
           dac7_tax_id_type?: string | null
           dac7_tax_residency_country?: string | null
+          is_founding_seller?: boolean | null
           member_since?: string | null
           payout_account_holder_name?: string | null
           payout_iban?: string | null
@@ -1430,6 +1432,7 @@ export type Database = {
           dac7_tax_id?: string | null
           dac7_tax_id_type?: string | null
           dac7_tax_residency_country?: string | null
+          is_founding_seller?: boolean | null
           member_since?: string | null
           payout_account_holder_name?: string | null
           payout_iban?: string | null
@@ -2123,6 +2126,7 @@ export type Database = {
           seller_badge_tier: string | null
           seller_country: string | null
           seller_id: string | null
+          seller_is_founding_seller: boolean | null
           seller_member_since: string | null
           seller_name: string | null
           seller_positive_rating_percent: number | null
@@ -2321,6 +2325,7 @@ export type Database = {
           average_rating: number | null
           badge_tier: string | null
           created_at: string | null
+          is_founding_seller: boolean | null
           member_since: string | null
           positive_rating_percent: number | null
           seller_status: string | null
@@ -2332,6 +2337,7 @@ export type Database = {
           average_rating?: number | null
           badge_tier?: never
           created_at?: string | null
+          is_founding_seller?: boolean | null
           member_since?: string | null
           positive_rating_percent?: number | null
           seller_status?: string | null
@@ -2343,6 +2349,7 @@ export type Database = {
           average_rating?: number | null
           badge_tier?: never
           created_at?: string | null
+          is_founding_seller?: boolean | null
           member_since?: string | null
           positive_rating_percent?: number | null
           seller_status?: string | null

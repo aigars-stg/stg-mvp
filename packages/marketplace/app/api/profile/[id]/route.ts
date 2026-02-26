@@ -103,7 +103,8 @@ export async function GET(
         average_rating,
         positive_rating_percent,
         total_completed_sales,
-        member_since
+        member_since,
+        is_founding_seller
       `)
       .eq('user_id', userId)
       .single();
@@ -134,6 +135,7 @@ export async function GET(
         positive_rating_percent: number;
         total_completed_sales: number;
         badge_tier: SellerBadgeTier;
+        is_founding_seller: boolean;
         active_listings_count?: number;
       };
       reviews?: {
@@ -173,6 +175,7 @@ export async function GET(
         positive_rating_percent: 100,
         total_completed_sales: 0,
         member_since: userProfile.created_at,
+        is_founding_seller: false,
       };
 
       const badgeTier = getBadgeTier(
@@ -186,6 +189,7 @@ export async function GET(
         positive_rating_percent: trustData.positive_rating_percent ?? 100,
         total_completed_sales: trustData.total_completed_sales ?? 0,
         badge_tier: badgeTier,
+        is_founding_seller: trustData.is_founding_seller ?? false,
       };
 
       // Fetch active listings preview (we already have the count from earlier)

@@ -2645,7 +2645,13 @@
       "sale": "sale",
       "sales": "sales",
       "newSeller": "New seller",
-      "shipsFrom": "Ships from {country}"
+      "shipsFrom": "Ships from {country}",
+      "badges": {
+        "topSeller": "Top Seller",
+        "trustedSeller": "Trusted Seller",
+        "newSeller": "New Seller",
+        "foundingSeller": "Founding seller"
+      }
     },
     "SellerTrustCard": {
       "title": "Your Reputation",

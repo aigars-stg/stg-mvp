@@ -47,6 +47,7 @@ export function SellerTrustBadge({
     totalReviews,
     badgeTier,
     memberSince,
+    isFoundingSeller,
   } = trust;
 
   // Size-based styles
@@ -119,6 +120,7 @@ export function SellerTrustBadge({
 
       {/* Badge tier */}
       <BadgeTierPill tier={badgeTier} size={size} />
+      {isFoundingSeller && <FoundingSellerPill size={size} />}
 
       {/* Member since */}
       {showMemberSince && memberSince && (
@@ -239,6 +241,38 @@ function BadgeTierPill({
     >
       <Icon className={iconSizes[size]} />
       {config.label}
+    </span>
+  );
+}
+
+/**
+ * Founding seller recognition pill — shown alongside trust badge
+ */
+export function FoundingSellerPill({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
+  const t = useTranslations('SellerDashboard.SellerTrustBadge');
+
+  const sizeStyles = {
+    sm: 'text-[10px] px-1.5 py-0.5 gap-0.5',
+    md: 'text-xs px-2 py-0.5 gap-1',
+    lg: 'text-sm px-2.5 py-1 gap-1',
+  };
+
+  const iconSizes = {
+    sm: 'w-2.5 h-2.5',
+    md: 'w-3 h-3',
+    lg: 'w-3.5 h-3.5',
+  };
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full font-medium border',
+        'bg-aurora-green/10 text-aurora-green border-aurora-green/20',
+        sizeStyles[size]
+      )}
+    >
+      <Sparkles className={iconSizes[size]} />
+      {t('badges.foundingSeller')}
     </span>
   );
 }

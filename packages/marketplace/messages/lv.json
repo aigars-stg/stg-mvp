@@ -2650,7 +2650,13 @@
       "sale": "pārdošana",
       "sales": "pārdošanas",
       "newSeller": "Jauns pārdevējs",
-      "shipsFrom": "Sūta no {country}"
+      "shipsFrom": "Sūta no {country}",
+      "badges": {
+        "topSeller": "Top pārdevējs",
+        "trustedSeller": "Uzticams pārdevējs",
+        "newSeller": "Jauns pārdevējs",
+        "foundingSeller": "Dibinātājs"
+      }
     },
     "SellerTrustCard": {
       "title": "Tava reputācija",

@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { Button, Card, ResultPage } from '@second-turn/design-system';
 import { ArrowLeft, RefreshCw as Loader2, User, Star, Package, ShoppingBag, Chat as MessageSquare } from '@/lib/icons';
 import { SellerReviewsList } from '@/components/seller/SellerReviewsList';
-import { BadgeTierPill } from '@/components/seller/SellerTrustBadge';
+import { BadgeTierPill, FoundingSellerPill } from '@/components/seller/SellerTrustBadge';
 import type { SellerBadgeTier } from '@/lib/types/seller';
 import { UserInfoCard } from '@/components/user';
 import { OfferCard } from '@/components/game/OfferCard';
@@ -27,6 +27,7 @@ interface SellerData {
   positive_rating_percent: number;
   total_completed_sales: number;
   badge_tier: SellerBadgeTier;
+  is_founding_seller: boolean;
   active_listings_count?: number;
 }
 
@@ -254,6 +255,7 @@ export default function ProfilePage() {
                   linkToProfile={false}
                 />
                 {isSeller && <BadgeTierPill tier={seller.badge_tier} size="md" />}
+                {isSeller && seller.is_founding_seller && <FoundingSellerPill size="md" />}
               </div>
 
               {/* Seller Stats Row (only for sellers with reviews) */}

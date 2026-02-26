@@ -50,6 +50,9 @@ export interface SellerProfile {
   total_completed_sales: number;
   member_since: string | null;
 
+  // Founding seller recognition
+  is_founding_seller: boolean;
+
   // Payout Banking
   payout_iban: string | null;
   payout_account_holder_name: string | null;
@@ -166,6 +169,7 @@ export interface SellerTrustSummary {
   member_since: string | null;
   seller_status: SellerStatus;
   badge_tier: SellerBadgeTier;
+  is_founding_seller: boolean;
 }
 
 /**
@@ -181,6 +185,7 @@ export interface SellerTrustInfo {
   totalReviews: number;
   badgeTier: SellerBadgeTier;
   memberSince: string | null;
+  isFoundingSeller: boolean;
 }
 
 /**
