@@ -1012,7 +1012,8 @@
         "description": "Stop refreshing. Post what you're hunting and we'll alert you when it appears.",
         "button": "Tell us what you want"
       },
-      "comingSoonBanner": "We're launching soon. Sign up to be the first to know.",
+      "comingSoonBadge": "Launching spring 2026",
+      "comingSoonSignup": "Be the first to browse when we open the doors.",
       "comingSoonButton": "Coming soon"
     },
     "collections": {

@@ -116,15 +116,15 @@ export function CompactHero() {
 
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
-        {isComingSoon && (
-          <div className="mb-4 rounded-lg bg-frost-ice/10 border border-frost-ice/20 px-4 py-3 text-center">
-            <p className="text-sm text-frost-700 font-medium">
-              {t('comingSoonBanner')}
-            </p>
-          </div>
-        )}
-
         <div className="text-center mb-5">
+          {isComingSoon && (
+            <div className="flex justify-center mb-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-frost-ice/10 border border-frost-ice/20 px-3 py-1 text-xs font-medium text-frost-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-frost-ice animate-pulse" />
+                {t('comingSoonBadge')}
+              </span>
+            </div>
+          )}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-polar-night mb-2 tracking-tight">
             <span className="text-frost-ice">{t('discover')}</span>{' '}
             <span className="text-frost-polar">{t('list')}</span>{' '}
@@ -136,8 +136,11 @@ export function CompactHero() {
         </div>
 
         {isComingSoon && (
-          <div className="max-w-md mx-auto mb-5">
-            <NewsletterSignup />
+          <div className="max-w-sm mx-auto mb-6 text-center">
+            <p className="text-sm text-text-secondary mb-3">
+              {t('comingSoonSignup')}
+            </p>
+            <NewsletterSignup hideDescription />
           </div>
         )}
 

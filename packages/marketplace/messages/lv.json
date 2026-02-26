@@ -1012,7 +1012,8 @@
         "description": "Beidz atjaunot lapu. Publicē, ko meklē, un mēs tevi informēsim, kad tā parādīsies.",
         "button": "Pastāsti, ko vēlies"
       },
-      "comingSoonBanner": "Mēs drīz atvērsimies. Pierakstieties, lai uzzinātu pirmie.",
+      "comingSoonBadge": "Atvērsimies 2026. gada pavasarī",
+      "comingSoonSignup": "Esi pirmais, kas uzzina, kad atvērsim durvis.",
       "comingSoonButton": "Drīzumā"
     },
     "collections": {

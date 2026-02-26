@@ -13,7 +13,7 @@ import {
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
-export function NewsletterSignup() {
+export function NewsletterSignup({ hideDescription }: { hideDescription?: boolean } = {}) {
   const t = useTranslations('Newsletter');
   const locale = useLocale() as NewsletterLocale;
   const { profile } = useAuth();
@@ -91,9 +91,11 @@ export function NewsletterSignup() {
 
   return (
     <div className="w-full">
-      <p className="text-sm text-text-secondary mb-3">
-        {t('description')}
-      </p>
+      {!hideDescription && (
+        <p className="text-sm text-text-secondary mb-3">
+          {t('description')}
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
         <div className="flex-1">
