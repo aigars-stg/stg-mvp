@@ -191,7 +191,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                     <br />
                     {tFooter('tagline.line2')}
                   </p>
-                  <div className="mt-4">
+                  <div className="mt-4 max-w-sm">
                     <NewsletterSignup />
                   </div>
                 </div>
