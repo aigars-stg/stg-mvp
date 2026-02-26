@@ -5,7 +5,7 @@
  * This content is consumed by:
  * - GradingGuidePanel (sell flow)
  * - ConditionInfoModal (buyer view)
- * - /help?section=grading (help hub)
+ * - /help/grading (help centre)
  */
 
 import type { ListingCondition } from './types/listing';

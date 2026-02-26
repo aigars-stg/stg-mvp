@@ -19,8 +19,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/sell`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8, alternates: { languages: localized('/sell') } },
     { url: `${baseUrl}/play`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7, alternates: { languages: localized('/play') } },
     { url: `${baseUrl}/help`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6, alternates: { languages: localized('/help') } },
+    { url: `${baseUrl}/help/buying`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/buying') } },
+    { url: `${baseUrl}/help/selling`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/selling') } },
+    { url: `${baseUrl}/help/grading`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/grading') } },
+    { url: `${baseUrl}/help/shipping`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/shipping') } },
+    { url: `${baseUrl}/help/wallet`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/wallet') } },
+    { url: `${baseUrl}/help/dac7`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/dac7') } },
+    { url: `${baseUrl}/help/listing-types`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/listing-types') } },
     { url: `${baseUrl}/legal`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3, alternates: { languages: localized('/legal') } },
-    { url: `${baseUrl}/pricing`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6, alternates: { languages: localized('/pricing') } },
+    { url: `${baseUrl}/legal/terms`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4, alternates: { languages: localized('/legal/terms') } },
+    { url: `${baseUrl}/legal/privacy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4, alternates: { languages: localized('/legal/privacy') } },
+    { url: `${baseUrl}/legal/seller`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4, alternates: { languages: localized('/legal/seller') } },
+    { url: `${baseUrl}/legal/cookies`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3, alternates: { languages: localized('/legal/cookies') } },
+    { url: `${baseUrl}/legal/fees`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4, alternates: { languages: localized('/legal/fees') } },
   ];
 
   // Dynamic game pages from active listings

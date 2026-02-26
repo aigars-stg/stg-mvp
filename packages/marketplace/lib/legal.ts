@@ -1,12 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { serialize } from 'next-mdx-remote/serialize';
-import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
-import remarkGfm from 'remark-gfm';
-import rehypeSlug from 'rehype-slug';
-
-export type { MDXRemoteSerializeResult };
 
 interface DocumentFrontmatter {
   title: string;
@@ -65,16 +59,6 @@ export function getLegalDocument(slug: string, locale: string = 'en'): Document 
     }
   }
   return loadDocument('legal', slug);
-}
-
-/** Serialize MDX content with remark/rehype plugins */
-export async function serializeMdx(content: string): Promise<MDXRemoteSerializeResult> {
-  return serialize(content, {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [rehypeSlug],
-    },
-  });
 }
 
 /** Load a help document (from content/help/en/) */

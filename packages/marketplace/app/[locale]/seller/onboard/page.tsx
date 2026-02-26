@@ -228,7 +228,7 @@ export default function SellerOnboardingPage() {
                   </li>
                 </ul>
                 <p className="mt-3 sm:mt-4 pt-3 border-t border-border">
-                  <Link href="/legal?section=seller" target="_blank" className="text-frost-ice hover:underline text-xs sm:text-sm">
+                  <Link href="/legal/seller" target="_blank" className="text-frost-ice hover:underline text-xs sm:text-sm">
                     {t('step1.readFullTerms')}
                   </Link>
                 </p>
@@ -276,7 +276,7 @@ export default function SellerOnboardingPage() {
                 />
                 <span className="text-xs sm:text-sm text-text-secondary">
                   {t('step1.checkbox')}{' '}
-                  <Link href="/legal?section=seller" target="_blank" className="text-frost-ice hover:underline">
+                  <Link href="/legal/seller" target="_blank" className="text-frost-ice hover:underline">
                     {t('step1.sellerTerms')}
                   </Link>.
                 </span>

@@ -54,7 +54,7 @@ export function ConditionInfoModal({
       footer={
         <div className="flex items-center justify-between w-full">
           <Link
-            href="/help?section=grading"
+            href="/help/grading"
             target="_blank"
             className="text-frost-ice hover:text-aurora-blue text-sm flex items-center gap-1 transition-colors"
           >

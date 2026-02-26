@@ -411,7 +411,7 @@
     "forSellers": "For Sellers:",
     "sellerRequirements": "You must have no pending withdrawals or open disputes. Any remaining wallet balance will be withdrawn before deletion.",
     "recoveryTitle": "Account Recovery (14-Day Grace Period):",
-    "recoveryDescription": "You have 14 days to recover your account by logging in again. After this period, deletion is permanent.",
+    "recoveryDescription": "You have 14 days to recover your account by emailing us at info@secondturn.games. After this period, deletion is permanent.",
     "dataRetentionTitle": "Data Retention (GDPR Compliance):",
     "dataRetentionDescription": "For legal and fraud prevention purposes, we retain:",
     "retention": {

@@ -361,8 +361,7 @@ export default function ListingTypesPage() {
   const t = useTranslations('Help.ListingTypes');
 
   return (
-    <div className="min-h-screen bg-bg py-6 sm:py-8">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+    <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">
@@ -405,6 +404,5 @@ export default function ListingTypesPage() {
           </div>
         </Card>
       </div>
-    </div>
   );
 }

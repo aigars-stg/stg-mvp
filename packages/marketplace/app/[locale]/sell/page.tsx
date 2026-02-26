@@ -1490,7 +1490,7 @@ function SellPageContent() {
             />
             <div className="flex-1 text-sm text-text-secondary">
               {tTerms('prefix')}{' '}
-              <a href="/legal?section=terms" className="text-frost-ice hover:underline">
+              <a href="/legal/terms" className="text-frost-ice hover:underline">
                 {tTerms('termsLink')}
               </a>{' '}
               {tTerms('middle')}

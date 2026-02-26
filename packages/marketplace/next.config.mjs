@@ -31,49 +31,69 @@ const nextConfig = {
       },
     ],
   },
-  // Redirect old seller profile URLs to new unified profile URLs
   async redirects() {
+    // Generate ?section= → clean URL redirects for both locale-prefixed and bare paths
+    // (localePrefix: 'as-needed' means default locale has no prefix)
+    const sectionRedirects = [
+      { base: 'legal', section: 'buyer', dest: 'legal/terms' },
+      { base: 'legal', section: 'terms', dest: 'legal/terms' },
+      { base: 'legal', section: 'privacy', dest: 'legal/privacy' },
+      { base: 'legal', section: 'seller', dest: 'legal/seller' },
+      { base: 'legal', section: 'cookies', dest: 'legal/cookies' },
+      { base: 'legal', section: 'fees', dest: 'legal/fees' },
+      { base: 'help', section: 'buying', dest: 'help/buying' },
+      { base: 'help', section: 'selling', dest: 'help/selling' },
+      { base: 'help', section: 'grading', dest: 'help/grading' },
+      { base: 'help', section: 'shipping', dest: 'help/shipping' },
+      { base: 'help', section: 'wallet', dest: 'help/wallet' },
+      { base: 'help', section: 'payments', dest: 'help/wallet' },
+      { base: 'help', section: 'dac7', dest: 'help/dac7' },
+    ].flatMap(({ base, section, dest }) => [
+      {
+        source: `/${base}`,
+        has: [{ type: 'query', key: 'section', value: section }],
+        destination: `/${dest}`,
+        permanent: true,
+      },
+      {
+        source: `/:locale/${base}`,
+        has: [{ type: 'query', key: 'section', value: section }],
+        destination: `/:locale/${dest}`,
+        permanent: true,
+      },
+    ]);
+
     return [
+      // Seller profile URL migration
       {
         source: '/sellers/:id',
         destination: '/profile/:id',
-        permanent: true, // 301 redirect for SEO
+        permanent: true,
       },
+      // Legacy standalone legal URLs (constrain :locale to real locale codes)
       {
-        source: '/:locale/terms',
-        destination: '/:locale/legal?section=terms',
+        source: '/:locale(lv|lt|et)/terms',
+        destination: '/:locale/legal/terms',
         permanent: true,
       },
       {
-        source: '/:locale/privacy',
-        destination: '/:locale/legal?section=privacy',
+        source: '/:locale(lv|lt|et)/privacy',
+        destination: '/:locale/legal/privacy',
         permanent: true,
       },
       {
-        source: '/:locale/seller/terms',
-        destination: '/:locale/legal?section=seller',
+        source: '/:locale(lv|lt|et)/seller/terms',
+        destination: '/:locale/legal/seller',
         permanent: true,
       },
+      // Legacy help slug (grading-guide → grading)
       {
-        source: '/:locale/help/selling',
-        destination: '/:locale/help?section=selling',
+        source: '/:locale(lv|lt|et)/help/grading-guide',
+        destination: '/:locale/help/grading',
         permanent: true,
       },
-      {
-        source: '/:locale/help/grading-guide',
-        destination: '/:locale/help?section=grading',
-        permanent: true,
-      },
-      {
-        source: '/:locale/help/shipping',
-        destination: '/:locale/help?section=shipping',
-        permanent: true,
-      },
-      {
-        source: '/:locale/help/dac7',
-        destination: '/:locale/help?section=dac7',
-        permanent: true,
-      },
+      // Legacy ?section= → clean URL redirects
+      ...sectionRedirects,
     ];
   },
   // Rewrites to handle locale-prefixed manifest requests

@@ -167,7 +167,7 @@ Bankas pārsūtīšanas aizņem 1-3 darba dienas. Ja tas ir ilgāk, sazinieties 
 
 ## Saistītie ceļveži
 
-- [Kā pārdot](/help?section=selling) — Pilns pārdošanas ceļvedis
-- [Kā pirkt](/help?section=buying) — Pilns pirkuma ceļvedis
-- [Maksas](/legal?section=fees) — Pilns maksas sadalījums
-- [DAC7 & nodokļi](/help?section=dac7) — Nodokļu ziņošanas slieksni
+- [Kā pārdot](/help/selling) — Pilns pārdošanas ceļvedis
+- [Kā pirkt](/help/buying) — Pilns pirkuma ceļvedis
+- [Maksas](/legal/fees) — Pilns maksas sadalījums
+- [DAC7 & nodokļi](/help/dac7) — Nodokļu ziņošanas slieksni

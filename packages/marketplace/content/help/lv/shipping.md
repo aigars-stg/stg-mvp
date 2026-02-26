@@ -338,6 +338,6 @@ Pirms katra sūtījuma:
 
 ## Saistīts palīdzības
 
-- [Stāvokļa novērtējuma ceļvedis](/help?section=grading) — Kā pareizi novērtēt savas spēles
-- [Pārdošanas ceļvedis](/help?section=selling) — Pilns pārdošanas ceļvedis Second Turn Games
-- [DAC7 nodokļu ziņošana](/help?section=dac7) — Nodokļu ziņošanas slieksni pārdevējiem
+- [Stāvokļa novērtējuma ceļvedis](/help/grading) — Kā pareizi novērtēt savas spēles
+- [Pārdošanas ceļvedis](/help/selling) — Pilns pārdošanas ceļvedis Second Turn Games
+- [DAC7 nodokļu ziņošana](/help/dac7) — Nodokļu ziņošanas slieksni pārdevējiem
