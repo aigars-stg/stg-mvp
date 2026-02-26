@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { getHelpDocument, serializeMdx } from '@/lib/legal';
+import { getHelpDocument } from '@/lib/legal';
 import { LegalSection } from '@/components/legal/LegalSection';
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema';
 
@@ -56,8 +56,6 @@ export default async function HelpSectionPage({
     notFound();
   }
 
-  const serialized = await serializeMdx(doc.content);
-
   return (
     <>
       <BreadcrumbSchema items={[
@@ -68,7 +66,7 @@ export default async function HelpSectionPage({
       <LegalSection
         title={doc.frontmatter.title}
         lastUpdated={doc.frontmatter.lastUpdated}
-        serialized={serialized}
+        content={doc.content}
       />
     </>
   );

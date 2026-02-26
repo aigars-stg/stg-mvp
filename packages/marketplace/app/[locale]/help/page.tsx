@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { getHelpDocument, serializeMdx } from '@/lib/legal';
+import { getHelpDocument } from '@/lib/legal';
 import { LegalSection } from '@/components/legal/LegalSection';
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema';
 
@@ -40,8 +40,6 @@ export default async function HelpPage({
     // Fall back to placeholder
   }
 
-  const serialized = await serializeMdx(content);
-
   const faqJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -68,7 +66,7 @@ export default async function HelpPage({
       <LegalSection
         title={title}
         lastUpdated={lastUpdated}
-        serialized={serialized}
+        content={content}
       />
     </>
   );
