@@ -13,6 +13,7 @@ import { Providers } from './providers';
 import { Navbar } from '@/components/layout/Navbar';
 import { SkipLink } from '@/components/layout/SkipLink';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
+import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup';
 
 // Lazy load BottomNav - it's only visible on mobile and can be deferred
 const BottomNav = dynamic(() => import('@/components/layout/BottomNav').then(mod => ({ default: mod.BottomNav })), {
@@ -190,6 +191,9 @@ export default async function LocaleLayout({ children, params }: Props) {
                     <br />
                     {tFooter('tagline.line2')}
                   </p>
+                  <div className="mt-4">
+                    <NewsletterSignup />
+                  </div>
                 </div>
                 <div>
                   <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.marketplace')}</h4>
