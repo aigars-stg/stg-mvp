@@ -333,11 +333,15 @@ function MyListingsContent() {
                 <h3 className="text-xl font-semibold text-polar-night mb-2">
                   {activeTab === 'all'
                     ? t('selling.emptyAll.title')
+                    : activeTab === 'draft'
+                    ? t('selling.emptyDraft.title')
                     : t('selling.emptyFiltered.title', { status: tListings(`statuses.${activeTab}`).toLowerCase() })}
                 </h3>
                 <p className="text-text-secondary mb-6">
                   {activeTab === 'all'
                     ? t('selling.emptyAll.description')
+                    : activeTab === 'draft'
+                    ? t('selling.emptyDraft.description')
                     : t('selling.emptyFiltered.description', { status: tListings(`statuses.${activeTab}`).toLowerCase() })}
                 </p>
                 {activeTab === 'all' && (
@@ -345,6 +349,13 @@ function MyListingsContent() {
                     <Button variant="primary">
                       <Plus className="w-5 h-5 mr-2" />
                       {t('selling.emptyAll.button')}
+                    </Button>
+                  </Link>
+                )}
+                {activeTab === 'draft' && (
+                  <Link href="/sell">
+                    <Button variant="secondary">
+                      {t('selling.emptyDraft.button')}
                     </Button>
                   </Link>
                 )}

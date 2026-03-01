@@ -2487,6 +2487,11 @@
       "emptyFiltered": {
         "title": "Nav {status} sludinājumu",
         "description": "Tev pašlaik nav neviena {status} sludinājuma"
+      },
+      "emptyDraft": {
+        "title": "Nav melnrakstu sludinājumu",
+        "description": "Melnraksti tiek saglabāti tavā pārlūkprogrammā, kamēr aizpildi pārdošanas formu. Atver pārdošanas lapu, lai turpinātu no vietas, kur apstājies.",
+        "button": "Turpināt pārdošanas lapā"
       }
     },
     "wanted": {

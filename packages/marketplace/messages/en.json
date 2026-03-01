@@ -2487,6 +2487,11 @@
       "emptyFiltered": {
         "title": "No {status} listings",
         "description": "You don't have any {status} listings at the moment"
+      },
+      "emptyDraft": {
+        "title": "No draft listings",
+        "description": "Drafts are saved in your browser while you fill in the sell form. Open the sell page to continue where you left off.",
+        "button": "Continue on Sell Page"
       }
     },
     "wanted": {
