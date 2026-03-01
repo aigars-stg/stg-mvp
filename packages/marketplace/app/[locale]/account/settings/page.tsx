@@ -23,7 +23,7 @@ type SettingsTab = 'profile' | 'preferences' | 'privacy';
 
 function AccountSettingsContent() {
   const t = useTranslations('AccountSettings');
-  const { user, profile, updateProfile, refreshProfile, signOut, isProfileComplete } = useAuth();
+  const { user, profile, loading: authLoading, updateProfile, refreshProfile, signOut, isProfileComplete } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -157,15 +157,31 @@ function AccountSettingsContent() {
     }
   };
 
-  // Show loading only while auth is initializing
-  if (!user) {
+  // Show loading skeleton while auth is still initializing
+  if (authLoading) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-text-secondary">{t('loading')}</p>
+      <div className="min-h-screen bg-bg py-4 sm:py-6 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse space-y-6">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="space-y-2">
+                <div className="h-8 bg-polar-night/10 rounded w-48" />
+                <div className="h-4 bg-polar-night/10 rounded w-64" />
+              </div>
+              <div className="h-10 bg-polar-night/10 rounded w-72" />
+            </div>
+            <div className="h-40 bg-polar-night/10 rounded-xl" />
+            <div className="h-24 bg-polar-night/10 rounded-xl" />
+          </div>
         </div>
       </div>
     );
+  }
+
+  // Not logged in — redirect to auth
+  if (!user) {
+    router.push('/auth/signin?redirectTo=/account/settings');
+    return null;
   }
 
   // If user exists but profile doesn't, show error with retry
