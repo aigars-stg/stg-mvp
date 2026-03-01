@@ -114,8 +114,19 @@ export function NotificationsList() {
     }
 
     // Navigate immediately
+    // Order-related notifications: read order_id from the view-extracted top-level field
+    // (the notifications_with_context view extracts data->>'order_id' into order_id)
+    if (notification.type === 'new_order') {
+      const orderId = notification.order_id ?? (notification.data?.order_id ?? notification.raw_data?.order_id) as string | undefined;
+      if (orderId) {
+        loader.start();
+        router.push(`/orders/${orderId}`);
+        return;
+      }
+    }
+
     if (notification.type === 'wanted_match') {
-      const bggGameId = notification.raw_data?.bgg_game_id as string | undefined;
+      const bggGameId = (notification.raw_data?.bgg_game_id ?? notification.data?.bgg_game_id) as string | undefined;
       if (bggGameId) {
         loader.start();
         router.push(`/game/${bggGameId}`);
@@ -123,12 +134,13 @@ export function NotificationsList() {
       }
     }
 
-    if (notification.listing_id) {
-      loader.start();
-      router.push(`/game/${notification.listing_id}`);
-    } else if (notification.order_id) {
+    // Auction and other order-linked notifications: prefer order_id, fall back to listing_id
+    if (notification.order_id) {
       loader.start();
       router.push(`/orders/${notification.order_id}`);
+    } else if (notification.listing_id) {
+      loader.start();
+      router.push(`/game/${notification.listing_id}`);
     }
   };
 

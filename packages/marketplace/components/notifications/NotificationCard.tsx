@@ -17,7 +17,10 @@ export interface NotificationData {
   auction_ends_at?: string;
   previous_bid?: number;
   order_id?: string;
+  // raw_data is the full JSONB data column as exposed by the notifications_with_context view
   raw_data?: Record<string, unknown>;
+  // data mirrors raw_data for forward compatibility if the view alias changes
+  data?: Record<string, unknown>;
 }
 
 const typeConfig: Record<string, { Icon: React.ComponentType<{ className?: string }>; color: string }> = {
