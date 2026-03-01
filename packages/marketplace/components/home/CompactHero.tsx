@@ -136,11 +136,13 @@ export function CompactHero() {
         </div>
 
         {isComingSoon && (
-          <div className="max-w-sm mx-auto mb-6 text-center">
-            <p className="text-sm text-text-secondary mb-3">
-              {t('comingSoonSignup')}
-            </p>
-            <NewsletterSignup hideDescription />
+          <div className="max-w-md mx-auto mb-6">
+            <div className="bg-snow-white border border-border-subtle shadow-sm rounded-xl p-5 sm:p-6">
+              <p className="text-sm font-medium text-polar-night text-center mb-1">
+                {t('comingSoonSignup')}
+              </p>
+              <NewsletterSignup hideDescription />
+            </div>
           </div>
         )}
 

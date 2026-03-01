@@ -1013,7 +1013,7 @@
         "button": "Pastāsti, ko vēlies"
       },
       "comingSoonBadge": "Atvērsimies 2026. gada pavasarī",
-      "comingSoonSignup": "Esi pirmais, kas uzzina, kad atvērsim durvis.",
+      "comingSoonSignup": "Pieraksties, lai uzzinātu, kad būsim vaļā",
       "comingSoonButton": "Drīzumā"
     },
     "collections": {
@@ -1274,7 +1274,8 @@
       "marketplace": "Tirgus",
       "help": "Palīdzība",
       "legal": "Juridiskā informācija",
-      "resources": "Resursi"
+      "resources": "Resursi",
+      "partners": "Mūsu partneri"
     },
     "links": {
       "browseGames": "Pārlūkot spēles",

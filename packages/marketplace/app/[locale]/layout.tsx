@@ -211,6 +211,57 @@ export default async function LocaleLayout({ children, params }: Props) {
                   </ul>
                 </div>
               </div>
+
+              {/* Partners & Data */}
+              <div className="mt-6 sm:mt-8 pt-4 border-t border-border-subtle">
+                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
+                  <p className="text-xs text-text-muted shrink-0">
+                    {tFooter('sections.partners')}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-6">
+                    <a
+                      href="https://boardgamegeek.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="opacity-50 hover:opacity-100 transition-opacity"
+                      aria-label="Game data powered by BoardGameGeek"
+                    >
+                      <img
+                        src="/images/powered-by-bgg-rgb.svg"
+                        alt="Powered by BoardGameGeek"
+                        className="h-6 w-auto"
+                      />
+                    </a>
+                    <a
+                      href="https://swedbank.lv/business/cash/cashflow/paymentPortal?language=ENG"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="opacity-50 hover:opacity-100 transition-opacity"
+                      aria-label="Payments by EveryPay"
+                    >
+                      <img
+                        src="/images/everypay_logo.svg"
+                        alt="EveryPay"
+                        className="h-8 w-auto"
+                      />
+                    </a>
+                    <a
+                      href="https://unisend.lv"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="opacity-50 hover:opacity-100 transition-opacity"
+                      aria-label="Shipping by Unisend"
+                    >
+                      <img
+                        src="/images/unisend_logo.svg"
+                        alt="Unisend"
+                        className="h-3 w-auto"
+                      />
+                    </a>
+                  </div>
+                </div>
+              </div>
+
               {/* EveryPay/Swedbank compliance strip */}
               <div className="mt-6 sm:mt-8 pt-4 border-t border-border-subtle">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-muted">
