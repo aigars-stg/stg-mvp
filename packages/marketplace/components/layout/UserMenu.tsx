@@ -61,8 +61,10 @@ export function UserMenu() {
   }
 
   // User is logged in
-  const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';
-  const initials = getInitials(displayName);
+  const displayName = profile?.full_name || '';
+  const initials = displayName
+    ? getInitials(displayName)
+    : (user.email?.[0] ?? '?').toUpperCase();
 
   // Check if user is an active seller
   const isActiveSeller = profile?.seller_status === 'active';
@@ -112,7 +114,7 @@ export function UserMenu() {
           >
             <div className="pr-6">
               <p className="text-sm font-medium text-polar-night group-hover:text-frost-ice transition-colors">
-                {profile?.full_name || 'User'}
+                {profile?.full_name || user.email}
               </p>
               <p className="text-xs text-text-secondary truncate">
                 {user.email}

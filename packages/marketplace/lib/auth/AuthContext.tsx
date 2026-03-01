@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('user_profiles')
         .insert({
           id: userId,
-          full_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+          full_name: authUser.user_metadata?.full_name || '',
           email: authUser.email!,
           phone: authUser.user_metadata?.phone || null,
           country: authUser.user_metadata?.country || null,
