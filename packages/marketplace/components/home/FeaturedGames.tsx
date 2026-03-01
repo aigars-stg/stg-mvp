@@ -65,8 +65,8 @@ export async function FeaturedGames() {
 
         {/* Listings grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {listings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} showSeller={true} />
+          {listings.map((listing, index) => (
+            <ListingCard key={listing.id} listing={listing} showSeller={true} priority={index < 4} />
           ))}
         </div>
 

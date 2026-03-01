@@ -35,6 +35,8 @@ interface ImageCarouselProps {
   children?: React.ReactNode;
   /** Current image index (controlled mode) */
   currentIndex?: number;
+  /** Whether to set priority on the image (use for above-the-fold / LCP images) */
+  priority?: boolean;
   /** Translation function for aria labels */
   ariaLabels?: {
     prevImage?: string;
@@ -60,6 +62,7 @@ export function ImageCarousel({
   children,
   currentIndex: controlledIndex,
   ariaLabels = {},
+  priority = false,
 }: ImageCarouselProps) {
   // Internal state for uncontrolled mode
   const [internalIndex, setInternalIndex] = useState(0);
@@ -138,6 +141,7 @@ export function ImageCarousel({
           fill
           className={imageClassName}
           sizes={imageSizes}
+          priority={priority}
           unoptimized={displayImage.startsWith('http')}
         />
       ) : (

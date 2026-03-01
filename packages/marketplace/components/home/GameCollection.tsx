@@ -185,9 +185,9 @@ export function GameCollection({
               ))
             ) : (
               // Actual listings
-              collection?.listings.map((listing) => (
+              collection?.listings.map((listing, index) => (
                 <div key={listing.id} className="flex-shrink-0 w-[260px] snap-start">
-                  <ListingCard listing={listing} showSeller />
+                  <ListingCard listing={listing} showSeller priority={index < 4} />
                 </div>
               ))
             )}

@@ -19,6 +19,7 @@ interface ListingCardProps {
   listing: ListingWithSeller;
   showSeller?: boolean;
   isOwnListing?: boolean; // Whether this listing belongs to the current user
+  priority?: boolean; // Whether to set priority on the image (use for LCP images)
 }
 
 // Priority languages for Baltic region
@@ -56,7 +57,7 @@ function formatLanguages(languageString: string): string {
   return displayLangs.join(' / ');
 }
 
-export function ListingCard({ listing, showSeller = false, isOwnListing = false }: ListingCardProps) {
+export function ListingCard({ listing, showSeller = false, isOwnListing = false, priority = false }: ListingCardProps) {
   const t = useTranslations('Listings');
   const router = useRouter();
   const { user } = useAuth();
@@ -129,6 +130,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
           imageClassName="object-contain"
           currentIndex={currentImageIndex}
           onIndexChange={setCurrentImageIndex}
+          priority={priority}
           placeholderIcon={<Package className="w-16 h-16 text-text-muted" aria-hidden="true" />}
           ariaLabels={{
             prevImage: t('card.prevImageAria'),
