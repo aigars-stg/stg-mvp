@@ -243,17 +243,21 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Build redirect URL with error category and retry context
-      const redirectParams = new URLSearchParams({ error: errorCategory });
+      // Basket orders: redirect back to checkout form so the error shows inline
+      // Auction orders: redirect to success page (no checkout form to return to)
       if (orderRef.startsWith('BASKET-')) {
         const metadata = checkoutEvent.payload as Record<string, unknown>;
+        const checkoutParams = new URLSearchParams({ error: errorCategory });
         if (metadata.basket_id) {
-          redirectParams.set('basket_id', metadata.basket_id as string);
+          checkoutParams.set('basket', metadata.basket_id as string);
         }
+        return NextResponse.redirect(
+          `${appUrl}/checkout?${checkoutParams.toString()}`
+        );
       }
 
       return NextResponse.redirect(
-        `${appUrl}/checkout/success?${redirectParams.toString()}`
+        `${appUrl}/checkout/success?error=${errorCategory}`
       );
     }
 

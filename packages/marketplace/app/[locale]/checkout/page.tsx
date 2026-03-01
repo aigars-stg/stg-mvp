@@ -75,7 +75,8 @@ function CheckoutPageContent() {
   // Data state
   const [basket, setBasket] = useState<CartBasket | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Initialise from ?error= URL param so EveryPay cancel/failure redirects back here inline
+  const [error, setError] = useState<string | null>(() => searchParams.get('error'));
   const [submitting, setSubmitting] = useState(false);
   const [canExtendReservation, setCanExtendReservation] = useState(true);
   const [isExtending, setIsExtending] = useState(false);

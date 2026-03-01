@@ -88,7 +88,7 @@ export function UserInfoCard({
 }: UserInfoCardProps) {
   const locale = useLocale();
   const t = useTranslations('UserCard');
-  const profileUrl = `/${locale}/profile/${user.id}`;
+  const profileUrl = `/profile/${user.id}`;
 
   // Editable state
   const [isEditingName, setIsEditingName] = useState(false);
