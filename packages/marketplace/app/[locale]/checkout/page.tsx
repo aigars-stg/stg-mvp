@@ -58,6 +58,12 @@ interface CartBasket {
   subtotal: number;
 }
 
+function friendlyCheckoutError(error: string, t: ReturnType<typeof useTranslations<'Checkout'>>): string {
+  if (error.includes('customer_url')) return t('errors.paymentUnavailableLocally');
+  if (error.includes('amount')) return t('errors.invalidAmount');
+  return t('errors.paymentFailed');
+}
+
 function CheckoutPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -444,13 +450,13 @@ function CheckoutPageContent() {
     );
   }
 
-  // Error state
-  if (!user || !basket || error) {
+  // Error state — only when data is genuinely unavailable (payment errors stay inline)
+  if (!user || !basket) {
     return (
       <ResultPage
         variant="error"
         icon={<AlertCircle className="w-8 h-8 sm:w-10 sm:h-10" />}
-        title={error || t('errorTitle')}
+        title={t('errorTitle')}
       >
         <ResultPage.Actions>
           <Link href="/cart" className="block">
@@ -926,6 +932,14 @@ function CheckoutPageContent() {
                   </span>
                 </label>
 
+                {/* Inline payment error */}
+                {error && (
+                  <div role="alert" className="mb-3 p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" aria-hidden="true" />
+                    <p className="text-sm text-aurora-red">{friendlyCheckoutError(error, t)}</p>
+                  </div>
+                )}
+
                 {/* Pay Button */}
                 <Button
                   variant="primary"
@@ -987,6 +1001,12 @@ function CheckoutPageContent() {
               </span>
             )}
           </div>
+          {error && (
+            <div role="alert" className="mb-2 p-3 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-aurora-red flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <p className="text-xs text-aurora-red">{friendlyCheckoutError(error, t)}</p>
+            </div>
+          )}
           {!termsAccepted && (
             <p className="text-xs text-aurora-red mb-2 text-center">
               {t('consent.pleaseAccept')}

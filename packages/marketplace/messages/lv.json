@@ -817,7 +817,9 @@
       "fetchCartFailed": "Neizdevās ielādēt grozu",
       "createSessionFailed": "Neizdevās izveidot norēķināšanās sesiju",
       "noCheckoutUrl": "Nav atgriezta norēķināšanās URL",
-      "paymentFailed": "Neizdevās apstrādāt maksājumu. Lūdzu, mēģini vēlreiz."
+      "paymentFailed": "Maksājumu neizdevās apstrādāt. Lūdzu, mēģini vēlreiz.",
+      "paymentUnavailableLocally": "Maksājums nav pieejams no šīs atrašanās vietas. Lūdzu, mēģini no cita tīkla.",
+      "invalidAmount": "Maksājuma summa nav derīga. Lūdzu, pārbaud savu pasūtījumu."
     },
     "success": {
       "loading": "Ielādē pasūtījuma detaļas...",
@@ -1271,13 +1273,13 @@
   "Footer": {
     "tagline": {
       "line1": "Vieta, kur spēles atrod jaunas mājas.",
-      "line2": "Pievienojies galda spēļu entuziastiem visā Latvijā, Igaunijā un Lietuvā."
+      "line2": "Pievienojies galda spēļu entuziastiem Latvijā, Igaunijā un Lietuvā."
     },
     "sections": {
       "marketplace": "Tirgus",
       "help": "Palīdzība",
       "legal": "Juridiskā informācija",
-      "resources": "Resursi",
+      "resources": "Informācija",
       "partners": "Mūsu partneri"
     },
     "links": {
@@ -1288,11 +1290,11 @@
       "sellingGuide": "Pārdošanas ceļvedis",
       "shipping": "Piegāde",
       "dac7": "DAC7 un nodokļi",
-      "helpCentre": "Palīdzības centrs",
-      "legalHub": "Juridiskā informācija",
+      "helpCentre": "Padomi un ieteikumi",
+      "legalHub": "Noteikumi",
       "privacyPolicy": "Privātuma politika",
       "termsOfService": "Lietošanas noteikumi",
-      "sellerTerms": "Pārdevēja noteikumi",
+      "sellerTerms": "Pārdevēja līgums",
       "fees": "Maksas"
     },
     "copyright": "Autortiesības © 2025-{year} Second Turn Games SIA",

@@ -817,7 +817,9 @@
       "fetchCartFailed": "Failed to fetch cart",
       "createSessionFailed": "Failed to create checkout session",
       "noCheckoutUrl": "No checkout URL returned",
-      "paymentFailed": "Failed to process payment. Please try again."
+      "paymentFailed": "Payment could not be processed. Please try again.",
+      "paymentUnavailableLocally": "Payment is not available from this location. Please try from a different network.",
+      "invalidAmount": "The payment amount is invalid. Please review your order."
     },
     "success": {
       "loading": "Loading order details...",
