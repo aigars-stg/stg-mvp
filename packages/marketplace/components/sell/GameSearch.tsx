@@ -30,6 +30,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<BGGError | null>(null);
   const initialSearchDone = useRef(false);
+  const isInitialSearch = useRef(false);
 
   // Debounced search function using database
   // eslint-disable-next-line react-hooks/exhaustive-deps -- debounce returns stable function
@@ -83,6 +84,12 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
         setSearchResults(games);
         setError(null);
 
+        // Auto-select when exactly one result is returned from a user-triggered search
+        if (games.length === 1 && !isInitialSearch.current) {
+          onSelect(games[0]);
+        }
+        isInitialSearch.current = false;
+
       } catch (err: unknown) {
         console.error('❌ [GameSearch] Search error:', err);
 
@@ -109,6 +116,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
   useEffect(() => {
     if (initialQuery && !initialSearchDone.current && !selectedGame) {
       initialSearchDone.current = true;
+      isInitialSearch.current = true;
       performSearch(initialQuery);
     }
   }, [initialQuery, selectedGame, performSearch]);
