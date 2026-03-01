@@ -246,6 +246,7 @@ export default function SellerOnboardingPage() {
                       type="button"
                       onClick={() => handleSelectCountry(c.code)}
                       disabled={savingCountry !== null}
+                      aria-pressed={profile?.country === c.code}
                       className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-50 ${
                         profile?.country === c.code
                           ? 'bg-frost-ice text-white border-2 border-frost-ice'
