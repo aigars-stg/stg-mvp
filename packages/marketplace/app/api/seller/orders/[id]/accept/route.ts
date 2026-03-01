@@ -90,8 +90,7 @@ export async function POST(
       }
     }
 
-    // Post system message to transaction conversation (non-blocking)
-    postOrderAcceptedMessage(orderId, (result.shipping_method || 't2t') as 't2t' | 'local_pickup');
+    // System message is posted after label generation result is known (see below)
 
     // Fetch complete order details for email and label generation (including receiver info from checkout)
     const { data: order } = await supabase
@@ -149,6 +148,11 @@ export async function POST(
           if (normalizedSellerPhone && !isValidPhoneNumber(normalizedSellerPhone)) {
             console.error(`❌ [Accept Order] Invalid seller phone: ${rawSellerPhone} → ${normalizedSellerPhone}`);
             await updateOrderLabelError(orderId, `Invalid seller phone number. Please update your phone in Account Settings.`);
+            postOrderAcceptedMessage(
+              orderId,
+              (result.shipping_method || 't2t') as 't2t' | 'local_pickup',
+              false
+            );
             return NextResponse.json({
               success: true,
               orderId,
@@ -260,6 +264,13 @@ export async function POST(
       labelGenerated = !!orderData?.label_url;
       labelErrorResult = orderData?.label_error || null;
     }
+
+    // Post system message now that labelGenerated is known (non-blocking)
+    postOrderAcceptedMessage(
+      orderId,
+      (result.shipping_method || 't2t') as 't2t' | 'local_pickup',
+      labelGenerated
+    );
 
     return NextResponse.json({
       success: true,
