@@ -252,8 +252,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Sign in with magic link (passwordless)
   const signInWithMagicLink = async (email: string, locale?: string, redirectTo?: string) => {
     try {
-      // Derive a better default name from email (e.g. "alex" from "alex@gmail.com")
-      const emailPrefix = email.split('@')[0];
       const redirectLocale = locale || 'en';
       const confirmUrl = `${window.location.origin}/${redirectLocale}/auth/confirm${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ''}`;
 
@@ -263,7 +261,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           emailRedirectTo: confirmUrl,
           shouldCreateUser: process.env.NEXT_PUBLIC_COMING_SOON !== 'true',
           data: {
-            full_name: emailPrefix,
             preferred_locale: redirectLocale,
           },
         },
