@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from '@/i18n/navigation';
-import { useTopLoader } from 'nextjs-toploader';
 import { useTranslations } from 'next-intl';
+import { useNavigateWithLoader } from '@/lib/hooks/useNavigateWithLoader';
 import { isToday, isYesterday, subDays, isAfter } from 'date-fns';
 import { Notification as BellIcon, AlertCircle } from '@/lib/icons';
 import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
@@ -24,8 +23,7 @@ function getDateGroup(dateStr: string): DateGroup {
 
 export function NotificationsList() {
   const t = useTranslations('Notifications');
-  const router = useRouter();
-  const loader = useTopLoader();
+  const navigate = useNavigateWithLoader();
   const { refresh } = useUnreadNotifications();
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [total, setTotal] = useState(0);
@@ -117,30 +115,26 @@ export function NotificationsList() {
     // Order-related notifications: read order_id from the view-extracted top-level field
     // (the notifications_with_context view extracts data->>'order_id' into order_id)
     if (notification.type === 'new_order') {
-      const orderId = (notification.order_id ?? notification.data?.order_id ?? notification.raw_data?.order_id) as string | undefined;
+      const orderId = (notification.order_id ?? notification.raw_data?.order_id) as string | undefined;
       if (orderId) {
-        loader.start();
-        router.push(`/orders/${orderId}`);
+        navigate(`/orders/${orderId}`);
         return;
       }
     }
 
     if (notification.type === 'wanted_match') {
-      const bggGameId = (notification.raw_data?.bgg_game_id ?? notification.data?.bgg_game_id) as string | undefined;
+      const bggGameId = notification.raw_data?.bgg_game_id as string | undefined;
       if (bggGameId) {
-        loader.start();
-        router.push(`/game/${bggGameId}`);
+        navigate(`/game/${bggGameId}`);
         return;
       }
     }
 
     // Auction and other order-linked notifications: prefer order_id, fall back to listing_id
     if (notification.order_id) {
-      loader.start();
-      router.push(`/orders/${notification.order_id}`);
+      navigate(`/orders/${notification.order_id}`);
     } else if (notification.listing_id) {
-      loader.start();
-      router.push(`/game/${notification.listing_id}`);
+      navigate(`/game/${notification.listing_id}`);
     }
   };
 

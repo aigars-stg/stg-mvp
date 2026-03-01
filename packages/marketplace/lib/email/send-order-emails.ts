@@ -314,15 +314,14 @@ export async function sendDisputeOpenedToSeller(params: {
  *
  * @param supabase - A service-role Supabase client (needs cross-user reads)
  * @param orderId  - UUID of the newly created order
- * @param metadata - Checkout metadata; must contain buyer_id and seller_id
+ * @param params   - Must contain buyerId and sellerId
  */
 export async function sendOrderEmails(
   supabase: SupabaseClient,
   orderId: string,
-  metadata: Record<string, unknown>
+  params: { buyerId: string; sellerId: string }
 ): Promise<void> {
-  const buyerId = metadata.buyer_id as string;
-  const sellerId = metadata.seller_id as string;
+  const { buyerId, sellerId } = params;
 
   const [{ data: buyerProfile }, { data: sellerProfile }, { data: order }] =
     await Promise.all([

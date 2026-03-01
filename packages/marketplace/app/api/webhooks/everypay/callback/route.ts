@@ -183,7 +183,10 @@ export async function GET(request: NextRequest) {
 
       // 6. Post system message and send emails (non-blocking)
       postOrderCreatedMessage(orderId);
-      sendOrderEmails(supabase, orderId, metadata).catch((err) =>
+      sendOrderEmails(supabase, orderId, {
+        buyerId: metadata.buyer_id as string,
+        sellerId: metadata.seller_id as string,
+      }).catch((err) =>
         log.error({ err, orderId }, 'Email sending failed')
       );
 

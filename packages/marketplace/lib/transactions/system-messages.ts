@@ -19,7 +19,7 @@ const SYSTEM_MESSAGE_TEMPLATES: Record<
   order_accepted: (meta) =>
     meta?.shippingMethod === 'local_pickup'
       ? 'Seller accepted the order. Coordinate pickup details below.'
-      : meta?.labelGenerated === 'false'
+      : meta?.labelGenerated === 'false' // string — metadata values are Record<string, string>
         ? 'Seller accepted the order. Shipping label could not be generated — the seller will arrange shipping shortly.'
         : 'Seller accepted the order. Shipping label created.',
   order_declined: (meta) =>

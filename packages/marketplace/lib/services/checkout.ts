@@ -207,8 +207,8 @@ export async function createCheckoutSession(
 
     // Send buyer confirmation and seller notification emails (non-blocking)
     sendOrderEmails(supabase, orderId, {
-      buyer_id: buyerId,
-      seller_id: sellerId,
+      buyerId,
+      sellerId,
     }).catch((err) =>
       log.error({ err, orderId }, 'Wallet checkout: email sending failed')
     );
@@ -395,8 +395,8 @@ export async function createAuctionCheckoutSession(
 
     // Send buyer confirmation and seller notification emails (non-blocking)
     sendOrderEmails(supabase, order.id, {
-      buyer_id: buyerId,
-      seller_id: sellerId,
+      buyerId,
+      sellerId,
     }).catch((err) =>
       log.error({ err, orderId: order.id }, 'Wallet auction checkout: email sending failed')
     );

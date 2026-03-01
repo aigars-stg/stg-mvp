@@ -6,6 +6,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Button, ResultPage } from '@second-turn/design-system';
 import { ArrowLeft, RefreshCw as Loader2, AlertCircle, User, Email as Mail, CreditCard, Truck, LocationPin as MapPin } from '@/lib/icons';
+import { InlineAlert } from '@/components/common/InlineAlert';
 import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import { resolveListingImage } from '@/lib/utils/listing-image';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -934,10 +935,7 @@ function CheckoutPageContent() {
 
                 {/* Inline payment error */}
                 {error && (
-                  <div role="alert" className="mb-3 p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" aria-hidden="true" />
-                    <p className="text-sm text-aurora-red">{friendlyCheckoutError(error, t)}</p>
-                  </div>
+                  <InlineAlert message={friendlyCheckoutError(error, t)} />
                 )}
 
                 {/* Pay Button */}
@@ -1002,10 +1000,7 @@ function CheckoutPageContent() {
             )}
           </div>
           {error && (
-            <div role="alert" className="mb-2 p-3 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-aurora-red flex-shrink-0 mt-0.5" aria-hidden="true" />
-              <p className="text-xs text-aurora-red">{friendlyCheckoutError(error, t)}</p>
-            </div>
+            <InlineAlert message={friendlyCheckoutError(error, t)} compact />
           )}
           {!termsAccepted && (
             <p className="text-xs text-aurora-red mb-2 text-center">
