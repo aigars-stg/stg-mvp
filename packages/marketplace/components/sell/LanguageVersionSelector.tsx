@@ -71,7 +71,6 @@ export function LanguageVersionSelector({
 
         // Auto-select if only 1 version available
         if (fetchedVersions.length === 1 && !selectedVersion) {
-          console.log(`[Auto-select] Only 1 version found for ${game.name}, auto-selecting`);
           onSelect(fetchedVersions[0]);
         } else if (fetchedVersions.length > 1) {
           // Check if all versions have the same single language
@@ -87,7 +86,6 @@ export function LanguageVersionSelector({
           // Auto-select language if only 1 language exists
           if (languages.size === 1) {
             const singleLanguage = Array.from(languages)[0];
-            console.log(`[Auto-select] Only 1 language (${singleLanguage}) found for ${game.name}, auto-selecting`);
             setSelectedLanguage(singleLanguage);
 
             // If only 1 version for that language, auto-select it too
@@ -160,7 +158,6 @@ export function LanguageVersionSelector({
 
     // Auto-select if only one version available for this language
     if (versionsForLanguage.length === 1) {
-      console.log(`[Auto-select] Only 1 version for ${language}, auto-selecting`);
       onSelect(versionsForLanguage[0]);
     }
   };
