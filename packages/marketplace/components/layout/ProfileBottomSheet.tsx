@@ -1,17 +1,19 @@
 /* eslint-disable @next/next/no-img-element -- user avatars are external URLs */
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from '@/i18n/navigation';
-import { Package, Heart, Search, Settings, LogOut, Close, LogIn, ShoppingBag, Store, ChatBubble, Globe, Shield, Notification as BellIcon } from '@/lib/icons';
+import { useEffect, useState, useTransition } from 'react';
+import { useRouter, usePathname } from '@/i18n/navigation';
+import { useTopLoader } from 'nextjs-toploader';
+import { Package, Heart, Search, Settings, LogOut, Close, LogIn, ShoppingBag, Store, ChatBubble, Shield, Notification as BellIcon } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
 import { useUnreadNotifications } from '@/lib/contexts/UnreadNotificationsContext';
 import { Button } from '@second-turn/design-system';
 import { getInitials } from '@/lib/auth/utils';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
-import { LocaleSwitcher } from './LocaleSwitcher';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { routing, localeLabels } from '@/i18n/routing';
+import { supabase } from '@/lib/supabase/client';
 
 interface ProfileBottomSheetProps {
   isOpen: boolean;
@@ -20,10 +22,30 @@ interface ProfileBottomSheetProps {
 
 export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps) {
   const router = useRouter();
+  const loader = useTopLoader();
   const t = useTranslations('Navigation');
   const { user, profile, signOut } = useAuth();
   const { unreadCount } = useUnreadMessages();
   const { unreadCount: unreadNotifications } = useUnreadNotifications();
+  const locale = useLocale();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+
+  const handleLocaleChange = (newLocale: string) => {
+    if (newLocale === locale) return;
+    startTransition(async () => {
+      try {
+        document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+        if (user) {
+          await supabase.from('user_profiles').update({ preferred_locale: newLocale }).eq('id', user.id);
+        }
+        const search = window.location.search;
+        router.replace(pathname + search, { locale: newLocale });
+      } catch {
+        // cookie fallback will work
+      }
+    });
+  };
   const [listingsCount, setListingsCount] = useState(0);
   const [savedCount, setSavedCount] = useState(0);
   const [wantedCount, setWantedCount] = useState(0);
@@ -128,8 +150,9 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
   };
 
   const handleNavigate = (path: string) => {
-    router.push(path);
     onClose();
+    loader.start();
+    router.push(path);
   };
 
   if (!isOpen) return null;
@@ -203,48 +226,11 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                 </div>
               </div>
 
-              {/* Account & Settings Section - Prominent position */}
-              <div className="py-2 border-b border-border-subtle">
-                <button
-                  onClick={() => handleNavigate('/account/settings')}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated transition-colors"
-                >
-                  <Settings className="w-5 h-5 text-frost-ice" />
-                  <span className="text-polar-night font-medium">{t('profileSheet.accountSettings')}</span>
-                </button>
-
-                {isStaff && (
-                  <button
-                    onClick={() => handleNavigate('/staff/transactions')}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated transition-colors"
-                  >
-                    <Shield className="w-5 h-5 text-aurora-purple" />
-                    <span className="text-polar-night font-medium">{t('userMenu.staffDashboard')}</span>
-                  </button>
-                )}
-              </div>
-
               {/* Menu Items - My Activity Section */}
-              <div className="py-2">
+              <div className="py-2 border-b border-border-subtle">
                 <div className="px-4 py-2 text-xs font-semibold text-text-muted uppercase tracking-wide">
                   {t('profileSheet.sectionActivity')}
                 </div>
-
-                {/* Notifications */}
-                <button
-                  onClick={() => handleNavigate('/notifications')}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <BellIcon className="w-5 h-5 text-aurora-orange" />
-                    <span className="text-polar-night font-medium">{t('profileSheet.notifications')}</span>
-                  </div>
-                  {unreadNotifications > 0 && (
-                    <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
-                      {unreadNotifications}
-                    </span>
-                  )}
-                </button>
 
                 {/* Messages */}
                 <button
@@ -262,6 +248,7 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                   )}
                 </button>
 
+                {/* Orders */}
                 <button
                   onClick={() => handleNavigate('/orders')}
                   className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
@@ -273,6 +260,22 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                   {ordersCount > 0 && (
                     <span className="bg-frost-ice/10 text-frost-ice text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
                       {ordersCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Notifications */}
+                <button
+                  onClick={() => handleNavigate('/notifications')}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <BellIcon className="w-5 h-5 text-aurora-orange" />
+                    <span className="text-polar-night font-medium">{t('profileSheet.notifications')}</span>
+                  </div>
+                  {unreadNotifications > 0 && (
+                    <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                      {unreadNotifications}
                     </span>
                   )}
                 </button>
@@ -346,32 +349,42 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                     </button>
                   </>
                 ) : (
-                  <>
-                    {/* Non-seller: Saved & Wanted (combined) */}
-                    <button
-                      onClick={() => handleNavigate('/my-listings')}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Heart className="w-5 h-5 text-aurora-red" />
-                        <span className="text-polar-night font-medium">{t('userMenu.savedAndWanted')}</span>
-                      </div>
-                      {(savedCount + wantedCount) > 0 && (
-                        <span className="bg-aurora-red/10 text-aurora-red text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
-                          {savedCount + wantedCount}
-                        </span>
-                      )}
-                    </button>
+                  /* Non-seller: Saved & Wanted (combined) */
+                  <button
+                    onClick={() => handleNavigate('/my-listings')}
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Heart className="w-5 h-5 text-aurora-red" />
+                      <span className="text-polar-night font-medium">{t('userMenu.savedAndWanted')}</span>
+                    </div>
+                    {(savedCount + wantedCount) > 0 && (
+                      <span className="bg-aurora-red/10 text-aurora-red text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                        {savedCount + wantedCount}
+                      </span>
+                    )}
+                  </button>
+                )}
+              </div>
 
-                    {/* Non-seller: Start selling CTA */}
-                    <button
-                      onClick={() => handleNavigate('/seller/onboard')}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated transition-colors"
-                    >
-                      <Store className="w-5 h-5 text-aurora-green" />
-                      <span className="text-polar-night font-medium">{t('userMenu.startSelling')}</span>
-                    </button>
-                  </>
+              {/* Account & Settings Section */}
+              <div className="py-2 border-b border-border-subtle">
+                <button
+                  onClick={() => handleNavigate('/account/settings')}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated transition-colors"
+                >
+                  <Settings className="w-5 h-5 text-frost-ice" />
+                  <span className="text-polar-night font-medium">{t('profileSheet.accountSettings')}</span>
+                </button>
+
+                {isStaff && (
+                  <button
+                    onClick={() => handleNavigate('/staff/transactions')}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  >
+                    <Shield className="w-5 h-5 text-aurora-purple" />
+                    <span className="text-polar-night font-medium">{t('userMenu.staffDashboard')}</span>
+                  </button>
                 )}
               </div>
 
@@ -380,11 +393,27 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                 <div className="px-4 py-2 text-xs font-semibold text-text-muted uppercase tracking-wide">
                   {t('profileSheet.sectionLanguage')}
                 </div>
-                <div className="px-4 py-2">
-                  <div className="flex items-center gap-3">
-                    <Globe className="w-5 h-5 text-text-muted" />
-                    <LocaleSwitcher className="flex-1" />
-                  </div>
+                <div className="px-4 py-2 flex gap-2">
+                  {routing.locales.map((loc) => {
+                    const label = localeLabels[loc];
+                    if (!label) return null;
+                    const isActive = loc === locale;
+                    return (
+                      <button
+                        key={loc}
+                        onClick={() => handleLocaleChange(loc)}
+                        disabled={isPending}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 ${
+                          isActive
+                            ? 'bg-frost-ice/10 text-frost-ice'
+                            : 'bg-bg-secondary text-text-secondary hover:bg-bg-elevated hover:text-text'
+                        }`}
+                      >
+                        <span className="font-semibold">{label.code}</span>
+                        <span className="font-normal">{label.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -421,8 +450,9 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                 size="lg"
                 fullWidth
                 onClick={() => {
-                  router.push('/auth/signin');
                   onClose();
+                  loader.start();
+                  router.push('/auth/signin');
                 }}
               >
                 {t('profileSheet.guest.signIn')}
@@ -432,8 +462,9 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                 size="md"
                 fullWidth
                 onClick={() => {
-                  router.push('/auth/signup');
                   onClose();
+                  loader.start();
+                  router.push('/auth/signup');
                 }}
               >
                 {t('profileSheet.guest.createAccount')}

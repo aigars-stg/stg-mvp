@@ -522,6 +522,7 @@
     "cart": "Cart",
     "messages": "Messages",
     "profile": "Profile",
+    "signIn": "Sign in",
     "searchPlaceholder": "Search games...",
     "language": "Language",
     "userMenu": {
@@ -714,8 +715,6 @@
     },
     "sellerLabel": "Seller",
     "privateSeller": {
-      "notice": "Sold by a private individual - EU consumer return rights and guarantees do not apply.",
-      "learnMore": "Learn more",
       "contactNotice": "This is a direct listing - message the seller to agree on payment and delivery."
     },
     "auction": {
@@ -1022,7 +1021,7 @@
       "scrollRight": "Scroll right",
       "priceDisclaimer": "Item prices only. Full cost shown before checkout.",
       "recently_listed": {
-        "title": "Just Listed",
+        "title": "Recently listed games",
         "subtitle": "Fresh arrivals from Baltic gamers"
       },
       "popular": {
@@ -1209,6 +1208,10 @@
     "offers": {
       "availableOffers": "Available Offers ({count})",
       "activeAuctions": "Active Auctions ({count})"
+    },
+    "privateSeller": {
+      "footnote": "All listings are from private individuals. EU consumer return rights and guarantees do not apply.",
+      "learnMore": "Learn more"
     },
     "sort": {
       "priceLowHigh": "Price: Low to High",

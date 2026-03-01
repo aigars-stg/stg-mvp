@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from '@/i18n/navigation';
+import { useTopLoader } from 'nextjs-toploader';
 import { useTranslations } from 'next-intl';
 import { isToday, isYesterday, subDays, isAfter } from 'date-fns';
 import { Notification as BellIcon, AlertCircle } from '@/lib/icons';
@@ -24,6 +25,7 @@ function getDateGroup(dateStr: string): DateGroup {
 export function NotificationsList() {
   const t = useTranslations('Notifications');
   const router = useRouter();
+  const loader = useTopLoader();
   const { refresh } = useUnreadNotifications();
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [total, setTotal] = useState(0);
@@ -95,35 +97,37 @@ export function NotificationsList() {
     }
   };
 
-  const handleNotificationClick = async (notification: NotificationData) => {
-    // Mark as read
+  const handleNotificationClick = (notification: NotificationData) => {
+    // Fire-and-forget mark as read — navigation doesn't wait for this
     if (!notification.read_at) {
-      try {
-        await fetch(`/api/notifications/${notification.id}/read`, { method: 'PATCH' });
-        setNotifications(prev =>
-          prev.map(n =>
-            n.id === notification.id ? { ...n, read_at: new Date().toISOString() } : n
-          )
-        );
-        setUnreadCount(prev => Math.max(0, prev - 1));
-        refresh();
-      } catch (err) {
-        console.error('Failed to mark notification as read:', err);
-      }
+      fetch(`/api/notifications/${notification.id}/read`, { method: 'PATCH' })
+        .then(() => {
+          setNotifications(prev =>
+            prev.map(n =>
+              n.id === notification.id ? { ...n, read_at: new Date().toISOString() } : n
+            )
+          );
+          setUnreadCount(prev => Math.max(0, prev - 1));
+          refresh();
+        })
+        .catch(err => console.error('Failed to mark notification as read:', err));
     }
 
-    // Navigate based on notification type
+    // Navigate immediately
     if (notification.type === 'wanted_match') {
       const bggGameId = notification.raw_data?.bgg_game_id as string | undefined;
       if (bggGameId) {
+        loader.start();
         router.push(`/game/${bggGameId}`);
         return;
       }
     }
 
     if (notification.listing_id) {
+      loader.start();
       router.push(`/game/${notification.listing_id}`);
     } else if (notification.order_id) {
+      loader.start();
       router.push(`/orders/${notification.order_id}`);
     }
   };

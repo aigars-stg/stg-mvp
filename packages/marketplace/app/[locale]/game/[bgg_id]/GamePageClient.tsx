@@ -629,6 +629,16 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
               </div>
             )}
 
+            {/* Private Seller Footnote */}
+            {(filteredOffers.length > 0 || auctionOffers.length > 0) && (
+              <p className="mt-4 text-xs text-text-muted">
+                * {t('privateSeller.footnote')}{' '}
+                <Link href="/help/buying" className="underline underline-offset-2">
+                  {t('privateSeller.learnMore')}
+                </Link>
+              </p>
+            )}
+
             {/* People Looking For This (Wanted Listings) */}
             {wantedListings.length > 0 && (
               <section id="wanted" className="mt-12 scroll-mt-8">

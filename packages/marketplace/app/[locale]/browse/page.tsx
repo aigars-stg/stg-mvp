@@ -867,7 +867,7 @@ export default function BrowsePage() {
         {loading && (
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-pl-4 sm:grid sm:grid-cols-2 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0 sm:snap-none lg:grid-cols-3 xl:grid-cols-4 sm:gap-6">
             {Array.from({ length: 8 }).map((_, index) => (
-              <div key={`skeleton-${index}`} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
+              <div key={`skeleton-${index}`} className="flex-shrink-0 w-[260px] snap-start sm:w-auto sm:flex-shrink">
                 <ListingCardSkeleton />
               </div>
             ))}
@@ -926,12 +926,12 @@ export default function BrowsePage() {
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-pl-4 sm:grid sm:grid-cols-2 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0 sm:snap-none lg:grid-cols-3 xl:grid-cols-4 sm:gap-6">
               {listingType === 'wanted'
                 ? aggregatedWantedGames.map((game) => (
-                    <div key={game.bgg_game_id} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
+                    <div key={game.bgg_game_id} className="flex-shrink-0 w-[260px] snap-start sm:w-auto sm:flex-shrink">
                       <AggregatedWantedGameCard game={game} />
                     </div>
                   ))
                 : filteredGames.map((game, index) => (
-                    <div key={game.bgg_game_id} className="flex-shrink-0 w-[calc(100vw-4rem)] snap-start sm:w-auto sm:flex-shrink">
+                    <div key={game.bgg_game_id} className="flex-shrink-0 w-[260px] snap-start sm:w-auto sm:flex-shrink">
                       <AggregatedGameCard
                         game={game}
                         allGameIds={gameIds}

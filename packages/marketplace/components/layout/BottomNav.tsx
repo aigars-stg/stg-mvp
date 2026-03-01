@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
 import dynamic from 'next/dynamic';
-import { Home, Grid, Plus, ShoppingBasket as ShoppingCart, User } from '@/lib/icons';
+import { Home, Grid, Plus, ShoppingBasket as ShoppingCart, User, LogIn } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
 import { useUnreadNotifications } from '@/lib/contexts/UnreadNotificationsContext';
@@ -74,13 +74,20 @@ export function BottomNav() {
       active: isActive('/cart'),
       badge: cartCount > 0 ? cartCount : null,
     },
-    {
-      label: t('profile'),
-      icon: User,
-      path: null, // Opens bottom sheet instead
-      active: isActive('/account') || isActive('/my-listings'),
-      hasNotification: unreadCount > 0 || unreadNotifications > 0, // Dot indicator for unread messages or notifications
-    },
+    user
+      ? {
+          label: t('profile'),
+          icon: User,
+          path: null as null, // Opens bottom sheet instead
+          active: isActive('/account') || isActive('/my-listings'),
+          hasNotification: unreadCount > 0 || unreadNotifications > 0,
+        }
+      : {
+          label: t('signIn'),
+          icon: LogIn,
+          path: '/auth/signin' as string,
+          active: isActive('/auth/signin'),
+        },
   ];
 
   const handleNavClick = (item: typeof navItems[0]) => {
@@ -150,10 +157,10 @@ export function BottomNav() {
                       <img
                         src={profile.avatar_url}
                         alt={displayName}
-                        className="w-6 h-6 rounded-full object-cover border border-border"
+                        className="w-6 h-6 rounded-md object-cover border border-border"
                       />
                     ) : (
-                      <div className="w-6 h-6 rounded-full bg-frost-ice text-snow-white flex items-center justify-center text-[10px] font-semibold">
+                      <div className="w-6 h-6 rounded-md bg-frost-ice text-snow-white flex items-center justify-center text-[10px] font-semibold">
                         {initials}
                       </div>
                     )

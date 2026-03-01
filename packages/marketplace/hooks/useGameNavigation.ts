@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from '@/i18n/navigation';
+import { useTopLoader } from 'nextjs-toploader';
 import {
   getBrowseContext,
   getNavigationInfo,
@@ -22,6 +23,7 @@ export interface UseGameNavigationReturn {
 
 export function useGameNavigation(currentBggId: number): UseGameNavigationReturn {
   const router = useRouter();
+  const loader = useTopLoader();
   const [navState, setNavState] = useState<{
     hasPrev: boolean;
     hasNext: boolean;
@@ -82,6 +84,7 @@ export function useGameNavigation(currentBggId: number): UseGameNavigationReturn
       }
     }
 
+    loader.start();
     router.push(`/game/${navState.prevGameId}`);
   }, [navState.hasPrev, navState.prevGameId, router]);
 
@@ -97,6 +100,7 @@ export function useGameNavigation(currentBggId: number): UseGameNavigationReturn
       }
     }
 
+    loader.start();
     router.push(`/game/${navState.nextGameId}`);
   }, [navState.hasNext, navState.nextGameId, router]);
 

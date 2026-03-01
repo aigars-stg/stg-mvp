@@ -2,10 +2,11 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from '@/i18n/navigation';
+import { useTopLoader } from 'nextjs-toploader';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
-import { Package, AlertCircle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Handshake, User } from '@/lib/icons';
+import { Package, AlertCircle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Handshake } from '@/lib/icons';
 import { OfferCardPricing } from './OfferCardPricing';
 import { OfferCardVersionInfo } from './OfferCardVersionInfo';
 
@@ -37,6 +38,7 @@ interface OfferCardProps {
 
 export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }: OfferCardProps) {
   const router = useRouter();
+  const loader = useTopLoader();
   const { user } = useAuth();
   const locale = useLocale();
   const t = useTranslations('OfferCard');
@@ -158,6 +160,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
     e.stopPropagation();
 
     if (!user) {
+      loader.start();
       router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
       return;
     }
@@ -172,6 +175,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
     e.stopPropagation();
 
     if (!user) {
+      loader.start();
       router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
       return;
     }
@@ -195,6 +199,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
     e.stopPropagation();
 
     if (!user) {
+      loader.start();
       router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
       return;
     }
@@ -781,32 +786,17 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
           </div>
         </div>
 
-        {/* Private Seller / Transaction Notice — bottom of card */}
-        <div className="border-t border-border-subtle px-3 sm:px-4 py-2">
-          {isContactSellerListing(listing) ? (
+        {/* Contact Seller Notice — bottom of card, only for direct listings */}
+        {isContactSellerListing(listing) && (
+          <div className="border-t border-border-subtle px-3 sm:px-4 py-2">
             <div className="flex items-center gap-1.5">
               <Handshake className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
               <span className="text-xs text-text-muted">
                 {t('privateSeller.contactNotice')}
               </span>
             </div>
-          ) : (
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <User className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
-              <span className="text-xs text-text-muted">
-                {t('privateSeller.notice')}
-              </span>
-              <span className="text-text-muted text-xs">&middot;</span>
-              <Link
-                href="/legal/buyer-guide"
-                className="text-xs text-frost-ice hover:underline"
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              >
-                {t('privateSeller.learnMore')}
-              </Link>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Mobile Footer: Actions - Not shown for auctions (bid panel is above) */}
         {!isOwnListing && !isAuctionListing(listing) && (
@@ -923,6 +913,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
         onClose={() => setIsQADrawerOpen(false)}
         onQuestionCountChange={setQuestionCount}
         onLoginRequired={() => {
+          loader.start();
           router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
         }}
       />

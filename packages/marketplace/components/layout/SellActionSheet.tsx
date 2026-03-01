@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { useFocusTrap } from '@second-turn/design-system';
 import { useRouter } from '@/i18n/navigation';
+import { useTopLoader } from 'nextjs-toploader';
 import { Package, Search, Close } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';
@@ -14,27 +15,22 @@ interface SellActionSheetProps {
 
 export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
   const router = useRouter();
+  const loader = useTopLoader();
   const { user } = useAuth();
   const t = useTranslations('Navigation.sellActionSheet');
   const sheetRef = useRef<HTMLDivElement>(null);
   useFocusTrap(isOpen, sheetRef, onClose);
 
   const handleSellGame = () => {
-    if (!user) {
-      router.push('/auth/signin?redirect=/sell');
-    } else {
-      router.push('/sell');
-    }
     onClose();
+    loader.start();
+    router.push(!user ? '/auth/signin?redirect=/sell' : '/sell');
   };
 
   const handlePostWanted = () => {
-    if (!user) {
-      router.push('/auth/signin?redirect=/wanted/new');
-    } else {
-      router.push('/wanted/new');
-    }
     onClose();
+    loader.start();
+    router.push(!user ? '/auth/signin?redirect=/wanted/new' : '/wanted/new');
   };
 
   if (!isOpen) return null;

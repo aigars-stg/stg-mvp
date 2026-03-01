@@ -18,3 +18,9 @@ export const routing = defineRouting({
 
 // Export type for use throughout application
 export type Locale = (typeof routing.locales)[number];
+
+export const localeLabels: Record<Locale, { code: string; name: string }> = {
+  en: { code: 'EN', name: 'English' },
+  lv: { code: 'LV', name: 'Latviešu' },
+  // Future: lt: { code: 'LT', name: 'Lietuvių' }, et: { code: 'ET', name: 'Eesti' }
+};

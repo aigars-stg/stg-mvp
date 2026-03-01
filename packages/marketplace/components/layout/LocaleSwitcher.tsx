@@ -5,15 +5,7 @@ import { useRouter, usePathname } from '@/i18n/navigation';
 import { useTransition, useRef, useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
-import { routing } from '@/i18n/routing';
-
-const localeLabels: Record<string, { code: string; name: string }> = {
-  en: { code: 'EN', name: 'English' },
-  lv: { code: 'LV', name: 'Latviešu' },
-  // Future:
-  // lt: { code: 'LT', name: 'Lietuvių' },
-  // et: { code: 'ET', name: 'Eesti' },
-};
+import { routing, localeLabels, type Locale } from '@/i18n/routing';
 
 type LocaleSwitcherProps = {
   className?: string;
@@ -91,7 +83,7 @@ export function LocaleSwitcher({ className = '' }: LocaleSwitcherProps) {
     });
   };
 
-  const currentLabel = localeLabels[locale] || localeLabels.en;
+  const currentLabel = localeLabels[locale as Locale] ?? localeLabels.en;
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>

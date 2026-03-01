@@ -14,16 +14,16 @@
       "nextImage": "Nākamais attēls",
       "closeLightbox": "Aizvērt attēlu",
       "addToWishlist": "Pievienot vēlmju sarakstam",
-      "removeFromWishlist": "Noņemt no vēlmju saraksta",
+      "removeFromWishlist": "Izņemt no vēlmju saraksta",
       "dismiss": "Aizvērt",
       "helpSections": "Palīdzības sadaļas",
-      "legalSections": "Juridiskās sadaļas",
+      "legalSections": "Noteikumu sadaļas",
       "mainNavigation": "Galvenā navigācija",
       "searchGames": "Meklēt spēles",
       "clearSearch": "Notīrīt meklēšanu",
       "userMenu": "Lietotāja izvēlne",
       "selectLanguage": "Izvēlēties valodu",
-      "acceptTerms": "Piekrist pārdevēja noteikumiem"
+      "acceptTerms": "Piekrist pārdevēja līgumam"
     },
     "emptyStates": {
       "noMessages": "Nav vēl neviena ziņojuma",
@@ -522,6 +522,7 @@
     "cart": "Grozs",
     "messages": "Ziņojumi",
     "profile": "Profils",
+    "signIn": "Pieslēgties",
     "searchPlaceholder": "Meklēt spēles...",
     "language": "Valoda",
     "userMenu": {
@@ -714,8 +715,6 @@
     },
     "sellerLabel": "Pārdevējs",
     "privateSeller": {
-      "notice": "Pārdod privātpersona - ES patērētāju atgriešanas tiesības un garantijas uz šo piedāvājumu neattiecas.",
-      "learnMore": "Uzzināt vairāk",
       "contactNotice": "Šis ir tiešais sludinājums - sazinies ar pārdevēju, lai vienotos par maksājumu un piegādi."
     },
     "auction": {
@@ -731,14 +730,14 @@
     }
   },
   "Checkout": {
-    "loading": "Ielādē norēķināšanos...",
-    "errorTitle": "Neizdevās ielādēt norēķināšanos",
+    "loading": "Ielādē apmaksas lapu...",
+    "errorTitle": "Neizdevās ielādēt apmaksas lapu",
     "returnToCart": "Atgriezties pie groza",
     "breadcrumb": {
       "cart": "Grozs",
-      "checkout": "Norēķināšanās"
+      "checkout": "Apmaksas lapa"
     },
-    "title": "Norēķināšanās",
+    "title": "Apmaksas lapa",
     "orderFrom": "Pasūtījums no {sellerName}",
     "collapse": {
       "selectTerminal": "Izvēlies pakomātu spēļu saņemšanai",
@@ -750,8 +749,8 @@
       "terminalHint": "Izmanto atrašanās pogu kartē, lai atrastu tuvākos pakomātus, meklē pēc nosaukuma vai adreses, vai pārlūko visu sarakstu"
     },
     "country": {
-      "title": "Kur Tu atrodies?",
-      "subtitle": "Tas palīdz mums parādīt piemērotus pakomātus, apmaksas iespējas un tālruņa formātu",
+      "title": "Kur tu atrodies?",
+      "subtitle": "Tas palīdz mums parādīt tuvākos pakomātus un apmaksas iespējas",
       "detected": "noteikts"
     },
     "payment": {
@@ -1022,8 +1021,8 @@
       "scrollRight": "Ritināt pa labi",
       "priceDisclaimer": "Tikai spēles cena. Pilnā cena tiek parādīta pirms apmaksas.",
       "recently_listed": {
-        "title": "Tikko pievienots",
-        "subtitle": "Jaunākie piedāvājumi no Baltijas spēlmaņiem"
+        "title": "Nesen pievienotās spēles",
+        "subtitle": "Jaunākie piedāvājumi no spēļu pārdevējiem Baltijā"
       },
       "popular": {
         "title": "Populāri šobrīd",
@@ -1209,6 +1208,10 @@
     "offers": {
       "availableOffers": "Pieejamie piedāvājumi ({count})",
       "activeAuctions": "Aktīvās izsoles ({count})"
+    },
+    "privateSeller": {
+      "footnote": "Visi sludinājumi ir no privātpersonām. ES patērētāju atgriešanas tiesības un garantijas nav spēkā.",
+      "learnMore": "Uzzināt vairāk"
     },
     "sort": {
       "priceLowHigh": "Cena: no zemākās",

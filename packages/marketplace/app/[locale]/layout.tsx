@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { Inter } from 'next/font/google';
 import dynamic from 'next/dynamic';
+import NextTopLoader from 'nextjs-toploader';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { setRequestLocale } from 'next-intl/server';
@@ -169,6 +170,15 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
       </head>
       <body className={inter.className}>
+        <NextTopLoader
+          color="#D08770"
+          height={3}
+          showSpinner={false}
+          crawlSpeed={200}
+          speed={200}
+          easing="ease"
+          zIndex={9999}
+        />
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <ScrollToTop />
