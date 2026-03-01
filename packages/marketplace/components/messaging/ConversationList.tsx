@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/lib/auth/AuthContext';
+import { supabase } from '@/lib/supabase/client';
 import { ConversationListItem } from './ConversationListItem';
 import { ChatBubble as MessageCircle, AlertCircle } from '@/lib/icons';
 import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
@@ -15,11 +17,14 @@ export function ConversationList({
   activeConversationId,
 }: ConversationListProps) {
   const t = useTranslations('MessagesPage');
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<ConversationListItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!user) return;
+
     const fetchConversations = async () => {
       try {
         setLoading(true);
@@ -42,13 +47,28 @@ export function ConversationList({
       }
     };
 
-    fetchConversations();
+    fetchConversations(); // initial load
 
-    // Refresh conversations every 60 seconds to show new messages
-    const interval = setInterval(fetchConversations, 60000);
+    // Realtime subscription — re-fetch on new messages
+    const channel = supabase
+      .channel(`conversations:${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+      }, () => {
+        fetchConversations();
+      })
+      .subscribe();
 
-    return () => clearInterval(interval);
-  }, []);
+    // 5-minute fallback poll (resilience against missed Realtime events)
+    const interval = setInterval(fetchConversations, 5 * 60 * 1000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
+  }, [user?.id]);
 
   if (loading) {
     return (
