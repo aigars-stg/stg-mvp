@@ -117,7 +117,7 @@ export function NotificationsList() {
     // Order-related notifications: read order_id from the view-extracted top-level field
     // (the notifications_with_context view extracts data->>'order_id' into order_id)
     if (notification.type === 'new_order') {
-      const orderId = notification.order_id ?? (notification.data?.order_id ?? notification.raw_data?.order_id) as string | undefined;
+      const orderId = (notification.order_id ?? notification.data?.order_id ?? notification.raw_data?.order_id) as string | undefined;
       if (orderId) {
         loader.start();
         router.push(`/orders/${orderId}`);
