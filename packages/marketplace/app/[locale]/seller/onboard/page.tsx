@@ -90,7 +90,7 @@ export default function SellerOnboardingPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth/signin?redirect=/seller/onboard');
+      router.push('/auth/signin?redirectTo=/seller/onboard');
     }
   }, [user, authLoading, router]);
 

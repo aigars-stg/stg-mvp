@@ -14,7 +14,7 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/auth?returnTo=/notifications');
+      router.push('/auth?redirectTo=/notifications');
     }
   }, [user, loading, router]);
 

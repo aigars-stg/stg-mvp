@@ -95,7 +95,7 @@ export default function CartPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth/signin?redirect=/cart');
+      router.push('/auth/signin?redirectTo=/cart');
     }
   }, [user, authLoading, router]);
 

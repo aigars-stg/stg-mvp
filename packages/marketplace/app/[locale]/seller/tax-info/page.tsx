@@ -89,7 +89,7 @@ export default function SellerTaxInfoPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth/signin?redirect=/seller/tax-info');
+      router.push('/auth/signin?redirectTo=/seller/tax-info');
     }
   }, [user, authLoading, router]);
 

@@ -118,7 +118,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
   // Add to cart handler
   const handleAddToCart = async (listingId: string) => {
     if (!user) {
-      router.push(`/auth/signin?redirect=/game/${bggId}`);
+      router.push(`/auth/signin?redirectTo=/game/${bggId}`);
       return;
     }
 

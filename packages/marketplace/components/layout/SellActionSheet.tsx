@@ -24,13 +24,13 @@ export function SellActionSheet({ isOpen, onClose }: SellActionSheetProps) {
   const handleSellGame = () => {
     onClose();
     loader.start();
-    router.push(!user ? '/auth/signin?redirect=/sell' : '/sell');
+    router.push(!user ? '/auth/signin?redirectTo=/sell' : '/sell');
   };
 
   const handlePostWanted = () => {
     onClose();
     loader.start();
-    router.push(!user ? '/auth/signin?redirect=/wanted/new' : '/wanted/new');
+    router.push(!user ? '/auth/signin?redirectTo=/wanted/new' : '/wanted/new');
   };
 
   if (!isOpen) return null;

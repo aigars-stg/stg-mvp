@@ -249,7 +249,7 @@ function StaffTransactionsContent() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth/signin?redirect=/staff/transactions');
+      router.push('/auth/signin?redirectTo=/staff/transactions');
     }
   }, [user, authLoading, router]);
 

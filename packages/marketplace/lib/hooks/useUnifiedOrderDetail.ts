@@ -188,7 +188,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
   // --- Auth redirect ---
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push(`/auth/signin?redirect=/orders/${orderId}`);
+      router.push(`/auth/signin?redirectTo=/orders/${orderId}`);
     }
   }, [user, authLoading, router, orderId]);
 

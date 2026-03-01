@@ -83,7 +83,7 @@ export default function StaffTransactionPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push(`/auth/signin?redirect=/staff/transactions/${orderId}`);
+      router.push(`/auth/signin?redirectTo=/staff/transactions/${orderId}`);
     }
   }, [user, authLoading, router, orderId]);
 

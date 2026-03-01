@@ -119,7 +119,7 @@ function SellerDashboardContent() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth/signin?redirect=/seller/dashboard');
+      router.push('/auth/signin?redirectTo=/seller/dashboard');
       return;
     }
     if (user) {

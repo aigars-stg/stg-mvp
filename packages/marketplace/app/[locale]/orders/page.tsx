@@ -57,7 +57,7 @@ export default function OrdersPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth/signin?redirect=/orders');
+      router.push('/auth/signin?redirectTo=/orders');
     }
   }, [user, authLoading, router]);
 

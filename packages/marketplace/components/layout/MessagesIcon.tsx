@@ -14,7 +14,7 @@ export function MessagesIcon() {
     const handleClick = (e: React.MouseEvent) => {
         if (!user) {
             e.preventDefault();
-            router.push(`/auth?returnTo=${encodeURIComponent(pathname)}&prompt=messages`);
+            router.push(`/auth?redirectTo=${encodeURIComponent(pathname)}&prompt=messages`);
         }
     };
 

@@ -373,7 +373,7 @@ function CreateWantedListingPageContent() {
 
   // Redirect to signin if not authenticated
   if (!user) {
-    router.push('/auth/signin?redirect=/wanted/new');
+    router.push('/auth/signin?redirectTo=/wanted/new');
     return null;
   }
 

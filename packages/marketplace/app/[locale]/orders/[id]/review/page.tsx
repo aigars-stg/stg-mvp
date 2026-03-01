@@ -49,7 +49,7 @@ export default function ReviewOrderPage() {
     if (authLoading) return;
 
     if (!user) {
-      router.push(`/auth/signin?redirect=/orders/${orderId}/review`);
+      router.push(`/auth/signin?redirectTo=/orders/${orderId}/review`);
       return;
     }
 

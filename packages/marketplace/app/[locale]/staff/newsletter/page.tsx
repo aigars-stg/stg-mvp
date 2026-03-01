@@ -65,7 +65,7 @@ export default function StaffNewsletterPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth/signin?redirect=/staff/newsletter');
+      router.push('/auth/signin?redirectTo=/staff/newsletter');
     }
   }, [user, authLoading, router]);
 

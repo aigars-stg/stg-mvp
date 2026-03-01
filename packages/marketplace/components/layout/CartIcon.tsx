@@ -14,7 +14,7 @@ export function CartIcon() {
   const handleClick = (e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
-      router.push(`/auth?returnTo=${encodeURIComponent(pathname)}&prompt=cart`);
+      router.push(`/auth?redirectTo=${encodeURIComponent(pathname)}&prompt=cart`);
     }
   };
 

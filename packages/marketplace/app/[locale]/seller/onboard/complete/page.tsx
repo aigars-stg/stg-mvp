@@ -19,7 +19,7 @@ export default function SellerOnboardingCompletePage() {
   useEffect(() => {
     // Redirect to sign in if not authenticated
     if (!user) {
-      router.push('/auth/signin?redirect=/seller/onboard/complete');
+      router.push('/auth/signin?redirectTo=/seller/onboard/complete');
     }
   }, [user, router]);
 

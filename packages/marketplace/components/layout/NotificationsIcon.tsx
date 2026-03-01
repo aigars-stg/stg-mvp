@@ -14,7 +14,7 @@ export function NotificationsIcon() {
     const handleClick = (e: React.MouseEvent) => {
         if (!user) {
             e.preventDefault();
-            router.push(`/auth?returnTo=${encodeURIComponent(pathname)}&prompt=notifications`);
+            router.push(`/auth?redirectTo=${encodeURIComponent(pathname)}&prompt=notifications`);
         }
     };
 

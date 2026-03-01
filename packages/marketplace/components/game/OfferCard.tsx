@@ -161,7 +161,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
 
     if (!user) {
       loader.start();
-      router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
+      router.push(`/auth/signin?redirectTo=/game/${listing.bgg_game_id}`);
       return;
     }
 
@@ -176,7 +176,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
 
     if (!user) {
       loader.start();
-      router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
+      router.push(`/auth/signin?redirectTo=/game/${listing.bgg_game_id}`);
       return;
     }
 
@@ -200,7 +200,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
 
     if (!user) {
       loader.start();
-      router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
+      router.push(`/auth/signin?redirectTo=/game/${listing.bgg_game_id}`);
       return;
     }
 
@@ -914,7 +914,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
         onQuestionCountChange={setQuestionCount}
         onLoginRequired={() => {
           loader.start();
-          router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
+          router.push(`/auth/signin?redirectTo=/game/${listing.bgg_game_id}`);
         }}
       />
     </>

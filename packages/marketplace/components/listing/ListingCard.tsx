@@ -96,7 +96,7 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false 
     e.stopPropagation();
 
     if (!user) {
-      router.push(`/auth/signin?redirect=/game/${listing.bgg_game_id}`);
+      router.push(`/auth/signin?redirectTo=/game/${listing.bgg_game_id}`);
       return;
     }
 

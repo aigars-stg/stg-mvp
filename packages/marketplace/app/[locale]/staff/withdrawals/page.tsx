@@ -69,7 +69,7 @@ function WithdrawalsContent() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth/signin?redirect=/staff/withdrawals');
+      router.push('/auth/signin?redirectTo=/staff/withdrawals');
     }
   }, [user, authLoading, router]);
 

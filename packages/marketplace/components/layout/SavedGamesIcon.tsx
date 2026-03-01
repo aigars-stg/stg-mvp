@@ -16,7 +16,7 @@ export function SavedGamesIcon() {
     const handleClick = (e: React.MouseEvent) => {
         if (!user) {
             e.preventDefault();
-            router.push(`/auth?returnTo=${encodeURIComponent(pathname)}&prompt=wishlist`);
+            router.push(`/auth?redirectTo=${encodeURIComponent(pathname)}&prompt=wishlist`);
         }
     };
 
