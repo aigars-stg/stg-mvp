@@ -15,6 +15,10 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createPayment as createEveryPayPayment } from '@/lib/everypay/client';
 import { calculateCheckoutPricingFromEuros, calculateOrderPricing } from './pricing';
 import { getWalletBalance } from './wallet';
+import { sendOrderEmails } from '@/lib/email/send-order-emails';
+import { loggers } from '@/lib/logger';
+
+const log = loggers.payments;
 
 // ==============================================
 // TYPES
@@ -201,6 +205,14 @@ export async function createCheckoutSession(
     // Notify seller about new order (non-blocking)
     notifySellerNewOrder(sellerId, orderId, result.order_number).catch(() => {});
 
+    // Send buyer confirmation and seller notification emails (non-blocking)
+    sendOrderEmails(supabase, orderId, {
+      buyer_id: buyerId,
+      seller_id: sellerId,
+    }).catch((err) =>
+      log.error({ err, orderId }, 'Wallet checkout: email sending failed')
+    );
+
     return {
       type: 'wallet_only',
       orderId,
@@ -380,6 +392,14 @@ export async function createAuctionCheckoutSession(
 
     // Notify seller about new order (non-blocking)
     notifySellerNewOrder(sellerId, order.id, auctionOrderNumber).catch(() => {});
+
+    // Send buyer confirmation and seller notification emails (non-blocking)
+    sendOrderEmails(supabase, order.id, {
+      buyer_id: buyerId,
+      seller_id: sellerId,
+    }).catch((err) =>
+      log.error({ err, orderId: order.id }, 'Wallet auction checkout: email sending failed')
+    );
 
     return {
       type: 'wallet_only',

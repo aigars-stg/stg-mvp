@@ -5,6 +5,7 @@ import { SUCCESSFUL_STATES, FAILED_STATES } from '@/lib/everypay/types';
 import { classifyPaymentError } from '@/lib/everypay/classify-error';
 import { determineReleaseAction } from '@/lib/services/payment-capture';
 import { postOrderCreatedMessage } from '@/lib/transactions';
+import { sendOrderEmails } from '@/lib/email/send-order-emails';
 import * as Sentry from '@sentry/nextjs';
 import { loggers } from '@/lib/logger';
 
@@ -418,61 +419,3 @@ async function processAuctionPayment(
   return result.order_id as string;
 }
 
-// ==============================================
-// EMAIL NOTIFICATIONS
-// ==============================================
-
-async function sendOrderEmails(
-  supabase: AdminClient,
-  orderId: string,
-  metadata: Record<string, unknown>
-): Promise<void> {
-  const buyerId = metadata.buyer_id as string;
-  const sellerId = metadata.seller_id as string;
-
-  // Fetch profiles
-  const [{ data: buyerProfile }, { data: sellerProfile }, { data: order }] =
-    await Promise.all([
-      supabase
-        .from('user_profiles')
-        .select('full_name, email')
-        .eq('id', buyerId)
-        .single(),
-      supabase
-        .from('user_profiles')
-        .select('full_name, email')
-        .eq('id', sellerId)
-        .single(),
-      supabase
-        .from('orders')
-        .select('order_number, shipping_method, destination_terminal_name, pickup_city, total_amount, order_items(id)')
-        .eq('id', orderId)
-        .single(),
-    ]);
-
-  if (!buyerProfile || !sellerProfile || !order) return;
-
-  const emailData = {
-    orderNumber: order.order_number,
-    orderId,
-    sellerName: sellerProfile.full_name,
-    sellerEmail: sellerProfile.email,
-    buyerName: buyerProfile.full_name,
-    buyerEmail: buyerProfile.email,
-    itemCount: order.order_items?.length || 1,
-    totalAmount: order.total_amount,
-    shippingMethod: order.shipping_method as 't2t' | 'local_pickup',
-    destinationInfo:
-      order.shipping_method === 't2t'
-        ? order.destination_terminal_name || ''
-        : order.pickup_city || '',
-  };
-
-  const { sendOrderPlacedToSeller, sendOrderConfirmationToBuyer } =
-    await import('@/lib/email/send-order-emails');
-
-  await Promise.allSettled([
-    sendOrderPlacedToSeller(emailData),
-    sendOrderConfirmationToBuyer(emailData),
-  ]);
-}

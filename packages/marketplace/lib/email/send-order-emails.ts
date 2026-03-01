@@ -3,6 +3,7 @@
  * SERVER-ONLY: This file should only be imported in API routes
  */
 
+import { type SupabaseClient } from '@supabase/supabase-js';
 import { sendEmail } from './resend';
 import { OrderPlacedSellerEmail } from './templates/order-placed-seller';
 import { OrderConfirmationBuyerEmail } from './templates/order-confirmation-buyer';
@@ -301,6 +302,69 @@ export async function sendDisputeOpenedToSeller(params: {
     loggers.email.error({ orderNumber, sellerEmail, error }, 'Failed to send dispute notification to seller');
     return { success: false, error };
   }
+}
+
+/**
+ * Fetch order participants and send both the buyer confirmation and seller
+ * notification emails for a newly-created order.
+ *
+ * Used by both the EveryPay callback handler and the wallet-only checkout
+ * path so that buyers always receive a confirmation regardless of payment
+ * method.
+ *
+ * @param supabase - A service-role Supabase client (needs cross-user reads)
+ * @param orderId  - UUID of the newly created order
+ * @param metadata - Checkout metadata; must contain buyer_id and seller_id
+ */
+export async function sendOrderEmails(
+  supabase: SupabaseClient,
+  orderId: string,
+  metadata: Record<string, unknown>
+): Promise<void> {
+  const buyerId = metadata.buyer_id as string;
+  const sellerId = metadata.seller_id as string;
+
+  const [{ data: buyerProfile }, { data: sellerProfile }, { data: order }] =
+    await Promise.all([
+      supabase
+        .from('user_profiles')
+        .select('full_name, email')
+        .eq('id', buyerId)
+        .single(),
+      supabase
+        .from('user_profiles')
+        .select('full_name, email')
+        .eq('id', sellerId)
+        .single(),
+      supabase
+        .from('orders')
+        .select('order_number, shipping_method, destination_terminal_name, pickup_city, total_amount, order_items(id)')
+        .eq('id', orderId)
+        .single(),
+    ]);
+
+  if (!buyerProfile || !sellerProfile || !order) return;
+
+  const emailData = {
+    orderNumber: order.order_number,
+    orderId,
+    sellerName: sellerProfile.full_name,
+    sellerEmail: sellerProfile.email,
+    buyerName: buyerProfile.full_name,
+    buyerEmail: buyerProfile.email,
+    itemCount: order.order_items?.length || 1,
+    totalAmount: order.total_amount,
+    shippingMethod: order.shipping_method as 't2t' | 'local_pickup',
+    destinationInfo:
+      order.shipping_method === 't2t'
+        ? order.destination_terminal_name || ''
+        : order.pickup_city || '',
+  };
+
+  await Promise.allSettled([
+    sendOrderPlacedToSeller(emailData),
+    sendOrderConfirmationToBuyer(emailData),
+  ]);
 }
 
 /**
