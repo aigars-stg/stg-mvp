@@ -23,7 +23,7 @@ export function CartIcon() {
       href="/cart"
       onClick={handleClick}
       className="relative p-2 text-text-secondary hover:text-text hover:scale-110 transition-all duration-200"
-      aria-label={`Shopping cart${user && itemCount > 0 ? `, ${itemCount} items` : ''}`}
+      aria-label={`Shopping cart${user && itemCount > 0 ? `, ${itemCount} ${itemCount === 1 ? 'item' : 'items'}` : ''}`}
     >
       <ShoppingCart className="w-6 h-6" />
 
