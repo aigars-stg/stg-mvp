@@ -174,7 +174,7 @@ export function PhotoUpload({
   const hasPhotos = totalPhotoCount > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Guidelines Card - only show when no photos */}
       {!hasPhotos && (
         <Card padding="md" className="bg-frost-ice/5 border border-frost-ice/20">
@@ -217,7 +217,7 @@ export function PhotoUpload({
             ${
               hasPhotos
                 ? 'p-4 min-h-[60px]' // Compact when photos exist
-                : 'p-8 sm:p-12 min-h-[160px]' // Full size when empty
+                : 'p-6 sm:p-8 min-h-[120px]' // Full size when empty
             }
             flex flex-col items-center justify-center
             ${
@@ -231,7 +231,7 @@ export function PhotoUpload({
           {/* Large icon - only show when no photos */}
           {!hasPhotos && (
             <div className="mb-4">
-              <Camera className="w-12 h-12 sm:w-16 sm:h-16 text-frost-ice mx-auto" />
+              <Camera className="w-10 h-10 sm:w-12 sm:h-12 text-frost-ice mx-auto" />
             </div>
           )}
 

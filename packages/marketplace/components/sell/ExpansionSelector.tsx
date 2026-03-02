@@ -144,11 +144,11 @@ export function ExpansionSelector({
                       <img
                         src={selected.thumbnail}
                         alt={selected.displayName}
-                        className="w-10 h-10 rounded object-cover"
+                        className="w-12 h-12 rounded object-cover"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded bg-bg-secondary flex items-center justify-center">
-                        <Package className="w-5 h-5 text-text-muted" />
+                      <div className="w-12 h-12 rounded bg-bg-secondary flex items-center justify-center">
+                        <Package className="w-6 h-6 text-text-muted" />
                       </div>
                     )}
                   </div>
@@ -317,11 +317,11 @@ export function ExpansionSelector({
                       <img
                         src={expansion.thumbnail}
                         alt={expansion.name}
-                        className="w-10 h-10 rounded object-cover"
+                        className="w-12 h-12 rounded object-cover"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded bg-bg-secondary flex items-center justify-center">
-                        <Package className="w-5 h-5 text-text-muted" />
+                      <div className="w-12 h-12 rounded bg-bg-secondary flex items-center justify-center">
+                        <Package className="w-6 h-6 text-text-muted" />
                       </div>
                     )}
                   </div>

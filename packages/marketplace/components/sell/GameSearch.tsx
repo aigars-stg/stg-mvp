@@ -7,7 +7,8 @@ import type { BGGGame, BGGVersion } from '@/lib/bgg-types';
 import { BGGError } from '@/lib/bgg-errors';
 import ErrorDisplay from './ErrorDisplay';
 import { GameResultCard } from './GameResultCard';
-import { Search as SearchX, Close, RefreshCw, Search } from '@/lib/icons';
+import { GameImageWithBackdrop } from './GameImageWithBackdrop';
+import { Search as SearchX, Close, RefreshCw, Search, LinkExternal as ExternalLink } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 
 interface GameSearchProps {
@@ -16,11 +17,11 @@ interface GameSearchProps {
   selectedVersion?: BGGVersion | null;
   selectedDisplayName?: string | null; // Localized display name
   onChangeVersion?: () => void;
-  hideChangeVersionButton?: boolean; // Hide button to render it externally
+  onChangeName?: () => void;
   initialQuery?: string; // Pre-fill search query (e.g., from navbar search)
 }
 
-export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDisplayName, onChangeVersion, hideChangeVersionButton, initialQuery }: GameSearchProps) {
+export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDisplayName, onChangeVersion, onChangeName, initialQuery }: GameSearchProps) {
   const t = useTranslations('Sell.GameSearch');
   const tNoResults = useTranslations('Sell.GameSearch.noResults');
 
@@ -127,54 +128,102 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
 
   if (selectedGame) {
     // Determine if we should show alternate/localized name as primary with English as subtitle
-    // Priority: explicitly selected display name > matched alternate name from search
     const showAlternateNameAsPrimary =
       (selectedDisplayName && selectedDisplayName !== selectedGame.name)
         ? selectedDisplayName
         : selectedGame.matchedAlternateName;
 
+    const displayName = showAlternateNameAsPrimary || selectedGame.name;
+    const subtitleName = showAlternateNameAsPrimary ? selectedGame.name : null;
+
+    const versionLanguage = selectedVersion?.languages?.join(' / ') || selectedVersion?.language;
+    const versionPublisher = selectedVersion?.publishers?.join(' / ') || selectedVersion?.publisher;
+    const displayYear = selectedVersion?.yearPublished || selectedGame.yearPublished;
+
     return (
-      <div className="space-y-3">
-        <div className="relative">
-          <GameResultCard
-            id={selectedGame.id}
-            name={selectedGame.name}
-            yearpublished={selectedVersion?.yearPublished || selectedGame.yearPublished}
-            isExpansion={selectedGame.isExpansion}
-            onClick={() => {}} // No-op since already selected
-            hideChevron={true}
-            versionPublisher={selectedVersion?.publishers?.join(' / ') || selectedVersion?.publisher}
-            versionLanguage={selectedVersion?.languages?.join(' / ') || selectedVersion?.language}
-            versionYear={selectedVersion?.yearPublished}
-            versionThumbnail={selectedVersion?.thumbnail}
-            matchedAlternateName={showAlternateNameAsPrimary}
-          />
-          <div className="absolute inset-0 border-2 border-frost-ice rounded-lg pointer-events-none" />
-          {/* X button to change game */}
-          <button
-            onClick={() => {
-              onSelect(null);
-              setSearchQuery('');
-              setSearchResults([]);
-              setHasSearched(false);
-            }}
-            className="absolute top-2 right-2 p-1.5 bg-white hover:bg-aurora-red/10 rounded-full border border-border hover:border-aurora-red transition-all shadow-sm group"
-            title={t('changeGame')}
-          >
-            <Close className="w-4 h-4 text-text-muted group-hover:text-aurora-red transition-colors" />
-          </button>
+      <div className="relative border-2 border-frost-ice rounded-lg p-3 flex gap-3">
+        <GameImageWithBackdrop
+          src={selectedVersion?.thumbnail || selectedGame.thumbnail || selectedGame.image || null}
+          alt={selectedGame.name}
+          isLoading={false}
+          hasError={false}
+        />
+        <div className="flex-1 flex flex-col justify-center min-w-0">
+          {/* Name + year + BGG link */}
+          <div className="flex items-center gap-1.5">
+            <h3 className="font-semibold text-polar-night leading-tight">
+              {displayName}
+              {displayYear && (
+                <span className="text-text-muted font-normal"> ({displayYear})</span>
+              )}
+            </h3>
+            <a
+              href={`https://boardgamegeek.com/boardgame/${selectedGame.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-muted hover:text-frost-ice transition-colors flex-shrink-0"
+              title="BoardGameGeek"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
+          {/* Subtitle: English name when showing localized */}
+          {subtitleName && (
+            <p className="text-xs text-text-muted truncate">{subtitleName}</p>
+          )}
+
+          {/* Version info line */}
+          {(versionLanguage || versionPublisher) && (
+            <p className="text-sm text-text-secondary mt-0.5">
+              {versionLanguage}
+              {versionLanguage && versionPublisher && ' \u00b7 '}
+              {versionPublisher}
+            </p>
+          )}
+
+          {/* Inline change links (matching expansion card pattern) */}
+          {selectedVersion && (onChangeVersion || onChangeName) && (
+            <div className="flex items-center gap-2 text-xs mt-1 flex-wrap">
+              {onChangeVersion && (
+                <button
+                  onClick={onChangeVersion}
+                  className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 transition-colors"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  {t('changeVersion')}
+                </button>
+              )}
+              {onChangeVersion && onChangeName && (
+                <span className="text-border">&middot;</span>
+              )}
+              {onChangeName && (
+                <button
+                  onClick={onChangeName}
+                  className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 transition-colors"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  {t('changeName')}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Change Version button (only shown when version is selected and not hidden) */}
-        {!hideChangeVersionButton && selectedVersion && onChangeVersion && (
-          <button
-            onClick={onChangeVersion}
-            className="w-full px-4 py-2 text-sm font-medium text-frost-ice hover:text-aurora-blue border-2 border-frost-ice/30 hover:border-frost-ice rounded-lg hover:bg-frost-ice/5 transition-all flex items-center justify-center gap-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            {t('changeVersion')}
-          </button>
-        )}
+        {/* X button to change game */}
+        <button
+          onClick={() => {
+            onSelect(null);
+            setSearchQuery('');
+            setSearchResults([]);
+            setHasSearched(false);
+          }}
+          className="absolute top-2 right-2 p-1.5 bg-white hover:bg-aurora-red/10 rounded-full border border-border hover:border-aurora-red transition-all shadow-sm group"
+          title={t('changeGame')}
+        >
+          <Close className="w-4 h-4 text-text-muted group-hover:text-aurora-red transition-colors" />
+        </button>
       </div>
     );
   }
@@ -187,7 +236,13 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      {/* Header */}
+      <div>
+        <h3 className="text-sm font-semibold text-polar-night">{t('findYourGame')}</h3>
+        <p className="text-xs text-text-secondary mt-0.5">{t('findYourGameSubtitle')}</p>
+      </div>
+
       {/* Search Input */}
       <div className="relative">
         <div className={`relative ${!hasSearched && searchQuery.length === 0 ? 'animate-pulse-border' : ''}`}>

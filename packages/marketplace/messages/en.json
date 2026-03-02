@@ -655,7 +655,8 @@
       "expansionTooltip": "Expansion",
       "expansionOffersTooltip": "Includes expansion offers",
       "auctionEndsIn": "Ends in",
-      "auctionEnded": "Auction ended"
+      "auctionEnded": "Auction ended",
+      "cooldownResets": "Resets on bid"
     },
     "detail": {},
     "create": {},
@@ -1360,6 +1361,11 @@
     "notifications": {
       "extended": "Auction extended by {minutes} minutes due to last-minute bid"
     },
+    "cooldown": {
+      "resetsOnBid": "Resets on bid",
+      "biddingResetsTimer": "Bidding resets the timer to {hours}h",
+      "timerResetsEachBid": "Timer resets with each new bid"
+    },
     "bidHistory": {
       "title": "Bid History",
       "noBidsYet": "No bids yet - be the first.",
@@ -1409,7 +1415,8 @@
         "subtitle": "Start typing to search thousands of board games",
         "subtitleWithGame": "{gameName}",
         "changeVersion": "Change version",
-        "changeName": "Change name"
+        "changeName": "Change name",
+        "expansionCount": "{count, plural, one {expansion} other {expansions}}"
       },
       "gameNameSelector": {
         "hint": "Choose the localized name that matches your physical box for better discoverability",
@@ -1455,7 +1462,8 @@
       "publishing": "Publishing...",
       "saving": "Saving...",
       "saveDraft": "Save Draft",
-      "preview": "Preview"
+      "preview": "Preview",
+      "edit": "Edit"
     },
     "preview": {
       "title": "Live preview",
@@ -1513,8 +1521,11 @@
       "goToMyListings": "Go to My Listings"
     },
     "GameSearch": {
+      "findYourGame": "Find Your Game",
+      "findYourGameSubtitle": "Search thousands of board games by name",
       "changeGame": "Change game",
       "changeVersion": "Change Version",
+      "changeName": "Change name",
       "placeholder": "e.g., Wingspan, Catan, Icecool",
       "clearSearch": "Clear search",
       "searching": "Searching games...",
@@ -1949,9 +1960,30 @@
       },
       "duration": {
         "title": "Auction Duration",
+        "titleCooldown": "Initial Listing Period",
         "description": "How long the auction will run before the highest bidder wins.",
+        "cooldownHelper": "If no bids arrive in this time, the auction expires",
         "oneDay": "1 day",
         "days": "{count} days"
+      },
+      "endStrategy": {
+        "title": "How should the auction end?",
+        "fixed": {
+          "label": "Fixed end time",
+          "description": "Auction ends when the timer runs out"
+        },
+        "cooldown": {
+          "label": "Last-bid cooldown",
+          "description": "Timer resets after each bid, giving everyone time to respond"
+        }
+      },
+      "cooldownPeriod": {
+        "title": "Cooldown period after each bid",
+        "hours": "{count} hours"
+      },
+      "cooldownInfo": {
+        "title": "Last-bid cooldown",
+        "description": "Each bid resets the auction timer to {hours} hours. The auction ends only when no new bids arrive within the cooldown period. Great for giving more people time to discover and bid on your game."
       },
       "antiSnipe": {
         "title": "Anti-snipe protection",
@@ -3430,5 +3462,75 @@
     "reason": "Reason: {reason}",
     "loading": "Loading...",
     "showMore": "Show more"
+  },
+  "Phases": {
+    "listing": {
+      "flowTitle": "Your Turn — List a Game",
+      "research": {
+        "name": "Research Phase",
+        "subtitle": "Find your game",
+        "completionMsg": "Game found! Moving to market.",
+        "shortName": "Research",
+        "continueButton": "Continue →"
+      },
+      "market": {
+        "name": "Market Phase",
+        "subtitle": "Set your price and condition",
+        "completionMsg": "Price set! Time for action.",
+        "shortName": "Market",
+        "continueButton": "Continue →"
+      },
+      "action": {
+        "name": "Action Phase",
+        "subtitle": "Show off your game",
+        "completionMsg": "Looking good! Final review.",
+        "shortName": "Action",
+        "continueButton": "Continue →"
+      },
+      "score": {
+        "name": "Score Phase",
+        "subtitle": "Review and list",
+        "completionMsg": "Your game is now in play!",
+        "shortName": "Score",
+        "publishButton": "List your game"
+      }
+    },
+    "celebrations": {
+      "listingPublished": "Your game is now in play!",
+      "listingPublishedSubtext": "We will notify you when someone makes a move.",
+      "listingDetail": "{gameName} is listed at {price}.",
+      "resumeTurn": "Resume your turn",
+      "resumeSubtitle": "Continue where you left off",
+      "listAnother": "List another game",
+      "viewListing": "View your listing",
+      "browseAll": "Browse all games"
+    },
+    "achievements": {
+      "firstTurn": {
+        "name": "First Turn",
+        "toast": "First Turn complete!",
+        "subtitle": "You're officially a player.",
+        "badge": "First Turn — Achievement unlocked"
+      },
+      "speedRound": {
+        "name": "Speed Round",
+        "toast": "Speed Round!",
+        "subtitle": "Listed in under a minute."
+      }
+    },
+    "validation": {
+      "researchIncomplete": "Please select a game and version to continue.",
+      "marketIncomplete": "Please set a condition and price to continue.",
+      "actionIncomplete": "Please upload at least one photo to continue."
+    },
+    "tracker": {
+      "ariaLabel": "Listing progress",
+      "stepOf": "Step {current} of {total}",
+      "stepStatus": {
+        "completed": "completed",
+        "current": "current",
+        "upcoming": "upcoming"
+      }
+    }
   }
 }

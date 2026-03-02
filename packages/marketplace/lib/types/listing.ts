@@ -5,6 +5,8 @@
 export type ListingStatus = 'draft' | 'active' | 'sold' | 'removed';
 export type ListingCondition = 'likeNew' | 'veryGood' | 'good' | 'acceptable';
 export type AuctionDuration = 1 | 3 | 5 | 7;
+export type AuctionEndStrategy = 'fixed' | 'cooldown';
+export type AuctionCooldownHours = 24 | 48;
 
 // New 2-dimensional model
 export type TransactionMethod = 'contact_seller' | 'instant_buy';
@@ -102,6 +104,8 @@ export interface Listing {
   auction_winner_notified_at?: string | null;
   auction_payment_deadline?: string | null;
   auction_anti_snipe_extended?: boolean;
+  auction_end_strategy?: AuctionEndStrategy;
+  auction_cooldown_hours?: AuctionCooldownHours | null;
 }
 
 // Listing with seller profile and game images populated
@@ -324,6 +328,10 @@ export function getMinimumBid(listing: { pricing_format?: PricingFormat; listing
     return listing.auction_current_bid + 1; // EUR 1.00 increment
   }
   return listing.auction_start_price || listing.price;
+}
+
+export function isAuctionCooldown(listing: { auction_end_strategy?: AuctionEndStrategy }): boolean {
+  return listing.auction_end_strategy === 'cooldown';
 }
 
 export function getAuctionDurationLabel(days: AuctionDuration): string {

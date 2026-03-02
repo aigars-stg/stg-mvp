@@ -33,13 +33,7 @@ export function ConditionSelector({
   const tCond = useTranslations('Sell.ConditionSelector.condition');
   const tDetails = useTranslations('Sell.ConditionSelector.additionalDetails');
 
-  const [showConditionOptions, setShowConditionOptions] = useState(true);
   const [showGradingGuide, setShowGradingGuide] = useState(false);
-
-  const handleConditionSelect = (value: typeof condition) => {
-    onChange('condition', value);
-    setShowConditionOptions(false);
-  };
 
   // Helper to get condition label and description
   const getConditionLabel = (value: string) => tCond(value);
@@ -110,7 +104,7 @@ export function ConditionSelector({
 
       {/* Condition Selection */}
       <div>
-        <h3 className="text-sm sm:text-base font-semibold text-polar-night mb-2 flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-polar-night mb-2 flex items-center gap-2">
           {tCond('title')}
           <button
             type="button"
@@ -118,69 +112,49 @@ export function ConditionSelector({
             className="text-frost-ice hover:text-aurora-blue transition-colors"
             aria-label={tCond('openGuide')}
           >
-            <HelpCircle className="w-5 h-5" />
+            <HelpCircle className="w-4 h-4" />
           </button>
         </h3>
 
-        {showConditionOptions || condition === null ? (
-          <div className="grid grid-cols-1 gap-2">
+        <Tabs
+          variant="toggle"
+          size="sm"
+          value={condition || ''}
+          onValueChange={(v) => onChange('condition', v)}
+        >
+          <TabsList>
             {CONDITION_OPTIONS.map((option) => {
               const Icon = option.icon;
               return (
-                <button
+                <TabsTrigger
                   key={option.value}
-                  onClick={() => handleConditionSelect(option.value)}
-                  className={`
-                    p-3 border-2 rounded-lg text-left transition-all flex items-center gap-3
-                    ${
-                      condition === option.value
-                        ? 'border-frost-ice bg-frost-ice/5'
-                        : 'border-border hover:border-frost-ice/50'
-                    }
-                  `}
+                  value={option.value}
+                  icon={<Icon className="w-4 h-4" />}
                 >
-                  <Icon className="w-5 h-5 text-frost-ice flex-shrink-0" />
-                  <div className="flex-1">
-                    <div className="font-semibold text-polar-night mb-1">{getConditionLabel(option.value)}</div>
-                    <div className="text-sm text-text-secondary">{getConditionDescription(option.value)}</div>
-                  </div>
-                </button>
+                  {getConditionLabel(option.value)}
+                </TabsTrigger>
               );
             })}
+          </TabsList>
+        </Tabs>
+
+        {/* Description — changes based on selected condition */}
+        {condition && selectedCondition && (
+          <div className="flex items-start gap-2">
+            {(() => {
+              const Icon = selectedCondition.icon;
+              return <Icon className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />;
+            })()}
+            <p className="text-sm text-text-secondary">
+              {getConditionDescription(condition)}
+            </p>
           </div>
-        ) : selectedCondition ? (
-          /* Compact view when selected */
-          <div className="p-2.5 border border-border rounded-lg bg-bg-secondary/30">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 flex-1">
-                {(() => {
-                  const Icon = selectedCondition.icon;
-                  return <Icon className="w-5 h-5 text-frost-ice flex-shrink-0" />;
-                })()}
-                <div className="flex-1">
-                  <div className="font-semibold text-polar-night text-sm">
-                    {getConditionLabel(selectedCondition.value)}
-                  </div>
-                  <div className="text-xs text-text-secondary">
-                    {getConditionDescription(selectedCondition.value)}
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowConditionOptions(true)}
-                className="text-xs text-frost-ice hover:text-frost-ice/80 font-medium whitespace-nowrap"
-              >
-                {tComplete('change')}
-              </button>
-            </div>
-          </div>
-        ) : null}
+        )}
       </div>
 
       {/* Additional Details */}
       <div>
-        <h3 className="text-sm sm:text-base font-semibold text-polar-night mb-2">
+        <h3 className="text-sm font-semibold text-polar-night mb-2">
           {tDetails('title')} {condition === 'acceptable' ? tDetails('required') : tDetails('optional')}
         </h3>
         <p className="text-sm text-text-secondary mb-2">

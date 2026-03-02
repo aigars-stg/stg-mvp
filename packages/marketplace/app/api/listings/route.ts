@@ -7,6 +7,8 @@ import { ensureGameMetadata } from '@/lib/bgg-api';
 import { checkRateLimit, getRateLimitAction } from '@/lib/ratelimit';
 import type { TransactionMethod, PricingFormat } from '@/lib/types/listing';
 import type { ListingWithDetailsRow } from '@/lib/supabase/query-types';
+import { createServiceClient } from '@/lib/supabase/client';
+import { checkAndAwardAchievements } from '@/lib/services/achievements';
 
 interface GameVersion {
   id: number;
@@ -146,6 +148,8 @@ export async function POST(request: NextRequest) {
       includedExpansions, // Bundled expansions
       // Auction-specific fields
       auctionDurationDays,
+      auctionEndStrategy,
+      auctionCooldownHours,
       // Source wanted listing (for "I have this" flow)
       sourceWantedListingId,
     } = body;
@@ -173,6 +177,20 @@ export async function POST(request: NextRequest) {
       if (![1, 3, 5, 7].includes(auctionDurationDays)) {
         return NextResponse.json(
           { error: 'Auction duration must be 1, 3, 5, or 7 days' },
+          { status: 400 }
+        );
+      }
+
+      if (auctionEndStrategy && !['fixed', 'cooldown'].includes(auctionEndStrategy)) {
+        return NextResponse.json(
+          { error: 'Invalid auction end strategy' },
+          { status: 400 }
+        );
+      }
+
+      if (auctionEndStrategy === 'cooldown' && ![24, 48].includes(auctionCooldownHours)) {
+        return NextResponse.json(
+          { error: 'Cooldown period must be 24 or 48 hours' },
           { status: 400 }
         );
       }
@@ -238,6 +256,10 @@ export async function POST(request: NextRequest) {
         auction_ends_at: new Date(Date.now() + auctionDurationDays * 24 * 60 * 60 * 1000).toISOString(),
         auction_bid_count: 0,
         auction_anti_snipe_extended: false,
+        auction_end_strategy: auctionEndStrategy || 'fixed',
+        ...(auctionEndStrategy === 'cooldown' ? {
+          auction_cooldown_hours: auctionCooldownHours,
+        } : {}),
       } : {}),
 
       // Source wanted listing (for "I have this" flow - enables buyer notification)
@@ -296,8 +318,34 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check and award achievements (non-blocking — failures don't affect listing)
+    let achievements: string[] = [];
+    try {
+      const serviceClient = createServiceClient();
+      achievements = await checkAndAwardAchievements(serviceClient, user!.id, {
+        flowStartTime: body.flowStartTime ? Number(body.flowStartTime) : undefined,
+      });
+    } catch (achievementError) {
+      console.error('Achievement check failed (non-blocking):', achievementError);
+    }
+
+    // Count active listings for celebration screen variant
+    let listingCount = 1;
+    try {
+      const { count } = await supabase
+        .from('listings')
+        .select('*', { count: 'exact', head: true })
+        .eq('seller_id', user!.id)
+        .eq('status', 'active');
+      listingCount = count ?? 1;
+    } catch {
+      // Non-critical — default to 1
+    }
+
     return NextResponse.json({
       listing,
+      achievements,
+      listingCount,
       message: 'Listing created successfully',
     });
   } catch (error) {
@@ -443,6 +491,10 @@ export async function GET(request: NextRequest) {
         auction_winner_id: row.auction_winner_id,
         auction_payment_deadline: row.auction_payment_deadline,
         auction_anti_snipe_extended: row.auction_anti_snipe_extended,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- columns added by migration, not yet in generated types
+        auction_end_strategy: (row as any).auction_end_strategy || 'fixed',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        auction_cooldown_hours: (row as any).auction_cooldown_hours || null,
 
         // Nested game object
         game: {

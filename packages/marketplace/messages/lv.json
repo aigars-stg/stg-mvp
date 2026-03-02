@@ -655,7 +655,8 @@
       "expansionTooltip": "Papildinājums",
       "expansionOffersTooltip": "Ietver papildinājumu piedāvājumus",
       "auctionEndsIn": "Beidzas pēc",
-      "auctionEnded": "Izsole beigusies"
+      "auctionEnded": "Izsole beigusies",
+      "cooldownResets": "Atiestatās ar likmi"
     },
     "detail": {},
     "create": {},
@@ -1360,6 +1361,11 @@
     "notifications": {
       "extended": "Izsole pagarināta par {minutes} minūtēm pēdējā brīža likmes dēļ"
     },
+    "cooldown": {
+      "resetsOnBid": "Atiestatās ar likmi",
+      "biddingResetsTimer": "Likme atiestata taimeri uz {hours}h",
+      "timerResetsEachBid": "Taimeris atiestatās ar katru jaunu likmi"
+    },
     "bidHistory": {
       "title": "Likmju vēsture",
       "noBidsYet": "Vēl nav likmju - esi pirmais.",
@@ -1409,7 +1415,8 @@
         "subtitle": "Sāc rakstīt, lai meklētu tūkstošiem galda spēļu",
         "subtitleWithGame": "{gameName}",
         "changeVersion": "Mainīt versiju",
-        "changeName": "Mainīt nosaukumu"
+        "changeName": "Mainīt nosaukumu",
+        "expansionCount": "{count, plural, one {papildinājums} other {papildinājumi}}"
       },
       "gameNameSelector": {
         "hint": "Izvēlies nosaukumu, kas redzams uz spēles kastes",
@@ -1455,7 +1462,8 @@
       "publishing": "Publicē...",
       "saving": "Saglabā...",
       "saveDraft": "Saglabāt melnrakstu",
-      "preview": "Priekšskatījums"
+      "preview": "Priekšskatījums",
+      "edit": "Rediģēt"
     },
     "preview": {
       "title": "Tiešraides priekšskatījums",
@@ -1513,8 +1521,11 @@
       "goToMyListings": "Doties uz Maniem sludinājumiem"
     },
     "GameSearch": {
+      "findYourGame": "Atrodi savu spēli",
+      "findYourGameSubtitle": "Meklē tūkstošiem galda spēļu pēc nosaukuma",
       "changeGame": "Mainīt spēli",
       "changeVersion": "Mainīt versiju",
+      "changeName": "Mainīt nosaukumu",
       "placeholder": "piem., Wingspan, Catan, Icecool",
       "clearSearch": "Notīrīt meklēšanu",
       "searching": "Meklē spēles...",
@@ -1949,9 +1960,30 @@
       },
       "duration": {
         "title": "Izsoles ilgums",
+        "titleCooldown": "Sākotnējais izvietošanas periods",
         "description": "Cik ilgi izsole norisēsies, pirms augstākais solītājs uzvarēs.",
+        "cooldownHelper": "Ja šajā laikā neienāk neviena likme, izsole beidzas",
         "oneDay": "1 diena",
         "days": "{count} dienas"
+      },
+      "endStrategy": {
+        "title": "Kā izsolei vajadzētu beigties?",
+        "fixed": {
+          "label": "Fiksēts beigu laiks",
+          "description": "Izsole beidzas, kad taimeris norit"
+        },
+        "cooldown": {
+          "label": "Pēdējās likmes gaidīšana",
+          "description": "Taimeris atiestatās pēc katras likmes, dodot visiem laiku reaģēt"
+        }
+      },
+      "cooldownPeriod": {
+        "title": "Gaidīšanas periods pēc katras likmes",
+        "hours": "{count} stundas"
+      },
+      "cooldownInfo": {
+        "title": "Pēdējās likmes gaidīšana",
+        "description": "Katra likme atiestata izsoles taimeri uz {hours} stundām. Izsole beidzas tikai tad, kad gaidīšanas periodā neienāk jaunas likmes. Lieliski piemērots, lai vairāk cilvēku paspētu atrast un likt likmes uz Jūsu spēli."
       },
       "antiSnipe": {
         "title": "Anti-snipe aizsardzība",
@@ -3435,5 +3467,75 @@
     "reason": "Iemesls: {reason}",
     "loading": "Ielādē...",
     "showMore": "Rādīt vairāk"
+  },
+  "Phases": {
+    "listing": {
+      "flowTitle": "Tavs gājiens — Ieliec spēli",
+      "research": {
+        "name": "Izpētes fāze",
+        "subtitle": "Atrodi savu spēli",
+        "completionMsg": "Spēle atrasta! Pārejam uz tirgu.",
+        "shortName": "Izpēte",
+        "continueButton": "Turpināt →"
+      },
+      "market": {
+        "name": "Tirgus fāze",
+        "subtitle": "Nosaki cenu un stāvokli",
+        "completionMsg": "Cena noteikta! Laiks rīkoties.",
+        "shortName": "Tirgus",
+        "continueButton": "Turpināt →"
+      },
+      "action": {
+        "name": "Darbības fāze",
+        "subtitle": "Parādi savu spēli",
+        "completionMsg": "Izskatās lieliski! Pēdējā pārbaude.",
+        "shortName": "Darbība",
+        "continueButton": "Turpināt →"
+      },
+      "score": {
+        "name": "Rezultātu fāze",
+        "subtitle": "Pārskati un publicē",
+        "completionMsg": "Tava spēle tagad ir pieejama!",
+        "shortName": "Rezultāts",
+        "publishButton": "Publicēt spēli"
+      }
+    },
+    "celebrations": {
+      "listingPublished": "Tava spēle tagad ir pieejama!",
+      "listingPublishedSubtext": "Mēs paziņosim, kad kāds izrādīs interesi.",
+      "listingDetail": "{gameName} ir publicēta par {price}.",
+      "resumeTurn": "Turpini savu gājienu",
+      "resumeSubtitle": "Turpini no vietas, kur apstājies",
+      "listAnother": "Publicēt vēl vienu spēli",
+      "viewListing": "Skatīt savu sludinājumu",
+      "browseAll": "Pārlūkot visas spēles"
+    },
+    "achievements": {
+      "firstTurn": {
+        "name": "Pirmais gājiens",
+        "toast": "Pirmais gājiens pabeigts!",
+        "subtitle": "Tu tagad esi spēlētājs.",
+        "badge": "Pirmais gājiens — Sasniegums atbloķēts"
+      },
+      "speedRound": {
+        "name": "Ātrā kārta",
+        "toast": "Ātrā kārta!",
+        "subtitle": "Publicēts ātrāk par minūti."
+      }
+    },
+    "validation": {
+      "researchIncomplete": "Lūdzu izvēlies spēli un versiju, lai turpinātu.",
+      "marketIncomplete": "Lūdzu norādi stāvokli un cenu, lai turpinātu.",
+      "actionIncomplete": "Lūdzu augšupielādē vismaz vienu fotoattēlu, lai turpinātu."
+    },
+    "tracker": {
+      "ariaLabel": "Sludinājuma progress",
+      "stepOf": "Solis {current} no {total}",
+      "stepStatus": {
+        "completed": "pabeigts",
+        "current": "pašreizējais",
+        "upcoming": "gaidāmais"
+      }
+    }
   }
 }

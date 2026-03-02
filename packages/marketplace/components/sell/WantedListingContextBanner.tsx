@@ -27,7 +27,7 @@ export function WantedListingContextBanner({
 
   if (isLoading) {
     return (
-      <Card padding="md" className="mb-6 bg-aurora-orange/10 border border-aurora-orange/30 animate-pulse">
+      <Card padding="md" className="mb-4 bg-aurora-orange/10 border border-aurora-orange/30 animate-pulse">
         <div className="h-20 bg-aurora-orange/20 rounded" />
       </Card>
     );
@@ -37,7 +37,7 @@ export function WantedListingContextBanner({
   const buyerCountry = wantedListing.buyer?.country;
 
   return (
-    <Card padding="md" className="mb-6 bg-aurora-orange/10 border border-aurora-orange/30">
+    <Card padding="md" className="mb-4 bg-aurora-orange/10 border border-aurora-orange/30">
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-start gap-3">

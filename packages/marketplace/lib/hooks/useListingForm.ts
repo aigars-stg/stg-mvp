@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from 'react';
 import type { BGGGame, BGGExpansionInfo } from '@/lib/bgg-api';
 import type { VersionSelection } from '@/lib/bgg-types';
 import type { PhotoFile } from '@/components/sell/PhotoUpload';
-import type { TransactionMethod, PricingFormat, AuctionDuration } from '@/lib/types/listing';
+import type { TransactionMethod, PricingFormat, AuctionDuration, AuctionEndStrategy, AuctionCooldownHours } from '@/lib/types/listing';
 import type { SelectedExpansion } from '@/components/sell/ExpansionSelector';
 
 export interface ListingFormData {
@@ -22,6 +22,8 @@ export interface ListingFormData {
   price: string;
   termsAccepted: boolean;
   auctionDurationDays: AuctionDuration;
+  auctionEndStrategy: AuctionEndStrategy;
+  auctionCooldownHours: AuctionCooldownHours;
 }
 
 export const INITIAL_FORM_DATA: ListingFormData = {
@@ -32,13 +34,15 @@ export const INITIAL_FORM_DATA: ListingFormData = {
   selectedVersion: null,
   selectedExpansions: [],
   photos: [],
-  condition: null,
+  condition: 'good',
   conditionNotes: '',
   allComponentsPresent: true,
   missingComponents: '',
   price: '',
   termsAccepted: false,
   auctionDurationDays: 3,
+  auctionEndStrategy: 'fixed',
+  auctionCooldownHours: 24,
 };
 
 export interface UseListingFormReturn {

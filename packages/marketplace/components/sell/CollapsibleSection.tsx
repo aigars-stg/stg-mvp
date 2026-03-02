@@ -40,7 +40,7 @@ export function CollapsibleSection({
       <button
         type="button"
         onClick={onToggle}
-        className="w-full px-4 sm:px-6 py-4 flex items-center justify-between hover:bg-bg-secondary/50 transition-colors text-left"
+        className="w-full px-4 sm:px-6 py-3 flex items-center justify-between hover:bg-bg-secondary/50 transition-colors text-left"
       >
         <div className="flex items-center gap-3 flex-1">
           <div className="flex-shrink-0">{icon}</div>
@@ -86,7 +86,7 @@ export function CollapsibleSection({
             : 'max-h-0 opacity-0 overflow-hidden'
         }`}
       >
-        <div className="px-4 sm:px-6 py-4 sm:py-6 border-t border-border-subtle">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border-subtle">
           {children}
         </div>
       </div>

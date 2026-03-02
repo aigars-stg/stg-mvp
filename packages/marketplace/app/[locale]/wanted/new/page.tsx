@@ -517,7 +517,6 @@ function CreateWantedListingPageContent() {
                 selectedVersion={selectedVersion}
                 onSelect={handleGameSelect}
                 onChangeVersion={handleChangeVersion}
-                hideChangeVersionButton={true}
                 initialQuery={initialSearchQuery || undefined}
               />
 

@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Card, Button } from '@second-turn/design-system';
+import { Card, Badge, Button } from '@second-turn/design-system';
 import type { BGGGame, BGGVersion, VersionSelection } from '@/lib/bgg-types';
 import { ManualVersionInput } from './ManualVersionInput';
 import { useTranslations } from 'next-intl';
@@ -147,19 +147,6 @@ export function LanguageVersionSelector({
 
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
-
-    // Filter versions for this language
-    const versionsForLanguage = versions.filter((version) => {
-      if (version.languages && version.languages.length > 0) {
-        return version.languages.includes(language);
-      }
-      return version.language === language;
-    });
-
-    // Auto-select if only one version available for this language
-    if (versionsForLanguage.length === 1) {
-      onSelect(versionsForLanguage[0]);
-    }
   };
 
   // Render manual input immediately if in fallback mode (placed after all hooks)
@@ -261,7 +248,7 @@ export function LanguageVersionSelector({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Language Selection */}
       <div>
         <label className="block text-sm font-medium text-text mb-3">
@@ -270,52 +257,48 @@ export function LanguageVersionSelector({
         <div className="flex flex-wrap gap-2">
           {/* Primary languages (Baltic region priority) */}
           {primaryLanguages.map((language) => (
-            <button
+            <Badge
               key={language}
+              variant={selectedLanguage === language ? 'trust' : 'default'}
+              className="cursor-pointer transition-all hover:scale-105"
               onClick={() => handleLanguageChange(language)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                selectedLanguage === language
-                  ? 'bg-frost-ice text-snow-white border-2 border-frost-ice shadow-sm'
-                  : 'bg-bg-secondary text-text border-2 border-border hover:border-frost-ice hover:bg-frost-ice/10'
-              }`}
             >
               {language}
-            </button>
+            </Badge>
           ))}
 
           {/* Other languages button (if any exist) */}
           {otherLanguages.length > 0 && !showOtherLanguages && (
-            <button
+            <Badge
+              variant="default"
+              className="cursor-pointer transition-all hover:scale-105"
               onClick={() => setShowOtherLanguages(true)}
-              className="px-4 py-2 rounded-lg font-medium transition-all bg-bg-secondary text-text-secondary border-2 border-border hover:border-frost-ice hover:bg-frost-ice/10 hover:text-text"
             >
               {t('otherLanguages', { count: otherLanguages.length })}
-            </button>
+            </Badge>
           )}
 
           {/* Other languages (expanded) */}
           {showOtherLanguages && otherLanguages.map((language) => (
-            <button
+            <Badge
               key={language}
+              variant={selectedLanguage === language ? 'trust' : 'default'}
+              className="cursor-pointer transition-all hover:scale-105"
               onClick={() => handleLanguageChange(language)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                selectedLanguage === language
-                  ? 'bg-frost-ice text-snow-white border-2 border-frost-ice shadow-sm'
-                  : 'bg-bg-secondary text-text border-2 border-border hover:border-frost-ice hover:bg-frost-ice/10'
-              }`}
             >
               {language}
-            </button>
+            </Badge>
           ))}
 
           {/* Hide other languages button */}
           {showOtherLanguages && otherLanguages.length > 0 && (
-            <button
+            <Badge
+              variant="default"
+              className="cursor-pointer transition-all hover:scale-105"
               onClick={() => setShowOtherLanguages(false)}
-              className="px-4 py-2 rounded-lg font-medium transition-all bg-bg-secondary text-text-secondary border-2 border-border hover:border-frost-ice hover:bg-frost-ice/10 hover:text-text"
             >
               {t('showLess')}
-            </button>
+            </Badge>
           )}
         </div>
         <p className="mt-3 text-xs text-text-muted">
@@ -323,61 +306,8 @@ export function LanguageVersionSelector({
         </p>
       </div>
 
-      {/* Auto-selected version confirmation - when only 1 version for selected language */}
-      {selectedLanguage && filteredVersions.length === 1 && selectedVersion && (
-        <Card padding="md" className="bg-success/10 border border-success/20 animate-fade-in">
-          <div className="flex gap-3">
-            <div className="text-success flex-shrink-0 mt-0.5">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <div className="font-semibold text-polar-night mb-2">
-                {tAutoSelected('title')}
-              </div>
-              <p className="text-sm text-text-secondary mb-3">
-                {tAutoSelected('onlyLanguageVersion', { language: selectedLanguage })}
-              </p>
-              <div className="bg-bg-elevated rounded-lg p-3 flex gap-3">
-                {selectedVersion.thumbnail && (
-                  <div className="flex-shrink-0 w-16 h-16 bg-bg-secondary rounded border border-border flex items-center justify-center overflow-hidden">
-                    <img
-                      src={selectedVersion.thumbnail}
-                      alt={selectedVersion.name}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                )}
-                <div className="flex-1 space-y-1">
-                  <div className="font-medium text-polar-night">{selectedVersion.name}</div>
-                  {selectedVersion.publishers && selectedVersion.publishers.length > 0 ? (
-                    <div className="text-sm text-text-secondary">
-                      {selectedVersion.publishers.join(' / ')}
-                    </div>
-                  ) : selectedVersion.publisher ? (
-                    <div className="text-sm text-text-secondary">
-                      {selectedVersion.publisher}
-                    </div>
-                  ) : null}
-                  {selectedVersion.yearPublished && (
-                    <div className="text-sm text-text-secondary">
-                      {selectedVersion.yearPublished}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Version Selection - appears when language is selected AND there are multiple versions */}
-      {selectedLanguage && filteredVersions.length > 1 && (
+      {/* Version Selection - appears when language is selected */}
+      {selectedLanguage && filteredVersions.length >= 1 && (
         <div className="space-y-3 animate-fade-in">
           <div>
             <label className="block text-sm font-medium text-text mb-2">

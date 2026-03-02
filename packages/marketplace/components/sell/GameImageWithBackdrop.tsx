@@ -19,7 +19,7 @@ export function GameImageWithBackdrop({
 
   return (
     <div
-      className="w-14 h-14 sm:w-24 sm:h-24 flex-shrink-0 rounded border border-snow-storm flex items-center justify-center overflow-hidden relative"
+      className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 rounded border border-snow-storm flex items-center justify-center overflow-hidden relative"
       style={{
         backgroundColor: backdropColor,
         aspectRatio: '1 / 1'

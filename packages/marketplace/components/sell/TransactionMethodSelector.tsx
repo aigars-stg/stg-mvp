@@ -39,8 +39,8 @@ export function TransactionMethodSelector({
   if (showInstantBuy) {
     // LV sellers: toggle between instant buy (default) and contact seller
     return (
-      <div className="space-y-4">
-        <p className="text-sm font-medium text-polar-night">
+      <div className="space-y-3">
+        <p className="text-sm font-semibold text-polar-night">
           {t('title')}
         </p>
         <Tabs
@@ -70,14 +70,14 @@ export function TransactionMethodSelector({
         <div className="flex items-start gap-3">
           {value === 'instant_buy' ? (
             <>
-              <CreditCard className="w-5 h-5 text-aurora-green flex-shrink-0 mt-0.5" />
+              <CreditCard className="w-4 h-4 text-aurora-green flex-shrink-0 mt-0.5" />
               <p className="text-sm text-text-secondary">
                 {t('instantBuyBanner')}
               </p>
             </>
           ) : (
             <>
-              <MessageSquare className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
+              <MessageSquare className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
               <p className="text-sm text-text-secondary">
                 {t('contactSeller.description')}
               </p>
@@ -87,9 +87,9 @@ export function TransactionMethodSelector({
 
         {/* Phone input — only when instant_buy selected and seller has no phone */}
         {value === 'instant_buy' && !hasPhone && onPhoneChange && (
-          <div className="p-4 rounded-lg border border-aurora-orange/30 bg-aurora-orange/5">
+          <div className="p-3 rounded-lg border border-aurora-orange/30 bg-aurora-orange/5">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-aurora-orange/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-7 h-7 rounded-lg bg-aurora-orange/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <Phone className="w-4 h-4 text-aurora-orange" />
               </div>
               <div className="flex-1 min-w-0 space-y-2">
@@ -118,21 +118,21 @@ export function TransactionMethodSelector({
 
   // EE/LT sellers: only contact seller, full width
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div>
-        <h3 className="text-base sm:text-lg font-semibold text-polar-night mb-1">
+        <h3 className="text-sm font-semibold text-polar-night mb-1">
           {t('title')}
         </h3>
-        <p className="text-sm text-text-secondary mb-4">
+        <p className="text-sm text-text-secondary mb-2">
           {t('subtitle')}
         </p>
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-start text-left p-4 rounded-lg border-2 border-frost-ice bg-frost-ice/5">
+        <div className="flex items-start text-left p-3 rounded-lg border-2 border-frost-ice bg-frost-ice/5">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-frost-ice text-white">
-              <MessageSquare className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-frost-ice text-white">
+              <MessageSquare className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
               <span className="font-semibold text-polar-night">
