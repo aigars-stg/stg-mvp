@@ -236,10 +236,12 @@ export default async function LocaleLayout({ children, params }: Props) {
                       className="opacity-50 hover:opacity-100 transition-opacity"
                       aria-label="Game data powered by BoardGameGeek"
                     >
-                      <img
+                      <Image
                         src="/images/powered-by-bgg-rgb.svg"
                         alt="Powered by BoardGameGeek"
                         className="h-6 w-auto"
+                        width={120}
+                        height={24}
                       />
                     </a>
                     <a
@@ -249,10 +251,12 @@ export default async function LocaleLayout({ children, params }: Props) {
                       className="opacity-50 hover:opacity-100 transition-opacity"
                       aria-label="Payments by EveryPay"
                     >
-                      <img
+                      <Image
                         src="/images/everypay_logo.svg"
                         alt="EveryPay"
                         className="h-8 w-auto"
+                        width={80}
+                        height={32}
                       />
                     </a>
                     <a
@@ -262,10 +266,12 @@ export default async function LocaleLayout({ children, params }: Props) {
                       className="opacity-50 hover:opacity-100 transition-opacity"
                       aria-label="Shipping by Unisend"
                     >
-                      <img
+                      <Image
                         src="/images/unisend_logo.svg"
                         alt="Unisend"
                         className="h-3 w-auto"
+                        width={60}
+                        height={12}
                       />
                     </a>
                   </div>

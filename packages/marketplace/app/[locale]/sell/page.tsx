@@ -24,7 +24,7 @@ import { NotificationModal } from '@/components/common/NotificationModal';
 import { PricingAssistant } from '@/components/sell/PricingAssistant';
 import { WantedListingContextBanner } from '@/components/sell/WantedListingContextBanner';
 import { useTranslations, useLocale } from 'next-intl';
-import { useListingForm, INITIAL_FORM_DATA } from '@/lib/hooks/useListingForm';
+import { useListingForm } from '@/lib/hooks/useListingForm';
 import { usePhaseFlow } from '@/lib/hooks/usePhaseFlow';
 import { formatPrice } from '@/lib/services/pricing';
 

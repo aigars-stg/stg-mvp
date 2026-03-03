@@ -68,7 +68,7 @@ export function ConversationList({
       supabase.removeChannel(channel);
       clearInterval(interval);
     };
-  }, [user?.id]);
+  }, [user?.id, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (

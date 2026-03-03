@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useTopLoader } from 'nextjs-toploader';
-import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
 import { Package, AlertCircle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Handshake } from '@/lib/icons';
