@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Gavel } from '@/lib/icons';
+import { Gavel, RefreshCw } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import {
   getAuctionTimeRemaining,
@@ -13,10 +13,12 @@ interface AuctionCountdownProps {
   endsAt: string | null;
   /** Show "Auction ended" for games with only ended auctions */
   showEnded?: boolean;
+  /** Whether this auction uses last-bid cooldown strategy */
+  isCooldown?: boolean;
   className?: string;
 }
 
-export function AuctionCountdown({ endsAt, showEnded = false, className = '' }: AuctionCountdownProps) {
+export function AuctionCountdown({ endsAt, showEnded = false, isCooldown = false, className = '' }: AuctionCountdownProps) {
   const t = useTranslations('Listings.card');
   const [, setTick] = useState(0);
 
@@ -55,6 +57,11 @@ export function AuctionCountdown({ endsAt, showEnded = false, className = '' }: 
     >
       <Gavel className="w-3.5 h-3.5" />
       <span>{t('auctionEndsIn')} {formatCompactTimeRemaining(time)}</span>
+      {isCooldown && (
+        <span title={t('cooldownResets')} className="flex items-center">
+          <RefreshCw className="w-3 h-3" />
+        </span>
+      )}
     </div>
   );
 }

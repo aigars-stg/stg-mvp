@@ -21,6 +21,7 @@ import {
   getAuctionTimeRemaining,
   getMinimumBid,
   formatCompactTimeRemaining,
+  isAuctionCooldown,
 } from '@/lib/types/listing';
 import { BidHistory } from './BidHistory';
 import { formatPrice } from '@/lib/services/pricing';
@@ -157,6 +158,7 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
   const isEnded = timeRemaining.isEnded;
   const isWinner = listing.auction_winner_id === user?.id;
   const displayPrice = currentBid || listing.auction_start_price || 0;
+  const isCooldown = isAuctionCooldown(listing);
 
   // Auto-expand for winner
   useEffect(() => {
@@ -208,6 +210,11 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
                 <Zap className="w-3 h-3 text-aurora-purple" />
               </span>
             )}
+            {isCooldown && !isEnded && (
+              <span className="text-xs text-text-muted font-normal">
+                {t('cooldown.resetsOnBid')}
+              </span>
+            )}
           </div>
 
           {/* Right: Status + Toggle */}
@@ -252,6 +259,11 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
               <Zap className="w-3 h-3 text-aurora-purple" />
             </span>
           )}
+          {isCooldown && !isEnded && (
+            <span className="text-xs text-text-muted">
+              {t('cooldown.resetsOnBid')}
+            </span>
+          )}
         </div>
       </button>
 
@@ -278,6 +290,18 @@ export function AuctionBidPanel({ listing, onBidPlaced }: AuctionBidPanelProps) 
                   <span className="font-medium">{t('status.outbid')}</span>
                 </>
               )}
+            </div>
+          )}
+
+          {/* Cooldown auction info */}
+          {isCooldown && !isEnded && (
+            <div className="flex items-center gap-2 text-xs text-text-secondary bg-aurora-orange/5 border border-aurora-orange/20 p-2.5 rounded-lg">
+              <RefreshCw className="w-4 h-4 text-aurora-orange flex-shrink-0" />
+              <span>
+                {bidCount > 0
+                  ? t('cooldown.timerResetsEachBid', { hours: listing.auction_cooldown_hours || 24 })
+                  : t('cooldown.biddingResetsTimer', { hours: listing.auction_cooldown_hours || 24 })}
+              </span>
             </div>
           )}
 

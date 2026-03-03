@@ -125,12 +125,38 @@ const config: Config = {
           '0%, 100%': { transform: 'translateX(0)' },
           '50%': { transform: 'translateX(10px)' },
         },
+        'sparkle-fly': {
+          '0%': { transform: 'translate(0, 0) scale(1)', opacity: '1' },
+          '100%': { transform: 'translate(var(--tx), var(--ty)) scale(0)', opacity: '0' },
+        },
+        'gentle-bounce': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-3px)' },
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(200%)' },
+        },
+        'celebrate-bounce': {
+          '0%': { transform: 'scale(0.3) rotate(-20deg)', opacity: '0' },
+          '60%': { transform: 'scale(1.1) rotate(5deg)' },
+          '100%': { transform: 'scale(1) rotate(0)', opacity: '1' },
+        },
+        'pulse-width': {
+          '0%, 100%': { width: '0%', opacity: '0' },
+          '50%': { width: '60%', opacity: '0.5' },
+        },
       },
       animation: {
         'fade-in-out': 'fade-in-out 3s ease-in-out',
         'fade-in': 'fade-in 0.3s ease-out',
         'swipe-left': 'swipe-left 1.5s ease-in-out infinite',
         'swipe-right': 'swipe-right 1.5s ease-in-out infinite',
+        'sparkle-fly': 'sparkle-fly 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        'gentle-bounce': 'gentle-bounce 2s infinite',
+        shimmer: 'shimmer 2s infinite',
+        'celebrate-bounce': 'celebrate-bounce 600ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'pulse-width': 'pulse-width 2s infinite ease-in-out',
       },
     },
   },
