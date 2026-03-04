@@ -50,7 +50,7 @@ export function OrderPricingSummary({
               <span className="font-medium text-aurora-red">
                 -{commissionCents != null
                   ? formatCentsToCurrency(commissionCents)
-                  : formatPrice(order.items_total * 0.1)}
+                  : '—'}
               </span>
             </div>
             <div className="flex justify-between pt-3 border-t border-border-subtle">
@@ -60,7 +60,7 @@ export function OrderPricingSummary({
               <span className="text-xl font-bold text-aurora-green">
                 {sellerCreditCents != null
                   ? formatCentsToCurrency(sellerCreditCents)
-                  : formatPrice(order.items_total * 0.9)}
+                  : '—'}
               </span>
             </div>
           </>

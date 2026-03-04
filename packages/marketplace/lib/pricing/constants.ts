@@ -5,17 +5,6 @@
  */
 
 // ==============================================
-// SHIPPING
-// ==============================================
-
-/**
- * Flat-rate shipping across the Baltics (Latvia, Lithuania, Estonia)
- * VAT-inclusive (21% VAT)
- */
-export const SHIPPING_COST_CENTS = 200; // €2.00 flat rate
-export const SHIPPING_COST_EUROS = 2.0;
-
-// ==============================================
 // SELLER COMMISSION
 // ==============================================
 

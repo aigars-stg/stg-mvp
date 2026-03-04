@@ -163,10 +163,41 @@ export async function POST(
             });
           }
 
+          // Validate countries before attempting label generation
+          if (!sellerProfile.country || !['LV', 'LT', 'EE'].includes(sellerProfile.country)) {
+            await supabase.from('orders').update({
+              label_error: 'Seller country not set. Please update your country in Account Settings.',
+              updated_at: new Date().toISOString(),
+            }).eq('id', orderId);
+
+            return NextResponse.json({
+              success: true,
+              orderId,
+              shippingMethod: result.shipping_method,
+              labelGenerated: false,
+              labelError: 'Seller country not set',
+            });
+          }
+
+          if (!order.destination_country || !['LV', 'LT', 'EE'].includes(order.destination_country)) {
+            await supabase.from('orders').update({
+              label_error: 'Destination country missing on order.',
+              updated_at: new Date().toISOString(),
+            }).eq('id', orderId);
+
+            return NextResponse.json({
+              success: true,
+              orderId,
+              shippingMethod: result.shipping_method,
+              labelGenerated: false,
+              labelError: 'Destination country missing',
+            });
+          }
+
           try {
             console.log(`📦 [Accept Order] Generating shipping label for order ${orderId}...`);
-            console.log(`📦 [Accept Order] Sender: ${sellerProfile.full_name}, Phone: ${rawSellerPhone} → ${normalizedSellerPhone}, Country: ${sellerProfile.country || 'LT'}`);
-            console.log(`📦 [Accept Order] Receiver: ${receiverName}, Phone: ${rawReceiverPhone} → ${normalizedReceiverPhone}, Country: ${order.destination_country || 'LT'}`);
+            console.log(`📦 [Accept Order] Sender: ${sellerProfile.full_name}, Phone: ${rawSellerPhone} → ${normalizedSellerPhone}, Country: ${sellerProfile.country}`);
+            console.log(`📦 [Accept Order] Receiver: ${receiverName}, Phone: ${rawReceiverPhone} → ${normalizedReceiverPhone}, Country: ${order.destination_country}`);
             console.log(`📦 [Accept Order] Terminal: ${order.destination_terminal_id || '(empty)'}, Parcel Size: ${order.parcel_size || 'M'}`);
 
             const labelResult = await generateShippingLabel({
@@ -174,10 +205,10 @@ export async function POST(
               orderNumber: order.order_number,
               senderName: sellerProfile.full_name,
               senderPhone: normalizedSellerPhone,
-              senderCountry: (sellerProfile.country || 'LT') as 'LT' | 'LV' | 'EE',
+              senderCountry: sellerProfile.country as 'LT' | 'LV' | 'EE',
               receiverName,
               receiverPhone: normalizedReceiverPhone,
-              receiverCountry: (order.destination_country || 'LT') as 'LT' | 'LV' | 'EE',
+              receiverCountry: order.destination_country as 'LT' | 'LV' | 'EE',
               destinationTerminalId: order.destination_terminal_id || '',
               parcelSize: (order.parcel_size || 'M') as 'XS' | 'S' | 'M' | 'L',
             });

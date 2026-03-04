@@ -1020,6 +1020,9 @@ export type Database = {
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          commission_net_cents: number | null
+          commission_vat_cents: number | null
+          commission_vat_rate: number | null
           created_at: string | null
           delivered_at: string | null
           destination_country: string | null
@@ -1059,6 +1062,7 @@ export type Database = {
           refund_note: string | null
           refund_reason: string | null
           refunded_at: string | null
+          review_reminder_sent_at: string | null
           seller_decline_reason: string | null
           seller_id: string
           seller_responded_at: string | null
@@ -1067,6 +1071,9 @@ export type Database = {
           sender_country: string | null
           shipping_cost: number
           shipping_method: string
+          shipping_net_cents: number | null
+          shipping_vat_cents: number | null
+          shipping_vat_rate: number | null
           status: string
           total_amount: number
           tracking_url: string | null
@@ -1082,6 +1089,9 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          commission_net_cents?: number | null
+          commission_vat_cents?: number | null
+          commission_vat_rate?: number | null
           created_at?: string | null
           delivered_at?: string | null
           destination_country?: string | null
@@ -1121,6 +1131,7 @@ export type Database = {
           refund_note?: string | null
           refund_reason?: string | null
           refunded_at?: string | null
+          review_reminder_sent_at?: string | null
           seller_decline_reason?: string | null
           seller_id: string
           seller_responded_at?: string | null
@@ -1129,6 +1140,9 @@ export type Database = {
           sender_country?: string | null
           shipping_cost?: number
           shipping_method: string
+          shipping_net_cents?: number | null
+          shipping_vat_cents?: number | null
+          shipping_vat_rate?: number | null
           status?: string
           total_amount: number
           tracking_url?: string | null
@@ -1144,6 +1158,9 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          commission_net_cents?: number | null
+          commission_vat_cents?: number | null
+          commission_vat_rate?: number | null
           created_at?: string | null
           delivered_at?: string | null
           destination_country?: string | null
@@ -1183,6 +1200,7 @@ export type Database = {
           refund_note?: string | null
           refund_reason?: string | null
           refunded_at?: string | null
+          review_reminder_sent_at?: string | null
           seller_decline_reason?: string | null
           seller_id?: string
           seller_responded_at?: string | null
@@ -1191,6 +1209,9 @@ export type Database = {
           sender_country?: string | null
           shipping_cost?: number
           shipping_method?: string
+          shipping_net_cents?: number | null
+          shipping_vat_cents?: number | null
+          shipping_vat_rate?: number | null
           status?: string
           total_amount?: number
           tracking_url?: string | null
@@ -1370,7 +1391,7 @@ export type Database = {
           dac7_tax_id: string | null
           dac7_tax_id_type: string | null
           dac7_tax_residency_country: string | null
-          is_founding_seller: boolean | null
+          is_founding_seller: boolean
           member_since: string | null
           payout_account_holder_name: string | null
           payout_iban: string | null
@@ -1401,7 +1422,7 @@ export type Database = {
           dac7_tax_id?: string | null
           dac7_tax_id_type?: string | null
           dac7_tax_residency_country?: string | null
-          is_founding_seller?: boolean | null
+          is_founding_seller?: boolean
           member_since?: string | null
           payout_account_holder_name?: string | null
           payout_iban?: string | null
@@ -1432,7 +1453,7 @@ export type Database = {
           dac7_tax_id?: string | null
           dac7_tax_id_type?: string | null
           dac7_tax_residency_country?: string | null
-          is_founding_seller?: boolean | null
+          is_founding_seller?: boolean
           member_since?: string | null
           payout_account_holder_name?: string | null
           payout_iban?: string | null
@@ -1579,6 +1600,27 @@ export type Database = {
           },
         ]
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_feedback: {
         Row: {
           created_at: string | null
@@ -1648,8 +1690,6 @@ export type Database = {
           full_name: string
           id: string
           is_staff: boolean
-          last_onboarding_email_at: string | null
-          onboarding_email_step: number | null
           original_email: string | null
           phone: string | null
           preferred_delivery_country: string | null
@@ -1657,7 +1697,6 @@ export type Database = {
           preferred_terminal_address: string | null
           preferred_terminal_id: string | null
           preferred_terminal_name: string | null
-          profile_banner_dismissed_until: string | null
           recovery_codes: string[] | null
           recovery_codes_generated_at: string | null
           recovery_deadline: string | null
@@ -1676,8 +1715,6 @@ export type Database = {
           full_name: string
           id: string
           is_staff?: boolean
-          last_onboarding_email_at?: string | null
-          onboarding_email_step?: number | null
           original_email?: string | null
           phone?: string | null
           preferred_delivery_country?: string | null
@@ -1685,7 +1722,6 @@ export type Database = {
           preferred_terminal_address?: string | null
           preferred_terminal_id?: string | null
           preferred_terminal_name?: string | null
-          profile_banner_dismissed_until?: string | null
           recovery_codes?: string[] | null
           recovery_codes_generated_at?: string | null
           recovery_deadline?: string | null
@@ -1704,8 +1740,6 @@ export type Database = {
           full_name?: string
           id?: string
           is_staff?: boolean
-          last_onboarding_email_at?: string | null
-          onboarding_email_step?: number | null
           original_email?: string | null
           phone?: string | null
           preferred_delivery_country?: string | null
@@ -1713,7 +1747,6 @@ export type Database = {
           preferred_terminal_address?: string | null
           preferred_terminal_id?: string | null
           preferred_terminal_name?: string | null
-          profile_banner_dismissed_until?: string | null
           recovery_codes?: string[] | null
           recovery_codes_generated_at?: string | null
           recovery_deadline?: string | null
@@ -2835,3 +2868,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

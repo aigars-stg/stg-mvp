@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { SHIPPING_COST_EUROS } from '@/lib/pricing/constants';
+import { getShippingPrice } from '@/lib/unisend';
 import { createAuctionCheckoutSession } from '@/lib/services/checkout';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
@@ -119,7 +119,35 @@ export async function POST(request: NextRequest, { params }: Params) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    const shippingCostEuros = shippingMethod === 't2t' ? SHIPPING_COST_EUROS : 0;
+    // Get seller country for route-based shipping pricing
+    const { data: sellerProfile } = await adminSupabase
+      .from('user_profiles')
+      .select('country')
+      .eq('id', listing.seller_id)
+      .single();
+
+    const sellerCountry = sellerProfile?.country;
+    if (shippingMethod === 't2t' && (!sellerCountry || !['LV', 'LT', 'EE'].includes(sellerCountry))) {
+      return NextResponse.json(
+        { error: 'Seller country is required for shipping' },
+        { status: 400 }
+      );
+    }
+
+    if (shippingMethod === 't2t' && !body.destinationCountry) {
+      return NextResponse.json(
+        { error: 'Destination country required for T2T shipping' },
+        { status: 400 }
+      );
+    }
+
+    const shippingCostEuros = shippingMethod === 't2t'
+      ? getShippingPrice(
+          sellerCountry as 'LV' | 'LT' | 'EE',
+          body.destinationCountry as 'LV' | 'LT' | 'EE',
+          'M'
+        )
+      : 0;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
     const result = await createAuctionCheckoutSession(adminSupabase, {

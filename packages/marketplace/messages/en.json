@@ -2321,6 +2321,7 @@
       "subtotal": "Subtotal",
       "subtotalItems": "Subtotal ({count, plural, one {# item} other {# items}})",
       "shipping": "Shipping",
+      "shippingAtCheckout": "Calculated at checkout",
       "total": "Total",
       "shippingNote": "+ shipping (calculated at checkout)",
       "checkout": "Checkout"

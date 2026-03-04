@@ -149,3 +149,66 @@ export function formatCentsToEuros(cents: number): string {
 export function formatCentsToCurrency(cents: number): string {
   return formatPrice(cents / 100);
 }
+
+// ==============================================
+// VAT
+// ==============================================
+
+/**
+ * VAT rates by destination country (EU OSS).
+ * STG is a Latvian company registered for EU OSS.
+ * Commission and shipping VAT follow destination country rate.
+ */
+export const VAT_RATES: Record<string, number> = {
+  LV: 0.21,
+  LT: 0.21,
+  EE: 0.22,
+};
+
+/** Default VAT rate (Latvia domestic) for unknown destinations */
+export const DEFAULT_VAT_RATE = 0.21;
+
+export interface VatSplit {
+  grossCents: number;
+  netCents: number;
+  vatCents: number;
+  vatRate: number;
+}
+
+export interface OrderVat {
+  commissionVat: VatSplit;
+  shippingVat: VatSplit;
+}
+
+/**
+ * Get the VAT rate for a destination country
+ */
+export function getVatRate(destinationCountry: string | null | undefined): number {
+  if (!destinationCountry) return DEFAULT_VAT_RATE;
+  return VAT_RATES[destinationCountry.toUpperCase()] ?? DEFAULT_VAT_RATE;
+}
+
+/**
+ * Back-calculate VAT from a gross (VAT-inclusive) amount.
+ * Commission and shipping prices are VAT-inclusive.
+ */
+export function calculateVatSplit(grossCents: number, vatRate: number): VatSplit {
+  const netCents = Math.round(grossCents / (1 + vatRate));
+  const vatCents = grossCents - netCents;
+  return { grossCents, netCents, vatCents, vatRate };
+}
+
+/**
+ * Calculate full order pricing with VAT breakdown
+ */
+export function calculateOrderPricingWithVat(
+  itemsTotalCents: number,
+  shippingCostCents: number,
+  destinationCountry: string | null | undefined
+): OrderPricing & OrderVat {
+  const base = calculateOrderPricing(itemsTotalCents, shippingCostCents);
+  const vatRate = getVatRate(destinationCountry);
+  const commissionVat = calculateVatSplit(base.commissionCents, vatRate);
+  const shippingVat = calculateVatSplit(shippingCostCents, vatRate);
+  return { ...base, commissionVat, shippingVat };
+}

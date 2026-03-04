@@ -2315,6 +2315,7 @@
       "subtotal": "Starpsumma",
       "subtotalItems": "Starpsumma ({count, plural, one {# spēle} other {# spēles}})",
       "shipping": "Piegāde",
+      "shippingAtCheckout": "Tiks aprēķināta pie apmaksas",
       "total": "Kopā",
       "shippingNote": "+ piegāde (aprēķināta pie norēķināšanās)",
       "checkout": "Norēķināties"

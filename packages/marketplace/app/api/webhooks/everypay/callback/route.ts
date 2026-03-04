@@ -330,6 +330,12 @@ async function processBasketPayment(
       platform_commission_cents: commissionCents,
       seller_wallet_credit_cents: walletCreditCents,
       everypay_payment_state: paymentState,
+      commission_net_cents: (metadata.commission_net_cents as number) || null,
+      commission_vat_cents: (metadata.commission_vat_cents as number) || null,
+      commission_vat_rate: (metadata.commission_vat_rate as number) || null,
+      shipping_net_cents: (metadata.shipping_net_cents as number) || null,
+      shipping_vat_cents: (metadata.shipping_vat_cents as number) || null,
+      shipping_vat_rate: (metadata.shipping_vat_rate as number) || null,
     })
     .eq('id', orderId);
 
@@ -404,10 +410,18 @@ async function processAuctionPayment(
     throw new Error(`Auction order creation failed: ${result.error}`);
   }
 
-  // Store actual payment state (authorised for pre-auth cards, settled for bank links)
+  // Store actual payment state and VAT breakdown
   await supabase
     .from('orders')
-    .update({ everypay_payment_state: paymentState })
+    .update({
+      everypay_payment_state: paymentState,
+      commission_net_cents: (metadata.commission_net_cents as number) || null,
+      commission_vat_cents: (metadata.commission_vat_cents as number) || null,
+      commission_vat_rate: (metadata.commission_vat_rate as number) || null,
+      shipping_net_cents: (metadata.shipping_net_cents as number) || null,
+      shipping_vat_cents: (metadata.shipping_vat_cents as number) || null,
+      shipping_vat_rate: (metadata.shipping_vat_rate as number) || null,
+    })
     .eq('id', result.order_id);
 
   log.info({ orderId: result.order_id, orderNumber: result.order_number, listingId, paymentState }, 'Auction order created');

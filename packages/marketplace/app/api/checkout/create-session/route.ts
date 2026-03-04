@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { SHIPPING_COST_EUROS } from '@/lib/pricing/constants';
+import { getShippingPrice } from '@/lib/unisend';
 import { checkoutSessionSchema } from '@/lib/validation/checkout';
 import { createCheckoutSession } from '@/lib/services/checkout';
 import { requireAuth } from '@/lib/api/auth-middleware';
@@ -122,7 +122,21 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const shippingCostEuros = input.shippingMethod === 't2t' ? SHIPPING_COST_EUROS : 0;
+
+    if (input.shippingMethod === 't2t' && !input.destinationCountry) {
+      return NextResponse.json(
+        { error: 'Destination country required for T2T shipping' },
+        { status: 400 }
+      );
+    }
+
+    const shippingCostEuros = input.shippingMethod === 't2t'
+      ? getShippingPrice(
+          sellerCountry as 'LV' | 'LT' | 'EE',
+          input.destinationCountry as 'LV' | 'LT' | 'EE',
+          'M'
+        )
+      : 0;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
     // Create checkout session via service

@@ -1,16 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
-  SHIPPING_COST_CENTS,
-  SHIPPING_COST_EUROS,
   SELLER_COMMISSION_RATE,
   DISPUTE_WINDOW_DAYS,
 } from './constants';
 
 describe('pricing constants', () => {
-  it('shipping cents and euros are consistent', () => {
-    expect(SHIPPING_COST_CENTS).toBe(SHIPPING_COST_EUROS * 100);
-  });
-
   it('commission rate is between 0 and 1', () => {
     expect(SELLER_COMMISSION_RATE).toBeGreaterThan(0);
     expect(SELLER_COMMISSION_RATE).toBeLessThan(1);

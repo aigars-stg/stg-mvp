@@ -17,11 +17,10 @@ import { isValidPhoneNumber } from '@/lib/phone-utils';
 import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 import { CheckoutSection } from '@/components/checkout/CheckoutSection';
 import { UserInfoCard } from '@/components/user/UserInfoCard';
-import type { Terminal, TerminalCountry } from '@/lib/unisend/types';
+import { getShippingPrice, type Terminal, type TerminalCountry } from '@/lib/unisend/types';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import type { CountryCode } from '@/lib/country-utils';
 import { calculateCheckoutPricing, formatCentsToCurrency, formatPrice } from '@/lib/services/pricing';
-import { SHIPPING_COST_EUROS } from '@/lib/pricing/constants';
 import { useTranslations } from 'next-intl';
 
 interface CartItem {
@@ -329,7 +328,14 @@ function CheckoutPageContent() {
 
   // Calculate pricing (with wallet applied)
   const itemsTotalCents = basket ? Math.round(basket.subtotal * 100) : 0;
-  const shippingCostCents = Math.round(SHIPPING_COST_EUROS * 100);
+  const shippingCostEuros = selectedTerminal && basket?.seller_country
+    ? getShippingPrice(
+        basket.seller_country as TerminalCountry,
+        selectedTerminal.countryCode as TerminalCountry,
+        'M'
+      )
+    : 0;
+  const shippingCostCents = Math.round(shippingCostEuros * 100);
   const pricing = basket
     ? calculateCheckoutPricing(itemsTotalCents, shippingCostCents, walletBalanceCents)
     : null;

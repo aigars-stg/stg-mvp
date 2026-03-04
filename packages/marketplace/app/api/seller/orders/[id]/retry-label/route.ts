@@ -102,10 +102,41 @@ export async function POST(
     const receiverName = order.receiver_name || buyerProfile.full_name;
     const receiverPhone = order.receiver_phone || buyerProfile.phone || '';
 
+    // Validate countries before attempting label generation
+    if (!sellerProfile.country || !['LV', 'LT', 'EE'].includes(sellerProfile.country)) {
+      await supabase.from('orders').update({
+        label_error: 'Seller country not set. Please update your country in Account Settings.',
+        updated_at: new Date().toISOString(),
+      }).eq('id', orderId);
+
+      return NextResponse.json({
+        success: true,
+        orderId,
+        shippingMethod: order.shipping_method,
+        labelGenerated: false,
+        labelError: 'Seller country not set',
+      });
+    }
+
+    if (!order.destination_country || !['LV', 'LT', 'EE'].includes(order.destination_country)) {
+      await supabase.from('orders').update({
+        label_error: 'Destination country missing on order.',
+        updated_at: new Date().toISOString(),
+      }).eq('id', orderId);
+
+      return NextResponse.json({
+        success: true,
+        orderId,
+        shippingMethod: order.shipping_method,
+        labelGenerated: false,
+        labelError: 'Destination country missing',
+      });
+    }
+
     // Log attempt
     console.log(`🔄 [Retry Label] Retrying label generation for order ${orderId}...`);
-    console.log(`📦 [Retry Label] Sender: ${sellerProfile.full_name}, Phone: ${sellerProfile.phone || '(empty)'}, Country: ${sellerProfile.country || 'LT'}`);
-    console.log(`📦 [Retry Label] Receiver: ${receiverName}, Phone: ${receiverPhone || '(empty)'}, Country: ${order.destination_country || 'LT'}`);
+    console.log(`📦 [Retry Label] Sender: ${sellerProfile.full_name}, Phone: ${sellerProfile.phone || '(empty)'}, Country: ${sellerProfile.country}`);
+    console.log(`📦 [Retry Label] Receiver: ${receiverName}, Phone: ${receiverPhone || '(empty)'}, Country: ${order.destination_country}`);
     console.log(`📦 [Retry Label] Terminal: ${order.destination_terminal_id || '(empty)'}, Parcel Size: ${order.parcel_size || 'M'}`);
 
     try {
@@ -114,10 +145,10 @@ export async function POST(
         orderNumber: order.order_number,
         senderName: sellerProfile.full_name,
         senderPhone: sellerProfile.phone || '',
-        senderCountry: (sellerProfile.country || 'LT') as 'LT' | 'LV' | 'EE',
+        senderCountry: sellerProfile.country as 'LT' | 'LV' | 'EE',
         receiverName,
         receiverPhone,
-        receiverCountry: (order.destination_country || 'LT') as 'LT' | 'LV' | 'EE',
+        receiverCountry: order.destination_country as 'LT' | 'LV' | 'EE',
         destinationTerminalId: order.destination_terminal_id || '',
         parcelSize: (order.parcel_size || 'M') as 'XS' | 'S' | 'M' | 'L',
       });

@@ -13,7 +13,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createPayment as createEveryPayPayment } from '@/lib/everypay/client';
-import { calculateCheckoutPricingFromEuros, calculateOrderPricing } from './pricing';
+import { calculateCheckoutPricingFromEuros, calculateOrderPricingWithVat } from './pricing';
 import { getWalletBalance } from './wallet';
 import { sendOrderEmails } from '@/lib/email/send-order-emails';
 import { loggers } from '@/lib/logger';
@@ -150,9 +150,10 @@ export async function createCheckoutSession(
     walletBalance
   );
 
-  const orderPricing = calculateOrderPricing(
+  const orderPricing = calculateOrderPricingWithVat(
     pricing.itemsTotalCents,
-    pricing.shippingCostCents
+    pricing.shippingCostCents,
+    input.destinationCountry
   );
 
   // 2. Build RPC params (only params the RPC accepts)
@@ -199,6 +200,12 @@ export async function createCheckoutSession(
         locale,
         platform_commission_cents: orderPricing.commissionCents,
         seller_wallet_credit_cents: orderPricing.walletCreditCents,
+        commission_net_cents: orderPricing.commissionVat.netCents,
+        commission_vat_cents: orderPricing.commissionVat.vatCents,
+        commission_vat_rate: orderPricing.commissionVat.vatRate,
+        shipping_net_cents: orderPricing.shippingVat.netCents,
+        shipping_vat_cents: orderPricing.shippingVat.vatCents,
+        shipping_vat_rate: orderPricing.shippingVat.vatRate,
       })
       .eq('id', orderId);
 
@@ -248,6 +255,12 @@ export async function createCheckoutSession(
           wallet_debit_cents: pricing.walletDebitCents,
           platform_commission_cents: orderPricing.commissionCents,
           seller_wallet_credit_cents: orderPricing.walletCreditCents,
+          commission_net_cents: orderPricing.commissionVat.netCents,
+          commission_vat_cents: orderPricing.commissionVat.vatCents,
+          commission_vat_rate: orderPricing.commissionVat.vatRate,
+          shipping_net_cents: orderPricing.shippingVat.netCents,
+          shipping_vat_cents: orderPricing.shippingVat.vatCents,
+          shipping_vat_rate: orderPricing.shippingVat.vatRate,
           shipping_method: shippingMethod,
           shipping_cost: shippingCostEuros,
           destination_country: input.destinationCountry || null,
@@ -318,9 +331,10 @@ export async function createAuctionCheckoutSession(
     walletBalance
   );
 
-  const orderPricing = calculateOrderPricing(
+  const orderPricing = calculateOrderPricingWithVat(
     pricing.itemsTotalCents,
-    pricing.shippingCostCents
+    pricing.shippingCostCents,
+    input.destinationCountry
   );
 
   // 2. For auctions, we don't use create_order_from_basket.
@@ -358,6 +372,12 @@ export async function createAuctionCheckoutSession(
         buyer_wallet_debit_cents: pricing.walletDebitCents,
         platform_commission_cents: orderPricing.commissionCents,
         seller_wallet_credit_cents: orderPricing.walletCreditCents,
+        commission_net_cents: orderPricing.commissionVat.netCents,
+        commission_vat_cents: orderPricing.commissionVat.vatCents,
+        commission_vat_rate: orderPricing.commissionVat.vatRate,
+        shipping_net_cents: orderPricing.shippingVat.netCents,
+        shipping_vat_cents: orderPricing.shippingVat.vatCents,
+        shipping_vat_rate: orderPricing.shippingVat.vatRate,
       })
       .select('id')
       .single();
@@ -431,6 +451,12 @@ export async function createAuctionCheckoutSession(
         wallet_debit_cents: pricing.walletDebitCents,
         platform_commission_cents: orderPricing.commissionCents,
         seller_wallet_credit_cents: orderPricing.walletCreditCents,
+        commission_net_cents: orderPricing.commissionVat.netCents,
+        commission_vat_cents: orderPricing.commissionVat.vatCents,
+        commission_vat_rate: orderPricing.commissionVat.vatRate,
+        shipping_net_cents: orderPricing.shippingVat.netCents,
+        shipping_vat_cents: orderPricing.shippingVat.vatCents,
+        shipping_vat_rate: orderPricing.shippingVat.vatRate,
         winning_bid_euros: winningBidEuros,
         shipping_method: shippingMethod,
         shipping_cost: shippingCostEuros,

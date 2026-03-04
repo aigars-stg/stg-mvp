@@ -1,24 +1,18 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { SHIPPING_COST_EUROS } from '@/lib/pricing/constants';
 import { formatPrice } from '@/lib/services/pricing';
 
 interface CartBasketSummaryProps {
   itemCount: number;
   subtotal: number;
-  /** Override shipping cost (default: €2.00) */
-  shippingCost?: number;
 }
 
 export function CartBasketSummary({
   itemCount,
   subtotal,
-  shippingCost = SHIPPING_COST_EUROS,
 }: CartBasketSummaryProps) {
   const t = useTranslations('Cart');
-
-  const total = subtotal + shippingCost;
 
   return (
     <div className="space-y-2 text-sm">
@@ -37,8 +31,8 @@ export function CartBasketSummary({
         <span className="text-text-secondary">
           {t('basket.shipping')}
         </span>
-        <span className="font-medium text-polar-night">
-          {formatPrice(shippingCost)}
+        <span className="text-text-secondary text-sm">
+          {t('basket.shippingAtCheckout')}
         </span>
       </div>
 
@@ -51,7 +45,7 @@ export function CartBasketSummary({
           {t('basket.total')}
         </span>
         <span className="text-xl font-bold text-polar-night">
-          {formatPrice(total)}
+          {formatPrice(subtotal)}
         </span>
       </div>
     </div>
