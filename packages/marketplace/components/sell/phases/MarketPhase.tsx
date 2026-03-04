@@ -2,11 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 import { Button, Card, Input } from '@second-turn/design-system';
-import { TransactionMethodSelector } from '@/components/sell/TransactionMethodSelector';
 import { ConditionSelector } from '@/components/sell/ConditionSelector';
+import { PhoneInput } from '@/components/common/PhoneInput';
 import { PricingFormatSelector } from '@/components/sell/PricingFormatSelector';
 import { PricingAssistant } from '@/components/sell/PricingAssistant';
-import { ClipboardCheck, CurrencyEuro as Euro } from '@/lib/icons';
+import { ClipboardCheck, CurrencyEuro as Euro, Phone } from '@/lib/icons';
 import { SELLER_COMMISSION_RATE } from '@/lib/pricing/constants';
 import { formatPrice } from '@/lib/services/pricing';
 import type { ListingFormData } from '@/lib/hooks/useListingForm';
@@ -23,16 +23,7 @@ export interface MarketPhaseProps {
   onAdvance: () => void;
   isPhaseComplete: boolean;
 
-  // Transaction method / seller capabilities
-  sellerCapabilities: {
-    canCreateContactSeller: boolean;
-    canCreateInstantBuy: boolean;
-    isLoading: boolean;
-  };
-  sellerCountry: string | null | undefined;
-  onUpgradeClick: () => void;
-
-  // Phone state (for instant buy)
+  // Phone state
   hasPhone: boolean;
   sellerPhone: string | null;
   onPhoneChange: (phone: string) => void;
@@ -48,9 +39,6 @@ export function MarketPhase({
   setFormData,
   onAdvance,
   isPhaseComplete,
-  sellerCapabilities,
-  sellerCountry,
-  onUpgradeClick,
   hasPhone,
   sellerPhone,
   onPhoneChange,
@@ -62,23 +50,32 @@ export function MarketPhase({
 
   return (
     <div className="space-y-4">
-      {/* Transaction Method Selection */}
-      {!sellerCapabilities.isLoading && (
-        <Card padding="md">
-          <TransactionMethodSelector
-            value={formData.transactionMethod}
-            onChange={(method) =>
-              setFormData((prev) => ({ ...prev, transactionMethod: method }))
-            }
-            canUseInstantBuy={sellerCapabilities.canCreateInstantBuy}
-            sellerCountry={sellerCountry}
-            onUpgradeClick={onUpgradeClick}
-            hasPhone={hasPhone}
-            phoneValue={sellerPhone || ''}
-            onPhoneChange={onPhoneChange}
-            defaultCountry={defaultCountry}
-          />
-        </Card>
+      {/* Phone prompt — required for shipping labels */}
+      {!hasPhone && onPhoneChange && (
+        <div className="bg-snow-white border border-border rounded-lg p-3 sm:p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-7 h-7 rounded-lg bg-aurora-orange/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Phone className="w-4 h-4 text-aurora-orange" />
+            </div>
+            <div className="flex-1 min-w-0 space-y-2">
+              <div>
+                <p className="text-sm font-medium text-polar-night">
+                  {tSections('phone.label')}
+                </p>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  {tSections('phone.description')}
+                </p>
+              </div>
+              <PhoneInput
+                value={sellerPhone || ''}
+                onChange={onPhoneChange}
+                compact
+                defaultCountry={defaultCountry}
+                id="seller-phone-inline"
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Condition Section */}

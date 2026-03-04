@@ -641,7 +641,6 @@
       "parcelLocker": "Pakomāts",
       "pickupOnly": "Tikai saņemšana klātienē",
       "missingComponents": "Trūkst komponentes",
-      "contactSeller": "Sazināties",
       "saveAria": "Saglabāt sludinājumu",
       "unsaveAria": "Noņemt no saglabātajiem",
       "prevImageAria": "Iepriekšējais attēls",
@@ -650,7 +649,6 @@
       "learnConditionAria": "Uzzināt par {condition} stāvokli",
       "offers": "{count, plural, one {# piedāvājums} other {# piedāvājumi}}",
       "instantBuyTooltip": "{count, plural, one {# tūlītējs pirkums} other {# tūlītēji pirkumi}}",
-      "contactSellerTooltip": "{count, plural, one {# sazināties ar pārdevēju} other {# sazināties ar pārdevēju}}",
       "auctionTooltip": "{count, plural, one {# izsole} other {# izsoles}}",
       "expansionTooltip": "Papildinājums",
       "expansionOffersTooltip": "Ietver papildinājumu piedāvājumus",
@@ -709,15 +707,11 @@
       "unsaveTooltip": "Noņemt no saglabātajiem",
       "askQuestion": "Uzdot jautājumu",
       "addToCart": "Pievienot grozam",
-      "contactSeller": "Sazināties ar pārdevēju",
       "sold": "Pārdots",
       "reserved": "Rezervēts",
       "reservedTooltip": "Kāds norēķinās - drīzumā pieejams, ja viņi nepabeigs"
     },
     "sellerLabel": "Pārdevējs",
-    "privateSeller": {
-      "contactNotice": "Šis ir tiešais sludinājums - sazinies ar pārdevēju, lai vienotos par maksājumu un piegādi."
-    },
     "auction": {
       "badge": "Izsole",
       "ended": "Izsole beigusies",
@@ -1112,11 +1106,13 @@
   "Countries": {
     "LV": "Latvija",
     "EE": "Igaunija",
-    "LT": "Lietuva",
-    "OTHER": "Cita"
+    "LT": "Lietuva"
   },
   "CountryPrompt": {
     "pickCountry": "Izvēlies valsti, lai redzētu spēles tev tuvumā",
+    "looksLikeYoureIn": "Izskatās, ka esi {country}",
+    "yesImIn": "Jā, esmu {country}",
+    "notInCountry": "Neesi {country}?",
     "somethingWentWrong": "Kaut kas nogāja greizi"
   },
   "Browse": {
@@ -1231,11 +1227,7 @@
       "clearAll": "Notīrīt visu",
       "clearFilters": "Notīrīt filtrus",
       "allListings": "Visi sludinājumi",
-      "instantBuy": "Pirkt uzreiz",
-      "contactSeller": "Sazināties ar pārdevēju",
-      "all": "Visi",
-      "buy": "Pirkt",
-      "contact": "Kontaktēt"
+      "all": "Visi"
     },
     "cart": {
       "addedToCart": "Pievienots grozam",
@@ -1385,6 +1377,9 @@
       "editTitle": "Labot sludinājumu",
       "bggAttribution": "Spēļu datus nodrošina BoardGameGeek",
       "loading": "Ielādē...",
+      "welcome": {
+        "sellerActivated": "Tu tagad esi pārdevējs — ievieto savu pirmo spēli"
+      },
       "loadingGameDetails": "Ielādē spēles informāciju...",
       "loadingListing": "Ielādē sludinājumu...",
       "preparing": "Sagatavo..."
@@ -1449,6 +1444,10 @@
         "subtitle": "Iestati savu cenu",
         "auctionTitle": "Izsoles iestatījumi",
         "auctionSubtitle": "Iestatiet sākuma cenu un izsoles ilgumu"
+      },
+      "phone": {
+        "label": "Piegādei nepieciešams tālruņa numurs",
+        "description": "Unisend pakomātiem nepieciešams tavs tālruņa numurs, lai izveidotu sūtījuma uzlīmes. Tas tiks saglabāts tavā profilā."
       }
     },
     "terms": {
@@ -1490,8 +1489,6 @@
       "photoCount_other": "{count} fotogrāfijas",
       "allComponents": "Visas sastāvdaļas klāt",
       "missingComponents": "Dažas sastāvdaļas trūkst",
-      "instantBuy": "Pirkt uzreiz",
-      "contactSeller": "Sazināties ar pārdevēju",
       "auction": "Izsole",
       "fixedPrice": "Fiksēta cena"
     },
@@ -1583,7 +1580,7 @@
     "PhotoUpload": {
       "guidelines": {
         "requiredTitle": "Fotogrāfijas ir obligātas Pieņemama stāvokļa spēlēm",
-        "optionalTitle": "Fotogrāfijas palīdz veidot pircēju uzticību (pēc izvēles)",
+        "optionalTitle": "Fotogrāfijas palīdz veidot pircēju uzticību",
         "tip1": "Nofotografē kasti, sastāvdaļas",
         "tip2": "Parādi jebkādus bojājumus vai nolietojumu"
       },
@@ -1606,32 +1603,6 @@
         "photoAlt": "Fotogrāfija {number}",
         "uploadAlt": "Augšupielāde {number}",
         "removePhoto": "Noņemt fotogrāfiju"
-      }
-    },
-    "PricingShipping": {
-      "pricing": {
-        "title": "Pieprasītā cena *",
-        "label": "Cena (€)",
-        "placeholder": "25.00"
-      },
-      "shipping": {
-        "title": "Piegādes iespējas *",
-        "selectOne": "Izvēlieties vismaz vienu opciju",
-        "localPickup": {
-          "title": "Saņemšana klātienē",
-          "description": "Tikšanās vietējā rajonā",
-          "locationLabel": "Saņemšanas vietas detaļas",
-          "locationPlaceholder": "piem., Rīga, Vecrīga vai pie Centrāltirgus"
-        },
-        "parcelLocker": {
-          "title": "Pakomāti",
-          "description": "Unisend, Latvijas Pasts, uDrop",
-          "paymentLabel": "Kas maksā par piegādi?",
-          "sellerPays": "Es sedzu piegādes izmaksas",
-          "sellerPaysDescription": "Bezmaksas piegāde pircējam",
-          "buyerPays": "Pircējs maksā",
-          "buyerPaysDescription": "Piegādes izmaksas pievienotas apmaksāšanai"
-        }
       }
     },
     "VersionSelector": {
@@ -1889,28 +1860,6 @@
         "content": "Ja svārsties starp divām pakāpēm, izvēlies zemāko. Pircējs, kurš saņem spēli labākā stāvoklī nekā gaidīts, ir sajūsmā."
       }
     },
-    "transactionMethod": {
-      "title": "Kā vēlies pārdot?",
-      "subtitle": "Izvēlies, kā sazināsies ar pircēju.",
-      "contactSeller": {
-        "label": "Sazināties ar pircēju",
-        "description": "Pircēji tev rakstīs, lai vienotos par maksājumu un piegādi."
-      },
-      "instantBuy": {
-        "label": "Pirkt uzreiz",
-        "description": "Pircēji maksā uzreiz caur platformu",
-        "unavailable": "Pieejams Latvijas pārdevējiem ar pievienotu maksājumu kontu",
-        "upgrade": "Iestatīt maksājumus",
-        "phoneRequired": {
-          "label": "Nepieciešams tālruņa numurs",
-          "description": "Unisend pakomāti izmanto tālruņa numuru sūtījuma uzlīmju izveidei. Tas tiks saglabāts tavā profilā.",
-          "placeholder": "+371 12345678"
-        }
-      },
-      "helpLink": "Kāda ir atšķirība?",
-      "countryUnavailable": "Tiešsaistes maksājumi drīzumā būs pieejami tavā valstī. Pagaidām vienojies par maksājumu tieši ar pircēju caur ziņojumiem.",
-      "instantBuyBanner": "Pircēji maksā, izmantojot platformu. Tu saņem līdzekļus savā maciņā pēc piegādes."
-    },
     "pricingFormat": {
       "title": "Cenas formāts",
       "fixedPrice": {
@@ -1931,26 +1880,6 @@
         "auctionNote": "10% platformas maksa tiek ieturēta no uzvarošās likmes",
         "platformFee": "Platformas maksa (10%)",
         "youReceive": "Tu saņem"
-      }
-    },
-    "listingType": {
-      "title": "Kā vēlies pārdot?",
-      "subtitle": "Izvēlies, vai vēlies sazināties ar pircējiem.",
-      "instantBuy": {
-        "title": "Pirkt uzreiz",
-        "description": "Pircēji maksā, izmantojot platformu. Tu saņem līdzekļus savā maciņā pēc piegādes.",
-        "disabled": "Pabeidz maksājumu iestatīšanu, lai aktivizētu",
-        "upgrade": "Iestatīt maksājumus"
-      },
-      "contactSeller": {
-        "title": "Sazināties ar pārdevēju",
-        "description": "Pircēji vispirms raksta tev. Maksājumu organizē pats.",
-        "note": "Tu tieši vienojies ar pircēju par maksājumu un piegādi. Šiem darījumiem mēs nevaram nodrošināt pircēja aizsardzību."
-      },
-      "auction": {
-        "title": "Izsole",
-        "description": "Pircēji solās, augstākā likme uzvar, kad beidzas laiks.",
-        "note": "Iestati sākuma cenu un ilgumu. Anti-snipe aizsardzība pagarina izsoli, ja likmes tiek izdarītas pēdējās minūtēs."
       }
     },
     "auction": {
@@ -2064,13 +1993,13 @@
       "subtitle": "Pārvērt savas spēles naudā. Ātra iestatīšana - sāc pārdot mazāk nekā minūtē."
     },
     "step1": {
-      "title": "1. solis: Pieņem pārdevēja noteikumus",
+      "title": "Pieņem pārdevēja noteikumus",
       "heading": "Pieņem pārdevēja noteikumus",
       "description": "Pārskati un pieņem mūsu pārdevēja noteikumus, lai apstiprinātu, ka pārdod kā privātpersona.",
       "keyPoints": {
         "title": "Galvenie punkti:",
         "zeroFees": "<strong>Bez sludinājumu maksas</strong> - bezmaksas spēļu izvietošana",
-        "ageRequirement": "Tev jābūt vismaz <strong>16 gadus vecam</strong>",
+        "ageRequirement": "Tev jābūt vismaz <strong>18 gadus vecam</strong>",
         "personalItems": "Tu pārdod <strong>personīgas lietas</strong>, nevis darbojies kā uzņēmums",
         "accurateDescriptions": "Tu esi atbildīgs par <strong>precīziem aprakstiem</strong> savām spēlēm"
       },
@@ -2079,7 +2008,7 @@
         "title": "Kur tu atrodies?",
         "hint": "Tas palīdz mums parādīt pieejamās maksājumu un piegādes opcijas."
       },
-      "checkbox": "Es apstiprinu, ka esmu 16+, pārdodu personīgas lietas un piekrītu",
+      "checkbox": "Es apstiprinu, ka esmu 18+, pārdodu personīgas lietas un piekrītu",
       "sellerTerms": "Pārdevēja noteikumiem",
       "acceptButton": "Pieņemt pārdevēja noteikumus",
       "countryRequired": "Lūdzu, izvēlies savu valsti augstāk, lai turpinātu"
@@ -2087,72 +2016,6 @@
     "support": {
       "needHelp": "Nepieciešama palīdzība?",
       "contactUs": "Sazinies ar mums"
-    },
-    "complete": {
-      "title": "Viss gatavs",
-      "subtitle": "Laipni lūdzam Second Turn Games. Tagad vari sākt izvietot un pārdot savas galda spēles.",
-      "whatYouCanDo": {
-        "title": "Ko tagad vari darīt",
-        "createListing": {
-          "title": "Izveido savu pirmo sludinājumu",
-          "description": "Ievieto galda spēli no savas kolekcijas. Nosaki cenu, augšupielādē fotogrāfijas un apraksti stāvokli. Aizņem mazāk nekā 3 minūtes.",
-          "button": "Izveidot sludinājumu"
-        },
-        "browseGames": {
-          "title": "Pārlūko un pērc spēles",
-          "description": "Kamēr gaidi pārdošanu, izpēti spēles no citiem pārdevējiem. Papildini savu kolekciju.",
-          "button": "Pārlūkot tirgu"
-        },
-        "manageSales": {
-          "title": "Pārvaldi savas pārdošanas",
-          "description": "Skati savus aktīvos sludinājumus, gaidošos pasūtījumus un izmaksu vēsturi pārdevēja panelī.",
-          "button": "Uz paneli"
-        }
-      },
-      "howItWorks": {
-        "title": "Kā darbojas pārdošana",
-        "step1": {
-          "title": "Kāds nopērk tavu spēli",
-          "description": "Saņemsi e-pasta paziņojumu ar piegādes informāciju un iepriekš apmaksātu Unisend uzlīmi."
-        },
-        "step2": {
-          "title": "Iepako un nosūti",
-          "description": "Droši iepako spēli un nodod to jebkurā Unisend pakomātā 2 darba dienu laikā."
-        },
-        "step3": {
-          "title": "Pircējs saņem spēli",
-          "description": "Pircējs izņem spēli no izvēlētā pakomāta. Izsekošana atjauninās automātiski."
-        },
-        "step4": {
-          "title": "Saņem samaksu",
-          "description": "Tavi ieņēmumi tiek ieskaitīti platformas makā pēc katras pabeigtas pārdošanas. Tiek piemērota 10% platformas komisija."
-        }
-      },
-      "tips": {
-        "title": "Padomi veiksmīgai pārdošanai",
-        "photos": "<strong>Uzņem skaidras fotogrāfijas:</strong> Parādi pašu spēli, ieskaitot jebkādu nolietojumu vai bojājumus",
-        "condition": "<strong>Esi godīgs par stāvokli:</strong> Precīzi apraksti novērš strīdus",
-        "pricing": "<strong>Nosaki konkurētspējīgu cenu:</strong> Pārbaudi līdzīgus sludinājumus, lai noteiktu taisnīgu cenu",
-        "shipping": "<strong>Sūti ātri:</strong> Ātra piegāde nodrošina labākas atsauksmes",
-        "packaging": "<strong>Iepako droši:</strong> Pasargā spēles no bojājumiem pārvadāšanas laikā",
-        "messages": "<strong>Atbildi uz ziņām:</strong> Ātra komunikācija veido uzticību"
-      },
-      "earnings": {
-        "title": "Par taviem ieņēmumiem",
-        "subtitle": "Tavi ieņēmumi tiek ieskaitīti platformas makā pēc katras pabeigtas pārdošanas.",
-        "commission": "<strong>90% no sludinājuma cenas</strong> - Tiek ieturēta 10% platformas komisija",
-        "withdraw": "<strong>Izņem jebkurā laikā</strong> - Pieprasi bankas pārskaitījumu kad vēlies",
-        "track": "<strong>Seko līdzi panelī</strong> - Skati maka atlikumu un darījumu vēsturi",
-        "viewWallet": "Skatīt maku un izmaksas →"
-      },
-      "completeSupport": {
-        "questions": "Ir jautājumi vai nepieciešama palīdzība?",
-        "contactSeller": "Sazināties ar pārdevēju atbalstu"
-      },
-      "cta": {
-        "button": "Izveido savu pirmo sludinājumu",
-        "subtitle": "Gatavs pārdot? Ievieto savu pirmo spēli tagad."
-      }
     }
   },
   "StatusChangeModal": {
@@ -2662,28 +2525,6 @@
       "statsPlural": "{count} pārdošanas · {amount} pēdējās 30 dienās",
       "viewWallet": "Skatīt maku un darījumus"
     },
-    "EarningsSummary": {
-      "title": "Ieņēmumu kopsavilkums",
-      "totalSales": "Kopējās pārdošanas",
-      "last30Days": "Pēdējās 30 dienas",
-      "totalEarnings": "Kopējie ieņēmumi",
-      "averageOrder": "Vid. pasūtījums",
-      "noData": "Vēl nav ieņēmumu datu",
-      "noDataHint": "Tavi ieņēmumu dati parādīsies šeit pēc pirmās pārdošanas"
-    },
-    "PayoutHistory": {
-      "title": "Pēdējās izmaksas",
-      "viewAll": "Skatīt visas",
-      "noPayout": "Vēl nav izmaksu",
-      "noPayoutHint": "Pieprasi izmaksu, lai redzētu savu izmaksu vēsturi",
-      "status": {
-        "pending": "Gaida",
-        "in_transit": "Ceļā",
-        "paid": "Izmaksāts",
-        "failed": "Neizdevās",
-        "canceled": "Atcelts"
-      }
-    },
     "TransactionList": {
       "title": "Pēdējās pārdošanas",
       "viewAll": "Skatīt visas",
@@ -2932,166 +2773,6 @@
     }
   },
   "Help": {
-    "ListingTypes": {
-      "meta": {
-        "title": "Tūlītēja pirkšana vai Sazināties ar pārdevēju | Second Turn Games",
-        "description": "Uzziniet par Sazināties ar pārdevēju un Tūlītēja pirkšana piedāvājumu veidiem. Izprotiet maksu, maksājumu apstrādi un kura opcija Jums ir piemērotāka.",
-        "ogTitle": "Piedāvājumu veidi izskaidroti | Second Turn Games",
-        "ogDescription": "Izvēlieties pareizo pārdošanas veidu savām galda spēlēm. Salīdziniet Sazināties ar pārdevēju un Tūlītēja pirkšana."
-      },
-      "intro": {
-        "title": "Tūlītēja pirkšana vai Sazināties ar pārdevēju",
-        "tagline": "Izvēlieties, kā vēlaties pārdot savas spēles",
-        "description": "Second Turn Games piedāvā divus veidus, kā pārdot savas lietotas galda spēles. Katram ir savas priekšrocības atkarībā no Jūsu vēlmēm un situācijas."
-      },
-      "toc": {
-        "title": "Šajā lapā",
-        "comparison": "Ātrais salīdzinājums",
-        "instantBuy": "Kā darbojas Tūlītēja pirkšana",
-        "contactSeller": "Kā darbojas Sazināties ar pārdevēju",
-        "switching": "Vai varu mainīt vēlāk?",
-        "faqs": "Bieži uzdoti jautājumi"
-      },
-      "comparison": {
-        "title": "Ātrais salīdzinājums",
-        "bestFor": "Vislabākais",
-        "howBuyersPay": "Kā pircēji maksā",
-        "howShippingWorks": "Kā darbojas piegāde",
-        "yourEarnings": "Jūsu ienākumi",
-        "buyerProtection": "Pircēja aizsardzība",
-        "setupRequired": "Nepieciešamā iestatīšana",
-        "availability": "Pieejamība",
-        "instantBuy": {
-          "bestFor": "Vairumam pārdevēju Latvijā",
-          "howBuyersPay": "Caur Second Turn Games",
-          "howShippingWorks": "€2 vienota likme caur Unisend skapjiem",
-          "yourEarnings": "90% no Jūsu prasītās cenas (10% komisija)",
-          "buyerProtection": "Jā - mēs turam maksājumu līdz piegādei",
-          "setupRequired": "Pieņemt pārdevēja noteikumus (1 min)",
-          "availability": "Tikai Latvijā"
-        },
-        "contactSeller": {
-          "bestFor": "Pārdevējiem, kas dod priekšroku pilnai kontrolei",
-          "howBuyersPay": "Tieši Jums (ārpus platformas)",
-          "howShippingWorks": "Jūs vienojaties ar pircēju",
-          "yourEarnings": "Tas, par ko vienojaties ar pircēju",
-          "buyerProtection": "Nē",
-          "setupRequired": "Nav nepieciešama",
-          "availability": "Latvija, Lietuva, Igaunija"
-        }
-      },
-      "instantBuySection": {
-        "title": "Kā darbojas Tūlītēja pirkšana",
-        "description": "Tūlītēja pirkšana ir mūsu pilna servisa pārdošanas opcija. Lūk, kas notiek, kad kāds pērk Jūsu spēli:",
-        "steps": {
-          "step1": {
-            "title": "Pircējs iegādājas",
-            "description": "Viņi maksā spēles cenu plus €2 piegādi. Nav servisa maksas pircējiem."
-          },
-          "step2": {
-            "title": "Jūs saņemat paziņojumu",
-            "description": "Mēs nosūtām Jums e-pastu un paziņojumu informācijas panelī. Jums ir 24 stundas, lai apstiprinātu pasūtījumu."
-          },
-          "step3": {
-            "title": "Jūs nosūtāt spēli",
-            "description": "Pēc apstiprināšanas Jūs saņemsiet Unisend skapīša kodu. Iepakojiet spēli, dodieties uz jebkuru no 500+ Unisend pakomātiem (ieskaitot Latvijas Pastu un uDrop vietas), ievadiet kodu un ielieciet sūtījumu."
-          },
-          "step4": {
-            "title": "Pircējs to saņem",
-            "description": "Kad pircējs paņem spēli, mēs atbrīvojam Jūsu maksājumu."
-          },
-          "step5": {
-            "title": "Jūs saņemat naudu",
-            "description": "Tavi ienākumi (spēles cena mīnus 10% komisija) tiek ieskaitīti platformas makā. Izņem uz savu banku jebkurā laikā."
-          }
-        },
-        "issuesTitle": "Kas notiek, ja kaut kas noiet greizi?",
-        "issues": {
-          "cantShip": "Ja nevarat nosūtīt 24 stundu laikā, varat noraidīt pasūtījumu. Pircējs saņem pilnu atmaksu.",
-          "mismatch": "Ja spēle neatbilst Jūsu aprakstam, mēs palīdzam atrisināt problēmu un varam atmaksāt pircējam.",
-          "notPickedUp": "Ja pircējs nepaņem sūtījumu, mēs sadarbosimies ar Jums par turpmākajiem soļiem."
-        },
-        "setupTitle": "Tūlītējas pirkšanas iestatīšana",
-        "setupDescription": "Lai izmantotu Tūlītējo pirkšanu, vienkārši pieņemiet pārdevēja noteikumus. Jūsu ienākumi nonāks platformas makā.",
-        "setupTime": "Iestatīšana aizņem aptuveni 2 minūtes. Jums būs nepieciešams:",
-        "setupRequirements": {
-          "name": "Jūsu pilns vārds",
-          "bank": "Bankas konta dati (IBAN)"
-        },
-        "setupTrust": "Jūsu IBAN ir nepieciešams tikai tad, kad pieprasāt pirmo izņemšanu. Maksājumi tiek apstrādāti droši caur mūsu maksājumu partneri."
-      },
-      "contactSellerSection": {
-        "title": "Kā darbojas Sazināties ar pārdevēju",
-        "description": "Sazināties ar pārdevēju ir mūsu vienkāršā piedāvājuma opcija. Tā darbojas kā sludinājums vai Facebook Marketplace:",
-        "steps": {
-          "step1": {
-            "title": "Jūs publicējat spēli",
-            "description": "Pievienojiet fotogrāfijas, norādiet cenu, aprakstiet stāvokli."
-          },
-          "step2": {
-            "title": "Pircēji redz Jūsu piedāvājumu",
-            "description": "Jūsu spēle parādās meklēšanas rezultātos kopā ar Tūlītējās pirkšanas piedāvājumiem."
-          },
-          "step3": {
-            "title": "Pircējs Jums raksta",
-            "description": "Kad kāds ir ieinteresēts, viņš nosūta Jums ziņu caur mūsu platformu."
-          },
-          "step4": {
-            "title": "Jūs vienojaties par detaļām",
-            "description": "Vienojieties par cenu, maksājuma veidu un to, kā spēle nonāks pie viņiem (tikšanās, piegāde utt.)."
-          },
-          "step5": {
-            "title": "Darījums notiek ārpus platformas",
-            "description": "Maksājums un piegāde notiek tieši starp Jums un pircēju."
-          }
-        },
-        "whyChoose": "Kāpēc izvēlēties šo opciju?",
-        "reasons": {
-          "directPayments": "Jūs dodat priekšroku tiešiem maksājumiem",
-          "negotiate": "Jūs dodat priekšroku cenu sarunām",
-          "ownShipping": "Jūs vēlaties izvēlēties savu piegādes veidu",
-          "country": "Jūs atrodaties Lietuvā vai Igaunijā (kur Tūlītējā pirkšana vēl nav pieejama)"
-        },
-        "tradeoff": "Kompromiss: Jums pašam būs jānodrošina maksājums un piegāde, un pircējiem nav tādas pašas aizsardzības kā ar Tūlītējo pirkšanu."
-      },
-      "switchingSection": {
-        "title": "Vai varu mainīt vēlāk?",
-        "upgradeTitle": "Sākot ar Sazināties ar pārdevēju, pārejot uz Tūlītējo pirkšanu:",
-        "upgradeDescription": "Jā, ja esat iestatījis Sazināties ar pārdevēju, Jūs varat iespējot Tūlītējo pirkšanu jebkurā laikā no Pārdevēja iestatījumiem. Jūsu nākotnes piedāvājumiem būs pieejamas abas opcijas.",
-        "downgradeTitle": "Jau ir Tūlītējā pirkšana, vēlaties izmantot Sazināties ar pārdevēju:",
-        "downgradeDescription": "Jūs varat izvēlēties piedāvājuma veidu katrai spēlei, kad veidojat piedāvājumu. Pat ar iespējotu Tūlītējo pirkšanu Jūs varat konkrētas spēles publicēt kā Sazināties ar pārdevēju, ja vēlaties.",
-        "countryNoteTitle": "Piezīme Lietuvas un Igaunijas pārdevējiem:",
-        "countryNoteDescription": "Tūlītējā pirkšana Jūsu valstī vēl nav pieejama. Mēs strādājam pie integrēto maksājumu un piegādes paplašināšanas visā Baltijas reģionā. Pierakstieties jaunumiem un mēs paziņosim, kad tas būs gatavs."
-      },
-      "faqSection": {
-        "title": "Bieži uzdoti jautājumi",
-        "q1": {
-          "question": "Kā es saņemu samaksu?",
-          "answer": "Tavi ienākumi tiek ieskaitīti platformas makā pēc katra pārdošanas. Tu vari izņemt maka atlikumu uz savu bankas kontu jebkurā laikā, izmantojot IBAN pārskaitījumu."
-        },
-        "q2": {
-          "question": "Kurš maksā maksu?",
-          "answer": "Pircēji maksā pakalpojuma maksu (6% + €0.50) un piegādi (€2). Kā pārdevējs Jūs saņemat 100% no savas norādītās cenas. Ja publicējat spēli par €20, Jūs saņemat €20."
-        },
-        "q3": {
-          "question": "Kas ietilpst 500+ pakomātos?",
-          "answer": "Mūsu Unisend integrācija ietver pakomātus no vairākiem tīkliem: Unisend, kā arī Latvijas Pasta un uDrop pakomātus. Jūs varat nodot sūtījumu tajā, kas Jums ērtākais."
-        },
-        "q4": {
-          "question": "Kāpēc Tūlītējā pirkšana nav pieejama Lietuvā un Igaunijā?",
-          "answer": "Mēs strādājam pie pārrobežu piegādes un PVN apstrādes loģistikas. Tā ir mūsu prioritāte, un mēs paziņosim, kad tas būs gatavs."
-        },
-        "q5": {
-          "question": "Vai pircēji joprojām var ar mani sazināties, ja izmantoju Tūlītējo pirkšanu?",
-          "answer": "Jā. Pircēji var Jums rakstīt ar jautājumiem par Jūsu piedāvājumu pirms pirkšanas. Tūlītējā pirkšana vienkārši nozīmē, ka viņi var arī iegādāties uzreiz, negaidot atbildi."
-        }
-      },
-      "cta": {
-        "ready": "Gatavs sākt pārdot?",
-        "sellButton": "Publicēt savu pirmo spēli",
-        "backToHome": "Atpakaļ uz sākumu"
-      }
-    },
     "sectionNotFound": "Sadaļa nav atrasta.",
     "nav": {
       "overview": "Palīdzības centrs",
@@ -3532,6 +3213,7 @@
       "ariaLabel": "Sludinājuma progress",
       "stepOf": "Solis {current} no {total}",
       "stepStatus": {
+        "active": "aktīvs",
         "completed": "pabeigts",
         "current": "pašreizējais",
         "upcoming": "gaidāmais"

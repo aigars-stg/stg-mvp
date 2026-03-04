@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/lib/auth/AuthContext';
-import { OnboardingProvider } from '@/components/onboarding';
+
 import { SavedListingsProvider } from '@/lib/contexts/SavedListingsContext';
 import { ConditionalAnalytics } from '@/components/ConditionalAnalytics';
 import { CookieConsent } from '@/components/CookieConsent';
@@ -36,10 +36,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <UnreadMessagesProvider>
               <UnreadNotificationsProvider>
               <CartProvider>
-                <OnboardingProvider>
                   <PathTracker />
                   {children}
-                </OnboardingProvider>
               </CartProvider>
               </UnreadNotificationsProvider>
             </UnreadMessagesProvider>

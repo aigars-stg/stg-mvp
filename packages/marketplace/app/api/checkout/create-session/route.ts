@@ -115,7 +115,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate shipping
-    const sellerCountry = basket.seller_country || 'LV';
+    const sellerCountry = basket.seller_country;
+    if (!sellerCountry || !['LV', 'LT', 'EE'].includes(sellerCountry)) {
+      return NextResponse.json(
+        { error: 'Seller country is required for shipping' },
+        { status: 400 }
+      );
+    }
     const shippingCostEuros = input.shippingMethod === 't2t' ? SHIPPING_COST_EUROS : 0;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 

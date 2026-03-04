@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Card } from '@second-turn/design-system';
-import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle, Delivery, Handshake } from '@/lib/icons';
+import { Package, Users, User as Baby, Time as Clock, PuzzlePiece as Puzzle, Delivery } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
 import type { AggregatedGame } from '@/lib/types/aggregated-game';
 import { saveBrowseContext } from '@/lib/browse-context';
@@ -100,11 +100,6 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
             {game.instant_buy_count > 0 && (
               <span title={tListings('instantBuyTooltip', { count: game.instant_buy_count })}>
                 <Delivery className="w-4 h-4 text-aurora-orange" />
-              </span>
-            )}
-            {game.contact_seller_count > 0 && (
-              <span title={tListings('contactSellerTooltip', { count: game.contact_seller_count })}>
-                <Handshake className="w-4 h-4 text-text-muted" />
               </span>
             )}
             {showExpansionIcon && (

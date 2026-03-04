@@ -2,18 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 
-export async function POST(request: NextRequest) {
+const CURRENT_SELLER_TERMS_VERSION = '1.0';
+
+export async function POST(_request: NextRequest) {
   try {
     const { response, user, supabase } = await requireAuth();
     if (response) return response;
 
-    // Parse request body
-    const body = await request.json();
-    const { termsVersion } = body;
+    // Server controls terms version — client value is ignored
+    const termsVersion = CURRENT_SELLER_TERMS_VERSION;
 
-    if (!termsVersion) {
+    // Verify user has a country set (required for shipping/payment)
+    const { data: userProfile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('country')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !userProfile?.country) {
       return NextResponse.json(
-        { error: 'Terms version is required' },
+        { error: 'Please select your country before becoming a seller.' },
         { status: 400 }
       );
     }
@@ -37,6 +45,11 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Create wallet for new seller (idempotent)
+    await supabase
+      .from('wallets')
+      .upsert({ user_id: user.id, balance_cents: 0 }, { onConflict: 'user_id' });
 
     return NextResponse.json({
       success: true,

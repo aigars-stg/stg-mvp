@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { Card, Badge } from '@second-turn/design-system';
-import { Package, LocationPin as MapPin, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Chat as MessageSquare, Gavel } from '@/lib/icons';
+import { Package, LocationPin as MapPin, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Gavel } from '@/lib/icons';
 import { ImageCarousel } from '@/components/common/ImageCarousel';
 import type { ListingWithSeller } from '@/lib/types/listing';
-import { isContactSellerListing, isAuctionListing, getAuctionTimeRemaining, formatCompactTimeRemaining } from '@/lib/types/listing';
+import { isAuctionListing, getAuctionTimeRemaining, formatCompactTimeRemaining } from '@/lib/types/listing';
 import { getCountryFlag, getCountryName } from '@/lib/country-utils';
 import { useSavedListingsContext } from '@/lib/contexts/SavedListingsContext';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -173,13 +173,6 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
             </Badge>
           </button>
 
-          {/* Contact Seller badge - bottom left */}
-          {isContactSellerListing(listing) && (
-            <div className="absolute bottom-3 left-3 px-2 py-1 bg-polar-night/80 backdrop-blur-sm rounded-md text-xs text-snow-white font-medium flex items-center gap-1">
-              <MessageSquare className="w-3 h-3" aria-hidden="true" />
-              {t('card.contactSeller')}
-            </div>
-          )}
         </ImageCarousel>
 
         {/* Content Section */}
@@ -297,7 +290,6 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
           {/* Bottom Section: Location + Shipping + Buy Now Button */}
           <div className="pt-2 space-y-2 border-t border-border-subtle">
             {/* Location + Shipping - answers "Can I get this?" and "How?" */}
-            {/* Contact Seller listings don't show shipping options - arranged directly */}
             {showSeller && listing.seller?.country && (
               <div className="flex items-center gap-1.5 text-sm text-text-secondary">
                 {getCountryFlag(listing.seller.country) && (
@@ -308,23 +300,18 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
                   />
                 )}
                 <span>{getCountryName(listing.seller.country)}</span>
-                {/* Only show shipping options for instant_buy listings */}
-                {!isContactSellerListing(listing) && (
-                  <>
-                    <span className="text-text-muted">•</span>
-                    {listing.shipping_parcel_locker ? (
-                      <span className="flex items-center gap-1">
-                        <Package className="w-3.5 h-3.5" aria-hidden="true" />
-                        {t('card.parcelLocker')}
-                      </span>
-                    ) : listing.shipping_local_pickup ? (
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
-                        {t('card.pickupOnly')}
-                      </span>
-                    ) : null}
-                  </>
-                )}
+                <span className="text-text-muted">•</span>
+                {listing.shipping_parcel_locker ? (
+                  <span className="flex items-center gap-1">
+                    <Package className="w-3.5 h-3.5" aria-hidden="true" />
+                    {t('card.parcelLocker')}
+                  </span>
+                ) : listing.shipping_local_pickup ? (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
+                    {t('card.pickupOnly')}
+                  </span>
+                ) : null}
               </div>
             )}
 

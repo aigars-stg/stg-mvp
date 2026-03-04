@@ -10,6 +10,7 @@ import {
   composePhoneNumber,
   isValidPhoneNumber,
   getPhonePrefix,
+  type PhoneCountryCode,
 } from '@/lib/phone-utils';
 
 interface PhoneInputProps {
@@ -23,8 +24,7 @@ interface PhoneInputProps {
   compact?: boolean;
 }
 
-const BALTIC_COUNTRIES = COUNTRIES.filter(c => c.code !== 'OTHER');
-const OTHER_COUNTRY = COUNTRIES.find(c => c.code === 'OTHER');
+const BALTIC_COUNTRIES = COUNTRIES;
 
 export function PhoneInput({
   value,
@@ -39,7 +39,7 @@ export function PhoneInput({
   const t = useTranslations('Common.PhoneInput');
   const tCountries = useTranslations('Countries');
 
-  const [selectedCountry, setSelectedCountry] = useState<CountryCode>(() => {
+  const [selectedCountry, setSelectedCountry] = useState<PhoneCountryCode>(() => {
     if (value) {
       return detectPhoneCountry(value).country;
     }
@@ -113,14 +113,14 @@ export function PhoneInput({
   }, [isDropdownOpen]);
 
   const emitChange = useCallback(
-    (country: CountryCode, local: string, prefix?: string) => {
+    (country: PhoneCountryCode, local: string, prefix?: string) => {
       const fullNumber = composePhoneNumber(country, local, prefix);
       onChange(fullNumber);
     },
     [onChange]
   );
 
-  const handleCountrySelect = (country: CountryCode) => {
+  const handleCountrySelect = (country: PhoneCountryCode) => {
     setSelectedCountry(country);
     setIsDropdownOpen(false);
 
@@ -159,7 +159,7 @@ export function PhoneInput({
   const currentFlagClass =
     selectedCountry !== 'OTHER'
       ? COUNTRIES.find(c => c.code === selectedCountry)?.flagClass || ''
-      : OTHER_COUNTRY?.flagClass || '';
+      : 'fi fi-un';
 
   const currentConfig = PHONE_COUNTRY_CONFIGS.find(c => c.code === selectedCountry);
 

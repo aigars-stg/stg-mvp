@@ -27,7 +27,7 @@ export interface ListingFormData {
 }
 
 export const INITIAL_FORM_DATA: ListingFormData = {
-  transactionMethod: 'instant_buy',
+  transactionMethod: 'claim',
   pricingFormat: 'fixed_price',
   selectedGame: null,
   selectedGameDisplayName: null,
@@ -118,11 +118,10 @@ export interface UseListingFormReturn {
 
   // Seller capabilities
   sellerCapabilities: {
-    canCreateContactSeller: boolean;
-    canCreateInstantBuy: boolean;
+    canListItems: boolean;
     isLoading: boolean;
   };
-  setSellerCapabilities: (value: { canCreateContactSeller: boolean; canCreateInstantBuy: boolean; isLoading: boolean }) => void;
+  setSellerCapabilities: (value: { canListItems: boolean; isLoading: boolean }) => void;
 
   // Ref for initial type setting
   hasSetInitialListingType: React.MutableRefObject<boolean>;
@@ -195,8 +194,7 @@ export function useListingForm(): UseListingFormReturn {
 
   // Seller capabilities
   const [sellerCapabilities, setSellerCapabilities] = useState({
-    canCreateContactSeller: false,
-    canCreateInstantBuy: false,
+    canListItems: false,
     isLoading: true,
   });
 
@@ -259,8 +257,7 @@ export function useListingForm(): UseListingFormReturn {
     if (!price || parseFloat(price) <= 0) return false;
 
     // Check seller capabilities
-    if (transactionMethod === 'instant_buy' && !sellerCapabilities.canCreateInstantBuy) return false;
-    if (transactionMethod === 'contact_seller' && !sellerCapabilities.canCreateContactSeller) return false;
+    if (!sellerCapabilities.canListItems) return false;
 
     return true;
   }, [formData, sellerCapabilities]);

@@ -1,10 +1,10 @@
 /**
  * Country utilities for marketplace
- * Supporting Latvia, Estonia, Lithuania, and Other countries
+ * Supporting Latvia, Estonia, and Lithuania (Baltic countries only)
  * Uses flag-icons library for proper SVG flag rendering
  */
 
-export type CountryCode = 'LV' | 'EE' | 'LT' | 'OTHER';
+export type CountryCode = 'LV' | 'EE' | 'LT';
 
 export interface Country {
   code: CountryCode;
@@ -14,13 +14,12 @@ export interface Country {
 
 /**
  * Supported countries for the marketplace
- * LV = Latvia, EE = Estonia, LT = Lithuania, OTHER = Other countries
+ * LV = Latvia, EE = Estonia, LT = Lithuania
  */
 export const COUNTRIES: Country[] = [
   { code: 'LV', name: 'Latvia', flagClass: 'fi fi-lv' },
   { code: 'EE', name: 'Estonia', flagClass: 'fi fi-ee' },
   { code: 'LT', name: 'Lithuania', flagClass: 'fi fi-lt' },
-  { code: 'OTHER', name: 'Other', flagClass: 'fi fi-un' },
 ];
 
 /**

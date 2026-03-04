@@ -36,10 +36,6 @@ export interface UserProfile {
   preferred_terminal_name?: string | null;
   preferred_terminal_address?: string | null;
   preferred_delivery_country?: string | null;
-  // Onboarding tracking
-  profile_banner_dismissed_until?: string | null;
-  onboarding_email_step?: number;
-  last_onboarding_email_at?: string | null;
   // Legacy: seller_status still available during migration
   seller_status?: SellerStatus;
   // Staff access

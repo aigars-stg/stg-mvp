@@ -5,7 +5,7 @@ import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { ensureGameMetadata } from '@/lib/bgg-api';
 import { checkRateLimit, getRateLimitAction } from '@/lib/ratelimit';
-import type { TransactionMethod, PricingFormat } from '@/lib/types/listing';
+import type { PricingFormat } from '@/lib/types/listing';
 import type { ListingWithDetailsRow } from '@/lib/supabase/query-types';
 import { createServiceClient } from '@/lib/supabase/client';
 import { checkAndAwardAchievements } from '@/lib/services/achievements';
@@ -23,40 +23,9 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // New 2-dimensional model: transactionMethod + pricingFormat
-    // Also support legacy listingType for backwards compatibility
-    let transactionMethod: TransactionMethod;
-    let pricingFormat: PricingFormat;
-
-    if (body.transactionMethod && body.pricingFormat) {
-      // New model
-      transactionMethod = body.transactionMethod;
-      pricingFormat = body.pricingFormat;
-    } else if (body.listingType) {
-      // Legacy model - convert to new format
-      if (body.listingType === 'auction') {
-        transactionMethod = 'contact_seller';
-        pricingFormat = 'auction';
-      } else if (body.listingType === 'instant_buy') {
-        transactionMethod = 'instant_buy';
-        pricingFormat = 'fixed_price';
-      } else {
-        transactionMethod = 'contact_seller';
-        pricingFormat = 'fixed_price';
-      }
-    } else {
-      // Default
-      transactionMethod = 'contact_seller';
-      pricingFormat = 'fixed_price';
-    }
-
-    // Validate transaction method
-    if (!['contact_seller', 'instant_buy'].includes(transactionMethod)) {
-      return NextResponse.json(
-        { error: 'Invalid transaction method' },
-        { status: 400 }
-      );
-    }
+    // All listings are Claim — server controls transaction method
+    const transactionMethod = 'claim';
+    const pricingFormat: PricingFormat = body.pricingFormat === 'auction' ? 'auction' : 'fixed_price';
 
     // Validate pricing format
     if (!['fixed_price', 'auction'].includes(pricingFormat)) {
@@ -67,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Derive listing_type for backwards compatibility
-    const listingType = pricingFormat === 'auction' ? 'auction' : transactionMethod;
+    const listingType = pricingFormat === 'auction' ? 'auction' : 'claim';
 
     // Check if seller has completed onboarding
     const { data: profile, error: profileError } = await supabase
@@ -116,24 +85,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For instant_buy, also require phone number (needed for Unisend shipping labels)
-    if (transactionMethod === 'instant_buy') {
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
-        .select('phone')
-        .eq('id', user.id)
-        .single();
+    // Verify seller has a country and phone set
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('country, phone')
+      .eq('id', user.id)
+      .single();
 
-      if (!userProfile?.phone || userProfile.phone.trim() === '') {
-        return NextResponse.json(
-          {
-            error: 'Phone number required for instant buy listings. Please add your phone number in your profile settings.',
-            requiresPhone: true,
-            settingsUrl: '/profile/settings'
-          },
-          { status: 403 }
-        );
-      }
+    if (!userProfile?.country) {
+      return NextResponse.json(
+        {
+          error: 'Please set your country before creating a listing.',
+          requiresCountry: true,
+          settingsUrl: '/account/settings'
+        },
+        { status: 403 }
+      );
+    }
+
+    // Phone required for all listings (needed for Unisend shipping labels)
+    if (!userProfile.phone || userProfile.phone.trim() === '') {
+      return NextResponse.json(
+        {
+          error: 'Phone number required for listings. Please add your phone number in your profile settings.',
+          requiresPhone: true,
+          settingsUrl: '/profile/settings'
+        },
+        { status: 403 }
+      );
     }
 
     const {
@@ -360,9 +339,7 @@ export async function POST(request: NextRequest) {
  * - ?gameId=123 - Get listings for a specific game
  * - ?sellerId=xyz - Get listings by a specific seller
  * - ?status=active - Filter by status (default: active for public browse, all for seller's own listings)
- * - ?listingType=instant_buy|contact_seller|auction - Filter by legacy listing type (backwards compat)
- * - ?transactionMethod=instant_buy|contact_seller - Filter by transaction method (new model)
- * - ?pricingFormat=fixed_price|auction - Filter by pricing format (new model)
+ * - ?pricingFormat=fixed_price|auction - Filter by pricing format
  * - ?page=1 - Page number (default: 1)
  * - ?limit=20 - Items per page (default: 20)
  *
@@ -374,8 +351,6 @@ export async function GET(request: NextRequest) {
     const gameId = searchParams.get('gameId');
     const sellerId = searchParams.get('sellerId');
     const status = searchParams.get('status');
-    const listingType = searchParams.get('listingType');
-    const transactionMethod = searchParams.get('transactionMethod');
     const pricingFormat = searchParams.get('pricingFormat');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -408,16 +383,6 @@ export async function GET(request: NextRequest) {
 
     if (status) {
       query = query.eq('status', status);
-    }
-
-    // Filter by legacy listing type (backwards compat)
-    if (listingType && ['instant_buy', 'contact_seller', 'auction'].includes(listingType)) {
-      query = query.eq('listing_type', listingType);
-    }
-
-    // Filter by new transaction method
-    if (transactionMethod && ['instant_buy', 'contact_seller'].includes(transactionMethod)) {
-      query = query.eq('transaction_method', transactionMethod);
     }
 
     // Filter by pricing format
@@ -472,9 +437,9 @@ export async function GET(request: NextRequest) {
         shipping_notes: row.shipping_notes,
         seller_id: row.seller_id,
         status: row.status,
-        listing_type: row.listing_type || 'instant_buy', // Default for backwards compatibility
+        listing_type: row.listing_type || 'claim', // Default for backwards compatibility
         // New 2-dimensional model columns
-        transaction_method: row.transaction_method || (row.listing_type === 'instant_buy' ? 'instant_buy' : 'contact_seller'),
+        transaction_method: row.transaction_method || 'claim',
         pricing_format: row.pricing_format || (row.listing_type === 'auction' ? 'auction' : 'fixed_price'),
         reserved_by: row.reserved_by,
         reserved_until: row.reserved_until,

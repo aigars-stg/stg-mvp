@@ -8,16 +8,14 @@ export type AuctionDuration = 1 | 3 | 5 | 7;
 export type AuctionEndStrategy = 'fixed' | 'cooldown';
 export type AuctionCooldownHours = 24 | 48;
 
-// New 2-dimensional model
-export type TransactionMethod = 'contact_seller' | 'instant_buy';
+// Transaction method — all listings are now 'claim' (platform-handled)
+export type TransactionMethod = 'claim';
 export type PricingFormat = 'fixed_price' | 'auction';
 
 // DEPRECATED: Old compound type - kept for backwards compatibility during transition
-export type ListingType = 'instant_buy' | 'contact_seller' | 'auction';
+export type ListingType = 'claim' | 'auction';
 
-// Type guards for new model
-export const isInstantBuy = (method: TransactionMethod): boolean => method === 'instant_buy';
-export const isContactSeller = (method: TransactionMethod): boolean => method === 'contact_seller';
+// Type guards
 export const isAuction = (format: PricingFormat): boolean => format === 'auction';
 export const isFixedPrice = (format: PricingFormat): boolean => format === 'fixed_price';
 
@@ -189,50 +187,12 @@ export function getStatusLabel(status: ListingStatus): string {
   return labels[status];
 }
 
-// DEPRECATED: Use getTransactionMethodLabel or getPricingFormatLabel instead
-export function getListingTypeLabel(type: ListingType): string {
-  const labels: Record<ListingType, string> = {
-    instant_buy: 'Instant Buy',
-    contact_seller: 'Contact Seller',
-    auction: 'Auction',
-  };
-  return labels[type];
-}
-
-export function getTransactionMethodLabel(method: TransactionMethod): string {
-  const labels: Record<TransactionMethod, string> = {
-    contact_seller: 'Contact Seller',
-    instant_buy: 'Instant Buy',
-  };
-  return labels[method];
-}
-
 export function getPricingFormatLabel(format: PricingFormat): string {
   const labels: Record<PricingFormat, string> = {
     fixed_price: 'Fixed Price',
     auction: 'Auction',
   };
   return labels[format];
-}
-
-// Check if listing uses contact seller transaction method
-// Works with both new model (transaction_method) and legacy (listing_type)
-export function isContactSellerListing(listing: { transaction_method?: TransactionMethod; listing_type?: ListingType }): boolean {
-  if (listing.transaction_method) {
-    return listing.transaction_method === 'contact_seller';
-  }
-  // Legacy fallback
-  return listing.listing_type === 'contact_seller';
-}
-
-// Check if listing uses instant buy transaction method
-// Works with both new model (transaction_method) and legacy (listing_type)
-export function isInstantBuyListing(listing: { transaction_method?: TransactionMethod; listing_type?: ListingType }): boolean {
-  if (listing.transaction_method) {
-    return listing.transaction_method === 'instant_buy';
-  }
-  // Legacy fallback - 'auction' was always instant_buy in old model
-  return listing.listing_type === 'instant_buy' || listing.listing_type === 'auction';
 }
 
 // Check if listing uses auction pricing format
@@ -246,13 +206,11 @@ export function isAuctionListing(listing: { pricing_format?: PricingFormat; list
 }
 
 // Check if listing uses fixed price format
-// Works with both new model (pricing_format) and legacy (listing_type)
 export function isFixedPriceListing(listing: { pricing_format?: PricingFormat; listing_type?: ListingType }): boolean {
   if (listing.pricing_format) {
     return listing.pricing_format === 'fixed_price';
   }
-  // Legacy fallback
-  return listing.listing_type === 'instant_buy' || listing.listing_type === 'contact_seller';
+  return listing.listing_type === 'claim';
 }
 
 // Bid interface

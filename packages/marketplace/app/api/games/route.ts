@@ -297,7 +297,6 @@ export async function GET(request: NextRequest) {
       // Split pricing and counts by listing type
       let instantBuyLowestPrice = Infinity;
       let instantBuyCount = 0;
-      let contactSellerCount = 0;
       let auctionCount = 0;
       let auctionLowestPrice = Infinity;
       let hasBundledExpansions = false;
@@ -311,7 +310,6 @@ export async function GET(request: NextRequest) {
       for (const listing of gameListings) {
         // For auctions, use current bid or starting price; for fixed price, use price
         const isAuction = listing.pricing_format === 'auction';
-        const isContactSeller = listing.transaction_method === 'contact_seller';
         const effectivePrice = isAuction
           ? (listing.auction_current_bid || listing.auction_start_price || listing.price)
           : listing.price;
@@ -334,12 +332,7 @@ export async function GET(request: NextRequest) {
             }
           }
         } else {
-          if (isContactSeller) {
-            contactSellerCount++;
-          } else {
-            instantBuyCount++;
-          }
-          // Both instant-buy and contact-seller feed into the primary price
+          instantBuyCount++;
           if (effectivePrice < instantBuyLowestPrice) instantBuyLowestPrice = effectivePrice;
           if (effectivePrice < cheapestNonAuctionPrice) {
             cheapestNonAuction = listing;
@@ -402,7 +395,6 @@ export async function GET(request: NextRequest) {
         instant_buy_lowest_price: instantBuyLowestPrice === Infinity ? null : instantBuyLowestPrice,
         auction_lowest_price: auctionLowestPrice === Infinity ? null : auctionLowestPrice,
         instant_buy_count: instantBuyCount,
-        contact_seller_count: contactSellerCount,
         auction_count: auctionCount,
         has_bundled_expansions: hasBundledExpansions,
         has_expansion_listings: data.expansionGameIds.size > 0,

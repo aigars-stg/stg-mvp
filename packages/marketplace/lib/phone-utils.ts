@@ -6,6 +6,9 @@
 import { type CountryCode } from '@/lib/country-utils';
 import { PHONE_FORMATS, type TerminalCountry } from '@/lib/unisend/types';
 
+/** Extended country code for phone input — includes 'OTHER' for non-Baltic numbers */
+export type PhoneCountryCode = CountryCode | 'OTHER';
+
 /** Phone prefix and local number config per Baltic country */
 export interface PhoneCountryConfig {
   code: CountryCode;
@@ -29,7 +32,7 @@ const BALTIC_PREFIXES: Record<string, CountryCode> = {
  * Get phone prefix for a country code.
  * Returns empty string for 'OTHER'.
  */
-export function getPhonePrefix(country: CountryCode): string {
+export function getPhonePrefix(country: PhoneCountryCode): string {
   const config = PHONE_COUNTRY_CONFIGS.find(c => c.code === country);
   return config?.prefix || '';
 }
@@ -39,7 +42,7 @@ export function getPhonePrefix(country: CountryCode): string {
  * Returns the country code, prefix, and local part.
  */
 export function detectPhoneCountry(phone: string): {
-  country: CountryCode;
+  country: PhoneCountryCode;
   prefix: string;
   localNumber: string;
 } {
@@ -67,7 +70,7 @@ export function detectPhoneCountry(phone: string): {
  * Compose full international number from parts.
  */
 export function composePhoneNumber(
-  country: CountryCode,
+  country: PhoneCountryCode,
   localNumber: string,
   customPrefix?: string
 ): string {

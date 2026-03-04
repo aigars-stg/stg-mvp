@@ -11,6 +11,7 @@ import type { PhaseDefinition } from '@/components/phases/phase-definitions';
 // ---------------------------------------------------------------------------
 
 const DRAFT_KEY = 'listing-draft';
+const DRAFT_DISMISSED_KEY = 'listing-draft-dismissed';
 const DRAFT_VERSION = 2;
 const SPARKLE_DURATION_MS = 700;
 const ADVANCE_DELAY_MS = 500;
@@ -63,6 +64,8 @@ export interface PhaseFlowState extends UseListingFormReturn {
 
   // Draft persistence
   saveDraft: () => void;
+  loadDraftData: () => void;
+  dismissDraft: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,6 +146,8 @@ function persistDraft(data: DraftV2): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+    // Clear dismissal flag so banner shows for newly saved drafts
+    sessionStorage.removeItem(DRAFT_DISMISSED_KEY);
   } catch {
     // localStorage full or unavailable — silently ignore
   }
@@ -176,33 +181,27 @@ export function usePhaseFlow(): PhaseFlowState {
     };
   }, []);
 
-  // ------- Draft loading on mount -------
+  // ------- Draft detection on mount (check only, do NOT load data) -------
   useEffect(() => {
     if (hasLoadedDraft.current) return;
     hasLoadedDraft.current = true;
 
     const draft = loadDraft();
-    if (!draft) {
+    if (!draft || !draft.formData) {
       setFlowStartTime(Date.now());
       return;
     }
 
-    // Restore formData regardless of version
-    if (draft.formData) {
-      listingForm.setFormData({ ...INITIAL_FORM_DATA, ...draft.formData });
-      listingForm.setHasDraft(true);
-      listingForm.setShowDraftBanner(true);
-    }
+    // Draft exists — flag it, but do NOT apply data to form state
+    listingForm.setHasDraft(true);
 
-    if (isDraftV2(draft)) {
-      setCurrentPhaseIndex(draft.currentPhaseIndex);
-      setCompletedPhaseIds(draft.completedPhaseIds);
-      setFlowStartTime(draft.flowStartTime);
-    } else {
-      // v1 draft — start at phase 0
-      setCurrentPhaseIndex(0);
-      setCompletedPhaseIds([]);
-      setFlowStartTime(Date.now());
+    // Only show banner if not already dismissed this session
+    const wasDismissed =
+      typeof window !== 'undefined' &&
+      sessionStorage.getItem(DRAFT_DISMISSED_KEY) === 'true';
+
+    if (!wasDismissed) {
+      listingForm.setShowDraftBanner(true);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount
   }, []);
@@ -239,6 +238,49 @@ export function usePhaseFlow(): PhaseFlowState {
     });
     setHasDraft(true);
   }, [formData, setHasDraft, currentPhaseIndex, completedPhaseIds, flowStartTime]);
+
+  const loadDraftData = useCallback(() => {
+    const draft = loadDraft();
+    if (!draft || !draft.formData) return;
+
+    // Apply form data
+    listingForm.setFormData({ ...INITIAL_FORM_DATA, ...draft.formData });
+    listingForm.setHasDraft(true);
+    listingForm.setShowDraftBanner(false);
+
+    // Apply phase state
+    if (isDraftV2(draft)) {
+      setCurrentPhaseIndex(draft.currentPhaseIndex);
+      setCompletedPhaseIds(draft.completedPhaseIds);
+      setFlowStartTime(draft.flowStartTime);
+    } else {
+      setCurrentPhaseIndex(0);
+      setCompletedPhaseIds([]);
+      setFlowStartTime(Date.now());
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable refs
+  }, []);
+
+  const dismissDraft = useCallback(() => {
+    // Hide banner and clear draft flag
+    listingForm.setShowDraftBanner(false);
+    listingForm.setHasDraft(false);
+
+    // Remove draft from localStorage, mark dismissed for this session
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(DRAFT_KEY);
+      sessionStorage.setItem(DRAFT_DISMISSED_KEY, 'true');
+    }
+
+    // Reset form data to initial state
+    listingForm.resetForm();
+
+    // Reset phase state
+    setCurrentPhaseIndex(0);
+    setCompletedPhaseIds([]);
+    setFlowStartTime(Date.now());
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable refs
+  }, []);
 
   // ------- Phase navigation -------
   const advanceToNextPhase = useCallback((): boolean => {
@@ -335,5 +377,7 @@ export function usePhaseFlow(): PhaseFlowState {
 
     // Draft persistence
     saveDraft,
+    loadDraftData,
+    dismissDraft,
   };
 }

@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Badge } from '@second-turn/design-system';
-import { CreditCard, Chat as MessageSquare, Package } from '@/lib/icons';
+import { CreditCard, Package } from '@/lib/icons';
 import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import { UserInfoCard } from '@/components/user/UserInfoCard';
 import { getConditionBadgeVariant } from '@/lib/utils/condition-utils';
@@ -232,35 +232,14 @@ export function ListingPreviewSidebar({
               {t('sections.saleType')}
             </p>
             <div className="flex items-center gap-2">
-              {formData.transactionMethod === 'instant_buy' ? (
-                <>
-                  <div className="w-7 h-7 rounded-md bg-aurora-green/10 flex items-center justify-center">
-                    <CreditCard className="w-3.5 h-3.5 text-aurora-green" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-polar-night">
-                      {t('instantBuy')}
-                    </p>
-                    <p className="text-xs text-text-secondary">
-                      {formData.pricingFormat === 'auction' ? t('auction') : t('fixedPrice')}
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="w-7 h-7 rounded-md bg-frost-ice/10 flex items-center justify-center">
-                    <MessageSquare className="w-3.5 h-3.5 text-frost-ice" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-polar-night">
-                      {t('contactSeller')}
-                    </p>
-                    <p className="text-xs text-text-secondary">
-                      {formData.pricingFormat === 'auction' ? t('auction') : t('fixedPrice')}
-                    </p>
-                  </div>
-                </>
-              )}
+              <div className="w-7 h-7 rounded-md bg-aurora-green/10 flex items-center justify-center">
+                <CreditCard className="w-3.5 h-3.5 text-aurora-green" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-polar-night">
+                  {formData.pricingFormat === 'auction' ? t('auction') : t('fixedPrice')}
+                </p>
+              </div>
             </div>
           </div>
 

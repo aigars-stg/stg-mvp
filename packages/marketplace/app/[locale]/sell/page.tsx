@@ -18,12 +18,13 @@ import { SELLER_COMMISSION_RATE } from '@/lib/pricing/constants';
 import { PhotoCamera as Camera, ClipboardCheck, CurrencyEuro as Euro, InfoCircle as Info, Close, AlertCircle, RefreshCw as Loader2 } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
-import type { TransactionMethod, PricingFormat } from '@/lib/types/listing';
+import type { PricingFormat } from '@/lib/types/listing';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { NotificationModal } from '@/components/common/NotificationModal';
 import { PricingAssistant } from '@/components/sell/PricingAssistant';
 import { WantedListingContextBanner } from '@/components/sell/WantedListingContextBanner';
 import { useTranslations, useLocale } from 'next-intl';
+import { useToast } from '@/components/common/Toast';
 import { useListingForm } from '@/lib/hooks/useListingForm';
 import { usePhaseFlow } from '@/lib/hooks/usePhaseFlow';
 import { formatPrice } from '@/lib/services/pricing';
@@ -71,7 +72,7 @@ function useSharedSellLogic(opts: {
   setIsLoadingListing: (v: boolean) => void;
   setLoadError: (v: string) => void;
   setExpandedSections: React.Dispatch<React.SetStateAction<{ game: boolean; photos: boolean; condition: boolean; pricing: boolean }>>;
-  setSellerCapabilities: (v: { canCreateContactSeller: boolean; canCreateInstantBuy: boolean; isLoading: boolean }) => void;
+  setSellerCapabilities: (v: { canListItems: boolean; isLoading: boolean }) => void;
   hasSetInitialListingType: React.MutableRefObject<boolean>;
   expansionsFetched: boolean;
   user: import('@supabase/supabase-js').User | null;
@@ -285,36 +286,25 @@ function useSharedSellLogic(opts: {
         const data = await response.json();
 
         if (response.ok) {
-          const canCreateContactSeller = data.can_create_contact_seller ?? false;
-          const canCreateInstantBuy = data.can_create_instant_buy ?? false;
+          const canListItems = data.can_list_items ?? false;
 
           setHasPhone(data.has_phone ?? true);
 
           setSellerCapabilities({
-            canCreateContactSeller,
-            canCreateInstantBuy,
+            canListItems,
             isLoading: false,
           });
 
-          if (!hasSetInitialListingType.current) {
-            hasSetInitialListingType.current = true;
-            const isInstantBuyCountry = profile?.country === 'LV' || !profile?.country;
-            setFormData((prev) => ({
-              ...prev,
-              transactionMethod: (canCreateInstantBuy && isInstantBuyCountry) ? 'instant_buy' : 'contact_seller',
-            }));
-          }
+          hasSetInitialListingType.current = true;
         } else {
           setSellerCapabilities({
-            canCreateContactSeller: false,
-            canCreateInstantBuy: false,
+            canListItems: false,
             isLoading: false,
           });
         }
       } catch {
         setSellerCapabilities({
-          canCreateContactSeller: false,
-          canCreateInstantBuy: false,
+          canListItems: false,
           isLoading: false,
         });
       }
@@ -352,13 +342,11 @@ function useSharedSellLogic(opts: {
           return;
         }
 
-        const transactionMethod: TransactionMethod = listing.transaction_method
-          || (listing.listing_type === 'contact_seller' ? 'contact_seller' : 'instant_buy');
         const pricingFormat: PricingFormat = listing.pricing_format
           || (listing.listing_type === 'auction' ? 'auction' : 'fixed_price');
 
         setFormData({
-          transactionMethod,
+          transactionMethod: 'claim',
           pricingFormat,
           selectedGame: {
             id: listing.bgg_game_id,
@@ -437,13 +425,11 @@ function useSharedSellLogic(opts: {
           return;
         }
 
-        const transactionMethod: TransactionMethod = listing.transaction_method
-          || (listing.listing_type === 'contact_seller' ? 'contact_seller' : 'instant_buy');
         const pricingFormat: PricingFormat = listing.pricing_format
           || (listing.listing_type === 'auction' ? 'auction' : 'fixed_price');
 
         setFormData({
-          transactionMethod,
+          transactionMethod: 'claim',
           pricingFormat,
           selectedGame: {
             id: listing.bgg_game_id,
@@ -1118,7 +1104,6 @@ function CreateModeSellContent() {
     isPublishing,
     setIsPublishing,
     showDraftBanner,
-    setShowDraftBanner,
     hasDraft,
     setHasDraft,
     isLoadingGameDetails,
@@ -1156,6 +1141,8 @@ function CreateModeSellContent() {
     isCurrentPhaseComplete,
     flowStartTime,
     saveDraft,
+    loadDraftData,
+    dismissDraft,
   } = phaseFlow;
 
   // Relist / wanted / search params
@@ -1163,6 +1150,21 @@ function CreateModeSellContent() {
   const isRelistMode = !!relistListingId;
   const wantedListingId = searchParams.get('wantedListingId');
   const initialSearchQuery = searchParams.get('q');
+
+  // Welcome toast for new sellers (redirected from onboarding)
+  const { addToast } = useToast();
+  const isWelcome = searchParams.get('welcome') === 'true';
+
+  useEffect(() => {
+    if (isWelcome) {
+      addToast('success', t('welcome.sellerActivated'));
+      // Clean URL without re-render
+      const url = new URL(window.location.href);
+      url.searchParams.delete('welcome');
+      window.history.replaceState({}, '', url.toString());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isWelcome]);
 
   const shared = useSharedSellLogic({
     isEditMode: false,
@@ -1209,17 +1211,13 @@ function CreateModeSellContent() {
   const dismissSpeedRoundToast = useCallback(() => setShowSpeedRoundToast(false), []);
 
   // ── Draft banner handlers ─────────────────────────────
-  // Draft loading is handled by usePhaseFlow on mount (v1 + v2 formats).
-  // handleLoadDraft just dismisses the banner since data is already restored.
 
   const handleLoadDraft = () => {
-    setShowDraftBanner(false);
+    loadDraftData();
   };
 
   const handleDismissDraft = () => {
-    setShowDraftBanner(false);
-    localStorage.removeItem('listing-draft');
-    setHasDraft(false);
+    dismissDraft();
   };
 
   // ── handleSaveDraft ───────────────────────────────────
@@ -1284,7 +1282,6 @@ function CreateModeSellContent() {
         allComponentsPresent: formData.allComponentsPresent,
         missingComponents: formData.missingComponents,
         price: formData.price,
-        transactionMethod: formData.transactionMethod,
         pricingFormat: formData.pricingFormat,
         ...(formData.pricingFormat === 'auction' ? {
           auctionDurationDays: formData.auctionDurationDays,
@@ -1311,7 +1308,7 @@ function CreateModeSellContent() {
       };
 
       // Save phone to profile if needed
-      if (formData.transactionMethod === 'instant_buy' && shared.sellerPhone && !shared.hasPhone) {
+      if (shared.sellerPhone && !shared.hasPhone) {
         const { error: phoneError } = await updateProfile({ phone: shared.sellerPhone.trim() });
         if (phoneError) {
           setErrorModal({
@@ -1346,6 +1343,7 @@ function CreateModeSellContent() {
 
       // Clear draft
       localStorage.removeItem('listing-draft');
+      sessionStorage.removeItem('listing-draft-dismissed');
       setHasDraft(false);
 
       // Mark score phase as complete (triggers isFlowComplete)
@@ -1578,9 +1576,6 @@ function CreateModeSellContent() {
               setFormData={setFormData}
               onAdvance={advanceToNextPhase}
               isPhaseComplete={isCurrentPhaseComplete}
-              sellerCapabilities={sellerCapabilities}
-              sellerCountry={profile?.country}
-              onUpgradeClick={() => router.push('/seller/dashboard?tab=earnings')}
               hasPhone={shared.hasPhone}
               sellerPhone={shared.sellerPhone}
               onPhoneChange={(phone) => shared.setSellerPhone(phone)}

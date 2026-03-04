@@ -14,7 +14,7 @@ import { clsx } from 'clsx';
  */
 const buttonVariants = cva(
   // Base styles applied to all buttons
-  'inline-flex items-center justify-center font-medium transition-all focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-aurora-orange/30 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center font-medium transition-all focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-aurora-orange/30 disabled:pointer-events-none disabled:opacity-40 disabled:saturate-50',
   {
     variants: {
       variant: {

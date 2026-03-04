@@ -641,7 +641,6 @@
       "parcelLocker": "Parcel Locker",
       "pickupOnly": "Pickup only",
       "missingComponents": "Missing components",
-      "contactSeller": "Contact",
       "saveAria": "Save listing",
       "unsaveAria": "Remove from saved",
       "prevImageAria": "Previous image",
@@ -650,7 +649,6 @@
       "learnConditionAria": "Learn about {condition} condition",
       "offers": "{count, plural, one {# offer} other {# offers}}",
       "instantBuyTooltip": "{count, plural, one {# instant buy} other {# instant buy}}",
-      "contactSellerTooltip": "{count, plural, one {# contact seller} other {# contact seller}}",
       "auctionTooltip": "{count, plural, one {# auction} other {# auctions}}",
       "expansionTooltip": "Expansion",
       "expansionOffersTooltip": "Includes expansion offers",
@@ -709,15 +707,11 @@
       "unsaveTooltip": "Remove from saved",
       "askQuestion": "Ask a question",
       "addToCart": "Add to Cart",
-      "contactSeller": "Contact Seller",
       "sold": "Sold",
       "reserved": "Reserved",
       "reservedTooltip": "Someone is checking out - available soon if they don't complete"
     },
     "sellerLabel": "Seller",
-    "privateSeller": {
-      "contactNotice": "This is a direct listing - message the seller to agree on payment and delivery."
-    },
     "auction": {
       "badge": "Auction",
       "ended": "Auction Ended",
@@ -1112,11 +1106,13 @@
   "Countries": {
     "LV": "Latvia",
     "EE": "Estonia",
-    "LT": "Lithuania",
-    "OTHER": "Other"
+    "LT": "Lithuania"
   },
   "CountryPrompt": {
     "pickCountry": "Pick your country to see games near you",
+    "looksLikeYoureIn": "Looks like you're in {country}",
+    "yesImIn": "Yes, I'm in {country}",
+    "notInCountry": "Not in {country}?",
     "somethingWentWrong": "Something went wrong"
   },
   "Browse": {
@@ -1385,6 +1381,9 @@
       "editTitle": "Edit listing",
       "bggAttribution": "Game data provided by BoardGameGeek",
       "loading": "Loading...",
+      "welcome": {
+        "sellerActivated": "You're a seller now — list your first game"
+      },
       "loadingGameDetails": "Loading game details...",
       "loadingListing": "Loading listing...",
       "preparing": "Preparing..."
@@ -1449,6 +1448,10 @@
         "subtitle": "Set your asking price",
         "auctionTitle": "Auction Settings",
         "auctionSubtitle": "Set your starting price and auction duration"
+      },
+      "phone": {
+        "label": "Phone number needed for shipping",
+        "description": "Unisend parcel lockers need your phone number to create shipping labels. This will be saved to your profile."
       }
     },
     "terms": {
@@ -1583,7 +1586,7 @@
     "PhotoUpload": {
       "guidelines": {
         "requiredTitle": "Photos are required for Acceptable condition items",
-        "optionalTitle": "Photos help build buyer trust (optional)",
+        "optionalTitle": "Photos help build buyer trust",
         "tip1": "Photograph the box, components",
         "tip2": "Show any damage or wear"
       },
@@ -1606,32 +1609,6 @@
         "photoAlt": "Photo {number}",
         "uploadAlt": "Upload {number}",
         "removePhoto": "Remove photo"
-      }
-    },
-    "PricingShipping": {
-      "pricing": {
-        "title": "Asking Price *",
-        "label": "Price (€)",
-        "placeholder": "25.00"
-      },
-      "shipping": {
-        "title": "Shipping Options *",
-        "selectOne": "Select at least one option",
-        "localPickup": {
-          "title": "Local pickup",
-          "description": "Meet at a local area",
-          "locationLabel": "Pickup location details",
-          "locationPlaceholder": "e.g., Riga, Old Town area or near Central Market"
-        },
-        "parcelLocker": {
-          "title": "Parcel lockers",
-          "description": "Omniva, DPD, or similar",
-          "paymentLabel": "Who pays for shipping?",
-          "sellerPays": "I'll cover shipping",
-          "sellerPaysDescription": "Free shipping for buyer",
-          "buyerPays": "Buyer pays",
-          "buyerPaysDescription": "Shipping cost added at checkout"
-        }
       }
     },
     "VersionSelector": {
@@ -1889,28 +1866,6 @@
         "content": "If you're debating between two grades, go with the lower one. A buyer who receives a game in better condition than expected is delighted."
       }
     },
-    "transactionMethod": {
-      "title": "How would you like to sell?",
-      "subtitle": "Choose how you'll connect with the buyer.",
-      "contactSeller": {
-        "label": "Contact Seller",
-        "description": "Chat with the buyer to arrange payment and shipping"
-      },
-      "instantBuy": {
-        "label": "Instant Buy",
-        "description": "Buyers pay instantly through the platform",
-        "unavailable": "Available for Latvian sellers with connected payment account",
-        "upgrade": "Set up payments",
-        "phoneRequired": {
-          "label": "Phone number required",
-          "description": "Unisend parcel lockers need your phone number to create shipping labels. This will be saved to your profile.",
-          "placeholder": "+371 12345678"
-        }
-      },
-      "helpLink": "What's the difference?",
-      "countryUnavailable": "Online payments are coming soon to your country. For now, arrange payment directly with your buyer through messaging.",
-      "instantBuyBanner": "Buyers pay securely online. You receive funds in your wallet after delivery."
-    },
     "pricingFormat": {
       "title": "Pricing",
       "fixedPrice": {
@@ -1931,26 +1886,6 @@
         "auctionNote": "A 10% platform fee is deducted from the winning bid",
         "platformFee": "Platform fee (10%)",
         "youReceive": "You receive"
-      }
-    },
-    "listingType": {
-      "title": "How do you want to sell?",
-      "subtitle": "Choose how you want to connect with buyers.",
-      "instantBuy": {
-        "title": "Instant Buy",
-        "description": "Buyers pay instantly through our secure system. Money goes directly to your bank.",
-        "disabled": "Complete payment setup to enable",
-        "upgrade": "Set up payments"
-      },
-      "contactSeller": {
-        "title": "Contact Seller",
-        "description": "Buyers message you first. Arrange payment yourselves.",
-        "note": "You'll handle payment and delivery directly with the buyer. We cannot provide buyer protection for these transactions."
-      },
-      "auction": {
-        "title": "Auction",
-        "description": "Buyers bid, highest bid wins when time runs out.",
-        "note": "Set a starting price and duration. Anti-snipe protection extends the auction if bids come in the final minutes."
       }
     },
     "auction": {
@@ -2064,13 +1999,13 @@
       "subtitle": "Turn your games into cash. Quick setup - start selling in under a minute."
     },
     "step1": {
-      "title": "Step 1: Accept seller terms",
+      "title": "Accept seller terms",
       "heading": "Accept seller terms",
       "description": "Review and accept our seller terms to confirm you're selling as a private individual.",
       "keyPoints": {
         "title": "Key points:",
         "zeroFees": "<strong>Zero listing fees</strong> - free to list your games",
-        "ageRequirement": "You must be at least <strong>16 years old</strong>",
+        "ageRequirement": "You must be at least <strong>18 years old</strong>",
         "personalItems": "You're selling <strong>personal items</strong>, not operating a business",
         "accurateDescriptions": "You're responsible for <strong>accurate descriptions</strong> of your games"
       },
@@ -2079,7 +2014,7 @@
         "title": "Where are you located?",
         "hint": "This helps us show you available payment and shipping options."
       },
-      "checkbox": "I confirm I'm 16+, selling personal items, and agree to the",
+      "checkbox": "I confirm I'm 18+, selling personal items, and agree to the",
       "sellerTerms": "Seller Terms",
       "acceptButton": "Accept seller terms",
       "countryRequired": "Please select your country above to continue"
@@ -2087,72 +2022,6 @@
     "support": {
       "needHelp": "Need help?",
       "contactUs": "Contact us"
-    },
-    "complete": {
-      "title": "You're all set",
-      "subtitle": "Welcome to Second Turn Games. You can now start listing and selling your board games.",
-      "whatYouCanDo": {
-        "title": "What You Can Do Now",
-        "createListing": {
-          "title": "Create Your First Listing",
-          "description": "List a board game from your collection. Set your price, upload photos, and describe the condition. Takes less than 3 minutes.",
-          "button": "Create Listing"
-        },
-        "browseGames": {
-          "title": "Browse & Buy Games",
-          "description": "While you wait for sales, explore games from other sellers. Build your collection.",
-          "button": "Browse Marketplace"
-        },
-        "manageSales": {
-          "title": "Manage Your Sales",
-          "description": "View your active listings, pending orders, and payout history in your seller dashboard.",
-          "button": "Go to Dashboard"
-        }
-      },
-      "howItWorks": {
-        "title": "How Selling Works",
-        "step1": {
-          "title": "Someone Buys Your Game",
-          "description": "You'll receive an email notification with shipping details and a pre-paid Unisend label."
-        },
-        "step2": {
-          "title": "Package & Ship",
-          "description": "Pack the game securely and drop it off at any Unisend parcel terminal within 2 business days."
-        },
-        "step3": {
-          "title": "Buyer Receives Game",
-          "description": "The buyer picks up the game from their selected parcel terminal. Tracking updates automatically."
-        },
-        "step4": {
-          "title": "Get Paid",
-          "description": "Your earnings are credited to your platform wallet after each completed sale. A 10% platform commission applies."
-        }
-      },
-      "tips": {
-        "title": "Tips for Successful Selling",
-        "photos": "<strong>Take clear photos:</strong> Show the actual game, including any wear or damage",
-        "condition": "<strong>Be honest about condition:</strong> Accurate descriptions prevent disputes",
-        "pricing": "<strong>Price competitively:</strong> Check similar listings to set fair prices",
-        "shipping": "<strong>Ship promptly:</strong> Fast shipping leads to better reviews",
-        "packaging": "<strong>Package securely:</strong> Protect games from damage during transit",
-        "messages": "<strong>Respond to messages:</strong> Quick communication builds trust"
-      },
-      "earnings": {
-        "title": "About Your Earnings",
-        "subtitle": "Your earnings are credited to your platform wallet after each completed sale.",
-        "commission": "<strong>90% of listing price</strong> - A 10% platform commission is deducted",
-        "withdraw": "<strong>Withdraw anytime</strong> - Request a bank transfer whenever you like",
-        "track": "<strong>Track in dashboard</strong> - View your wallet balance and transaction history",
-        "viewWallet": "View wallet & withdrawals →"
-      },
-      "completeSupport": {
-        "questions": "Questions or need help?",
-        "contactSeller": "Contact Seller Support"
-      },
-      "cta": {
-        "button": "Create Your First Listing",
-        "subtitle": "Ready to sell? List your first game now."
-      }
     }
   },
   "StatusChangeModal": {
@@ -2658,15 +2527,6 @@
       "statsPlural": "{count} sales · {amount} last 30 days",
       "viewWallet": "View wallet & transactions"
     },
-    "EarningsSummary": {
-      "title": "Earnings Summary",
-      "totalSales": "Total Sales",
-      "last30Days": "Last 30 Days",
-      "totalEarnings": "Total Earnings",
-      "averageOrder": "Avg. Order",
-      "noData": "No earnings data yet",
-      "noDataHint": "Your earnings breakdown will appear here after your first sale"
-    },
     "WithdrawalHistory": {
       "title": "Recent Withdrawals",
       "viewAll": "View All",
@@ -2927,166 +2787,6 @@
     }
   },
   "Help": {
-    "ListingTypes": {
-      "meta": {
-        "title": "Instant Buy vs Contact Seller | Second Turn Games",
-        "description": "Learn about Contact Seller and Instant Buy listing types. Understand fees, payment handling, and which option works best for you.",
-        "ogTitle": "Listing Types Explained | Second Turn Games",
-        "ogDescription": "Choose the right selling method for your board games. Compare Contact Seller vs Instant Buy."
-      },
-      "intro": {
-        "title": "Instant Buy vs Contact Seller",
-        "tagline": "Choose how you want to sell your games",
-        "description": "Second Turn Games offers two ways to sell your pre-loved board games. Each has its advantages depending on your preferences and situation."
-      },
-      "toc": {
-        "title": "On this page",
-        "comparison": "Quick comparison",
-        "instantBuy": "How Instant Buy works",
-        "contactSeller": "How Contact Seller works",
-        "switching": "Can I switch later?",
-        "faqs": "Common questions"
-      },
-      "comparison": {
-        "title": "Quick comparison",
-        "bestFor": "Best for",
-        "howBuyersPay": "How buyers pay",
-        "howShippingWorks": "How shipping works",
-        "yourEarnings": "Your earnings",
-        "buyerProtection": "Buyer protection",
-        "setupRequired": "Setup required",
-        "availability": "Availability",
-        "instantBuy": {
-          "bestFor": "Most sellers in Latvia",
-          "howBuyersPay": "Through Second Turn Games",
-          "howShippingWorks": "€2 flat-rate via Unisend lockers",
-          "yourEarnings": "90% of your asking price (10% commission)",
-          "buyerProtection": "Yes - we hold payment until delivery",
-          "setupRequired": "Accept seller terms (1 min)",
-          "availability": "Latvia only"
-        },
-        "contactSeller": {
-          "bestFor": "Sellers who prefer full control",
-          "howBuyersPay": "Directly to you (off-platform)",
-          "howShippingWorks": "You arrange with buyer",
-          "yourEarnings": "Whatever you agree with buyer",
-          "buyerProtection": "No",
-          "setupRequired": "None",
-          "availability": "Latvia, Lithuania, Estonia"
-        }
-      },
-      "instantBuySection": {
-        "title": "How Instant Buy works",
-        "description": "Instant Buy is our full-service selling option. Here's what happens when someone buys your game:",
-        "steps": {
-          "step1": {
-            "title": "Buyer purchases",
-            "description": "They pay the game price plus €2 shipping. No service fees for buyers."
-          },
-          "step2": {
-            "title": "You get notified",
-            "description": "We send you an email and dashboard notification. You have 24 hours to confirm the order."
-          },
-          "step3": {
-            "title": "You ship the game",
-            "description": "After confirming, you'll get a Unisend locker code. Pack your game, go to any of 500+ Unisend terminals (including Latvijas Pasts and uDrop locations), enter the code, and drop it off."
-          },
-          "step4": {
-            "title": "Buyer receives it",
-            "description": "Once the buyer picks up the game, we release your payment."
-          },
-          "step5": {
-            "title": "You get paid",
-            "description": "Your earnings (item price minus 10% commission) are credited to your platform wallet. Withdraw to your bank anytime."
-          }
-        },
-        "issuesTitle": "What if something goes wrong?",
-        "issues": {
-          "cantShip": "If you can't ship within 24 hours, you can decline the order. The buyer gets a full refund.",
-          "mismatch": "If the game doesn't match your description, we help resolve the issue and may refund the buyer.",
-          "notPickedUp": "If the buyer doesn't pick up the package, we'll work with you on next steps."
-        },
-        "setupTitle": "Setting up Instant Buy",
-        "setupDescription": "To use Instant Buy, just accept the seller terms. Your earnings will go to your platform wallet.",
-        "setupTime": "To withdraw earnings, you'll need:",
-        "setupRequirements": {
-          "name": "Your full name",
-          "bank": "Bank account details (IBAN)"
-        },
-        "setupTrust": "Your IBAN is only needed when you request your first withdrawal. Payments are processed securely through our payment partner."
-      },
-      "contactSellerSection": {
-        "title": "How Contact Seller works",
-        "description": "Contact Seller is our simple listing option. It works like a classified ad or Facebook Marketplace:",
-        "steps": {
-          "step1": {
-            "title": "You list your game",
-            "description": "Add photos, set a price, describe the condition."
-          },
-          "step2": {
-            "title": "Buyers see your listing",
-            "description": "Your game appears in search results alongside Instant Buy listings."
-          },
-          "step3": {
-            "title": "Buyer messages you",
-            "description": "When someone's interested, they send you a message through our platform."
-          },
-          "step4": {
-            "title": "You work out the details",
-            "description": "Agree on price, payment method, and how to get the game to them (meetup, shipping, etc.)."
-          },
-          "step5": {
-            "title": "Transaction happens off-platform",
-            "description": "Payment and delivery are between you and the buyer directly."
-          }
-        },
-        "whyChoose": "Why choose this option?",
-        "reasons": {
-          "directPayments": "You prefer to handle payments directly",
-          "negotiate": "You prefer negotiating prices",
-          "ownShipping": "You want to arrange your own shipping method",
-          "country": "You're located in Lithuania or Estonia (where Instant Buy isn't available yet)"
-        },
-        "tradeoff": "The tradeoff: You'll need to handle payment and shipping yourself, and buyers don't have the same protection they get with Instant Buy."
-      },
-      "switchingSection": {
-        "title": "Can I switch later?",
-        "upgradeTitle": "Starting with Contact Seller, upgrading to Instant Buy:",
-        "upgradeDescription": "Yes, if you set up as a Contact Seller, you can enable Instant Buy anytime from your Seller Settings. Your future listings will have both options.",
-        "downgradeTitle": "Already have Instant Buy, want to use Contact Seller:",
-        "downgradeDescription": "You can choose the listing type for each game when you create a listing. Even with Instant Buy enabled, you can list specific games as Contact Seller if you prefer.",
-        "countryNoteTitle": "Note for Lithuanian and Estonian sellers:",
-        "countryNoteDescription": "Instant Buy isn't available in your country yet. We're working on expanding integrated payments and shipping to the full Baltic region. Sign up for updates and we'll let you know when it's ready."
-      },
-      "faqSection": {
-        "title": "Common questions",
-        "q1": {
-          "question": "How do I get paid?",
-          "answer": "Your earnings are credited to your platform wallet after each completed sale. You can withdraw your wallet balance to your bank account at any time via IBAN transfer."
-        },
-        "q2": {
-          "question": "Who pays the fees?",
-          "answer": "Buyers pay the listed price plus €2 shipping - no service fees. As a seller, a 10% platform commission is deducted from your earnings. If you list a game for €20, you earn €18."
-        },
-        "q3": {
-          "question": "What's included in the 500+ parcel terminals?",
-          "answer": "Our Unisend integration includes terminals from multiple networks: Unisend's own locations plus Latvijas Pasts and uDrop terminals. You can drop off at whichever is most convenient for you."
-        },
-        "q4": {
-          "question": "Why isn't Instant Buy available in Lithuania and Estonia?",
-          "answer": "We're working through the logistics of cross-border shipping and VAT handling. It's a priority for us, and we'll announce when it's ready."
-        },
-        "q5": {
-          "question": "Can buyers still contact me if I use Instant Buy?",
-          "answer": "Yes. Buyers can message you with questions about your listing before purchasing. Instant Buy just means they can also purchase immediately without waiting for a response."
-        }
-      },
-      "cta": {
-        "ready": "Ready to start selling?",
-        "sellButton": "List your first game",
-        "backToHome": "Back to home"
-      }
-    },
     "sectionNotFound": "Section not found.",
     "nav": {
       "overview": "Help Centre",
@@ -3527,6 +3227,7 @@
       "ariaLabel": "Listing progress",
       "stepOf": "Step {current} of {total}",
       "stepStatus": {
+        "active": "active",
         "completed": "completed",
         "current": "current",
         "upcoming": "upcoming"

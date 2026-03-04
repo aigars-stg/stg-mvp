@@ -39,7 +39,7 @@ export interface SellerProfile {
   user_id: string;
 
   // Seller status
-  seller_status: 'not_started' | 'onboarding' | 'active' | 'suspended';
+  seller_status: 'not_started' | 'active' | 'suspended';
   seller_terms_accepted_at: string | null;
   seller_terms_version: string;
 

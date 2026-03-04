@@ -4,7 +4,7 @@
  */
 
 export type SupportedLocale = 'en' | 'lv'
-export type EmailActionType = 'signup' | 'magiclink' | 'recovery' | 'email_change' | 'invite' | 'reauthentication'
+export type EmailActionType = 'signup' | 'magiclink' | 'email_change' | 'invite' | 'reauthentication'
 
 export interface EmailTranslation {
   subject: string
@@ -53,16 +53,6 @@ const translations: TranslationMap = {
       footerSecurity: '',
       tagline: 'Every game deserves a second turn',
     },
-    recovery: {
-      subject: 'Reset your password – Second Turn Games',
-      heading: 'Reset your password',
-      body: 'Someone requested a password reset for your Second Turn Games account. Click below to create a new password.',
-      cta: 'Reset password',
-      expiryNote: 'This link expires in 1 hour.',
-      footerNote: "Didn't request this? You can safely ignore this email. Your password won't change unless you click the link above.",
-      footerSecurity: '',
-      tagline: 'Every game deserves a second turn',
-    },
     email_change: {
       subject: 'Confirm your new email address – Second Turn Games',
       heading: 'Confirm your new email',
@@ -98,16 +88,6 @@ const translations: TranslationMap = {
       cta: 'Pieteikties',
       expiryNote: 'Šī saite derīga 1 stundu.',
       footerNote: 'Nepieprasīji? Droši ignorē šo e-pastu.',
-      footerSecurity: '',
-      tagline: 'Katra spēle ir pelnījusi vēl vienu kārtu',
-    },
-    recovery: {
-      subject: 'Atjauno savu paroli – Second Turn Games',
-      heading: 'Atjauno savu paroli',
-      body: 'Kāds pieprasīja paroles atjaunošanu tavam Second Turn Games kontam. Noklikšķini zemāk, lai izveidotu jaunu paroli.',
-      cta: 'Atjaunot paroli',
-      expiryNote: 'Šī saite derīga 1 stundu.',
-      footerNote: 'Nepieprasīji? Droši ignorē šo e-pastu. Tava parole netiks mainīta, ja nenoklikšķināsi uz saites.',
       footerSecurity: '',
       tagline: 'Katra spēle ir pelnījusi vēl vienu kārtu',
     },

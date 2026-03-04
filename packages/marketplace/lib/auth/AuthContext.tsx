@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const [profileResult, sellerResult] = await Promise.all([
         supabase
           .from('user_profiles')
-          .select('id, full_name, email, phone, avatar_url, country, preferred_locale, created_at, updated_at, deleted_at, deletion_reason, recovery_deadline, original_email, preferred_terminal_id, preferred_terminal_name, preferred_terminal_address, preferred_delivery_country, profile_banner_dismissed_until, onboarding_email_step, last_onboarding_email_at, is_staff')
+          .select('id, full_name, email, phone, avatar_url, country, preferred_locale, created_at, updated_at, deleted_at, deletion_reason, recovery_deadline, original_email, preferred_terminal_id, preferred_terminal_name, preferred_terminal_address, preferred_delivery_country, is_staff')
           .eq('id', userId)
           .single(),
         supabase

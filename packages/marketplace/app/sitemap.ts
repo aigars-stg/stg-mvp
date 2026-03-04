@@ -25,7 +25,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/help/shipping`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/shipping') } },
     { url: `${baseUrl}/help/wallet`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/wallet') } },
     { url: `${baseUrl}/help/dac7`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/dac7') } },
-    { url: `${baseUrl}/help/listing-types`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5, alternates: { languages: localized('/help/listing-types') } },
     { url: `${baseUrl}/legal`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3, alternates: { languages: localized('/legal') } },
     { url: `${baseUrl}/legal/terms`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4, alternates: { languages: localized('/legal/terms') } },
     { url: `${baseUrl}/legal/privacy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4, alternates: { languages: localized('/legal/privacy') } },

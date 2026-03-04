@@ -154,7 +154,10 @@ function CreateWantedListingPageContent() {
   useEffect(() => {
     if (isEditMode) return;
     const draft = localStorage.getItem(WANTED_DRAFT_KEY);
-    if (draft) {
+    const wasDismissed =
+      typeof window !== 'undefined' &&
+      sessionStorage.getItem('wanted-draft-dismissed') === 'true';
+    if (draft && !wasDismissed) {
       setHasDraft(true);
       setShowDraftBanner(true);
     }
@@ -174,6 +177,7 @@ function CreateWantedListingPageContent() {
         notes,
       };
       localStorage.setItem(WANTED_DRAFT_KEY, JSON.stringify(draftData));
+      sessionStorage.removeItem('wanted-draft-dismissed');
       setHasDraft(true);
     }, 2000);
 
@@ -203,6 +207,7 @@ function CreateWantedListingPageContent() {
     setShowDraftBanner(false);
     localStorage.removeItem(WANTED_DRAFT_KEY);
     setHasDraft(false);
+    sessionStorage.setItem('wanted-draft-dismissed', 'true');
   };
 
   const handleSaveDraft = () => {
@@ -215,6 +220,7 @@ function CreateWantedListingPageContent() {
       notes,
     };
     localStorage.setItem(WANTED_DRAFT_KEY, JSON.stringify(draftData));
+    sessionStorage.removeItem('wanted-draft-dismissed');
     setHasDraft(true);
   };
 
@@ -362,6 +368,7 @@ function CreateWantedListingPageContent() {
         // Show success modal and clear draft
         setShowSuccessModal(true);
         localStorage.removeItem(WANTED_DRAFT_KEY);
+        sessionStorage.removeItem('wanted-draft-dismissed');
         setHasDraft(false);
       }
     } catch (err: unknown) {

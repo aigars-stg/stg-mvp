@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Only return if it's a valid Baltic country code
-    if (detectedCode && isValidCountryCode(detectedCode) && detectedCode !== 'OTHER') {
+    if (detectedCode && isValidCountryCode(detectedCode)) {
       return NextResponse.json({
         detected: true,
         country: detectedCode as CountryCode,

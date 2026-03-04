@@ -34,8 +34,7 @@ export interface AggregatedGame {
   auction_lowest_price: number | null;      // Lowest current_bid or start_price from auctions
 
   // Counts by listing type (for icon strip tooltips)
-  instant_buy_count: number;       // transaction_method='instant_buy' AND pricing_format='fixed_price'
-  contact_seller_count: number;    // transaction_method='contact_seller'
+  instant_buy_count: number;       // transaction_method='claim' AND pricing_format='fixed_price'
   auction_count: number;           // pricing_format='auction'
 
   // Content signals

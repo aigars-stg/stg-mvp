@@ -1,8 +1,7 @@
 'use client';
 
-import { AlertCircle, Package, Undo as RotateCcw, Eye, EyeOff, Chat as MessageSquare } from '@/lib/icons';
+import { AlertCircle, Package, Undo as RotateCcw, Eye, EyeOff } from '@/lib/icons';
 import { useTranslations } from 'next-intl';
-import type { ListingType } from '@/lib/types/listing';
 import { BaseStatusChangeModal, type StatusConfig } from '@/components/common/StatusChangeModal';
 
 export interface StatusChangeModalProps {
@@ -13,7 +12,6 @@ export interface StatusChangeModalProps {
   newStatus: 'draft' | 'active' | 'sold' | 'removed';
   gameName: string;
   isLoading?: boolean;
-  listingType?: ListingType;
 }
 
 export function StatusChangeModal({
@@ -24,23 +22,17 @@ export function StatusChangeModal({
   newStatus,
   gameName,
   isLoading = false,
-  listingType = 'instant_buy',
 }: StatusChangeModalProps) {
   const t = useTranslations('StatusChangeModal');
-  const isContactSeller = listingType === 'contact_seller';
 
   const getStatusConfig = (): StatusConfig => {
     switch (newStatus) {
       case 'sold':
         return {
-          icon: isContactSeller
-            ? <MessageSquare className="w-12 h-12 text-frost-ice" />
-            : <Package className="w-12 h-12 text-frost-ice" />,
+          icon: <Package className="w-12 h-12 text-frost-ice" />,
           title: t('sold.title'),
           message: t('sold.message', { gameName }),
-          description: isContactSeller
-            ? t('sold.descriptionContactSeller')
-            : t('sold.description'),
+          description: t('sold.description'),
           confirmText: t('sold.confirm'),
           confirmVariant: 'primary',
         };

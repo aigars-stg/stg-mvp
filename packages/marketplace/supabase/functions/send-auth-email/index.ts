@@ -4,7 +4,7 @@
  * Supabase Send Email Auth Hook that intercepts authentication emails
  * and sends them via Resend with locale-aware templates.
  *
- * Handles: signup, magiclink, recovery, email_change
+ * Handles: signup, magiclink, email_change
  * Languages: English (en), Latvian (lv)
  */
 
@@ -87,7 +87,7 @@ Deno.serve(async (req: Request) => {
   const locale = (user.user_metadata?.preferred_locale || 'en') as SupportedLocale
 
   // Only handle supported email types
-  const supportedTypes = ['signup', 'magiclink', 'recovery', 'email_change']
+  const supportedTypes = ['signup', 'magiclink', 'email_change']
   if (!supportedTypes.includes(email_data.email_action_type)) {
     console.log(`[send-auth-email] Unsupported email type: ${email_data.email_action_type}, skipping`)
     // Return empty success to let Supabase fall back to default

@@ -5,12 +5,12 @@ import { useRouter } from '@/i18n/navigation';
 import { useTopLoader } from 'nextjs-toploader';
 import Image from 'next/image';
 import { Badge, Button } from '@second-turn/design-system';
-import { Package, AlertCircle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare, Handshake } from '@/lib/icons';
+import { Package, AlertCircle, RefreshCw as Loader2, Heart, PuzzlePiece as Puzzle, InfoCircle as Info, LinkExternal as ExternalLink, Chat as MessageSquare } from '@/lib/icons';
 import { OfferCardPricing } from './OfferCardPricing';
 import { OfferCardVersionInfo } from './OfferCardVersionInfo';
 
 import type { ListingWithSeller } from '@/lib/types/listing';
-import { isAuctionListing, isContactSellerListing } from '@/lib/types/listing';
+import { isAuctionListing } from '@/lib/types/listing';
 // Country utilities available from @/lib/country-utils if needed
 import { useAuth } from '@/lib/auth/AuthContext';
 import { UserInfoCard } from '@/components/user';
@@ -188,49 +188,6 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
       console.error('Failed to toggle save:', error);
     } finally {
       setSaveLoading(false);
-    }
-  };
-
-  // Handle Contact Seller - initiate conversation and redirect to messages
-  const [isInitiatingConversation, setIsInitiatingConversation] = useState(false);
-  const handleContactSeller = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!user) {
-      loader.start();
-      router.push(`/auth/signin?redirectTo=/game/${listing.bgg_game_id}`);
-      return;
-    }
-
-    // Don't allow seller to message themselves
-    if (isOwnListing) {
-      return;
-    }
-
-    try {
-      setIsInitiatingConversation(true);
-      const response = await fetch('/api/messages/initiate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          listing_id: listing.id,
-          seller_id: listing.seller_id,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        console.error('Failed to initiate conversation:', data.error);
-        return;
-      }
-
-      const data = await response.json();
-      router.push(`/messages/${data.conversation_id}`);
-    } catch (error) {
-      console.error('Failed to contact seller:', error);
-    } finally {
-      setIsInitiatingConversation(false);
     }
   };
 
@@ -714,22 +671,6 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                 )}
                 {listingStatus === 'sold' ? (
                   <div className="text-sm text-text-muted px-4 py-2">{t('actions.sold')}</div>
-                ) : isContactSellerListing(listing) ? (
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={handleContactSeller}
-                    disabled={isInitiatingConversation || isOwnListing}
-                  >
-                    {isInitiatingConversation ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <MessageSquare className="w-4 h-4 mr-1.5" aria-hidden="true" />
-                        {t('actions.contactSeller')}
-                      </>
-                    )}
-                  </Button>
                 ) : (
                   <Button
                     variant={listingStatus === 'reserved' ? 'secondary' : 'accent'}
@@ -785,18 +726,6 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
           </div>
         </div>
 
-        {/* Contact Seller Notice — bottom of card, only for direct listings */}
-        {isContactSellerListing(listing) && (
-          <div className="border-t border-border-subtle px-3 sm:px-4 py-2">
-            <div className="flex items-center gap-1.5">
-              <Handshake className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden="true" />
-              <span className="text-xs text-text-muted">
-                {t('privateSeller.contactNotice')}
-              </span>
-            </div>
-          </div>
-        )}
-
         {/* Mobile Footer: Actions - Not shown for auctions (bid panel is above) */}
         {!isOwnListing && !isAuctionListing(listing) && (
           <div className="sm:hidden sticky bottom-0 left-0 right-0 bg-snow-white border-t border-border-subtle p-3 shadow-lg">
@@ -846,22 +775,6 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
                   />
                 ) : listingStatus === 'sold' ? (
                   <span className="text-sm text-text-muted px-3">{t('actions.sold')}</span>
-                ) : isContactSellerListing(listing) ? (
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={handleContactSeller}
-                    disabled={isInitiatingConversation || isOwnListing}
-                  >
-                    {isInitiatingConversation ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <MessageSquare className="w-4 h-4 mr-1.5" aria-hidden="true" />
-                        {t('actions.contactSeller')}
-                      </>
-                    )}
-                  </Button>
                 ) : (
                   <Button
                     variant="primary"

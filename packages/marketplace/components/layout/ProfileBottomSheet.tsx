@@ -349,21 +349,32 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                     </button>
                   </>
                 ) : (
-                  /* Non-seller: Saved & Wanted (combined) */
-                  <button
-                    onClick={() => handleNavigate('/my-listings')}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Heart className="w-5 h-5 text-aurora-red" />
-                      <span className="text-polar-night font-medium">{t('userMenu.savedAndWanted')}</span>
-                    </div>
-                    {(savedCount + wantedCount) > 0 && (
-                      <span className="bg-aurora-red/10 text-aurora-red text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
-                        {savedCount + wantedCount}
-                      </span>
-                    )}
-                  </button>
+                  <>
+                    {/* Non-seller: Saved & Wanted (combined) */}
+                    <button
+                      onClick={() => handleNavigate('/my-listings')}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Heart className="w-5 h-5 text-aurora-red" />
+                        <span className="text-polar-night font-medium">{t('userMenu.savedAndWanted')}</span>
+                      </div>
+                      {(savedCount + wantedCount) > 0 && (
+                        <span className="bg-aurora-red/10 text-aurora-red text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                          {savedCount + wantedCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Start Selling CTA */}
+                    <button
+                      onClick={() => handleNavigate('/seller/onboard')}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated transition-colors"
+                    >
+                      <Store className="w-5 h-5 text-aurora-green" />
+                      <span className="text-polar-night font-medium">{t('userMenu.startSelling')}</span>
+                    </button>
+                  </>
                 )}
               </div>
 

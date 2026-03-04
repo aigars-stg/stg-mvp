@@ -14,7 +14,6 @@ import {
   ArrowUp, ArrowDown,
 } from '@/lib/icons';
 import type { GameWithOffers } from '@/lib/types/aggregated-game';
-import type { ListingType } from '@/lib/types/listing';
 import { isAuctionListing } from '@/lib/types/listing';
 import type { WantedListingWithDetails } from '@/lib/types/wanted-listing';
 import { OfferCard } from '@/components/game/OfferCard';
@@ -62,8 +61,6 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
 
   // Filters
   const [sortBy, setSortBy] = useState<SortOption>('price_asc');
-  const [listingTypeFilter, setListingTypeFilter] = useState<ListingType | 'all'>('all');
-
   // Cart states
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [cartSuccess, setCartSuccess] = useState<string | null>(null);
@@ -161,13 +158,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
     }
   };
 
-  // Clear all filters
-  const clearFilters = () => {
-    setListingTypeFilter('all');
-    setSortBy('price_asc');
-  };
-
-  // Split offers: auctions filtered by end state, regular offers filtered by listing type
+  // Split offers: auctions filtered by end state, regular offers
   const now = new Date();
   const auctionOffers = game?.offers.filter(o => {
     if (!isAuctionListing(o)) return false;
@@ -179,10 +170,6 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
     return true;
   }) ?? [];
   const regularOffers = game?.offers.filter(o => !isAuctionListing(o)) ?? [];
-  const filteredOffers = listingTypeFilter === 'all'
-    ? regularOffers
-    : regularOffers.filter(o => o.listing_type === listingTypeFilter);
-
   // Loading state
   if (loading) {
     return (
@@ -332,19 +319,6 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
           {regularOffers.length > 1 && (
             <div className="flex flex-wrap items-center gap-1.5">
               {/* Listing type pills */}
-              {(['all', 'instant_buy', 'contact_seller'] as const).map((type) => (
-                <Badge
-                  key={type}
-                  variant={listingTypeFilter === type ? 'trust' : 'default'}
-                  size="sm"
-                  className="cursor-pointer transition-all hover:scale-105"
-                  onClick={() => setListingTypeFilter(type)}
-                >
-                  {t(`filter.${type === 'all' ? 'all' : type === 'instant_buy' ? 'buy' : 'contact'}`)}
-                </Badge>
-              ))}
-              {/* Thin separator */}
-              <div className="w-px h-5 bg-border-subtle" />
               {/* Sort pills */}
               <Badge
                 variant={sortBy !== 'newest' ? 'trust' : 'default'}
@@ -498,20 +472,6 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                 {/* Filter Pills (only when multiple non-auction offers) */}
                 {regularOffers.length > 1 && (
                   <div className="mt-3 pt-3 border-t border-border-subtle space-y-2">
-                    {/* Listing type pills */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {(['all', 'instant_buy', 'contact_seller'] as const).map((type) => (
-                        <Badge
-                          key={type}
-                          variant={listingTypeFilter === type ? 'trust' : 'default'}
-                          size="sm"
-                          className="cursor-pointer transition-all hover:scale-105"
-                          onClick={() => setListingTypeFilter(type)}
-                        >
-                          {t(`filter.${type === 'all' ? 'all' : type === 'instant_buy' ? 'buy' : 'contact'}`)}
-                        </Badge>
-                      ))}
-                    </div>
                     {/* Sort pills */}
                     <div className="flex flex-wrap gap-1.5">
                       <Badge
@@ -581,13 +541,13 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
 
             {/* Offers Heading */}
             <h2 className="text-lg font-semibold text-polar-night mb-4">
-              {t('offers.availableOffers', { count: filteredOffers.length })}
+              {t('offers.availableOffers', { count: regularOffers.length })}
             </h2>
 
             {/* Offers List */}
-            {filteredOffers.length > 0 ? (
+            {regularOffers.length > 0 ? (
               <div className="space-y-4">
-                {filteredOffers.map((offer) => (
+                {regularOffers.map((offer) => (
                   <OfferCard
                     key={offer.id}
                     listing={offer}
@@ -599,20 +559,7 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
             ) : (
               <div className="text-center py-12 bg-snow-white border border-border rounded-xl">
                 <Package className="w-12 h-12 text-text-muted mx-auto mb-4" />
-                {listingTypeFilter !== 'all' ? (
-                  <>
-                    <h3 className="text-lg font-semibold text-polar-night mb-2">
-                      {t('emptyState.noOffersMatch')}
-                    </h3>
-                    <p className="text-text-secondary mb-4">
-                      {t('emptyState.tryAdjusting')}
-                    </p>
-                    <Button variant="secondary" onClick={clearFilters}>
-                      {t('filter.clearFilters')}
-                    </Button>
-                  </>
-                ) : (
-                  <>
+                <>
                     <h3 className="text-lg font-semibold text-polar-night mb-2">
                       {t('emptyState.noOffersYet')}
                     </h3>
@@ -624,13 +571,12 @@ export function GamePageClient({ bggId }: GamePageClientProps) {
                         {t('actions.sellThisGame')}
                       </Button>
                     </Link>
-                  </>
-                )}
+                </>
               </div>
             )}
 
             {/* Private Seller Footnote */}
-            {(filteredOffers.length > 0 || auctionOffers.length > 0) && (
+            {(regularOffers.length > 0 || auctionOffers.length > 0) && (
               <p className="mt-4 text-xs text-text-muted">
                 * {t('privateSeller.footnote')}{' '}
                 <Link href="/help/buying" className="underline underline-offset-2">
