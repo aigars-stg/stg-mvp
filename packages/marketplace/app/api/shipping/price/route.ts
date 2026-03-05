@@ -50,6 +50,13 @@ export async function GET(request: NextRequest) {
     const price = getShippingPrice(from, to, size);
     const allPrices = SHIPPING_PRICES[from]?.[to];
 
+    if (price == null) {
+      return NextResponse.json(
+        { error: 'Shipping not available for this route' },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json({
       from,
       to,

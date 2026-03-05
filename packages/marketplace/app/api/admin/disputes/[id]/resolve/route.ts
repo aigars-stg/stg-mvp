@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { processRefund, processPartialRefund } from '@/lib/services/refund';
+import { sendDisputeResolved } from '@/lib/email/send-order-emails';
 
 const adminSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     // Get order
     const { data: order, error: orderError } = await adminSupabase
       .from('orders')
-      .select('id, order_number, status, dispute_status, buyer_id, seller_id')
+      .select('id, order_number, status, dispute_status, buyer_id, seller_id, total_amount, buyer_wallet_debit_cents, everypay_payment_reference')
       .eq('id', orderId)
       .single();
 
@@ -126,8 +128,54 @@ export async function POST(request: NextRequest, { params }: Params) {
       `⚖️ [Dispute] Resolved order ${order.order_number}: ${resolution_type} by admin ${user.id}`
     );
 
-    // TODO: Process refund if buyer_full_refund or buyer_partial_refund
-    // TODO: Send resolution emails to buyer and seller
+    // Process refund if applicable
+    if (resolution_type === 'buyer_full_refund') {
+      const { refundPayment } = await import('@/lib/everypay/client');
+      const refundResult = await processRefund(adminSupabase, orderId, async (ref, cents) => {
+        try {
+          await refundPayment(ref, cents);
+          return { success: true };
+        } catch (e) {
+          return { success: false, error: (e as Error).message };
+        }
+      });
+      if (!refundResult.success) {
+        console.error(`Refund failed for order ${order.order_number}:`, refundResult.error);
+      }
+    } else if (resolution_type === 'buyer_partial_refund' && refund_amount_cents) {
+      const { refundPayment } = await import('@/lib/everypay/client');
+      const refundResult = await processPartialRefund(adminSupabase, orderId, refund_amount_cents, async (ref, cents) => {
+        try {
+          await refundPayment(ref, cents);
+          return { success: true };
+        } catch (e) {
+          return { success: false, error: (e as Error).message };
+        }
+      });
+      if (!refundResult.success) {
+        console.error(`Partial refund failed for order ${order.order_number}:`, refundResult.error);
+      }
+    }
+
+    // Send resolution emails to buyer and seller
+    const { data: profiles } = await adminSupabase
+      .from('user_profiles')
+      .select('id, full_name, email')
+      .in('id', [order.buyer_id, order.seller_id]);
+
+    if (profiles) {
+      const isSellerFavor = resolution_type === 'seller_favor';
+      for (const profile of profiles) {
+        sendDisputeResolved({
+          recipientName: profile.full_name || 'User',
+          recipientEmail: profile.email,
+          orderNumber: order.order_number,
+          resolution: resolution_type,
+          resolutionNote: resolution_notes.trim(),
+          isSellerFavor,
+        }).catch(err => console.error('Dispute email failed:', err));
+      }
+    }
 
     return NextResponse.json({
       success: true,

@@ -137,6 +137,14 @@ export async function POST(request: NextRequest) {
           'M'
         )
       : 0;
+
+    if (shippingCostEuros == null) {
+      return NextResponse.json(
+        { error: 'Shipping not available for this route' },
+        { status: 400 }
+      );
+    }
+
     const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
     // Create checkout session via service

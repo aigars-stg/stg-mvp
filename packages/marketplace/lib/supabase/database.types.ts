@@ -504,8 +504,10 @@ export type Database = {
           all_components_present: boolean | null
           auction_anti_snipe_extended: boolean | null
           auction_bid_count: number | null
+          auction_cooldown_hours: number | null
           auction_current_bid: number | null
           auction_duration_days: number | null
+          auction_end_strategy: string | null
           auction_ends_at: string | null
           auction_payment_deadline: string | null
           auction_start_price: number | null
@@ -548,8 +550,10 @@ export type Database = {
           all_components_present?: boolean | null
           auction_anti_snipe_extended?: boolean | null
           auction_bid_count?: number | null
+          auction_cooldown_hours?: number | null
           auction_current_bid?: number | null
           auction_duration_days?: number | null
+          auction_end_strategy?: string | null
           auction_ends_at?: string | null
           auction_payment_deadline?: string | null
           auction_start_price?: number | null
@@ -592,8 +596,10 @@ export type Database = {
           all_components_present?: boolean | null
           auction_anti_snipe_extended?: boolean | null
           auction_bid_count?: number | null
+          auction_cooldown_hours?: number | null
           auction_current_bid?: number | null
           auction_duration_days?: number | null
+          auction_end_strategy?: string | null
           auction_ends_at?: string | null
           auction_payment_deadline?: string | null
           auction_start_price?: number | null
@@ -2121,8 +2127,10 @@ export type Database = {
           all_components_present: boolean | null
           auction_anti_snipe_extended: boolean | null
           auction_bid_count: number | null
+          auction_cooldown_hours: number | null
           auction_current_bid: number | null
           auction_duration_days: number | null
+          auction_end_strategy: string | null
           auction_ends_at: string | null
           auction_payment_deadline: string | null
           auction_start_price: number | null

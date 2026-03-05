@@ -456,10 +456,8 @@ export async function GET(request: NextRequest) {
         auction_winner_id: row.auction_winner_id,
         auction_payment_deadline: row.auction_payment_deadline,
         auction_anti_snipe_extended: row.auction_anti_snipe_extended,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- columns added by migration, not yet in generated types
-        auction_end_strategy: (row as any).auction_end_strategy || 'fixed',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        auction_cooldown_hours: (row as any).auction_cooldown_hours || null,
+        auction_end_strategy: row.auction_end_strategy || 'fixed',
+        auction_cooldown_hours: row.auction_cooldown_hours || null,
 
         // Nested game object
         game: {

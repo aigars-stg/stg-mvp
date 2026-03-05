@@ -244,8 +244,8 @@ export function getShippingPrice(
   senderCountry: TerminalCountry,
   receiverCountry: TerminalCountry,
   size: ParcelSize = 'M'
-): number {
-  return SHIPPING_PRICES[senderCountry]?.[receiverCountry]?.[size] ?? 0;
+): number | null {
+  return SHIPPING_PRICES[senderCountry]?.[receiverCountry]?.[size] ?? null;
 }
 
 // ============================================

@@ -40,7 +40,7 @@ export async function POST(
     // Verify parent question exists and is a top-level question (not a reply)
     const { data: parentQuestion, error: parentError } = await supabase
       .from('listing_questions')
-      .select('id, listing_id, parent_id, deleted_at')
+      .select('id, listing_id, parent_id, deleted_at, user_id')
       .eq('id', parentId)
       .single();
 
@@ -76,7 +76,7 @@ export async function POST(
     // Verify listing exists and is active
     const { data: listing, error: listingError } = await supabase
       .from('listings')
-      .select('id, status')
+      .select('id, status, game_name')
       .eq('id', listingId)
       .single();
 
@@ -133,8 +133,33 @@ export async function POST(
       is_seller: replyWithAuthor?.is_seller ?? false,
     };
 
-    // TODO: Send email notification to question author (if not the seller replying)
-    // This can be added in a follow-up PR
+    // Send email notification to question author (fire-and-forget, skip if replying to own question)
+    if (parentQuestion.user_id !== user!.id) {
+      const { data: authorProfile } = await supabase
+        .from('user_profiles')
+        .select('full_name, email')
+        .eq('id', parentQuestion.user_id)
+        .single();
+
+      const { data: replierProfile } = await supabase
+        .from('user_profiles')
+        .select('full_name')
+        .eq('id', user!.id)
+        .single();
+
+      if (authorProfile?.email) {
+        const { sendNewReplyEmail } = await import('@/lib/email/send-question-emails');
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://secondturn.games';
+        sendNewReplyEmail({
+          recipientName: authorProfile.full_name || 'User',
+          recipientEmail: authorProfile.email,
+          gameName: listing.game_name || 'a listing',
+          replyContent: content,
+          authorName: replierProfile?.full_name || 'Someone',
+          listingUrl: `${baseUrl}/en/games/${listingId}`,
+        }).catch(() => {});
+      }
+    }
 
     return NextResponse.json({
       reply: formattedReply,

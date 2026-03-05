@@ -149,3 +149,50 @@ export async function processRefund(
     everypayRefundedCents,
   };
 }
+
+/**
+ * Process a partial refund for a specific amount
+ * Used for dispute resolutions with buyer_partial_refund
+ */
+export async function processPartialRefund(
+  supabase: SupabaseClient,
+  orderId: string,
+  refundAmountCents: number,
+  refundEveryPay: (paymentRef: string, amountCents: number) => Promise<{ success: boolean; error?: string }>
+): Promise<RefundResult> {
+  const { data: order, error: fetchError } = await supabase
+    .from('orders')
+    .select('id, status, buyer_id, buyer_wallet_debit_cents, everypay_payment_reference')
+    .eq('id', orderId)
+    .single();
+
+  if (fetchError || !order) {
+    return { success: false, walletRefundedCents: 0, everypayRefundedCents: 0, error: 'Order not found' };
+  }
+
+  const walletDebitCents = order.buyer_wallet_debit_cents || 0;
+  // Refund wallet portion first (up to what was debited), remainder from EveryPay
+  const walletRefundCents = Math.min(refundAmountCents, walletDebitCents);
+  const everypayRefundCents = refundAmountCents - walletRefundCents;
+
+  let walletRefundedCents = 0;
+  let everypayRefundedCents = 0;
+
+  if (everypayRefundCents > 0 && order.everypay_payment_reference) {
+    const epResult = await refundEveryPay(order.everypay_payment_reference, everypayRefundCents);
+    if (!epResult.success) {
+      return { success: false, walletRefundedCents: 0, everypayRefundedCents: 0, error: `EveryPay refund failed: ${epResult.error}` };
+    }
+    everypayRefundedCents = everypayRefundCents;
+  }
+
+  if (walletRefundCents > 0) {
+    const walletResult = await refundToWallet(supabase, order.buyer_id, walletRefundCents, orderId);
+    if (!walletResult.success) {
+      return { success: false, walletRefundedCents: 0, everypayRefundedCents, error: `Wallet refund failed: ${walletResult.error}` };
+    }
+    walletRefundedCents = walletRefundCents;
+  }
+
+  return { success: true, walletRefundedCents, everypayRefundedCents };
+}

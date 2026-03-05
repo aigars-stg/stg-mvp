@@ -1258,6 +1258,7 @@ BEGIN
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'preferred_locale', 'en')
   );
+  PERFORM link_newsletter_to_user(NEW.id, NEW.email);
   RETURN NEW;
 END;
 $$;
@@ -1937,7 +1938,7 @@ SET search_path TO 'public', 'extensions'
 AS $$
 BEGIN
   UPDATE newsletter_subscribers SET user_id = p_user_id, updated_at = NOW()
-  WHERE email = p_email AND user_id IS NULL;
+  WHERE LOWER(TRIM(email)) = LOWER(TRIM(p_email)) AND user_id IS NULL;
 END;
 $$;
 

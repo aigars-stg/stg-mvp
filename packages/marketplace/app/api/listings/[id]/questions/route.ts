@@ -184,7 +184,7 @@ export async function POST(
     // Verify listing exists and user is not the seller
     const { data: listing, error: listingError } = await supabase
       .from('listings')
-      .select('id, seller_id, status')
+      .select('id, seller_id, status, game_name')
       .eq('id', listingId)
       .single();
 
@@ -256,8 +256,31 @@ export async function POST(
       reply_count: 0,
     };
 
-    // TODO: Send email notification to seller (via Resend)
-    // This can be added in a follow-up PR
+    // Send email notification to seller (fire-and-forget)
+    const { data: sellerProfile } = await supabase
+      .from('user_profiles')
+      .select('full_name, email')
+      .eq('id', listing.seller_id)
+      .single();
+
+    const { data: askerProfile } = await supabase
+      .from('user_profiles')
+      .select('full_name')
+      .eq('id', user!.id)
+      .single();
+
+    if (sellerProfile?.email) {
+      const { sendNewQuestionEmail } = await import('@/lib/email/send-question-emails');
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://secondturn.games';
+      sendNewQuestionEmail({
+        sellerName: sellerProfile.full_name || 'Seller',
+        sellerEmail: sellerProfile.email,
+        gameName: listing.game_name || 'your listing',
+        questionContent: content,
+        authorName: askerProfile?.full_name || 'Someone',
+        listingUrl: `${baseUrl}/en/games/${listingId}`,
+      }).catch(() => {});
+    }
 
     return NextResponse.json({
       question: formattedQuestion,

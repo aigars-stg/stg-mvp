@@ -328,13 +328,13 @@ function CheckoutPageContent() {
 
   // Calculate pricing (with wallet applied)
   const itemsTotalCents = basket ? Math.round(basket.subtotal * 100) : 0;
-  const shippingCostEuros = selectedTerminal && basket?.seller_country
+  const shippingCostEuros = (selectedTerminal && basket?.seller_country
     ? getShippingPrice(
         basket.seller_country as TerminalCountry,
         selectedTerminal.countryCode as TerminalCountry,
         'M'
       )
-    : 0;
+    : 0) ?? 0;
   const shippingCostCents = Math.round(shippingCostEuros * 100);
   const pricing = basket
     ? calculateCheckoutPricing(itemsTotalCents, shippingCostCents, walletBalanceCents)
