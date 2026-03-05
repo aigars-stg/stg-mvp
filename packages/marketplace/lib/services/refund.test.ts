@@ -11,6 +11,7 @@ describe('REFUNDABLE_STATUSES', () => {
       'pending_seller',
       'accepted',
       'shipped',
+      'in_transit',
       'delivered',
       'disputed',
     ]);
@@ -29,6 +30,7 @@ describe('isRefundableStatus', () => {
     expect(isRefundableStatus('pending_seller')).toBe(true);
     expect(isRefundableStatus('accepted')).toBe(true);
     expect(isRefundableStatus('shipped')).toBe(true);
+    expect(isRefundableStatus('in_transit')).toBe(true);
     expect(isRefundableStatus('delivered')).toBe(true);
     expect(isRefundableStatus('disputed')).toBe(true);
   });

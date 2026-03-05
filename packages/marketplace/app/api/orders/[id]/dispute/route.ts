@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { DISPUTE_WINDOW_DAYS } from '@/lib/pricing/constants';
+import { createServiceClient } from '@/lib/supabase/client';
 
-const adminSupabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const adminSupabase = createServiceClient();
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -64,7 +61,8 @@ export async function POST(request: NextRequest, { params }: Params) {
         seller_id,
         status,
         delivered_at,
-        updated_at
+        updated_at,
+        wallet_credited_at
       `)
       .eq('id', orderId)
       .single();
@@ -84,11 +82,12 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Check if order is in delivered status
-    if (order.status !== 'delivered') {
+    // Only allow disputes on shipped, in_transit, or delivered orders
+    const disputeAllowedStatuses = ['shipped', 'in_transit', 'delivered'];
+    if (!disputeAllowedStatuses.includes(order.status)) {
       if (order.status === 'completed') {
         return NextResponse.json(
-          { error: 'Dispute window has closed - order has been completed' },
+          { error: 'This order has already been completed. Please contact info@secondturn.games for assistance.' },
           { status: 400 }
         );
       }
@@ -99,25 +98,34 @@ export async function POST(request: NextRequest, { params }: Params) {
         );
       }
       return NextResponse.json(
-        { error: `Cannot dispute order in status: ${order.status}` },
+        { error: 'Disputes can only be opened on shipped or delivered orders. Need help? Contact us at info@secondturn.games' },
         { status: 400 }
       );
     }
 
-    // Check if within dispute window (2 days after delivery)
-    const deliveryTimestamp = order.delivered_at || order.updated_at;
-    const deliveryDate = new Date(deliveryTimestamp);
-    const disputeDeadline = new Date(deliveryDate.getTime() + DISPUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
-    const now = new Date();
-
-    if (now > disputeDeadline) {
+    // Check seller wallet hasn't been credited already
+    if (order.wallet_credited_at) {
       return NextResponse.json(
-        {
-          error: `Dispute window has closed. You had ${DISPUTE_WINDOW_DAYS} days after delivery to open a dispute.`,
-          disputeDeadline: disputeDeadline.toISOString(),
-        },
+        { error: 'This order has already been completed. Please contact info@secondturn.games for assistance.' },
         { status: 400 }
       );
+    }
+
+    // Check if within dispute window (2 days after delivery) - only applies if delivered
+    if (order.delivered_at) {
+      const deliveryDate = new Date(order.delivered_at);
+      const disputeDeadline = new Date(deliveryDate.getTime() + DISPUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+      const now = new Date();
+
+      if (now > disputeDeadline) {
+        return NextResponse.json(
+          {
+            error: 'The inspection window for this order has closed. Please contact info@secondturn.games for assistance.',
+            disputeDeadline: disputeDeadline.toISOString(),
+          },
+          { status: 400 }
+        );
+      }
     }
 
     console.log(`⚠️ [Dispute] Opening dispute for order ${order.order_number}`);
@@ -146,16 +154,16 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Get seller email to notify them
-    const { data: sellerProfile } = await adminSupabase
-      .from('user_profiles')
-      .select('email, full_name')
-      .eq('id', order.seller_id)
-      .single();
+    // Fetch both profiles in parallel for notification emails
+    const [{ data: sellerProfile }, { data: buyerProfile }] = await Promise.all([
+      adminSupabase.from('user_profiles').select('email, full_name').eq('id', order.seller_id).single(),
+      adminSupabase.from('user_profiles').select('email, full_name').eq('id', user.id).single(),
+    ]);
 
-    // Send notification email to seller (async, don't block response)
+    // Send notification emails (async, don't block response)
+    const { sendDisputeOpenedToSeller, sendDisputeOpenedToBuyer } = await import('@/lib/email/send-order-emails');
+
     if (sellerProfile?.email) {
-      const { sendDisputeOpenedToSeller } = await import('@/lib/email/send-order-emails');
       sendDisputeOpenedToSeller({
         sellerName: sellerProfile.full_name || 'Seller',
         sellerEmail: sellerProfile.email,
@@ -163,6 +171,16 @@ export async function POST(request: NextRequest, { params }: Params) {
         orderId: order.id,
         gameName: order.order_number,
         buyerReason: reason,
+      });
+    }
+
+    if (buyerProfile?.email) {
+      sendDisputeOpenedToBuyer({
+        buyerName: buyerProfile.full_name || 'Buyer',
+        buyerEmail: buyerProfile.email,
+        orderNumber: order.order_number,
+        orderId: order.id,
+        disputeType: reason,
       });
     }
 
@@ -234,7 +252,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     }
 
     // Calculate dispute window info
-    const deliveryTimestamp = order.delivered_at || order.updated_at;
+    const deliveryTimestamp = order.delivered_at || order.updated_at || new Date().toISOString();
     const deliveryDate = new Date(deliveryTimestamp);
     const disputeDeadline = new Date(deliveryDate.getTime() + DISPUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
     const now = new Date();

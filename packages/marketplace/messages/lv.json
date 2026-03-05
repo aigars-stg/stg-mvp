@@ -3220,5 +3220,48 @@
         "upcoming": "gaidāmais"
       }
     }
+  },
+  "Disputes": {
+    "status": {
+      "awaiting_seller": "Gaida pārdevēja atbildi",
+      "under_review": "Tiek izskatīts",
+      "resolved": "Atrisināts"
+    },
+    "title": "Strīds noris",
+    "yourReport": "Jūsu ziņojums",
+    "waitingForSeller": "Gaidām pārdevēja atbildi (termiņš: {deadline})",
+    "underReviewBuyer": "Mūsu komanda izskata strīdu. Mēs jūs informēsim par rezultātu.",
+    "underReviewSeller": "Mūsu komanda izskata strīdu. Mēs informēsim abas puses par rezultātu.",
+    "resolution": "Lēmums",
+    "yourResponse": "Jūsu atbilde",
+    "refunded": "Šim pasūtījumam ir veikta atmaksa.",
+    "refundAmount": "Atmaksas summa: {amount}",
+    "types": {
+      "not_as_described": "Prece neatbilst aprakstam",
+      "missing_parts": "Trūkst detaļu vai komponentu",
+      "damaged": "Prece saņemta bojāta",
+      "wrong_item": "Saņemta nepareiza prece",
+      "not_received": "Prece nav saņemta"
+    },
+    "sellerResponse": {
+      "howToRespond": "Kā vēlaties atbildēt?",
+      "contest": "Apstrīdēt prasību",
+      "contestDescription": "Sniedziet savu viedokli administratora pārskatīšanai",
+      "accept": "Pieņemt prasību",
+      "acceptDescription": "Piekrist atmaksai pircējam",
+      "acceptWarning": "Pieņemot prasību, jūs piekrītat, ka pircēja prasība ir pamatota. Strīds tiks atrisināts nekavējoties un pircējam tiks veikta pilna atmaksa. Šo darbību nevar atsaukt.",
+      "submitContest": "Iesniegt atbildi",
+      "submitAccept": "Pieņemt prasību un atmaksāt pircējam",
+      "responseSubmitted": "Atbilde iesniegta",
+      "claimAccepted": "Prasība pieņemta",
+      "responseSubmittedMessage": "Mūsu komanda izskatīs strīdu un informēs abas puses par rezultātu.",
+      "claimAcceptedMessage": "Jūs pieņēmāt pircēja prasību. Pircējam tiks veikta atmaksa.",
+      "singleResponseWarning": "Jūs varat iesniegt tikai vienu atbildi. Pārliecinieties, ka esat iekļāvis visu nepieciešamo informāciju.",
+      "minChars": "Minimums 50 rakstzīmes",
+      "deadlineExpired": "Atbildes termiņš ir beidzies",
+      "hoursRemaining": "Atbildei atlikušas {hours} stundas",
+      "optionalNote": "Neobligāta piezīme (komentāri pircējam)",
+      "responseLabel": "Jūsu atbilde pasūtījumam #{orderNumber}"
+    }
   }
 }

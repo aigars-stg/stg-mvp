@@ -101,13 +101,20 @@ export async function GET(request: NextRequest) {
       const orderRef = checkoutEvent.order_reference as string;
       const actualPaymentState = paymentStatus.payment_state;
 
+      // Detect payment method: cc_details present = card, absent = bank link
+      const walletDebitCents = (metadata.wallet_debit_cents as number) || 0;
+      const hasCard = !!paymentStatus.cc_details?.last_four_digits;
+      const detectedPaymentMethod = walletDebitCents > 0
+        ? 'mixed'
+        : (hasCard ? 'card' : 'bank_link');
+
       let orderId: string;
 
       try {
         if (orderRef.startsWith('BASKET-')) {
-          orderId = await processBasketPayment(supabase, metadata, paymentReference, actualPaymentState);
+          orderId = await processBasketPayment(supabase, metadata, paymentReference, actualPaymentState, detectedPaymentMethod);
         } else if (orderRef.startsWith('AUCTION-')) {
-          orderId = await processAuctionPayment(supabase, metadata, paymentReference, actualPaymentState);
+          orderId = await processAuctionPayment(supabase, metadata, paymentReference, actualPaymentState, detectedPaymentMethod);
         } else {
           log.error({ orderRef }, 'Unknown order_reference type');
           return NextResponse.redirect(
@@ -282,7 +289,8 @@ async function processBasketPayment(
   supabase: AdminClient,
   metadata: Record<string, unknown>,
   paymentReference: string,
-  paymentState: string
+  paymentState: string,
+  paymentMethod: string
 ): Promise<string> {
   const basketId = metadata.basket_id as string;
   const shippingMethod = metadata.shipping_method as string;
@@ -330,6 +338,7 @@ async function processBasketPayment(
       platform_commission_cents: commissionCents,
       seller_wallet_credit_cents: walletCreditCents,
       everypay_payment_state: paymentState,
+      payment_method: paymentMethod,
       commission_net_cents: (metadata.commission_net_cents as number) || null,
       commission_vat_cents: (metadata.commission_vat_cents as number) || null,
       commission_vat_rate: (metadata.commission_vat_rate as number) || null,
@@ -339,7 +348,7 @@ async function processBasketPayment(
     })
     .eq('id', orderId);
 
-  log.info({ orderNumber: result.order_number, orderId }, 'Basket order created');
+  log.info({ orderNumber: result.order_number, orderId, paymentMethod }, 'Basket order created');
 
   // Notify seller about new order (non-blocking)
   supabase.from('notifications').insert({
@@ -363,7 +372,8 @@ async function processAuctionPayment(
   supabase: AdminClient,
   metadata: Record<string, unknown>,
   paymentReference: string,
-  paymentState: string
+  paymentState: string,
+  paymentMethod: string
 ): Promise<string> {
   const listingId = metadata.listing_id as string;
   const buyerId = metadata.buyer_id as string;
@@ -415,6 +425,7 @@ async function processAuctionPayment(
     .from('orders')
     .update({
       everypay_payment_state: paymentState,
+      payment_method: paymentMethod,
       commission_net_cents: (metadata.commission_net_cents as number) || null,
       commission_vat_cents: (metadata.commission_vat_cents as number) || null,
       commission_vat_rate: (metadata.commission_vat_rate as number) || null,
@@ -424,7 +435,7 @@ async function processAuctionPayment(
     })
     .eq('id', result.order_id);
 
-  log.info({ orderId: result.order_id, orderNumber: result.order_number, listingId, paymentState }, 'Auction order created');
+  log.info({ orderId: result.order_id, orderNumber: result.order_number, listingId, paymentState, paymentMethod }, 'Auction order created');
 
   // Notify seller about new order (non-blocking)
   supabase.from('notifications').insert({

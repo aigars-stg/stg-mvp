@@ -3234,5 +3234,48 @@
         "upcoming": "upcoming"
       }
     }
+  },
+  "Disputes": {
+    "status": {
+      "awaiting_seller": "Awaiting seller",
+      "under_review": "Under review",
+      "resolved": "Resolved"
+    },
+    "title": "Dispute in Progress",
+    "yourReport": "Your report",
+    "waitingForSeller": "Waiting for seller response (deadline: {deadline})",
+    "underReviewBuyer": "Our team is reviewing the dispute. We will notify you of the outcome.",
+    "underReviewSeller": "Our team is reviewing the dispute. We will notify both parties of the outcome.",
+    "resolution": "Resolution",
+    "yourResponse": "Your response",
+    "refunded": "This order has been refunded.",
+    "refundAmount": "Refund amount: {amount}",
+    "types": {
+      "not_as_described": "Item not as described",
+      "missing_parts": "Missing parts or components",
+      "damaged": "Item arrived damaged",
+      "wrong_item": "Wrong item received",
+      "not_received": "Item not received"
+    },
+    "sellerResponse": {
+      "howToRespond": "How would you like to respond?",
+      "contest": "Contest claim",
+      "contestDescription": "Provide your side for admin review",
+      "accept": "Accept claim",
+      "acceptDescription": "Agree to refund the buyer",
+      "acceptWarning": "By accepting, you agree that the buyer's claim is valid. The dispute will be resolved immediately and a full refund will be processed. This cannot be undone.",
+      "submitContest": "Submit Response",
+      "submitAccept": "Accept Claim and Refund Buyer",
+      "responseSubmitted": "Response Submitted",
+      "claimAccepted": "Claim Accepted",
+      "responseSubmittedMessage": "Our team will review the dispute and notify both parties of the outcome.",
+      "claimAcceptedMessage": "You accepted the buyer's claim. A refund will be processed for the buyer.",
+      "singleResponseWarning": "You can only submit one response. Make sure to include all relevant information before submitting.",
+      "minChars": "Minimum 50 characters",
+      "deadlineExpired": "Response deadline has passed",
+      "hoursRemaining": "{hours} hours remaining to respond",
+      "optionalNote": "Optional note (any comments for the buyer)",
+      "responseLabel": "Your Response to Order #{orderNumber}"
+    }
   }
 }

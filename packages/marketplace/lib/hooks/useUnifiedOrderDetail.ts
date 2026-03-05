@@ -40,6 +40,19 @@ export interface ConversationData {
   created_at: string;
 }
 
+export interface OrderDispute {
+  reason: string;
+  description: string;
+  status: string;
+  seller_response?: string;
+  seller_responded_at?: string;
+  seller_deadline?: string;
+  photo_urls?: string[];
+  resolved_at?: string;
+  resolution?: string;
+  resolution_note?: string;
+}
+
 export interface OrderData {
   id: string;
   order_number: string;
@@ -49,6 +62,8 @@ export interface OrderData {
   items_total: number;
   shipping_cost: number;
   refund_amount?: number | null;
+  refund_status?: string | null;
+  payment_method?: string | null;
   destination: ShippingDestination;
   tracking: TrackingData;
   timestamps: {
@@ -61,6 +76,7 @@ export interface OrderData {
     refunded_at?: string;
     disputed_at?: string;
   };
+  dispute?: OrderDispute | null;
   // Seller-specific (only present when viewer is seller)
   parcel_size?: string;
   label_error?: string;

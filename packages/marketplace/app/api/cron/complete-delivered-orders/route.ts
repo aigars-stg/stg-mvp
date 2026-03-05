@@ -39,17 +39,35 @@ export async function GET(request: NextRequest) {
     const twoDaysAgo = new Date();
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
-    // Query orders where delivered_at (or updated_at as fallback) is more than 2 days ago
+    // Query delivered orders that have no open disputes or issues
     const { data: orders, error: fetchError } = await supabase
       .from('orders')
-      .select('id, order_number, delivered_at, updated_at')
-      .eq('status', 'delivered');
+      .select('id, order_number, delivered_at, updated_at, dispute_status')
+      .eq('status', 'delivered')
+      .is('dispute_status', null);
 
     // Filter in JS to handle COALESCE(delivered_at, updated_at) logic
-    const ordersToComplete = orders?.filter((order) => {
+    // Also exclude orders with open order_issues
+    const candidateOrders = orders?.filter((order) => {
       const deliveryDate = new Date(order.delivered_at || order.updated_at);
       return deliveryDate < twoDaysAgo;
     }) || [];
+
+    // Check for open issues on candidate orders
+    const orderIds = candidateOrders.map(o => o.id);
+    let ordersWithOpenIssues: Set<string> = new Set();
+    if (orderIds.length > 0) {
+      const { data: openIssues } = await supabase
+        .from('order_issues')
+        .select('order_id')
+        .in('order_id', orderIds)
+        .in('status', ['open', 'investigating']);
+      if (openIssues) {
+        ordersWithOpenIssues = new Set(openIssues.map(i => i.order_id));
+      }
+    }
+
+    const ordersToComplete = candidateOrders.filter(o => !ordersWithOpenIssues.has(o.id));
 
     // Re-assign for compatibility with rest of code
     const fetchErrorToUse = fetchError;

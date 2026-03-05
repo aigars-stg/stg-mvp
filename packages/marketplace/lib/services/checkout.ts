@@ -198,6 +198,7 @@ export async function createCheckoutSession(
       .from('orders')
       .update({
         locale,
+        payment_method: 'wallet_only',
         platform_commission_cents: orderPricing.commissionCents,
         seller_wallet_credit_cents: orderPricing.walletCreditCents,
         commission_net_cents: orderPricing.commissionVat.netCents,
@@ -369,6 +370,7 @@ export async function createAuctionCheckoutSession(
         status: 'pending_seller',
         paid_at: new Date().toISOString(),
         locale,
+        payment_method: 'wallet_only',
         buyer_wallet_debit_cents: pricing.walletDebitCents,
         platform_commission_cents: orderPricing.commissionCents,
         seller_wallet_credit_cents: orderPricing.walletCreditCents,

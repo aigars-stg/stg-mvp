@@ -12,7 +12,14 @@ import { OrderCancelledBuyerEmail } from './templates/order-cancelled-buyer';
 import { ShippingLabelSellerEmail } from './templates/shipping-label-seller';
 import { PackageDeliveredBuyerEmail } from './templates/package-delivered-buyer';
 import { DisputeOpenedSellerEmail } from './templates/dispute-opened-seller';
+import { DisputeOpenedBuyerEmail } from './templates/dispute-opened-buyer';
+import { DisputeSellerResponseEmail } from './templates/dispute-seller-response';
+import { DisputeSellerAcceptedEmail } from './templates/dispute-seller-accepted';
+import { DisputeSellerDeadlinePassedEmail } from './templates/dispute-seller-deadline-passed';
 import { DisputeResolvedEmail } from './templates/dispute-resolved';
+import { RefundCompletedEmail } from './templates/refund-completed';
+import { ShippingReminderEmail } from './templates/shipping-reminder';
+import { ShippingDeadlineCancelledEmail } from './templates/shipping-deadline-cancelled';
 import { loggers } from '../logger';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? (() => {
@@ -396,6 +403,222 @@ export async function sendDisputeResolved(params: {
     return { success: true };
   } catch (error) {
     loggers.email.error({ orderNumber, recipientEmail, error }, 'Failed to send dispute resolved email');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send dispute opened confirmation to buyer
+ */
+export async function sendDisputeOpenedToBuyer(params: {
+  buyerName: string;
+  buyerEmail: string;
+  orderNumber: string;
+  orderId: string;
+  disputeType: string;
+}) {
+  const { buyerName, buyerEmail, orderNumber, orderId, disputeType } = params;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `We received your report for Order #${orderNumber}`,
+      react: DisputeOpenedBuyerEmail({
+        buyerName,
+        orderNumber,
+        disputeType,
+        orderId,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, buyerEmail }, 'Dispute opened confirmation sent to buyer');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, buyerEmail, error }, 'Failed to send dispute opened email to buyer');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send notification to buyer that seller responded to dispute
+ */
+export async function sendDisputeSellerResponse(params: {
+  buyerName: string;
+  buyerEmail: string;
+  orderNumber: string;
+  orderId: string;
+}) {
+  const { buyerName, buyerEmail, orderNumber, orderId } = params;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `Seller responded to your dispute - Order #${orderNumber}`,
+      react: DisputeSellerResponseEmail({
+        buyerName,
+        orderNumber,
+        orderId,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, buyerEmail }, 'Dispute seller response notification sent to buyer');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, buyerEmail, error }, 'Failed to send dispute seller response email');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send notification to buyer that seller accepted their claim
+ */
+export async function sendDisputeSellerAccepted(params: {
+  buyerName: string;
+  buyerEmail: string;
+  orderNumber: string;
+  orderId: string;
+  refundAmount: string;
+}) {
+  const { buyerName, buyerEmail, orderNumber, orderId, refundAmount } = params;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `Seller accepted your claim - Order #${orderNumber}`,
+      react: DisputeSellerAcceptedEmail({
+        buyerName,
+        orderNumber,
+        refundAmount,
+        orderId,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, buyerEmail }, 'Dispute seller accepted notification sent to buyer');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, buyerEmail, error }, 'Failed to send dispute seller accepted email');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send notification to seller that their dispute deadline passed
+ */
+export async function sendDisputeSellerDeadlinePassed(params: {
+  sellerName: string;
+  sellerEmail: string;
+  orderNumber: string;
+}) {
+  const { sellerName, sellerEmail, orderNumber } = params;
+
+  try {
+    await sendEmail({
+      to: sellerEmail,
+      subject: `Dispute deadline passed - Order #${orderNumber}`,
+      react: DisputeSellerDeadlinePassedEmail({
+        sellerName,
+        orderNumber,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, sellerEmail }, 'Dispute deadline passed notification sent to seller');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, sellerEmail, error }, 'Failed to send dispute deadline passed email');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send refund completed notification to buyer
+ */
+export async function sendRefundCompleted(params: {
+  buyerName: string;
+  buyerEmail: string;
+  orderNumber: string;
+  refundAmount: string;
+  refundMethod: 'card' | 'bank' | 'wallet';
+}) {
+  const { buyerName, buyerEmail, orderNumber, refundAmount, refundMethod } = params;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `Refund processed - Order #${orderNumber}`,
+      react: RefundCompletedEmail({
+        buyerName,
+        orderNumber,
+        refundAmount,
+        refundMethod,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, buyerEmail }, 'Refund completed email sent to buyer');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, buyerEmail, error }, 'Failed to send refund completed email');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send shipping reminder to seller (24h after accept, no ship event)
+ */
+export async function sendShippingReminder(params: {
+  sellerName: string;
+  sellerEmail: string;
+  orderNumber: string;
+  orderId: string;
+  deadline: string;
+}) {
+  const { sellerName, sellerEmail, orderNumber, orderId, deadline } = params;
+
+  try {
+    await sendEmail({
+      to: sellerEmail,
+      subject: `Reminder: Ship Order #${orderNumber}`,
+      react: ShippingReminderEmail({
+        sellerName,
+        orderNumber,
+        deadline,
+        orderId,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, sellerEmail }, 'Shipping reminder sent to seller');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, sellerEmail, error }, 'Failed to send shipping reminder');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send shipping deadline cancelled notification to buyer or seller
+ */
+export async function sendShippingDeadlineCancelled(params: {
+  recipientName: string;
+  recipientEmail: string;
+  orderNumber: string;
+  isBuyer: boolean;
+}) {
+  const { recipientName, recipientEmail, orderNumber, isBuyer } = params;
+
+  try {
+    await sendEmail({
+      to: recipientEmail,
+      subject: `Order #${orderNumber} cancelled - seller did not ship`,
+      react: ShippingDeadlineCancelledEmail({
+        recipientName,
+        orderNumber,
+        isBuyer,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, recipientEmail }, 'Shipping deadline cancelled email sent');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, recipientEmail, error }, 'Failed to send shipping deadline cancelled email');
     return { success: false, error };
   }
 }

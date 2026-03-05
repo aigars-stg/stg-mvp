@@ -32,9 +32,11 @@ export function DisputeResponseForm({
   existingResponse,
 }: DisputeResponseFormProps) {
   const [responseText, setResponseText] = useState('');
+  const [acceptClaim, setAcceptClaim] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [autoResolved, setAutoResolved] = useState(false);
 
   const deadlineDate = new Date(deadline);
   const now = new Date();
@@ -46,7 +48,7 @@ export function DisputeResponseForm({
   const charCount = responseText.trim().length;
 
   const handleSubmit = async () => {
-    if (charCount < 50) return;
+    if (!acceptClaim && charCount < 50) return;
 
     try {
       setSubmitting(true);
@@ -57,7 +59,12 @@ export function DisputeResponseForm({
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ response_text: responseText.trim() }),
+          body: JSON.stringify({
+            response_text: acceptClaim
+              ? (responseText.trim() || 'Seller accepted the claim.')
+              : responseText.trim(),
+            accept_claim: acceptClaim,
+          }),
         }
       );
 
@@ -66,7 +73,9 @@ export function DisputeResponseForm({
         throw new Error(data.error || 'Failed to submit response');
       }
 
+      const result = await res.json();
       setSuccess(true);
+      if (result.autoResolved) setAutoResolved(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit');
     } finally {
@@ -131,11 +140,12 @@ export function DisputeResponseForm({
             <CheckCircle2 className="w-8 h-8 text-aurora-green" />
           </div>
           <h3 className="text-lg font-semibold text-polar-night mb-2">
-            Response Submitted
+            {autoResolved ? 'Claim Accepted' : 'Response Submitted'}
           </h3>
           <p className="text-sm text-text-secondary">
-            Our team will review the dispute and notify both parties of the
-            outcome.
+            {autoResolved
+              ? 'You accepted the buyer\'s claim. A refund will be processed for the buyer.'
+              : 'Our team will review the dispute and notify both parties of the outcome.'}
           </p>
         </div>
       )}
@@ -143,9 +153,50 @@ export function DisputeResponseForm({
       {/* Response form */}
       {!alreadyResponded && !success && !isExpired && (
         <>
+          {/* Accept or Contest toggle */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-polar-night">How would you like to respond?</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setAcceptClaim(false)}
+                className={`p-3 rounded-lg border-2 text-left transition-colors ${
+                  !acceptClaim
+                    ? 'border-frost-ice bg-frost-ice/5'
+                    : 'border-border bg-snow-white hover:border-border-subtle'
+                }`}
+              >
+                <p className="text-sm font-medium text-polar-night">Contest claim</p>
+                <p className="text-xs text-text-secondary mt-0.5">Provide your side for admin review</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAcceptClaim(true)}
+                className={`p-3 rounded-lg border-2 text-left transition-colors ${
+                  acceptClaim
+                    ? 'border-aurora-green bg-aurora-green/5'
+                    : 'border-border bg-snow-white hover:border-border-subtle'
+                }`}
+              >
+                <p className="text-sm font-medium text-polar-night">Accept claim</p>
+                <p className="text-xs text-text-secondary mt-0.5">Agree to refund the buyer</p>
+              </button>
+            </div>
+          </div>
+
+          {acceptClaim && (
+            <div className="flex items-start gap-2 p-3 bg-aurora-green/5 border border-aurora-green/20 rounded-lg">
+              <CheckCircle2 className="w-4 h-4 text-aurora-green flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-text-secondary">
+                By accepting, you agree that the buyer&apos;s claim is valid. The dispute will be
+                resolved immediately and a full refund will be processed. This cannot be undone.
+              </p>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-polar-night mb-2">
-              Your Response to Order #{orderNumber}
+              {acceptClaim ? 'Optional note (any comments for the buyer)' : `Your Response to Order #${orderNumber}`}
             </label>
             <textarea
               value={responseText}
@@ -169,13 +220,15 @@ export function DisputeResponseForm({
             </div>
           </div>
 
-          <div className="flex items-start gap-2 p-3 bg-aurora-yellow/5 border border-aurora-yellow/20 rounded-lg">
-            <AlertTriangle className="w-4 h-4 text-aurora-yellow flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-text-secondary">
-              You can only submit one response. Make sure to include all
-              relevant information before submitting.
-            </p>
-          </div>
+          {!acceptClaim && (
+            <div className="flex items-start gap-2 p-3 bg-aurora-yellow/5 border border-aurora-yellow/20 rounded-lg">
+              <AlertTriangle className="w-4 h-4 text-aurora-yellow flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-text-secondary">
+                You can only submit one response. Make sure to include all
+                relevant information before submitting.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="flex items-start gap-2 p-3 bg-aurora-red/10 border border-aurora-red/20 rounded-lg">
@@ -185,16 +238,18 @@ export function DisputeResponseForm({
           )}
 
           <Button
-            variant="primary"
+            variant={acceptClaim ? 'accent' : 'primary'}
             fullWidth
-            disabled={charCount < 50 || submitting}
+            disabled={(!acceptClaim && charCount < 50) || submitting}
             onClick={handleSubmit}
           >
             {submitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Submitting...
+                {acceptClaim ? 'Processing...' : 'Submitting...'}
               </>
+            ) : acceptClaim ? (
+              'Accept Claim and Refund Buyer'
             ) : (
               'Submit Response'
             )}

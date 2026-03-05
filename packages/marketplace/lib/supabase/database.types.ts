@@ -900,6 +900,9 @@ export type Database = {
           resolution_notes: string | null
           resolved_at: string | null
           resolved_by: string | null
+          return_label_barcode: string | null
+          return_label_url: string | null
+          return_tracking_url: string | null
           status: string
           updated_at: string | null
         }
@@ -915,6 +918,9 @@ export type Database = {
           resolution_notes?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
+          return_label_barcode?: string | null
+          return_label_url?: string | null
+          return_tracking_url?: string | null
           status?: string
           updated_at?: string | null
         }
@@ -930,6 +936,9 @@ export type Database = {
           resolution_notes?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
+          return_label_barcode?: string | null
+          return_label_url?: string | null
+          return_tracking_url?: string | null
           status?: string
           updated_at?: string | null
         }
@@ -1058,6 +1067,7 @@ export type Database = {
           order_number: string
           paid_at: string | null
           parcel_size: string | null
+          payment_method: string | null
           pickup_city: string | null
           pickup_notes: string | null
           platform_commission_cents: number | null
@@ -1065,8 +1075,15 @@ export type Database = {
           receiver_name: string | null
           receiver_phone: string | null
           refund_amount: number | null
+          refund_completed_at: string | null
+          refund_error: string | null
+          refund_everypay_reference: string | null
+          refund_initiated_at: string | null
+          refund_method: string | null
           refund_note: string | null
           refund_reason: string | null
+          refund_sepa_reference: string | null
+          refund_status: string | null
           refunded_at: string | null
           review_reminder_sent_at: string | null
           seller_decline_reason: string | null
@@ -1076,13 +1093,18 @@ export type Database = {
           seller_wallet_credit_cents: number | null
           sender_country: string | null
           shipping_cost: number
+          shipping_deadline: string | null
           shipping_method: string
           shipping_net_cents: number | null
+          shipping_reminder_sent_at: string | null
           shipping_vat_cents: number | null
           shipping_vat_rate: number | null
           status: string
           total_amount: number
           tracking_url: string | null
+          unisend_claim_filed_at: string | null
+          unisend_claim_reference: string | null
+          unisend_claim_status: string | null
           unisend_parcel_id: number | null
           unisend_request_id: string | null
           updated_at: string | null
@@ -1127,6 +1149,7 @@ export type Database = {
           order_number: string
           paid_at?: string | null
           parcel_size?: string | null
+          payment_method?: string | null
           pickup_city?: string | null
           pickup_notes?: string | null
           platform_commission_cents?: number | null
@@ -1134,8 +1157,15 @@ export type Database = {
           receiver_name?: string | null
           receiver_phone?: string | null
           refund_amount?: number | null
+          refund_completed_at?: string | null
+          refund_error?: string | null
+          refund_everypay_reference?: string | null
+          refund_initiated_at?: string | null
+          refund_method?: string | null
           refund_note?: string | null
           refund_reason?: string | null
+          refund_sepa_reference?: string | null
+          refund_status?: string | null
           refunded_at?: string | null
           review_reminder_sent_at?: string | null
           seller_decline_reason?: string | null
@@ -1145,13 +1175,18 @@ export type Database = {
           seller_wallet_credit_cents?: number | null
           sender_country?: string | null
           shipping_cost?: number
+          shipping_deadline?: string | null
           shipping_method: string
           shipping_net_cents?: number | null
+          shipping_reminder_sent_at?: string | null
           shipping_vat_cents?: number | null
           shipping_vat_rate?: number | null
           status?: string
           total_amount: number
           tracking_url?: string | null
+          unisend_claim_filed_at?: string | null
+          unisend_claim_reference?: string | null
+          unisend_claim_status?: string | null
           unisend_parcel_id?: number | null
           unisend_request_id?: string | null
           updated_at?: string | null
@@ -1196,6 +1231,7 @@ export type Database = {
           order_number?: string
           paid_at?: string | null
           parcel_size?: string | null
+          payment_method?: string | null
           pickup_city?: string | null
           pickup_notes?: string | null
           platform_commission_cents?: number | null
@@ -1203,8 +1239,15 @@ export type Database = {
           receiver_name?: string | null
           receiver_phone?: string | null
           refund_amount?: number | null
+          refund_completed_at?: string | null
+          refund_error?: string | null
+          refund_everypay_reference?: string | null
+          refund_initiated_at?: string | null
+          refund_method?: string | null
           refund_note?: string | null
           refund_reason?: string | null
+          refund_sepa_reference?: string | null
+          refund_status?: string | null
           refunded_at?: string | null
           review_reminder_sent_at?: string | null
           seller_decline_reason?: string | null
@@ -1214,13 +1257,18 @@ export type Database = {
           seller_wallet_credit_cents?: number | null
           sender_country?: string | null
           shipping_cost?: number
+          shipping_deadline?: string | null
           shipping_method?: string
           shipping_net_cents?: number | null
+          shipping_reminder_sent_at?: string | null
           shipping_vat_cents?: number | null
           shipping_vat_rate?: number | null
           status?: string
           total_amount?: number
           tracking_url?: string | null
+          unisend_claim_filed_at?: string | null
+          unisend_claim_reference?: string | null
+          unisend_claim_status?: string | null
           unisend_parcel_id?: number | null
           unisend_request_id?: string | null
           updated_at?: string | null
@@ -2600,6 +2648,7 @@ export type Database = {
         Args: { p_amount_cents: number; p_order_id: string; p_user_id: string }
         Returns: Json
       }
+      escalate_expired_disputes: { Args: never; Returns: number }
       expire_wanted_listings: { Args: never; Returns: number }
       extend_cart_reservation: {
         Args: { p_basket_id: string; p_buyer_id: string }
@@ -2616,26 +2665,6 @@ export type Database = {
         Returns: string
       }
       get_order_tracking: { Args: { p_order_id: string }; Returns: Json }
-      get_pending_payouts: {
-        Args: { p_seller_id: string }
-        Returns: {
-          completed_at: string
-          gross_amount: number
-          net_amount: number
-          order_id: string
-          order_number: string
-          platform_fee: number
-        }[]
-      }
-      get_seller_payout_stats: {
-        Args: { p_seller_id: string }
-        Returns: {
-          last_payout_date: string
-          payout_count: number
-          pending_payout_amount: number
-          total_withdrawn: number
-        }[]
-      }
       get_seller_trust_summary: { Args: { p_seller_id: string }; Returns: Json }
       get_suspicious_login_activity: {
         Args: { p_days?: number; p_min_unique_ips?: number }
@@ -2731,10 +2760,6 @@ export type Database = {
           p_seller_id: string
         }
         Returns: Json
-      }
-      seller_can_receive_payouts: {
-        Args: { p_seller_id: string }
-        Returns: boolean
       }
       seller_decline_order: {
         Args: { p_order_id: string; p_reason?: string; p_seller_id: string }
@@ -2876,4 +2901,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

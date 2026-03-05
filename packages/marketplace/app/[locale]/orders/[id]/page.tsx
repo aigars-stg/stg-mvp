@@ -2,13 +2,16 @@
 
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { Button } from '@second-turn/design-system';
+import { Button, Badge } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
   AlertCircle,
+  AlertTriangle,
+  Time as Clock,
 } from '@/lib/icons';
 import { UserInfoCard } from '@/components/user';
 import { OrderActions } from '@/components/orders';
+import { DisputeResponseForm } from '@/components/seller/DisputeResponseForm';
 import { useUnifiedOrderDetail } from '@/lib/hooks/useUnifiedOrderDetail';
 import { StatusTimeline, isCancelledStatus } from '@/components/shipping';
 import {
@@ -26,6 +29,7 @@ import {
 } from '@/components/order-detail';
 import type { OrderDetailOrder, OrderDetailItem } from '@/lib/types/order-detail';
 import { formatDate, formatTime } from '@/lib/date-utils';
+import { formatPrice } from '@/lib/services/pricing';
 
 export default function OrderDetailPage() {
   const t = useTranslations('Orders.detail');
@@ -200,6 +204,95 @@ export default function OrderDetailPage() {
               viewerRole={viewerRole || 'buyer'}
               timeRemainingMs={timeRemainingMs}
             />
+
+            {/* Dispute status section */}
+            {order.status === 'disputed' && order.dispute && (
+              <div className="bg-aurora-red/5 border border-aurora-red/20 rounded-xl p-4 sm:p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-aurora-red" />
+                  <h3 className="font-semibold text-polar-night">Dispute in Progress</h3>
+                  <Badge variant={
+                    order.dispute.status === 'awaiting_seller' ? 'warning' :
+                    order.dispute.status === 'under_review' ? 'default' :
+                    order.dispute.status === 'resolved' ? 'success' : 'default'
+                  } size="sm">
+                    {order.dispute.status === 'awaiting_seller' ? 'Awaiting seller' :
+                     order.dispute.status === 'under_review' ? 'Under review' :
+                     order.dispute.status === 'resolved' ? 'Resolved' : order.dispute.status}
+                  </Badge>
+                </div>
+
+                {/* Buyer view: show dispute details */}
+                {isBuyer && (
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-text-muted">Your report</p>
+                      <p className="text-sm font-medium text-polar-night">{order.dispute.reason}</p>
+                      <p className="text-sm text-text-secondary mt-1">{order.dispute.description}</p>
+                    </div>
+                    {order.dispute.status === 'awaiting_seller' && order.dispute.seller_deadline && (
+                      <div className="flex items-center gap-2 text-sm text-text-secondary">
+                        <Clock className="w-4 h-4" />
+                        Waiting for seller response (deadline: {formatDate(order.dispute.seller_deadline)})
+                      </div>
+                    )}
+                    {order.dispute.status === 'under_review' && (
+                      <p className="text-sm text-text-secondary">
+                        Our team is reviewing the dispute. We will notify you of the outcome.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Seller view: show response form or dispute info */}
+                {isSeller && order.dispute.status === 'awaiting_seller' && (
+                  <DisputeResponseForm
+                    orderId={order.id}
+                    orderNumber={order.order_number}
+                    buyerReason={order.dispute.reason}
+                    buyerDescription={order.dispute.description}
+                    deadline={order.dispute.seller_deadline || ''}
+                    alreadyResponded={!!order.dispute.seller_responded_at}
+                    existingResponse={order.dispute.seller_response}
+                  />
+                )}
+
+                {isSeller && order.dispute.status === 'under_review' && (
+                  <div className="space-y-3">
+                    {order.dispute.seller_response && (
+                      <div>
+                        <p className="text-xs text-text-muted">Your response</p>
+                        <p className="text-sm text-text-secondary">{order.dispute.seller_response}</p>
+                      </div>
+                    )}
+                    <p className="text-sm text-text-secondary">
+                      Our team is reviewing the dispute. We will notify both parties of the outcome.
+                    </p>
+                  </div>
+                )}
+
+                {order.dispute.status === 'resolved' && order.dispute.resolution_note && (
+                  <div className="pt-3 border-t border-aurora-red/10">
+                    <p className="text-xs text-text-muted">Resolution</p>
+                    <p className="text-sm text-text-secondary">{order.dispute.resolution_note}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Refund status */}
+            {order.status === 'refunded' && (
+              <div className="bg-aurora-green/5 border border-aurora-green/20 rounded-xl p-4">
+                <p className="text-sm font-medium text-polar-night">
+                  This order has been refunded.
+                </p>
+                {order.refund_amount != null && (
+                  <p className="text-sm text-text-secondary mt-1">
+                    Refund amount: {formatPrice(order.refund_amount)}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Seller: Accept/Decline */}
             {isSeller && order.status === 'pending_seller' && (

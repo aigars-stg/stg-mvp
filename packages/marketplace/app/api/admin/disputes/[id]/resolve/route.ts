@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { processRefund, processPartialRefund } from '@/lib/services/refund';
-import { sendDisputeResolved } from '@/lib/email/send-order-emails';
+import { processRefund, processPartialRefund, createRefundAdapter } from '@/lib/services/refund';
+import { sendDisputeResolved, sendRefundCompleted } from '@/lib/email/send-order-emails';
+import { creditSellerWallet } from '@/lib/services/wallet';
+import { formatCentsToCurrency } from '@/lib/services/pricing';
+import { createServiceClient } from '@/lib/supabase/client';
 
-const adminSupabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const adminSupabase = createServiceClient();
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -40,14 +39,14 @@ export async function POST(request: NextRequest, { params }: Params) {
     const { response, user } = await requireAuth();
     if (response) return response;
 
-    // Check admin role
+    // Check staff role
     const { data: userProfile } = await adminSupabase
       .from('user_profiles')
-      .select('role')
+      .select('is_staff')
       .eq('id', user.id)
       .single();
 
-    if (!userProfile || userProfile.role !== 'admin') {
+    if (!userProfile?.is_staff) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
@@ -83,7 +82,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     // Get order
     const { data: order, error: orderError } = await adminSupabase
       .from('orders')
-      .select('id, order_number, status, dispute_status, buyer_id, seller_id, total_amount, buyer_wallet_debit_cents, everypay_payment_reference')
+      .select('id, order_number, status, dispute_status, buyer_id, seller_id, total_amount, buyer_wallet_debit_cents, everypay_payment_reference, payment_method')
       .eq('id', orderId)
       .single();
 
@@ -98,9 +97,19 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
+    // Allow resolution from under_review or awaiting_seller (admin override)
+    if (order.dispute_status !== 'under_review' && order.dispute_status !== 'awaiting_seller') {
+      return NextResponse.json(
+        { error: 'Dispute is not awaiting resolution' },
+        { status: 400 }
+      );
+    }
+
     // Determine final order status based on resolution
     const finalOrderStatus =
-      resolution_type === 'seller_favor' ? 'completed' : 'refunded';
+      resolution_type === 'seller_favor' || resolution_type === 'mutual_agreement'
+        ? 'completed'
+        : 'refunded';
 
     const now = new Date().toISOString();
     const { error: updateError } = await adminSupabase
@@ -124,36 +133,34 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
+    // Close corresponding order_issues
+    await adminSupabase
+      .from('order_issues')
+      .update({ status: 'resolved', resolved_at: now })
+      .eq('order_id', orderId)
+      .in('status', ['open', 'investigating']);
+
     console.log(
-      `⚖️ [Dispute] Resolved order ${order.order_number}: ${resolution_type} by admin ${user.id}`
+      `[Dispute] Resolved order ${order.order_number}: ${resolution_type} by admin ${user.id}`
     );
 
     // Process refund if applicable
+    let refundResult;
     if (resolution_type === 'buyer_full_refund') {
-      const { refundPayment } = await import('@/lib/everypay/client');
-      const refundResult = await processRefund(adminSupabase, orderId, async (ref, cents) => {
-        try {
-          await refundPayment(ref, cents);
-          return { success: true };
-        } catch (e) {
-          return { success: false, error: (e as Error).message };
-        }
-      });
+      refundResult = await processRefund(adminSupabase, orderId, createRefundAdapter());
       if (!refundResult.success) {
         console.error(`Refund failed for order ${order.order_number}:`, refundResult.error);
       }
     } else if (resolution_type === 'buyer_partial_refund' && refund_amount_cents) {
-      const { refundPayment } = await import('@/lib/everypay/client');
-      const refundResult = await processPartialRefund(adminSupabase, orderId, refund_amount_cents, async (ref, cents) => {
-        try {
-          await refundPayment(ref, cents);
-          return { success: true };
-        } catch (e) {
-          return { success: false, error: (e as Error).message };
-        }
-      });
+      refundResult = await processPartialRefund(adminSupabase, orderId, refund_amount_cents, createRefundAdapter());
       if (!refundResult.success) {
         console.error(`Partial refund failed for order ${order.order_number}:`, refundResult.error);
+      }
+    } else if (resolution_type === 'seller_favor' || resolution_type === 'mutual_agreement') {
+      // Credit seller wallet since order is completed in seller's favor
+      const walletResult = await creditSellerWallet(adminSupabase, orderId);
+      if (!walletResult.success) {
+        console.error(`Seller wallet credit failed for order ${order.order_number}:`, walletResult.error);
       }
     }
 
@@ -164,7 +171,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       .in('id', [order.buyer_id, order.seller_id]);
 
     if (profiles) {
-      const isSellerFavor = resolution_type === 'seller_favor';
+      const isSellerFavor = resolution_type === 'seller_favor' || resolution_type === 'mutual_agreement';
       for (const profile of profiles) {
         sendDisputeResolved({
           recipientName: profile.full_name || 'User',
@@ -175,6 +182,27 @@ export async function POST(request: NextRequest, { params }: Params) {
           isSellerFavor,
         }).catch(err => console.error('Dispute email failed:', err));
       }
+
+      // Send refund confirmation to buyer if refund was processed
+      if (refundResult?.success) {
+        const buyerProfile = profiles.find(p => p.id === order.buyer_id);
+        if (buyerProfile?.email) {
+          const refundMethodMap: Record<string, 'card' | 'bank' | 'wallet'> = {
+            everypay_card: 'card',
+            everypay_bank_link: 'bank',
+            wallet_only: 'wallet',
+            mixed: 'wallet',
+          };
+          const totalRefundCents = (refundResult.walletRefundedCents || 0) + (refundResult.everypayRefundedCents || 0);
+          sendRefundCompleted({
+            buyerName: buyerProfile.full_name || 'Buyer',
+            buyerEmail: buyerProfile.email,
+            orderNumber: order.order_number,
+            refundAmount: formatCentsToCurrency(totalRefundCents),
+            refundMethod: refundMethodMap[refundResult.refundMethod || ''] || 'card',
+          }).catch(err => console.error('Refund email failed:', err));
+        }
+      }
     }
 
     return NextResponse.json({
@@ -182,6 +210,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       orderNumber: order.order_number,
       resolution: resolution_type,
       finalStatus: finalOrderStatus,
+      requiresManualSepa: refundResult?.requiresManualSepa || false,
     });
   } catch (error) {
     return handleApiError(error, 'Resolve dispute');

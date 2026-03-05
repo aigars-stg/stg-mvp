@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { handleApiError } from '@/lib/api/error-handler';
+import { createServiceClient } from '@/lib/supabase/client';
 import { loggers } from '@/lib/logger';
 import { calculateEverypayPortionCents, determineReleaseAction } from '@/lib/services/payment-capture';
 
@@ -32,16 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Use service role client to bypass RLS
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    );
+    const supabase = createServiceClient();
 
     log.info('Running expire-seller-deadlines job');
 
@@ -54,8 +45,9 @@ export async function GET(request: NextRequest) {
       throw new Error(`Failed to handle expired deadlines: ${error.message}`);
     }
 
-    const cancelledCount = result?.cancelled_count || 0;
-    const refundsNeeded = result?.refunds_needed || [];
+    const rpcResult = result as { cancelled_count?: number; refunds_needed?: Array<{ order_id: string; buyer_id: string; amount: number }> } | null;
+    const cancelledCount = rpcResult?.cancelled_count || 0;
+    const refundsNeeded = rpcResult?.refunds_needed || [];
 
     log.info({ cancelledCount }, 'Cancelled orders with expired deadlines');
 
@@ -193,13 +185,23 @@ export async function GET(request: NextRequest) {
     let disputeDeadlinesExpired = 0;
     const { data: expiredDisputes } = await supabase
       .from('orders')
-      .select('id, order_number')
+      .select('id, order_number, seller_id')
       .eq('status', 'disputed')
       .eq('dispute_status', 'awaiting_seller')
       .is('dispute_seller_responded_at', null)
       .lt('dispute_seller_deadline', new Date().toISOString());
 
     if (expiredDisputes && expiredDisputes.length > 0) {
+      const { sendDisputeSellerDeadlinePassed } = await import('@/lib/email/send-order-emails');
+
+      // Batch-fetch seller profiles
+      const sellerIds = [...new Set(expiredDisputes.map(d => d.seller_id))];
+      const { data: sellerProfiles } = await supabase
+        .from('user_profiles')
+        .select('id, full_name, email')
+        .in('id', sellerIds);
+      const sellerMap = new Map((sellerProfiles || []).map(p => [p.id, p]));
+
       for (const dispute of expiredDisputes) {
         const { error: dErr } = await supabase
           .from('orders')
@@ -213,6 +215,166 @@ export async function GET(request: NextRequest) {
         if (!dErr) {
           disputeDeadlinesExpired++;
           log.info({ orderNumber: dispute.order_number }, 'Dispute deadline expired');
+
+          const sellerProfile = sellerMap.get(dispute.seller_id);
+          if (sellerProfile?.email) {
+            sendDisputeSellerDeadlinePassed({
+              sellerName: sellerProfile.full_name || 'Seller',
+              sellerEmail: sellerProfile.email,
+              orderNumber: dispute.order_number,
+            }).catch(err => log.error({ orderId: dispute.id, error: err }, 'Failed to send dispute deadline email'));
+          }
+        }
+      }
+    }
+
+    // Handle expired shipping deadlines (seller accepted but didn't ship)
+    let shippingDeadlinesCancelled = 0;
+    const { data: expiredShipping } = await supabase
+      .from('orders')
+      .select('id, order_number, buyer_id, seller_id')
+      .eq('status', 'accepted')
+      .not('shipping_deadline', 'is', null)
+      .lt('shipping_deadline', new Date().toISOString());
+
+    if (expiredShipping && expiredShipping.length > 0) {
+      const { processRefund, createRefundAdapter } = await import('@/lib/services/refund');
+
+      for (const expiredOrder of expiredShipping) {
+        // Check if there are any tracking events (parcel might be at locker)
+        const { data: trackingEvents } = await supabase
+          .from('tracking_events')
+          .select('id')
+          .eq('order_id', expiredOrder.id)
+          .limit(1);
+
+        // Skip if there are tracking events (seller did ship, just late)
+        if (trackingEvents && trackingEvents.length > 0) continue;
+
+        // Cancel the order
+        const { error: cancelErr } = await supabase
+          .from('orders')
+          .update({
+            status: 'cancelled',
+            cancellation_reason: 'Seller did not ship within the shipping deadline.',
+            cancelled_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', expiredOrder.id);
+
+        if (cancelErr) continue;
+
+        shippingDeadlinesCancelled++;
+        log.info({ orderNumber: expiredOrder.order_number }, 'Shipping deadline expired, order cancelled');
+
+        // Process refund using shared service
+        try {
+          const refundResult = await processRefund(supabase, expiredOrder.id, createRefundAdapter());
+          if (!refundResult.success) {
+            log.error({ orderId: expiredOrder.id, error: refundResult.error }, 'Shipping deadline refund failed');
+          }
+        } catch (refundError) {
+          log.error({ orderId: expiredOrder.id, error: refundError }, 'Shipping deadline refund failed');
+        }
+
+        // Relist items
+        const { data: orderItems } = await supabase
+          .from('order_items')
+          .select('listing_id')
+          .eq('order_id', expiredOrder.id);
+
+        if (orderItems && orderItems.length > 0) {
+          const listingIds = orderItems.map(item => item.listing_id);
+          await supabase
+            .from('listings')
+            .update({ status: 'active', sold_at: null, updated_at: new Date().toISOString() })
+            .in('id', listingIds);
+        }
+
+        // Send cancellation emails to buyer and seller
+        try {
+          const { sendShippingDeadlineCancelled } = await import('@/lib/email/send-order-emails');
+
+          const [{ data: buyerProfile }, { data: sellerProfile }] = await Promise.all([
+            supabase.from('user_profiles').select('full_name, email').eq('id', expiredOrder.buyer_id).single(),
+            supabase.from('user_profiles').select('full_name, email').eq('id', expiredOrder.seller_id).single(),
+          ]);
+
+          if (buyerProfile?.email) {
+            sendShippingDeadlineCancelled({
+              recipientName: buyerProfile.full_name || 'Buyer',
+              recipientEmail: buyerProfile.email,
+              orderNumber: expiredOrder.order_number,
+              isBuyer: true,
+            });
+          }
+          if (sellerProfile?.email) {
+            sendShippingDeadlineCancelled({
+              recipientName: sellerProfile.full_name || 'Seller',
+              recipientEmail: sellerProfile.email,
+              orderNumber: expiredOrder.order_number,
+              isBuyer: false,
+            });
+          }
+        } catch (emailError) {
+          log.error({ orderId: expiredOrder.id, error: emailError }, 'Shipping deadline email failed');
+        }
+      }
+    }
+
+    // Send 24h shipping reminders (accepted > 24h ago, no tracking events, no reminder sent yet)
+    let shippingRemindersSent = 0;
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: needsReminder } = await supabase
+      .from('orders')
+      .select('id, order_number, seller_id, shipping_deadline')
+      .eq('status', 'accepted')
+      .not('shipping_deadline', 'is', null)
+      .is('shipping_reminder_sent_at', null)
+      .lt('seller_responded_at', twentyFourHoursAgo);
+
+    if (needsReminder && needsReminder.length > 0) {
+      const { sendShippingReminder } = await import('@/lib/email/send-order-emails');
+      const { formatDateTime } = await import('@/lib/date-utils');
+
+      // Batch-fetch tracking events and seller profiles
+      const reminderOrderIds = needsReminder.map(o => o.id);
+      const reminderSellerIds = [...new Set(needsReminder.map(o => o.seller_id))];
+
+      const [{ data: allTrackingEvents }, { data: reminderSellerProfiles }] = await Promise.all([
+        supabase.from('tracking_events').select('order_id').in('order_id', reminderOrderIds),
+        supabase.from('user_profiles').select('id, full_name, email').in('id', reminderSellerIds),
+      ]);
+
+      const ordersWithTracking = new Set((allTrackingEvents || []).map(e => e.order_id));
+      const reminderSellerMap = new Map((reminderSellerProfiles || []).map(p => [p.id, p]));
+
+      for (const order of needsReminder) {
+        // Skip if seller already shipped
+        if (ordersWithTracking.has(order.id)) continue;
+
+        const sellerProfile = reminderSellerMap.get(order.seller_id);
+        if (sellerProfile?.email) {
+          try {
+            await sendShippingReminder({
+              sellerName: sellerProfile.full_name || 'Seller',
+              sellerEmail: sellerProfile.email,
+              orderNumber: order.order_number,
+              orderId: order.id,
+              deadline: formatDateTime(order.shipping_deadline!),
+            });
+
+            // Mark reminder as sent
+            await supabase
+              .from('orders')
+              .update({ shipping_reminder_sent_at: new Date().toISOString() })
+              .eq('id', order.id);
+
+            shippingRemindersSent++;
+            log.info({ orderNumber: order.order_number }, 'Shipping reminder sent');
+          } catch (emailError) {
+            log.error({ orderId: order.id, error: emailError }, 'Shipping reminder email failed');
+          }
         }
       }
     }
@@ -224,6 +386,8 @@ export async function GET(request: NextRequest) {
       refundsFailed,
       emailsSent,
       disputeDeadlinesExpired,
+      shippingDeadlinesCancelled,
+      shippingRemindersSent,
       timestamp: new Date().toISOString(),
     };
 
