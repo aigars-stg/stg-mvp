@@ -33,7 +33,6 @@ import { formatPrice } from '@/lib/services/pricing';
 import { LISTING_PHASES } from '@/components/phases/phase-definitions';
 import { PhaseTracker, type PhaseStatus } from '@/components/phases/PhaseTracker';
 import { MilestoneToast } from '@/components/phases/MilestoneToast';
-import { CelebrationScreen } from '@/components/phases/CelebrationScreen';
 import { ResearchPhase } from '@/components/sell/phases/ResearchPhase';
 import { MarketPhase } from '@/components/sell/phases/MarketPhase';
 import { ActionPhase } from '@/components/sell/phases/ActionPhase';
@@ -1038,7 +1037,6 @@ function CreateModeSellContent() {
   const tValidation = useTranslations('Sell.validation');
   const tErrors = useTranslations('Sell.errors');
   const tPhases = useTranslations('Phases.listing');
-  const tAchievements = useTranslations('Phases.achievements');
   const tPreview = useTranslations('Sell.preview');
 
   const router = useRouter();
@@ -1086,7 +1084,6 @@ function CreateModeSellContent() {
     goToPhase,
     toastData,
     dismissToast,
-    isFlowComplete,
     isCurrentPhaseComplete,
     flowStartTime,
     saveDraft,
@@ -1169,20 +1166,6 @@ function CreateModeSellContent() {
     user,
     router,
   });
-
-  // Celebration state
-  const [celebrationData, setCelebrationData] = useState<{
-    gameName: string;
-    price: string;
-    condition: string;
-    listingId: string;
-    isFirstListing: boolean;
-    listingCount: number;
-  } | null>(null);
-
-  // Speed round achievement toast (shown after celebration loads)
-  const [showSpeedRoundToast, setShowSpeedRoundToast] = useState(false);
-  const dismissSpeedRoundToast = useCallback(() => setShowSpeedRoundToast(false), []);
 
   // ── handleSaveDraft ───────────────────────────────────
   const handleSaveDraft = () => {
@@ -1300,24 +1283,18 @@ function CreateModeSellContent() {
       sessionStorage.removeItem('listing-draft-dismissed');
       setHasDraft(false);
 
-      // Mark score phase as complete (triggers isFlowComplete)
-      advanceToNextPhase();
-
-      // Set up celebration data
-      setPublishedListingId(listing.id);
-      setCelebrationData({
-        gameName: formData.selectedGameDisplayName || formData.selectedGame?.name || '',
-        price: formData.price,
-        condition: formData.condition || 'good',
-        listingId: listing.id,
-        isFirstListing: responseData.achievements?.includes('first_turn') ?? false,
-        listingCount: responseData.listingCount ?? 1,
-      });
-
-      // Show speed_round toast after a delay (lets celebration load first)
-      if (responseData.achievements?.includes('speed_round')) {
-        setTimeout(() => setShowSpeedRoundToast(true), 1500);
+      // Store achievements for listing page to display
+      if (responseData.achievements?.length) {
+        sessionStorage.setItem('new-listing-achievements', JSON.stringify({
+          achievements: responseData.achievements,
+          listingCount: responseData.listingCount,
+          flowDurationMs: Date.now() - flowStartTime,
+        }));
       }
+
+      // Redirect to listing page with published flag
+      setPublishedListingId(listing.id);
+      router.push(`/${locale}/listings/${listing.id}?published=1`);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setErrorModal({
@@ -1380,34 +1357,6 @@ function CreateModeSellContent() {
           </Button>
         </Card>
       </div>
-    );
-  }
-
-  // ── Celebration screen ────────────────────────────────
-  if (celebrationData && isFlowComplete) {
-    return (
-      <>
-        <CelebrationScreen
-          gameName={celebrationData.gameName}
-          price={celebrationData.price}
-          condition={celebrationData.condition}
-          listingId={celebrationData.listingId}
-          isFirstListing={celebrationData.isFirstListing}
-          listingCount={celebrationData.listingCount}
-          locale={locale}
-          onListAnother={() => {
-            setCelebrationData(null);
-            phaseFlow.resetForm();
-            window.location.href = `/${locale}/sell`;
-          }}
-        />
-        <MilestoneToast
-          title={tAchievements('speedRound.toast')}
-          subtitle={tAchievements('speedRound.subtitle')}
-          visible={showSpeedRoundToast}
-          onDismiss={dismissSpeedRoundToast}
-        />
-      </>
     );
   }
 
