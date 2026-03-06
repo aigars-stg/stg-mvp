@@ -28,7 +28,7 @@ export interface ResearchPhaseProps {
   // Core form state
   formData: ListingFormData;
   setFormData: React.Dispatch<React.SetStateAction<ListingFormData>>;
-  onAdvance: () => void;
+  onAdvance?: () => void;
   isPhaseComplete: boolean;
 
   // Game selection handlers
@@ -296,18 +296,20 @@ export function ResearchPhase({
           </>
         )}
 
-      {/* Continue button */}
-      <div className="pt-4">
-        <Button
-          variant="primary"
-          size="lg"
-          fullWidth
-          onClick={onAdvance}
-          disabled={!isPhaseComplete}
-        >
-          {tPhases('research.continueButton')}
-        </Button>
-      </div>
+      {/* Continue button — mobile only (hidden on desktop where onAdvance is not provided) */}
+      {onAdvance && (
+        <div className="pt-4">
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onClick={onAdvance}
+            disabled={!isPhaseComplete}
+          >
+            {tPhases('research.continueButton')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
