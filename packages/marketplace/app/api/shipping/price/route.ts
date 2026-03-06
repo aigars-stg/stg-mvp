@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic';
 import {
   getShippingPrice,
   TerminalCountry,
-  SHIPPING_PRICES,
 } from '@/lib/unisend';
 import { handleApiError } from '@/lib/api/error-handler';
 

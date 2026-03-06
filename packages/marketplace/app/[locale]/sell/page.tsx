@@ -169,7 +169,6 @@ function useSharedSellLogic(opts: {
   hasSetInitialListingType: React.MutableRefObject<boolean>;
   expansionsFetched: boolean;
   user: import('@supabase/supabase-js').User | null;
-  profile: import('@/lib/auth/types').UserProfile | null;
   router: ReturnType<typeof useRouter>;
 }) {
   const {
@@ -198,7 +197,6 @@ function useSharedSellLogic(opts: {
     hasSetInitialListingType,
     expansionsFetched,
     user,
-    profile,
     router,
   } = opts;
 
@@ -613,7 +611,6 @@ function EditModeSellContent() {
     hasSetInitialListingType: listingForm.hasSetInitialListingType,
     expansionsFetched: listingForm.expansionsFetched,
     user,
-    profile,
     router,
   });
 
@@ -1058,7 +1055,6 @@ function CreateModeSellContent() {
     expansionCount,
     versionCount,
     existingActiveListings,
-    sellerCapabilities,
     fallbackMode,
     fallbackReason,
     validationModal,
@@ -1133,7 +1129,6 @@ function CreateModeSellContent() {
     hasSetInitialListingType: phaseFlow.hasSetInitialListingType,
     expansionsFetched: phaseFlow.expansionsFetched,
     user,
-    profile,
     router,
   });
 
