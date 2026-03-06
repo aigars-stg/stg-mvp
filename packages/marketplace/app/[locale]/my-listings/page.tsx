@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircle, CloseCircle as XCircle, Plus, Search, Heart, Layout as LayoutDashboard, Store } from '@/lib/icons';
@@ -110,6 +110,16 @@ function MyListingsContent() {
 
   const searchParams = useSearchParams();
   const justPublished = searchParams.get('published') === '1';
+
+  // Remove ?published=1 from URL after first render so the banner doesn't
+  // reappear if the user refreshes or navigates back to this page later.
+  useEffect(() => {
+    if (justPublished) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('published');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Determine auction-specific status display for seller's listing
   const getAuctionStatusDisplay = (listing: Listing): AuctionStatusDisplay | null => {

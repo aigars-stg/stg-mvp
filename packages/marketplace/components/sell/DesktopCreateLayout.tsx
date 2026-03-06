@@ -14,6 +14,26 @@ import type { ActionPhaseProps } from '@/components/sell/phases/ActionPhase';
 import type { ScorePhaseProps } from '@/components/sell/phases/ScorePhase';
 
 // ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const SECTIONS = {
+  RESEARCH: 'research',
+  CONDITION: 'condition',
+  PRICING: 'pricing',
+  REVIEW: 'review',
+} as const;
+
+type SectionId = (typeof SECTIONS)[keyof typeof SECTIONS];
+
+// Maps phase index (from ScorePhase edit links) to desktop section ID
+const SECTION_BY_PHASE_INDEX: Record<number, SectionId> = {
+  0: SECTIONS.RESEARCH,
+  1: SECTIONS.CONDITION,
+  2: SECTIONS.PRICING,
+};
+
+// ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
@@ -50,11 +70,11 @@ export function DesktopCreateLayout({
   const tSections = useTranslations('Sell.sections');
   const tCommon = useTranslations('Common');
 
-  const [openSections, setOpenSections] = useState<Set<string>>(
-    new Set(['research']),
+  const [openSections, setOpenSections] = useState<Set<SectionId>>(
+    new Set([SECTIONS.RESEARCH]),
   );
 
-  const toggleSection = (id: string, enabled: boolean) => {
+  const toggleSection = (id: SectionId, enabled: boolean) => {
     if (!enabled) return;
     setOpenSections((prev) => {
       const next = new Set(prev);
@@ -71,18 +91,13 @@ export function DesktopCreateLayout({
   useEffect(() => {
     if (isResearchComplete) {
       setOpenSections((prev) => {
-        if (prev.has('condition')) return prev;
-        return new Set([...prev, 'condition']);
+        if (prev.has(SECTIONS.CONDITION)) return prev;
+        return new Set([...prev, SECTIONS.CONDITION]);
       });
     }
   }, [isResearchComplete]);
 
   // In desktop mode, "edit" links in ScorePhase open the relevant section
-  const SECTION_BY_PHASE_INDEX: Record<number, string> = {
-    0: 'research',
-    1: 'condition',
-    2: 'pricing',
-  };
   const handleGoToSection = (index: number) => {
     const sectionId = SECTION_BY_PHASE_INDEX[index];
     if (sectionId) {
@@ -96,8 +111,8 @@ export function DesktopCreateLayout({
       <CollapsibleSection
         title={tSections('research.title')}
         icon={<Search className="w-5 h-5 text-frost-ice" />}
-        isExpanded={openSections.has('research')}
-        onToggle={() => toggleSection('research', true)}
+        isExpanded={openSections.has(SECTIONS.RESEARCH)}
+        onToggle={() => toggleSection(SECTIONS.RESEARCH, true)}
         isComplete={isResearchComplete}
       >
         <ResearchPhase
@@ -111,8 +126,8 @@ export function DesktopCreateLayout({
         title={tSections('condition.title')}
         subtitle={!isResearchComplete ? tCommon('completeResearchFirst') : undefined}
         icon={<PhotoCamera className="w-5 h-5 text-frost-ice" />}
-        isExpanded={openSections.has('condition')}
-        onToggle={() => toggleSection('condition', isResearchComplete)}
+        isExpanded={openSections.has(SECTIONS.CONDITION)}
+        onToggle={() => toggleSection(SECTIONS.CONDITION, isResearchComplete)}
         isComplete={isMarketComplete}
         disabled={!isResearchComplete}
       >
@@ -124,9 +139,9 @@ export function DesktopCreateLayout({
         title={tSections('pricing.title')}
         subtitle={!marketProps.formData.condition ? tCommon('selectConditionFirst') : undefined}
         icon={<Euro className="w-5 h-5 text-frost-ice" />}
-        isExpanded={openSections.has('pricing')}
+        isExpanded={openSections.has(SECTIONS.PRICING)}
         onToggle={() =>
-          toggleSection('pricing', !!marketProps.formData.condition)
+          toggleSection(SECTIONS.PRICING, !!marketProps.formData.condition)
         }
         isComplete={isActionComplete}
         disabled={!marketProps.formData.condition}
@@ -138,8 +153,8 @@ export function DesktopCreateLayout({
       <CollapsibleSection
         title={tSections('review.title')}
         icon={<ClipboardCheck className="w-5 h-5 text-frost-ice" />}
-        isExpanded={openSections.has('review')}
-        onToggle={() => toggleSection('review', isActionComplete)}
+        isExpanded={openSections.has(SECTIONS.REVIEW)}
+        onToggle={() => toggleSection(SECTIONS.REVIEW, isActionComplete)}
         isComplete={false}
         disabled={!isActionComplete}
       >
