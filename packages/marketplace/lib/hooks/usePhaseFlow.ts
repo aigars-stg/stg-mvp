@@ -93,15 +93,24 @@ function isResearchComplete(formData: ListingFormData): boolean {
   return true;
 }
 
-function isMarketComplete(formData: ListingFormData): boolean {
-  return !!formData.condition && !!formData.price && parseFloat(formData.price) > 0;
-}
-
-function isActionComplete(
+function isMarketComplete(
   formData: ListingFormData,
   existingPhotoUrls: string[],
 ): boolean {
-  return formData.photos.length >= 1 || existingPhotoUrls.length >= 1;
+  if (!formData.condition) return false;
+  // Acceptable condition requires at least 1 photo
+  if (formData.condition === 'acceptable') {
+    return formData.photos.length >= 1 || existingPhotoUrls.length >= 1;
+  }
+  return true;
+}
+
+function isActionComplete(formData: ListingFormData): boolean {
+  if (!formData.price || parseFloat(formData.price) <= 0) return false;
+  if (formData.pricingFormat === 'auction') {
+    return parseFloat(formData.price) >= 1.0 && !!formData.auctionDurationDays;
+  }
+  return parseFloat(formData.price) >= 0.01;
 }
 
 function isScoreComplete(): boolean {
@@ -117,9 +126,9 @@ function isPhaseComplete(
     case 'isResearchComplete':
       return isResearchComplete(formData);
     case 'isMarketComplete':
-      return isMarketComplete(formData);
+      return isMarketComplete(formData, existingPhotoUrls);
     case 'isActionComplete':
-      return isActionComplete(formData, existingPhotoUrls);
+      return isActionComplete(formData);
     case 'isScoreComplete':
       return isScoreComplete();
     default:
@@ -180,6 +189,21 @@ export function usePhaseFlow(): PhaseFlowState {
       if (advanceTimer.current) clearTimeout(advanceTimer.current);
     };
   }, []);
+
+  // ------- EC-1: Re-evaluate market completion when condition or photos change -------
+  // If user changes condition to 'acceptable' after marking market complete,
+  // remove 'market' from completedPhaseIds until a photo is uploaded.
+  useEffect(() => {
+    const { formData: fd, existingPhotoUrls: epUrls } = listingForm;
+    setCompletedPhaseIds((prev) => {
+      if (!prev.includes('market')) return prev;
+      if (!isMarketComplete(fd, epUrls)) {
+        return prev.filter((id) => id !== 'market');
+      }
+      return prev;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listingForm.formData.condition, listingForm.formData.photos.length, listingForm.existingPhotoUrls.length]);
 
   // ------- Draft detection on mount (check only, do NOT load data) -------
   useEffect(() => {

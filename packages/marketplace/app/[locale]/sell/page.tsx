@@ -513,7 +513,7 @@ function useSharedSellLogic(opts: {
   // ── Warn before leaving ───────────────────────────────
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (formData.selectedGame || formData.photos.length > 0 || formData.price) {
+      if (formData.selectedGame || formData.selectedVersion || formData.photos.length > 0 || formData.price) {
         e.preventDefault();
         e.returnValue = '';
       }

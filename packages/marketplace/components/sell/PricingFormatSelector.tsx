@@ -14,6 +14,8 @@ interface PricingFormatSelectorProps {
   onAuctionEndStrategyChange: (strategy: AuctionEndStrategy) => void;
   auctionCooldownHours: AuctionCooldownHours;
   onAuctionCooldownHoursChange: (hours: AuctionCooldownHours) => void;
+  disabled?: boolean;
+  disabledMessage?: string;
 }
 
 const DURATION_OPTIONS: AuctionDuration[] = [1, 3, 5, 7];
@@ -29,12 +31,20 @@ export function PricingFormatSelector({
   onAuctionEndStrategyChange,
   auctionCooldownHours,
   onAuctionCooldownHoursChange,
+  disabled = false,
+  disabledMessage,
 }: PricingFormatSelectorProps) {
   const t = useTranslations('Sell.pricingFormat');
   const tAuction = useTranslations('Sell.auction');
 
   return (
     <div className="space-y-3">
+      {disabled && disabledMessage && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          {disabledMessage}
+        </div>
+      )}
+      <div className={disabled ? 'pointer-events-none opacity-50' : ''}>
       <Tabs variant="toggle" size="sm" value={value} onValueChange={(v) => onChange(v as PricingFormat)}>
         <TabsList>
           <TabsTrigger value="fixed_price" icon={<Tag className="w-4 h-4" />}>
@@ -146,6 +156,7 @@ export function PricingFormatSelector({
           </Card>
         </div>
       )}
+      </div>
     </div>
   );
 }
