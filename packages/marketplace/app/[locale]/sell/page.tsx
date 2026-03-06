@@ -1500,6 +1500,8 @@ function CreateModeSellContent() {
               sellerPhone={shared.sellerPhone}
               onPhoneChange={(phone) => shared.setSellerPhone(phone)}
               defaultCountry={(profile?.country && ['LV', 'LT', 'EE'].includes(profile.country) ? profile.country : 'LV') as CountryCode}
+              existingPhotoUrls={existingPhotoUrls}
+              setExistingPhotoUrls={setExistingPhotoUrls}
             />
           )}
 
@@ -1509,8 +1511,6 @@ function CreateModeSellContent() {
               setFormData={setFormData}
               onAdvance={advanceToNextPhase}
               isPhaseComplete={isCurrentPhaseComplete}
-              existingPhotoUrls={existingPhotoUrls}
-              setExistingPhotoUrls={setExistingPhotoUrls}
             />
           )}
 
