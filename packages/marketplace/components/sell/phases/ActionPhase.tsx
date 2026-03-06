@@ -17,8 +17,8 @@ export interface ActionPhaseProps {
   // Core form state
   formData: ListingFormData;
   setFormData: React.Dispatch<React.SetStateAction<ListingFormData>>;
-  onAdvance: () => void;
-  isPhaseComplete: boolean;
+  onAdvance?: () => void;
+  isPhaseComplete?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -169,18 +169,20 @@ export function ActionPhase({
         </div>
       </Card>
 
-      {/* Continue button — sticky at bottom */}
-      <div className="pt-4 sticky bottom-4 z-10">
-        <Button
-          variant="primary"
-          size="lg"
-          fullWidth
-          onClick={onAdvance}
-          disabled={!isPhaseComplete}
-        >
-          {tPhases('action.continueButton')}
-        </Button>
-      </div>
+      {/* Continue button — sticky at bottom; omitted on desktop */}
+      {onAdvance && (
+        <div className="pt-4 sticky bottom-4 z-10">
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onClick={onAdvance}
+            disabled={!isPhaseComplete}
+          >
+            {tPhases('action.continueButton')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

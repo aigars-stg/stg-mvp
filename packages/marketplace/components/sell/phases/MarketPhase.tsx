@@ -18,8 +18,8 @@ export interface MarketPhaseProps {
   // Core form state
   formData: ListingFormData;
   setFormData: React.Dispatch<React.SetStateAction<ListingFormData>>;
-  onAdvance: () => void;
-  isPhaseComplete: boolean;
+  onAdvance?: () => void;
+  isPhaseComplete?: boolean;
 
   // Phone state
   hasPhone: boolean;
@@ -116,18 +116,20 @@ export function MarketPhase({
         />
       </Card>
 
-      {/* Continue button — sticky at bottom (EC-18) */}
-      <div className="pt-4 sticky bottom-4 z-10">
-        <Button
-          variant="primary"
-          size="lg"
-          fullWidth
-          onClick={onAdvance}
-          disabled={!isPhaseComplete}
-        >
-          {tPhases('market.continueButton')}
-        </Button>
-      </div>
+      {/* Continue button — sticky at bottom (EC-18); omitted on desktop */}
+      {onAdvance && (
+        <div className="pt-4 sticky bottom-4 z-10">
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onClick={onAdvance}
+            disabled={!isPhaseComplete}
+          >
+            {tPhases('market.continueButton')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
