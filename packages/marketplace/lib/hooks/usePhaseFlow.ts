@@ -407,7 +407,7 @@ export function usePhaseFlow(): PhaseFlowState {
     });
 
     return true;
-  }, [currentPhaseIndex, formData, existingPhotoUrls, listingForm, completedPhaseIds, flowStartTime]);
+  }, [currentPhaseIndex, formData, existingPhotoUrls, listingForm, completedPhaseIds, flowStartTime, highestVisitedPhaseIndex]);
 
   const goToPhase = useCallback(
     (index: number) => {

@@ -9,6 +9,8 @@
     "delete": "Dzēst",
     "edit": "Labot",
     "complete": "Pabeigts",
+    "completeResearchFirst": "Vispirms pabeidz spēles izvēli augstāk",
+    "selectConditionFirst": "Vispirms izvēlies stāvokli augstāk",
     "aria": {
       "previousImage": "Iepriekšējais attēls",
       "nextImage": "Nākamais attēls",
@@ -1390,7 +1392,8 @@
       "loadButton": "Ielādēt melnrakstu",
       "startFreshButton": "Sākt no jauna",
       "dismiss": "Aizvērt",
-      "savedMessage": "Melnraksts saglabāts. Vari turpināt vēlāk no vietas, kur pārtrauci."
+      "savedMessage": "Melnraksts saglabāts. Vari turpināt vēlāk no vietas, kur pārtrauci.",
+      "photosStripped": "Fotoattēli netiek saglabāti melnrakstos. Lūdzu augšupielādē fotoattēlus vēlreiz."
     },
     "existingListings": {
       "warningTitle_one": "Tev jau ir aktīvs sludinājums šai spēlei",
@@ -1405,6 +1408,12 @@
       "publisher": "Izdevējs:"
     },
     "sections": {
+      "research": {
+        "title": "Atrodi savu spēli"
+      },
+      "review": {
+        "title": "Pārskatīt un publicēt"
+      },
       "game": {
         "title": "Atrodi savu spēli",
         "subtitle": "Sāc rakstīt, lai meklētu tūkstošiem galda spēļu",
@@ -1875,6 +1884,7 @@
       "label": "Cena",
       "labelAuction": "Sākuma likme",
       "helperAuction": "Minimālā summa, ko pieņemsi",
+      "bidLockMessage": "Cenu formātu nevar mainīt pēc solīšanas sākšanas",
       "commission": {
         "fixedNote": "10% platformas maksa tiek ieturēta, kad tavs priekšmets tiek pārdots",
         "auctionNote": "10% platformas maksa tiek ieturēta no uzvarošās likmes",
@@ -3159,18 +3169,18 @@
         "continueButton": "Turpināt →"
       },
       "market": {
-        "name": "Tirgus fāze",
-        "subtitle": "Nosaki cenu un stāvokli",
-        "completionMsg": "Cena noteikta! Laiks rīkoties.",
-        "shortName": "Tirgus",
-        "continueButton": "Turpināt →"
+        "name": "Stāvoklis un foto",
+        "subtitle": "Pastāsti pircējiem par spēles stāvokli",
+        "completionMsg": "Stāvoklis noteikts. Turpinām ar cenu.",
+        "shortName": "Stāvoklis",
+        "continueButton": "Turpināt uz cenu"
       },
       "action": {
-        "name": "Darbības fāze",
-        "subtitle": "Parādi savu spēli",
-        "completionMsg": "Izskatās lieliski! Pēdējā pārbaude.",
-        "shortName": "Darbība",
-        "continueButton": "Turpināt →"
+        "name": "Cena",
+        "subtitle": "Nosaki savu cenu",
+        "completionMsg": "Izskatās lieliski. Pēdējā pārbaude.",
+        "shortName": "Cena",
+        "continueButton": "Turpināt uz pārskatu"
       },
       "score": {
         "name": "Rezultātu fāze",
@@ -3205,8 +3215,8 @@
     },
     "validation": {
       "researchIncomplete": "Lūdzu izvēlies spēli un versiju, lai turpinātu.",
-      "marketIncomplete": "Lūdzu norādi stāvokli un cenu, lai turpinātu.",
-      "actionIncomplete": "Lūdzu augšupielādē vismaz vienu fotoattēlu, lai turpinātu."
+      "marketIncomplete": "Lūdzu izvēlies stāvokli, lai turpinātu. Pieņemams stāvoklis prasa vismaz vienu fotoattēlu.",
+      "actionIncomplete": "Lūdzu norādi derīgu cenu, lai turpinātu."
     },
     "tracker": {
       "ariaLabel": "Sludinājuma progress",

@@ -9,6 +9,8 @@
     "delete": "Delete",
     "edit": "Edit",
     "complete": "Complete",
+    "completeResearchFirst": "Complete the game selection above first",
+    "selectConditionFirst": "Select a condition above first",
     "aria": {
       "previousImage": "Previous image",
       "nextImage": "Next image",
@@ -1394,7 +1396,8 @@
       "loadButton": "Load Draft",
       "startFreshButton": "Start fresh",
       "dismiss": "Dismiss",
-      "savedMessage": "Draft saved. You can continue later from where you left off."
+      "savedMessage": "Draft saved. You can continue later from where you left off.",
+      "photosStripped": "Photos aren't saved in drafts. Please re-upload your photos."
     },
     "existingListings": {
       "warningTitle_one": "You already have an active listing for this game",
@@ -1409,6 +1412,12 @@
       "publisher": "Publisher:"
     },
     "sections": {
+      "research": {
+        "title": "Find your game"
+      },
+      "review": {
+        "title": "Review & list"
+      },
       "game": {
         "title": "Find your game",
         "subtitle": "Start typing to search thousands of board games",
@@ -1881,6 +1890,7 @@
       "label": "Price",
       "labelAuction": "Starting bid",
       "helperAuction": "The minimum amount you'll accept",
+      "bidLockMessage": "Pricing format cannot be changed after bids have been placed",
       "commission": {
         "fixedNote": "A 10% platform fee is deducted when your item sells",
         "auctionNote": "A 10% platform fee is deducted from the winning bid",
@@ -3173,18 +3183,18 @@
         "continueButton": "Continue →"
       },
       "market": {
-        "name": "Market Phase",
-        "subtitle": "Set your price and condition",
-        "completionMsg": "Price set! Time for action.",
-        "shortName": "Market",
-        "continueButton": "Continue →"
+        "name": "Condition & Photos",
+        "subtitle": "Tell buyers about your game's condition",
+        "completionMsg": "Condition set. On to pricing.",
+        "shortName": "Condition",
+        "continueButton": "Continue to pricing"
       },
       "action": {
-        "name": "Action Phase",
-        "subtitle": "Show off your game",
-        "completionMsg": "Looking good! Final review.",
-        "shortName": "Action",
-        "continueButton": "Continue →"
+        "name": "Pricing",
+        "subtitle": "Set your asking price",
+        "completionMsg": "Looking good. Final review.",
+        "shortName": "Pricing",
+        "continueButton": "Continue to review"
       },
       "score": {
         "name": "Score Phase",
@@ -3219,8 +3229,8 @@
     },
     "validation": {
       "researchIncomplete": "Please select a game and version to continue.",
-      "marketIncomplete": "Please set a condition and price to continue.",
-      "actionIncomplete": "Please upload at least one photo to continue."
+      "marketIncomplete": "Please select a condition to continue. Acceptable condition requires at least one photo.",
+      "actionIncomplete": "Please set a valid price to continue."
     },
     "tracker": {
       "ariaLabel": "Listing progress",
