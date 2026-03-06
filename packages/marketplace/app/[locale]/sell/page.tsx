@@ -1098,7 +1098,9 @@ function CreateModeSellContent() {
     showPhotosWarning,
     setShowPhotosWarning,
     sellerCapabilities,
+    canSubmit: canSubmitFn,
   } = phaseFlow;
+  const canSubmit = canSubmitFn();
 
   // Per-phase completion booleans for desktop layout
   const desktopIsResearchComplete = (() => {
@@ -1570,6 +1572,7 @@ function CreateModeSellContent() {
               goToPhase={goToPhase}
               onPublish={handlePublish}
               isPublishing={isPublishing}
+              canSubmit={canSubmit}
               onSaveDraft={handleSaveDraft}
               existingPhotoUrls={existingPhotoUrls}
             />
@@ -1625,6 +1628,7 @@ function CreateModeSellContent() {
             goToPhase,
             onPublish: handlePublish,
             isPublishing,
+            canSubmit,
             onSaveDraft: handleSaveDraft,
             existingPhotoUrls,
           }}

@@ -29,6 +29,7 @@ export interface ScorePhaseProps {
   // Publish
   onPublish: () => void;
   isPublishing: boolean;
+  canSubmit: boolean;
 
   // Draft
   onSaveDraft: () => void;
@@ -71,6 +72,7 @@ export function ScorePhase({
   goToPhase,
   onPublish,
   isPublishing,
+  canSubmit,
   onSaveDraft,
   existingPhotoUrls,
 }: ScorePhaseProps) {
@@ -269,7 +271,7 @@ export function ScorePhase({
           size="lg"
           fullWidth
           onClick={onPublish}
-          disabled={isPublishing || !formData.termsAccepted}
+          disabled={isPublishing || !canSubmit}
         >
           {isPublishing
             ? tActions('publishing')
