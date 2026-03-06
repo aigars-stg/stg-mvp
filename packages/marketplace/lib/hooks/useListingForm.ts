@@ -34,7 +34,7 @@ export const INITIAL_FORM_DATA: ListingFormData = {
   selectedVersion: null,
   selectedExpansions: [],
   photos: [],
-  condition: 'good',
+  condition: null,
   conditionNotes: '',
   allComponentsPresent: true,
   missingComponents: '',

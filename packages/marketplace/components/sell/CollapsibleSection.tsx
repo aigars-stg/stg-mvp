@@ -13,6 +13,7 @@ interface CollapsibleSectionProps {
   children: ReactNode;
   required?: boolean;
   subtitle?: string;
+  disabled?: boolean;
 }
 
 export function CollapsibleSection({
@@ -24,6 +25,7 @@ export function CollapsibleSection({
   children,
   required = false,
   subtitle,
+  disabled = false,
 }: CollapsibleSectionProps) {
   const tCommon = useTranslations('Common');
 
@@ -40,7 +42,12 @@ export function CollapsibleSection({
       <button
         type="button"
         onClick={onToggle}
-        className="w-full px-4 sm:px-6 py-3 flex items-center justify-between hover:bg-bg-secondary/50 transition-colors text-left"
+        disabled={disabled}
+        className={`w-full px-4 sm:px-6 py-3 flex items-center justify-between transition-colors text-left ${
+          disabled
+            ? 'opacity-50 cursor-not-allowed'
+            : 'hover:bg-bg-secondary/50 cursor-pointer'
+        }`}
       >
         <div className="flex items-center gap-3 flex-1">
           <div className="flex-shrink-0">{icon}</div>

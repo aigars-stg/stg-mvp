@@ -16,8 +16,8 @@ export interface PhaseDefinition {
 
 export const LISTING_PHASES: PhaseDefinition[] = [
   { id: 'research', iconName: 'Search', validationKey: 'isResearchComplete' },
-  { id: 'market', iconName: 'CurrencyEuro', validationKey: 'isMarketComplete' },
-  { id: 'action', iconName: 'PhotoCamera', validationKey: 'isActionComplete' },
+  { id: 'market', iconName: 'PhotoCamera', validationKey: 'isMarketComplete' },
+  { id: 'action', iconName: 'CurrencyEuro', validationKey: 'isActionComplete' },
   { id: 'score', iconName: 'ClipboardCheck', validationKey: 'isScoreComplete' },
 ];
 
