@@ -134,7 +134,6 @@ export async function POST(request: NextRequest) {
       ? getShippingPrice(
           sellerCountry as 'LV' | 'LT' | 'EE',
           input.destinationCountry as 'LV' | 'LT' | 'EE',
-          'M'
         )
       : 0;
 

@@ -332,7 +332,6 @@ function CheckoutPageContent() {
     ? getShippingPrice(
         basket.seller_country as TerminalCountry,
         selectedTerminal.countryCode as TerminalCountry,
-        'M'
       )
     : 0) ?? 0;
   const shippingCostCents = Math.round(shippingCostEuros * 100);

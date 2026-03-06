@@ -3033,8 +3033,7 @@
     },
     "acceptModal": {
       "title": "Pieņemt pasūtījumu",
-      "parcelSizeLabel": "Izvēlieties sūtījuma izmēru",
-      "parcelSizeHelp": "Izvēlieties izmēru, kas atbilst jūsu iepakotajai spēlei(-ēm). Tas ir nepieciešams piegādes uzlīmes ģenerēšanai.",
+      "confirmDescription": "M izmēra pakomāta nodalījums tiks rezervēts automātiski. Lielākā daļa galda spēļu ērti ietilpst šajā izmērā.",
       "confirmAccept": "Apstiprināt pieņemšanu",
       "cancel": "Atcelt",
       "processing": "Pieņem..."
@@ -3064,8 +3063,7 @@
     },
     "acceptModal": {
       "title": "Apstiprināt pasūtījuma pieņemšanu",
-      "parcelSizeLabel": "Izvēlieties sūtījuma izmēru *",
-      "parcelSizeHelp": "Izvēlieties izmēru, kas atbilst jūsu iepakotajai spēlei(-ēm). Tas nepieciešams piegādes uzlīmes ģenerēšanai.",
+      "confirmDescription": "M izmēra pakomāta nodalījums tiks rezervēts automātiski. Lielākā daļa galda spēļu ērti ietilpst šajā izmērā.",
       "localPickupConfirm": "Pieņemot pasūtījumu, jūs piekrītat koordinēt saņemšanu ar pircēju pilsētā {city}. Lūdzu, izmantojiet čatu, lai vienotos par tikšanās laiku un vietu.",
       "confirmAccept": "Apstiprināt pieņemšanu",
       "cancel": "Atcelt",

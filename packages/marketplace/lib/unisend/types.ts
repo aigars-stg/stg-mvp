@@ -45,6 +45,9 @@ export type TerminalCountry = 'LT' | 'LV' | 'EE';
 
 export type ParcelSize = 'XS' | 'S' | 'M' | 'L';
 
+/** Default parcel size for all Unisend shipments. M fits most board games. */
+export const UNISEND_DEFAULT_PARCEL_SIZE: ParcelSize = 'M';
+
 export type ParcelType = 'T2T' | 'H2H' | 'P2H' | 'H2F';
 
 export type PlanCode = 'TERMINAL' | 'HANDS' | 'SIGNED' | 'TRACKED' | 'UNTRACKED';
@@ -209,43 +212,19 @@ export const PHONE_FORMATS: Record<TerminalCountry, PhoneFormat> = {
 // Shipping Price Matrix
 // ============================================
 
-// Shipping prices in EUR based on sender country and parcel size
-// These are example prices - update with actual Unisend pricing
-export interface ShippingPrice {
-  XS: number;
-  S: number;
-  M: number;
-  L: number;
-}
-
-export const SHIPPING_PRICES: Record<TerminalCountry, Record<TerminalCountry, ShippingPrice>> = {
-  // From Lithuania
-  LT: {
-    LT: { XS: 2.70, S: 2.70, M: 2.70, L: 2.70 }, // Domestic LT
-    LV: { XS: 2.50, S: 2.50, M: 2.50, L: 2.50 }, // LT to LV
-    EE: { XS: 2.70, S: 2.70, M: 2.70, L: 2.70 }, // LT to EE
-  },
-  // From Latvia
-  LV: {
-    LT: { XS: 2.10, S: 2.10, M: 2.10, L: 2.10 }, // LV to LT
-    LV: { XS: 1.90, S: 1.90, M: 1.90, L: 1.90 }, // Domestic LV
-    EE: { XS: 2.10, S: 2.10, M: 2.10, L: 2.10 }, // LV to EE
-  },
-  // From Estonia
-  EE: {
-    LT: { XS: 3.50, S: 3.50, M: 3.50, L: 3.50 }, // EE to LT
-    LV: { XS: 3.20, S: 3.20, M: 3.20, L: 3.20 }, // EE to LV
-    EE: { XS: 2.80, S: 2.80, M: 2.80, L: 2.80 }, // Domestic EE
-  },
+// Shipping prices in EUR per route (price is the same regardless of parcel size)
+export const SHIPPING_PRICES: Record<TerminalCountry, Record<TerminalCountry, number>> = {
+  LT: { LT: 2.70, LV: 2.50, EE: 2.70 },
+  LV: { LT: 2.10, LV: 1.90, EE: 2.10 },
+  EE: { LT: 3.50, LV: 3.20, EE: 2.80 },
 };
 
-// Get shipping price for a route (uses M size as default for quotes)
+// Get shipping price for a route
 export function getShippingPrice(
   senderCountry: TerminalCountry,
   receiverCountry: TerminalCountry,
-  size: ParcelSize = 'M'
 ): number | null {
-  return SHIPPING_PRICES[senderCountry]?.[receiverCountry]?.[size] ?? null;
+  return SHIPPING_PRICES[senderCountry]?.[receiverCountry] ?? null;
 }
 
 // ============================================

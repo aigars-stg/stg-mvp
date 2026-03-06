@@ -43,6 +43,99 @@ export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Shared utilities
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Upload photos and return their URLs. Returns empty array if no photos. */
+async function uploadPhotos(photos: import('@/components/sell/PhotoUpload').PhotoFile[]): Promise<string[]> {
+  if (photos.length === 0) return [];
+
+  const photoFormData = new FormData();
+  photos.forEach((photoFile) => {
+    photoFormData.append('photos', photoFile.file);
+  });
+
+  const uploadResponse = await fetch('/api/upload/photos', {
+    method: 'POST',
+    body: photoFormData,
+  });
+
+  if (!uploadResponse.ok) throw new Error('Failed to upload photos');
+
+  const uploadData = await uploadResponse.json();
+  return uploadData.urls;
+}
+
+/** Map a listing API response to ListingFormData + photo URLs. */
+function mapListingToFormData(
+  listing: Record<string, unknown>,
+  overrides?: { termsAccepted?: boolean },
+): { formData: import('@/lib/hooks/useListingForm').ListingFormData; photoUrls: string[] } {
+  const pricingFormat: PricingFormat = (listing.pricing_format as PricingFormat)
+    || ((listing.listing_type as string) === 'auction' ? 'auction' : 'fixed_price');
+  const game = listing.game as Record<string, unknown> | undefined;
+
+  return {
+    formData: {
+      transactionMethod: 'claim',
+      pricingFormat,
+      selectedGame: {
+        id: listing.bgg_game_id as number,
+        name: listing.game_name as string,
+        yearPublished: (listing.game_year || listing.edition_year) as number,
+        thumbnail: (game?.thumbnail as string) || undefined,
+        image: (game?.image as string) || undefined,
+        playerCount: (game?.player_count as string) || undefined,
+        minAge: (game?.min_age as number) || undefined,
+        playingTime: (game?.playing_time as string) || undefined,
+        alternateNames: undefined,
+      },
+      selectedGameDisplayName: listing.game_name as string,
+      selectedVersion: {
+        id: 0,
+        isManual: true,
+        name: (listing.version_name as string) || '',
+        publishers: (listing.publisher as string) ? (listing.publisher as string).split(', ') : [],
+        publisher: (listing.publisher as string) || '',
+        languages: (listing.language as string) ? (listing.language as string).split(', ') : [],
+        language: (listing.language as string) || '',
+        yearPublished: (listing.edition_year as number) || undefined,
+        thumbnail: (game?.thumbnail as string) || undefined,
+        image: (game?.image as string) || undefined,
+      },
+      selectedExpansions: [],
+      photos: [],
+      condition: listing.condition as 'likeNew' | 'veryGood' | 'good' | 'acceptable',
+      conditionNotes: (listing.condition_notes as string) || '',
+      allComponentsPresent: listing.all_components_present as boolean,
+      missingComponents: (listing.missing_components as string) || '',
+      price: String(listing.price),
+      termsAccepted: overrides?.termsAccepted ?? false,
+      auctionDurationDays: (listing.auction_duration_days as 1 | 3 | 5 | 7) || 3,
+      auctionEndStrategy: (listing.auction_end_strategy as 'fixed' | 'cooldown') || 'fixed',
+      auctionCooldownHours: (listing.auction_cooldown_hours as 24 | 48) || 24,
+    },
+    photoUrls: (listing.photo_urls as string[]) || [],
+  };
+}
+
+/** Validates listing sections are complete. Reused by edit and create modes. */
+function getListingSectionStatus(formData: import('@/lib/hooks/useListingForm').ListingFormData, existingPhotoUrls: string[]) {
+  const isConditionComplete = !!formData.condition;
+  const isPhotosComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1 || existingPhotoUrls.length >= 1;
+  const isPriceComplete = formData.pricingFormat === 'auction'
+    ? (!!formData.price && parseFloat(formData.price) >= 1.00 && !!formData.auctionDurationDays)
+    : (!!formData.price && parseFloat(formData.price) > 0);
+
+  return {
+    isConditionComplete,
+    isPhotosComplete,
+    isPriceComplete,
+    canPublish: isConditionComplete && isPhotosComplete && isPriceComplete && formData.termsAccepted,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Shared hooks and handlers
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -314,78 +407,39 @@ function useSharedSellLogic(opts: {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // ── Fetch listing for edit mode ───────────────────────
+  // ── Fetch listing for edit or relist mode ─────────────
   useEffect(() => {
-    async function fetchListingForEdit() {
-      if (!isEditMode || !editListingId || !user) return;
+    const listingId = isEditMode ? editListingId : isRelistMode ? relistListingId : null;
+    if (!listingId || !user) return;
+    const userId = user.id;
 
+    async function fetchListing() {
       try {
         setIsLoadingListing(true);
         setLoadError('');
 
-        const response = await fetch(`/api/listings/${editListingId}`);
+        const response = await fetch(`/api/listings/${listingId}`);
 
         if (!response.ok) {
-          if (response.status === 404) {
-            setLoadError('Listing not found');
-          } else {
-            setLoadError('Failed to load listing');
-          }
+          setLoadError(response.status === 404 ? 'Listing not found' : 'Failed to load listing');
           return;
         }
 
         const data = await response.json();
         const listing = data.listing;
 
-        if (listing.seller_id !== user.id) {
-          setLoadError('You do not have permission to edit this listing');
+        if (listing.seller_id !== userId) {
+          setLoadError(isEditMode
+            ? 'You do not have permission to edit this listing'
+            : 'You do not have permission to re-list this item');
           return;
         }
 
-        const pricingFormat: PricingFormat = listing.pricing_format
-          || (listing.listing_type === 'auction' ? 'auction' : 'fixed_price');
-
-        setFormData({
-          transactionMethod: 'claim',
-          pricingFormat,
-          selectedGame: {
-            id: listing.bgg_game_id,
-            name: listing.game_name,
-            yearPublished: listing.game_year || listing.edition_year,
-            thumbnail: listing.game?.thumbnail || null,
-            image: listing.game?.image || null,
-            playerCount: listing.game?.player_count || null,
-            minAge: listing.game?.min_age || null,
-            playingTime: listing.game?.playing_time || null,
-            alternateNames: undefined,
-          },
-          selectedGameDisplayName: listing.game_name,
-          selectedVersion: {
-            id: 0,
-            isManual: true,
-            name: listing.version_name || '',
-            publishers: listing.publisher ? listing.publisher.split(', ') : [],
-            publisher: listing.publisher || '',
-            languages: listing.language ? listing.language.split(', ') : [],
-            language: listing.language || '',
-            yearPublished: listing.edition_year || null,
-            thumbnail: listing.game?.thumbnail || null,
-            image: listing.game?.image || null,
-          },
-          selectedExpansions: [],
-          photos: [],
-          condition: listing.condition,
-          conditionNotes: listing.condition_notes || '',
-          allComponentsPresent: listing.all_components_present,
-          missingComponents: listing.missing_components || '',
-          price: listing.price.toString(),
-          termsAccepted: true,
-          auctionDurationDays: listing.auction_duration_days || 3,
-          auctionEndStrategy: listing.auction_end_strategy || 'fixed',
-          auctionCooldownHours: listing.auction_cooldown_hours || 24,
+        const mapped = mapListingToFormData(listing, {
+          termsAccepted: isEditMode,
         });
-
-        setExistingPhotoUrls(listing.photo_urls || []);
+        setFormData(mapped.formData);
+        setExistingPhotoUrls(mapped.photoUrls);
       } catch {
         setLoadError('Failed to load listing');
       } finally {
@@ -393,91 +447,9 @@ function useSharedSellLogic(opts: {
       }
     }
 
-    fetchListingForEdit();
+    fetchListing();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditMode, editListingId, user]);
-
-  // ── Fetch listing for relist mode ─────────────────────
-  useEffect(() => {
-    async function fetchListingForRelist() {
-      if (!isRelistMode || !relistListingId || !user) return;
-
-      try {
-        setIsLoadingListing(true);
-        setLoadError('');
-
-        const response = await fetch(`/api/listings/${relistListingId}`);
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            setLoadError('Listing not found');
-          } else {
-            setLoadError('Failed to load listing');
-          }
-          return;
-        }
-
-        const data = await response.json();
-        const listing = data.listing;
-
-        if (listing.seller_id !== user.id) {
-          setLoadError('You do not have permission to re-list this item');
-          return;
-        }
-
-        const pricingFormat: PricingFormat = listing.pricing_format
-          || (listing.listing_type === 'auction' ? 'auction' : 'fixed_price');
-
-        setFormData({
-          transactionMethod: 'claim',
-          pricingFormat,
-          selectedGame: {
-            id: listing.bgg_game_id,
-            name: listing.game_name,
-            yearPublished: listing.game_year || listing.edition_year,
-            thumbnail: listing.game?.thumbnail || null,
-            image: listing.game?.image || null,
-            playerCount: listing.game?.player_count || null,
-            minAge: listing.game?.min_age || null,
-            playingTime: listing.game?.playing_time || null,
-          },
-          selectedGameDisplayName: listing.game_name,
-          selectedVersion: {
-            id: 0,
-            isManual: true,
-            name: listing.version_name || '',
-            publishers: listing.publisher ? listing.publisher.split(', ') : [],
-            publisher: listing.publisher || '',
-            languages: listing.language ? listing.language.split(', ') : [],
-            language: listing.language || '',
-            yearPublished: listing.edition_year || null,
-            thumbnail: listing.game?.thumbnail || null,
-            image: listing.game?.image || null,
-          },
-          selectedExpansions: [],
-          photos: [],
-          condition: listing.condition,
-          conditionNotes: listing.condition_notes || '',
-          allComponentsPresent: listing.all_components_present,
-          missingComponents: listing.missing_components || '',
-          price: listing.price.toString(),
-          termsAccepted: false,
-          auctionDurationDays: listing.auction_duration_days || 3,
-          auctionEndStrategy: listing.auction_end_strategy || 'fixed',
-          auctionCooldownHours: listing.auction_cooldown_hours || 24,
-        });
-
-        setExistingPhotoUrls(listing.photo_urls || []);
-      } catch {
-        setLoadError('Failed to load listing');
-      } finally {
-        setIsLoadingListing(false);
-      }
-    }
-
-    fetchListingForRelist();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRelistMode, relistListingId, user]);
+  }, [isEditMode, editListingId, isRelistMode, relistListingId, user]);
 
   // ── Fetch wanted listing ──────────────────────────────
   useEffect(() => {
@@ -684,33 +656,19 @@ function EditModeSellContent() {
     }));
   };
 
-  // Section completions
-  const isConditionSectionComplete = !!formData.condition;
-  const isPhotosSectionComplete = formData.condition !== 'acceptable' || formData.photos.length >= 1 || existingPhotoUrls.length >= 1;
-  const isPriceSectionComplete = formData.pricingFormat === 'auction'
-    ? (!!formData.price && parseFloat(formData.price) >= 1.00 && !!formData.auctionDurationDays)
-    : (!!formData.price && parseFloat(formData.price) > 0);
-  const isPricingSectionComplete = isPriceSectionComplete;
-
-  const canPublish = (): boolean => {
-    return (
-      isConditionSectionComplete &&
-      isPhotosSectionComplete &&
-      isPricingSectionComplete &&
-      formData.termsAccepted
-    );
-  };
+  // Section completions (shared utility)
+  const sections = getListingSectionStatus(formData, existingPhotoUrls);
 
   const validateForPublish = (): boolean => {
-    if (!isConditionSectionComplete) {
+    if (!sections.isConditionComplete) {
       setValidationModal({ isOpen: true, message: tValidation('selectCondition') });
       return false;
     }
-    if (!isPhotosSectionComplete) {
+    if (!sections.isPhotosComplete) {
       setValidationModal({ isOpen: true, message: tValidation('photoRequired') });
       return false;
     }
-    if (!isPricingSectionComplete) {
+    if (!sections.isPriceComplete) {
       setValidationModal({ isOpen: true, message: tValidation('priceRequired') });
       return false;
     }
@@ -727,24 +685,7 @@ function EditModeSellContent() {
     setIsPublishing(true);
 
     try {
-      let newPhotoUrls: string[] = [];
-      if (formData.photos.length > 0) {
-        const photoFormData = new FormData();
-        formData.photos.forEach((photoFile) => {
-          photoFormData.append('photos', photoFile.file);
-        });
-
-        const uploadResponse = await fetch('/api/upload/photos', {
-          method: 'POST',
-          body: photoFormData,
-        });
-
-        if (!uploadResponse.ok) throw new Error('Failed to upload photos');
-
-        const uploadData = await uploadResponse.json();
-        newPhotoUrls = uploadData.urls;
-      }
-
+      const newPhotoUrls = await uploadPhotos(formData.photos);
       const allPhotoUrls = [...existingPhotoUrls, ...newPhotoUrls];
 
       const updates = {
@@ -868,7 +809,7 @@ function EditModeSellContent() {
           <CollapsibleSection
             title={tSections('condition.title')}
             icon={<ClipboardCheck className="w-6 h-6 text-frost-ice" />}
-            isComplete={isConditionSectionComplete}
+            isComplete={sections.isConditionComplete}
             isExpanded={expandedSections.condition}
             onToggle={() => toggleSection('condition')}
             required
@@ -910,7 +851,7 @@ function EditModeSellContent() {
           <CollapsibleSection
             title={tSections('pricing.title')}
             icon={<Euro className="w-6 h-6 text-frost-ice" />}
-            isComplete={isPriceSectionComplete}
+            isComplete={sections.isPriceComplete}
             isExpanded={expandedSections.pricing}
             onToggle={() => toggleSection('pricing')}
             required
@@ -1007,7 +948,7 @@ function EditModeSellContent() {
             <div className="mt-8 space-y-3 sm:space-y-0">
               {/* Mobile: Sticky bottom bar */}
               <div className="sm:hidden flex flex-col gap-3 sticky bottom-0 bg-bg-elevated border-t border-border-subtle shadow-lg -mx-4 px-4 py-4">
-                <Button variant="primary" onClick={handlePublish} disabled={!canPublish() || isPublishing} size="lg" fullWidth>
+                <Button variant="primary" onClick={handlePublish} disabled={!sections.canPublish || isPublishing} size="lg" fullWidth>
                   {isPublishing ? tActions('saving') : tActions('saveChanges')}
                 </Button>
                 <Button variant="secondary" onClick={() => setShowMobilePreview(true)} size="lg" fullWidth>
@@ -1017,7 +958,7 @@ function EditModeSellContent() {
 
               {/* Desktop: Regular button row */}
               <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-4">
-                <Button variant="primary" onClick={handlePublish} disabled={!canPublish() || isPublishing} size="lg" className="ml-auto">
+                <Button variant="primary" onClick={handlePublish} disabled={!sections.canPublish || isPublishing} size="lg" className="ml-auto">
                   {isPublishing ? tActions('saving') : tActions('saveChanges')}
                 </Button>
               </div>
@@ -1210,16 +1151,6 @@ function CreateModeSellContent() {
   const [showSpeedRoundToast, setShowSpeedRoundToast] = useState(false);
   const dismissSpeedRoundToast = useCallback(() => setShowSpeedRoundToast(false), []);
 
-  // ── Draft banner handlers ─────────────────────────────
-
-  const handleLoadDraft = () => {
-    loadDraftData();
-  };
-
-  const handleDismissDraft = () => {
-    dismissDraft();
-  };
-
   // ── handleSaveDraft ───────────────────────────────────
   const handleSaveDraft = () => {
     saveDraft();
@@ -1250,24 +1181,7 @@ function CreateModeSellContent() {
 
     try {
       // Upload photos
-      let newPhotoUrls: string[] = [];
-      if (formData.photos.length > 0) {
-        const photoFormData = new FormData();
-        formData.photos.forEach((photoFile) => {
-          photoFormData.append('photos', photoFile.file);
-        });
-
-        const uploadResponse = await fetch('/api/upload/photos', {
-          method: 'POST',
-          body: photoFormData,
-        });
-
-        if (!uploadResponse.ok) throw new Error('Failed to upload photos');
-
-        const uploadData = await uploadResponse.json();
-        newPhotoUrls = uploadData.urls;
-      }
-
+      const newPhotoUrls = await uploadPhotos(formData.photos);
       const allPhotoUrls = [...existingPhotoUrls, ...newPhotoUrls];
 
       const listingData = {
@@ -1501,13 +1415,13 @@ function CreateModeSellContent() {
               <p className="text-sm text-text-secondary mb-3">{tDraft('subtitle')}</p>
               <div className="flex gap-2">
                 <button
-                  onClick={handleLoadDraft}
+                  onClick={loadDraftData}
                   className="px-4 py-2 bg-frost-ice text-snow-white rounded-lg hover:bg-frost-ice/90 transition-colors text-sm font-medium"
                 >
                   {tDraft('loadButton')}
                 </button>
                 <button
-                  onClick={handleDismissDraft}
+                  onClick={dismissDraft}
                   className="px-4 py-2 bg-bg-secondary text-text rounded-lg hover:bg-border transition-colors text-sm font-medium"
                 >
                   {tDraft('startFreshButton')}
@@ -1515,7 +1429,7 @@ function CreateModeSellContent() {
               </div>
             </div>
             <button
-              onClick={handleDismissDraft}
+              onClick={dismissDraft}
               className="p-1 hover:bg-bg-secondary rounded transition-colors"
               title={tDraft('dismiss')}
             >

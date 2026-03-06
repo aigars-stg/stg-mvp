@@ -26,13 +26,11 @@ export {
   type ShippingDestination,
   type TrackingData,
   type ParcelSize,
-  type ParcelSizeOption,
   type ShippingInfo,
   type OrderItem,
   type UserProfile,
   type OrderTimestamps,
   type OrderIssue,
-  PARCEL_SIZES,
   issueTypeLabels,
   issueStatusConfig,
 } from './types';

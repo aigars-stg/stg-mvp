@@ -8,18 +8,12 @@ import {
   CloseCircle as XCircle,
   RefreshCw as Loader2,
 } from '@/lib/icons';
-import { PARCEL_SIZES } from '@/components/shipping';
-import type { ParcelSize } from '@/components/shipping';
-
 interface SellerAcceptDeclineProps {
-  shippingMethod: string;
   timeRemaining: string | null;
   showAcceptModal: boolean;
   setShowAcceptModal: (show: boolean) => void;
   showDeclineModal: boolean;
   setShowDeclineModal: (show: boolean) => void;
-  selectedParcelSize: ParcelSize;
-  setSelectedParcelSize: (size: ParcelSize) => void;
   declineReason: string;
   setDeclineReason: (reason: string) => void;
   actionLoading: boolean;
@@ -30,14 +24,11 @@ interface SellerAcceptDeclineProps {
 }
 
 export function SellerAcceptDecline({
-  shippingMethod,
   timeRemaining,
   showAcceptModal,
   setShowAcceptModal,
   showDeclineModal,
   setShowDeclineModal,
-  selectedParcelSize,
-  setSelectedParcelSize,
   declineReason,
   setDeclineReason,
   actionLoading,
@@ -108,37 +99,9 @@ export function SellerAcceptDecline({
               <h4 className="font-semibold text-polar-night mb-3">
                 {t('acceptModal.title')}
               </h4>
-              {shippingMethod === 't2t' && (
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-text-secondary mb-2">
-                    {t('acceptModal.parcelSizeLabel')}
-                  </label>
-                  <p className="text-xs text-text-muted mb-3">
-                    {t('acceptModal.parcelSizeHelp')}
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {PARCEL_SIZES.map((size) => (
-                      <button
-                        key={size.value}
-                        type="button"
-                        onClick={() => setSelectedParcelSize(size.value)}
-                        className={`p-3 rounded-lg border-2 text-left transition-all ${
-                          selectedParcelSize === size.value
-                            ? 'border-frost-ice bg-frost-ice/10'
-                            : 'border-border hover:border-frost-ice/50'
-                        }`}
-                      >
-                        <span className="block font-semibold text-polar-night">
-                          {size.label}
-                        </span>
-                        <span className="block text-xs text-text-muted">
-                          {size.dimensions}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <p className="text-sm text-text-secondary mb-4">
+                {t('acceptModal.confirmDescription')}
+              </p>
               <div className="flex gap-3">
                 <Button
                   variant="primary"

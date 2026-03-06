@@ -3047,8 +3047,7 @@
     },
     "acceptModal": {
       "title": "Accept Order",
-      "parcelSizeLabel": "Select Parcel Size",
-      "parcelSizeHelp": "Choose the size that fits your packaged game(s). This is required for generating the shipping label.",
+      "confirmDescription": "A size M parcel locker will be reserved automatically. Most board games fit comfortably in this size.",
       "confirmAccept": "Confirm Accept",
       "cancel": "Cancel",
       "processing": "Accepting..."
@@ -3078,8 +3077,7 @@
     },
     "acceptModal": {
       "title": "Confirm Accept Order",
-      "parcelSizeLabel": "Select Parcel Size *",
-      "parcelSizeHelp": "Choose the size that fits your packaged game(s). This is required for generating the shipping label.",
+      "confirmDescription": "A size M parcel locker will be reserved automatically. Most board games fit comfortably in this size.",
       "localPickupConfirm": "By accepting, you agree to coordinate pickup with the buyer in {city}. Please use the chat feature to arrange a meeting time and location.",
       "confirmAccept": "Confirm Accept",
       "cancel": "Cancel",

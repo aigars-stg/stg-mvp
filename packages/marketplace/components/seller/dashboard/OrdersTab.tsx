@@ -7,15 +7,12 @@ import { Button, Badge } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight } from '@/lib/icons';
 import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { PARCEL_SIZES } from '@/components/shipping';
 import { getStatusConfig } from '@/components/shipping/ShippingStatusConfig';
 import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import { resolveListingImage } from '@/lib/utils/listing-image';
 import { formatCentsToCurrency } from '@/lib/services/pricing';
 import { SELLER_COMMISSION_RATE } from '@/lib/pricing/constants';
 import { formatDate } from '@/lib/date-utils';
-
-type ParcelSize = 'XS' | 'S' | 'M' | 'L';
 
 interface OrderItem {
   id: string;
@@ -74,7 +71,6 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
 
   // Accept modal state
   const [showAcceptModal, setShowAcceptModal] = useState<string | null>(null);
-  const [selectedParcelSize, setSelectedParcelSize] = useState<ParcelSize>('M');
   const [acceptingOrder, setAcceptingOrder] = useState<string | null>(null);
   const [acceptError, setAcceptError] = useState<string | null>(null);
 
@@ -169,8 +165,6 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
 
       const response = await fetch(`/api/seller/orders/${orderId}/accept`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ parcelSize: selectedParcelSize }),
       });
 
       const data = await response.json();
@@ -180,7 +174,6 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
       }
 
       setShowAcceptModal(null);
-      setSelectedParcelSize('M');
       await fetchOrders();
     } catch (err) {
       setAcceptError(err instanceof Error ? err.message : 'Failed to accept order');
@@ -369,7 +362,6 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
                         onClick={(e) => {
                           e.preventDefault();
                           setShowAcceptModal(order.id);
-                          setSelectedParcelSize('M');
                           setAcceptError(null);
                         }}
                       >
@@ -405,33 +397,8 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
               {t('acceptModal.title')}
             </h3>
             <p className="text-sm text-text-secondary mb-4">
-              {t('acceptModal.parcelSizeHelp')}
+              {t('acceptModal.confirmDescription')}
             </p>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-text-secondary mb-2">
-                {t('acceptModal.parcelSizeLabel')}
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {PARCEL_SIZES.map((size) => (
-                  <button
-                    key={size.value}
-                    type="button"
-                    onClick={() => setSelectedParcelSize(size.value)}
-                    className={`p-3 rounded-lg border-2 text-left transition-all ${
-                      selectedParcelSize === size.value
-                        ? 'border-frost-ice bg-frost-ice/10'
-                        : 'border-border hover:border-frost-ice/50'
-                    }`}
-                  >
-                    <span className="block font-semibold text-polar-night">
-                      {size.label}
-                    </span>
-                    <span className="block text-xs text-text-muted">{size.dimensions}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {acceptError && (
               <div className="mb-4 p-3 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-2">

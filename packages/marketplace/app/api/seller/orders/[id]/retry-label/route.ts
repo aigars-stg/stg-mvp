@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendShippingLabelToSeller } from '@/lib/email/send-order-emails';
-import { generateShippingLabel, updateOrderWithShippingData, updateOrderLabelError } from '@/lib/unisend/label-service';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { UnisendValidationError } from '@/lib/unisend/types';
-import { formatLabelError } from '@/lib/unisend/format-label-error';
+import { prepareAndGenerateLabel } from '@/lib/unisend/prepare-and-generate-label';
 
 /**
  * POST /api/seller/orders/[id]/retry-label
  *
- * Retry generating shipping label for a T2T order
- * Only works for accepted orders that don't have a label yet
+ * Retry generating shipping label for a T2T order.
+ * Only works for accepted orders that don't have a label yet.
  */
 export async function POST(
   request: NextRequest,
@@ -98,96 +95,33 @@ export async function POST(
       );
     }
 
-    // Use receiver info from order (provided during checkout) with fallback to buyer profile
-    const receiverName = order.receiver_name || buyerProfile.full_name;
-    const receiverPhone = order.receiver_phone || buyerProfile.phone || '';
+    const labelResult = await prepareAndGenerateLabel({
+      orderId,
+      orderNumber: order.order_number,
+      seller: {
+        fullName: sellerProfile.full_name,
+        phone: sellerProfile.phone || '',
+        email: sellerProfile.email,
+        country: sellerProfile.country,
+      },
+      buyer: {
+        fullName: buyerProfile.full_name,
+        email: buyerProfile.email,
+      },
+      receiver: {
+        name: order.receiver_name || buyerProfile.full_name,
+        phone: order.receiver_phone || buyerProfile.phone || '',
+      },
+      destination: {
+        country: order.destination_country,
+        terminalId: order.destination_terminal_id || '',
+        terminalName: order.destination_terminal_name || '',
+        terminalAddress: order.destination_terminal_address || '',
+      },
+      parcelSize: order.parcel_size,
+    });
 
-    // Validate countries before attempting label generation
-    if (!sellerProfile.country || !['LV', 'LT', 'EE'].includes(sellerProfile.country)) {
-      await supabase.from('orders').update({
-        label_error: 'Seller country not set. Please update your country in Account Settings.',
-        updated_at: new Date().toISOString(),
-      }).eq('id', orderId);
-
-      return NextResponse.json({
-        success: true,
-        orderId,
-        shippingMethod: order.shipping_method,
-        labelGenerated: false,
-        labelError: 'Seller country not set',
-      });
-    }
-
-    if (!order.destination_country || !['LV', 'LT', 'EE'].includes(order.destination_country)) {
-      await supabase.from('orders').update({
-        label_error: 'Destination country missing on order.',
-        updated_at: new Date().toISOString(),
-      }).eq('id', orderId);
-
-      return NextResponse.json({
-        success: true,
-        orderId,
-        shippingMethod: order.shipping_method,
-        labelGenerated: false,
-        labelError: 'Destination country missing',
-      });
-    }
-
-    // Log attempt
-    console.log(`🔄 [Retry Label] Retrying label generation for order ${orderId}...`);
-    console.log(`📦 [Retry Label] Sender: ${sellerProfile.full_name}, Phone: ${sellerProfile.phone || '(empty)'}, Country: ${sellerProfile.country}`);
-    console.log(`📦 [Retry Label] Receiver: ${receiverName}, Phone: ${receiverPhone || '(empty)'}, Country: ${order.destination_country}`);
-    console.log(`📦 [Retry Label] Terminal: ${order.destination_terminal_id || '(empty)'}, Parcel Size: ${order.parcel_size || 'M'}`);
-
-    try {
-      const labelResult = await generateShippingLabel({
-        orderId,
-        orderNumber: order.order_number,
-        senderName: sellerProfile.full_name,
-        senderPhone: sellerProfile.phone || '',
-        senderCountry: sellerProfile.country as 'LT' | 'LV' | 'EE',
-        receiverName,
-        receiverPhone,
-        receiverCountry: order.destination_country as 'LT' | 'LV' | 'EE',
-        destinationTerminalId: order.destination_terminal_id || '',
-        parcelSize: (order.parcel_size || 'M') as 'XS' | 'S' | 'M' | 'L',
-      });
-
-      console.log(`✅ [Retry Label] Label generated successfully: ParcelId ${labelResult.parcelId}`);
-
-      // Update order with Unisend tracking data (uses service role to bypass RLS)
-      const updateResult = await updateOrderWithShippingData(orderId, {
-        parcelId: labelResult.parcelId,
-        barcode: labelResult.barcode,
-        trackingUrl: labelResult.trackingUrl,
-        labelUrl: labelResult.labelUrl,
-      });
-
-      if (!updateResult.success) {
-        console.error(`❌ [Retry Label] Failed to save shipping data:`, updateResult.error);
-        return NextResponse.json(
-          { error: 'Label generated but failed to save to database', details: updateResult.error },
-          { status: 500 }
-        );
-      }
-
-      // Send shipping notification email to seller with parcelId
-      // Seller will print the label at the Unisend terminal
-      sendShippingLabelToSeller({
-        sellerName: sellerProfile.full_name,
-        sellerEmail: sellerProfile.email,
-        orderNumber: order.order_number,
-        orderId,
-        buyerName: buyerProfile.full_name,
-        destinationTerminalName: order.destination_terminal_name || '',
-        destinationTerminalAddress: order.destination_terminal_address || '',
-        parcelId: String(labelResult.parcelId),
-        barcode: labelResult.barcode,
-        trackingUrl: labelResult.trackingUrl,
-      }).catch((err) => {
-        console.error('❌ [Retry Label] Failed to send shipping email:', err);
-      });
-
+    if (labelResult.labelGenerated) {
       return NextResponse.json({
         success: true,
         orderId,
@@ -197,26 +131,16 @@ export async function POST(
         labelUrl: labelResult.labelUrl,
         message: 'Parcel registered successfully. Go to any Unisend terminal to print your label.',
       });
-    } catch (error) {
-      console.error('❌ [Retry Label] Label generation failed:', error);
-
-      const errorMessage = formatLabelError(error);
-      if (error instanceof UnisendValidationError) {
-        console.error('❌ [Retry Label] Validation errors:', error.validationErrors);
-      }
-
-      // Store the detailed error in the database (uses service role to bypass RLS)
-      await updateOrderLabelError(orderId, errorMessage);
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Label generation failed',
-          details: errorMessage,
-        },
-        { status: 500 }
-      );
     }
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Label generation failed',
+        details: labelResult.labelError,
+      },
+      { status: 500 }
+    );
   } catch (error) {
     return handleApiError(error, 'Retry label generation');
   }

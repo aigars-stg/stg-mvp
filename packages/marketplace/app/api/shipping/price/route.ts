@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic';
 import {
   getShippingPrice,
   TerminalCountry,
-  ParcelSize,
   SHIPPING_PRICES,
 } from '@/lib/unisend';
 import { handleApiError } from '@/lib/api/error-handler';
@@ -15,14 +14,12 @@ import { handleApiError } from '@/lib/api/error-handler';
  * Query params:
  *   - from: sender country (LT | LV | EE) - required
  *   - to: receiver country (LT | LV | EE) - required
- *   - size: parcel size (XS | S | M | L) - optional, defaults to 'M' for quotes
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const from = searchParams.get('from') as TerminalCountry;
     const to = searchParams.get('to') as TerminalCountry;
-    const size = (searchParams.get('size') as ParcelSize) || 'M';
 
     // Validate countries
     if (!from || !['LT', 'LV', 'EE'].includes(from)) {
@@ -39,16 +36,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Validate size
-    if (!['XS', 'S', 'M', 'L'].includes(size)) {
-      return NextResponse.json(
-        { error: 'Valid parcel size is required (XS, S, M, or L)' },
-        { status: 400 }
-      );
-    }
-
-    const price = getShippingPrice(from, to, size);
-    const allPrices = SHIPPING_PRICES[from]?.[to];
+    const price = getShippingPrice(from, to);
 
     if (price == null) {
       return NextResponse.json(
@@ -60,11 +48,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       from,
       to,
-      size,
       price,
       currency: 'EUR',
-      // Include all size prices for the route
-      prices: allPrices || null,
     });
   } catch (error) {
     return handleApiError(error, 'Calculate shipping');

@@ -65,8 +65,6 @@ export default function OrderDetailPage() {
     setShowAcceptModal,
     showDeclineModal,
     setShowDeclineModal,
-    selectedParcelSize,
-    setSelectedParcelSize,
     declineReason,
     setDeclineReason,
     actionLoading,
@@ -297,14 +295,11 @@ export default function OrderDetailPage() {
             {/* Seller: Accept/Decline */}
             {isSeller && order.status === 'pending_seller' && (
               <SellerAcceptDecline
-                shippingMethod={order.shipping_method}
                 timeRemaining={timeRemaining}
                 showAcceptModal={showAcceptModal}
                 setShowAcceptModal={setShowAcceptModal}
                 showDeclineModal={showDeclineModal}
                 setShowDeclineModal={setShowDeclineModal}
-                selectedParcelSize={selectedParcelSize}
-                setSelectedParcelSize={setSelectedParcelSize}
                 declineReason={declineReason}
                 setDeclineReason={setDeclineReason}
                 actionLoading={actionLoading}

@@ -10,7 +10,6 @@ import type { FC, SVGProps } from 'react';
 
 // Order status type - all possible statuses
 export type OrderStatus =
-  | 'pending_payment'
   | 'pending_seller'
   | 'accepted'
   | 'shipped'
@@ -38,11 +37,6 @@ export interface StatusConfig {
 
 // Unified status configuration - single source of truth
 export const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
-  pending_payment: {
-    label: 'Pending Payment',
-    variant: 'warning',
-    icon: Clock,
-  },
   pending_seller: {
     label: 'Waiting for Seller',
     variant: 'warning',
@@ -107,7 +101,6 @@ export const statusSteps = [
     key: 'placed',
     label: 'Order Placed',
     statuses: [
-      'pending_payment',
       'pending_seller',
       'accepted',
       'shipped',

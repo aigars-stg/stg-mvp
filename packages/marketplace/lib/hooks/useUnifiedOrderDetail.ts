@@ -9,7 +9,6 @@ import { useOrderMessages } from './useOrderMessages';
 import type { User } from '@supabase/supabase-js';
 import type { Message } from '@/lib/types/message';
 import type { TrackingEvent, ShippingDestination, TrackingData } from '@/components/shipping';
-import type { ParcelSize } from '@/components/shipping';
 import type { OrderPayment } from '@/lib/types/order-detail';
 
 // --- Data types ---
@@ -134,8 +133,6 @@ export interface UseUnifiedOrderDetailReturn {
   setShowAcceptModal: (show: boolean) => void;
   showDeclineModal: boolean;
   setShowDeclineModal: (show: boolean) => void;
-  selectedParcelSize: ParcelSize;
-  setSelectedParcelSize: (size: ParcelSize) => void;
   declineReason: string;
   setDeclineReason: (reason: string) => void;
   actionLoading: boolean;
@@ -189,7 +186,6 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
   // --- Seller action state ---
   const [showAcceptModal, setShowAcceptModal] = useState(false);
   const [showDeclineModal, setShowDeclineModal] = useState(false);
-  const [selectedParcelSize, setSelectedParcelSize] = useState<ParcelSize>('M');
   const [declineReason, setDeclineReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [retryingLabel, setRetryingLabel] = useState(false);
@@ -357,21 +353,12 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
 
   // --- Seller: Accept order ---
   const handleAcceptOrder = useCallback(async () => {
-    if (data?.order.shipping_method === 't2t' && !selectedParcelSize) {
-      setActionError('Please select a parcel size');
-      return;
-    }
-
     try {
       setActionLoading(true);
       setActionError(null);
 
       const response = await fetch(`/api/seller/orders/${orderId}/accept`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          parcelSize: data?.order.shipping_method === 't2t' ? selectedParcelSize : undefined,
-        }),
       });
 
       const result = await response.json();
@@ -387,7 +374,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     } finally {
       setActionLoading(false);
     }
-  }, [data?.order.shipping_method, selectedParcelSize, orderId, fetchData]);
+  }, [orderId, fetchData]);
 
   // --- Seller: Decline order ---
   const handleDeclineOrder = useCallback(async () => {
@@ -484,8 +471,6 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     setShowAcceptModal,
     showDeclineModal,
     setShowDeclineModal,
-    selectedParcelSize,
-    setSelectedParcelSize,
     declineReason,
     setDeclineReason,
     actionLoading,

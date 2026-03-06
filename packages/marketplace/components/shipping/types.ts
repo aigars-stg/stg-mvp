@@ -33,19 +33,6 @@ export interface TrackingData {
 // Parcel size options
 export type ParcelSize = 'XS' | 'S' | 'M' | 'L';
 
-export interface ParcelSizeOption {
-  value: ParcelSize;
-  label: string;
-  dimensions: string;
-}
-
-export const PARCEL_SIZES: ParcelSizeOption[] = [
-  { value: 'XS', label: 'XS', dimensions: 'up to 10×7×38 cm' },
-  { value: 'S', label: 'S', dimensions: 'up to 38×64×12 cm' },
-  { value: 'M', label: 'M', dimensions: 'up to 38×64×39 cm' },
-  { value: 'L', label: 'L', dimensions: 'up to 38×64×64 cm' },
-];
-
 // Shipping info for display components
 export interface ShippingInfo {
   shipping_method: 't2t';
