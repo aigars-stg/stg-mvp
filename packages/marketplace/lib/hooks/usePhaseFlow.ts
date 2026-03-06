@@ -12,7 +12,7 @@ import type { PhaseDefinition } from '@/components/phases/phase-definitions';
 
 const DRAFT_KEY = 'listing-draft';
 const DRAFT_DISMISSED_KEY = 'listing-draft-dismissed';
-const DRAFT_VERSION = 2;
+const DRAFT_VERSION = 3;
 const SPARKLE_DURATION_MS = 700;
 const ADVANCE_DELAY_MS = 500;
 
@@ -39,10 +39,25 @@ interface DraftV2 {
   flowStartTime: number;
 }
 
-type DraftPayload = DraftV1 | DraftV2;
+interface DraftV3 {
+  version: 3;
+  formData: Partial<ListingFormData>;
+  currentPhaseIndex: number;
+  highestVisitedPhaseIndex: number;
+  completedPhaseIds: string[];
+  flowStartTime: number;
+  savedAt: number;
+  hadPhotos: boolean;
+}
+
+type DraftPayload = DraftV1 | DraftV2 | DraftV3;
 
 function isDraftV2(draft: DraftPayload): draft is DraftV2 {
   return 'version' in draft && draft.version === 2;
+}
+
+function isDraftV3(draft: DraftPayload): draft is DraftV3 {
+  return 'version' in draft && draft.version === 3;
 }
 
 export interface PhaseFlowState extends UseListingFormReturn {
@@ -61,11 +76,16 @@ export interface PhaseFlowState extends UseListingFormReturn {
   isFlowComplete: boolean;
   isCurrentPhaseComplete: boolean;
   flowStartTime: number;
+  highestVisitedPhaseIndex: number;
 
   // Draft persistence
   saveDraft: () => void;
   loadDraftData: () => void;
   dismissDraft: () => void;
+
+  // Photos warning (shown when draft was loaded but photos were stripped)
+  showPhotosWarning: boolean;
+  setShowPhotosWarning: (value: boolean) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -151,7 +171,7 @@ function loadDraft(): DraftPayload | null {
   }
 }
 
-function persistDraft(data: DraftV2): void {
+function persistDraft(data: DraftV3): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
@@ -171,10 +191,12 @@ export function usePhaseFlow(): PhaseFlowState {
 
   // ------- Phase state -------
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+  const [highestVisitedPhaseIndex, setHighestVisitedPhaseIndex] = useState(0);
   const [completedPhaseIds, setCompletedPhaseIds] = useState<string[]>([]);
   const [sparklePhaseId, setSparklePhaseId] = useState<string | null>(null);
   const [toastData, setToastData] = useState<ToastData | null>(null);
   const [flowStartTime, setFlowStartTime] = useState<number>(() => Date.now());
+  const [showPhotosWarning, setShowPhotosWarning] = useState(false);
 
   // Track whether we've loaded from a draft on mount
   const hasLoadedDraft = useRef(false);
@@ -253,32 +275,52 @@ export function usePhaseFlow(): PhaseFlowState {
   // ------- Draft persistence -------
 
   const saveDraft = useCallback(() => {
+    // Strip photos (File objects can't be serialized) and force termsAccepted=false
+    const { photos, ...formDataWithoutPhotos } = formData;
     persistDraft({
       version: DRAFT_VERSION,
-      formData,
+      formData: { ...formDataWithoutPhotos, termsAccepted: false },
       currentPhaseIndex,
+      highestVisitedPhaseIndex,
       completedPhaseIds,
       flowStartTime,
+      savedAt: Date.now(),
+      hadPhotos: photos.length > 0,
     });
     setHasDraft(true);
-  }, [formData, setHasDraft, currentPhaseIndex, completedPhaseIds, flowStartTime]);
+  }, [formData, setHasDraft, currentPhaseIndex, highestVisitedPhaseIndex, completedPhaseIds, flowStartTime]);
 
   const loadDraftData = useCallback(() => {
     const draft = loadDraft();
     if (!draft || !draft.formData) return;
 
-    // Apply form data
-    listingForm.setFormData({ ...INITIAL_FORM_DATA, ...draft.formData });
+    // Always restore form data with photos cleared and termsAccepted forced false
+    listingForm.setFormData({
+      ...INITIAL_FORM_DATA,
+      ...draft.formData,
+      photos: [],
+      termsAccepted: false,
+    });
     listingForm.setHasDraft(true);
     listingForm.setShowDraftBanner(false);
 
     // Apply phase state
-    if (isDraftV2(draft)) {
+    if (isDraftV3(draft)) {
       setCurrentPhaseIndex(draft.currentPhaseIndex);
+      setHighestVisitedPhaseIndex(draft.highestVisitedPhaseIndex);
+      setCompletedPhaseIds(draft.completedPhaseIds);
+      setFlowStartTime(draft.flowStartTime);
+      if (draft.hadPhotos) {
+        setShowPhotosWarning(true);
+      }
+    } else if (isDraftV2(draft)) {
+      setCurrentPhaseIndex(draft.currentPhaseIndex);
+      setHighestVisitedPhaseIndex(draft.currentPhaseIndex);
       setCompletedPhaseIds(draft.completedPhaseIds);
       setFlowStartTime(draft.flowStartTime);
     } else {
       setCurrentPhaseIndex(0);
+      setHighestVisitedPhaseIndex(0);
       setCompletedPhaseIds([]);
       setFlowStartTime(Date.now());
     }
@@ -301,8 +343,10 @@ export function usePhaseFlow(): PhaseFlowState {
 
     // Reset phase state
     setCurrentPhaseIndex(0);
+    setHighestVisitedPhaseIndex(0);
     setCompletedPhaseIds([]);
     setFlowStartTime(Date.now());
+    setShowPhotosWarning(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- stable refs
   }, []);
 
@@ -341,19 +385,25 @@ export function usePhaseFlow(): PhaseFlowState {
     const nextIndex = currentPhaseIndex < LISTING_PHASES.length - 1
       ? currentPhaseIndex + 1
       : currentPhaseIndex;
+    const nextHighest = Math.max(highestVisitedPhaseIndex, nextIndex);
     if (currentPhaseIndex < LISTING_PHASES.length - 1) {
       advanceTimer.current = setTimeout(() => {
         setCurrentPhaseIndex(nextIndex);
+        setHighestVisitedPhaseIndex(nextHighest);
       }, ADVANCE_DELAY_MS);
     }
 
     // 6. Persist draft on phase advance (uses computed values, not stale closure)
+    const { photos, ...formDataWithoutPhotos } = formData;
     persistDraft({
       version: DRAFT_VERSION,
-      formData,
+      formData: { ...formDataWithoutPhotos, termsAccepted: false },
       currentPhaseIndex: nextIndex,
+      highestVisitedPhaseIndex: nextHighest,
       completedPhaseIds: updatedCompleted,
       flowStartTime,
+      savedAt: Date.now(),
+      hadPhotos: photos.length > 0,
     });
 
     return true;
@@ -362,20 +412,20 @@ export function usePhaseFlow(): PhaseFlowState {
   const goToPhase = useCallback(
     (index: number) => {
       if (index < 0 || index >= LISTING_PHASES.length) return;
-      // Only allow going to a completed phase or the current+1 if current is complete
       const targetPhase = LISTING_PHASES[index];
       if (!targetPhase) return;
 
       const isCompleted = completedPhaseIds.includes(targetPhase.id);
-      const isNext =
-        index === currentPhaseIndex + 1 && isCurrentPhaseComplete;
+      const isNext = index === currentPhaseIndex + 1 && isCurrentPhaseComplete;
       const isCurrent = index === currentPhaseIndex;
+      // EC-9: allow navigating to any previously visited phase
+      const isPreviouslyVisited = index <= highestVisitedPhaseIndex;
 
-      if (isCompleted || isNext || isCurrent) {
+      if (isCompleted || isNext || isCurrent || isPreviouslyVisited) {
         setCurrentPhaseIndex(index);
       }
     },
-    [completedPhaseIds, currentPhaseIndex, isCurrentPhaseComplete],
+    [completedPhaseIds, currentPhaseIndex, isCurrentPhaseComplete, highestVisitedPhaseIndex],
   );
 
   // ------- Return -------
@@ -398,10 +448,15 @@ export function usePhaseFlow(): PhaseFlowState {
     isFlowComplete,
     isCurrentPhaseComplete,
     flowStartTime,
+    highestVisitedPhaseIndex,
 
     // Draft persistence
     saveDraft,
     loadDraftData,
     dismissDraft,
+
+    // Photos warning
+    showPhotosWarning,
+    setShowPhotosWarning,
   };
 }

@@ -1092,6 +1092,8 @@ function CreateModeSellContent() {
     saveDraft,
     loadDraftData,
     dismissDraft,
+    showPhotosWarning,
+    setShowPhotosWarning,
   } = phaseFlow;
 
   // Per-phase completion booleans for desktop layout
@@ -1475,6 +1477,21 @@ function CreateModeSellContent() {
             </button>
           </div>
         </Card>
+      )}
+
+      {/* Photos warning banner — shown when draft was loaded but photos were stripped */}
+      {showPhotosWarning && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex items-start gap-3">
+          <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-800 flex-1">{tDraft('photosStripped')}</p>
+          <button
+            onClick={() => setShowPhotosWarning(false)}
+            className="p-0.5 hover:bg-amber-100 rounded transition-colors"
+            aria-label="Dismiss"
+          >
+            <Close className="w-4 h-4 text-amber-600" />
+          </button>
+        </div>
       )}
 
       {/* Mobile layout: phase wizard (hidden on md+) */}
