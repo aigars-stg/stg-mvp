@@ -38,6 +38,15 @@ export async function GET(_request: NextRequest) {
     // Onboarding is "completed" if seller has accepted terms and is active
     const onboardingCompleted = termsAccepted && isActive;
 
+    // Count listings created in the last 24 hours (for rate-limit warning banner — EC-15)
+    const dailyLimit = isActive ? 50 : 2;
+    const { count: listingsToday } = await supabase
+      .from('listings')
+      .select('*', { count: 'exact', head: true })
+      .eq('seller_id', user.id)
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .neq('status', 'removed');
+
     const statusData = {
       seller_status: sellerProfile?.seller_status || 'not_started',
       terms_accepted: termsAccepted,
@@ -45,6 +54,8 @@ export async function GET(_request: NextRequest) {
       can_list_items: onboardingCompleted,
       has_phone: hasPhone,
       has_payout_info: !!(sellerProfile?.payout_iban && sellerProfile?.payout_account_holder_name),
+      listings_today: listingsToday ?? 0,
+      daily_limit: dailyLimit,
     };
 
     return NextResponse.json(statusData);

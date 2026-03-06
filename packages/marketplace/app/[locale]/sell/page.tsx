@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Button, Modal, Input, Card } from '@second-turn/design-system';
@@ -166,7 +166,7 @@ function useSharedSellLogic(opts: {
   setIsLoadingListing: (v: boolean) => void;
   setLoadError: (v: string) => void;
   setExpandedSections: React.Dispatch<React.SetStateAction<{ game: boolean; photos: boolean; condition: boolean; pricing: boolean }>>;
-  setSellerCapabilities: (v: { canListItems: boolean; isLoading: boolean }) => void;
+  setSellerCapabilities: (v: { canListItems: boolean; isLoading: boolean; listingsToday: number; dailyLimit: number }) => void;
   hasSetInitialListingType: React.MutableRefObject<boolean>;
   expansionsFetched: boolean;
   user: import('@supabase/supabase-js').User | null;
@@ -385,6 +385,8 @@ function useSharedSellLogic(opts: {
           setSellerCapabilities({
             canListItems,
             isLoading: false,
+            listingsToday: data.listings_today ?? 0,
+            dailyLimit: data.daily_limit ?? 50,
           });
 
           hasSetInitialListingType.current = true;
@@ -392,12 +394,16 @@ function useSharedSellLogic(opts: {
           setSellerCapabilities({
             canListItems: false,
             isLoading: false,
+            listingsToday: 0,
+            dailyLimit: 50,
           });
         }
       } catch {
         setSellerCapabilities({
           canListItems: false,
           isLoading: false,
+          listingsToday: 0,
+          dailyLimit: 50,
         });
       }
     }
@@ -1091,6 +1097,7 @@ function CreateModeSellContent() {
     dismissDraft,
     showPhotosWarning,
     setShowPhotosWarning,
+    sellerCapabilities,
   } = phaseFlow;
 
   // Per-phase completion booleans for desktop layout
@@ -1137,6 +1144,38 @@ function CreateModeSellContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWelcome]);
+
+  // EC-14: Browser back button support for mobile phases
+  const goToPhaseRef = useRef(goToPhase);
+  useEffect(() => { goToPhaseRef.current = goToPhase; }, [goToPhase]);
+
+  useEffect(() => {
+    // Set initial history state on mount so back-navigation can return to phase 0
+    history.replaceState({ sellPhase: 0 }, '');
+
+    const handlePopState = (e: PopStateEvent) => {
+      const target = e.state?.sellPhase;
+      if (typeof target === 'number') {
+        goToPhaseRef.current(target);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only; goToPhase kept current via ref
+  }, []);
+
+  const prevPhaseIndexRef = useRef(currentPhaseIndex);
+  useEffect(() => {
+    if (currentPhaseIndex > prevPhaseIndexRef.current) {
+      // Advancing forward — push a new browser history entry
+      history.pushState({ sellPhase: currentPhaseIndex }, '');
+    } else if (currentPhaseIndex !== prevPhaseIndexRef.current) {
+      // Going back (edit links / goToPhase) — replace to keep stack clean
+      history.replaceState({ sellPhase: currentPhaseIndex }, '');
+    }
+    prevPhaseIndexRef.current = currentPhaseIndex;
+  }, [currentPhaseIndex]);
 
   const shared = useSharedSellLogic({
     isEditMode: false,
@@ -1440,6 +1479,18 @@ function CreateModeSellContent() {
           >
             <Close className="w-4 h-4 text-amber-600" />
           </button>
+        </div>
+      )}
+
+      {/* Rate limit warning banner — shown when approaching daily limit (EC-15) */}
+      {!sellerCapabilities.isLoading && sellerCapabilities.dailyLimit - sellerCapabilities.listingsToday <= 5 && sellerCapabilities.listingsToday > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex items-start gap-3">
+          <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-800">
+            {tValidation('rateLimitWarning', {
+              remaining: sellerCapabilities.dailyLimit - sellerCapabilities.listingsToday,
+            })}
+          </p>
         </div>
       )}
 

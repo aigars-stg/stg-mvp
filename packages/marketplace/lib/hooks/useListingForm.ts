@@ -122,8 +122,10 @@ export interface UseListingFormReturn {
   sellerCapabilities: {
     canListItems: boolean;
     isLoading: boolean;
+    listingsToday: number;
+    dailyLimit: number;
   };
-  setSellerCapabilities: (value: { canListItems: boolean; isLoading: boolean }) => void;
+  setSellerCapabilities: (value: { canListItems: boolean; isLoading: boolean; listingsToday: number; dailyLimit: number }) => void;
 
   // Ref for initial type setting
   hasSetInitialListingType: React.MutableRefObject<boolean>;
@@ -198,6 +200,8 @@ export function useListingForm(): UseListingFormReturn {
   const [sellerCapabilities, setSellerCapabilities] = useState({
     canListItems: false,
     isLoading: true,
+    listingsToday: 0,
+    dailyLimit: 50,
   });
 
   // Ref for initial type setting

@@ -1515,7 +1515,8 @@
       "priceRequired": "Lūdzu, ievadi derīgu cenu",
       "phoneRequired": "Lūdzu, ievadi savu tālruņa numuru, lai iespējotu piegādi Instant Buy sludinājumiem",
       "termsRequired": "Lūdzu, piekrīti noteikumiem un nosacījumiem",
-      "emailVerificationRequired": "Lūdzu, verificē savu e-pasta adresi pirms sludinājuma izveidošanas. Pārbaudi savu iesūtni, lai atrastu verificēšanas saiti."
+      "emailVerificationRequired": "Lūdzu, verificē savu e-pasta adresi pirms sludinājuma izveidošanas. Pārbaudi savu iesūtni, lai atrastu verificēšanas saiti.",
+      "rateLimitWarning": "Šodien tev vēl atliek {remaining, plural, one {# sludinājums} other {# sludinājumi}}."
     },
     "errors": {
       "loadDraftFailed": "Neizdevās ielādēt melnrakstu. Sāc no jauna.",

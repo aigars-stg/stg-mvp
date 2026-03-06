@@ -1521,7 +1521,8 @@
       "priceRequired": "Please enter a valid price",
       "phoneRequired": "Please enter your phone number to enable shipping for Instant Buy listings",
       "termsRequired": "Please accept the terms and conditions",
-      "emailVerificationRequired": "Please verify your email address before creating a listing. Check your inbox for the verification link."
+      "emailVerificationRequired": "Please verify your email address before creating a listing. Check your inbox for the verification link.",
+      "rateLimitWarning": "You have {remaining, plural, one {# listing} other {# listings}} remaining today."
     },
     "errors": {
       "loadDraftFailed": "Failed to load draft. Please start fresh.",
