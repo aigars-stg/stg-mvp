@@ -38,6 +38,7 @@ import { ResearchPhase } from '@/components/sell/phases/ResearchPhase';
 import { MarketPhase } from '@/components/sell/phases/MarketPhase';
 import { ActionPhase } from '@/components/sell/phases/ActionPhase';
 import { ScorePhase } from '@/components/sell/phases/ScorePhase';
+import { DesktopCreateLayout } from '@/components/sell/DesktopCreateLayout';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
@@ -1093,6 +1094,30 @@ function CreateModeSellContent() {
     dismissDraft,
   } = phaseFlow;
 
+  // Per-phase completion booleans for desktop layout
+  const desktopIsResearchComplete = (() => {
+    if (!formData.selectedGame || !formData.selectedVersion) return false;
+    const hasAlternateNames = (formData.selectedGame.alternateNames?.length ?? 0) > 0;
+    let hasEnglish = false;
+    if ((formData.selectedVersion.languages?.length ?? 0) > 0) {
+      hasEnglish = formData.selectedVersion.languages!.includes('English');
+    } else if (formData.selectedVersion.language) {
+      hasEnglish = formData.selectedVersion.language === 'English';
+    }
+    if (hasAlternateNames && !hasEnglish && !formData.selectedGameDisplayName) return false;
+    return true;
+  })();
+  const desktopIsMarketComplete =
+    !!formData.condition &&
+    (formData.condition !== 'acceptable' ||
+      formData.photos.length >= 1 ||
+      existingPhotoUrls.length >= 1);
+  const desktopIsActionComplete =
+    !!formData.price &&
+    parseFloat(formData.price) > 0 &&
+    (formData.pricingFormat !== 'auction' ||
+      (parseFloat(formData.price) >= 1.0 && !!formData.auctionDurationDays));
+
   // Relist / wanted / search params
   const relistListingId = searchParams.get('relist');
   const isRelistMode = !!relistListingId;
@@ -1249,6 +1274,13 @@ function CreateModeSellContent() {
 
       if (!listingResponse.ok) {
         const errorData = await listingResponse.json();
+
+        // EC-13: auth expiry — save draft and redirect to login
+        if (listingResponse.status === 401) {
+          saveDraft();
+          router.push(`/${locale}/auth/login?redirect=/${locale}/sell`);
+          return;
+        }
 
         if (errorData.requiresOnboarding) {
           router.push(errorData.onboardingUrl || '/seller/onboard');
@@ -1445,24 +1477,24 @@ function CreateModeSellContent() {
         </Card>
       )}
 
-      {/* Phase Tracker */}
-      <div className="mb-4">
-        <PhaseTracker
-          phases={LISTING_PHASES}
-          currentPhaseIndex={currentPhaseIndex}
-          completedPhaseIds={completedPhaseIds}
-          flowTitle={tPhases('flowTitle')}
-          onPhaseClick={goToPhase}
-          sparklePhaseId={sparklePhaseId}
-          getPhaseLabel={getPhaseLabel}
-          getStepAriaLabel={getStepAriaLabel}
-        />
-      </div>
+      {/* Mobile layout: phase wizard (hidden on md+) */}
+      <div className="md:hidden">
+        {/* Phase Tracker */}
+        <div className="mb-4">
+          <PhaseTracker
+            phases={LISTING_PHASES}
+            currentPhaseIndex={currentPhaseIndex}
+            completedPhaseIds={completedPhaseIds}
+            flowTitle={tPhases('flowTitle')}
+            onPhaseClick={goToPhase}
+            sparklePhaseId={sparklePhaseId}
+            getPhaseLabel={getPhaseLabel}
+            getStepAriaLabel={getStepAriaLabel}
+          />
+        </div>
 
-      {/* Two-Column Layout: Phase Content + Preview */}
-      <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-        {/* Left Column: Phase Content (8 cols) */}
-        <div className="lg:col-span-8">
+        {/* Phase Content */}
+        <div>
           {currentPhaseIndex === 0 && (
             <ResearchPhase
               formData={formData}
@@ -1526,18 +1558,60 @@ function CreateModeSellContent() {
             />
           )}
         </div>
+      </div>
 
-        {/* Right Column: Live Preview (4 cols, desktop only) */}
-        <div className="hidden lg:block lg:col-span-4">
-          <div className="sticky top-8">
-            <ListingPreviewSidebar
-              formData={formData}
-              user={user}
-              profile={profile}
-              existingPhotoUrls={existingPhotoUrls}
-            />
-          </div>
-        </div>
+      {/* Desktop layout: collapsible sections (hidden below md) */}
+      <div className="hidden md:block">
+        <DesktopCreateLayout
+          researchProps={{
+            formData,
+            setFormData,
+            handleGameSelect: shared.handleGameSelect,
+            handleVersionSelect: shared.handleVersionSelect,
+            handleChangeVersion: shared.handleChangeVersion,
+            handleChangeName: shared.handleChangeName,
+            handleExpansionsChange: shared.handleExpansionsChange,
+            handleEnableExpansions: shared.handleEnableExpansions,
+            handleDisableExpansions: shared.handleDisableExpansions,
+            isLoadingGameDetails,
+            fallbackMode,
+            fallbackReason,
+            versionCount,
+            prefetchedVersions: shared.prefetchedVersions,
+            expansionCount,
+            availableExpansions,
+            isLoadingExpansions,
+            showExpansionSection,
+            existingActiveListings,
+            initialSearchQuery: initialSearchQuery || undefined,
+          }}
+          isResearchComplete={desktopIsResearchComplete}
+          marketProps={{
+            formData,
+            setFormData,
+            hasPhone: shared.hasPhone,
+            sellerPhone: shared.sellerPhone,
+            onPhoneChange: (phone) => shared.setSellerPhone(phone),
+            defaultCountry: (profile?.country && ['LV', 'LT', 'EE'].includes(profile.country) ? profile.country : 'LV') as CountryCode,
+            existingPhotoUrls,
+            setExistingPhotoUrls,
+          }}
+          isMarketComplete={desktopIsMarketComplete}
+          actionProps={{
+            formData,
+            setFormData,
+          }}
+          isActionComplete={desktopIsActionComplete}
+          scoreProps={{
+            formData,
+            setFormData,
+            goToPhase,
+            onPublish: handlePublish,
+            isPublishing,
+            onSaveDraft: handleSaveDraft,
+            existingPhotoUrls,
+          }}
+        />
       </div>
 
       {/* Milestone Toast */}
