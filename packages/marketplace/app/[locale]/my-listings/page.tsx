@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button, Card } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircle, CloseCircle as XCircle, Plus, Search, Heart, Layout as LayoutDashboard, Store } from '@/lib/icons';
 import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
@@ -107,6 +108,9 @@ function MyListingsContent() {
     refetchSavedListings,
   } = useMyListings();
 
+  const searchParams = useSearchParams();
+  const justPublished = searchParams.get('published') === '1';
+
   // Determine auction-specific status display for seller's listing
   const getAuctionStatusDisplay = (listing: Listing): AuctionStatusDisplay | null => {
     if (!isAuctionListing(listing)) return null;
@@ -160,6 +164,12 @@ function MyListingsContent() {
   return (
     <div className="min-h-screen bg-bg py-6 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
+        {/* Publish success banner */}
+        {justPublished && (
+          <div className="bg-aurora-green/10 border border-aurora-green/30 rounded-lg p-4 mb-6 text-sm text-aurora-green font-medium">
+            {t('publishSuccess')}
+          </div>
+        )}
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-6 sm:mb-8">
           <div>

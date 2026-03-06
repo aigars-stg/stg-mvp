@@ -2362,6 +2362,7 @@
     "loading": "Ielādē..."
   },
   "MyListings": {
+    "publishSuccess": "Tavs sludinājums ir publicēts.",
     "title": "Mani sludinājumi",
     "subtitle": "Spēles, ko pārdod, meklē un saglabā",
     "buyerTitle": "Saglabātās un meklētās",

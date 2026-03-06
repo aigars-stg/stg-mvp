@@ -2368,6 +2368,7 @@
     "loading": "Loading..."
   },
   "MyListings": {
+    "publishSuccess": "Your listing is live.",
     "title": "My listings",
     "subtitle": "Games you're selling, seeking, and saving",
     "buyerTitle": "Saved & wanted",

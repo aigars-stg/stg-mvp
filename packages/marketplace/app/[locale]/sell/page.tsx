@@ -1331,9 +1331,9 @@ function CreateModeSellContent() {
         }));
       }
 
-      // Redirect to listing page with published flag
+      // Redirect to my listings with published flag (no listings/[id] page exists)
       setPublishedListingId(listing.id);
-      router.push(`/${locale}/listings/${listing.id}?published=1`);
+      router.push(`/${locale}/my-listings?published=1`);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setErrorModal({
