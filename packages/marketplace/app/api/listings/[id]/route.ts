@@ -35,6 +35,11 @@ interface ListingUpdateFields {
   pickup_city?: string | null;
   status?: string;
   why_selling?: string | null;
+  pricing_format?: string;
+  listing_type?: string;
+  auction_duration_days?: number | null;
+  auction_end_strategy?: string | null;
+  auction_cooldown_hours?: number | null;
 }
 
 export async function GET(
@@ -171,6 +176,13 @@ export async function PATCH(
           { status: 400 }
         );
       }
+      // EC-6: price ceiling
+      if (price > 500) {
+        return NextResponse.json(
+          { error: 'Price cannot exceed €500' },
+          { status: 400 }
+        );
+      }
 
       // Fetch current listing to check for price reduction
       const { data: currentListing } = await supabase
@@ -204,6 +216,48 @@ export async function PATCH(
         );
       }
       updates.minimum_offer = minOffer;
+    }
+
+    // Pricing format + auction fields (EC-3, EC-4)
+    if (body.pricing_format !== undefined) {
+      const validFormats = ['fixed_price', 'auction'];
+      if (!validFormats.includes(body.pricing_format)) {
+        return NextResponse.json(
+          { error: `Invalid pricing_format. Must be one of: ${validFormats.join(', ')}` },
+          { status: 400 }
+        );
+      }
+
+      // EC-4: bid-count guard — fetch current listing to check if format change is allowed
+      const { data: currentListing } = await supabase
+        .from('listings')
+        .select('pricing_format, auction_bid_count')
+        .eq('id', id)
+        .eq('seller_id', user!.id)
+        .single();
+
+      if (currentListing && body.pricing_format !== currentListing.pricing_format) {
+        const bidCount = (currentListing.auction_bid_count as number) ?? 0;
+        if (bidCount > 0) {
+          return NextResponse.json(
+            { error: 'Cannot change pricing format after bids have been placed' },
+            { status: 400 }
+          );
+        }
+      }
+
+      updates.pricing_format = body.pricing_format;
+      updates.listing_type = body.pricing_format;
+    }
+
+    if (body.auction_duration_days !== undefined) {
+      updates.auction_duration_days = body.auction_duration_days ?? null;
+    }
+    if (body.auction_end_strategy !== undefined) {
+      updates.auction_end_strategy = body.auction_end_strategy ?? null;
+    }
+    if (body.auction_cooldown_hours !== undefined) {
+      updates.auction_cooldown_hours = body.auction_cooldown_hours ?? null;
     }
 
     // Photo fields

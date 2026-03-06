@@ -24,6 +24,7 @@ export interface ListingFormData {
   auctionDurationDays: AuctionDuration;
   auctionEndStrategy: AuctionEndStrategy;
   auctionCooldownHours: AuctionCooldownHours;
+  auctionBidCount: number; // Read-only — populated from API in edit mode, 0 for new listings
 }
 
 export const INITIAL_FORM_DATA: ListingFormData = {
@@ -43,6 +44,7 @@ export const INITIAL_FORM_DATA: ListingFormData = {
   auctionDurationDays: 3,
   auctionEndStrategy: 'fixed',
   auctionCooldownHours: 24,
+  auctionBidCount: 0,
 };
 
 export interface UseListingFormReturn {

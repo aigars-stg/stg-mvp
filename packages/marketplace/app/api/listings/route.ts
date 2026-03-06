@@ -150,6 +150,10 @@ export async function POST(request: NextRequest) {
     if (!price || parseFloat(price) <= 0) {
       return NextResponse.json({ error: 'Valid price is required' }, { status: 400 });
     }
+    // EC-6: price ceiling
+    if (parseFloat(price) > 500) {
+      return NextResponse.json({ error: 'Price cannot exceed €500' }, { status: 400 });
+    }
 
     // Auction-specific validation
     if (pricingFormat === 'auction') {

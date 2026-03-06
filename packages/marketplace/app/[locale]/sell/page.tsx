@@ -114,6 +114,7 @@ function mapListingToFormData(
       auctionDurationDays: (listing.auction_duration_days as 1 | 3 | 5 | 7) || 3,
       auctionEndStrategy: (listing.auction_end_strategy as 'fixed' | 'cooldown') || 'fixed',
       auctionCooldownHours: (listing.auction_cooldown_hours as 24 | 48) || 24,
+      auctionBidCount: (listing.auction_bid_count as number) || 0,
     },
     photoUrls: (listing.photo_urls as string[]) || [],
   };
@@ -685,13 +686,23 @@ function EditModeSellContent() {
       const newPhotoUrls = await uploadPhotos(formData.photos);
       const allPhotoUrls = [...existingPhotoUrls, ...newPhotoUrls];
 
-      const updates = {
+      const updates: Record<string, unknown> = {
         photo_urls: allPhotoUrls,
         condition: formData.condition,
         condition_notes: formData.conditionNotes || null,
         all_components_present: formData.allComponentsPresent,
         missing_components: formData.missingComponents || null,
         price: parseFloat(formData.price),
+        // EC-3: include pricing format and auction fields
+        pricing_format: formData.pricingFormat,
+        listing_type: formData.pricingFormat,
+        ...(formData.pricingFormat === 'auction' && {
+          auction_duration_days: formData.auctionDurationDays,
+          auction_end_strategy: formData.auctionEndStrategy,
+          ...(formData.auctionEndStrategy === 'cooldown' && {
+            auction_cooldown_hours: formData.auctionCooldownHours,
+          }),
+        }),
       };
 
       const response = await fetch(`/api/listings/${editListingId}`, {
