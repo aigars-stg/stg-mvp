@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
@@ -20,8 +20,6 @@ import type { Message } from '@/lib/types/message';
 import type {
   OrderDetailOrder,
   OrderDetailItem,
-  OrderTimestamps,
-  OrderPayment,
 } from '@/lib/types/order-detail';
 import { formatDateTime } from '@/lib/date-utils';
 import { formatPrice, formatCentsToCurrency } from '@/lib/services/pricing';
@@ -112,7 +110,7 @@ export default function StaffDisputeDetailPage() {
     }
   }, [user, authLoading, router, orderId]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -141,12 +139,11 @@ export default function StaffDisputeDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (user && orderId) fetchData();
-  }, [user, orderId]);
+  }, [user, orderId, fetchData]);
 
   const handleResolve = async () => {
     if (!resolutionType || resolutionNote.trim().length < 10) return;

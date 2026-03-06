@@ -11,8 +11,6 @@ import {
   getVatRate,
   calculateVatSplit,
   calculateOrderPricingWithVat,
-  VAT_RATES,
-  DEFAULT_VAT_RATE,
 } from './pricing';
 
 describe('calculateBuyerPricing', () => {
