@@ -122,7 +122,7 @@ export function ConditionSelector({
           value={condition || ''}
           onValueChange={(v) => onChange('condition', v)}
         >
-          <TabsList>
+          <TabsList className="grid grid-cols-2 sm:inline-flex w-full sm:w-auto">
             {CONDITION_OPTIONS.map((option) => {
               const Icon = option.icon;
               return (

@@ -362,13 +362,13 @@ export function PricingAssistant({
         {/* Suggested Price */}
         {suggestedPrice && condition && (
           <div className="pt-3 mt-3 border-t border-frost-ice/20">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-sm font-medium text-frost-ice">
                 {pricingFormat === 'auction'
                   ? t('suggestedStartingBid')
                   : t('suggestedFor', { condition: formatCondition(condition) })}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <span className="font-bold text-frost-ice text-lg tabular-nums">
                   {formatPrice(suggestedPrice)}
                 </span>

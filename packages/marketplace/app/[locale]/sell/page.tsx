@@ -1622,16 +1622,12 @@ function CreateModeSellContent() {
             setFormData,
           }}
           isActionComplete={desktopIsActionComplete}
-          scoreProps={{
-            formData,
-            setFormData,
-            goToPhase,
-            onPublish: handlePublish,
-            isPublishing,
-            canSubmit,
-            onSaveDraft: handleSaveDraft,
-            existingPhotoUrls,
-          }}
+          user={user}
+          profile={profile}
+          onPublish={handlePublish}
+          isPublishing={isPublishing}
+          canSubmit={canSubmit}
+          onSaveDraft={handleSaveDraft}
         />
       </div>
 

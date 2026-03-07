@@ -20,7 +20,8 @@ export function FeedbackButton() {
   const shouldHide =
     pathname.includes('/checkout') ||
     pathname.includes('/admin') ||
-    pathname.includes('/staff');
+    pathname.includes('/staff') ||
+    pathname.includes('/sell');
 
   if (shouldHide) {
     return null;
