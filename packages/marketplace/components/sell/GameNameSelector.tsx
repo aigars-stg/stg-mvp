@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Badge } from '@second-turn/design-system';
 import { useTranslations } from 'next-intl';
 import type { VersionSelection } from '@/lib/bgg-types';
-import { RefreshCw, InfoCircle as Info, ChevronDown } from '@/lib/icons';
+import { RefreshCw, ChevronDown } from '@/lib/icons';
 
 interface GameNameSelectorProps {
   primaryName: string;
@@ -170,60 +169,62 @@ export function GameNameSelector({
   ];
 
   return (
-    <div className="space-y-3">
-      <div className="bg-frost-ice/5 border border-frost-ice/20 rounded-lg p-3 flex items-start gap-2">
-        <Info className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
-        <p className="text-sm text-text-secondary">
-          {t('hint')}
-        </p>
+    <div className="space-y-2">
+      <div>
+        <p className="text-sm font-medium text-polar-night">{t('question')}</p>
+        <p className="text-xs text-text-muted mt-0.5">{t('hintCompact')}</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="space-y-2">
         {nameOptions.map((option) => (
-          <Badge
+          <button
             key={option.value}
-            variant={selectedName === option.value ? 'trust' : 'default'}
-            className="cursor-pointer transition-all hover:scale-105"
             onClick={() => onChange(option.value)}
+            className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors ${
+              selectedName === option.value
+                ? 'border-frost-ice bg-frost-ice/5 text-polar-night'
+                : 'border-border bg-snow-white text-text-secondary hover:border-frost-ice/50 hover:bg-frost-ice/5'
+            }`}
           >
-            {option.label}
-            {option.isPrimary && (
-              <span className="ml-1 text-xs opacity-70">({t('primary')})</span>
-            )}
-          </Badge>
+            <span className="text-sm leading-snug">
+              {option.label}
+              {option.isPrimary && (
+                <span className="ml-1.5 text-xs text-text-muted">({t('primary')})</span>
+              )}
+            </span>
+          </button>
         ))}
 
-        {/* "Other" toggle button for non-Latin names */}
+        {/* "Other scripts" toggle */}
         {nonLatinNames.length > 0 && (
-          <Badge
-            variant={showOtherNames ? 'trust' : 'default'}
-            className="cursor-pointer transition-all hover:scale-105 flex items-center gap-1"
+          <button
             onClick={() => setShowOtherNames(!showOtherNames)}
+            className="w-full text-left px-3 py-2.5 rounded-lg border border-border bg-snow-white text-text-muted hover:border-frost-ice/50 hover:bg-frost-ice/5 transition-colors flex items-center justify-between"
           >
-            {t('other')}
-            <ChevronDown className={`w-3 h-3 transition-transform ${showOtherNames ? 'rotate-180' : ''}`} />
-          </Badge>
+            <span className="text-sm">{t('other')}</span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showOtherNames ? 'rotate-180' : ''}`} />
+          </button>
         )}
-      </div>
 
-      {/* Show non-Latin names when "Other" is expanded */}
-      {nonLatinNames.length > 0 && showOtherNames && (
-        <div className="p-4 bg-bg-elevated border-2 border-border rounded-lg space-y-2 animate-in slide-in-from-top-2 duration-300">
-          <p className="text-sm font-medium text-polar-night">{t('otherScripts')}</p>
-          <div className="flex flex-wrap gap-2">
+        {/* Non-Latin name rows */}
+        {nonLatinNames.length > 0 && showOtherNames && (
+          <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
             {nonLatinNames.map((name) => (
-              <Badge
+              <button
                 key={name}
-                variant={selectedName === name ? 'trust' : 'default'}
-                className="cursor-pointer transition-all hover:scale-105"
                 onClick={() => onChange(name)}
+                className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors ${
+                  selectedName === name
+                    ? 'border-frost-ice bg-frost-ice/5 text-polar-night'
+                    : 'border-border bg-snow-white text-text-secondary hover:border-frost-ice/50 hover:bg-frost-ice/5'
+                }`}
               >
-                {name}
-              </Badge>
+                <span className="text-sm leading-snug">{name}</span>
+              </button>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

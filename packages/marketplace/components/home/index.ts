@@ -1,4 +1,3 @@
-export { HeroSection } from './HeroSection';
 export { CompactHero } from './CompactHero';
 export { HomepageBrowse } from './HomepageBrowse';
 export { StatsCounter } from './StatsCounter';

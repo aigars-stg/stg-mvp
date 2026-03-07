@@ -109,11 +109,12 @@ export function DesktopCreateLayout({
   return (
     <div className="grid lg:grid-cols-12 gap-6 items-start">
       {/* Left column: sections + bottom bar */}
-      <div className="lg:col-span-8 space-y-4">
+      <div className="lg:col-span-8 space-y-5">
         {/* Research Section — always enabled */}
         <CollapsibleSection
           title={tSections('research.title')}
-          icon={<Search className="w-5 h-5 text-frost-ice" />}
+          icon={<Search className="w-5 h-5" />}
+          stepNumber={1}
           isExpanded={openSections.has(SECTIONS.RESEARCH)}
           onToggle={() => toggleSection(SECTIONS.RESEARCH, true)}
           isComplete={isResearchComplete}
@@ -128,7 +129,8 @@ export function DesktopCreateLayout({
         <CollapsibleSection
           title={tSections('condition.title')}
           subtitle={!isResearchComplete ? tCommon('completeResearchFirst') : undefined}
-          icon={<PhotoCamera className="w-5 h-5 text-frost-ice" />}
+          icon={<PhotoCamera className="w-5 h-5" />}
+          stepNumber={2}
           isExpanded={openSections.has(SECTIONS.CONDITION)}
           onToggle={() => toggleSection(SECTIONS.CONDITION, isResearchComplete)}
           isComplete={isMarketComplete}
@@ -141,7 +143,8 @@ export function DesktopCreateLayout({
         <CollapsibleSection
           title={tSections('pricing.title')}
           subtitle={!marketProps.formData.condition ? tCommon('selectConditionFirst') : undefined}
-          icon={<Euro className="w-5 h-5 text-frost-ice" />}
+          icon={<Euro className="w-5 h-5" />}
+          stepNumber={3}
           isExpanded={openSections.has(SECTIONS.PRICING)}
           onToggle={() =>
             toggleSection(SECTIONS.PRICING, !!marketProps.formData.condition)
@@ -153,7 +156,7 @@ export function DesktopCreateLayout({
         </CollapsibleSection>
 
         {/* Bottom bar: terms + publish */}
-        <div className="border border-border rounded-xl bg-snow-white p-4 sm:p-6 space-y-4">
+        <div className="border border-border rounded-lg bg-snow-white p-5 sm:p-6 shadow-sm space-y-4">
           <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
@@ -175,7 +178,7 @@ export function DesktopCreateLayout({
             </div>
           </label>
 
-          <div className="flex gap-3">
+          <div className="border-t border-border-subtle pt-4 flex gap-3">
             <Button
               variant="primary"
               size="lg"
@@ -199,7 +202,7 @@ export function DesktopCreateLayout({
 
       {/* Right column: live preview sidebar */}
       <div className="lg:col-span-4">
-        <div className="sticky top-8">
+        <div className="sticky top-6">
           <ListingPreviewSidebar
             formData={marketProps.formData}
             user={user}

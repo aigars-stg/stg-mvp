@@ -7,7 +7,8 @@ import { useTranslations } from 'next-intl';
 interface CollapsibleSectionProps {
   title: string;
   icon: ReactNode;
-  isComplete?: boolean; // Optional - if not provided, won't show Complete badge
+  stepNumber?: number;
+  isComplete?: boolean;
   isExpanded: boolean;
   onToggle: () => void;
   children: ReactNode;
@@ -16,9 +17,26 @@ interface CollapsibleSectionProps {
   disabled?: boolean;
 }
 
+function getCardClassName(isExpanded: boolean, isComplete: boolean | undefined, disabled: boolean) {
+  const base = 'overflow-hidden transition-all';
+  if (disabled) return `${base} border border-border-subtle shadow-none opacity-60`;
+  if (isExpanded && !isComplete) return `${base} border border-frost-ice/40 shadow-md`;
+  if (isComplete) return `${base} border border-aurora-green/30 shadow-sm`;
+  return `${base} border border-border-subtle shadow-sm`;
+}
+
+function getIconBgClassName(isExpanded: boolean, isComplete: boolean | undefined, disabled: boolean) {
+  const base = 'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0';
+  if (disabled) return `${base} bg-bg-secondary text-text-muted`;
+  if (isComplete) return `${base} bg-aurora-green/15 text-aurora-green`;
+  if (isExpanded) return `${base} bg-frost-ice/15 text-frost-ice ring-1 ring-frost-ice/30`;
+  return `${base} bg-bg-secondary text-frost-ice`;
+}
+
 export function CollapsibleSection({
   title,
   icon,
+  stepNumber,
   isComplete,
   isExpanded,
   onToggle,
@@ -36,8 +54,15 @@ export function CollapsibleSection({
     }
   }, [isComplete, isExpanded]);
 
+  const showAccent = isExpanded && !isComplete && !disabled;
+
   return (
-    <Card padding="none" className="overflow-hidden transition-all border-2 border-border">
+    <Card padding="none" className={getCardClassName(isExpanded, isComplete, disabled)}>
+      {/* Active section accent bar */}
+      {showAccent && (
+        <div className="h-0.5 bg-frost-ice/40" />
+      )}
+
       {/* Section Header - Always visible, clickable */}
       <button
         type="button"
@@ -45,12 +70,22 @@ export function CollapsibleSection({
         disabled={disabled}
         className={`w-full px-4 sm:px-6 py-3 flex items-center justify-between transition-colors text-left ${
           disabled
-            ? 'opacity-50 cursor-not-allowed'
+            ? 'cursor-not-allowed'
             : 'hover:bg-bg-secondary/50 cursor-pointer'
         }`}
       >
         <div className="flex items-center gap-3 flex-1">
-          <div className="flex-shrink-0">{icon}</div>
+          <div className={getIconBgClassName(isExpanded, isComplete, disabled)}>
+            {isComplete ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            ) : stepNumber ? (
+              <span className="text-sm font-bold">{stepNumber}</span>
+            ) : (
+              icon
+            )}
+          </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h2 className="text-lg sm:text-xl font-bold text-text">
@@ -58,8 +93,8 @@ export function CollapsibleSection({
                 {required && <span className="text-aurora-red ml-1">*</span>}
               </h2>
               {isComplete && (
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-frost-ice">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <span className="inline-flex items-center gap-1 bg-aurora-green/10 text-aurora-green text-xs font-medium px-2 py-0.5 rounded-full">
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   {tCommon('complete')}

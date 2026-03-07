@@ -1423,9 +1423,11 @@
         "expansionCount": "{count, plural, one {papildinājums} other {papildinājumi}}"
       },
       "gameNameSelector": {
+        "question": "Kāds nosaukums ir uz kastes?",
+        "hintCompact": "Palīdz vietējiem pircējiem atrast tavu sludinājumu",
         "hint": "Izvēlies nosaukumu, kas redzams uz spēles kastes",
         "primary": "Pamata",
-        "other": "Citi",
+        "other": "Citi raksti",
         "otherScripts": "Izvēlies no citiem nosaukumiem:",
         "changeName": "Mainīt nosaukumu"
       },
@@ -1499,7 +1501,10 @@
       "allComponents": "Visas sastāvdaļas klāt",
       "missingComponents": "Dažas sastāvdaļas trūkst",
       "auction": "Izsole",
-      "fixedPrice": "Fiksēta cena"
+      "fixedPrice": "Fiksēta cena",
+      "emptyPhotos": "Pievienojiet fotoattēlus priekšskatījumam",
+      "emptyPrice": "Iestatiet cenu 3. solī",
+      "emptyCondition": "Izvēlieties stāvokli 2. solī"
     },
     "successModal": {
       "title": "Sludinājums publicēts",
@@ -1660,7 +1665,7 @@
       },
       "selectLanguage": "Izvēlies valodu",
       "required": "*",
-      "otherLanguages": "Citas valodas ({count})",
+      "otherLanguages": "Citas ({count})",
       "showLess": "Rādīt mazāk",
       "languagesAvailable": "{count} valoda pieejama",
       "languagesAvailable_other": "{count} valodas pieejamas",

@@ -251,16 +251,16 @@ export function LanguageVersionSelector({
     <div className="space-y-4">
       {/* Language Selection */}
       <div>
-        <label className="block text-sm font-medium text-text mb-3">
-          {t('selectLanguage')} <span className="text-error">{t('required')}</span>
-        </label>
+        <p className="text-sm font-medium text-polar-night mb-3">
+          {t('selectLanguage')}
+        </p>
         <div className="flex flex-wrap gap-2">
           {/* Primary languages (Baltic region priority) */}
           {primaryLanguages.map((language) => (
             <Badge
               key={language}
               variant={selectedLanguage === language ? 'trust' : 'default'}
-              className="cursor-pointer transition-all hover:scale-105"
+              className="cursor-pointer transition-all hover:scale-105 !rounded-lg"
               onClick={() => handleLanguageChange(language)}
             >
               {language}
@@ -269,13 +269,12 @@ export function LanguageVersionSelector({
 
           {/* Other languages button (if any exist) */}
           {otherLanguages.length > 0 && !showOtherLanguages && (
-            <Badge
-              variant="default"
-              className="cursor-pointer transition-all hover:scale-105"
+            <button
+              className="px-3 py-1 text-sm text-text-muted border border-dashed border-border rounded-lg hover:border-frost-ice/50 hover:text-frost-ice transition-colors"
               onClick={() => setShowOtherLanguages(true)}
             >
               {t('otherLanguages', { count: otherLanguages.length })}
-            </Badge>
+            </button>
           )}
 
           {/* Other languages (expanded) */}
@@ -283,7 +282,7 @@ export function LanguageVersionSelector({
             <Badge
               key={language}
               variant={selectedLanguage === language ? 'trust' : 'default'}
-              className="cursor-pointer transition-all hover:scale-105"
+              className="cursor-pointer transition-all hover:scale-105 !rounded-lg"
               onClick={() => handleLanguageChange(language)}
             >
               {language}
@@ -292,41 +291,37 @@ export function LanguageVersionSelector({
 
           {/* Hide other languages button */}
           {showOtherLanguages && otherLanguages.length > 0 && (
-            <Badge
-              variant="default"
-              className="cursor-pointer transition-all hover:scale-105"
+            <button
+              className="px-3 py-1 text-sm text-text-muted border border-dashed border-border rounded-lg hover:border-frost-ice/50 hover:text-frost-ice transition-colors"
               onClick={() => setShowOtherLanguages(false)}
             >
               {t('showLess')}
-            </Badge>
+            </button>
           )}
         </div>
-        <p className="mt-3 text-xs text-text-muted">
-          {t(primaryLanguages.length + otherLanguages.length === 1 ? 'languagesAvailable' : 'languagesAvailable_other', { count: primaryLanguages.length + otherLanguages.length })}
-        </p>
       </div>
 
       {/* Version Selection - appears when language is selected */}
       {selectedLanguage && filteredVersions.length >= 1 && (
         <div className="space-y-3 animate-fade-in">
-          <div>
-            <label className="block text-sm font-medium text-text mb-2">
-              {t('selectVersion')} <span className="text-error">{t('required')}</span>
-            </label>
-            <p className="text-xs text-text-muted mb-3">
+          <div className="mb-3">
+            <p className="text-sm font-medium text-polar-night">
+              {t('selectVersion')}
+            </p>
+            <p className="text-xs text-text-muted mt-0.5">
               {t('versionsAvailable', { count: filteredVersions.length, language: selectedLanguage })}
             </p>
           </div>
 
-          <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+          <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
             {filteredVersions.map((version) => (
               <Card
                 key={version.id}
                 padding="none"
                 className={`cursor-pointer transition-all duration-200 overflow-hidden ${
                   selectedVersion?.id === version.id
-                    ? 'border-2 border-primary bg-frost-1/10'
-                    : 'border border-border hover:border-primary hover:shadow-md'
+                    ? 'border-frost-ice bg-frost-ice/5'
+                    : 'border border-border hover:border-frost-ice hover:shadow-md'
                 }`}
                 onClick={() => onSelect(version)}
               >

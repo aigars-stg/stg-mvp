@@ -1427,9 +1427,11 @@
         "expansionCount": "{count, plural, one {expansion} other {expansions}}"
       },
       "gameNameSelector": {
+        "question": "Which name is on your box?",
+        "hintCompact": "Helps local buyers find your listing",
         "hint": "Choose the localized name that matches your physical box for better discoverability",
         "primary": "Primary",
-        "other": "Other",
+        "other": "Other scripts",
         "otherScripts": "Select from other scripts:",
         "changeName": "Change Name"
       },
@@ -1505,7 +1507,10 @@
       "instantBuy": "Instant Buy",
       "contactSeller": "Contact Seller",
       "auction": "Auction",
-      "fixedPrice": "Fixed Price"
+      "fixedPrice": "Fixed Price",
+      "emptyPhotos": "Add photos to preview",
+      "emptyPrice": "Set your price in step 3",
+      "emptyCondition": "Select condition in step 2"
     },
     "successModal": {
       "title": "Listing published",
@@ -1666,7 +1671,7 @@
       },
       "selectLanguage": "Select Language",
       "required": "*",
-      "otherLanguages": "Other languages ({count})",
+      "otherLanguages": "Other ({count})",
       "showLess": "Show less",
       "languagesAvailable": "{count} language available",
       "languagesAvailable_other": "{count} languages available",

@@ -63,13 +63,33 @@ export function ListingPreviewSidebar({
 
   const hasGame = !!formData.selectedGame;
 
+  // Completion milestones for progress indicator
+  const hasConditionAndPhoto =
+    !!formData.condition && (allPhotoUrls.length > 0 || existingPhotoUrls.length > 0);
+  const completedSteps = [hasGame, hasConditionAndPhoto, hasValidPrice].filter(
+    Boolean,
+  ).length;
+  const hasAnyData = hasGame || !!formData.condition || hasValidPrice;
+
   return (
-    <div className="bg-snow-white border-2 border-border rounded-xl overflow-hidden">
+    <div className="bg-snow-white border border-border-subtle shadow-md rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-border-subtle">
-        <h3 className="text-sm font-semibold text-polar-night">
-          {t('title')}
-        </h3>
+      <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-border-subtle bg-bg-secondary/50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span
+              className={`w-2 h-2 rounded-full ${
+                hasAnyData ? 'bg-aurora-green animate-pulse' : 'bg-text-muted'
+              }`}
+            />
+            <h3 className="text-sm font-semibold text-polar-night">
+              {t('title')}
+            </h3>
+          </div>
+          <span className="text-xs text-text-muted">
+            {completedSteps}/3
+          </span>
+        </div>
       </div>
 
       {!hasGame ? (
@@ -77,6 +97,7 @@ export function ListingPreviewSidebar({
         <div className="p-8 text-center">
           <Package className="w-12 h-12 text-text-muted mx-auto mb-3" />
           <p className="text-sm text-text-muted">{t('selectGame')}</p>
+          <p className="text-xs text-text-muted mt-1">{t('emptyPhotos')}</p>
         </div>
       ) : (
         <>
@@ -94,6 +115,14 @@ export function ListingPreviewSidebar({
             ) : (
               <div className="flex items-center justify-center h-full">
                 <Package className="w-12 h-12 text-text-muted" />
+              </div>
+            )}
+            {/* Condition badge overlay */}
+            {formData.condition && (
+              <div className="absolute top-2 right-2">
+                <Badge variant={getConditionBadgeVariant(formData.condition)} size="sm">
+                  {conditionLabels[formData.condition]}
+                </Badge>
               </div>
             )}
             {/* Photo count badge */}
@@ -212,17 +241,17 @@ export function ListingPreviewSidebar({
                     -{formatPrice(price! * SELLER_COMMISSION_RATE)}
                   </span>
                 </div>
-                <div className="flex justify-between pt-1.5 mt-1.5 border-t border-border-subtle">
+                <div className="flex justify-between items-center pt-1.5 mt-1.5 border-t border-border-subtle bg-aurora-green/5 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2 rounded-b-lg">
                   <span className="text-sm font-semibold text-polar-night">
                     {t('pricingBreakdown.youReceive')}
                   </span>
-                  <span className="text-base font-bold text-aurora-green">
+                  <span className="text-lg font-bold text-aurora-green">
                     {formatPrice(price! * (1 - SELLER_COMMISSION_RATE))}
                   </span>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-text-muted italic">—</p>
+              <p className="text-sm text-text-muted">{t('emptyPrice')}</p>
             )}
           </div>
 

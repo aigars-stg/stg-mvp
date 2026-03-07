@@ -148,10 +148,10 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
           isLoading={false}
           hasError={false}
         />
-        <div className="flex-1 flex flex-col justify-center min-w-0">
+        <div className="flex-1 flex flex-col justify-center min-w-0 min-h-0">
           {/* Name + year + BGG link */}
-          <div className="flex items-center gap-1.5">
-            <h3 className="font-semibold text-polar-night leading-tight">
+          <div className="flex items-start gap-1.5">
+            <h3 className="font-semibold text-polar-night leading-tight line-clamp-2 min-w-0">
               {displayName}
               {displayYear && (
                 <span className="text-text-muted font-normal"> ({displayYear})</span>
@@ -183,10 +183,10 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
             </p>
           )}
 
-          {/* Inline change links (matching expansion card pattern) */}
-          {selectedVersion && (onChangeVersion || onChangeName) && (
-            <div className="flex items-center gap-2 text-xs mt-1 flex-wrap">
-              {onChangeVersion && (
+          {/* Inline change links */}
+          <div className="flex items-center gap-2 text-xs mt-1 flex-wrap">
+            {selectedVersion && onChangeVersion && (
+              <>
                 <button
                   onClick={onChangeVersion}
                   className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 transition-colors"
@@ -194,11 +194,11 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
                   <RefreshCw className="w-3 h-3" />
                   {t('changeVersion')}
                 </button>
-              )}
-              {onChangeVersion && onChangeName && (
                 <span className="text-border">&middot;</span>
-              )}
-              {onChangeName && (
+              </>
+            )}
+            {selectedVersion && onChangeName && (
+              <>
                 <button
                   onClick={onChangeName}
                   className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 transition-colors"
@@ -206,24 +206,23 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
                   <RefreshCw className="w-3 h-3" />
                   {t('changeName')}
                 </button>
-              )}
-            </div>
-          )}
+                <span className="text-border">&middot;</span>
+              </>
+            )}
+            <button
+              onClick={() => {
+                onSelect(null);
+                setSearchQuery('');
+                setSearchResults([]);
+                setHasSearched(false);
+              }}
+              className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 transition-colors"
+            >
+              <Search className="w-3 h-3" />
+              {t('changeGame')}
+            </button>
+          </div>
         </div>
-
-        {/* X button to change game */}
-        <button
-          onClick={() => {
-            onSelect(null);
-            setSearchQuery('');
-            setSearchResults([]);
-            setHasSearched(false);
-          }}
-          className="absolute top-2 right-2 p-1.5 bg-white hover:bg-aurora-red/10 rounded-full border border-border hover:border-aurora-red transition-all shadow-sm group"
-          title={t('changeGame')}
-        >
-          <Close className="w-4 h-4 text-text-muted group-hover:text-aurora-red transition-colors" />
-        </button>
       </div>
     );
   }
@@ -239,8 +238,8 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
     <div className="space-y-3">
       {/* Header */}
       <div>
-        <h3 className="text-sm font-semibold text-polar-night">{t('findYourGame')}</h3>
-        <p className="text-xs text-text-secondary mt-0.5">{t('findYourGameSubtitle')}</p>
+        <p className="text-sm font-medium text-polar-night">{t('findYourGame')}</p>
+        <p className="text-xs text-text-muted mt-0.5">{t('findYourGameSubtitle')}</p>
       </div>
 
       {/* Search Input */}

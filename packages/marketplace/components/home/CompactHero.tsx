@@ -40,9 +40,10 @@ interface MiniActionCardProps {
   buttonText: string;
   color: ColorVariant;
   disabled?: boolean;
+  primary?: boolean;
 }
 
-function MiniActionCard({ href, icon, title, description, buttonText, color, disabled }: MiniActionCardProps) {
+function MiniActionCard({ href, icon, title, description, buttonText, color, disabled, primary }: MiniActionCardProps) {
   const styles = colorStyles[color];
 
   const content = (
@@ -50,7 +51,7 @@ function MiniActionCard({ href, icon, title, description, buttonText, color, dis
       className={`relative h-full p-4 sm:p-5 rounded-xl border transition-all duration-200 bg-snow-white ${
         disabled
           ? 'border-border opacity-75 cursor-default'
-          : `border-border ${styles.border} hover:shadow-md cursor-pointer group`
+          : `${primary ? 'border-frost-ice/30 shadow-sm' : 'border-border'} ${styles.border} hover:shadow-md cursor-pointer group`
       }`}
     >
       <div className="flex items-center gap-3 mb-3">
@@ -106,33 +107,38 @@ export function CompactHero() {
           src="/images/hero-background.webp"
           alt=""
           fill
-          className="object-cover opacity-15"
+          className="object-cover opacity-65"
+          priority
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMCwsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAcI/8QAIhAAAQQBBAMBAAAAAAAAAAAAAQIDBBEABQYSIRMxQVH/xAAVAQEBAAAAAAAAAAAAAAAAAAADBf/EABoRAAICAwAAAAAAAAAAAAAAAAECAAMREiH/2gAMAwEAAhEDEEAAggbE7eDubIamwJkiQ4srUpLqgAAAPwAVdAn+xjGaZ1VKlT//2Q=="
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-frost-ice/5 via-bg/90 to-bg" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
-        <div className="text-center mb-5">
-          {isComingSoon && (
-            <div className="flex justify-center mb-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-frost-ice/10 border border-frost-ice/20 px-3 py-1 text-xs font-medium text-frost-700">
-                <span className="w-1.5 h-1.5 rounded-full bg-frost-ice animate-pulse" />
-                {t('comingSoonBadge')}
-              </span>
-            </div>
-          )}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-polar-night mb-2 tracking-tight">
-            <span className="text-frost-ice">{t('discover')}</span>{' '}
-            <span className="text-frost-polar">{t('list')}</span>{' '}
-            <span className="text-aurora-orange">{t('play')}</span>
-          </h1>
-          <p className="text-base sm:text-lg text-text-secondary max-w-2xl mx-auto">
-            {t('tagline')}
-          </p>
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8 lg:py-20">
+        <div className="flex justify-center mb-5">
+          <div className="text-center bg-snow-white/60 backdrop-blur-md rounded-lg border border-snow-white/40 px-6 py-5 sm:px-10 sm:py-6 max-w-2xl">
+            {isComingSoon && (
+              <div className="flex justify-center mb-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-frost-ice/10 border border-frost-ice/20 px-3 py-1 text-xs font-medium text-frost-700">
+                  <span className="w-1.5 h-1.5 rounded-full bg-frost-ice animate-pulse" />
+                  {t('comingSoonBadge')}
+                </span>
+              </div>
+            )}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-polar-night mb-2 tracking-tight">
+              <span className="text-frost-ice">{t('discover')}</span>{' '}
+              <span className="text-frost-polar">{t('list')}</span>{' '}
+              <span className="text-aurora-orange">{t('play')}</span>
+            </h1>
+            <p className="text-base sm:text-lg text-text-secondary">
+              {t('tagline')}
+              <br />
+              {t('subtitle')}
+            </p>
+          </div>
         </div>
 
         {isComingSoon && (
@@ -156,6 +162,7 @@ export function CompactHero() {
             buttonText={isComingSoon ? t('comingSoonButton') : t('browseCard.button')}
             color="frost-ice"
             disabled={isComingSoon}
+            primary={!isComingSoon}
           />
           <MiniActionCard
             href="/sell"

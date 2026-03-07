@@ -119,7 +119,7 @@ export function GameResultCard({
           matchedAlternateName, // Preserve for auto-selection of display name
         })
       }
-      className="w-full text-left p-3 rounded-lg border-2 border-border hover:border-frost-ice hover:bg-frost-ice/5 transition-all flex gap-3"
+      className="w-full text-left p-3 rounded-lg border border-border hover:border-frost-ice hover:bg-frost-ice/5 transition-all flex gap-3"
     >
       {/* Thumbnail with Color Backdrop */}
       <GameImageWithBackdrop

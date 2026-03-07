@@ -205,9 +205,6 @@ export default async function LocaleLayout({ children, params }: Props) {
                     <br />
                     {tFooter('tagline.line2')}
                   </p>
-                  <div className="mt-4 max-w-sm">
-                    <NewsletterSignup />
-                  </div>
                 </div>
                 <div>
                   <h4 className="font-medium text-polar-night mb-2 sm:mb-3">{tFooter('sections.marketplace')}</h4>
@@ -226,13 +223,17 @@ export default async function LocaleLayout({ children, params }: Props) {
                 </div>
               </div>
 
-              {/* Partners & Data */}
-              <div className="mt-6 sm:mt-8 pt-4 border-t border-border-subtle">
-                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
-                  <p className="text-xs text-text-muted shrink-0">
-                    {tFooter('sections.partners')}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-6">
+              {/* Newsletter & Partners */}
+              <div className="mt-4 sm:mt-6 pt-3 border-t border-border-subtle">
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                  <div className="max-w-md">
+                    <NewsletterSignup />
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">
+                    <p className="text-xs text-text-muted shrink-0">
+                      {tFooter('sections.partners')}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-6">
                     <a
                       href="https://boardgamegeek.com"
                       target="_blank"
@@ -278,12 +279,13 @@ export default async function LocaleLayout({ children, params }: Props) {
                         height={12}
                       />
                     </a>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* EveryPay/Swedbank compliance strip */}
-              <div className="mt-6 sm:mt-8 pt-4 border-t border-border-subtle">
+              <div className="mt-4 sm:mt-6 pt-3 border-t border-border-subtle">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-muted">
                   <p>{tFooter('copyright', { year: currentYear })}</p>
                   <div className="flex items-center gap-3">
