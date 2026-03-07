@@ -1,14 +1,16 @@
 {
+  "id": "/",
   "name": "Second Turn Games",
   "short_name": "Second Turn",
   "description": "Every game deserves a second turn. The Baltic marketplace for pre-loved board games.",
-  "start_url": "/",
+  "start_url": "/?utm_source=pwa&utm_medium=homescreen",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ECEFF4",
   "theme_color": "#D08770",
   "orientation": "portrait-primary",
   "categories": ["shopping", "lifestyle"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -67,15 +69,15 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/mobile-browse.png",
+      "src": "/screenshots/pwa-narrow.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Browse board games for sale"
     },
     {
-      "src": "/screenshots/desktop-browse.png",
-      "sizes": "1920x1080",
+      "src": "/screenshots/pwa-wide.png",
+      "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Browse games on desktop"
