@@ -1396,10 +1396,10 @@
       "photosStripped": "Fotoattēli netiek saglabāti melnrakstos. Lūdzu augšupielādē fotoattēlus vēlreiz."
     },
     "existingListings": {
-      "warningTitle_one": "Tev jau ir aktīvs sludinājums šai spēlei",
+      "warningTitle_one": "Tev ir aktīvs sludinājums šai spēlei",
       "warningTitle_other": "Tev jau ir {count} aktīvi sludinājumi šai spēlei",
-      "warningSubtitle_one": "Tu joprojām vari izveidot jaunu sludinājumu, bet varbūt vēlies vispirms pārskatīt esošo.",
-      "warningSubtitle_other": "Tu joprojām vari izveidot jaunu sludinājumu, bet varbūt vēlies vispirms pārskatīt esošos."
+      "warningSubtitle_one": "Tu joprojām vari publicēt vēlreiz. Pārskatīt esošo sludinājumu:",
+      "warningSubtitle_other": "Tu joprojām vari publicēt vēlreiz. Pārskatīt esošos sludinājumus:"
     },
     "editMode": {
       "lockedInfo": "Spēles un izdevuma detaļas nevar mainīt. Ja nepieciešams mainīt spēli, izdzēs šo sludinājumu un izveido jaunu.",
@@ -1424,21 +1424,14 @@
       },
       "gameNameSelector": {
         "question": "Kāds nosaukums ir uz kastes?",
-        "hintCompact": "Palīdz vietējiem pircējiem atrast tavu sludinājumu",
-        "hint": "Izvēlies nosaukumu, kas redzams uz spēles kastes",
-        "primary": "Pamata",
-        "other": "Citi raksti",
+        "other": "Citi ({count})",
         "otherScripts": "Izvēlies no citiem nosaukumiem:",
         "changeName": "Mainīt nosaukumu"
       },
       "expansions": {
-        "title": "Iekļaut papildinājumus",
-        "subtitle": "Pievieno papildinājumus šai spēlei (izvēles)",
-        "subtitleWithCount_one": "{count} papildinājums iekļauts",
-        "subtitleWithCount_other": "{count} papildinājumi iekļauti",
+        "title": "Papildinājumi",
         "toggleTitle": "Iekļaut papildinājumus?",
-        "toggleSubtitle": "Pievieno papildinājumus šim sludinājumam (izvēles)",
-        "addButton": "Pievienot +",
+        "addButton": "+",
         "cancelButton": "Atcelt"
       },
       "condition": {
@@ -1538,16 +1531,17 @@
       "changeGame": "Mainīt spēli",
       "changeVersion": "Mainīt versiju",
       "changeName": "Mainīt nosaukumu",
-      "placeholder": "piem., Wingspan, Catan, Icecool",
+      "placeholder": "Wingspan, Catan, Icecool...",
       "clearSearch": "Notīrīt meklēšanu",
-      "searching": "Meklē spēles...",
-      "resultsFound": "Atrasta {count} spēle - izvēlies savu:",
-      "resultsFound_other": "Atrastas {count} spēles - izvēlies savu:",
+      "expansion": "Papildinājums",
+      "searching": "Meklē...",
+      "resultsFound": "Atrasta {count} spēle",
+      "resultsFound_other": "Atrastas {count} spēles",
       "noResults": {
-        "title": "Neizdevās atrast \"{query}\"",
-        "helpText1": "Pārbaudi pareizrakstību uz spēles kastes vai meklē",
+        "title": "Nav rezultātu vaicājumam \"{query}\"",
+        "helpText1": "Pārbaudi pareizrakstību vai meklē precīzu nosaukumu vietnē",
         "bggLink": "BoardGameGeek.com",
-        "helpText2": "precīzu nosaukumu.",
+        "helpText2": ".",
         "helpText3": "Joprojām nevari atrast?",
         "contactLink": "Paziņo mums",
         "helpText4": "un mēs palīdzēsim."
@@ -1670,7 +1664,7 @@
       "languagesAvailable": "{count} valoda pieejama",
       "languagesAvailable_other": "{count} valodas pieejamas",
       "selectVersion": "Izvēlies savu versiju",
-      "versionsAvailable": "{count} versija(-as) pieejamas {language} valodā",
+      "selectVersion_other": "Izvēlies savu versiju ({count} pieejamas)",
       "noVersionsForLanguage": "Nav atrasta neviena versija {language} valodā. Tam nevajadzētu notikt - izvēlies citu valodu."
     },
     "ManualVersionInput": {
@@ -1708,38 +1702,24 @@
     "ExpansionSelector": {
       "loading": "Ielādē papildinājumus...",
       "noExpansions": "Šai spēlei nav atrasti papildinājumi",
-      "searchPlaceholder": "Meklēt {count} papildinājumos...",
+      "searchPlaceholder": "Meklēt...",
       "clearSearch": "Notīrīt meklēšanu",
       "resultsCount": "{filtered} no {total} papildinājumiem",
       "selectedCount": "{count} izvēlēts",
-      "noResults": {
-        "title": "Neviens papildinājums neatbilst \"{query}\"",
-        "hint": "Mēģini meklēt angliski vai pārbaudi pareizrakstību"
-      },
-      "noMatch": "Neviens papildinājums neatbilst \"{query}\"",
-      "searchTip": "Mēģini meklēt angliski vai pārbaudi pareizrakstību",
+      "noMatch": "Nav rezultātu vaicājumam \"{query}\"",
+      "searchTip": "Mēģini angliski vai pārbaudi pareizrakstību",
       "moreSelected": "+ {count} vairāk izvēlēti",
-      "expansionsAvailable": "{count} papildinājums pieejams",
-      "expansionsAvailable_other": "{count} papildinājumi pieejami",
+      "expansionsAvailable": "{count, plural, one {# papildinājums pieejams} other {# papildinājumi pieejami}}",
       "show": "Rādīt",
       "collapse": "Sakļaut",
-      "change": "Mainīt",
-      "changeVersion": "Mainīt",
-      "changeName": "Nosaukums",
-      "name": "Nosaukums",
+      "changeVersion": "Mainīt versiju",
+      "changeName": "Mainīt nosaukumu",
       "onlyEdition": "vienīgais izdevums",
-      "expansionsIncluded": "{count} papildinājums iekļauts",
-      "expansionsIncluded_other": "{count} papildinājumi iekļauti",
+      "expansionsIncluded": "{count, plural, one {# papildinājums iekļauts} other {# papildinājumi iekļauti}}",
       "selectEdition": "Izvēlies izdevumu",
-      "selectEditionModal": "Izvēlies izdevumu",
-      "selectNameModal": "Izvēlies attēlojamo nosaukumu",
-      "chooseNamePrompt": "Izvēlies nosaukumu, kas atbilst tavam izdevumam:",
-      "primary": "(Galvenais)",
-      "current": "(Pašreizējais)",
-      "cancel": "Atcelt",
       "nameModal": {
-        "title": "Izvēlies attēlojamo nosaukumu",
-        "instruction": "Izvēlies nosaukumu, kas atbilst tavam izdevumam:",
+        "title": "Izvēlies nosaukumu",
+        "instruction": "Kāds nosaukums ir uz kastes?",
         "primary": "Galvenais",
         "current": "Pašreizējais",
         "cancel": "Atcelt"
@@ -3171,28 +3151,24 @@
       "research": {
         "name": "Izpētes fāze",
         "subtitle": "Atrodi savu spēli",
-        "completionMsg": "Spēle atrasta! Pārejam uz tirgu.",
         "shortName": "Izpēte",
         "continueButton": "Turpināt →"
       },
       "market": {
         "name": "Stāvoklis un foto",
         "subtitle": "Pastāsti pircējiem par spēles stāvokli",
-        "completionMsg": "Stāvoklis noteikts. Turpinām ar cenu.",
         "shortName": "Stāvoklis",
         "continueButton": "Turpināt uz cenu"
       },
       "action": {
         "name": "Cena",
         "subtitle": "Nosaki savu cenu",
-        "completionMsg": "Izskatās lieliski. Pēdējā pārbaude.",
         "shortName": "Cena",
         "continueButton": "Turpināt uz pārskatu"
       },
       "score": {
         "name": "Rezultātu fāze",
         "subtitle": "Pārskati un publicē",
-        "completionMsg": "Tava spēle tagad ir pieejama!",
         "shortName": "Rezultāts",
         "publishButton": "Publicēt spēli"
       }

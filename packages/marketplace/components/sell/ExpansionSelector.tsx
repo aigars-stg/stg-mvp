@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, Modal, Input, Button } from '@second-turn/design-system';
-import { Package, RefreshCw, Search, Close, LinkExternal as ExternalLink, TextFont as Type, ChevronDown, ChevronUp } from '@/lib/icons';
+import { Package, RefreshCw, Search, Close, LinkExternal as ExternalLink, ChevronDown, ChevronUp } from '@/lib/icons';
 import type { VersionSelection } from '@/lib/bgg-types';
 import type { BGGExpansionInfo } from '@/lib/bgg-api';
 import { LanguageVersionSelector } from './LanguageVersionSelector';
@@ -183,7 +183,7 @@ export function ExpansionSelector({
                           onClick={() => handleChangeName(expansion.bgg_id)}
                           className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 flex-shrink-0"
                         >
-                          <Type className="w-3 h-3" />
+                          <RefreshCw className="w-3 h-3" />
                           {t('changeName')}
                         </button>
                       )}
@@ -390,7 +390,7 @@ export function ExpansionSelector({
                             }}
                             className="text-frost-ice hover:text-aurora-blue flex items-center gap-1 flex-shrink-0"
                           >
-                            <Type className="w-3 h-3" />
+                            <RefreshCw className="w-3 h-3" />
                             {t('changeName')}
                           </button>
                         )}

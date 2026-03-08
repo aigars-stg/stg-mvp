@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import type { VersionSelection } from '@/lib/bgg-types';
+import { Badge } from '@second-turn/design-system';
 import { RefreshCw, ChevronDown } from '@/lib/icons';
 
 interface GameNameSelectorProps {
@@ -170,59 +171,50 @@ export function GameNameSelector({
 
   return (
     <div className="space-y-2">
-      <div>
-        <p className="text-sm font-medium text-polar-night">{t('question')}</p>
-        <p className="text-xs text-text-muted mt-0.5">{t('hintCompact')}</p>
-      </div>
+      <p className="text-sm font-medium text-polar-night">{t('question')}</p>
 
-      <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
         {nameOptions.map((option) => (
-          <button
+          <Badge
             key={option.value}
+            variant={selectedName === option.value ? 'trust' : 'default'}
+            className="cursor-pointer transition-all hover:scale-105 !rounded-lg"
             onClick={() => onChange(option.value)}
-            className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors ${
-              selectedName === option.value
-                ? 'border-frost-ice bg-frost-ice/5 text-polar-night'
-                : 'border-border bg-snow-white text-text-secondary hover:border-frost-ice/50 hover:bg-frost-ice/5'
-            }`}
           >
-            <span className="text-sm leading-snug">
-              {option.label}
-              {option.isPrimary && (
-                <span className="ml-1.5 text-xs text-text-muted">({t('primary')})</span>
-              )}
-            </span>
-          </button>
+            {option.label}
+          </Badge>
         ))}
 
-        {/* "Other scripts" toggle */}
-        {nonLatinNames.length > 0 && (
+        {/* "Other" toggle — dashed chip matching language selector pattern */}
+        {nonLatinNames.length > 0 && !showOtherNames && (
           <button
-            onClick={() => setShowOtherNames(!showOtherNames)}
-            className="w-full text-left px-3 py-2.5 rounded-lg border border-border bg-snow-white text-text-muted hover:border-frost-ice/50 hover:bg-frost-ice/5 transition-colors flex items-center justify-between"
+            onClick={() => setShowOtherNames(true)}
+            className="px-3 py-1 text-sm text-text-muted border border-dashed border-border rounded-lg hover:border-frost-ice/50 hover:text-frost-ice transition-colors"
           >
-            <span className="text-sm">{t('other')}</span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${showOtherNames ? 'rotate-180' : ''}`} />
+            {t('other', { count: nonLatinNames.length })}
           </button>
         )}
 
-        {/* Non-Latin name rows */}
-        {nonLatinNames.length > 0 && showOtherNames && (
-          <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-            {nonLatinNames.map((name) => (
-              <button
-                key={name}
-                onClick={() => onChange(name)}
-                className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors ${
-                  selectedName === name
-                    ? 'border-frost-ice bg-frost-ice/5 text-polar-night'
-                    : 'border-border bg-snow-white text-text-secondary hover:border-frost-ice/50 hover:bg-frost-ice/5'
-                }`}
-              >
-                <span className="text-sm leading-snug">{name}</span>
-              </button>
-            ))}
-          </div>
+        {/* Non-Latin name chips (expanded) */}
+        {showOtherNames && nonLatinNames.map((name) => (
+          <Badge
+            key={name}
+            variant={selectedName === name ? 'trust' : 'default'}
+            className="cursor-pointer transition-all hover:scale-105 !rounded-lg"
+            onClick={() => onChange(name)}
+          >
+            {name}
+          </Badge>
+        ))}
+
+        {/* Collapse button */}
+        {showOtherNames && nonLatinNames.length > 0 && (
+          <button
+            onClick={() => setShowOtherNames(false)}
+            className="px-3 py-1 text-sm text-text-muted border border-dashed border-border rounded-lg hover:border-frost-ice/50 hover:text-frost-ice transition-colors flex items-center gap-1"
+          >
+            <ChevronDown className="w-3.5 h-3.5 rotate-180" />
+          </button>
         )}
       </div>
     </div>

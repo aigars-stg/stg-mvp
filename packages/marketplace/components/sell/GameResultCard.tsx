@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { LinkExternal as ExternalLink, PuzzlePiece as Puzzle } from '@/lib/icons';
 import { GameImageWithBackdrop } from './GameImageWithBackdrop';
 
@@ -35,6 +36,7 @@ export function GameResultCard({
   versionThumbnail,
   matchedAlternateName,
 }: GameResultCardProps) {
+  const t = useTranslations('Sell.GameSearch');
   // Determine display name - show matched alternate name as primary if provided
   const displayName = matchedAlternateName || name;
   const subtitleName = matchedAlternateName ? name : null;
@@ -169,7 +171,7 @@ export function GameResultCard({
         {isExpansion && (
           <span className="inline-flex items-center gap-1 text-xs text-aurora-purple mt-0.5">
             <Puzzle className="w-3 h-3" />
-            Expansion
+            {t('expansion')}
           </span>
         )}
 

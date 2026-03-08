@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
 import { useCallback } from 'react';
@@ -8,13 +7,8 @@ import { GameSearch } from '@/components/sell/GameSearch';
 import { GameNameSelector } from '@/components/sell/GameNameSelector';
 import { LanguageVersionSelector } from '@/components/sell/LanguageVersionSelector';
 import { ExpansionSelector, type SelectedExpansion } from '@/components/sell/ExpansionSelector';
-import { CollapsibleSection } from '@/components/sell/CollapsibleSection';
-import {
-  AlertCircle,
-  PuzzlePiece as Puzzle,
-} from '@/lib/icons';
-import type { BGGGame } from '@/lib/bgg-api';
-import type { BGGExpansionInfo } from '@/lib/bgg-api';
+import { AlertCircle, PuzzlePiece as Puzzle } from '@/lib/icons';
+import type { BGGGame, BGGExpansionInfo } from '@/lib/bgg-api';
 import type { BGGVersion, VersionSelection } from '@/lib/bgg-types';
 import type { ListingFormData } from '@/lib/hooks/useListingForm';
 import { formatDate } from '@/lib/date-utils';
@@ -178,6 +172,58 @@ export function ResearchPhase({
               />
             )}
 
+          {/* Expansion Section (inline, inside the Card) */}
+          {formData.selectedGame &&
+            formData.selectedVersion &&
+            !formData.selectedGame.isExpansion &&
+            expansionCount > 0 && (
+              <>
+                {!showExpansionSection ? (
+                  <button
+                    onClick={handleEnableExpansions}
+                    className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-text-secondary hover:text-polar-night hover:bg-snow-stormLightest transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Puzzle className="w-4 h-4 text-frost-ice" />
+                      <span className="text-sm font-medium">
+                        {tSections('expansions.toggleTitle')}
+                      </span>
+                    </div>
+                    <span className="text-frost-ice text-sm font-medium">
+                      {tSections('expansions.addButton')}
+                    </span>
+                  </button>
+                ) : (
+                  <div className="border-t border-border-subtle pt-3 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Puzzle className="w-4 h-4 text-frost-ice" />
+                      <span className="text-sm font-semibold text-polar-night">
+                        {tSections('expansions.title')}
+                      </span>
+                    </div>
+
+                    <ExpansionSelector
+                      expansions={availableExpansions}
+                      baseGameVersion={formData.selectedVersion}
+                      selectedExpansions={formData.selectedExpansions}
+                      onExpansionsChange={handleExpansionsChange}
+                      isLoading={isLoadingExpansions}
+                    />
+
+                    {formData.selectedExpansions.length === 0 &&
+                      !isLoadingExpansions && (
+                        <button
+                          onClick={handleDisableExpansions}
+                          className="text-sm text-text-muted hover:text-text-secondary transition-colors"
+                        >
+                          {tSections('expansions.cancelButton')}
+                        </button>
+                      )}
+                  </div>
+                )}
+              </>
+            )}
+
         </div>
       </Card>
 
@@ -221,80 +267,6 @@ export function ResearchPhase({
           </div>
         </div>
       )}
-
-      {/* Expansion Section */}
-      {formData.selectedGame &&
-        formData.selectedVersion &&
-        !formData.selectedGame.isExpansion &&
-        expansionCount > 0 && (
-          <>
-            {!showExpansionSection ? (
-              <Card
-                padding="md"
-                className="border-dashed border-2 border-border hover:border-frost-ice/50 transition-colors"
-              >
-                <button
-                  onClick={handleEnableExpansions}
-                  className="w-full flex items-center justify-between gap-3 text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-frost-ice/10 flex items-center justify-center">
-                      <Puzzle className="w-5 h-5 text-frost-ice" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-polar-night">
-                        {tSections('expansions.toggleTitle')}
-                      </p>
-                      <p className="text-sm text-text-secondary">
-                        {tSections('expansions.toggleSubtitle')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-frost-ice font-medium text-sm">
-                    {tSections('expansions.addButton')}
-                  </div>
-                </button>
-              </Card>
-            ) : (
-              <CollapsibleSection
-                title={tSections('expansions.title')}
-                icon={<Puzzle className="w-6 h-6 text-frost-ice" />}
-                isExpanded={true}
-                onToggle={() => {}}
-                subtitle={
-                  formData.selectedExpansions.length > 0
-                    ? tSections(
-                        formData.selectedExpansions.length === 1
-                          ? 'expansions.subtitle'
-                          : 'expansions.subtitle_other',
-                        { count: formData.selectedExpansions.length },
-                      )
-                    : tSections('expansions.toggleSubtitle')
-                }
-              >
-                <div className="space-y-4">
-                  <ExpansionSelector
-                    expansions={availableExpansions}
-                    baseGameVersion={formData.selectedVersion}
-                    selectedExpansions={formData.selectedExpansions}
-                    onExpansionsChange={handleExpansionsChange}
-                    isLoading={isLoadingExpansions}
-                  />
-
-                  {formData.selectedExpansions.length === 0 &&
-                    !isLoadingExpansions && (
-                      <button
-                        onClick={handleDisableExpansions}
-                        className="text-sm text-text-muted hover:text-text-secondary transition-colors"
-                      >
-                        {tSections('expansions.cancelButton')}
-                      </button>
-                    )}
-                </div>
-              </CollapsibleSection>
-            )}
-          </>
-        )}
 
       {/* Continue button — mobile only (hidden on desktop where onAdvance is not provided) */}
       {onAdvance && (

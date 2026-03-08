@@ -20,13 +20,6 @@ const ADVANCE_DELAY_MS = 500;
 // Types
 // ---------------------------------------------------------------------------
 
-export interface ToastData {
-  /** Completed phase ID — caller translates via i18n */
-  phaseId: string;
-  /** Next phase ID (if any) — caller translates via i18n */
-  nextPhaseId?: string;
-}
-
 interface DraftV1 {
   formData: Partial<ListingFormData>;
 }
@@ -67,10 +60,6 @@ export interface PhaseFlowState extends UseListingFormReturn {
   sparklePhaseId: string | null;
   advanceToNextPhase: () => boolean;
   goToPhase: (index: number) => void;
-
-  // Toast
-  toastData: ToastData | null;
-  dismissToast: () => void;
 
   // Flow status
   isFlowComplete: boolean;
@@ -194,7 +183,6 @@ export function usePhaseFlow(): PhaseFlowState {
   const [highestVisitedPhaseIndex, setHighestVisitedPhaseIndex] = useState(0);
   const [completedPhaseIds, setCompletedPhaseIds] = useState<string[]>([]);
   const [sparklePhaseId, setSparklePhaseId] = useState<string | null>(null);
-  const [toastData, setToastData] = useState<ToastData | null>(null);
   const [flowStartTime, setFlowStartTime] = useState<number>(() => Date.now());
   const [showPhotosWarning, setShowPhotosWarning] = useState(false);
 
@@ -266,11 +254,6 @@ export function usePhaseFlow(): PhaseFlowState {
   const isFlowComplete =
     currentPhaseIndex >= LISTING_PHASES.length - 1 &&
     completedPhaseIds.includes(LISTING_PHASES[LISTING_PHASES.length - 1]?.id ?? '');
-
-  // ------- Toast -------
-  const dismissToast = useCallback(() => {
-    setToastData(null);
-  }, []);
 
   // ------- Draft persistence -------
 
@@ -374,14 +357,7 @@ export function usePhaseFlow(): PhaseFlowState {
       : [...completedPhaseIds, phase.id];
     setCompletedPhaseIds(updatedCompleted);
 
-    // 4. Show completion toast (phase IDs — caller translates via i18n)
-    const nextPhase = LISTING_PHASES[currentPhaseIndex + 1];
-    setToastData({
-      phaseId: phase.id,
-      nextPhaseId: nextPhase?.id,
-    });
-
-    // 5. Advance after delay (animation plays concurrently)
+    // 4. Advance after delay (animation plays concurrently)
     const nextIndex = currentPhaseIndex < LISTING_PHASES.length - 1
       ? currentPhaseIndex + 1
       : currentPhaseIndex;
@@ -393,7 +369,7 @@ export function usePhaseFlow(): PhaseFlowState {
       }, ADVANCE_DELAY_MS);
     }
 
-    // 6. Persist draft on phase advance (uses computed values, not stale closure)
+    // 5. Persist draft on phase advance (uses computed values, not stale closure)
     const { photos, ...formDataWithoutPhotos } = formData;
     persistDraft({
       version: DRAFT_VERSION,
@@ -439,10 +415,6 @@ export function usePhaseFlow(): PhaseFlowState {
     sparklePhaseId,
     advanceToNextPhase,
     goToPhase,
-
-    // Toast
-    toastData,
-    dismissToast,
 
     // Flow status
     isFlowComplete,

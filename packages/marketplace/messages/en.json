@@ -1400,10 +1400,10 @@
       "photosStripped": "Photos aren't saved in drafts. Please re-upload your photos."
     },
     "existingListings": {
-      "warningTitle_one": "You already have an active listing for this game",
+      "warningTitle_one": "You have an active listing for this game",
       "warningTitle_other": "You already have {count} active listings for this game",
-      "warningSubtitle_one": "You can still create a new listing, but you might want to review your existing one first.",
-      "warningSubtitle_other": "You can still create a new listing, but you might want to review your existing ones first."
+      "warningSubtitle_one": "You can still list it again. Review your existing listing:",
+      "warningSubtitle_other": "You can still list it again. Review your existing listings:"
     },
     "editMode": {
       "lockedInfo": "Game and edition details cannot be changed. If you need to change the game, please delete this listing and create a new one.",
@@ -1428,21 +1428,14 @@
       },
       "gameNameSelector": {
         "question": "Which name is on your box?",
-        "hintCompact": "Helps local buyers find your listing",
-        "hint": "Choose the localized name that matches your physical box for better discoverability",
-        "primary": "Primary",
-        "other": "Other scripts",
+        "other": "Other ({count})",
         "otherScripts": "Select from other scripts:",
         "changeName": "Change Name"
       },
       "expansions": {
-        "title": "Include Expansions",
-        "subtitle": "Bundle expansions with this game (optional)",
-        "subtitleWithCount_one": "{count} expansion included",
-        "subtitleWithCount_other": "{count} expansions included",
+        "title": "Expansions",
         "toggleTitle": "Include expansions?",
-        "toggleSubtitle": "Bundle expansions with this listing (optional)",
-        "addButton": "Add +",
+        "addButton": "+",
         "cancelButton": "Cancel"
       },
       "condition": {
@@ -1542,18 +1535,19 @@
       "findYourGame": "Find Your Game",
       "findYourGameSubtitle": "Search thousands of board games by name",
       "changeGame": "Change game",
-      "changeVersion": "Change Version",
+      "changeVersion": "Change version",
       "changeName": "Change name",
-      "placeholder": "e.g., Wingspan, Catan, Icecool",
+      "placeholder": "Wingspan, Catan, Icecool...",
       "clearSearch": "Clear search",
-      "searching": "Searching games...",
-      "resultsFound": "Found {count} game - select yours:",
-      "resultsFound_other": "Found {count} games - select yours:",
+      "expansion": "Expansion",
+      "searching": "Searching...",
+      "resultsFound": "{count} game found",
+      "resultsFound_other": "{count} games found",
       "noResults": {
-        "title": "We couldn't find \"{query}\"",
-        "helpText1": "Check the spelling on your game box, or search",
+        "title": "No results for \"{query}\"",
+        "helpText1": "Check the spelling, or look up the exact title on",
         "bggLink": "BoardGameGeek.com",
-        "helpText2": "for the exact title.",
+        "helpText2": ".",
         "helpText3": "Still can't find it?",
         "contactLink": "Let us know",
         "helpText4": "and we'll help."
@@ -1675,8 +1669,8 @@
       "showLess": "Show less",
       "languagesAvailable": "{count} language available",
       "languagesAvailable_other": "{count} languages available",
-      "selectVersion": "Select Your Version",
-      "versionsAvailable": "{count} version(s) available in {language}",
+      "selectVersion": "Select your version",
+      "selectVersion_other": "Select your version ({count} available)",
       "noVersionsForLanguage": "No versions found for {language}. This shouldn't happen - please try selecting a different language."
     },
     "ManualVersionInput": {
@@ -1714,38 +1708,24 @@
     "ExpansionSelector": {
       "loading": "Loading expansions...",
       "noExpansions": "No expansions found for this game",
-      "searchPlaceholder": "Search {count} expansions...",
+      "searchPlaceholder": "Search...",
       "clearSearch": "Clear search",
       "resultsCount": "{filtered} of {total} expansions",
       "selectedCount": "{count} selected",
-      "noResults": {
-        "title": "No expansions match \"{query}\"",
-        "hint": "Try searching in English or check spelling"
-      },
-      "noMatch": "No expansions match \"{query}\"",
-      "searchTip": "Try searching in English or check spelling",
+      "noMatch": "No match for \"{query}\"",
+      "searchTip": "Try English or check spelling",
       "moreSelected": "+ {count} more selected",
-      "expansionsAvailable": "{count} expansion available",
-      "expansionsAvailable_other": "{count} expansions available",
+      "expansionsAvailable": "{count, plural, one {# expansion available} other {# expansions available}}",
       "show": "Show",
       "collapse": "Collapse",
-      "change": "Change",
-      "changeVersion": "Change",
-      "changeName": "Name",
-      "name": "Name",
+      "changeVersion": "Change version",
+      "changeName": "Change name",
       "onlyEdition": "only edition",
-      "expansionsIncluded": "{count} expansion included",
-      "expansionsIncluded_other": "{count} expansions included",
-      "selectEdition": "Select Edition",
-      "selectEditionModal": "Select Edition",
-      "selectNameModal": "Select Display Name",
-      "chooseNamePrompt": "Choose the name that matches your edition:",
-      "primary": "(Primary)",
-      "current": "(Current)",
-      "cancel": "Cancel",
+      "expansionsIncluded": "{count, plural, one {# expansion included} other {# expansions included}}",
+      "selectEdition": "Select edition",
       "nameModal": {
-        "title": "Select Display Name",
-        "instruction": "Choose the name that matches your edition:",
+        "title": "Select display name",
+        "instruction": "Which name is on your box?",
         "primary": "Primary",
         "current": "Current",
         "cancel": "Cancel"
@@ -3185,28 +3165,24 @@
       "research": {
         "name": "Research Phase",
         "subtitle": "Find your game",
-        "completionMsg": "Game found! Moving to market.",
         "shortName": "Research",
         "continueButton": "Continue →"
       },
       "market": {
         "name": "Condition & Photos",
         "subtitle": "Tell buyers about your game's condition",
-        "completionMsg": "Condition set. On to pricing.",
         "shortName": "Condition",
         "continueButton": "Continue to pricing"
       },
       "action": {
         "name": "Pricing",
         "subtitle": "Set your asking price",
-        "completionMsg": "Looking good. Final review.",
         "shortName": "Pricing",
         "continueButton": "Continue to review"
       },
       "score": {
         "name": "Score Phase",
         "subtitle": "Review and list",
-        "completionMsg": "Your game is now in play!",
         "shortName": "Score",
         "publishButton": "List your game"
       }

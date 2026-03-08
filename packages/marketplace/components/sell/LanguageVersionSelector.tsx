@@ -304,14 +304,9 @@ export function LanguageVersionSelector({
       {/* Version Selection - appears when language is selected */}
       {selectedLanguage && filteredVersions.length >= 1 && (
         <div className="space-y-3 animate-fade-in">
-          <div className="mb-3">
-            <p className="text-sm font-medium text-polar-night">
-              {t('selectVersion')}
-            </p>
-            <p className="text-xs text-text-muted mt-0.5">
-              {t('versionsAvailable', { count: filteredVersions.length, language: selectedLanguage })}
-            </p>
-          </div>
+          <p className="text-sm font-medium text-polar-night mb-3">
+            {t('selectVersion', { count: filteredVersions.length })}
+          </p>
 
           <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
             {filteredVersions.map((version) => (

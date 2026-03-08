@@ -32,7 +32,6 @@ import { formatPrice } from '@/lib/services/pricing';
 // Phase system imports
 import { LISTING_PHASES } from '@/components/phases/phase-definitions';
 import { PhaseTracker, type PhaseStatus } from '@/components/phases/PhaseTracker';
-import { MilestoneToast } from '@/components/phases/MilestoneToast';
 import { ResearchPhase } from '@/components/sell/phases/ResearchPhase';
 import { MarketPhase } from '@/components/sell/phases/MarketPhase';
 import { ActionPhase } from '@/components/sell/phases/ActionPhase';
@@ -1088,8 +1087,6 @@ function CreateModeSellContent() {
     sparklePhaseId,
     advanceToNextPhase,
     goToPhase,
-    toastData,
-    dismissToast,
     isCurrentPhaseComplete,
     flowStartTime,
     saveDraft,
@@ -1630,22 +1627,6 @@ function CreateModeSellContent() {
           onSaveDraft={handleSaveDraft}
         />
       </div>
-
-      {/* Milestone Toast */}
-      <MilestoneToast
-        title={
-          toastData
-            ? tPhases(`${toastData.phaseId}.completionMsg`)
-            : ''
-        }
-        subtitle={
-          toastData?.nextPhaseId
-            ? tPhases(`${toastData.nextPhaseId}.name`)
-            : undefined
-        }
-        visible={!!toastData}
-        onDismiss={dismissToast}
-      />
 
       {/* Mobile Preview Modal */}
       <Modal

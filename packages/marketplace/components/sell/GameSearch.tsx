@@ -184,7 +184,7 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
           )}
 
           {/* Inline change links */}
-          <div className="flex items-center gap-2 text-xs mt-1 flex-wrap">
+          <div className="flex items-center gap-2 text-xs mt-1 flex-wrap justify-end">
             {selectedVersion && onChangeVersion && (
               <>
                 <button
@@ -236,12 +236,6 @@ export function GameSearch({ onSelect, selectedGame, selectedVersion, selectedDi
 
   return (
     <div className="space-y-3">
-      {/* Header */}
-      <div>
-        <p className="text-sm font-medium text-polar-night">{t('findYourGame')}</p>
-        <p className="text-xs text-text-muted mt-0.5">{t('findYourGameSubtitle')}</p>
-      </div>
-
       {/* Search Input */}
       <div className="relative">
         <div className={`relative ${!hasSearched && searchQuery.length === 0 ? 'animate-pulse-border' : ''}`}>
