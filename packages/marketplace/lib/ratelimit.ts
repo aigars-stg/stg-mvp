@@ -74,7 +74,7 @@ if (redis) {
     // Checkout (same for buyer/seller)
     checkout: new Ratelimit({
       redis,
-      limiter: Ratelimit.slidingWindow(5, '1 h'), // 5 checkouts per hour
+      limiter: Ratelimit.slidingWindow(15, '1 h'), // 15 checkouts per hour
       analytics: true,
       prefix: '@upstash/ratelimit/checkout',
     }),
