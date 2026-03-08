@@ -62,7 +62,7 @@ export function CartItemCard({ item, onRemove, isRemoving = false }: CartItemCar
       ? `${item.version_name}, ${item.edition_year}`
       : item.version_name
     : item.edition_year
-      ? `${item.edition_year} edition`
+      ? tListings('listing.edition', { year: item.edition_year })
       : null;
 
   const handleImageClick = () => {
@@ -129,7 +129,7 @@ export function CartItemCard({ item, onRemove, isRemoving = false }: CartItemCar
               <OfferCardVersionInfo
                 formattedEdition={formattedEdition}
                 language={item.language}
-                publisher={null}
+                publisher={item.publisher}
               />
             </div>
           </div>

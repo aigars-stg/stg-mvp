@@ -732,7 +732,8 @@
     "returnToCart": "Return to Cart",
     "breadcrumb": {
       "cart": "Cart",
-      "checkout": "Checkout"
+      "checkout": "Checkout",
+      "backToCart": "Back to cart"
     },
     "title": "Checkout",
     "orderFrom": "Order from {sellerName}",

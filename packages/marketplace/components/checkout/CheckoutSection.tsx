@@ -13,7 +13,6 @@ interface CheckoutSectionProps {
   required?: boolean;
   stepNumber?: number;
   collapsedSummary?: ReactNode;
-  completeLabel?: string;
   requiredLabel?: string;
 }
 
@@ -27,7 +26,6 @@ export function CheckoutSection({
   required = false,
   stepNumber,
   collapsedSummary,
-  completeLabel = 'Complete',
   requiredLabel = 'Required',
 }: CheckoutSectionProps) {
   return (
@@ -69,11 +67,6 @@ export function CheckoutSection({
             <h2 className="text-base sm:text-lg font-semibold text-polar-night truncate">
               {title}
             </h2>
-            {isComplete && (
-              <span className="text-xs font-medium text-aurora-green flex-shrink-0">
-                {completeLabel}
-              </span>
-            )}
             {required && !isComplete && (
               <span className="text-xs font-medium text-text-muted flex-shrink-0">
                 {requiredLabel}

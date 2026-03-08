@@ -732,7 +732,8 @@
     "returnToCart": "Atgriezties pie groza",
     "breadcrumb": {
       "cart": "Grozs",
-      "checkout": "Apmaksas lapa"
+      "checkout": "Apmaksas lapa",
+      "backToCart": "Atpakaļ uz grozu"
     },
     "title": "Apmaksas lapa",
     "orderFrom": "Pasūtījums no {sellerName}",

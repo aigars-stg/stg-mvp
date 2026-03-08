@@ -478,8 +478,12 @@ function CheckoutPageContent() {
     <div className="min-h-screen bg-bg-primary pb-28 lg:pb-8">
       {/* Header */}
       <div className="bg-frost-ice/5 border-b border-frost-ice/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <Link href="/cart" className="sm:hidden flex items-center gap-1.5 text-sm text-text-secondary hover:text-frost-ice mb-4">
+            <ArrowLeft className="w-4 h-4" />
+            {t('breadcrumb.backToCart')}
+          </Link>
+          <div className="hidden sm:flex items-center gap-2 text-sm text-text-secondary mb-4">
             <Link href="/cart" className="hover:text-frost-ice">
               {t('breadcrumb.cart')}
             </Link>
@@ -491,7 +495,7 @@ function CheckoutPageContent() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="grid lg:grid-cols-7 gap-6 sm:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-4 space-y-3 sm:space-y-4">
@@ -551,7 +555,7 @@ function CheckoutPageContent() {
               isComplete={isTerminalComplete}
               isExpanded={terminalExpanded}
               onToggle={() => setTerminalExpanded(!terminalExpanded)}
-              completeLabel={t('collapse.complete')}
+
               collapsedSummary={
                 selectedTerminal ? (
                   <span>
@@ -589,7 +593,7 @@ function CheckoutPageContent() {
               isComplete={isContactComplete}
               isExpanded={contactExpanded}
               onToggle={() => setContactExpanded(!contactExpanded)}
-              completeLabel={t('collapse.complete')}
+
               collapsedSummary={
                 isContactComplete ? (
                   <span>{receiverName} &middot; {receiverEmail} &middot; {receiverPhone}</span>
@@ -722,7 +726,7 @@ function CheckoutPageContent() {
                   });
                   return (
                     <div key={item.item_id} className="flex gap-3">
-                      <ListingThumbnail src={displayImage} alt={item.game_name} size="sm" />
+                      <ListingThumbnail src={displayImage} alt={item.game_name} size="md" />
                       <div className="flex-grow min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-sm font-medium text-polar-night line-clamp-1">
@@ -768,7 +772,7 @@ function CheckoutPageContent() {
             </div>
 
             {/* Mobile-only: Inline Terms & Conditions */}
-            <div className="lg:hidden bg-snow-white border border-border rounded-xl p-4">
+            <div className="lg:hidden bg-snow-white border border-border rounded-xl p-4 mb-4">
               <label className="flex items-start gap-3 cursor-pointer p-2 rounded-lg hover:bg-bg-elevated transition-colors">
                 <input
                   type="checkbox"
@@ -777,7 +781,7 @@ function CheckoutPageContent() {
                   className="mt-0.5 w-6 h-6 rounded border-border text-frost-ice focus:ring-frost-ice focus:ring-offset-0"
                   aria-required="true"
                 />
-                <span className="text-xs text-polar-night">
+                <span className="text-xs text-polar-night leading-relaxed">
                   {t('consent.checkboxPrefix')}{' '}
                   <Link href="/legal/terms" target="_blank" className="text-frost-ice underline hover:text-frost-iceDark">
                     {t('consent.termsLink')}

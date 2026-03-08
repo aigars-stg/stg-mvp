@@ -32,7 +32,7 @@ export function BottomNav() {
   const t = useTranslations('Navigation');
 
   // Routes where bottom nav should be hidden
-  const hideOnRoutes = ['/auth/', '/privacy', '/terms'];
+  const hideOnRoutes = ['/auth/', '/privacy', '/terms', '/checkout'];
   const shouldHide = hideOnRoutes.some(route => pathname?.startsWith(route));
 
   // Don't render bottom nav on auth pages and legal pages

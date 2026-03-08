@@ -87,7 +87,7 @@ export function ReservationTimer({
   };
 
   const colorClasses = {
-    normal: 'text-aurora-green bg-aurora-green/10',
+    normal: 'text-amber-700 bg-aurora-yellow/15',
     warning: 'text-aurora-yellow bg-aurora-yellow/10',
     critical: 'text-aurora-red bg-aurora-red/10 motion-safe:animate-pulse',
     expired: 'text-text-muted bg-bg-secondary',

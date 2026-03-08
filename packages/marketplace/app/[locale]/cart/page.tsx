@@ -191,11 +191,11 @@ export default function CartPage() {
   if (authLoading || (loading && baskets.length === 0)) {
     return (
       <div className="min-h-screen bg-bg py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Header */}
           <div className="flex items-center gap-3 mb-2">
             <ShoppingCart className="w-8 h-8 text-frost-ice" />
-            <h1 className="text-3xl font-bold text-polar-night">{t('title')}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">{t('title')}</h1>
           </div>
           <div className="h-5 bg-bg-secondary rounded w-40 mb-8 animate-pulse" />
 
@@ -215,11 +215,11 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-bg py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <ShoppingCart className="w-8 h-8 text-frost-ice" />
-          <h1 className="text-3xl font-bold text-polar-night">{t('title')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">{t('title')}</h1>
         </div>
 
         {summary && summary.totalItems > 0 && (
