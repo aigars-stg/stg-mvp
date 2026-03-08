@@ -2572,6 +2572,7 @@ export type Database = {
           p_everypay_payment_reference?: string
           p_listing_id: string
           p_locale?: string
+          p_order_number?: string
           p_pickup_city?: string
           p_pickup_notes?: string
           p_platform_commission_cents?: number
@@ -2586,45 +2587,26 @@ export type Database = {
         }
         Returns: Json
       }
-      create_order_from_basket:
-        | {
-            Args: {
-              p_basket_id: string
-              p_buyer_wallet_debit_cents?: number
-              p_destination_country?: string
-              p_destination_terminal_address?: string
-              p_destination_terminal_id?: string
-              p_destination_terminal_name?: string
-              p_everypay_payment_reference?: string
-              p_pickup_city?: string
-              p_pickup_notes?: string
-              p_receiver_email?: string
-              p_receiver_name?: string
-              p_receiver_phone?: string
-              p_shipping_cost?: number
-              p_shipping_method: string
-            }
-            Returns: Json
-          }
-        | {
-            Args: {
-              p_basket_id: string
-              p_destination_country?: string
-              p_destination_terminal_address?: string
-              p_destination_terminal_id?: string
-              p_destination_terminal_name?: string
-              p_pickup_city?: string
-              p_pickup_notes?: string
-              p_receiver_email?: string
-              p_receiver_name?: string
-              p_receiver_phone?: string
-              p_service_fee?: number
-              p_shipping_cost?: number
-              p_shipping_method: string
-              p_stripe_payment_intent_id?: string
-            }
-            Returns: Json
-          }
+      create_order_from_basket: {
+        Args: {
+          p_basket_id: string
+          p_buyer_wallet_debit_cents?: number
+          p_destination_country?: string
+          p_destination_terminal_address?: string
+          p_destination_terminal_id?: string
+          p_destination_terminal_name?: string
+          p_everypay_payment_reference?: string
+          p_order_number?: string
+          p_pickup_city?: string
+          p_pickup_notes?: string
+          p_receiver_email?: string
+          p_receiver_name?: string
+          p_receiver_phone?: string
+          p_shipping_cost?: number
+          p_shipping_method: string
+        }
+        Returns: Json
+      }
       create_withdrawal_request: {
         Args: {
           p_account_holder_name: string

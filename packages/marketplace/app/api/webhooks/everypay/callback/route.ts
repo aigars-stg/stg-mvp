@@ -110,11 +110,17 @@ export async function GET(request: NextRequest) {
 
       let orderId: string;
 
+      // Determine checkout type from metadata (new) or order_reference prefix (legacy fallback)
+      const checkoutType = metadata.checkout_type as string | undefined;
+      const preGeneratedOrderNumber = metadata.order_number as string | undefined;
+      const isBasket = checkoutType === 'basket' || (!checkoutType && orderRef.startsWith('BASKET-'));
+      const isAuction = checkoutType === 'auction' || (!checkoutType && orderRef.startsWith('AUCTION-'));
+
       try {
-        if (orderRef.startsWith('BASKET-')) {
-          orderId = await processBasketPayment(supabase, metadata, paymentReference, actualPaymentState, detectedPaymentMethod);
-        } else if (orderRef.startsWith('AUCTION-')) {
-          orderId = await processAuctionPayment(supabase, metadata, paymentReference, actualPaymentState, detectedPaymentMethod);
+        if (isBasket) {
+          orderId = await processBasketPayment(supabase, metadata, paymentReference, actualPaymentState, detectedPaymentMethod, preGeneratedOrderNumber);
+        } else if (isAuction) {
+          orderId = await processAuctionPayment(supabase, metadata, paymentReference, actualPaymentState, detectedPaymentMethod, preGeneratedOrderNumber);
         } else {
           log.error({ orderRef }, 'Unknown order_reference type');
           return NextResponse.redirect(
@@ -168,7 +174,7 @@ export async function GET(request: NextRequest) {
 
         // Build redirect with retry context
         const failParams = new URLSearchParams({ error: 'order_creation_failed' });
-        if (orderRef.startsWith('BASKET-')) {
+        if (isBasket) {
           const basketId = metadata.basket_id as string;
           if (basketId) failParams.set('basket_id', basketId);
         }
@@ -236,11 +242,16 @@ export async function GET(request: NextRequest) {
         })
         .eq('id', checkoutEvent.id);
 
+      // Determine checkout type from metadata or legacy prefix
+      const failedMetadata = checkoutEvent.payload as Record<string, unknown>;
+      const failedOrderRef = checkoutEvent.order_reference as string;
+      const failedCheckoutType = failedMetadata.checkout_type as string | undefined;
+      const failedIsBasket = failedCheckoutType === 'basket' || (!failedCheckoutType && failedOrderRef.startsWith('BASKET-'));
+      const failedIsAuction = failedCheckoutType === 'auction' || (!failedCheckoutType && failedOrderRef.startsWith('AUCTION-'));
+
       // Release auction listing reservation on payment failure
-      const orderRef = checkoutEvent.order_reference as string;
-      if (orderRef.startsWith('AUCTION-')) {
-        const metadata = checkoutEvent.payload as Record<string, unknown>;
-        const listingId = metadata.listing_id as string;
+      if (failedIsAuction) {
+        const listingId = failedMetadata.listing_id as string;
         if (listingId) {
           await supabase
             .from('listings')
@@ -252,11 +263,10 @@ export async function GET(request: NextRequest) {
 
       // Basket orders: redirect back to checkout form so the error shows inline
       // Auction orders: redirect to success page (no checkout form to return to)
-      if (orderRef.startsWith('BASKET-')) {
-        const metadata = checkoutEvent.payload as Record<string, unknown>;
+      if (failedIsBasket) {
         const checkoutParams = new URLSearchParams({ error: errorCategory });
-        if (metadata.basket_id) {
-          checkoutParams.set('basket', metadata.basket_id as string);
+        if (failedMetadata.basket_id) {
+          checkoutParams.set('basket', failedMetadata.basket_id as string);
         }
         return NextResponse.redirect(
           `${appUrl}/checkout?${checkoutParams.toString()}`
@@ -290,7 +300,8 @@ async function processBasketPayment(
   metadata: Record<string, unknown>,
   paymentReference: string,
   paymentState: string,
-  paymentMethod: string
+  paymentMethod: string,
+  preGeneratedOrderNumber?: string
 ): Promise<string> {
   const basketId = metadata.basket_id as string;
   const shippingMethod = metadata.shipping_method as string;
@@ -316,6 +327,7 @@ async function processBasketPayment(
     p_shipping_cost: shippingCost,
     p_everypay_payment_reference: paymentReference,
     p_buyer_wallet_debit_cents: walletDebitCents,
+    p_order_number: preGeneratedOrderNumber || null,
   });
 
   if (error) {
@@ -373,7 +385,8 @@ async function processAuctionPayment(
   metadata: Record<string, unknown>,
   paymentReference: string,
   paymentState: string,
-  paymentMethod: string
+  paymentMethod: string,
+  preGeneratedOrderNumber?: string
 ): Promise<string> {
   const listingId = metadata.listing_id as string;
   const buyerId = metadata.buyer_id as string;
@@ -408,6 +421,7 @@ async function processAuctionPayment(
     p_platform_commission_cents: commissionCents,
     p_seller_wallet_credit_cents: walletCreditCents,
     p_locale: locale,
+    p_order_number: preGeneratedOrderNumber || null,
   });
 
   if (error) {

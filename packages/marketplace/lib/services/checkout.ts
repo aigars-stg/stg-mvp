@@ -113,6 +113,21 @@ async function notifySellerNewOrder(
 }
 
 // ==============================================
+// HELPERS
+// ==============================================
+
+async function generateOrderNumber(
+  supabase: SupabaseClient
+): Promise<string | CheckoutResult> {
+  const { data, error } = await supabase.rpc('generate_order_number');
+  if (error || !data) {
+    log.error({ err: error }, 'Failed to generate order number');
+    return { type: 'error', error: 'Failed to generate order number', status: 500 };
+  }
+  return data;
+}
+
+// ==============================================
 // BASKET CHECKOUT
 // ==============================================
 
@@ -156,7 +171,12 @@ export async function createCheckoutSession(
     input.destinationCountry
   );
 
-  // 2. Build RPC params (only params the RPC accepts)
+  // 2. Generate order number upfront (STG-YYYY-NNNNNN)
+  const orderNumberResult = await generateOrderNumber(supabase);
+  if (typeof orderNumberResult !== 'string') return orderNumberResult;
+  const orderNumber = orderNumberResult;
+
+  // 3. Build RPC params
   const rpcParams = {
     p_basket_id: basketId,
     p_shipping_method: shippingMethod,
@@ -172,9 +192,10 @@ export async function createCheckoutSession(
     p_shipping_cost: shippingCostEuros,
     p_everypay_payment_reference: null as string | null,
     p_buyer_wallet_debit_cents: pricing.walletDebitCents,
+    p_order_number: orderNumber,
   };
 
-  // 3. Wallet-only payment (no EveryPay needed)
+  // 4. Wallet-only payment (no EveryPay needed)
   if (pricing.everypayChargeCents === 0) {
     const { data: result, error } = await supabase.rpc(
       'create_order_from_basket',
@@ -228,9 +249,9 @@ export async function createCheckoutSession(
     };
   }
 
-  // 4. EveryPay payment (full or partial with wallet)
-  // Include short timestamp suffix so retries don't hit EveryPay uniqueness constraint
-  const orderReference = `BASKET-${basketId}-${Date.now().toString(36)}`;
+  // 5. EveryPay payment (full or partial with wallet)
+  // Each checkout attempt gets a fresh order number, so no uniqueness collision
+  const orderReference = orderNumber;
   const customerUrl = `${appUrl}/api/webhooks/everypay/callback?basket_id=${basketId}`;
 
   try {
@@ -250,6 +271,8 @@ export async function createCheckoutSession(
         order_reference: orderReference,
         event_type: 'checkout_initiated',
         payload: {
+          checkout_type: 'basket',
+          order_number: orderNumber,
           basket_id: basketId,
           buyer_id: buyerId,
           seller_id: sellerId,
@@ -338,22 +361,22 @@ export async function createAuctionCheckoutSession(
     input.destinationCountry
   );
 
-  // 2. For auctions, we don't use create_order_from_basket.
-  //    The webhook handler will create the order directly.
-  // Include short timestamp suffix so retries don't hit EveryPay uniqueness constraint
-  const orderReference = `AUCTION-${listingId}-${Date.now().toString(36)}`;
+  // 2. Generate order number upfront (STG-YYYY-NNNNNN)
+  const orderNumberResult = await generateOrderNumber(supabase);
+  if (typeof orderNumberResult !== 'string') return orderNumberResult;
+  const orderNumber = orderNumberResult;
+
+  // Each checkout attempt gets a fresh order number, so no uniqueness collision
+  const orderReference = orderNumber;
 
   if (pricing.everypayChargeCents === 0) {
     // Wallet-only: create auction order immediately
-    // TODO: Create a dedicated RPC for auction orders, or use direct insert
-    // For now, create the order directly via insert
-    const auctionOrderNumber = `A-${Date.now()}`;
     const { data: order, error } = await supabase
       .from('orders')
       .insert({
         buyer_id: buyerId,
         seller_id: sellerId,
-        order_number: auctionOrderNumber,
+        order_number: orderNumber,
         shipping_method: shippingMethod,
         destination_country: input.destinationCountry || null,
         destination_terminal_id: input.destinationTerminalId || null,
@@ -413,7 +436,7 @@ export async function createAuctionCheckoutSession(
     });
 
     // Notify seller about new order (non-blocking)
-    notifySellerNewOrder(sellerId, order.id, auctionOrderNumber).catch(() => {});
+    notifySellerNewOrder(sellerId, order.id, orderNumber).catch(() => {});
 
     // Send buyer confirmation and seller notification emails (non-blocking)
     sendOrderEmails(supabase, order.id, {
@@ -447,6 +470,8 @@ export async function createAuctionCheckoutSession(
       order_reference: orderReference,
       event_type: 'checkout_initiated',
       payload: {
+        checkout_type: 'auction',
+        order_number: orderNumber,
         listing_id: listingId,
         buyer_id: buyerId,
         seller_id: sellerId,
