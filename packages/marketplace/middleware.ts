@@ -67,6 +67,16 @@ export async function middleware(request: NextRequest) {
     || request.nextUrl.searchParams.has('code')
     || request.nextUrl.searchParams.has('token_hash');
 
+  // If ?code= lands on a non-auth-confirm route (e.g., Supabase redirect URL mismatch),
+  // redirect to /auth/confirm to properly exchange the code for a session
+  if (request.nextUrl.searchParams.has('code') && !pathname.includes('/auth/confirm')) {
+    const localeMatch = pathname.match(new RegExp(`^/(${localePattern})`));
+    const locale = localeMatch ? localeMatch[1] : 'en';
+    const confirmUrl = request.nextUrl.clone();
+    confirmUrl.pathname = `/${locale}/auth/confirm`;
+    return NextResponse.redirect(confirmUrl);
+  }
+
   const supabaseProjectRef = process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0];
   const authCookiePrefix = `sb-${supabaseProjectRef}-auth-token`;
 
