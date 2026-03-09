@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from '@/i18n/navigation';
 import { Badge } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
   Shield,
-  Email,
   Download,
   Globe,
 } from '@/lib/icons';
@@ -44,7 +42,7 @@ const sourceLabels: Record<string, string> = {
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg">
+    <div className="flex items-center justify-center py-24">
       <div className="text-center">
         <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
         <p className="text-text-secondary">Loading subscribers...</p>
@@ -54,20 +52,13 @@ function LoadingFallback() {
 }
 
 export default function StaffNewsletterPage() {
-  const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
 
   const [data, setData] = useState<NewsletterData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isStaff, setIsStaff] = useState<boolean | null>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'unsubscribed'>('active');
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/signin?redirectTo=/staff/newsletter');
-    }
-  }, [user, authLoading, router]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -102,13 +93,13 @@ export default function StaffNewsletterPage() {
     }
   }, [user, fetchData]);
 
-  if (authLoading || (loading && isStaff === null)) {
+  if (loading && isStaff === null) {
     return <LoadingFallback />;
   }
 
   if (isStaff === false) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg">
+      <div className="flex items-center justify-center py-24">
         <div className="text-center max-w-md mx-auto px-4">
           <Shield className="w-16 h-16 text-aurora-red mx-auto mb-4" />
           <h1 className="text-2xl sm:text-3xl font-bold text-text mb-2">Staff Access Required</h1>
@@ -127,19 +118,7 @@ export default function StaffNewsletterPage() {
   }) || [];
 
   return (
-    <div className="min-h-screen bg-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Email className="w-8 h-8 text-frost-ice" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-text">Newsletter Subscribers</h1>
-          </div>
-          <p className="text-text-secondary">
-            Manage newsletter subscriptions and export subscriber data
-          </p>
-        </div>
-
         {/* Stats Cards */}
         {data?.stats && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -291,6 +270,5 @@ export default function StaffNewsletterPage() {
           </p>
         )}
       </div>
-    </div>
   );
 }

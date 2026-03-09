@@ -76,6 +76,8 @@ export interface OrderData {
     disputed_at?: string;
   };
   dispute?: OrderDispute | null;
+  invoice_number?: string | null;
+  credit_note_number?: string | null;
   // Seller-specific (only present when viewer is seller)
   parcel_size?: string;
   label_error?: string;

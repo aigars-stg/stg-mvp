@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useRouter } from '@/i18n/navigation';
 import { Link } from '@/i18n/navigation';
 import { Button, Badge } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
   Shield,
   AlertCircle,
-  AlertTriangle,
   Time as Clock,
 } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -95,17 +93,10 @@ function getCountdown(deadlineStr: string): { text: string; urgent: boolean } {
 }
 
 function DisputesContent() {
-  const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [data, setData] = useState<DisputeResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [section, setSection] = useState<Section>('needs_action');
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/signin?redirectTo=/staff/disputes');
-    }
-  }, [user, authLoading, router]);
 
   const fetchDisputes = useCallback(async () => {
     try {
@@ -126,37 +117,7 @@ function DisputesContent() {
     if (user) fetchDisputes();
   }, [user, fetchDisputes]);
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-frost-ice" />
-      </div>
-    );
-  }
-
-  if (!user) return null;
-
   return (
-    <div className="min-h-screen bg-bg-primary">
-      {/* Header */}
-      <div className="bg-frost-ice/5 border-b border-frost-ice/20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="flex items-center gap-2 text-xs text-text-muted mb-4">
-            <Shield className="w-3.5 h-3.5" />
-            Staff Dashboard
-          </div>
-          <div className="flex items-center gap-3 mb-2">
-            <AlertTriangle className="w-8 h-8 text-frost-ice" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
-              Dispute Management
-            </h1>
-          </div>
-          <p className="text-text-secondary">
-            Review and resolve buyer disputes
-          </p>
-        </div>
-      </div>
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* Summary */}
         {data?.counts && data.counts.needs_action > 0 && (
@@ -322,7 +283,6 @@ function DisputesContent() {
           </div>
         )}
       </div>
-    </div>
   );
 }
 
@@ -330,7 +290,7 @@ export default function StaffDisputesPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center py-24">
           <Loader2 className="w-8 h-8 animate-spin text-frost-ice" />
         </div>
       }

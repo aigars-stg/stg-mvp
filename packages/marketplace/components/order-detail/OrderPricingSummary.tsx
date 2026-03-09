@@ -1,5 +1,8 @@
 'use client';
 
+import Link from 'next/link';
+import { useLocale } from 'next-intl';
+import { Download } from '@/lib/icons';
 import { formatPrice, formatCentsToCurrency } from '@/lib/services/pricing';
 import type { OrderDetailOrder, ViewerRole } from '@/lib/types/order-detail';
 
@@ -14,6 +17,7 @@ export function OrderPricingSummary({
   viewerRole,
   title = 'Order Summary',
 }: OrderPricingSummaryProps) {
+  const locale = useLocale();
   const commissionCents = order.payment?.platform_commission_cents;
   const sellerCreditCents = order.payment?.seller_wallet_credit_cents;
 
@@ -110,6 +114,36 @@ export function OrderPricingSummary({
           </>
         )}
       </div>
+
+      {/* Document links */}
+      {(['completed', 'refunded'].includes(order.status)) && (() => {
+        const links: { href: string; label: string }[] = [];
+        if (viewerRole === 'seller' || viewerRole === 'staff') {
+          if (order.invoice_number) {
+            links.push({ href: `/${locale}/orders/${order.id}/invoice`, label: viewerRole === 'seller' ? 'View invoice' : 'Invoice' });
+          }
+          if (order.credit_note_number) {
+            links.push({ href: `/${locale}/orders/${order.id}/credit-note`, label: viewerRole === 'seller' ? 'View credit note' : 'Credit note' });
+          }
+        }
+        if (viewerRole === 'buyer' || viewerRole === 'staff') {
+          links.push({ href: `/${locale}/orders/${order.id}/confirmation`, label: viewerRole === 'buyer' ? 'Order confirmation' : 'Confirmation' });
+        }
+        return links.length > 0 ? (
+          <div className="mt-4 flex flex-wrap gap-3 border-t border-border-subtle pt-4">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex items-center gap-1.5 text-sm text-text-secondary transition-colors hover:text-polar-night"
+              >
+                <Download className="h-4 w-4" />
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        ) : null;
+      })()}
     </div>
   );
 }

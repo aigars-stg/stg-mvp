@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useRouter } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
@@ -74,8 +74,7 @@ export default function StaffFeedbackDetailPage({
   params: { id: string };
 }) {
   const id = params.id;
-  const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
 
   const [feedback, setFeedback] = useState<FeedbackDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,13 +85,6 @@ export default function StaffFeedbackDetailPage({
   const [status, setStatus] = useState<FeedbackStatus>('new');
   const [internalNotes, setInternalNotes] = useState('');
   const [copied, setCopied] = useState(false);
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/signin?redirectTo=/staff/feedback');
-    }
-  }, [user, authLoading, router]);
 
   // Fetch feedback detail
   const fetchFeedback = useCallback(async () => {
@@ -186,9 +178,9 @@ export default function StaffFeedbackDetailPage({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (authLoading || (loading && isStaff === null)) {
+  if (loading && isStaff === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg">
+      <div className="flex items-center justify-center py-24">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
           <p className="text-text-secondary">Loading feedback...</p>
@@ -199,7 +191,7 @@ export default function StaffFeedbackDetailPage({
 
   if (isStaff === false) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg">
+      <div className="flex items-center justify-center py-24">
         <div className="text-center max-w-md mx-auto px-4">
           <Shield className="w-16 h-16 text-aurora-red mx-auto mb-4" />
           <h1 className="text-2xl sm:text-3xl font-bold text-text mb-2">Staff Access Required</h1>
@@ -213,7 +205,6 @@ export default function StaffFeedbackDetailPage({
 
   if (error && !feedback) {
     return (
-      <div className="min-h-screen bg-bg">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
           <Link
             href="/staff/feedback"
@@ -226,7 +217,6 @@ export default function StaffFeedbackDetailPage({
             {error}
           </div>
         </div>
-      </div>
     );
   }
 
@@ -238,7 +228,6 @@ export default function StaffFeedbackDetailPage({
     status !== feedback.status || internalNotes !== (feedback.internal_notes || '');
 
   return (
-    <div className="min-h-screen bg-bg">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Back link */}
         <Link
@@ -444,6 +433,5 @@ export default function StaffFeedbackDetailPage({
           </div>
         </div>
       </div>
-    </div>
   );
 }

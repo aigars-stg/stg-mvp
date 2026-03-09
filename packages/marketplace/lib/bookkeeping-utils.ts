@@ -45,6 +45,13 @@ export interface OrderBookkeepingData {
   total_amount: number;
   buyer_name: string;
   seller_name: string;
+  // Per-order stored VAT columns (null for legacy orders pre-migration)
+  commission_net_cents: number | null;
+  commission_vat_cents: number | null;
+  commission_vat_rate: number | null;
+  shipping_net_cents: number | null;
+  shipping_vat_cents: number | null;
+  shipping_vat_rate: number | null;
 }
 
 /** Aggregated bookkeeping summary for a set of orders */
@@ -168,15 +175,11 @@ export const DATE_RANGE_PRESETS: DateRangePreset[] = [
 // ============================================================================
 
 /**
- * Extract VAT from a VAT-inclusive (gross) amount
- * Formula: VAT = gross × (rate / (1 + rate))
+ * Extract VAT from a VAT-inclusive (gross) amount using Latvia's default rate.
+ * Legacy fallback for orders without stored VAT columns.
  *
  * @param grossAmount - VAT-inclusive amount in EUR
  * @returns Breakdown with gross, net, and VAT amounts (rounded to 2 decimal places)
- *
- * @example
- * extractVatFromGross(2.00)  // { gross: 2.00, net: 1.65, vat: 0.35 }
- * extractVatFromGross(1.58)  // { gross: 1.58, net: 1.31, vat: 0.27 }
  */
 export function extractVatFromGross(grossAmount: number): VATBreakdown {
   const vat = grossAmount * VAT_MULTIPLIER;
@@ -186,6 +189,25 @@ export function extractVatFromGross(grossAmount: number): VATBreakdown {
     net: Math.round(net * 100) / 100,
     vat: Math.round(vat * 100) / 100,
   };
+}
+
+/**
+ * Resolve VAT breakdown from stored per-order columns, falling back to
+ * Latvia-rate calculation for legacy orders (pre-VAT-column migration).
+ */
+export function resolveVatBreakdown(
+  grossEuros: number,
+  storedNetCents: number | null,
+  storedVatCents: number | null,
+): VATBreakdown {
+  if (storedNetCents != null) {
+    return {
+      gross: grossEuros,
+      net: storedNetCents / 100,
+      vat: (storedVatCents ?? 0) / 100,
+    };
+  }
+  return extractVatFromGross(grossEuros);
 }
 
 // ============================================================================
@@ -205,19 +227,37 @@ export function calculateBookkeepingSummary(orders: OrderBookkeepingData[]): Boo
 
   let gmv = 0;
   let totalBuyerPaid = 0;
-  let totalCommission = 0;
-  let totalShipping = 0;
+  const platformRevenue: VATBreakdown = { gross: 0, net: 0, vat: 0 };
+  const shippingRevenue: VATBreakdown = { gross: 0, net: 0, vat: 0 };
 
   for (const order of validOrders) {
     gmv += order.items_total;
     totalBuyerPaid += order.total_amount;
-    totalCommission += order.platform_commission_cents / 100;
-    totalShipping += order.shipping_cost;
+
+    const commission = resolveVatBreakdown(
+      order.platform_commission_cents / 100, order.commission_net_cents, order.commission_vat_cents
+    );
+    platformRevenue.gross += commission.gross;
+    platformRevenue.net += commission.net;
+    platformRevenue.vat += commission.vat;
+
+    const shipping = resolveVatBreakdown(
+      order.shipping_cost, order.shipping_net_cents, order.shipping_vat_cents
+    );
+    shippingRevenue.gross += shipping.gross;
+    shippingRevenue.net += shipping.net;
+    shippingRevenue.vat += shipping.vat;
   }
 
-  const platformRevenue = extractVatFromGross(totalCommission);
-  const shippingRevenue = extractVatFromGross(totalShipping);
-  const totalVatCollected = platformRevenue.vat + shippingRevenue.vat;
+  // Round aggregated values to 2 decimal places
+  platformRevenue.gross = Math.round(platformRevenue.gross * 100) / 100;
+  platformRevenue.net = Math.round(platformRevenue.net * 100) / 100;
+  platformRevenue.vat = Math.round(platformRevenue.vat * 100) / 100;
+  shippingRevenue.gross = Math.round(shippingRevenue.gross * 100) / 100;
+  shippingRevenue.net = Math.round(shippingRevenue.net * 100) / 100;
+  shippingRevenue.vat = Math.round(shippingRevenue.vat * 100) / 100;
+
+  const totalVatCollected = Math.round((platformRevenue.vat + shippingRevenue.vat) * 100) / 100;
 
   return {
     orderCount: validOrders.length,
@@ -266,11 +306,17 @@ export function generateBookkeepingCSV(orders: OrderBookkeepingData[]): string {
     'Shipping VAT (EUR)',
     'Total VAT (EUR)',
     'Buyer Paid (EUR)',
+    'VAT Rate',
   ];
 
   const rows = orders.map((order) => {
-    const platformFee = extractVatFromGross(order.platform_commission_cents / 100);
-    const shipping = extractVatFromGross(order.shipping_cost);
+    const platformFee = resolveVatBreakdown(
+      order.platform_commission_cents / 100, order.commission_net_cents, order.commission_vat_cents
+    );
+    const shipping = resolveVatBreakdown(
+      order.shipping_cost, order.shipping_net_cents, order.shipping_vat_cents
+    );
+    const vatRate = order.commission_vat_rate ?? LATVIA_VAT_RATE;
     const totalVat = platformFee.vat + shipping.vat;
     const date = order.paid_at
       ? new Date(order.paid_at).toISOString().split('T')[0]
@@ -291,6 +337,7 @@ export function generateBookkeepingCSV(orders: OrderBookkeepingData[]): string {
       shipping.vat.toFixed(2),
       totalVat.toFixed(2),
       order.total_amount.toFixed(2),
+      (vatRate * 100).toFixed(0) + '%',
     ].join(',');
   });
 

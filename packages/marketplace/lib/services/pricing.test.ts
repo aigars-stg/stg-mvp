@@ -169,8 +169,8 @@ describe('getVatRate', () => {
   it('returns 0.21 for LT', () => {
     expect(getVatRate('LT')).toBe(0.21);
   });
-  it('returns 0.22 for EE', () => {
-    expect(getVatRate('EE')).toBe(0.22);
+  it('returns 0.24 for EE', () => {
+    expect(getVatRate('EE')).toBe(0.24);
   });
   it('returns default 0.21 for null', () => {
     expect(getVatRate(null)).toBe(0.21);
@@ -179,7 +179,7 @@ describe('getVatRate', () => {
     expect(getVatRate('DE')).toBe(0.21);
   });
   it('is case-insensitive', () => {
-    expect(getVatRate('ee')).toBe(0.22);
+    expect(getVatRate('ee')).toBe(0.24);
   });
 });
 
@@ -191,12 +191,12 @@ describe('calculateVatSplit', () => {
     expect(result.vatCents).toBe(43);
     expect(result.vatRate).toBe(0.21);
   });
-  it('splits EE shipping correctly (210 cents at 22%)', () => {
-    const result = calculateVatSplit(210, 0.22);
+  it('splits EE shipping correctly (210 cents at 24%)', () => {
+    const result = calculateVatSplit(210, 0.24);
     expect(result.grossCents).toBe(210);
-    expect(result.netCents).toBe(172);
-    expect(result.vatCents).toBe(38);
-    expect(result.vatRate).toBe(0.22);
+    expect(result.netCents).toBe(169);
+    expect(result.vatCents).toBe(41);
+    expect(result.vatRate).toBe(0.24);
   });
   it('handles zero amount', () => {
     const result = calculateVatSplit(0, 0.21);
@@ -207,7 +207,7 @@ describe('calculateVatSplit', () => {
 });
 
 describe('calculateOrderPricingWithVat', () => {
-  it('includes VAT breakdown for LV destination', () => {
+  it('includes VAT breakdown for LV seller', () => {
     const result = calculateOrderPricingWithVat(2500, 190, 'LV');
     expect(result.commissionCents).toBe(250);
     expect(result.commissionVat.vatRate).toBe(0.21);
@@ -217,12 +217,12 @@ describe('calculateOrderPricingWithVat', () => {
     expect(result.shippingVat.vatRate).toBe(0.21);
     expect(result.shippingVat.grossCents).toBe(190);
   });
-  it('uses EE rate for Estonian destination', () => {
+  it('uses EE rate for Estonian seller', () => {
     const result = calculateOrderPricingWithVat(2500, 210, 'EE');
-    expect(result.commissionVat.vatRate).toBe(0.22);
-    expect(result.shippingVat.vatRate).toBe(0.22);
+    expect(result.commissionVat.vatRate).toBe(0.24);
+    expect(result.shippingVat.vatRate).toBe(0.24);
   });
-  it('uses default rate for null destination', () => {
+  it('uses default rate for null seller country', () => {
     const result = calculateOrderPricingWithVat(2500, 0, null);
     expect(result.commissionVat.vatRate).toBe(0.21);
   });

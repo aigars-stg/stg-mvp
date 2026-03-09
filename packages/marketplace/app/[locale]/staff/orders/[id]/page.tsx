@@ -54,7 +54,7 @@ interface UserProfile {
   phone?: string;
 }
 
-interface StaffTransactionData {
+interface StaffOrderData {
   conversation: { id: string; buyer_id: string; seller_id: string };
   messages: Message[];
   order: OrderDetailOrder;
@@ -65,50 +65,37 @@ interface StaffTransactionData {
   seller: UserProfile | null;
 }
 
-export default function StaffTransactionPage() {
+export default function StaffOrderDetailPage() {
   const router = useRouter();
   const params = useParams();
   const orderId = params.id as string;
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
 
-  const [data, setData] = useState<StaffTransactionData | null>(null);
+  const [data, setData] = useState<StaffOrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isStaff, setIsStaff] = useState<boolean | null>(null);
 
   // Simulation state
   const [simulationOptions, setSimulationOptions] = useState<SimulationOption[]>([]);
   const [simulationLoading, setSimulationLoading] = useState(false);
   const [simulationMessage, setSimulationMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push(`/auth/signin?redirectTo=/staff/transactions/${orderId}`);
-    }
-  }, [user, authLoading, router, orderId]);
-
-  const fetchTransaction = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await fetch(`/api/staff/transactions/${orderId}`);
       const result = await response.json();
 
-      if (response.status === 403) {
-        setIsStaff(false);
-        setError('Staff access required');
-        return;
-      }
-      if (!response.ok) throw new Error(result.error || 'Failed to fetch transaction');
+      if (!response.ok) throw new Error(result.error || 'Failed to fetch order');
 
-      setIsStaff(true);
       setData(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load transaction');
+      setError(err instanceof Error ? err.message : 'Failed to load order');
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
 
   const fetchSimulationOptions = useCallback(async () => {
     try {
@@ -134,8 +121,7 @@ export default function StaffTransactionPage() {
       const result = await response.json();
       if (response.ok) {
         setSimulationMessage({ type: 'success', text: result.message });
-        await fetchTransaction();
-        await fetchSimulationOptions();
+        await Promise.all([fetchOrder(), fetchSimulationOptions()]);
       } else {
         setSimulationMessage({ type: 'error', text: result.error || 'Simulation failed' });
       }
@@ -146,32 +132,18 @@ export default function StaffTransactionPage() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (user && orderId) fetchTransaction(); }, [user, orderId]);
+  useEffect(() => { if (user && orderId) fetchOrder(); }, [user?.id, orderId, fetchOrder]);
 
   useEffect(() => {
-    if (data?.order?.shipping_method === 't2t' && isStaff) fetchSimulationOptions();
-  }, [data?.order?.shipping_method, isStaff, fetchSimulationOptions]);
+    if (data?.order?.shipping_method === 't2t') fetchSimulationOptions();
+  }, [data?.order?.shipping_method, fetchSimulationOptions]);
 
-  if (isStaff === false) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-primary">
-        <div className="text-center max-w-md px-4">
-          <Shield className="w-16 h-16 text-aurora-red mx-auto mb-4" />
-          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night mb-2">Staff Access Required</h1>
-          <p className="text-text-secondary mb-6">This page is only accessible to staff members.</p>
-          <Link href="/"><Button variant="accent">Go Home</Button></Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-primary">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
-          <p className="text-text-secondary">Loading transaction...</p>
+          <p className="text-text-secondary">Loading order...</p>
         </div>
       </div>
     );
@@ -179,11 +151,11 @@ export default function StaffTransactionPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-primary">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center max-w-md px-4">
           <AlertCircle className="w-12 h-12 text-aurora-red mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-polar-night mb-2">{error || 'Transaction not found'}</h2>
-          <Link href="/staff/transactions"><Button variant="accent">Back to Dashboard</Button></Link>
+          <h2 className="text-xl font-semibold text-polar-night mb-2">{error || 'Order not found'}</h2>
+          <Link href="/staff/orders"><Button variant="accent">Back to Orders</Button></Link>
         </div>
       </div>
     );
@@ -194,13 +166,13 @@ export default function StaffTransactionPage() {
   const { order, order_items, tracking_events, issues, buyer, seller, messages } = data;
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <div>
       <OrderDetailHeader
         orderNumber={order.order_number}
         status={order.status}
         subtitle={`Staff view • Created ${formatDateTime(order.timestamps.created_at)}`}
-        backHref="/staff/transactions"
-        backLabel="Back to Staff Dashboard"
+        backHref="/staff/orders"
+        backLabel="Back to Orders"
         extraBadges={
           <>
             <Badge variant="default" size="sm">
@@ -375,6 +347,26 @@ export default function StaffTransactionPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6 order-1 lg:order-2">
             <OrderStatusNotice order={order} viewerRole="staff" />
+
+            {/* Dispute action card */}
+            {order.status === 'disputed' && (
+              <div className="bg-aurora-red/5 border border-aurora-red/30 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-5 h-5 text-aurora-red flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-polar-night">This order has an open dispute</p>
+                      <p className="text-sm text-text-secondary mt-0.5">
+                        Review buyer and seller claims, then resolve the dispute.
+                      </p>
+                    </div>
+                  </div>
+                  <Link href={`/staff/disputes/${orderId}`}>
+                    <Button variant="accent" size="sm">Resolve Dispute</Button>
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {/* Issues (staff-only) */}
             {issues.length > 0 && (

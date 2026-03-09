@@ -87,7 +87,9 @@ export async function GET(
         seller_wallet_credit_cents,
         parcel_size,
         unisend_parcel_id,
-        label_error
+        label_error,
+        invoice_number,
+        credit_note_number
       `)
       .eq('id', orderId)
       .single();
@@ -308,6 +310,8 @@ export async function GET(
         refund_amount: order.refund_amount,
         refund_status: order.refund_status,
         payment_method: order.payment_method,
+        invoice_number: order.invoice_number,
+        credit_note_number: order.credit_note_number,
         dispute: order.disputed_at ? {
           reason: order.dispute_reason,
           description: order.dispute_description,

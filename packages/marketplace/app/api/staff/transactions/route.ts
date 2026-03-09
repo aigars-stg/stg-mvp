@@ -89,7 +89,13 @@ export async function GET(request: NextRequest) {
         paid_at,
         items_total,
         shipping_cost,
-        platform_commission_cents
+        platform_commission_cents,
+        commission_net_cents,
+        commission_vat_cents,
+        commission_vat_rate,
+        shipping_net_cents,
+        shipping_vat_cents,
+        shipping_vat_rate
       `, { count: 'exact' });
 
     // Apply filters

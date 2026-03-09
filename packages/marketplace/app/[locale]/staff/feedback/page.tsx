@@ -9,7 +9,6 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
-  Chat as MessageSquare,
   Bug,
   Sparks as Lightbulb,
   HelpCircle,
@@ -72,7 +71,7 @@ const typeOptions = [
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg">
+    <div className="flex items-center justify-center py-24">
       <div className="text-center">
         <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
         <p className="text-text-secondary">Loading feedback...</p>
@@ -92,7 +91,7 @@ export default function StaffFeedbackPage() {
 function StaffFeedbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
 
   const [data, setData] = useState<FeedbackListResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,13 +106,6 @@ function StaffFeedbackContent() {
   const [currentPage, setCurrentPage] = useState(
     parseInt(searchParams.get('page') || '1', 10)
   );
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/signin?redirectTo=/staff/feedback');
-    }
-  }, [user, authLoading, router]);
 
   // Fetch feedback
   const fetchFeedback = useCallback(async () => {
@@ -164,13 +156,13 @@ function StaffFeedbackContent() {
     router.replace(`/staff/feedback${params.toString() ? `?${params}` : ''}`);
   }, [statusFilter, typeFilter, currentPage, router]);
 
-  if (authLoading || (loading && isStaff === null)) {
+  if (loading && isStaff === null) {
     return <LoadingFallback />;
   }
 
   if (isStaff === false) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg">
+      <div className="flex items-center justify-center py-24">
         <div className="text-center max-w-md mx-auto px-4">
           <Shield className="w-16 h-16 text-aurora-red mx-auto mb-4" />
           <h1 className="text-2xl sm:text-3xl font-bold text-text mb-2">Staff Access Required</h1>
@@ -182,25 +174,8 @@ function StaffFeedbackContent() {
     );
   }
 
-  const newCount = data?.data.filter((f) => f.status === 'new').length || 0;
-
   return (
-    <div className="min-h-screen bg-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <MessageSquare className="w-8 h-8 text-frost-ice" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-text">User Feedback</h1>
-            {newCount > 0 && (
-              <Badge variant="error">{newCount} new</Badge>
-            )}
-          </div>
-          <p className="text-text-secondary">
-            Review and manage user feedback submissions
-          </p>
-        </div>
-
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
           <select
@@ -362,6 +337,5 @@ function StaffFeedbackContent() {
           </>
         )}
       </div>
-    </div>
   );
 }

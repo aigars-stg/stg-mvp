@@ -82,15 +82,9 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Only allow disputes on shipped, in_transit, or delivered orders
+    // Only allow disputes on shipped, in_transit, delivered, or completed orders
     const disputeAllowedStatuses = ['shipped', 'in_transit', 'delivered'];
     if (!disputeAllowedStatuses.includes(order.status)) {
-      if (order.status === 'completed') {
-        return NextResponse.json(
-          { error: 'This order has already been completed. Please contact info@secondturn.games for assistance.' },
-          { status: 400 }
-        );
-      }
       if (order.status === 'disputed') {
         return NextResponse.json(
           { error: 'This order already has an open dispute' },
@@ -103,15 +97,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Check seller wallet hasn't been credited already
-    if (order.wallet_credited_at) {
-      return NextResponse.json(
-        { error: 'This order has already been completed. Please contact info@secondturn.games for assistance.' },
-        { status: 400 }
-      );
-    }
-
-    // Check if within dispute window (2 days after delivery) - only applies if delivered
+    // Check if within dispute window (2 days after delivery) - only applies if delivered/completed
     if (order.delivered_at) {
       const deliveryDate = new Date(order.delivered_at);
       const disputeDeadline = new Date(deliveryDate.getTime() + DISPUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
@@ -256,7 +242,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     const deliveryDate = new Date(deliveryTimestamp);
     const disputeDeadline = new Date(deliveryDate.getTime() + DISPUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
     const now = new Date();
-    const canDispute = order.status === 'delivered' && now <= disputeDeadline;
+    const canDispute = (order.status === 'delivered' || order.status === 'completed') && now <= disputeDeadline;
 
     return NextResponse.json({
       orderId: order.id,

@@ -1,14 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useRouter } from '@/i18n/navigation';
 import { Button, Badge } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
-  CurrencyEuro as Euro,
   AlertCircle,
   CheckCircleAlt01 as CheckCircle,
-  Shield,
 } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { formatDateTime } from '@/lib/date-utils';
@@ -51,8 +48,7 @@ const STATUS_BADGE: Record<string, 'warning' | 'default' | 'success' | 'error'> 
 };
 
 function WithdrawalsContent() {
-  const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [data, setData] = useState<WithdrawalResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('pending');
@@ -66,12 +62,6 @@ function WithdrawalsContent() {
   const [bankReference, setBankReference] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/signin?redirectTo=/staff/withdrawals');
-    }
-  }, [user, authLoading, router]);
 
   const fetchWithdrawals = useCallback(async () => {
     try {
@@ -138,37 +128,8 @@ function WithdrawalsContent() {
   };
 
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-frost-ice" />
-      </div>
-    );
-  }
-
-  if (!user) return null;
-
   return (
-    <div className="min-h-screen bg-bg-primary">
-      {/* Header */}
-      <div className="bg-frost-ice/5 border-b border-frost-ice/20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="flex items-center gap-2 text-xs text-text-muted mb-4">
-            <Shield className="w-3.5 h-3.5" />
-            Staff Dashboard
-          </div>
-          <div className="flex items-center gap-3 mb-2">
-            <Euro className="w-8 h-8 text-frost-ice" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
-              Withdrawal Management
-            </h1>
-          </div>
-          <p className="text-text-secondary">
-            Review and process seller withdrawal requests
-          </p>
-        </div>
-      </div>
-
+    <>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* Summary */}
         {data?.summary && data.summary.pendingCount > 0 && (
@@ -413,7 +374,7 @@ function WithdrawalsContent() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -421,7 +382,7 @@ export default function StaffWithdrawalsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center py-24">
           <Loader2 className="w-8 h-8 animate-spin text-frost-ice" />
         </div>
       }

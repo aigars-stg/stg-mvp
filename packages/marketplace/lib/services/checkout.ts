@@ -66,6 +66,7 @@ export interface AuctionCheckoutInput {
   customerIp?: string;
 
   // T2T fields
+  senderCountry?: string;
   destinationCountry?: string;
   destinationTerminalId?: string;
   destinationTerminalName?: string;
@@ -168,7 +169,7 @@ export async function createCheckoutSession(
   const orderPricing = calculateOrderPricingWithVat(
     pricing.itemsTotalCents,
     pricing.shippingCostCents,
-    input.destinationCountry
+    input.senderCountry
   );
 
   // 2. Generate order number upfront (STG-YYYY-NNNNNN)
@@ -358,7 +359,7 @@ export async function createAuctionCheckoutSession(
   const orderPricing = calculateOrderPricingWithVat(
     pricing.itemsTotalCents,
     pricing.shippingCostCents,
-    input.destinationCountry
+    input.senderCountry
   );
 
   // 2. Generate order number upfront (STG-YYYY-NNNNNN)

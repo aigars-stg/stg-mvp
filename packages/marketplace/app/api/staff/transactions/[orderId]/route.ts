@@ -112,6 +112,8 @@ export async function GET(
         wallet_credited_at,
         refund_amount,
         refund_reason,
+        invoice_number,
+        credit_note_number,
         created_at,
         paid_at,
         seller_response_deadline,
@@ -273,6 +275,13 @@ export async function GET(
       .eq('id', order.seller_id)
       .single();
 
+    // Fetch seller wallet balance (useful for dispute resolution)
+    const { data: sellerWallet } = await serviceClient
+      .from('wallets')
+      .select('balance_cents')
+      .eq('user_id', order.seller_id)
+      .single();
+
     return NextResponse.json({
       conversation: {
         id: conversation.id,
@@ -320,6 +329,8 @@ export async function GET(
         },
         refund_amount: order.refund_amount,
         refund_reason: order.refund_reason,
+        invoice_number: order.invoice_number,
+        credit_note_number: order.credit_note_number,
         timestamps: {
           created_at: order.created_at,
           paid_at: order.paid_at,
@@ -335,6 +346,7 @@ export async function GET(
       issues: (issues || []) as IssueRow[],
       buyer: buyerProfile,
       seller: sellerProfile,
+      seller_wallet_balance_cents: sellerWallet?.balance_cents ?? null,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';

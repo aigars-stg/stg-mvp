@@ -155,17 +155,17 @@ export function formatCentsToCurrency(cents: number): string {
 // ==============================================
 
 /**
- * VAT rates by destination country (EU OSS).
- * STG is a Latvian company registered for EU OSS.
- * Commission and shipping VAT follow destination country rate.
+ * VAT rates by seller's country of establishment.
+ * Both commission (Article 46) and shipping (Article 50/45) VAT
+ * are determined by the seller's country, not the buyer's destination.
  */
 export const VAT_RATES: Record<string, number> = {
   LV: 0.21,
   LT: 0.21,
-  EE: 0.22,
+  EE: 0.24,
 };
 
-/** Default VAT rate (Latvia domestic) for unknown destinations */
+/** Default VAT rate (Latvia domestic) for unknown countries */
 export const DEFAULT_VAT_RATE = 0.21;
 
 export interface VatSplit {
@@ -181,11 +181,11 @@ export interface OrderVat {
 }
 
 /**
- * Get the VAT rate for a destination country
+ * Get the VAT rate for a country (seller's country determines VAT)
  */
-export function getVatRate(destinationCountry: string | null | undefined): number {
-  if (!destinationCountry) return DEFAULT_VAT_RATE;
-  return VAT_RATES[destinationCountry.toUpperCase()] ?? DEFAULT_VAT_RATE;
+export function getVatRate(country: string | null | undefined): number {
+  if (!country) return DEFAULT_VAT_RATE;
+  return VAT_RATES[country.toUpperCase()] ?? DEFAULT_VAT_RATE;
 }
 
 /**
@@ -199,15 +199,16 @@ export function calculateVatSplit(grossCents: number, vatRate: number): VatSplit
 }
 
 /**
- * Calculate full order pricing with VAT breakdown
+ * Calculate full order pricing with VAT breakdown.
+ * VAT is determined by the seller's country (Article 46 for commission, Article 50/45 for shipping).
  */
 export function calculateOrderPricingWithVat(
   itemsTotalCents: number,
   shippingCostCents: number,
-  destinationCountry: string | null | undefined
+  senderCountry: string | null | undefined
 ): OrderPricing & OrderVat {
   const base = calculateOrderPricing(itemsTotalCents, shippingCostCents);
-  const vatRate = getVatRate(destinationCountry);
+  const vatRate = getVatRate(senderCountry);
   const commissionVat = calculateVatSplit(base.commissionCents, vatRate);
   const shippingVat = calculateVatSplit(shippingCostCents, vatRate);
   return { ...base, commissionVat, shippingVat };

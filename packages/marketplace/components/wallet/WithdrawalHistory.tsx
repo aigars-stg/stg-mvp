@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 import { Badge, Button } from '@second-turn/design-system';
-import { RefreshCw as Loader2 } from '@/lib/icons';
+import { RefreshCw as Loader2, Download } from '@/lib/icons';
 import { formatDateTime } from '@/lib/date-utils';
 import { formatCentsToCurrency } from '@/lib/services/pricing';
 
@@ -31,6 +32,7 @@ const STATUS_CONFIG: Record<
 
 export function WithdrawalHistory() {
   const t = useTranslations('WithdrawalHistory');
+  const locale = useLocale();
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -120,6 +122,15 @@ export function WithdrawalHistory() {
                 <p className="text-xs text-text-muted mt-1">
                   {t('bankRef', { ref: w.bankReference })}
                 </p>
+              )}
+              {w.status === 'completed' && (
+                <Link
+                  href={`/${locale}/seller/payouts/${w.id}`}
+                  className="mt-2 inline-flex items-center gap-1 text-xs text-text-secondary transition-colors hover:text-polar-night"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  View statement
+                </Link>
               )}
               {w.status === 'rejected' && w.rejectionReason && (
                 <p className="text-xs text-aurora-red mt-1">

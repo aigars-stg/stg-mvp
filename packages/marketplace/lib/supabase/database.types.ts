@@ -1039,6 +1039,7 @@ export type Database = {
           commission_vat_cents: number | null
           commission_vat_rate: number | null
           created_at: string | null
+          credit_note_number: string | null
           delivered_at: string | null
           destination_country: string | null
           destination_terminal_address: string | null
@@ -1059,6 +1060,7 @@ export type Database = {
           everypay_payment_reference: string | null
           everypay_payment_state: string | null
           id: string
+          invoice_number: string | null
           items_total: number
           label_error: string | null
           label_generated_at: string | null
@@ -1121,6 +1123,7 @@ export type Database = {
           commission_vat_cents?: number | null
           commission_vat_rate?: number | null
           created_at?: string | null
+          credit_note_number?: string | null
           delivered_at?: string | null
           destination_country?: string | null
           destination_terminal_address?: string | null
@@ -1141,6 +1144,7 @@ export type Database = {
           everypay_payment_reference?: string | null
           everypay_payment_state?: string | null
           id?: string
+          invoice_number?: string | null
           items_total: number
           label_error?: string | null
           label_generated_at?: string | null
@@ -1203,6 +1207,7 @@ export type Database = {
           commission_vat_cents?: number | null
           commission_vat_rate?: number | null
           created_at?: string | null
+          credit_note_number?: string | null
           delivered_at?: string | null
           destination_country?: string | null
           destination_terminal_address?: string | null
@@ -1223,6 +1228,7 @@ export type Database = {
           everypay_payment_reference?: string | null
           everypay_payment_state?: string | null
           id?: string
+          invoice_number?: string | null
           items_total?: number
           label_error?: string | null
           label_generated_at?: string | null
@@ -1275,6 +1281,71 @@ export type Database = {
           wallet_credited_at?: string | null
         }
         Relationships: []
+      }
+      platform_documents: {
+        Row: {
+          created_at: string
+          data: Json
+          document_number: string
+          document_type: string
+          id: string
+          order_id: string | null
+          original_document_id: string | null
+          seller_id: string
+          withdrawal_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          document_number: string
+          document_type: string
+          id?: string
+          order_id?: string | null
+          original_document_id?: string | null
+          seller_id: string
+          withdrawal_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          document_number?: string
+          document_type?: string
+          id?: string
+          order_id?: string | null
+          original_document_id?: string | null
+          seller_id?: string
+          withdrawal_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_documents_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_documents_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_with_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_documents_original_document_id_fkey"
+            columns: ["original_document_id"]
+            isOneToOne: false
+            referencedRelation: "platform_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_documents_withdrawal_id_fkey"
+            columns: ["withdrawal_id"]
+            isOneToOne: false
+            referencedRelation: "withdrawal_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       play_completions: {
         Row: {
@@ -2572,7 +2643,6 @@ export type Database = {
           p_everypay_payment_reference?: string
           p_listing_id: string
           p_locale?: string
-          p_order_number?: string
           p_pickup_city?: string
           p_pickup_notes?: string
           p_platform_commission_cents?: number
@@ -2587,26 +2657,65 @@ export type Database = {
         }
         Returns: Json
       }
-      create_order_from_basket: {
-        Args: {
-          p_basket_id: string
-          p_buyer_wallet_debit_cents?: number
-          p_destination_country?: string
-          p_destination_terminal_address?: string
-          p_destination_terminal_id?: string
-          p_destination_terminal_name?: string
-          p_everypay_payment_reference?: string
-          p_order_number?: string
-          p_pickup_city?: string
-          p_pickup_notes?: string
-          p_receiver_email?: string
-          p_receiver_name?: string
-          p_receiver_phone?: string
-          p_shipping_cost?: number
-          p_shipping_method: string
-        }
-        Returns: Json
-      }
+      create_order_from_basket:
+        | {
+            Args: {
+              p_basket_id: string
+              p_buyer_wallet_debit_cents?: number
+              p_destination_country?: string
+              p_destination_terminal_address?: string
+              p_destination_terminal_id?: string
+              p_destination_terminal_name?: string
+              p_everypay_payment_reference?: string
+              p_pickup_city?: string
+              p_pickup_notes?: string
+              p_receiver_email?: string
+              p_receiver_name?: string
+              p_receiver_phone?: string
+              p_shipping_cost?: number
+              p_shipping_method: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_basket_id: string
+              p_buyer_wallet_debit_cents?: number
+              p_destination_country?: string
+              p_destination_terminal_address?: string
+              p_destination_terminal_id?: string
+              p_destination_terminal_name?: string
+              p_everypay_payment_reference?: string
+              p_order_number?: string
+              p_pickup_city?: string
+              p_pickup_notes?: string
+              p_receiver_email?: string
+              p_receiver_name?: string
+              p_receiver_phone?: string
+              p_shipping_cost?: number
+              p_shipping_method: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_basket_id: string
+              p_destination_country?: string
+              p_destination_terminal_address?: string
+              p_destination_terminal_id?: string
+              p_destination_terminal_name?: string
+              p_pickup_city?: string
+              p_pickup_notes?: string
+              p_receiver_email?: string
+              p_receiver_name?: string
+              p_receiver_phone?: string
+              p_service_fee?: number
+              p_shipping_cost?: number
+              p_shipping_method: string
+              p_stripe_payment_intent_id?: string
+            }
+            Returns: Json
+          }
       create_withdrawal_request: {
         Args: {
           p_account_holder_name: string
@@ -2630,13 +2739,20 @@ export type Database = {
         Args: { p_amount_cents: number; p_order_id: string; p_user_id: string }
         Returns: Json
       }
+      debit_seller_wallet: {
+        Args: { p_amount_cents: number; p_order_id: string }
+        Returns: Json
+      }
       escalate_expired_disputes: { Args: never; Returns: number }
       expire_wanted_listings: { Args: never; Returns: number }
       extend_cart_reservation: {
         Args: { p_basket_id: string; p_buyer_id: string }
         Returns: Json
       }
+      generate_commission_invoice_number: { Args: never; Returns: string }
+      generate_credit_note_number: { Args: never; Returns: string }
       generate_order_number: { Args: never; Returns: string }
+      generate_payout_statement_number: { Args: never; Returns: string }
       get_cart: { Args: { p_buyer_id: string }; Returns: Json }
       get_listing_question_count: {
         Args: { p_listing_id: string }
@@ -2883,3 +2999,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

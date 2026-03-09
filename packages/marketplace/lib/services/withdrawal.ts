@@ -4,6 +4,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { createPayoutStatement } from './document-service';
 
 // ==============================================
 // TYPES
@@ -113,29 +114,85 @@ export async function createWithdrawalRequest(
 
 /**
  * Mark a withdrawal as completed (staff action)
+ * Also generates a payout statement document for the seller.
  */
 export async function completeWithdrawal(
   supabase: SupabaseClient,
   withdrawalId: string,
   processedBy: string,
   bankReference: string
-): Promise<{ success: boolean; error?: string }> {
-  const { error } = await supabase
+): Promise<{ success: boolean; documentNumber?: string; error?: string }> {
+  // Fetch withdrawal to get seller ID and amount
+  const { data: withdrawal, error: fetchError } = await supabase
     .from('withdrawal_requests')
-    .update({
-      status: 'completed',
-      processed_by: processedBy,
-      processed_at: new Date().toISOString(),
-      bank_reference: bankReference,
-    })
+    .select('id, user_id, amount_cents, iban, account_holder_name, created_at')
     .eq('id', withdrawalId)
-    .eq('status', 'pending');
+    .eq('status', 'pending')
+    .single();
 
-  if (error) {
-    return { success: false, error: error.message };
+  if (fetchError || !withdrawal) {
+    return { success: false, error: 'Withdrawal not found or not pending' };
   }
 
-  return { success: true };
+  const processedAt = new Date().toISOString();
+
+  // Mark withdrawal as completed and fetch credited orders in parallel
+  const [updateResult, ordersResult] = await Promise.all([
+    supabase
+      .from('withdrawal_requests')
+      .update({
+        status: 'completed',
+        processed_by: processedBy,
+        processed_at: processedAt,
+        bank_reference: bankReference,
+      })
+      .eq('id', withdrawalId)
+      .eq('status', 'pending'),
+    supabase
+      .from('orders')
+      .select('id, order_number, invoice_number, paid_at, items_total, platform_commission_cents, seller_wallet_credit_cents')
+      .eq('seller_id', withdrawal.user_id)
+      .not('wallet_credited_at', 'is', null)
+      .lte('wallet_credited_at', withdrawal.created_at)
+      .order('paid_at', { ascending: true }),
+  ]);
+
+  if (updateResult.error) {
+    return { success: false, error: updateResult.error.message };
+  }
+
+  if (ordersResult.error) {
+    return { success: false, error: `Failed to fetch orders for statement: ${ordersResult.error.message}` };
+  }
+
+  const orders = ordersResult.data;
+
+  // Generate payout statement document
+  const statementData = {
+    withdrawal_id: withdrawalId,
+    amount_cents: withdrawal.amount_cents,
+    iban: withdrawal.iban,
+    account_holder_name: withdrawal.account_holder_name,
+    bank_reference: bankReference,
+    processed_at: processedAt,
+    orders: orders.map((o) => ({
+      order_number: o.order_number,
+      invoice_number: o.invoice_number,
+      paid_at: o.paid_at,
+      items_total: o.items_total,
+      platform_commission_cents: o.platform_commission_cents,
+      seller_wallet_credit_cents: o.seller_wallet_credit_cents,
+    })),
+  };
+
+  const result = await createPayoutStatement(
+    supabase,
+    withdrawalId,
+    withdrawal.user_id,
+    statementData,
+  );
+
+  return { success: true, documentNumber: result?.documentNumber };
 }
 
 /**

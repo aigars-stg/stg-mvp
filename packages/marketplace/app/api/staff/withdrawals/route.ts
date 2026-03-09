@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/client';
+import { completeWithdrawal } from '@/lib/services/withdrawal';
 
 export const dynamic = 'force-dynamic';
 
@@ -157,25 +158,20 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const { error } = await serviceClient
-        .from('withdrawal_requests')
-        .update({
-          status: 'completed',
-          processed_by: user.id,
-          processed_at: new Date().toISOString(),
-          bank_reference: bankReference,
-        })
-        .eq('id', withdrawalId)
-        .eq('status', 'pending');
+      const result = await completeWithdrawal(serviceClient, withdrawalId, user.id, bankReference);
 
-      if (error) {
+      if (!result.success) {
         return NextResponse.json(
-          { error: 'Failed to complete withdrawal' },
+          { error: result.error || 'Failed to complete withdrawal' },
           { status: 500 }
         );
       }
 
-      return NextResponse.json({ success: true, action: 'completed' });
+      return NextResponse.json({
+        success: true,
+        action: 'completed',
+        documentNumber: result.documentNumber,
+      });
     }
 
     if (action === 'reject') {

@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       buyer_id,
       seller_id,
       updated_at,
-      order_items(listing:listings(title))
+      order_items(game_name)
     `;
 
     let query = serviceClient.from('orders').select(selectFields);
@@ -157,11 +157,22 @@ export async function GET(request: NextRequest) {
       (profiles || []).map((p) => [p.id, p.full_name])
     );
 
-    // Attach names to disputes
+    // Project fields matching the page's Dispute interface
     const disputesWithNames = (disputes || []).map((dispute) => ({
-      ...dispute,
+      order_id: dispute.id,
+      order_number: dispute.order_number,
+      dispute_type: dispute.dispute_status,
+      dispute_reason: dispute.dispute_reason,
+      game_name: (dispute.order_items as { game_name: string }[])?.[0]?.game_name || 'Unknown game',
+      total_amount: dispute.total_amount,
+      disputed_at: dispute.disputed_at,
+      deadline_at: dispute.dispute_seller_deadline,
       buyer_name: profileMap.get(dispute.buyer_id) || 'Unknown',
       seller_name: profileMap.get(dispute.seller_id) || 'Unknown',
+      resolution_type: dispute.dispute_resolution,
+      refund_status: dispute.refund_status,
+      payment_method: dispute.payment_method,
+      status: dispute.status,
     }));
 
     return NextResponse.json({

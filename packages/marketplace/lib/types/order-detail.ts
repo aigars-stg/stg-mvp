@@ -78,6 +78,8 @@ export interface OrderDetailOrder {
   // Staff-specific
   payment?: OrderPayment;
   refund_reason?: string | null;
+  invoice_number?: string | null;
+  credit_note_number?: string | null;
 }
 
 export interface OrderDetailItem {

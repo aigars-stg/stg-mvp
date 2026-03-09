@@ -170,6 +170,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       customerIp: request.headers.get('x-forwarded-for') || undefined,
       useWallet: body.useWallet ?? true,
 
+      senderCountry: sellerCountry,
       destinationCountry: body.destinationCountry,
       destinationTerminalId: body.destinationTerminalId,
       destinationTerminalName: body.destinationTerminalName,

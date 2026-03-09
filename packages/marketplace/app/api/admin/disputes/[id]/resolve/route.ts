@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { processRefund, processPartialRefund, createRefundAdapter } from '@/lib/services/refund';
+import { processRefund, processPartialRefund, processPostCompletionRefund, processPostCompletionPartialRefund, createRefundAdapter } from '@/lib/services/refund';
 import { sendDisputeResolved, sendRefundCompleted } from '@/lib/email/send-order-emails';
 import { creditSellerWallet } from '@/lib/services/wallet';
 import { formatCentsToCurrency } from '@/lib/services/pricing';
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     // Get order
     const { data: order, error: orderError } = await adminSupabase
       .from('orders')
-      .select('id, order_number, status, dispute_status, buyer_id, seller_id, total_amount, buyer_wallet_debit_cents, everypay_payment_reference, payment_method')
+      .select('id, order_number, status, dispute_status, buyer_id, seller_id, total_amount, buyer_wallet_debit_cents, everypay_payment_reference, payment_method, wallet_credited_at')
       .eq('id', orderId)
       .single();
 
@@ -146,22 +146,65 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     // Process refund if applicable
     let refundResult;
+    let postCompletionResult;
     if (resolution_type === 'buyer_full_refund') {
-      refundResult = await processRefund(adminSupabase, orderId, createRefundAdapter());
-      if (!refundResult.success) {
-        console.error(`Refund failed for order ${order.order_number}:`, refundResult.error);
+      if (order.wallet_credited_at) {
+        // Post-completion: claw back seller wallet, refund buyer, generate credit note
+        postCompletionResult = await processPostCompletionRefund(
+          adminSupabase, orderId, resolution_notes.trim(), createRefundAdapter(),
+        );
+        if (!postCompletionResult.success) {
+          console.error(`Post-completion refund failed for order ${order.order_number}:`, postCompletionResult.error);
+        } else {
+          // Map to refundResult shape for email sending below
+          refundResult = {
+            success: true,
+            walletRefundedCents: postCompletionResult.buyerRefundResult?.walletRefundedCents,
+            everypayRefundedCents: postCompletionResult.buyerRefundResult?.everypayRefundedCents,
+            requiresManualSepa: postCompletionResult.buyerRefundResult?.requiresManualSepa,
+            refundMethod: postCompletionResult.buyerRefundResult?.requiresManualSepa ? 'everypay_bank_link' : undefined,
+          };
+        }
+      } else {
+        // Pre-completion: standard refund (no wallet clawback needed)
+        refundResult = await processRefund(adminSupabase, orderId, createRefundAdapter());
+        if (!refundResult.success) {
+          console.error(`Refund failed for order ${order.order_number}:`, refundResult.error);
+        }
       }
     } else if (resolution_type === 'buyer_partial_refund' && refund_amount_cents) {
-      refundResult = await processPartialRefund(adminSupabase, orderId, refund_amount_cents, createRefundAdapter());
-      if (!refundResult.success) {
-        console.error(`Partial refund failed for order ${order.order_number}:`, refundResult.error);
+      if (order.wallet_credited_at) {
+        // Post-completion: proportional clawback from seller wallet + refund buyer
+        postCompletionResult = await processPostCompletionPartialRefund(
+          adminSupabase, orderId, refund_amount_cents, resolution_notes.trim(), createRefundAdapter(),
+        );
+        if (!postCompletionResult.success) {
+          console.error(`Post-completion partial refund failed for order ${order.order_number}:`, postCompletionResult.error);
+        } else {
+          refundResult = {
+            success: true,
+            walletRefundedCents: postCompletionResult.buyerRefundResult?.walletRefundedCents,
+            everypayRefundedCents: postCompletionResult.buyerRefundResult?.everypayRefundedCents,
+            requiresManualSepa: postCompletionResult.buyerRefundResult?.requiresManualSepa,
+            refundMethod: postCompletionResult.buyerRefundResult?.requiresManualSepa ? 'everypay_bank_link' : undefined,
+          };
+        }
+      } else {
+        // Pre-completion: standard partial refund (no wallet clawback needed)
+        refundResult = await processPartialRefund(adminSupabase, orderId, refund_amount_cents, createRefundAdapter());
+        if (!refundResult.success) {
+          console.error(`Partial refund failed for order ${order.order_number}:`, refundResult.error);
+        }
       }
     } else if (resolution_type === 'seller_favor' || resolution_type === 'mutual_agreement') {
-      // Credit seller wallet since order is completed in seller's favor
-      const walletResult = await creditSellerWallet(adminSupabase, orderId);
-      if (!walletResult.success) {
-        console.error(`Seller wallet credit failed for order ${order.order_number}:`, walletResult.error);
+      if (!order.wallet_credited_at) {
+        // Pre-completion dispute resolved in seller's favor: credit wallet now
+        const walletResult = await creditSellerWallet(adminSupabase, orderId);
+        if (!walletResult.success) {
+          console.error(`Seller wallet credit failed for order ${order.order_number}:`, walletResult.error);
+        }
       }
+      // Post-completion seller_favor: wallet already credited, nothing to do
     }
 
     // Send resolution emails to buyer and seller
@@ -210,7 +253,8 @@ export async function POST(request: NextRequest, { params }: Params) {
       orderNumber: order.order_number,
       resolution: resolution_type,
       finalStatus: finalOrderStatus,
-      requiresManualSepa: refundResult?.requiresManualSepa || false,
+      requiresManualSepa: refundResult?.requiresManualSepa || postCompletionResult?.buyerRefundResult?.requiresManualSepa || false,
+      creditNoteNumber: postCompletionResult?.creditNoteNumber,
     });
   } catch (error) {
     return handleApiError(error, 'Resolve dispute');

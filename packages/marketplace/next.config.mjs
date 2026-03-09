@@ -92,6 +92,27 @@ const nextConfig = {
         destination: '/:locale/help/grading',
         permanent: true,
       },
+      // Staff dashboard: transactions → orders rename
+      {
+        source: '/staff/transactions',
+        destination: '/staff/orders',
+        permanent: true,
+      },
+      {
+        source: '/:locale(lv|lt|et)/staff/transactions',
+        destination: '/:locale/staff/orders',
+        permanent: true,
+      },
+      {
+        source: '/staff/transactions/:id',
+        destination: '/staff/orders/:id',
+        permanent: true,
+      },
+      {
+        source: '/:locale(lv|lt|et)/staff/transactions/:id',
+        destination: '/:locale/staff/orders/:id',
+        permanent: true,
+      },
       // Legacy ?section= → clean URL redirects
       ...sectionRedirects,
     ];
