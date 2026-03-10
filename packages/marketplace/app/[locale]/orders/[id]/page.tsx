@@ -43,17 +43,15 @@ export default function OrderDetailPage() {
   const router = useRouter();
 
   const isWelcome = searchParams.get('welcome') === 'true';
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(isWelcome);
 
   useEffect(() => {
     if (isWelcome) {
-      setShowWelcome(true);
-      // Clean the URL by removing the welcome param
       const url = new URL(window.location.href);
       url.searchParams.delete('welcome');
       window.history.replaceState({}, '', url.pathname);
     }
-  }, [isWelcome]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     data,

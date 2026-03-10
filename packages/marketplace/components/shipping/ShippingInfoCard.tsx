@@ -1,6 +1,7 @@
 'use client';
 
 import { User, LocationPin as MapPin, Phone, Email as Mail } from '@/lib/icons';
+import { CountryDisplay } from '@second-turn/design-system';
 import type { ShippingDestination, ParcelSize } from './types';
 
 interface ShippingInfoCardProps {
@@ -13,19 +14,6 @@ interface ShippingInfoCardProps {
   className?: string;
 }
 
-// Helper function to get country flag and name
-function getCountryDisplay(countryCode?: string): { flag: string; name: string } | null {
-  if (!countryCode) return null;
-
-  const countries: Record<string, { flag: string; name: string }> = {
-    LV: { flag: '\ud83c\uddf1\ud83c\uddfb', name: 'Latvia' },
-    LT: { flag: '\ud83c\uddf1\ud83c\uddf9', name: 'Lithuania' },
-    EE: { flag: '\ud83c\uddea\ud83c\uddea', name: 'Estonia' },
-  };
-
-  return countries[countryCode.toUpperCase()] || null;
-}
-
 export function ShippingInfoCard({
   destination,
   parcelSize,
@@ -34,7 +22,6 @@ export function ShippingInfoCard({
   showPhone = true,
   className = '',
 }: ShippingInfoCardProps) {
-  const countryDisplay = getCountryDisplay(destination.country);
 
   return (
     <div className={className}>
@@ -58,11 +45,7 @@ export function ShippingInfoCard({
                   {destination.terminal_address}
                 </p>
               )}
-              {countryDisplay && (
-                <p className="text-sm text-text-muted mt-1">
-                  {countryDisplay.flag} {countryDisplay.name}
-                </p>
-              )}
+              <CountryDisplay countryCode={destination.country} mode="full" className="text-sm text-text-muted mt-1" />
             </div>
           </div>
         )}

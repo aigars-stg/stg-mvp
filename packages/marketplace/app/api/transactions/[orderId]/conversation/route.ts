@@ -125,20 +125,46 @@ export async function GET(
       );
     }
 
-    // Fetch conversation with messages
-    const { data: conversation, error: convError } = await supabase
-      .from('conversations')
-      .select(`
-        id,
-        order_id,
-        listing_id,
-        buyer_id,
-        seller_id,
-        created_at,
-        updated_at
-      `)
-      .eq('id', conversationId)
-      .single();
+    // Fetch conversation, messages, order items, tracking events, and profiles in parallel
+    const [
+      { data: conversation, error: convError },
+      { data: messages },
+      { data: orderItems },
+      { data: trackingEvents },
+      { data: buyerProfile },
+      { data: sellerProfile },
+    ] = await Promise.all([
+      supabase
+        .from('conversations')
+        .select('id, order_id, listing_id, buyer_id, seller_id, created_at, updated_at')
+        .eq('id', conversationId)
+        .single(),
+      supabase
+        .from('messages')
+        .select('id, conversation_id, sender_id, content, is_system_message, system_message_type, photo_urls, created_at, updated_at, deleted_at')
+        .eq('conversation_id', conversationId)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('order_items')
+        .select('id, listing_id, game_name, bgg_game_id, price, condition, photo_url, game_thumbnail')
+        .eq('order_id', order.id),
+      supabase
+        .from('tracking_events')
+        .select('id, event_type, state_type, state_text, location, description, event_timestamp, created_at')
+        .eq('order_id', order.id)
+        .order('event_timestamp', { ascending: true }),
+      supabase
+        .from('user_profiles')
+        .select('id, full_name, avatar_url, country')
+        .eq('id', order.buyer_id)
+        .single(),
+      supabase
+        .from('user_profiles')
+        .select('id, full_name, avatar_url, country')
+        .eq('id', order.seller_id)
+        .single(),
+    ]);
 
     if (convError || !conversation) {
       return NextResponse.json(
@@ -147,30 +173,7 @@ export async function GET(
       );
     }
 
-    // Fetch messages with sender info
-    const { data: messages, error: messagesError } = await supabase
-      .from('messages')
-      .select(`
-        id,
-        conversation_id,
-        sender_id,
-        content,
-        is_system_message,
-        system_message_type,
-        photo_urls,
-        created_at,
-        updated_at,
-        deleted_at
-      `)
-      .eq('conversation_id', conversationId)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: true });
-
-    if (messagesError) {
-      // Continue - non-blocking error
-    }
-
-    // Fetch user profiles for messages
+    // Fetch user profiles for message senders
     const typedMessages = (messages || []) as MessageRow[];
     const senderIds = [...new Set(
       typedMessages
@@ -194,50 +197,6 @@ export async function GET(
       ...msg,
       sender: msg.sender_id ? senderMap.get(msg.sender_id) || null : null,
     }));
-
-    // Fetch order items
-    const { data: orderItems } = await supabase
-      .from('order_items')
-      .select(`
-        id,
-        listing_id,
-        game_name,
-        bgg_game_id,
-        price,
-        condition,
-        photo_url,
-        game_thumbnail
-      `)
-      .eq('order_id', order.id);
-
-    // Fetch tracking events
-    const { data: trackingEvents } = await supabase
-      .from('tracking_events')
-      .select(`
-        id,
-        event_type,
-        state_type,
-        state_text,
-        location,
-        description,
-        event_timestamp,
-        created_at
-      `)
-      .eq('order_id', order.id)
-      .order('event_timestamp', { ascending: true });
-
-    // Fetch buyer and seller profiles
-    const { data: buyerProfile } = await supabase
-      .from('user_profiles')
-      .select('id, full_name, avatar_url, country')
-      .eq('id', order.buyer_id)
-      .single();
-
-    const { data: sellerProfile } = await supabase
-      .from('user_profiles')
-      .select('id, full_name, avatar_url, country')
-      .eq('id', order.seller_id)
-      .single();
 
     // Mark messages as read for current user
     const lastMessage = messagesWithSenders[messagesWithSenders.length - 1];
