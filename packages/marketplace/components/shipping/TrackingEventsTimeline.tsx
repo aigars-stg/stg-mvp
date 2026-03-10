@@ -20,6 +20,8 @@ export function TrackingEventsTimeline({
   showFullTimestamps: _showFullTimestamps = false,
   className = '',
 }: TrackingEventsTimelineProps) {
+  const locale = useLocale();
+
   if (!events || events.length === 0) {
     return null;
   }
@@ -29,8 +31,6 @@ export function TrackingEventsTimeline({
     (a, b) =>
       new Date(b.event_timestamp).getTime() - new Date(a.event_timestamp).getTime()
   );
-
-  const locale = useLocale();
   const formatTimestamp = (timestamp: string) => {
     return formatDateTime(timestamp, locale);
   };

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Link, useRouter } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
 import {
@@ -40,7 +40,6 @@ export default function OrderDetailPage() {
   const t = useTranslations('Orders.detail');
   const tSeller = useTranslations('SellerOrderDetail');
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const isWelcome = searchParams.get('welcome') === 'true';
   const [showWelcome, setShowWelcome] = useState(isWelcome);
