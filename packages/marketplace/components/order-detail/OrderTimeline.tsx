@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { formatDateTime } from '@/lib/date-utils';
 import type { OrderTimestamps } from '@/lib/types/order-detail';
 
@@ -20,6 +20,7 @@ export function OrderTimeline({
   title,
 }: OrderTimelineProps) {
   const t = useTranslations('Orders.detail.timeline');
+  const locale = useLocale();
 
   const entries: TimelineEntry[] = [];
 
@@ -59,7 +60,7 @@ export function OrderTimeline({
                   : 'text-polar-night'
               }
             >
-              {formatDateTime(entry.date)}
+              {formatDateTime(entry.date, locale)}
             </span>
           </div>
         ))}

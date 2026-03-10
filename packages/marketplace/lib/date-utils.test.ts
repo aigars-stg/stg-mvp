@@ -44,11 +44,23 @@ describe('formatTime', () => {
   it('zero-pads hours and minutes', () => {
     expect(formatTime(new Date(2026, 0, 1, 9, 5))).toBe('09:05');
   });
+
+  it('uses dot separator for Latvian locale', () => {
+    expect(formatTime(new Date(2026, 0, 1, 14, 30), 'lv')).toBe('14.30');
+  });
+
+  it('uses dot for midnight in Latvian locale', () => {
+    expect(formatTime(new Date(2026, 0, 1, 0, 0), 'lv')).toBe('00.00');
+  });
 });
 
 describe('formatDateTime', () => {
   it('formats as dd.MM.yyyy HH:mm', () => {
     expect(formatDateTime(new Date(2026, 7, 31, 14, 30))).toBe('31.08.2026 14:30');
+  });
+
+  it('uses dot separator for Latvian locale', () => {
+    expect(formatDateTime(new Date(2026, 7, 31, 14, 30), 'lv')).toBe('31.08.2026 14.30');
   });
 });
 
@@ -93,5 +105,31 @@ describe('formatMessageTime', () => {
 
     const tenDaysAgo = new Date(2026, 5, 5, 8, 0);
     expect(formatMessageTime(tenDaysAgo)).toBe('05.06 08:00');
+  });
+
+  describe('with Latvian locale', () => {
+    it('uses dot separator for today', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 5, 15, 16, 0));
+      expect(formatMessageTime(new Date(2026, 5, 15, 14, 30), 'lv')).toBe('14.30');
+    });
+
+    it('uses dot separator for yesterday', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 5, 15, 16, 0));
+      expect(formatMessageTime(new Date(2026, 5, 14, 10, 45), 'lv')).toBe('Yesterday, 10.45');
+    });
+
+    it('uses dot separator for dates within 7 days', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 5, 15, 16, 0));
+      expect(formatMessageTime(new Date(2026, 5, 12, 9, 15), 'lv')).toBe('Fri, 09.15');
+    });
+
+    it('uses dot separator for older dates', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 5, 15, 16, 0));
+      expect(formatMessageTime(new Date(2026, 5, 5, 8, 0), 'lv')).toBe('05.06 08.00');
+    });
   });
 });

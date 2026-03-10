@@ -2700,7 +2700,8 @@
         "expiredTitle": "Pārdevēja termiņš beidzies",
         "waitingTitle": "Gaida pārdevēja atbildi",
         "expiredDescription": "Pārdevējs neatbildēja 24 stundu laikā. Tava atmaksa tiek apstrādāta automātiski.",
-        "waitingDescription": "Pārdevējam ir {hours} stundas un {minutes} minūtes, lai pieņemtu tavu pasūtījumu. Ja viņš neatbildēs, tu saņemsi automātisku pilnu atmaksu."
+        "waitingDescription": "Pārdevējam ir {hours} stundas un {minutes} minūtes, lai pieņemtu tavu pasūtījumu. Ja viņš neatbildēs, tu saņemsi automātisku pilnu atmaksu.",
+        "refundProtection": "Ja pārdevējs neatbildēs laikā, Jūs automātiski saņemsiet pilnu atmaksu uz sākotnējo maksājuma metodi."
       },
       "refunded": {
         "title": "Atmaksa apstrādāta",
@@ -2798,6 +2799,11 @@
       },
       "seller": {
         "title": "Pārdevējs"
+      },
+      "welcome": {
+        "title": "Maksājums veiksmīgs",
+        "subtitle": "Jūsu pasūtījums ir veikts un maksājums apstiprināts.",
+        "emailSent": "Mēs nosūtījām apstiprinājuma e-pastu ar Jūsu pasūtījuma informāciju."
       },
       "help": {
         "title": "Vajadzīga palīdzība?",

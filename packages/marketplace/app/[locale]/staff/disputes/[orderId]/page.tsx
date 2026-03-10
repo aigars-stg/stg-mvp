@@ -12,6 +12,7 @@ import {
   User,
   Time as Clock,
 } from '@/lib/icons';
+import { useLocale } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import type { TrackingEvent } from '@/components/shipping';
 import type { OrderDetailItem } from '@/lib/types/order-detail';
@@ -97,6 +98,7 @@ function disputeStatusVariant(
 }
 
 export default function StaffDisputeDetailPage() {
+  const locale = useLocale();
   const params = useParams();
   const orderId = params.orderId as string;
   const { user } = useAuth();
@@ -195,9 +197,9 @@ export default function StaffDisputeDetailPage() {
             )}
           </div>
           <p className="text-sm text-text-secondary mt-1">
-            Created {formatDateTime(order.timestamps.created_at)}
+            Created {formatDateTime(order.timestamps.created_at, locale)}
             {order.timestamps.disputed_at &&
-              ` | Disputed ${formatDateTime(order.timestamps.disputed_at)}`}
+              ` | Disputed ${formatDateTime(order.timestamps.disputed_at, locale)}`}
           </p>
         </div>
       </div>
@@ -378,7 +380,7 @@ export default function StaffDisputeDetailPage() {
                       )}
                       {event.event_timestamp && (
                         <p className="text-text-muted mt-0.5">
-                          {formatDateTime(event.event_timestamp)}
+                          {formatDateTime(event.event_timestamp, locale)}
                         </p>
                       )}
                     </div>
@@ -473,6 +475,7 @@ function TimelineEntry({
   time: string;
   highlight?: boolean;
 }) {
+  const locale = useLocale();
   return (
     <div
       className={`flex items-center justify-between text-sm py-1.5 ${
@@ -480,7 +483,7 @@ function TimelineEntry({
       }`}
     >
       <span>{label}</span>
-      <span className="text-xs text-text-muted">{formatDateTime(time)}</span>
+      <span className="text-xs text-text-muted">{formatDateTime(time, locale)}</span>
     </div>
   );
 }

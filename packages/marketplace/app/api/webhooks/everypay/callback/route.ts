@@ -61,17 +61,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 2. Already processed? Redirect to success (idempotent)
+    // 2. Already processed? Redirect to order page (idempotent)
     if (checkoutEvent.processed_at) {
       const { data: existingOrder } = await supabase
         .from('orders')
-        .select('id')
+        .select('id, order_number')
         .eq('everypay_payment_reference', paymentReference)
         .single();
 
       if (existingOrder) {
         return NextResponse.redirect(
-          `${appUrl}/checkout/success?order_id=${existingOrder.id}`
+          `${appUrl}/orders/${existingOrder.order_number}?welcome=true`
         );
       }
       // Already processed but order not found — payment may have failed
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
         ? 'mixed'
         : (hasCard ? 'card' : 'bank_link');
 
-      let orderId: string;
+      let orderResult: { orderId: string; orderNumber: string };
 
       // Determine checkout type from metadata (new) or order_reference prefix (legacy fallback)
       const checkoutType = metadata.checkout_type as string | undefined;
@@ -118,9 +118,9 @@ export async function GET(request: NextRequest) {
 
       try {
         if (isBasket) {
-          orderId = await processBasketPayment(supabase, metadata, paymentReference, actualPaymentState, detectedPaymentMethod, preGeneratedOrderNumber);
+          orderResult = await processBasketPayment(supabase, metadata, paymentReference, actualPaymentState, detectedPaymentMethod, preGeneratedOrderNumber);
         } else if (isAuction) {
-          orderId = await processAuctionPayment(supabase, metadata, paymentReference, actualPaymentState, detectedPaymentMethod, preGeneratedOrderNumber);
+          orderResult = await processAuctionPayment(supabase, metadata, paymentReference, actualPaymentState, detectedPaymentMethod, preGeneratedOrderNumber);
         } else {
           log.error({ orderRef }, 'Unknown order_reference type');
           return NextResponse.redirect(
@@ -195,16 +195,16 @@ export async function GET(request: NextRequest) {
         .eq('id', checkoutEvent.id);
 
       // 6. Post system message and send emails (non-blocking)
-      postOrderCreatedMessage(orderId);
-      sendOrderEmails(supabase, orderId, {
+      postOrderCreatedMessage(orderResult.orderId);
+      sendOrderEmails(supabase, orderResult.orderId, {
         buyerId: metadata.buyer_id as string,
         sellerId: metadata.seller_id as string,
       }).catch((err) =>
-        log.error({ err, orderId }, 'Email sending failed')
+        log.error({ err, orderId: orderResult.orderId }, 'Email sending failed')
       );
 
       return NextResponse.redirect(
-        `${appUrl}/checkout/success?order_id=${orderId}`
+        `${appUrl}/orders/${orderResult.orderNumber}?welcome=true`
       );
     }
 
@@ -302,7 +302,7 @@ async function processBasketPayment(
   paymentState: string,
   paymentMethod: string,
   preGeneratedOrderNumber?: string
-): Promise<string> {
+): Promise<{ orderId: string; orderNumber: string }> {
   const basketId = metadata.basket_id as string;
   const shippingMethod = metadata.shipping_method as string;
   const shippingCost = metadata.shipping_cost as number;
@@ -360,20 +360,21 @@ async function processBasketPayment(
     })
     .eq('id', orderId);
 
-  log.info({ orderNumber: result.order_number, orderId, paymentMethod }, 'Basket order created');
+  const orderNumber = result.order_number as string;
+  log.info({ orderNumber, orderId, paymentMethod }, 'Basket order created');
 
   // Notify seller about new order (non-blocking)
   supabase.from('notifications').insert({
     user_id: metadata.seller_id as string,
     type: 'new_order',
-    title: `New order ${result.order_number}`,
+    title: `New order ${orderNumber}`,
     body: 'Respond within 24 hours to confirm this order.',
     data: { order_id: orderId },
   }).then(({ error: notifError }) => {
     if (notifError) log.error({ notifError, orderId }, 'Failed to create seller notification');
   });
 
-  return orderId;
+  return { orderId, orderNumber };
 }
 
 // ==============================================
@@ -387,7 +388,7 @@ async function processAuctionPayment(
   paymentState: string,
   paymentMethod: string,
   preGeneratedOrderNumber?: string
-): Promise<string> {
+): Promise<{ orderId: string; orderNumber: string }> {
   const listingId = metadata.listing_id as string;
   const buyerId = metadata.buyer_id as string;
   const sellerId = metadata.seller_id as string;
@@ -462,6 +463,6 @@ async function processAuctionPayment(
     if (notifError) log.error({ notifError, orderId: result.order_id }, 'Failed to create seller notification');
   });
 
-  return result.order_id as string;
+  return { orderId: result.order_id as string, orderNumber: result.order_number as string };
 }
 

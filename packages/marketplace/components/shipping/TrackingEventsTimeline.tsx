@@ -1,5 +1,6 @@
 'use client';
 
+import { useLocale } from 'next-intl';
 import type { TrackingEvent } from './types';
 import { getTrackingEventColor } from './ShippingStatusConfig';
 import { formatDateTime } from '@/lib/date-utils';
@@ -29,8 +30,9 @@ export function TrackingEventsTimeline({
       new Date(b.event_timestamp).getTime() - new Date(a.event_timestamp).getTime()
   );
 
+  const locale = useLocale();
   const formatTimestamp = (timestamp: string) => {
-    return formatDateTime(timestamp);
+    return formatDateTime(timestamp, locale);
   };
 
   return (

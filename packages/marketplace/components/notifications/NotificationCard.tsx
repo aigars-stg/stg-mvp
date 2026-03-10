@@ -1,5 +1,6 @@
 'use client';
 
+import { useLocale } from 'next-intl';
 import { Gavel, Trophy, Timer, Star, CreditCard, Heart } from '@/lib/icons';
 import { formatMessageTime } from '@/lib/date-utils';
 
@@ -37,6 +38,7 @@ interface NotificationCardProps {
 }
 
 export function NotificationCard({ notification, onClick }: NotificationCardProps) {
+  const locale = useLocale();
   const config = typeConfig[notification.type] || { Icon: Star, color: 'text-text-secondary' };
   const { Icon, color } = config;
   const isUnread = !notification.read_at;
@@ -71,7 +73,7 @@ export function NotificationCard({ notification, onClick }: NotificationCardProp
           {notification.body}
         </p>
         <p className="text-xs text-text-muted mt-1">
-          {formatMessageTime(notification.created_at)}
+          {formatMessageTime(notification.created_at, locale)}
         </p>
       </div>
     </button>

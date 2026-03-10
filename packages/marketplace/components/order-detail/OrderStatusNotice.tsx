@@ -259,6 +259,11 @@ export function OrderStatusNotice({
                     minutes: Math.floor((timeRemainingMs % 3600000) / 60000),
                   })}
             </p>
+            {!isExpired && (
+              <p className="text-sm text-text-muted mt-2">
+                {t('pending.refundProtection')}
+              </p>
+            )}
           </div>
         </div>
       </div>

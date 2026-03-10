@@ -7,6 +7,7 @@ import {
   AlertCircle,
   CheckCircleAlt01 as CheckCircle,
 } from '@/lib/icons';
+import { useLocale } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { formatDateTime } from '@/lib/date-utils';
 import { formatCentsToCurrency } from '@/lib/services/pricing';
@@ -48,6 +49,7 @@ const STATUS_BADGE: Record<string, 'warning' | 'default' | 'success' | 'error'> 
 };
 
 function WithdrawalsContent() {
+  const locale = useLocale();
   const { user } = useAuth();
   const [data, setData] = useState<WithdrawalResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -225,7 +227,7 @@ function WithdrawalsContent() {
                   </div>
                   <div>
                     <span className="text-text-muted">Requested: </span>
-                    <span>{formatDateTime(w.createdAt)}</span>
+                    <span>{formatDateTime(w.createdAt, locale)}</span>
                   </div>
                 </div>
 

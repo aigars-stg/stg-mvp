@@ -16,6 +16,7 @@ import {
   LinkExternal as ExternalLink,
   User,
 } from '@/lib/icons';
+import { useLocale } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { formatDateTime } from '@/lib/date-utils';
 import type { FeedbackType, FeedbackStatus, UserFeedback } from '@/lib/types/feedback';
@@ -74,6 +75,7 @@ export default function StaffFeedbackDetailPage({
   params: { id: string };
 }) {
   const id = params.id;
+  const locale = useLocale();
   const { user } = useAuth();
 
   const [feedback, setFeedback] = useState<FeedbackDetail | null>(null);
@@ -249,7 +251,7 @@ export default function StaffFeedbackDetailPage({
                 {typeConfig[feedback.type].label}
               </h1>
               <p className="text-sm text-text-secondary">
-                Submitted {formatDateTime(new Date(feedback.created_at))}
+                Submitted {formatDateTime(new Date(feedback.created_at), locale)}
               </p>
             </div>
           </div>
@@ -333,7 +335,7 @@ export default function StaffFeedbackDetailPage({
               {feedback.reviewer && feedback.reviewed_at && (
                 <p className="mt-2 text-xs text-text-secondary">
                   Last updated by {feedback.reviewer.full_name || 'Staff'} on{' '}
-                  {formatDateTime(new Date(feedback.reviewed_at))}
+                  {formatDateTime(new Date(feedback.reviewed_at), locale)}
                 </p>
               )}
             </div>

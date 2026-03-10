@@ -20,6 +20,7 @@ interface ProfileRow {
   id: string;
   full_name: string | null;
   avatar_url: string | null;
+  country?: string | null;
 }
 
 /**
@@ -36,9 +37,10 @@ export async function GET(
     const { response, user, supabase } = await requireAuth();
     if (response) return response;
 
-    const orderId = params.orderId;
+    const orderParam = params.orderId;
+    const isOrderNumber = orderParam.startsWith('STG-');
 
-    // Fetch order and verify access
+    // Fetch order and verify access (supports both UUID and order_number lookup)
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .select(`
@@ -91,7 +93,7 @@ export async function GET(
         invoice_number,
         credit_note_number
       `)
-      .eq('id', orderId)
+      .eq(isOrderNumber ? 'order_number' : 'id', orderParam)
       .single();
 
     if (orderError || !order) {
@@ -115,7 +117,7 @@ export async function GET(
     // Get or create conversation for this order
     let conversationId: string;
     try {
-      conversationId = await getOrCreateTransactionConversation(orderId);
+      conversationId = await getOrCreateTransactionConversation(order.id);
     } catch {
       return NextResponse.json(
         { error: 'Failed to load conversation' },
@@ -206,7 +208,7 @@ export async function GET(
         photo_url,
         game_thumbnail
       `)
-      .eq('order_id', orderId);
+      .eq('order_id', order.id);
 
     // Fetch tracking events
     const { data: trackingEvents } = await supabase
@@ -221,19 +223,19 @@ export async function GET(
         event_timestamp,
         created_at
       `)
-      .eq('order_id', orderId)
+      .eq('order_id', order.id)
       .order('event_timestamp', { ascending: true });
 
     // Fetch buyer and seller profiles
     const { data: buyerProfile } = await supabase
       .from('user_profiles')
-      .select('id, full_name, avatar_url')
+      .select('id, full_name, avatar_url, country')
       .eq('id', order.buyer_id)
       .single();
 
     const { data: sellerProfile } = await supabase
       .from('user_profiles')
-      .select('id, full_name, avatar_url')
+      .select('id, full_name, avatar_url, country')
       .eq('id', order.seller_id)
       .single();
 

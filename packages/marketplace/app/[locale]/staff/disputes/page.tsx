@@ -9,6 +9,7 @@ import {
   AlertCircle,
   Time as Clock,
 } from '@/lib/icons';
+import { useLocale } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { formatDateTime } from '@/lib/date-utils';
 import { formatPrice } from '@/lib/services/pricing';
@@ -93,6 +94,7 @@ function getCountdown(deadlineStr: string): { text: string; urgent: boolean } {
 }
 
 function DisputesContent() {
+  const locale = useLocale();
   const { user } = useAuth();
   const [data, setData] = useState<DisputeResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -237,7 +239,7 @@ function DisputesContent() {
                   </span>
                   <span>
                     <span className="text-text-muted">Opened: </span>
-                    {formatDateTime(d.disputed_at)}
+                    {formatDateTime(d.disputed_at, locale)}
                   </span>
                 </div>
 

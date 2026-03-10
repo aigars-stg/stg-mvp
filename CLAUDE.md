@@ -43,9 +43,11 @@ Run from repo root:
 Always use the centralized utilities from `@/lib/date-utils` for consistent European formatting:
 - `formatDate(date)` → `31.08.2026` (dd.MM.yyyy) - for full dates
 - `formatDateShort(date)` → `31.08` (dd.MM) - for compact/recent dates
-- `formatTime(date)` → `14:30` (HH:mm, 24-hour) - for time only
-- `formatDateTime(date)` → `31.08.2026 14:30` - for timestamps
-- `formatMessageTime(date)` → smart relative time for messaging
+- `formatTime(date, locale?)` → `14:30` (en) / `14.30` (lv) - 24-hour time with locale-aware separator
+- `formatDateTime(date, locale?)` → `31.08.2026 14:30` (en) / `31.08.2026 14.30` (lv) - for timestamps
+- `formatMessageTime(date, locale?)` → smart relative time (locale-aware time separator)
+
+Time-formatting functions accept an optional `locale` parameter. Latvian uses dots (14.30), all other locales use colons (14:30). In components, pass `useLocale()` from `next-intl`.
 
 Never use `toLocaleDateString()`, `toLocaleTimeString()`, or `toLocaleString()` directly.
 Never use 12-hour time format (AM/PM).
@@ -78,6 +80,21 @@ Never use 12-hour time format (AM/PM).
 ## Supported Languages
 English (default), Latvian (lv), Lithuanian (lt), Estonian (et)
 
+## Shared Components
+
+Always use these — do not write inline equivalents:
+
+| Pattern | Component | Import |
+|---------|-----------|--------|
+| User / seller display | `UserInfoCard` | `@/components/user` |
+| Order items list | `OrderItemsList` | `@/components/order-detail` |
+| Game / product thumbnail | `ListingThumbnail` | `@second-turn/design-system` |
+| Country flag | `CountryDisplay` | `@second-turn/design-system` |
+| Section card wrapper | `Card` | `@second-turn/design-system` |
+| Condition badge | `Badge` | `@second-turn/design-system` |
+| User avatar | `Avatar` | `@second-turn/design-system` |
+| Price formatting | `formatPrice` / `formatCentsToCurrency` | `@/lib/services/pricing` |
+
 ## Important Notes
 - Always build design-system before marketplace: `pnpm build:ds`
 - Supabase RLS policies control data access
@@ -85,7 +102,7 @@ English (default), Latvian (lv), Lithuanian (lt), Estonian (et)
 ## Payment Model
 
 ### Pricing (all VAT-inclusive)
-- **Shipping**: €2.00 flat rate (Latvia preview, Unisend parcel lockers)
+- **Shipping**: Route-based pricing (Unisend parcel lockers, Baltic region)
 - **Buyer pays**: Item price + shipping only (no service fee)
 - **Seller commission**: 10% flat on item price (deducted from earnings)
 - **Seller receives**: 90% of item price, credited to platform wallet

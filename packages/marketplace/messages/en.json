@@ -2714,7 +2714,8 @@
         "expiredTitle": "Seller Deadline Expired",
         "waitingTitle": "Waiting for Seller Response",
         "expiredDescription": "The seller did not respond within 24 hours. Your refund is being processed automatically.",
-        "waitingDescription": "The seller has {hours} hours and {minutes} minutes to accept your order. If they don't respond, you'll receive an automatic full refund."
+        "waitingDescription": "The seller has {hours} hours and {minutes} minutes to accept your order. If they don't respond, you'll receive an automatic full refund.",
+        "refundProtection": "If the seller doesn't respond in time, you'll receive an automatic full refund to your original payment method."
       },
       "refunded": {
         "title": "Refund Processed",
@@ -2812,6 +2813,11 @@
       },
       "seller": {
         "title": "Seller"
+      },
+      "welcome": {
+        "title": "Payment successful",
+        "subtitle": "Your order has been placed and payment confirmed.",
+        "emailSent": "We've sent a confirmation email with your order details."
       },
       "help": {
         "title": "Need Help?",

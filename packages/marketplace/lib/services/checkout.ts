@@ -246,7 +246,7 @@ export async function createCheckoutSession(
     return {
       type: 'wallet_only',
       orderId,
-      redirect: `${appUrl}/checkout/success?order_id=${orderId}`,
+      redirect: `${appUrl}/orders/${result.order_number}?welcome=true`,
     };
   }
 
@@ -450,7 +450,7 @@ export async function createAuctionCheckoutSession(
     return {
       type: 'wallet_only',
       orderId: order.id,
-      redirect: `${appUrl}/checkout/success?order_id=${order.id}&type=auction`,
+      redirect: `${appUrl}/orders/${orderNumber}?welcome=true`,
     };
   }
 

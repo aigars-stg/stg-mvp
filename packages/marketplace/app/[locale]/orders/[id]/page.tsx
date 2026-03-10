@@ -1,13 +1,18 @@
 'use client';
 
-import { Link } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
 import {
   RefreshCw as Loader2,
   AlertCircle,
   AlertTriangle,
   Time as Clock,
+  CheckCircleAlt01 as CheckCircle,
+  CloseCircle as XIcon,
+  Email as Mail,
 } from '@/lib/icons';
 import { UserInfoCard } from '@/components/user';
 import { OrderActions } from '@/components/orders';
@@ -31,8 +36,24 @@ import type { OrderDetailOrder, OrderDetailItem } from '@/lib/types/order-detail
 import { formatDate, formatTime } from '@/lib/date-utils';
 
 export default function OrderDetailPage() {
+  const locale = useLocale();
   const t = useTranslations('Orders.detail');
   const tSeller = useTranslations('SellerOrderDetail');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const isWelcome = searchParams.get('welcome') === 'true';
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (isWelcome) {
+      setShowWelcome(true);
+      // Clean the URL by removing the welcome param
+      const url = new URL(window.location.href);
+      url.searchParams.delete('welcome');
+      window.history.replaceState({}, '', url.pathname);
+    }
+  }, [isWelcome]);
 
   const {
     data,
@@ -123,13 +144,40 @@ export default function OrderDetailPage() {
         status={order.status}
         subtitle={t('placedAt', {
           date: formatDate(order.timestamps.created_at),
-          time: formatTime(order.timestamps.created_at),
+          time: formatTime(order.timestamps.created_at, locale),
         })}
         backHref={isSeller ? '/orders?role=selling' : '/orders'}
         backLabel={t('backToOrders')}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {showWelcome && (
+          <div className="bg-aurora-green/10 border border-aurora-green/20 rounded-xl p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-aurora-green flex-shrink-0 mt-0.5" />
+              <div className="flex-grow">
+                <p className="font-medium text-polar-night">
+                  {t('welcome.title')}
+                </p>
+                <p className="text-sm text-text-secondary mt-1">
+                  {t('welcome.subtitle')}
+                </p>
+                <div className="flex items-center gap-2 mt-2 text-sm text-text-muted">
+                  <Mail className="w-4 h-4" />
+                  {t('welcome.emailSent')}
+                </div>
+              </div>
+              <button
+                onClick={() => setShowWelcome(false)}
+                className="text-text-muted hover:text-text-secondary transition-colors flex-shrink-0"
+                aria-label="Dismiss"
+              >
+                <XIcon className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {!isCancelled && order.status !== 'disputed' && (
           <div className="bg-snow-white border border-border rounded-xl p-4 mb-4">
             <StatusTimeline
@@ -168,7 +216,7 @@ export default function OrderDetailPage() {
                     id: otherParty.id,
                     name: otherParty.full_name || 'Unknown',
                     avatarUrl: otherParty.avatar_url,
-                    country: null,
+                    country: otherParty.country ?? null,
                   }}
                   size="md"
                   countryDisplay="full"

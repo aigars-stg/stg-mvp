@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLocale } from 'next-intl';
 import { Close } from '@/lib/icons';
 import type { Message } from '@/lib/types/message';
 import { formatMessageTime } from '@/lib/date-utils';
@@ -18,6 +19,7 @@ export function MessageBubble({
   isOwn,
   showSender = false,
 }: MessageBubbleProps) {
+  const locale = useLocale();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const photos = message.photo_urls || [];
 
@@ -98,7 +100,7 @@ export function MessageBubble({
 
           {/* Timestamp */}
           <div className="text-xs text-text-muted mt-1 px-1">
-            {formatMessageTime(message.created_at)}
+            {formatMessageTime(message.created_at, locale)}
           </div>
         </div>
 

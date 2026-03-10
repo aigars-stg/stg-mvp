@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Package } from '@/lib/icons';
 import { ListingThumbnail } from '@/components/common/ListingThumbnail';
@@ -19,6 +19,7 @@ export function ConversationListItem({
   isActive = false,
 }: ConversationListItemProps) {
   const t = useTranslations('MessagesPage');
+  const locale = useLocale();
   const { other_user, listing, last_message, unread_count } = conversation;
 
   const truncateMessage = (text: string, maxLength = 60) => {
@@ -68,7 +69,7 @@ export function ConversationListItem({
 
             {last_message && (
               <span className="text-xs text-text-muted flex-shrink-0">
-                {formatMessageTime(last_message.created_at)}
+                {formatMessageTime(last_message.created_at, locale)}
               </span>
             )}
           </div>

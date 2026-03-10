@@ -24,7 +24,7 @@ export function OrderItemsList({
   title,
 }: OrderItemsListProps) {
   return (
-    <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
+    <div className="bg-snow-white border border-border rounded-xl p-3 sm:p-4">
       {title && (
         <h3 className="text-sm font-semibold text-polar-night mb-3">
           {title}
@@ -46,7 +46,7 @@ export function OrderItemsList({
                 photoUrl: item.photo_url,
               })}
               alt={item.game_name}
-              size={compact ? 'md' : 'lg'}
+              size={compact ? 'md' : 'xl'}
             />
             <div className="flex-grow min-w-0">
               {showGameLinks && item.bgg_game_id ? (

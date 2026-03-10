@@ -116,7 +116,7 @@ export function WithdrawalHistory() {
               </div>
               <div className="flex items-center justify-between text-xs text-text-muted">
                 <span>{t('to', { iban: maskIban(w.iban) })}</span>
-                <span>{formatDateTime(w.createdAt)}</span>
+                <span>{formatDateTime(w.createdAt, locale)}</span>
               </div>
               {w.status === 'completed' && w.bankReference && (
                 <p className="text-xs text-text-muted mt-1">

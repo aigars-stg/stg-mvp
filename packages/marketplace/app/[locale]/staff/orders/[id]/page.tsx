@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   CheckCircleAlt01 as CheckCircle2,
 } from '@/lib/icons';
+import { useLocale } from 'next-intl';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {
   issueTypeLabels,
@@ -66,6 +67,7 @@ interface StaffOrderData {
 }
 
 export default function StaffOrderDetailPage() {
+  const locale = useLocale();
   const router = useRouter();
   const params = useParams();
   const orderId = params.id as string;
@@ -170,7 +172,7 @@ export default function StaffOrderDetailPage() {
       <OrderDetailHeader
         orderNumber={order.order_number}
         status={order.status}
-        subtitle={`Staff view • Created ${formatDateTime(order.timestamps.created_at)}`}
+        subtitle={`Staff view • Created ${formatDateTime(order.timestamps.created_at, locale)}`}
         backHref="/staff/orders"
         backLabel="Back to Orders"
         extraBadges={
@@ -324,7 +326,7 @@ export default function StaffOrderDetailPage() {
                   {order.payment.wallet_credited_at && (
                     <div>
                       <span className="text-text-muted">Credited At:</span>
-                      <p className="text-polar-night">{formatDateTime(order.payment.wallet_credited_at)}</p>
+                      <p className="text-polar-night">{formatDateTime(order.payment.wallet_credited_at, locale)}</p>
                     </div>
                   )}
                   {order.refund_amount != null && order.refund_amount > 0 && (
@@ -398,7 +400,7 @@ export default function StaffOrderDetailPage() {
                               </Badge>
                             </div>
                             <p className="text-xs text-text-muted mt-1">
-                              Reported by {issue.reporter_role} • {formatDateTime(issue.created_at)}
+                              Reported by {issue.reporter_role} • {formatDateTime(issue.created_at, locale)}
                             </p>
                           </div>
                         </div>

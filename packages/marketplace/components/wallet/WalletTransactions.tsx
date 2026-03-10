@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
 import {
   ArrowDown,
@@ -39,6 +39,7 @@ interface WalletTransactionsProps {
 
 export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProps) {
   const t = useTranslations('WalletTransactions');
+  const locale = useLocale();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -126,7 +127,7 @@ export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProp
                   {tx.description || t(config.labelKey)}
                 </p>
                 <p className="text-xs text-text-muted">
-                  {formatDateTime(tx.createdAt)}
+                  {formatDateTime(tx.createdAt, locale)}
                 </p>
               </div>
               <div className="text-right flex-shrink-0">
