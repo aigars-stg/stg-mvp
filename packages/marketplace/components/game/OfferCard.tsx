@@ -13,6 +13,7 @@ import type { ListingWithSeller } from '@/lib/types/listing';
 import { isAuctionListing } from '@/lib/types/listing';
 // Country utilities available from @/lib/country-utils if needed
 import { useAuth } from '@/lib/auth/AuthContext';
+import { formatDateCompact } from '@/lib/date-utils';
 import { UserInfoCard } from '@/components/user';
 import { getSellerBadgeTier } from '@/lib/types/seller';
 import { ImageLightbox } from '@/components/listing/ImageLightbox';
@@ -24,7 +25,7 @@ import { ListingQuestionsDrawer } from '@/components/game/ListingQuestionsDrawer
 
 import { DotCarousel } from '@/components/common/ImageCarousel';
 import { AuctionBidPanel } from '@/components/auction/AuctionBidPanel';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { formatPrice } from '@/lib/services/pricing';
 
 interface OfferCardProps {
@@ -39,7 +40,6 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
   const router = useRouter();
   const loader = useTopLoader();
   const { user } = useAuth();
-  const locale = useLocale();
   const t = useTranslations('OfferCard');
   const tListings = useTranslations('Listings');
   const [localLoading] = useState(false);
@@ -194,17 +194,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
   // Get BGG image for the version (same logic as ListingCard - BGG image first, then user photos)
   const displayImage = listing.game?.image || listing.photo_urls?.[0];
 
-  // Format posted date with locale support
-  const postedDate = new Date(listing.created_at).toLocaleDateString(locale, {
-    month: 'short',
-    day: 'numeric',
-  });
-  const postedYear = new Date(listing.created_at).getFullYear();
-  const currentYear = new Date().getFullYear();
-  const dateString = postedYear === currentYear
-    ? postedDate
-    : `${postedDate}, ${postedYear}`;
-  const formattedListedDate = t('listing.listed', { date: dateString });
+  const formattedListedDate = t('listing.listed', { date: formatDateCompact(listing.created_at) });
 
   // BGG external link URL
   const bggGameUrl = `https://boardgamegeek.com/boardgame/${listing.bgg_game_id}`;

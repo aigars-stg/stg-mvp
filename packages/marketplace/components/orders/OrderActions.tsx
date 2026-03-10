@@ -69,7 +69,7 @@ export function OrderActions({
 
   const showActionBar =
     orderStatus === 'delivered' ||
-    ['accepted', 'shipped', 'in_transit'].includes(orderStatus);
+    ['shipped', 'in_transit'].includes(orderStatus);
 
   if (!showActionBar) {
     return null;

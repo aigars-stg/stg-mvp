@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Chat as MessageSquare } from '@/lib/icons';
 import { MessageBubble } from '@/components/messaging/MessageBubble';
 import { MessageInput } from '@/components/messaging/MessageInput';
@@ -39,6 +40,8 @@ export function ConversationPanel({
   messagesContainerRef,
   title = 'Conversation',
 }: ConversationPanelProps) {
+  const t = useTranslations('Orders.detail.messages');
+
   return (
     <div className="bg-snow-white border border-border rounded-xl overflow-hidden">
       {/* Header */}
@@ -64,13 +67,11 @@ export function ConversationPanel({
           <div className="flex flex-col items-center justify-center h-full text-center py-8">
             <MessageSquare className="w-12 h-12 text-text-muted mb-3" />
             <p className="text-text-secondary">
-              {readOnly
-                ? 'No messages in this conversation'
-                : 'No messages yet'}
+              {readOnly ? t('emptyReadOnly') : t('empty')}
             </p>
             {!readOnly && otherUserName && (
               <p className="text-sm text-text-tertiary mt-1">
-                Start a conversation with {otherUserName}
+                {t('startConversation', { name: otherUserName })}
               </p>
             )}
           </div>
@@ -84,7 +85,7 @@ export function ConversationPanel({
                     message.sender_id === buyerId ? 'text-left' : 'text-right'
                   }`}
                 >
-                  {message.sender_id === buyerId ? '(Buyer)' : '(Seller)'}
+                  {message.sender_id === buyerId ? `(${t('buyerLabel')})` : `(${t('sellerLabel')})`}
                 </div>
               )}
               <MessageBubble

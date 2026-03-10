@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@second-turn/design-system';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { LogOut, ShoppingBag, Store, ChevronRight, Layout as LayoutDashboard, Heart, Shield } from '@/lib/icons';
+import { LogOut, ShoppingBag, ChevronRight, Shield, Wallet, Checkerboard } from '@/lib/icons';
 import { getInitials } from '@/lib/auth/utils';
 import { useTranslations } from 'next-intl';
 
@@ -128,18 +128,6 @@ export function UserMenu() {
 
           {/* Menu Items */}
           <div className="py-1">
-            {/* Seller Dashboard (sellers only) */}
-            {isActiveSeller && (
-              <Link
-                href="/seller/dashboard"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <Store className="w-4 h-4 text-frost-ice" />
-                {t('userMenu.sellerDashboard')}
-              </Link>
-            )}
-
             {/* My Orders */}
             <Link
               href="/orders"
@@ -150,29 +138,25 @@ export function UserMenu() {
               {t('userMenu.myOrders')}
             </Link>
 
-            {/* My Listings / Saved & Wanted (conditional label) */}
+            {/* My Games */}
             <Link
               href="/my-listings"
               className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              {isActiveSeller ? (
-                <LayoutDashboard className="w-4 h-4 text-frost-ice" />
-              ) : (
-                <Heart className="w-4 h-4 text-aurora-red" />
-              )}
-              {isActiveSeller ? t('userMenu.myListings') : t('userMenu.savedAndWanted')}
+              <Checkerboard className="w-4 h-4 text-frost-ice" />
+              {t('userMenu.myListings')}
             </Link>
 
-            {/* Start selling (non-sellers only) */}
-            {!isActiveSeller && (
+            {/* Earnings (sellers only) */}
+            {isActiveSeller && (
               <Link
-                href="/seller/onboard"
+                href="/seller/dashboard"
                 className="flex items-center gap-3 px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                <Store className="w-4 h-4 text-aurora-green" />
-                {t('userMenu.startSelling')}
+                <Wallet className="w-4 h-4 text-aurora-green" />
+                {t('userMenu.sellerDashboard')}
               </Link>
             )}
 

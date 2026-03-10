@@ -43,9 +43,9 @@ export function useOrderMessages({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback((smooth = true) => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: smooth ? 'smooth' : 'auto',
-    });
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    container.scrollTo({ top: container.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
   }, []);
 
   // Subscribe to realtime message updates

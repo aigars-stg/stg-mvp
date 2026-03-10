@@ -528,9 +528,9 @@
     "searchPlaceholder": "Search games...",
     "language": "Language",
     "userMenu": {
-      "sellerDashboard": "Seller dashboard",
-      "myOrders": "My purchases",
-      "myListings": "My listings",
+      "sellerDashboard": "Wallet & earnings",
+      "myOrders": "Orders",
+      "myListings": "My games",
       "savedAndWanted": "Saved & wanted",
       "startSelling": "Start selling",
       "staffDashboard": "Staff dashboard",
@@ -2454,6 +2454,7 @@
     "reviews": {
       "loading": "Loading reviews..."
     },
+    "viewAllSales": "View all sales",
     "refresh": "Refresh",
     "settings": "Settings",
     "bankAccount": {
@@ -2619,18 +2620,29 @@
     }
   },
   "Orders": {
-    "title": "My purchases",
+    "title": "My orders",
+    "actionRequired": {
+      "title": "Action required",
+      "confirmReceipt": "Confirm receipt",
+      "activeDispute": "Dispute open"
+    },
     "subtitle": "Games heading your way",
     "loading": "Loading your orders...",
     "error": {
       "title": "Error loading orders",
       "tryAgain": "Try again"
     },
+    "roleTabs": {
+      "purchases": "My purchases",
+      "sales": "My sales"
+    },
     "tabs": {
       "all": "All Orders",
       "pending": "Pending",
       "accepted": "Accepted",
       "shipped": "Shipped",
+      "delivered": "Delivered",
+      "disputed": "Disputed",
       "completed": "Completed",
       "cancelled": "Cancelled"
     },
@@ -2643,7 +2655,8 @@
       "delivered": "Delivered",
       "completed": "Completed",
       "cancelled": "Cancelled",
-      "disputed": "Disputed"
+      "disputed": "Disputed",
+      "refunded": "Refunded"
     },
     "emptyState": {
       "title": "Nothing here yet",
@@ -2659,7 +2672,10 @@
       "sellerDeadlineExpired": "Seller deadline expired - Refund processing",
       "sellerTimeRemaining": "Seller has {hours}h {minutes}m to respond",
       "terminalPickup": "Terminal Pickup",
-      "localPickup": "Local Pickup"
+      "localPickup": "Local Pickup",
+      "expired": "Expired",
+      "from": "From: {name}",
+      "itemsMore": "+{count} more"
     },
     "detail": {
       "loading": "Loading order details...",
@@ -2689,6 +2705,7 @@
       "sellerTimeRemaining": "Seller has {hours}h {minutes}m to respond",
       "cancelled": {
         "title": "Order Cancelled",
+        "body": "This order has been cancelled and a refund has been initiated.",
         "defaultReason": "This order has been cancelled",
         "refundProcessed": "Refund Processed: €{amount}",
         "refundedOn": "Refunded on {date}"
@@ -2701,12 +2718,60 @@
       },
       "refunded": {
         "title": "Refund Processed",
-        "amount": "Refund amount: €{amount}"
+        "notice": "This order has been refunded.",
+        "amount": "Refund amount: {amount}"
       },
       "disputed": {
         "title": "This order is under review",
         "openedOn": "Dispute opened: {date}",
-        "contactSoon": "Our team will contact you within 24 hours"
+        "contactSoon": "Our team will contact you within 24 hours",
+        "inProgress": "Dispute in Progress",
+        "yourReport": "Your report",
+        "awaitingDeadline": "Waiting for seller response (deadline: {date})",
+        "underReview": "Our team is reviewing the dispute. We will notify you of the outcome.",
+        "yourResponse": "Your response",
+        "staffReviewing": "Our team is reviewing the dispute. We will notify both parties of the outcome.",
+        "resolution": "Resolution",
+        "awaitingSeller": "Awaiting seller",
+        "resolved": "Resolved"
+      },
+      "labelGenerating": "Generating your shipping label — this usually takes a few seconds.",
+      "notices": {
+        "delivered": {
+          "title": "Your parcel has arrived",
+          "body": "Pick it up at the terminal and confirm receipt. You have 2 days to open a dispute if anything is wrong."
+        },
+        "deliveredSeller": {
+          "title": "Buyer has received the parcel",
+          "body": "If no dispute is raised within 2 days, your earnings will be credited to your wallet automatically."
+        },
+        "accepted": {
+          "title": "Seller is preparing your order",
+          "body": "They're getting it ready to ship. You'll be notified when it's on the way."
+        },
+        "shipped": {
+          "title": "Your parcel is on the way",
+          "body": "Track it below. You'll receive a notification when it arrives at the pickup terminal."
+        },
+        "completed": {
+          "title": "Order complete",
+          "body": "Thank you for your purchase."
+        },
+        "completedSeller": {
+          "title": "Order complete — you've been paid",
+          "body": "{amount} has been added to your wallet. You can withdraw any time."
+        }
+      },
+      "timeline": {
+        "title": "Tracking Timeline",
+        "paid": "Paid",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "refunded": "Refunded",
+        "disputed": "Disputed"
+      },
+      "statusTimeline": {
+        "remaining": "{hours}h {minutes}m remaining"
       },
       "items": {
         "title": "Items ({count})"
@@ -2731,7 +2796,19 @@
         "items": "Items",
         "shipping": "Shipping",
         "totalPaid": "Total Paid",
-        "free": "Free"
+        "free": "Free",
+        "commission": "Platform commission",
+        "youReceive": "You receive",
+        "youReceiveEstimated": "You'll receive (est.)",
+        "total": "Total",
+        "sellerCredit": "Seller credit",
+        "refund": "Refund",
+        "viewInvoice": "View invoice",
+        "viewCreditNote": "View credit note",
+        "orderConfirmation": "Order confirmation",
+        "invoice": "Invoice",
+        "creditNote": "Credit note",
+        "confirmation": "Confirmation"
       },
       "seller": {
         "title": "Seller"
@@ -2778,7 +2855,10 @@
       "messages": {
         "title": "Messages",
         "empty": "No messages yet",
-        "startConversation": "Start the conversation with {name}"
+        "emptyReadOnly": "No messages in this conversation",
+        "startConversation": "Start the conversation with {name}",
+        "buyerLabel": "Buyer",
+        "sellerLabel": "Seller"
       },
       "buyer": {
         "title": "Buyer"
@@ -3007,6 +3087,11 @@
       "pending": "You have no pending orders to review",
       "other": "No {tab} orders"
     },
+    "actionRequired": {
+      "title": "Action required",
+      "acceptOrDecline": "Accept or decline",
+      "activeDispute": "Dispute open"
+    },
     "summary": {
       "allOrders": "All Orders",
       "pending": "Pending",
@@ -3018,14 +3103,19 @@
       "pending": "Pending",
       "accepted": "Accepted",
       "shipped": "Shipped",
+      "delivered": "Delivered",
+      "disputed": "Disputed",
       "completed": "Completed",
+      "cancelled": "Cancelled",
       "all": "All"
     },
     "card": {
       "buyer": "Buyer: {name}",
       "expired": "Expired",
       "timeRemaining": "{hours}h {minutes}m left",
-      "items": "Items ({count})"
+      "items": "Items ({count})",
+      "itemsMore": "+{count} more",
+      "to": "To: {name}"
     },
     "shipping": {
       "terminalPickup": "Terminal Pickup:",
@@ -3066,7 +3156,6 @@
       "orderNotFound": "Order not found"
     },
     "backToOrders": "Back to Orders",
-    "buyer": "Buyer: {name}",
     "actionRequired": {
       "title": "Action Required",
       "description": "Please accept or decline this order. You have 24 hours from when the order was placed to respond. If you don\u2019t respond in time, the order will be automatically cancelled and the buyer will be refunded.",

@@ -9,7 +9,6 @@ import { clsx } from 'clsx';
  * - Condition badges use carefully designed color combinations
  * - Each condition feels friendly, not judgmental
  * - Trust badges use frost colors for verification
- * - 24px border radius creates friendly pill shapes
  * - Minimal use of green to avoid greenwashing association
  */
 const badgeVariants = cva(
@@ -47,9 +46,9 @@ const badgeVariants = cva(
       },
 
       size: {
-        sm: 'px-2 py-0.5 text-xs rounded-2xl',       // Small, subtle
-        md: 'px-3 py-1 text-sm rounded-2xl',         // Standard pill shape
-        lg: 'px-4 py-1.5 text-base rounded-2xl',     // Prominent
+        sm: 'px-2 py-0.5 text-xs rounded-md',
+        md: 'px-3 py-1 text-sm rounded-md',
+        lg: 'px-4 py-1.5 text-base rounded-md',
       },
     },
     defaultVariants: {
@@ -75,7 +74,6 @@ export interface BadgeProps
  * Design principles:
  * - Condition colors make used games feel approachable, not shameful
  * - Trust badges use frost blue for verification credibility
- * - 24px border radius creates friendly pill shapes
  * - Green used sparingly (only for success states, not primary branding)
  *
  * @example

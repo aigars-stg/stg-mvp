@@ -29,7 +29,6 @@ import {
 } from '@/components/order-detail';
 import type { OrderDetailOrder, OrderDetailItem } from '@/lib/types/order-detail';
 import { formatDate, formatTime } from '@/lib/date-utils';
-import { formatPrice } from '@/lib/services/pricing';
 
 export default function OrderDetailPage() {
   const t = useTranslations('Orders.detail');
@@ -122,22 +121,37 @@ export default function OrderDetailPage() {
       <OrderDetailHeader
         orderNumber={t('orderTitle', { orderNumber: order.order_number })}
         status={order.status}
-        subtitle={
-          isSeller
-            ? tSeller('buyer', { name: buyer?.full_name || 'Unknown' })
-            : t('placedAt', {
-                date: formatDate(order.timestamps.created_at),
-                time: formatTime(order.timestamps.created_at),
-              })
-        }
-        backHref="/orders"
+        subtitle={t('placedAt', {
+          date: formatDate(order.timestamps.created_at),
+          time: formatTime(order.timestamps.created_at),
+        })}
+        backHref={isSeller ? '/orders?role=selling' : '/orders'}
         backLabel={t('backToOrders')}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="grid lg:grid-cols-3 gap-6">
+        {!isCancelled && order.status !== 'disputed' && (
+          <div className="bg-snow-white border border-border rounded-xl p-4 mb-4">
+            <StatusTimeline
+              currentStatus={order.status}
+              variant="horizontal"
+              timeRemainingMs={timeRemainingMs}
+              timeRemainingLabel={
+                timeRemainingMs && timeRemainingMs > 0
+                  ? t('statusTimeline.remaining', {
+                      hours: Math.floor(timeRemainingMs / 3600000),
+                      minutes: Math.floor((timeRemainingMs % 3600000) / 60000),
+                    })
+                  : undefined
+              }
+              title={t('orderStatus')}
+            />
+          </div>
+        )}
+
+        <div className="grid lg:grid-cols-3 gap-4">
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6 order-2 lg:order-1">
+          <div className="lg:col-span-1 space-y-4 order-2 lg:order-1">
             <OrderPricingSummary
               order={order as OrderDetailOrder}
               viewerRole={viewerRole || 'buyer'}
@@ -145,7 +159,7 @@ export default function OrderDetailPage() {
             />
 
             {otherParty && (
-              <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
+              <div className="bg-snow-white border border-border rounded-xl p-3 sm:p-4">
                 <h3 className="text-sm font-semibold text-polar-night mb-3">
                   {isSeller ? tSeller('buyerInfo') : t('seller.title')}
                 </h3>
@@ -166,6 +180,8 @@ export default function OrderDetailPage() {
               order={order as OrderDetailOrder}
               trackingEvents={tracking_events}
               title={isSeller ? tSeller('shippingInfo.title') : t('shipping.deliveryTitle')}
+              showBarcode={isSeller}
+              showPhone={!isSeller}
             />
 
             <OrderTimeline timestamps={order.timestamps} />
@@ -186,17 +202,7 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6 order-1 lg:order-2">
-            {isBuyer && !isCancelled && (
-              <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
-                <StatusTimeline
-                  currentStatus={order.status}
-                  timeRemainingMs={timeRemainingMs}
-                  title={t('orderStatus')}
-                />
-              </div>
-            )}
-
+          <div className="lg:col-span-2 space-y-4 order-1 lg:order-2">
             <OrderStatusNotice
               order={order as OrderDetailOrder}
               viewerRole={viewerRole || 'buyer'}
@@ -208,15 +214,15 @@ export default function OrderDetailPage() {
               <div className="bg-aurora-red/5 border border-aurora-red/20 rounded-xl p-4 sm:p-6 space-y-4">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-aurora-red" />
-                  <h3 className="font-semibold text-polar-night">Dispute in Progress</h3>
+                  <h3 className="font-semibold text-polar-night">{t('disputed.inProgress')}</h3>
                   <Badge variant={
                     order.dispute.status === 'awaiting_seller' ? 'warning' :
                     order.dispute.status === 'under_review' ? 'default' :
                     order.dispute.status === 'resolved' ? 'success' : 'default'
                   } size="sm">
-                    {order.dispute.status === 'awaiting_seller' ? 'Awaiting seller' :
-                     order.dispute.status === 'under_review' ? 'Under review' :
-                     order.dispute.status === 'resolved' ? 'Resolved' : order.dispute.status}
+                    {order.dispute.status === 'awaiting_seller' ? t('disputed.awaitingSeller') :
+                     order.dispute.status === 'under_review' ? t('disputed.underReview') :
+                     order.dispute.status === 'resolved' ? t('disputed.resolved') : order.dispute.status}
                   </Badge>
                 </div>
 
@@ -224,19 +230,19 @@ export default function OrderDetailPage() {
                 {isBuyer && (
                   <div className="space-y-3">
                     <div>
-                      <p className="text-xs text-text-muted">Your report</p>
+                      <p className="text-xs text-text-muted">{t('disputed.yourReport')}</p>
                       <p className="text-sm font-medium text-polar-night">{order.dispute.reason}</p>
                       <p className="text-sm text-text-secondary mt-1">{order.dispute.description}</p>
                     </div>
                     {order.dispute.status === 'awaiting_seller' && order.dispute.seller_deadline && (
                       <div className="flex items-center gap-2 text-sm text-text-secondary">
                         <Clock className="w-4 h-4" />
-                        Waiting for seller response (deadline: {formatDate(order.dispute.seller_deadline)})
+                        {t('disputed.awaitingDeadline', { date: formatDate(order.dispute.seller_deadline) })}
                       </div>
                     )}
                     {order.dispute.status === 'under_review' && (
                       <p className="text-sm text-text-secondary">
-                        Our team is reviewing the dispute. We will notify you of the outcome.
+                        {t('disputed.underReview')}
                       </p>
                     )}
                   </div>
@@ -259,35 +265,21 @@ export default function OrderDetailPage() {
                   <div className="space-y-3">
                     {order.dispute.seller_response && (
                       <div>
-                        <p className="text-xs text-text-muted">Your response</p>
+                        <p className="text-xs text-text-muted">{t('disputed.yourResponse')}</p>
                         <p className="text-sm text-text-secondary">{order.dispute.seller_response}</p>
                       </div>
                     )}
                     <p className="text-sm text-text-secondary">
-                      Our team is reviewing the dispute. We will notify both parties of the outcome.
+                      {t('disputed.staffReviewing')}
                     </p>
                   </div>
                 )}
 
                 {order.dispute.status === 'resolved' && order.dispute.resolution_note && (
                   <div className="pt-3 border-t border-aurora-red/10">
-                    <p className="text-xs text-text-muted">Resolution</p>
+                    <p className="text-xs text-text-muted">{t('disputed.resolution')}</p>
                     <p className="text-sm text-text-secondary">{order.dispute.resolution_note}</p>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* Refund status */}
-            {order.status === 'refunded' && (
-              <div className="bg-aurora-green/5 border border-aurora-green/20 rounded-xl p-4">
-                <p className="text-sm font-medium text-polar-night">
-                  This order has been refunded.
-                </p>
-                {order.refund_amount != null && (
-                  <p className="text-sm text-text-secondary mt-1">
-                    Refund amount: {formatPrice(order.refund_amount)}
-                  </p>
                 )}
               </div>
             )}
@@ -310,8 +302,18 @@ export default function OrderDetailPage() {
               />
             )}
 
+            {/* Seller: Label generating (brief transitional state) */}
+            {isSeller && order.status === 'accepted' && !order.tracking.label_url && !order.label_error && (
+              <div className="bg-frost-ice/5 border border-frost-ice/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-5 h-5 text-frost-ice animate-spin flex-shrink-0" />
+                  <p className="text-sm text-text-secondary">{t('labelGenerating')}</p>
+                </div>
+              </div>
+            )}
+
             {/* Seller: Label generation failed */}
-            {isSeller && order.shipping_method === 't2t' && order.status === 'accepted' && !order.tracking.label_url && (
+            {isSeller && order.shipping_method === 't2t' && order.status === 'accepted' && !order.tracking.label_url && !!order.label_error && (
               <SellerLabelFailed
                 labelError={order.label_error}
                 retryError={retryError}
@@ -356,7 +358,7 @@ export default function OrderDetailPage() {
               />
             )}
 
-            {isBuyer && (order.status === 'delivered' || order.status === 'completed') && (
+            {isBuyer && order.status === 'completed' && (
               <BuyerReviewCTA orderId={order.id} hasReview={hasReview} />
             )}
 

@@ -8,6 +8,8 @@ interface ShippingInfoCardProps {
   parcelSize?: ParcelSize;
   title?: string;
   showReceiverInfo?: boolean;
+  /** When false, hides receiver phone number (seller view) */
+  showPhone?: boolean;
   className?: string;
 }
 
@@ -29,6 +31,7 @@ export function ShippingInfoCard({
   parcelSize,
   title = 'Delivery',
   showReceiverInfo = true,
+  showPhone = true,
   className = '',
 }: ShippingInfoCardProps) {
   const countryDisplay = getCountryDisplay(destination.country);
@@ -84,7 +87,7 @@ export function ShippingInfoCard({
                 {destination.receiver_name}
               </span>
             </div>
-            {destination.receiver_phone && (
+            {destination.receiver_phone && showPhone && (
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-text-muted" />
                 <span className="text-text-secondary">Phone:</span>

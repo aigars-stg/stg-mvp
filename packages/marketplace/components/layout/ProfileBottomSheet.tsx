@@ -4,7 +4,7 @@
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { useTopLoader } from 'nextjs-toploader';
-import { Package, Heart, Search, Settings, LogOut, Close, LogIn, ShoppingBag, Store, ChatBubble, Shield, Notification as BellIcon } from '@/lib/icons';
+import { Settings, LogOut, Close, LogIn, ShoppingBag, ChatBubble, Shield, Notification as BellIcon, Wallet, Checkerboard } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
 import { useUnreadNotifications } from '@/lib/contexts/UnreadNotificationsContext';
@@ -257,11 +257,21 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                     <ShoppingBag className="w-5 h-5 text-frost-ice" />
                     <span className="text-polar-night font-medium">{t('userMenu.myOrders')}</span>
                   </div>
-                  {ordersCount > 0 && (
+                  {isActiveSeller ? (
+                    pendingSalesCount > 0 ? (
+                      <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                        {pendingSalesCount}
+                      </span>
+                    ) : (ordersCount + salesCount) > 0 ? (
+                      <span className="bg-frost-ice/10 text-frost-ice text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                        {ordersCount + salesCount}
+                      </span>
+                    ) : null
+                  ) : ordersCount > 0 ? (
                     <span className="bg-frost-ice/10 text-frost-ice text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
                       {ordersCount}
                     </span>
-                  )}
+                  ) : null}
                 </button>
 
                 {/* Notifications */}
@@ -280,101 +290,39 @@ export function ProfileBottomSheet({ isOpen, onClose }: ProfileBottomSheetProps)
                   )}
                 </button>
 
-                {isActiveSeller ? (
-                  <>
-                    {/* Seller: Sales Dashboard */}
-                    <button
-                      onClick={() => handleNavigate('/seller/dashboard?tab=orders')}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Store className="w-5 h-5 text-aurora-green" />
-                        <span className="text-polar-night font-medium">{t('userMenu.sellerDashboard')}</span>
-                      </div>
-                      {pendingSalesCount > 0 ? (
-                        <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
-                          {pendingSalesCount}
-                        </span>
-                      ) : salesCount > 0 ? (
-                        <span className="bg-aurora-green/10 text-aurora-green text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
-                          {salesCount}
-                        </span>
-                      ) : null}
-                    </button>
+                {/* My Games — unified for all users */}
+                <button
+                  onClick={() => handleNavigate('/my-listings')}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Checkerboard className="w-5 h-5 text-frost-ice" />
+                    <span className="text-polar-night font-medium">{t('userMenu.myListings')}</span>
+                  </div>
+                  {isActiveSeller ? (
+                    listingsCount > 0 && (
+                      <span className="bg-frost-ice/10 text-frost-ice text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                        {listingsCount}
+                      </span>
+                    )
+                  ) : (
+                    (savedCount + wantedCount) > 0 && (
+                      <span className="bg-frost-ice/10 text-frost-ice text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
+                        {savedCount + wantedCount}
+                      </span>
+                    )
+                  )}
+                </button>
 
-                    {/* Seller: My Listings (all 3 tabs) */}
-                    <button
-                      onClick={() => handleNavigate('/my-listings')}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Package className="w-5 h-5 text-frost-ice" />
-                        <span className="text-polar-night font-medium">{t('userMenu.myListings')}</span>
-                      </div>
-                      {listingsCount > 0 && (
-                        <span className="bg-frost-ice/10 text-frost-ice text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
-                          {listingsCount}
-                        </span>
-                      )}
-                    </button>
-
-                    <button
-                      onClick={() => handleNavigate('/my-listings?tab=saved')}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Heart className="w-5 h-5 text-aurora-red" />
-                        <span className="text-polar-night font-medium">{t('profileSheet.savedListings')}</span>
-                      </div>
-                      {savedCount > 0 && (
-                        <span className="bg-aurora-red/10 text-aurora-red text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
-                          {savedCount}
-                        </span>
-                      )}
-                    </button>
-
-                    <button
-                      onClick={() => handleNavigate('/my-listings?tab=wanted')}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Search className="w-5 h-5 text-aurora-orange" />
-                        <span className="text-polar-night font-medium">{t('profileSheet.wantedGames')}</span>
-                      </div>
-                      {wantedCount > 0 && (
-                        <span className="bg-aurora-orange/10 text-aurora-orange text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
-                          {wantedCount}
-                        </span>
-                      )}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    {/* Non-seller: Saved & Wanted (combined) */}
-                    <button
-                      onClick={() => handleNavigate('/my-listings')}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-elevated transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Heart className="w-5 h-5 text-aurora-red" />
-                        <span className="text-polar-night font-medium">{t('userMenu.savedAndWanted')}</span>
-                      </div>
-                      {(savedCount + wantedCount) > 0 && (
-                        <span className="bg-aurora-red/10 text-aurora-red text-xs font-semibold rounded-full px-2 py-1 min-w-[24px] text-center">
-                          {savedCount + wantedCount}
-                        </span>
-                      )}
-                    </button>
-
-                    {/* Start Selling CTA */}
-                    <button
-                      onClick={() => handleNavigate('/seller/onboard')}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated transition-colors"
-                    >
-                      <Store className="w-5 h-5 text-aurora-green" />
-                      <span className="text-polar-night font-medium">{t('userMenu.startSelling')}</span>
-                    </button>
-                  </>
+                {/* Earnings (sellers only) */}
+                {isActiveSeller && (
+                  <button
+                    onClick={() => handleNavigate('/seller/dashboard')}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  >
+                    <Wallet className="w-5 h-5 text-aurora-green" />
+                    <span className="text-polar-night font-medium">{t('userMenu.sellerDashboard')}</span>
+                  </button>
                 )}
               </div>
 

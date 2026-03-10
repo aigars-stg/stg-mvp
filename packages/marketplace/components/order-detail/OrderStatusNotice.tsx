@@ -1,12 +1,16 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import {
   CloseCircle as XCircle,
   CheckCircleAlt01 as CheckCircle,
   AlertTriangle,
   Time as Clock,
+  Package,
+  InfoCircle as Info,
 } from '@/lib/icons';
 import { formatDate } from '@/lib/date-utils';
+import { formatCentsToCurrency } from '@/lib/services/pricing';
 import type { OrderDetailOrder, ViewerRole } from '@/lib/types/order-detail';
 
 interface OrderStatusNoticeProps {
@@ -20,6 +24,7 @@ export function OrderStatusNotice({
   viewerRole,
   timeRemainingMs,
 }: OrderStatusNoticeProps) {
+  const t = useTranslations('Orders.detail');
   const { status } = order;
 
   // Cancelled notice
@@ -30,15 +35,15 @@ export function OrderStatusNotice({
           <XCircle className="w-6 h-6 text-aurora-red flex-shrink-0 mt-0.5" />
           <div>
             <h3 className="font-semibold text-aurora-red mb-2">
-              Order Cancelled
+              {t('cancelled.title')}
             </h3>
             <p className="text-sm text-text-secondary mb-3">
-              This order has been cancelled and a refund has been initiated.
+              {t('cancelled.body')}
             </p>
             {order.timestamps.refunded_at && (
               <div className="p-3 bg-aurora-green/10 border border-aurora-green/20 rounded-lg">
                 <p className="text-sm font-medium text-polar-night">
-                  Refund of &euro;{order.total_amount.toFixed(2)} processed
+                  {t('cancelled.refundProcessed', { amount: order.total_amount.toFixed(2) })}
                 </p>
                 <p className="text-xs text-text-muted mt-1">
                   {formatDate(order.timestamps.refunded_at)}
@@ -59,10 +64,10 @@ export function OrderStatusNotice({
           <CheckCircle className="w-6 h-6 text-aurora-green flex-shrink-0 mt-0.5" />
           <div>
             <h3 className="font-semibold text-aurora-green mb-2">
-              Refund Processed
+              {t('refunded.title')}
             </h3>
             <p className="text-sm text-text-secondary">
-              &euro;{(order.refund_amount ?? order.total_amount).toFixed(2)} has been refunded
+              {t('refunded.amount', { amount: `€${(order.refund_amount ?? order.total_amount).toFixed(2)}` })}
             </p>
             {order.timestamps.refunded_at && (
               <p className="text-xs text-text-muted mt-2">
@@ -83,15 +88,15 @@ export function OrderStatusNotice({
           <AlertTriangle className="w-6 h-6 text-aurora-yellow flex-shrink-0 mt-0.5" />
           <div>
             <h3 className="font-semibold text-polar-night mb-2">
-              Order Under Dispute
+              {t('disputed.inProgress')}
             </h3>
             {order.timestamps.disputed_at && (
               <p className="text-sm text-text-secondary mb-2">
-                Opened on {formatDate(order.timestamps.disputed_at)}
+                {t('disputed.openedOn', { date: formatDate(order.timestamps.disputed_at) })}
               </p>
             )}
             <p className="text-xs text-text-muted">
-              Our team will review this case and contact you soon.
+              {t('disputed.staffReviewing')}
             </p>
           </div>
         </div>
@@ -99,7 +104,124 @@ export function OrderStatusNotice({
     );
   }
 
-  // Pending seller notice (buyer and staff views)
+  // Delivered notice — buyer
+  if (status === 'delivered' && viewerRole === 'buyer') {
+    return (
+      <div className="bg-aurora-green/10 border-2 border-aurora-green/20 rounded-xl p-4 sm:p-6">
+        <div className="flex items-start gap-3">
+          <Package className="w-6 h-6 text-aurora-green flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-polar-night mb-2">
+              {t('notices.delivered.title')}
+            </h3>
+            <p className="text-sm text-text-secondary">
+              {t('notices.delivered.body')}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Delivered notice — seller
+  if (status === 'delivered' && viewerRole === 'seller') {
+    return (
+      <div className="bg-aurora-green/10 border-2 border-aurora-green/20 rounded-xl p-4 sm:p-6">
+        <div className="flex items-start gap-3">
+          <Package className="w-6 h-6 text-aurora-green flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-polar-night mb-2">
+              {t('notices.deliveredSeller.title')}
+            </h3>
+            <p className="text-sm text-text-secondary">
+              {t('notices.deliveredSeller.body')}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Accepted notice — buyer
+  if (status === 'accepted' && viewerRole === 'buyer') {
+    return (
+      <div className="bg-frost-ice/10 border-2 border-frost-ice/20 rounded-xl p-4 sm:p-6">
+        <div className="flex items-start gap-3">
+          <Info className="w-6 h-6 text-frost-ice flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-polar-night mb-2">
+              {t('notices.accepted.title')}
+            </h3>
+            <p className="text-sm text-text-secondary">
+              {t('notices.accepted.body')}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Shipped / in_transit notice — buyer
+  if ((status === 'shipped' || status === 'in_transit') && viewerRole === 'buyer') {
+    return (
+      <div className="bg-frost-ice/10 border-2 border-frost-ice/20 rounded-xl p-4 sm:p-6">
+        <div className="flex items-start gap-3">
+          <Package className="w-6 h-6 text-frost-ice flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-polar-night mb-2">
+              {t('notices.shipped.title')}
+            </h3>
+            <p className="text-sm text-text-secondary">
+              {t('notices.shipped.body')}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Completed notice — buyer
+  if (status === 'completed' && viewerRole === 'buyer') {
+    return (
+      <div className="bg-aurora-green/10 border-2 border-aurora-green/20 rounded-xl p-4 sm:p-6">
+        <div className="flex items-start gap-3">
+          <CheckCircle className="w-6 h-6 text-aurora-green flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-aurora-green mb-2">
+              {t('notices.completed.title')}
+            </h3>
+            <p className="text-sm text-text-secondary">
+              {t('notices.completed.body')}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Completed notice — seller
+  if (status === 'completed' && viewerRole === 'seller') {
+    const sellerCreditCents = order.payment?.seller_wallet_credit_cents;
+    return (
+      <div className="bg-aurora-green/10 border-2 border-aurora-green/20 rounded-xl p-4 sm:p-6">
+        <div className="flex items-start gap-3">
+          <CheckCircle className="w-6 h-6 text-aurora-green flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-aurora-green mb-2">
+              {t('notices.completedSeller.title')}
+            </h3>
+            {sellerCreditCents != null && (
+              <p className="text-sm text-text-secondary">
+                {t('notices.completedSeller.body', { amount: formatCentsToCurrency(sellerCreditCents) })}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Pending seller notice (buyer view only)
   if (
     status === 'pending_seller' &&
     timeRemainingMs !== null &&
@@ -127,14 +249,15 @@ export function OrderStatusNotice({
                 isExpired ? 'text-aurora-red' : 'text-polar-night'
               }`}
             >
-              {isExpired
-                ? 'Seller Response Deadline Expired'
-                : 'Waiting for Seller'}
+              {isExpired ? t('pending.expiredTitle') : t('pending.waitingTitle')}
             </h3>
             <p className="text-sm text-text-secondary">
               {isExpired
-                ? 'The seller did not respond in time. A refund will be processed automatically.'
-                : `The seller has ${Math.floor(timeRemainingMs / 3600000)}h ${Math.floor((timeRemainingMs % 3600000) / 60000)}m to respond.`}
+                ? t('pending.expiredDescription')
+                : t('pending.waitingDescription', {
+                    hours: Math.floor(timeRemainingMs / 3600000),
+                    minutes: Math.floor((timeRemainingMs % 3600000) / 60000),
+                  })}
             </p>
           </div>
         </div>

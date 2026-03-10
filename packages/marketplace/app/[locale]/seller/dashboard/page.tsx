@@ -1,20 +1,19 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useRouter } from '@/i18n/navigation';
+import { useRouter, Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslations } from 'next-intl';
 import { RefreshCw as Loader2 } from '@/lib/icons';
-import { OrdersTab } from '@/components/seller/dashboard/OrdersTab';
 import { EarningsTab } from '@/components/seller/dashboard/EarningsTab';
 import { ReviewsTab } from '@/components/seller/dashboard/ReviewsTab';
 import type { Dac7ComplianceStatus } from '@/lib/types/seller';
 
-type DashboardTab = 'orders' | 'earnings' | 'reviews';
+type DashboardTab = 'earnings' | 'reviews';
 
-const VALID_TABS: DashboardTab[] = ['orders', 'earnings', 'reviews'];
+const VALID_TABS: DashboardTab[] = ['earnings', 'reviews'];
 
 interface SellerProfile {
   seller_status: string;
@@ -63,16 +62,13 @@ function SellerDashboardContent() {
 
   // Read initial tab from URL
   const tabParam = searchParams.get('tab') as DashboardTab | null;
-  const initialTab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'orders';
+  const initialTab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'earnings';
   const [activeTab, setActiveTab] = useState<DashboardTab>(initialTab);
 
   // Seller profile state
   const [profile, setProfile] = useState<SellerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  // Pending orders badge count (updated by OrdersTab)
-  const [pendingCount, setPendingCount] = useState(0);
 
   // Fetch seller profile + check onboarding status
   const fetchProfile = useCallback(async () => {
@@ -172,17 +168,16 @@ function SellerDashboardContent() {
                 {t('title')}
               </h1>
               <p className="text-text-secondary mt-1">{t('subtitle.contactOnly')}</p>
+              <Link
+                href="/orders?role=selling"
+                className="inline-flex items-center gap-1 text-sm text-frost-ice hover:underline mt-1"
+              >
+                {t('viewAllSales')} →
+              </Link>
             </div>
 
             {/* Tab Bar */}
             <div className="flex items-center gap-1 bg-frost-ice/10 rounded-lg p-1">
-              <TabButton
-                active={activeTab === 'orders'}
-                onClick={() => handleTabChange('orders')}
-                badge={pendingCount}
-              >
-                {t('tabs.orders')}
-              </TabButton>
               <TabButton
                 active={activeTab === 'earnings'}
                 onClick={() => handleTabChange('earnings')}
@@ -202,12 +197,6 @@ function SellerDashboardContent() {
 
       {/* Tab Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {activeTab === 'orders' && (
-          <OrdersTab
-            isActive={activeTab === 'orders'}
-            onPendingCountChange={setPendingCount}
-          />
-        )}
         {activeTab === 'earnings' && (
           <EarningsTab
             profile={profile}

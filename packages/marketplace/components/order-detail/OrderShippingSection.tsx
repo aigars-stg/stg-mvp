@@ -14,6 +14,10 @@ interface OrderShippingSectionProps {
   title?: string;
   /** Constrain tracking events height (e.g. "max-h-40" for sidebar) */
   trackingMaxHeight?: string;
+  /** When false, shows only the tracking link — no barcode number (buyer view) */
+  showBarcode?: boolean;
+  /** When false, hides receiver phone number (seller view) */
+  showPhone?: boolean;
 }
 
 export function OrderShippingSection({
@@ -21,16 +25,19 @@ export function OrderShippingSection({
   trackingEvents,
   title = 'Shipping',
   trackingMaxHeight,
+  showBarcode = true,
+  showPhone = true,
 }: OrderShippingSectionProps) {
   return (
-    <div className="bg-snow-white border border-border rounded-xl p-4 sm:p-6">
-      <ShippingInfoCard destination={order.destination} title={title} />
+    <div className="bg-snow-white border border-border rounded-xl p-3 sm:p-4">
+      <ShippingInfoCard destination={order.destination} title={title} showPhone={showPhone} />
 
       {order.tracking.barcode && (
         <div className="mt-4">
           <TrackingNumberCard
             tracking={order.tracking}
             title="Tracking number"
+            showBarcode={showBarcode}
           />
         </div>
       )}

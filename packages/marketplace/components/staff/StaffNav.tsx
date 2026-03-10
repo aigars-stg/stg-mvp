@@ -1,6 +1,7 @@
 'use client';
 
 import { Link, usePathname } from '@/i18n/navigation';
+import { SegmentedNav } from '@second-turn/design-system';
 import {
   Package,
   Receipt,
@@ -11,42 +12,38 @@ import {
   Email,
   TrendUp,
 } from '@/lib/icons';
+import type React from 'react';
 
-const STAFF_SECTIONS = [
-  { label: 'Orders', href: '/staff/orders', icon: Package },
-  { label: 'Bookkeeping', href: '/staff/bookkeeping', icon: Receipt },
-  { label: 'DAC7', href: '/staff/dac7', icon: FileText },
-  { label: 'Disputes', href: '/staff/disputes', icon: AlertTriangle },
-  { label: 'Withdrawals', href: '/staff/withdrawals', icon: Euro },
-  { label: 'Feedback', href: '/staff/feedback', icon: MessageSquare },
-  { label: 'Newsletter', href: '/staff/newsletter', icon: Email },
-  { label: 'Play', href: '/staff/play', icon: TrendUp },
-] as const;
+const STAFF_SECTIONS: {
+  value: string;
+  label: string;
+  href: string;
+  IconComponent: React.ComponentType<{ className?: string }>;
+}[] = [
+  { value: 'orders', label: 'Orders', href: '/staff/orders', IconComponent: Package },
+  { value: 'bookkeeping', label: 'Bookkeeping', href: '/staff/bookkeeping', IconComponent: Receipt },
+  { value: 'dac7', label: 'DAC7', href: '/staff/dac7', IconComponent: FileText },
+  { value: 'disputes', label: 'Disputes', href: '/staff/disputes', IconComponent: AlertTriangle },
+  { value: 'withdrawals', label: 'Withdrawals', href: '/staff/withdrawals', IconComponent: Euro },
+  { value: 'feedback', label: 'Feedback', href: '/staff/feedback', IconComponent: MessageSquare },
+  { value: 'newsletter', label: 'Newsletter', href: '/staff/newsletter', IconComponent: Email },
+  { value: 'play', label: 'Play', href: '/staff/play', IconComponent: TrendUp },
+];
 
 export function StaffNav() {
   const pathname = usePathname();
+  const activeValue = STAFF_SECTIONS.find((s) => pathname.startsWith(s.href))?.value ?? '';
 
   return (
-    <nav className="flex items-center gap-1 overflow-x-auto bg-frost-ice/10 rounded-lg p-1">
-      {STAFF_SECTIONS.map((section) => {
-        const Icon = section.icon;
-        const isActive = pathname.startsWith(section.href);
-
-        return (
-          <Link
-            key={section.href}
-            href={section.href}
-            className={`flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-              isActive
-                ? 'bg-frost-ice text-white'
-                : 'text-frost-ice hover:bg-frost-ice/20'
-            }`}
-          >
-            <Icon className="w-4 h-4 shrink-0" />
-            {section.label}
-          </Link>
-        );
-      })}
-    </nav>
+    <SegmentedNav
+      items={STAFF_SECTIONS}
+      activeValue={activeValue}
+      renderItem={(item, _isActive, className) => (
+        <Link key={item.value} href={item.href} className={className}>
+          <item.IconComponent className="w-4 h-4 shrink-0" />
+          {item.label}
+        </Link>
+      )}
+    />
   );
 }

@@ -1,18 +1,19 @@
-/* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
-import { Button, Badge, Card } from '@second-turn/design-system';
-import { Package, Time as Clock, RefreshCw as Loader2, AlertCircle, ChevronRight, Truck, User, ShoppingBag } from '@/lib/icons';
+import { useSearchParams } from 'next/navigation';
+import { Button, Badge, Card, SegmentedNav } from '@second-turn/design-system';
+import { Package, Time as Clock, RefreshCw as Loader2, AlertCircle, AlertTriangle, ChevronRight, ShoppingBag, Store } from '@/lib/icons';
 import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';
-import { formatDate } from '@/lib/date-utils';
+import { formatDateCompact } from '@/lib/date-utils';
 import { formatPrice } from '@/lib/services/pricing';
 import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import { resolveListingImage } from '@/lib/utils/listing-image';
 import { getStatusConfig } from '@/components/shipping';
+import { OrdersTab } from '@/components/seller/dashboard/OrdersTab';
 
 interface OrderItem {
   id: string;
@@ -36,17 +37,18 @@ interface Order {
   shipping_cost: number;
   total_amount: number;
   created_at: string;
+  updated_at: string;
   seller_response_deadline?: string;
   order_items: OrderItem[];
   time_remaining_ms: number | null;
   is_expired: boolean;
 }
 
-type FilterTab = 'all' | 'pending' | 'accepted' | 'shipped' | 'completed' | 'cancelled';
+type FilterTab = 'all' | 'pending' | 'accepted' | 'shipped' | 'delivered' | 'disputed' | 'completed' | 'cancelled';
+type RoleTab = 'buying' | 'selling';
 
-export default function OrdersPage() {
-  const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+function PurchasesTab() {
+  const { user } = useAuth();
   const t = useTranslations('Orders');
 
   const [orders, setOrders] = useState<Order[]>([]);
@@ -54,14 +56,6 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/signin?redirectTo=/orders');
-    }
-  }, [user, authLoading, router]);
-
-  // Fetch orders
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -86,31 +80,266 @@ export default function OrdersPage() {
     if (user) {
       fetchOrders();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Filter orders based on active tab
   const filteredOrders = orders.filter((order) => {
     if (activeTab === 'all') return true;
     if (activeTab === 'pending') return order.status === 'pending_seller';
     if (activeTab === 'accepted') return order.status === 'accepted';
     if (activeTab === 'shipped') return ['shipped', 'in_transit'].includes(order.status);
+    if (activeTab === 'delivered') return order.status === 'delivered';
+    if (activeTab === 'disputed') return order.status === 'disputed';
     if (activeTab === 'completed') return order.status === 'completed';
     if (activeTab === 'cancelled') return order.status === 'cancelled';
     return false;
   });
 
-  // Count orders by status
-  const counts = {
-    all: orders.length,
-    pending: orders.filter((o) => o.status === 'pending_seller').length,
-    accepted: orders.filter((o) => o.status === 'accepted').length,
-    shipped: orders.filter((o) => ['shipped', 'in_transit'].includes(o.status)).length,
-    completed: orders.filter((o) => o.status === 'completed').length,
-    cancelled: orders.filter((o) => o.status === 'cancelled').length,
+  const { counts, actionOrders } = orders.reduce(
+    (acc, o) => {
+      const s = o.status;
+      acc.counts.all++;
+      if (s === 'pending_seller') acc.counts.pending++;
+      else if (s === 'accepted') acc.counts.accepted++;
+      else if (s === 'shipped' || s === 'in_transit') acc.counts.shipped++;
+      else if (s === 'delivered') { acc.counts.delivered++; acc.actionOrders.push(o); }
+      else if (s === 'disputed') { acc.counts.disputed++; acc.actionOrders.push(o); }
+      else if (s === 'completed') acc.counts.completed++;
+      else if (s === 'cancelled') acc.counts.cancelled++;
+      return acc;
+    },
+    {
+      counts: { all: 0, pending: 0, accepted: 0, shipped: 0, delivered: 0, disputed: 0, completed: 0, cancelled: 0 },
+      actionOrders: [] as Order[],
+    }
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-frost-ice mx-auto mb-4" />
+          <p className="text-text-secondary">{t('loading')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {error && (
+        <div className="mb-6 p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-aurora-red font-medium">{t('error.title')}</p>
+            <p className="text-sm text-text-secondary mt-1">{error}</p>
+            <Button variant="ghost" size="sm" onClick={fetchOrders} className="mt-2">
+              {t('error.tryAgain')}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Action Required */}
+      {actionOrders.length > 0 && (
+        <div className="mb-6 bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-5 h-5 text-aurora-yellow" />
+            <h3 className="font-semibold text-polar-night">
+              {t('actionRequired.title')} ({actionOrders.length})
+            </h3>
+          </div>
+          <div className="space-y-1">
+            {actionOrders.map((order) => (
+              <Link
+                key={order.id}
+                href={`/orders/${order.id}`}
+                className="flex items-center justify-between py-2 px-3 bg-snow-white rounded-lg hover:bg-bg-elevated transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-mono text-sm font-semibold text-frost-ice flex-shrink-0">
+                    {order.order_number}
+                  </span>
+                  <span className="text-text-muted text-xs">·</span>
+                  <span className="text-sm text-text-secondary truncate">
+                    {order.status === 'delivered'
+                      ? t('actionRequired.confirmReceipt')
+                      : t('actionRequired.activeDispute')}
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-text-muted flex-shrink-0 ml-2" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Filter Tabs */}
+      <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        {[
+          { key: 'pending' as FilterTab, labelKey: 'tabs.pending' },
+          { key: 'accepted' as FilterTab, labelKey: 'tabs.accepted' },
+          { key: 'shipped' as FilterTab, labelKey: 'tabs.shipped' },
+          { key: 'delivered' as FilterTab, labelKey: 'tabs.delivered' },
+          { key: 'disputed' as FilterTab, labelKey: 'tabs.disputed' },
+          { key: 'completed' as FilterTab, labelKey: 'tabs.completed' },
+          { key: 'cancelled' as FilterTab, labelKey: 'tabs.cancelled' },
+          { key: 'all' as FilterTab, labelKey: 'tabs.all' },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`
+              px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors
+              ${activeTab === tab.key
+                ? 'bg-frost-ice text-snow-white'
+                : 'bg-snow-white text-text-secondary hover:bg-bg-elevated border border-border'
+              }
+            `}
+          >
+            {t(tab.labelKey)} ({counts[tab.key]})
+          </button>
+        ))}
+      </div>
+
+      {/* Orders List */}
+      {filteredOrders.length === 0 ? (
+        <Card padding="lg" className="text-center min-h-[40vh] flex flex-col justify-center items-center">
+          <div className="mb-4">
+            <EmptyStateIcon icon={Package} color="frost-ice" />
+          </div>
+          <h2 className="text-xl font-semibold text-polar-night mb-2">{t('emptyState.title')}</h2>
+          <p className="text-text-secondary mb-6">
+            {activeTab === 'all'
+              ? t('emptyState.descriptionAll')
+              : t('emptyState.descriptionFiltered', { status: t(`tabs.${activeTab}`).toLowerCase() })}
+          </p>
+          {activeTab === 'all' && (
+            <Link href="/browse">
+              <Button variant="primary">{t('emptyState.button')}</Button>
+            </Link>
+          )}
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {filteredOrders.map((order) => {
+            const statusInfo = getStatusConfig(order.status);
+            const StatusIcon = statusInfo.icon;
+            const firstItem = order.order_items[0];
+            const extraCount = order.order_items.length - 2;
+            const gameNames =
+              order.order_items
+                .slice(0, 2)
+                .map((i) => i.game_name)
+                .join(', ') +
+              (extraCount > 0
+                ? ` ${t('orderCard.itemsMore', { count: extraCount })}`
+                : '');
+
+            return (
+              <Link key={order.id} href={`/orders/${order.id}`}>
+                <div className="bg-snow-white border border-border rounded-xl p-3 hover:bg-bg-elevated transition-colors cursor-pointer flex items-start gap-3">
+                  {firstItem && (
+                    <ListingThumbnail
+                      src={resolveListingImage({
+                        gameThumbnail: firstItem.game_thumbnail,
+                        photoUrl: firstItem.photo_url,
+                      })}
+                      alt={firstItem.game_name}
+                      size="lg"
+                    />
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    <p className="font-mono text-sm font-semibold text-frost-ice leading-tight">
+                      {order.order_number}
+                    </p>
+                    <p className="text-sm text-polar-night truncate leading-tight mt-0.5">
+                      {gameNames}
+                    </p>
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                      <span className="text-xs text-text-secondary">
+                        {t('orderCard.from', { name: order.seller_name })}
+                      </span>
+                      <span className="text-text-muted text-xs">·</span>
+                      <Badge variant={statusInfo.variant} size="sm">
+                        <StatusIcon className="w-3 h-3 mr-1" />
+                        {statusInfo.labelKey ? t(statusInfo.labelKey) : statusInfo.label}
+                      </Badge>
+                      {order.status === 'pending_seller' && order.time_remaining_ms !== null && (
+                        <>
+                          <span className="text-text-muted text-xs">·</span>
+                          <span
+                            className={`inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-md ${
+                              order.is_expired
+                                ? 'bg-aurora-red/10 text-aurora-red'
+                                : 'bg-aurora-yellow/10 text-aurora-yellow'
+                            }`}
+                          >
+                            <Clock className="w-3 h-3" />
+                            {order.is_expired
+                              ? t('orderCard.expired')
+                              : `${Math.floor(order.time_remaining_ms / 3600000)}h ${Math.floor((order.time_remaining_ms % 3600000) / 60000)}m`}
+                          </span>
+                        </>
+                      )}
+                      <span className="text-text-muted text-xs">·</span>
+                      <span className="text-xs font-medium text-polar-night">
+                        {formatPrice(order.total_amount)}
+                      </span>
+                      <span className="text-text-muted text-xs">·</span>
+                      <span className="text-xs text-text-secondary">
+                        {formatDateCompact(order.updated_at)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <ChevronRight className="w-4 h-4 text-text-muted flex-shrink-0 self-center" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+}
+
+function OrdersPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, profile, loading: authLoading } = useAuth();
+  const t = useTranslations('Orders');
+
+  const isActiveSeller = profile?.seller_status === 'active';
+
+  const roleParam = searchParams.get('role') as RoleTab | null;
+  const initialRole: RoleTab =
+    roleParam === 'selling' && isActiveSeller ? 'selling' : 'buying';
+  const [activeRole, setActiveRole] = useState<RoleTab>(initialRole);
+
+  const [pendingSellerCount, setPendingSellerCount] = useState(0);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/auth/signin?redirectTo=/orders');
+    }
+  }, [user, authLoading, router]);
+
+  // Sync role tab with URL
+  const handleRoleChange = (role: RoleTab) => {
+    setActiveRole(role);
+    const url = new URL(window.location.href);
+    if (role === 'buying') {
+      url.searchParams.delete('role');
+    } else {
+      url.searchParams.set('role', role);
+    }
+    window.history.replaceState({}, '', url.toString());
   };
 
-  // Loading state
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -121,193 +350,73 @@ export default function OrdersPage() {
     );
   }
 
-  // Not authenticated
-  if (!user) {
-    return null; // Will redirect
-  }
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-bg py-6 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <ShoppingBag className="w-8 h-8 text-frost-ice" />
             <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">{t('title')}</h1>
           </div>
-          <p className="text-text-secondary">{t('subtitle')}</p>
         </div>
-        {/* Error State */}
-        {error && (
-          <div className="mb-6 p-4 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-aurora-red font-medium">{t('error.title')}</p>
-              <p className="text-sm text-text-secondary mt-1">{error}</p>
-              <Button variant="ghost" size="sm" onClick={fetchOrders} className="mt-2">
-                {t('error.tryAgain')}
-              </Button>
-            </div>
+
+        {/* Role Tab Switcher — only shown for active sellers */}
+        {isActiveSeller && (
+          <div className="mb-6">
+            <SegmentedNav
+              items={[
+                { value: 'buying', label: t('roleTabs.purchases'), icon: <ShoppingBag className="w-4 h-4" /> },
+                { value: 'selling', label: t('roleTabs.sales'), icon: <Store className="w-4 h-4" /> },
+              ]}
+              activeValue={activeRole}
+              className="w-full sm:w-auto"
+              renderItem={(item, _isActive, className) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() => handleRoleChange(item.value as RoleTab)}
+                  className={`${className} flex-1 justify-center`}
+                >
+                  <span className="shrink-0" aria-hidden="true">{item.icon}</span>
+                  {item.label}
+                  {item.value === 'selling' && pendingSellerCount > 0 && (
+                    <span className="px-1.5 py-0.5 text-xs rounded-md bg-aurora-orange text-white min-w-[20px] text-center leading-none">
+                      {pendingSellerCount}
+                    </span>
+                  )}
+                </button>
+              )}
+            />
           </div>
         )}
 
-        {/* Filter Tabs */}
-        <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
-          {[
-            { key: 'all' as FilterTab, labelKey: 'tabs.all' },
-            { key: 'pending' as FilterTab, labelKey: 'tabs.pending' },
-            { key: 'accepted' as FilterTab, labelKey: 'tabs.accepted' },
-            { key: 'shipped' as FilterTab, labelKey: 'tabs.shipped' },
-            { key: 'completed' as FilterTab, labelKey: 'tabs.completed' },
-            { key: 'cancelled' as FilterTab, labelKey: 'tabs.cancelled' },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`
-                px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors
-                ${activeTab === tab.key
-                  ? 'bg-frost-ice text-snow-white'
-                  : 'bg-snow-white text-text-secondary hover:bg-bg-elevated border border-border'
-                }
-              `}
-            >
-              {t(tab.labelKey)} ({counts[tab.key]})
-            </button>
-          ))}
-        </div>
-
-        {/* Orders List */}
-        {filteredOrders.length === 0 ? (
-          <Card padding="lg" className="text-center min-h-[60vh] flex flex-col justify-center items-center">
-            <div className="mb-4">
-              <EmptyStateIcon icon={Package} color="frost-ice" />
-            </div>
-            <h2 className="text-xl font-semibold text-polar-night mb-2">{t('emptyState.title')}</h2>
-            <p className="text-text-secondary mb-6">
-              {activeTab === 'all'
-                ? t('emptyState.descriptionAll')
-                : t('emptyState.descriptionFiltered', { status: t(`tabs.${activeTab}`).toLowerCase() })}
-            </p>
-            {activeTab === 'all' && (
-              <Link href="/browse">
-                <Button variant="primary">{t('emptyState.button')}</Button>
-              </Link>
-            )}
-          </Card>
+        {/* Tab Content */}
+        {activeRole === 'buying' || !isActiveSeller ? (
+          <PurchasesTab />
         ) : (
-          <div className="space-y-4">
-            {filteredOrders.map((order) => {
-              const statusInfo = getStatusConfig(order.status);
-              const StatusIcon = statusInfo.icon;
-
-              return (
-                <Link key={order.id} href={`/orders/${order.id}`}>
-                  <div className="bg-snow-white border-2 border-border rounded-xl p-4 sm:p-6 hover:border-frost-ice transition-colors cursor-pointer">
-                    {/* Order Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-semibold text-polar-night">
-                            {order.order_number}
-                          </h3>
-                          <Badge variant={statusInfo.variant}>
-                            <StatusIcon className="w-3 h-3 mr-1" />
-                            {statusInfo.label}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-text-secondary">
-                          {t('orderCard.seller', { name: order.seller_name })}
-                        </p>
-                        <p className="text-xs text-text-muted mt-1">
-                          {t('orderCard.ordered', { date: formatDate(order.created_at) })}
-                        </p>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-sm text-text-secondary">{t('orderCard.total')}</p>
-                        <p className="text-xl font-bold text-polar-night">
-                          {formatPrice(order.total_amount)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Waiting for Seller Alert */}
-                    {order.status === 'pending_seller' && order.time_remaining_ms !== null && (
-                      <div
-                        className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${order.is_expired
-                          ? 'bg-aurora-red/10 border border-aurora-red/20'
-                          : 'bg-aurora-yellow/10 border border-aurora-yellow/20'
-                          }`}
-                      >
-                        <Clock
-                          className={`w-4 h-4 flex-shrink-0 ${order.is_expired ? 'text-aurora-red' : 'text-aurora-yellow'
-                            }`}
-                        />
-                        <div className="flex-grow min-w-0">
-                          <p
-                            className={`text-sm font-medium ${order.is_expired ? 'text-aurora-red' : 'text-polar-night'
-                              }`}
-                          >
-                            {order.is_expired
-                              ? t('orderCard.sellerDeadlineExpired')
-                              : t('orderCard.sellerTimeRemaining', {
-                                  hours: Math.floor(order.time_remaining_ms / 3600000),
-                                  minutes: Math.floor((order.time_remaining_ms % 3600000) / 60000)
-                                })}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Order Items Preview */}
-                    <div className="mb-4">
-                      <div className="flex gap-2 overflow-x-auto pb-2">
-                        {order.order_items.slice(0, 3).map((item) => (
-                          <ListingThumbnail
-                            key={item.id}
-                            src={resolveListingImage({ gameThumbnail: item.game_thumbnail, photoUrl: item.photo_url })}
-                            alt={item.game_name}
-                            size="md"
-                          />
-                        ))}
-                        {order.order_items.length > 3 && (
-                          <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-bg-secondary flex items-center justify-center">
-                            <span className="text-sm font-medium text-text-secondary">
-                              +{order.order_items.length - 3}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-sm text-text-secondary mt-2">
-                        {t('orderCard.items', { count: order.order_items.length })}
-                      </p>
-                    </div>
-
-                    {/* Shipping Method */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm text-text-secondary">
-                        {order.shipping_method === 't2t' ? (
-                          <>
-                            <Truck className="w-4 h-4" />
-                            <span>{t('orderCard.terminalPickup')}</span>
-                          </>
-                        ) : (
-                          <>
-                            <User className="w-4 h-4" />
-                            <span>{t('orderCard.localPickup')}</span>
-                          </>
-                        )}
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-text-muted" />
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          <OrdersTab
+            isActive={activeRole === 'selling'}
+            onPendingCountChange={setPendingSellerCount}
+          />
         )}
       </div>
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-frost-ice" />
+        </div>
+      }
+    >
+      <OrdersPageContent />
+    </Suspense>
   );
 }

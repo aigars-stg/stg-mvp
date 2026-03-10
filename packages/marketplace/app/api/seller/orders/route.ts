@@ -73,24 +73,23 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Group orders by status for easy filtering on frontend
-    const pending = enrichedOrders.filter((o) => o.status === 'pending_seller');
-    const accepted = enrichedOrders.filter((o) => o.status === 'accepted');
-    const shipped = enrichedOrders.filter((o) => o.status === 'shipped');
-    const completed = enrichedOrders.filter((o) => o.status === 'completed');
-    const cancelled = enrichedOrders.filter((o) => o.status === 'cancelled');
-
-    return NextResponse.json({
-      orders: enrichedOrders,
-      summary: {
-        total: enrichedOrders.length,
-        pending: pending.length,
-        accepted: accepted.length,
-        shipped: shipped.length,
-        completed: completed.length,
-        cancelled: cancelled.length,
+    const summary = enrichedOrders.reduce(
+      (acc, o) => {
+        acc.total++;
+        const s = o.status;
+        if (s === 'pending_seller') acc.pending++;
+        else if (s === 'accepted') acc.accepted++;
+        else if (s === 'shipped') acc.shipped++;
+        else if (s === 'delivered') acc.delivered++;
+        else if (s === 'disputed') acc.disputed++;
+        else if (s === 'completed') acc.completed++;
+        else if (s === 'cancelled') acc.cancelled++;
+        return acc;
       },
-    });
+      { total: 0, pending: 0, accepted: 0, shipped: 0, delivered: 0, disputed: 0, completed: 0, cancelled: 0 }
+    );
+
+    return NextResponse.json({ orders: enrichedOrders, summary });
   } catch (error) {
     return handleApiError(error, 'Fetch seller orders');
   }

@@ -31,6 +31,7 @@ export type BadgeVariant =
 // Status configuration interface
 export interface StatusConfig {
   label: string;
+  labelKey: string;
   variant: BadgeVariant;
   icon: FC<SVGProps<SVGSVGElement>>;
 }
@@ -39,46 +40,55 @@ export interface StatusConfig {
 export const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
   pending_seller: {
     label: 'Waiting for Seller',
+    labelKey: 'statuses.pendingSeller',
     variant: 'warning',
     icon: Clock,
   },
   accepted: {
     label: 'Accepted',
+    labelKey: 'statuses.accepted',
     variant: 'trust',
     icon: CheckCircle2,
   },
   shipped: {
     label: 'Shipped',
+    labelKey: 'statuses.shipped',
     variant: 'success',
     icon: Truck,
   },
   in_transit: {
     label: 'In Transit',
+    labelKey: 'statuses.inTransit',
     variant: 'trust',
     icon: Truck,
   },
   delivered: {
     label: 'Delivered',
+    labelKey: 'statuses.delivered',
     variant: 'success',
     icon: Package,
   },
   completed: {
     label: 'Completed',
+    labelKey: 'statuses.completed',
     variant: 'success',
     icon: CheckCircle2,
   },
   cancelled: {
     label: 'Cancelled',
+    labelKey: 'statuses.cancelled',
     variant: 'error',
     icon: XCircle,
   },
   disputed: {
     label: 'Disputed',
+    labelKey: 'statuses.disputed',
     variant: 'error',
     icon: AlertCircle,
   },
   refunded: {
     label: 'Refunded',
+    labelKey: 'statuses.refunded',
     variant: 'error',
     icon: XCircle,
   },
@@ -89,6 +99,7 @@ export function getStatusConfig(status: string): StatusConfig {
   return (
     orderStatusConfig[status as OrderStatus] || {
       label: status,
+      labelKey: '',
       variant: 'default' as BadgeVariant,
       icon: Clock,
     }

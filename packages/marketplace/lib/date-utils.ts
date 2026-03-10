@@ -44,6 +44,18 @@ export function formatDateTime(date: DateInput): string {
 }
 
 /**
+ * Formats a date as dd.MM for the current year, dd.MM.yyyy for older dates.
+ * Use for compact displays where year ambiguity is a concern.
+ */
+export function formatDateCompact(date: DateInput): string {
+  const d = toDate(date);
+  if (d.getFullYear() === new Date().getFullYear()) {
+    return format(d, 'dd.MM');
+  }
+  return format(d, 'dd.MM.yyyy');
+}
+
+/**
  * Formats a relative time string (e.g., "5 minutes ago", "2 hours ago")
  */
 export function formatRelativeTime(date: DateInput, addSuffix = true): string {

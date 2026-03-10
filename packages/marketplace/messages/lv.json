@@ -528,9 +528,9 @@
     "searchPlaceholder": "Meklēt spēles...",
     "language": "Valoda",
     "userMenu": {
-      "sellerDashboard": "Pārdevēja panelis",
-      "myOrders": "Mani pirkumi",
-      "myListings": "Mani sludinājumi",
+      "sellerDashboard": "Maciņš & ieņēmumi",
+      "myOrders": "Pasūtījumi",
+      "myListings": "Manas spēles",
       "savedAndWanted": "Saglabātās un meklētās",
       "startSelling": "Sāc pārdot",
       "staffDashboard": "Darbinieku panelis",
@@ -2448,6 +2448,7 @@
     "reviews": {
       "loading": "Ielādē atsauksmes..."
     },
+    "viewAllSales": "Skatīt visus pārdošanas darījumus",
     "refresh": "Atjaunot",
     "settings": "Iestatījumi",
     "bankAccount": {
@@ -2605,18 +2606,29 @@
     }
   },
   "Orders": {
-    "title": "Mani pirkumi",
+    "title": "Mani pasūtījumi",
+    "actionRequired": {
+      "title": "Nepieciešama rīcība",
+      "confirmReceipt": "Apstiprināt saņemšanu",
+      "activeDispute": "Strīds atvērts"
+    },
     "subtitle": "Spēles, kas dodas pie tevis",
     "loading": "Ielādē tavus pasūtījumus...",
     "error": {
       "title": "Kļūda ielādējot pasūtījumus",
       "tryAgain": "Mēģināt vēlreiz"
     },
+    "roleTabs": {
+      "purchases": "Mani pirkumi",
+      "sales": "Mani pārdošanas darījumi"
+    },
     "tabs": {
       "all": "Visi pasūtījumi",
       "pending": "Gaida",
       "accepted": "Pieņemti",
       "shipped": "Nosūtīti",
+      "delivered": "Piegādāts",
+      "disputed": "Strīdā",
       "completed": "Pabeigti",
       "cancelled": "Atcelti"
     },
@@ -2629,12 +2641,13 @@
       "delivered": "Piegādāts",
       "completed": "Pabeigts",
       "cancelled": "Atcelts",
-      "disputed": "Strīds"
+      "disputed": "Strīds",
+      "refunded": "Atmaksāts"
     },
     "emptyState": {
       "title": "Šeit vēl nav nekā",
       "descriptionAll": "Kad nopirksi spēli, tā parādīsies šeit, lai varētu sekot tās ceļojumam.",
-      "descriptionFiltered": "Nav {status} pasūtījumu",
+      "descriptionFiltered": "Nav pasūtījumu",
       "button": "Atrast nākamo spēli"
     },
     "orderCard": {
@@ -2645,7 +2658,10 @@
       "sellerDeadlineExpired": "Pārdevēja termiņš beidzies - Notiek atmaksa",
       "sellerTimeRemaining": "Pārdevējam ir {hours}h {minutes}min, lai atbildētu",
       "terminalPickup": "Saņemšana pakomātā",
-      "localPickup": "Saņemšana klātienē"
+      "localPickup": "Saņemšana klātienē",
+      "expired": "Beidzies",
+      "from": "No: {name}",
+      "itemsMore": "+{count} vairāk"
     },
     "detail": {
       "loading": "Ielādē pasūtījuma detaļas...",
@@ -2675,6 +2691,7 @@
       "sellerTimeRemaining": "Pārdevējam ir {hours}h {minutes}min, lai atbildētu",
       "cancelled": {
         "title": "Pasūtījums atcelts",
+        "body": "Šis pasūtījums ir atcelts un atmaksa ir uzsākta.",
         "defaultReason": "Šis pasūtījums ir atcelts",
         "refundProcessed": "Atmaksa veikta: €{amount}",
         "refundedOn": "Atmaksāts {date}"
@@ -2687,12 +2704,60 @@
       },
       "refunded": {
         "title": "Atmaksa apstrādāta",
-        "amount": "Atmaksas summa: €{amount}"
+        "notice": "Šis pasūtījums ir atmaksāts.",
+        "amount": "Atmaksas summa: {amount}"
       },
       "disputed": {
         "title": "Šis pasūtījums tiek pārskatīts",
         "openedOn": "Strīds atvērts: {date}",
-        "contactSoon": "Mūsu komanda sazināsies ar tevi 24 stundu laikā"
+        "contactSoon": "Mūsu komanda sazināsies ar tevi 24 stundu laikā",
+        "inProgress": "Strīds izskatīšanā",
+        "yourReport": "Tavs ziņojums",
+        "awaitingDeadline": "Gaida pārdevēja atbildi (termiņš: {date})",
+        "underReview": "Mūsu komanda izskata strīdu. Mēs tev paziņosim par rezultātu.",
+        "yourResponse": "Tava atbilde",
+        "staffReviewing": "Mūsu komanda izskata strīdu. Mēs paziņosim abām pusēm par rezultātu.",
+        "resolution": "Atrisinājums",
+        "awaitingSeller": "Gaida pārdevēju",
+        "resolved": "Atrisināts"
+      },
+      "labelGenerating": "Tiek ģenerēta pasta etiķete — tas parasti aizņem dažas sekundes.",
+      "notices": {
+        "delivered": {
+          "title": "Tavs sūtījums ir pienācis",
+          "body": "Saņem to terminālī un apstiprin saņemšanu. Tev ir 2 dienas, lai atvērtu strīdu, ja kaut kas ir nepareizi."
+        },
+        "deliveredSeller": {
+          "title": "Pircējs ir saņēmis sūtījumu",
+          "body": "Ja 2 dienu laikā netiek atvērts strīds, tavi ienākumi tiks automātiski ieskaitīti tavā makā."
+        },
+        "accepted": {
+          "title": "Pārdevējs gatavo tavu pasūtījumu",
+          "body": "Viņi to sagatavo nosūtīšanai. Saņemsi paziņojumu, kad tas būs ceļā."
+        },
+        "shipped": {
+          "title": "Tavs sūtījums ir ceļā",
+          "body": "Seko tam zemāk. Saņemsi paziņojumu, kad tas nonāks pakomātā."
+        },
+        "completed": {
+          "title": "Pasūtījums pabeigts",
+          "body": "Paldies par pirkumu."
+        },
+        "completedSeller": {
+          "title": "Pasūtījums pabeigts — tev ir samaksāts",
+          "body": "{amount} ir pievienoti tavam makam. Vari izņemt jebkurā laikā."
+        }
+      },
+      "timeline": {
+        "title": "Izsekošanas laika līnija",
+        "paid": "Apmaksāts",
+        "completed": "Pabeigts",
+        "cancelled": "Atcelts",
+        "refunded": "Atmaksāts",
+        "disputed": "Strīdā"
+      },
+      "statusTimeline": {
+        "remaining": "{hours}h {minutes}min atlikuši"
       },
       "items": {
         "title": "Spēles ({count})"
@@ -2717,7 +2782,19 @@
         "items": "Spēles",
         "shipping": "Piegāde",
         "totalPaid": "Kopā samaksāts",
-        "free": "Bezmaksas"
+        "free": "Bezmaksas",
+        "commission": "Platformas komisija",
+        "youReceive": "Tu saņem",
+        "youReceiveEstimated": "Tu saņemsi (apr.)",
+        "total": "Kopā",
+        "sellerCredit": "Pārdevēja kredīts",
+        "refund": "Atmaksa",
+        "viewInvoice": "Skatīt rēķinu",
+        "viewCreditNote": "Skatīt kredīta noti",
+        "orderConfirmation": "Pasūtījuma apstiprinājums",
+        "invoice": "Rēķins",
+        "creditNote": "Kredīta note",
+        "confirmation": "Apstiprinājums"
       },
       "seller": {
         "title": "Pārdevējs"
@@ -2764,7 +2841,10 @@
       "messages": {
         "title": "Ziņas",
         "empty": "Ziņu vēl nav",
-        "startConversation": "Sāc sarunu ar {name}"
+        "emptyReadOnly": "Šajā sarunā nav ziņu",
+        "startConversation": "Sāc sarunu ar {name}",
+        "buyerLabel": "Pircējs",
+        "sellerLabel": "Pārdevējs"
       },
       "buyer": {
         "title": "Pircējs"
@@ -2990,8 +3070,13 @@
     },
     "noOrders": {
       "title": "Pasūtījumi nav atrasti",
-      "pending": "Jums nav gaidošu pasūtījumu",
-      "other": "Nav {tab} pasūtījumu"
+      "pending": "Jums nav pasūtījumu",
+      "other": "Nav pasūtījumu"
+    },
+    "actionRequired": {
+      "title": "Nepieciešama rīcība",
+      "acceptOrDecline": "Pieņemt vai noraidīt",
+      "activeDispute": "Strīds atvērts"
     },
     "summary": {
       "allOrders": "Visi pasūtījumi",
@@ -3004,14 +3089,19 @@
       "pending": "Gaida",
       "accepted": "Pieņemti",
       "shipped": "Nosūtīti",
+      "delivered": "Piegādāts",
+      "disputed": "Strīdā",
       "completed": "Pabeigti",
+      "cancelled": "Atcelti",
       "all": "Visi"
     },
     "card": {
       "buyer": "Pircējs: {name}",
       "expired": "Beidzies",
       "timeRemaining": "{hours}h {minutes}m atlicis",
-      "items": "Spēles ({count})"
+      "items": "Spēles ({count})",
+      "itemsMore": "+{count} vairāk",
+      "to": "Kam: {name}"
     },
     "shipping": {
       "terminalPickup": "Pakomāts:",
@@ -3052,7 +3142,6 @@
       "orderNotFound": "Pasūtījums nav atrasts"
     },
     "backToOrders": "Atpakaļ uz pasūtījumiem",
-    "buyer": "Pircējs: {name}",
     "actionRequired": {
       "title": "Nepieciešama darbība",
       "description": "Lūdzu, pieņemiet vai noraidiet šo pasūtījumu. Jums ir 24 stundas no pasūtījuma veikšanas brīža, lai atbildētu. Ja neatbildēsiet laikā, pasūtījums tiks automātiski atcelts un pircējam tiks atgriezta nauda.",

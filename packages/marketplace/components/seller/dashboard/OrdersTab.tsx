@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
-import { Package, Time as Clock, CheckCircleAlt01 as CheckCircle2, CloseCircle as XCircle, RefreshCw as Loader2, AlertCircle, ChevronRight } from '@/lib/icons';
+import { Package, Time as Clock, RefreshCw as Loader2, AlertCircle, AlertTriangle, ChevronRight } from '@/lib/icons';
 import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { getStatusConfig } from '@/components/shipping/ShippingStatusConfig';
@@ -12,7 +12,7 @@ import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import { resolveListingImage } from '@/lib/utils/listing-image';
 import { formatCentsToCurrency } from '@/lib/services/pricing';
 import { SELLER_COMMISSION_RATE } from '@/lib/pricing/constants';
-import { formatDate } from '@/lib/date-utils';
+import { formatDateCompact } from '@/lib/date-utils';
 
 interface OrderItem {
   id: string;
@@ -37,6 +37,7 @@ interface Order {
   platform_commission_cents?: number | null;
   seller_wallet_credit_cents?: number | null;
   created_at: string;
+  updated_at: string;
   seller_response_deadline?: string;
   order_items: OrderItem[];
   time_remaining_ms: number | null;
@@ -48,11 +49,13 @@ interface OrdersSummary {
   pending: number;
   accepted: number;
   shipped: number;
+  delivered: number;
+  disputed: number;
   completed: number;
   cancelled: number;
 }
 
-type FilterTab = 'all' | 'pending' | 'accepted' | 'shipped' | 'completed';
+type FilterTab = 'all' | 'pending' | 'accepted' | 'shipped' | 'delivered' | 'disputed' | 'completed' | 'cancelled';
 
 interface OrdersTabProps {
   isActive: boolean;
@@ -62,23 +65,14 @@ interface OrdersTabProps {
 export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
   const { user } = useAuth();
   const t = useTranslations('SellerOrders');
+  const tOrders = useTranslations('Orders');
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [summary, setSummary] = useState<OrdersSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<FilterTab>('pending');
-
-  // Accept modal state
-  const [showAcceptModal, setShowAcceptModal] = useState<string | null>(null);
-  const [acceptingOrder, setAcceptingOrder] = useState<string | null>(null);
-  const [acceptError, setAcceptError] = useState<string | null>(null);
-
-  // Decline modal state
-  const [showDeclineModal, setShowDeclineModal] = useState<string | null>(null);
-  const [decliningOrder, setDecliningOrder] = useState<string | null>(null);
-  const [declineReason, setDeclineReason] = useState('');
-  const [declineError, setDeclineError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<FilterTab>('all');
+  const lastPendingCount = useRef<number>(-1);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -94,7 +88,11 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
 
       setOrders(data.orders || []);
       setSummary(data.summary || null);
-      onPendingCountChange?.(data.summary?.pending || 0);
+      const pending = data.summary?.pending || 0;
+      if (pending !== lastPendingCount.current) {
+        lastPendingCount.current = pending;
+        onPendingCountChange?.(pending);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load orders');
     } finally {
@@ -116,7 +114,11 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
       if (response.ok) {
         setOrders(data.orders || []);
         setSummary(data.summary || null);
-        onPendingCountChange?.(data.summary?.pending || 0);
+        const pending = data.summary?.pending || 0;
+        if (pending !== lastPendingCount.current) {
+          lastPendingCount.current = pending;
+          onPendingCountChange?.(pending);
+        }
       }
     } catch {
       // Silent fail for background refresh
@@ -158,65 +160,21 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
     };
   }, [user, isActive, fetchOrdersSilent]);
 
-  const handleAcceptOrder = async (orderId: string) => {
-    try {
-      setAcceptingOrder(orderId);
-      setAcceptError(null);
-
-      const response = await fetch(`/api/seller/orders/${orderId}/accept`, {
-        method: 'POST',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to accept order');
-      }
-
-      setShowAcceptModal(null);
-      await fetchOrders();
-    } catch (err) {
-      setAcceptError(err instanceof Error ? err.message : 'Failed to accept order');
-    } finally {
-      setAcceptingOrder(null);
-    }
-  };
-
-  const handleDeclineOrder = async (orderId: string) => {
-    try {
-      setDecliningOrder(orderId);
-      setDeclineError(null);
-
-      const response = await fetch(`/api/seller/orders/${orderId}/decline`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: declineReason || 'Seller declined' }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to decline order');
-      }
-
-      setShowDeclineModal(null);
-      setDeclineReason('');
-      await fetchOrders();
-    } catch (err) {
-      setDeclineError(err instanceof Error ? err.message : 'Failed to decline order');
-    } finally {
-      setDecliningOrder(null);
-    }
-  };
-
   const filteredOrders = orders.filter((order) => {
     if (activeTab === 'all') return true;
     if (activeTab === 'pending') return order.status === 'pending_seller';
     if (activeTab === 'accepted') return order.status === 'accepted';
     if (activeTab === 'shipped') return order.status === 'shipped';
+    if (activeTab === 'delivered') return order.status === 'delivered';
+    if (activeTab === 'disputed') return order.status === 'disputed';
     if (activeTab === 'completed') return order.status === 'completed';
+    if (activeTab === 'cancelled') return order.status === 'cancelled';
     return false;
   });
+
+  const actionOrders = orders.filter(
+    (o) => o.status === 'pending_seller' || o.status === 'disputed'
+  );
 
   if (loading) {
     return (
@@ -245,13 +203,50 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
         </div>
       )}
 
+      {/* Action Required */}
+      {actionOrders.length > 0 && (
+        <div className="mb-6 bg-aurora-yellow/10 border border-aurora-yellow/20 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-5 h-5 text-aurora-yellow" />
+            <h3 className="font-semibold text-polar-night">
+              {t('actionRequired.title')} ({actionOrders.length})
+            </h3>
+          </div>
+          <div className="space-y-1">
+            {actionOrders.map((order) => (
+              <Link
+                key={order.id}
+                href={`/orders/${order.id}`}
+                className="flex items-center justify-between py-2 px-3 bg-snow-white rounded-lg hover:bg-bg-elevated transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-mono text-sm font-semibold text-frost-ice flex-shrink-0">
+                    {order.order_number}
+                  </span>
+                  <span className="text-text-muted text-xs">·</span>
+                  <span className="text-sm text-text-secondary truncate">
+                    {order.status === 'pending_seller'
+                      ? t('actionRequired.acceptOrDecline')
+                      : t('actionRequired.activeDispute')}
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-text-muted flex-shrink-0 ml-2" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Filter Tabs */}
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
+      <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {[
           { key: 'pending' as FilterTab, label: t('tabs.pending'), count: summary?.pending || 0 },
           { key: 'accepted' as FilterTab, label: t('tabs.accepted'), count: summary?.accepted || 0 },
           { key: 'shipped' as FilterTab, label: t('tabs.shipped'), count: summary?.shipped || 0 },
+          { key: 'delivered' as FilterTab, label: t('tabs.delivered'), count: summary?.delivered || 0 },
+          { key: 'disputed' as FilterTab, label: t('tabs.disputed'), count: summary?.disputed || 0 },
           { key: 'completed' as FilterTab, label: t('tabs.completed'), count: summary?.completed || 0 },
+          { key: 'cancelled' as FilterTab, label: t('tabs.cancelled'), count: summary?.cancelled || 0 },
           { key: 'all' as FilterTab, label: t('tabs.all'), count: summary?.total || 0 },
         ].map((tab) => (
           <button
@@ -259,10 +254,9 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
             onClick={() => setActiveTab(tab.key)}
             className={`
               px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors
-              ${
-                activeTab === tab.key
-                  ? 'bg-frost-ice text-snow-white'
-                  : 'bg-snow-white text-text-secondary hover:bg-bg-elevated border border-border'
+              ${activeTab === tab.key
+                ? 'bg-frost-ice text-snow-white'
+                : 'bg-snow-white text-text-secondary hover:bg-bg-elevated border border-border'
               }
             `}
           >
@@ -289,211 +283,81 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
           {filteredOrders.map((order) => {
             const statusConfig = getStatusConfig(order.status);
             const StatusIcon = statusConfig.icon;
-            const earnings = order.seller_wallet_credit_cents
-              ?? Math.round(order.items_total * (1 - SELLER_COMMISSION_RATE) * 100);
+            const firstItem = order.order_items[0];
+            const extraCount = order.order_items.length - 2;
+            const gameNames =
+              order.order_items
+                .slice(0, 2)
+                .map((i) => i.game_name)
+                .join(', ') +
+              (extraCount > 0 ? ` ${t('card.itemsMore', { count: extraCount })}` : '');
+            const earnings =
+              order.seller_wallet_credit_cents ??
+              Math.round(order.items_total * (1 - SELLER_COMMISSION_RATE) * 100);
 
             return (
               <Link key={order.id} href={`/orders/${order.id}`}>
-                <div className="bg-snow-white border border-border rounded-xl p-3 sm:p-4 hover:border-frost-ice transition-colors cursor-pointer">
-                  {/* Line 1: Thumbnails + Order # + Status + Time remaining */}
-                  <div className="flex items-center gap-3">
-                    {/* Thumbnails */}
-                    <div className="flex -space-x-2 flex-shrink-0">
-                      {order.order_items.slice(0, 3).map((item) => (
-                        <ListingThumbnail
-                          key={item.id}
-                          src={resolveListingImage({ gameThumbnail: item.game_thumbnail, photoUrl: item.photo_url })}
-                          alt={item.game_name}
-                          size="sm"
-                        />
-                      ))}
-                    </div>
+                <div className="bg-snow-white border border-border rounded-xl p-3 hover:bg-bg-elevated transition-colors cursor-pointer flex items-start gap-3">
+                  {firstItem && (
+                    <ListingThumbnail
+                      src={resolveListingImage({
+                        gameThumbnail: firstItem.game_thumbnail,
+                        photoUrl: firstItem.photo_url,
+                      })}
+                      alt={firstItem.game_name}
+                      size="lg"
+                    />
+                  )}
 
-                    {/* Order info */}
-                    <div className="flex-grow min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-sm font-semibold text-polar-night">
-                          {order.order_number}
-                        </span>
-                        <Badge variant={statusConfig.variant} size="sm">
-                          <StatusIcon className="w-3 h-3 mr-1" />
-                          {statusConfig.label}
-                        </Badge>
-                        {/* Time remaining chip for pending */}
-                        {order.status === 'pending_seller' && order.time_remaining_ms !== null && (
+                  <div className="flex-1 min-w-0">
+                    <p className="font-mono text-sm font-semibold text-frost-ice leading-tight">
+                      {order.order_number}
+                    </p>
+                    <p className="text-sm text-polar-night truncate leading-tight mt-0.5">
+                      {gameNames}
+                    </p>
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                      <span className="text-xs text-text-secondary">
+                        {t('card.to', { name: order.buyer_name })}
+                      </span>
+                      <span className="text-text-muted text-xs">·</span>
+                      <Badge variant={statusConfig.variant} size="sm">
+                        <StatusIcon className="w-3 h-3 mr-1" />
+                        {statusConfig.labelKey ? tOrders(statusConfig.labelKey) : statusConfig.label}
+                      </Badge>
+                      {order.status === 'pending_seller' && order.time_remaining_ms !== null && (
+                        <>
+                          <span className="text-text-muted text-xs">·</span>
                           <span
-                            className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                            className={`inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-md ${
                               order.is_expired
                                 ? 'bg-aurora-red/10 text-aurora-red'
-                                : order.time_remaining_ms < 3600000
-                                ? 'bg-aurora-yellow/10 text-aurora-yellow'
-                                : 'bg-frost-ice/10 text-frost-ice'
+                                : 'bg-aurora-yellow/10 text-aurora-yellow'
                             }`}
                           >
                             <Clock className="w-3 h-3" />
                             {order.is_expired
                               ? t('card.expired')
-                              : t('card.timeRemaining', { hours: Math.floor(order.time_remaining_ms / 3600000), minutes: Math.floor((order.time_remaining_ms % 3600000) / 60000) })}
+                              : `${Math.floor(order.time_remaining_ms / 3600000)}h ${Math.floor((order.time_remaining_ms % 3600000) / 60000)}m`}
                           </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Line 2: Buyer + items + date + earnings */}
-                  <div className="flex items-center justify-between mt-2 ml-0 sm:ml-[calc(theme(spacing.3)*3-theme(spacing.2)*2+theme(spacing.3))]">
-                    <p className="text-sm text-text-secondary truncate">
-                      {order.buyer_name} · {t('card.items', { count: order.order_items.length })} · {formatDate(order.created_at)}
-                    </p>
-                    <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                      <span className="text-sm font-semibold text-aurora-green">
+                        </>
+                      )}
+                      <span className="text-text-muted text-xs">·</span>
+                      <span className="text-xs font-medium text-aurora-green">
                         {formatCentsToCurrency(earnings)}
                       </span>
-                      <ChevronRight className="w-4 h-4 text-text-muted" />
+                      <span className="text-text-muted text-xs">·</span>
+                      <span className="text-xs text-text-secondary">
+                        {formatDateCompact(order.updated_at)}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Line 3: Accept/Decline for pending orders */}
-                  {order.status === 'pending_seller' && !order.is_expired && (
-                    <div className="flex gap-2 mt-3" onClick={(e) => e.preventDefault()}>
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setShowAcceptModal(order.id);
-                          setAcceptError(null);
-                        }}
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                        {t('actions.acceptOrder')}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setShowDeclineModal(order.id);
-                          setDeclineError(null);
-                        }}
-                      >
-                        <XCircle className="w-3.5 h-3.5 mr-1" />
-                        {t('actions.decline')}
-                      </Button>
-                    </div>
-                  )}
+                  <ChevronRight className="w-4 h-4 text-text-muted flex-shrink-0 self-center" />
                 </div>
               </Link>
             );
           })}
-        </div>
-      )}
-
-      {/* Accept Modal */}
-      {showAcceptModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-snow-white rounded-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-semibold text-polar-night mb-2">
-              {t('acceptModal.title')}
-            </h3>
-            <p className="text-sm text-text-secondary mb-4">
-              {t('acceptModal.confirmDescription')}
-            </p>
-
-            {acceptError && (
-              <div className="mb-4 p-3 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-aurora-red flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-aurora-red">{acceptError}</p>
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                fullWidth
-                onClick={() => {
-                  setShowAcceptModal(null);
-                  setAcceptError(null);
-                }}
-                disabled={acceptingOrder === showAcceptModal}
-              >
-                {t('acceptModal.cancel')}
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={() => handleAcceptOrder(showAcceptModal)}
-                disabled={acceptingOrder === showAcceptModal}
-              >
-                {acceptingOrder === showAcceptModal ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t('acceptModal.processing')}
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                    {t('acceptModal.confirmAccept')}
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Decline Modal */}
-      {showDeclineModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-snow-white rounded-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-semibold text-polar-night mb-4">{t('declineModal.title')}</h3>
-            <p className="text-text-secondary mb-4">
-              {t('declineModal.description')}
-            </p>
-            <textarea
-              value={declineReason}
-              onChange={(e) => setDeclineReason(e.target.value)}
-              placeholder={t('declineModal.placeholder')}
-              className="w-full p-3 border border-border rounded-lg mb-4 min-h-[100px] focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20 outline-none"
-            />
-
-            {declineError && (
-              <div className="mb-4 p-3 bg-aurora-red/10 border border-aurora-red/20 rounded-lg flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-aurora-red flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-aurora-red">{declineError}</p>
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                fullWidth
-                onClick={() => {
-                  setShowDeclineModal(null);
-                  setDeclineReason('');
-                  setDeclineError(null);
-                }}
-                disabled={decliningOrder === showDeclineModal}
-              >
-                {t('declineModal.cancel')}
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={() => handleDeclineOrder(showDeclineModal)}
-                disabled={decliningOrder === showDeclineModal}
-              >
-                {decliningOrder === showDeclineModal ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t('declineModal.declining')}
-                  </>
-                ) : (
-                  t('declineModal.confirmDecline')
-                )}
-              </Button>
-            </div>
-          </div>
         </div>
       )}
     </>

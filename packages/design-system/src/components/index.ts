@@ -15,3 +15,4 @@ export * from './Dropdown';
 export * from './ActionSheet';
 export * from './ImageCarousel';
 export * from './ResultPage';
+export * from './SegmentedNav/SegmentedNav';

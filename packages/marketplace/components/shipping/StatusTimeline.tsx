@@ -6,6 +6,8 @@ import { statusSteps, getStepStatus } from './ShippingStatusConfig';
 interface StatusTimelineProps {
   currentStatus: string;
   timeRemainingMs?: number | null;
+  /** Pre-formatted, translated "X remaining" string. Replaces inline formatting. */
+  timeRemainingLabel?: string;
   title?: string;
   variant?: 'vertical' | 'horizontal';
   className?: string;
@@ -14,19 +16,11 @@ interface StatusTimelineProps {
 export function StatusTimeline({
   currentStatus,
   timeRemainingMs,
+  timeRemainingLabel,
   title = 'Order Progress',
   variant = 'vertical',
   className = '',
 }: StatusTimelineProps) {
-  // Format time remaining
-  const formatTimeRemaining = (ms: number) => {
-    const hours = Math.floor(ms / 3600000);
-    const minutes = Math.floor((ms % 3600000) / 60000);
-    if (hours > 0) {
-      return `${hours}h ${minutes}m remaining`;
-    }
-    return `${minutes}m remaining`;
-  };
 
   if (variant === 'horizontal') {
     return (
@@ -139,10 +133,9 @@ export function StatusTimeline({
                 </p>
                 {isCurrent &&
                   currentStatus === 'pending_seller' &&
-                  timeRemainingMs &&
-                  timeRemainingMs > 0 && (
+                  timeRemainingLabel && (
                     <p className="text-sm text-aurora-yellow mt-1">
-                      {formatTimeRemaining(timeRemainingMs)}
+                      {timeRemainingLabel}
                     </p>
                   )}
               </div>

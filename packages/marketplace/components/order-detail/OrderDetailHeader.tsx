@@ -1,6 +1,7 @@
 'use client';
 
 import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@second-turn/design-system';
 import { ArrowLeft } from '@/lib/icons';
 import { getStatusConfig } from '@/components/shipping';
@@ -23,6 +24,7 @@ export function OrderDetailHeader({
   backLabel,
   extraBadges,
 }: OrderDetailHeaderProps) {
+  const tOrders = useTranslations('Orders');
   const statusInfo = getStatusConfig(status);
   const StatusIcon = statusInfo.icon;
 
@@ -43,7 +45,7 @@ export function OrderDetailHeader({
           </h1>
           <Badge variant={statusInfo.variant} size="sm">
             <StatusIcon className="w-3 h-3 mr-1" />
-            {statusInfo.label}
+            {statusInfo.labelKey ? tOrders(statusInfo.labelKey) : statusInfo.label}
           </Badge>
           {extraBadges}
         </div>
