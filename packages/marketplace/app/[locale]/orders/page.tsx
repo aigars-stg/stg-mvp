@@ -7,6 +7,7 @@ import { Button, Badge, Card, SegmentedNav } from '@second-turn/design-system';
 import { Package, Time as Clock, RefreshCw as Loader2, AlertCircle, AlertTriangle, ChevronRight, ShoppingBag, Store } from '@/lib/icons';
 import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useActiveOrders } from '@/lib/contexts/ActiveOrdersContext';
 import { useTranslations } from 'next-intl';
 import { formatDateCompact } from '@/lib/date-utils';
 import { formatPrice } from '@/lib/services/pricing';
@@ -22,6 +23,7 @@ interface OrderItem {
   condition: string;
   photo_url: string | null;
   game_thumbnail: string | null;
+  game_image?: string | null;
 }
 
 interface Order {
@@ -242,6 +244,7 @@ function PurchasesTab() {
                   {firstItem && (
                     <ListingThumbnail
                       src={resolveListingImage({
+                        gameImage: firstItem.game_image,
                         gameThumbnail: firstItem.game_thumbnail,
                         photoUrl: firstItem.photo_url,
                       })}
@@ -309,16 +312,23 @@ function OrdersPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, loading: authLoading } = useAuth();
+  const { refresh: refreshActiveOrders } = useActiveOrders();
   const t = useTranslations('Orders');
 
   const isActiveSeller = profile?.seller_status === 'active';
 
   const roleParam = searchParams.get('role') as RoleTab | null;
   const initialRole: RoleTab =
-    roleParam === 'selling' && isActiveSeller ? 'selling' : 'buying';
+    !isActiveSeller || roleParam === 'buying' ? 'buying' : 'selling';
   const [activeRole, setActiveRole] = useState<RoleTab>(initialRole);
 
   const [pendingSellerCount, setPendingSellerCount] = useState(0);
+
+  // Refresh navbar badge count on page mount
+  useEffect(() => {
+    refreshActiveOrders();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -331,8 +341,10 @@ function OrdersPageContent() {
   const handleRoleChange = (role: RoleTab) => {
     setActiveRole(role);
     const url = new URL(window.location.href);
-    if (role === 'buying') {
+    if (role === 'selling' && isActiveSeller) {
       url.searchParams.delete('role');
+    } else if (role === 'buying') {
+      url.searchParams.set('role', 'buying');
     } else {
       url.searchParams.set('role', role);
     }

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useActiveOrders } from '@/lib/contexts/ActiveOrdersContext';
 import { useOrderMessages } from './useOrderMessages';
 import type { User } from '@supabase/supabase-js';
 import type { Message } from '@/lib/types/message';
@@ -51,6 +52,12 @@ export interface OrderDispute {
   resolved_at?: string;
   resolution?: string;
   resolution_note?: string;
+}
+
+export interface ReviewData {
+  id: string;
+  rating: number;
+  review_text: string | null;
 }
 
 export interface OrderData {
@@ -129,7 +136,8 @@ export interface UseUnifiedOrderDetailReturn {
   issueDescription: string;
   setIssueDescription: (value: string) => void;
   handleReportIssue: () => Promise<void>;
-  hasReview: boolean | null;
+  existingReview: ReviewData | null | undefined;
+  setExistingReview: (review: ReviewData | null | undefined) => void;
 
   // Seller actions
   showAcceptModal: boolean;
@@ -184,7 +192,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
   const [reportingIssue, setReportingIssue] = useState(false);
   const [issueType, setIssueType] = useState('');
   const [issueDescription, setIssueDescription] = useState('');
-  const [hasReview, setHasReview] = useState<boolean | null>(null);
+  const [existingReview, setExistingReview] = useState<ReviewData | null | undefined>(undefined);
 
   // --- Seller action state ---
   const [showAcceptModal, setShowAcceptModal] = useState(false);
@@ -196,6 +204,9 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
 
   // --- Timer state ---
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
+
+  // --- Active orders badge refresh ---
+  const { refresh: refreshActiveOrders } = useActiveOrders();
 
   // Derived
   const viewerRole = data?.current_user.role ?? null;
@@ -223,20 +234,20 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       setData(result);
       messaging.setMessages(result.messages);
 
-      // Check if buyer has already reviewed this order
-      if (
-        result.current_user.role === 'buyer' &&
-        (result.order.status === 'delivered' || result.order.status === 'completed')
-      ) {
+      // Fetch review for both buyer and seller when order is delivered or completed
+      if (result.order.status === 'delivered' || result.order.status === 'completed') {
         try {
-          const reviewRes = await fetch(`/api/reviews?order_id=${orderId}`);
+          const reviewRes = await fetch(`/api/reviews?order_id=${result.order.id}`);
           if (reviewRes.ok) {
             const reviewData = await reviewRes.json();
-            setHasReview(reviewData.reviews?.length > 0);
+            const review = reviewData.reviews?.[0] ?? null;
+            setExistingReview(review ? { id: review.id, rating: review.rating, review_text: review.review_text ?? null } : null);
           }
         } catch {
-          // Non-critical
+          // Non-critical — leave as undefined
         }
+      } else {
+        setExistingReview(null);
       }
 
       setTimeout(() => messaging.scrollToBottom(false), 100);
@@ -296,7 +307,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     setActionSuccess(null);
 
     try {
-      const response = await fetch(`/api/transactions/${orderId}/confirm-receipt`, {
+      const response = await fetch(`/api/transactions/${data.order.id}/confirm-receipt`, {
         method: 'POST',
       });
 
@@ -310,13 +321,14 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       setData((prev) =>
         prev ? { ...prev, order: { ...prev.order, status: 'completed' } } : prev
       );
+      refreshActiveOrders();
       setTimeout(() => fetchData(), 1000);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : tActions('confirmReceiptError'));
     } finally {
       setConfirmingReceipt(false);
     }
-  }, [user, data, orderId, fetchData, tActions]);
+  }, [user, data, orderId, fetchData, tActions, refreshActiveOrders]);
 
   // --- Buyer: Report issue ---
   const handleReportIssue = useCallback(async () => {
@@ -327,7 +339,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     setActionSuccess(null);
 
     try {
-      const response = await fetch(`/api/transactions/${orderId}/report-issue`, {
+      const response = await fetch(`/api/transactions/${data.order.id}/report-issue`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -346,13 +358,14 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       setShowReportIssue(false);
       setIssueType('');
       setIssueDescription('');
+      refreshActiveOrders();
       setTimeout(() => fetchData(), 1000);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : tActions('reportIssueError'));
     } finally {
       setReportingIssue(false);
     }
-  }, [user, data, orderId, issueType, issueDescription, fetchData, tActions]);
+  }, [user, data, orderId, issueType, issueDescription, fetchData, tActions, refreshActiveOrders]);
 
   // --- Seller: Accept order ---
   const handleAcceptOrder = useCallback(async () => {
@@ -360,7 +373,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       setActionLoading(true);
       setActionError(null);
 
-      const response = await fetch(`/api/seller/orders/${orderId}/accept`, {
+      const response = await fetch(`/api/seller/orders/${data?.order.id ?? orderId}/accept`, {
         method: 'POST',
       });
 
@@ -372,12 +385,13 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
 
       await fetchData();
       setShowAcceptModal(false);
+      refreshActiveOrders();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to accept order');
     } finally {
       setActionLoading(false);
     }
-  }, [orderId, fetchData]);
+  }, [orderId, fetchData, refreshActiveOrders]);
 
   // --- Seller: Decline order ---
   const handleDeclineOrder = useCallback(async () => {
@@ -385,7 +399,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       setActionLoading(true);
       setActionError(null);
 
-      const response = await fetch(`/api/seller/orders/${orderId}/decline`, {
+      const response = await fetch(`/api/seller/orders/${data?.order.id ?? orderId}/decline`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -399,12 +413,13 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
         throw new Error(result.error || 'Failed to decline order');
       }
 
+      refreshActiveOrders();
       router.push('/orders');
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to decline order');
       setActionLoading(false);
     }
-  }, [orderId, declineReason, router]);
+  }, [orderId, declineReason, router, refreshActiveOrders]);
 
   // --- Seller: Retry label generation ---
   const handleRetryLabel = useCallback(async () => {
@@ -412,7 +427,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       setRetryingLabel(true);
       setRetryError(null);
 
-      const response = await fetch(`/api/seller/orders/${orderId}/retry-label`, {
+      const response = await fetch(`/api/seller/orders/${data?.order.id ?? orderId}/retry-label`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -467,7 +482,8 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     issueDescription,
     setIssueDescription,
     handleReportIssue,
-    hasReview,
+    existingReview,
+    setExistingReview,
 
     // Seller actions
     showAcceptModal,

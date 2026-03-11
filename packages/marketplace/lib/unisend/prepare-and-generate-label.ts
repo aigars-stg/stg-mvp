@@ -1,7 +1,7 @@
 import { generateShippingLabel, updateOrderWithShippingData, updateOrderLabelError } from './label-service';
-import { UnisendValidationError, UNISEND_DEFAULT_PARCEL_SIZE, type ParcelSize } from './types';
+import { UnisendValidationError, UNISEND_DEFAULT_PARCEL_SIZE, PHONE_FORMATS, type ParcelSize, type TerminalCountry } from './types';
 import { formatLabelError } from './format-label-error';
-import { detectPhoneCountry, composePhoneNumber, isValidPhoneNumber } from '@/lib/phone-utils';
+import { detectPhoneCountry, composePhoneNumber, isValidPhoneNumber, getPhonePrefix, type PhoneCountryCode } from '@/lib/phone-utils';
 import { sendShippingLabelToSeller } from '@/lib/email/send-order-emails';
 
 export interface LabelGenerationContext {
@@ -48,7 +48,29 @@ export async function prepareAndGenerateLabel(
   const receiverPhoneParsed = detectPhoneCountry(receiver.phone);
   const normalizedReceiverPhone = composePhoneNumber(receiverPhoneParsed.country, receiverPhoneParsed.localNumber);
 
-  // 2. Validate seller phone
+  // 2. Validate receiver phone against destination country mobile format
+  const destCountry = destination.country as TerminalCountry;
+  const destFormat = PHONE_FORMATS[destCountry];
+
+  const prefixOnly = getPhonePrefix(receiverPhoneParsed.country as PhoneCountryCode);
+  const receiverPhoneEmpty = !normalizedReceiverPhone || normalizedReceiverPhone === prefixOnly;
+
+  if (receiverPhoneEmpty) {
+    const example = destFormat?.example ?? '+3706XXXXXXX';
+    const errorMsg = `Buyer phone number is missing. For ${destCountry} deliveries, a ${destCountry} mobile number is required (e.g. ${example}).`;
+    console.error(`${logPrefix} ${errorMsg}`);
+    await updateOrderLabelError(orderId, errorMsg);
+    return { labelGenerated: false, labelError: errorMsg };
+  }
+
+  if (destFormat && !destFormat.regex.test(normalizedReceiverPhone)) {
+    const errorMsg = `Buyer phone must be a valid ${destCountry} mobile number (e.g. ${destFormat.example}). Current number: ${normalizedReceiverPhone}`;
+    console.error(`${logPrefix} ${errorMsg}`);
+    await updateOrderLabelError(orderId, errorMsg);
+    return { labelGenerated: false, labelError: errorMsg };
+  }
+
+  // 3. Validate seller phone
   if (normalizedSellerPhone && !isValidPhoneNumber(normalizedSellerPhone)) {
     console.error(`${logPrefix} Invalid seller phone: ${seller.phone} -> ${normalizedSellerPhone}`);
     const errorMsg = 'Invalid seller phone number. Please update your phone in Account Settings.';
@@ -56,7 +78,7 @@ export async function prepareAndGenerateLabel(
     return { labelGenerated: false, labelError: errorMsg };
   }
 
-  // 3. Validate countries
+  // 4. Validate countries
   if (!seller.country || !BALTIC_COUNTRIES.includes(seller.country)) {
     await updateOrderLabelError(orderId, 'Seller country not set. Please update your country in Account Settings.');
     return { labelGenerated: false, labelError: 'Seller country not set' };
@@ -67,7 +89,7 @@ export async function prepareAndGenerateLabel(
     return { labelGenerated: false, labelError: 'Destination country missing' };
   }
 
-  // 4. Generate label
+  // 5. Generate label
   console.log(`${logPrefix} Generating label...`);
   console.log(`${logPrefix} Sender: ${seller.fullName}, Phone: ${seller.phone} -> ${normalizedSellerPhone}, Country: ${seller.country}`);
   console.log(`${logPrefix} Receiver: ${receiver.name}, Phone: ${receiver.phone} -> ${normalizedReceiverPhone}, Country: ${destination.country}`);
@@ -89,7 +111,7 @@ export async function prepareAndGenerateLabel(
 
     console.log(`${logPrefix} Label generated: ParcelId ${labelResult.parcelId}`);
 
-    // 5. Update order with shipping data
+    // 6. Update order with shipping data
     const updateResult = await updateOrderWithShippingData(orderId, {
       parcelId: labelResult.parcelId,
       barcode: labelResult.barcode,
@@ -107,7 +129,7 @@ export async function prepareAndGenerateLabel(
       };
     }
 
-    // 6. Send shipping email to seller (non-blocking)
+    // 7. Send shipping email to seller (non-blocking)
     sendShippingLabelToSeller({
       sellerName: seller.fullName,
       sellerEmail: seller.email,

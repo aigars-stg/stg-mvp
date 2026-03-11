@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@second-turn/design-system';
 import { ArrowUp, RefreshCw as Loader2, Shield, AlertCircle } from '@/lib/icons';
 import { formatPrice } from '@/lib/services/pricing';
@@ -29,6 +30,7 @@ export function WithdrawalForm({
   onSuccess,
   onCancel,
 }: WithdrawalFormProps) {
+  const t = useTranslations('WithdrawalForm');
   const [amountEuros, setAmountEuros] = useState('');
   const [iban, setIban] = useState(savedIban ? formatIBAN(savedIban) : '');
   const [accountHolderName, setAccountHolderName] = useState(savedName || '');
@@ -39,7 +41,6 @@ export function WithdrawalForm({
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    // Allow only valid decimal input
     if (/^\d*\.?\d{0,2}$/.test(val) || val === '') {
       setAmountEuros(val);
       setError(null);
@@ -63,22 +64,22 @@ export function WithdrawalForm({
     const amountCents = Math.round(parseFloat(amountEuros || '0') * 100);
 
     if (amountCents <= 0) {
-      setError('Please enter an amount');
+      setError(t('errors.amountRequired'));
       return;
     }
 
     if (amountCents > balanceCents) {
-      setError('Amount exceeds your wallet balance');
+      setError(t('errors.exceedsBalance'));
       return;
     }
 
     if (!iban.replace(/\s/g, '').trim()) {
-      setError('IBAN is required');
+      setError(t('errors.ibanRequired'));
       return;
     }
 
     if (!accountHolderName.trim()) {
-      setError('Account holder name is required');
+      setError(t('errors.nameRequired'));
       return;
     }
 
@@ -97,12 +98,12 @@ export function WithdrawalForm({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to create withdrawal request');
+        throw new Error(data.error || t('errors.generic'));
       }
 
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : t('errors.generic'));
     } finally {
       setLoading(false);
     }
@@ -110,13 +111,14 @@ export function WithdrawalForm({
 
   const countryCode = iban.replace(/\s/g, '').substring(0, 2).toUpperCase();
   const hint = IBAN_HINTS[countryCode] || 'LV00 BANK 0000 0000 0000 0';
+  const ibanIsSaved = savedIban && iban === formatIBAN(savedIban);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Amount */}
       <div>
         <label htmlFor="amount" className="block text-sm font-medium text-polar-night mb-1">
-          Withdrawal amount
+          {t('amountLabel')}
         </label>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary font-medium">
@@ -129,7 +131,7 @@ export function WithdrawalForm({
             value={amountEuros}
             onChange={handleAmountChange}
             placeholder="0.00"
-            className="w-full pl-8 pr-4 py-3 rounded-lg border-2 border-border bg-snow-white
+            className="w-full pl-8 pr-4 py-3 rounded-lg border border-border bg-snow-white
                        text-polar-night placeholder:text-text-muted font-medium text-lg
                        focus:outline-none focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20
                        transition-colors"
@@ -138,7 +140,7 @@ export function WithdrawalForm({
         </div>
         <div className="flex items-center justify-between mt-1">
           <p className="text-xs text-text-muted">
-            Available: {formatPrice(balanceEuros)}
+            {t('available', { amount: formatPrice(balanceEuros) })}
           </p>
           {balanceCents > 0 && (
             <button
@@ -146,7 +148,7 @@ export function WithdrawalForm({
               onClick={handleWithdrawAll}
               className="text-xs text-frost-ice hover:underline font-medium"
             >
-              Withdraw all
+              {t('withdrawAll')}
             </button>
           )}
         </div>
@@ -155,7 +157,7 @@ export function WithdrawalForm({
       {/* Account Holder Name */}
       <div>
         <label htmlFor="holderName" className="block text-sm font-medium text-polar-night mb-1">
-          Account holder name
+          {t('holderNameLabel')}
         </label>
         <input
           id="holderName"
@@ -165,8 +167,8 @@ export function WithdrawalForm({
             setAccountHolderName(e.target.value);
             setError(null);
           }}
-          placeholder="Full name as on bank account"
-          className="w-full px-4 py-3 rounded-lg border-2 border-border bg-snow-white
+          placeholder={t('holderNamePlaceholder')}
+          className="w-full px-4 py-3 rounded-lg border border-border bg-snow-white
                      text-polar-night placeholder:text-text-muted
                      focus:outline-none focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20
                      transition-colors"
@@ -176,8 +178,13 @@ export function WithdrawalForm({
 
       {/* IBAN */}
       <div>
-        <label htmlFor="iban" className="block text-sm font-medium text-polar-night mb-1">
-          IBAN
+        <label htmlFor="iban" className="flex items-center gap-2 text-sm font-medium text-polar-night mb-1">
+          {t('ibanLabel')}
+          {ibanIsSaved && (
+            <span className="text-xs font-normal text-frost-ice bg-frost-ice/10 px-1.5 py-0.5 rounded">
+              {t('savedBadge')}
+            </span>
+          )}
         </label>
         <input
           id="iban"
@@ -185,14 +192,13 @@ export function WithdrawalForm({
           value={iban}
           onChange={handleIBANChange}
           placeholder={hint}
-          className="w-full px-4 py-3 rounded-lg border-2 border-border bg-snow-white
+          className="w-full px-4 py-3 rounded-lg border border-border bg-snow-white
                      text-polar-night placeholder:text-text-muted font-mono tracking-wide
                      focus:outline-none focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20
                      transition-colors uppercase"
           disabled={loading}
           autoComplete="off"
         />
-        <p className="text-xs text-text-muted mt-1">Format: {hint}</p>
       </div>
 
       {/* Error */}
@@ -207,8 +213,7 @@ export function WithdrawalForm({
       <div className="flex items-start gap-2 p-3 bg-frost-ice/5 rounded-lg">
         <Shield className="w-4 h-4 text-frost-ice flex-shrink-0 mt-0.5" />
         <p className="text-xs text-text-secondary">
-          Withdrawals are processed manually via bank transfer within 1-3 business days.
-          Your IBAN is stored securely for future withdrawals.
+          {t('securityNote')}
         </p>
       </div>
 
@@ -221,7 +226,7 @@ export function WithdrawalForm({
           disabled={loading}
           className="flex-1"
         >
-          Cancel
+          {t('cancel')}
         </Button>
         <Button
           type="submit"
@@ -230,14 +235,11 @@ export function WithdrawalForm({
           className="flex-1"
         >
           {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Submitting...
-            </>
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <>
               <ArrowUp className="w-4 h-4 mr-2" />
-              Request Withdrawal
+              {t('submit')}
             </>
           )}
         </Button>

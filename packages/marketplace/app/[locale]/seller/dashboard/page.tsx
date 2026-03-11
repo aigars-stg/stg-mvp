@@ -1,19 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useRouter, Link } from '@/i18n/navigation';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslations } from 'next-intl';
 import { RefreshCw as Loader2 } from '@/lib/icons';
 import { EarningsTab } from '@/components/seller/dashboard/EarningsTab';
-import { ReviewsTab } from '@/components/seller/dashboard/ReviewsTab';
 import type { Dac7ComplianceStatus } from '@/lib/types/seller';
-
-type DashboardTab = 'earnings' | 'reviews';
-
-const VALID_TABS: DashboardTab[] = ['earnings', 'reviews'];
 
 interface SellerProfile {
   seller_status: string;
@@ -24,53 +18,15 @@ interface SellerProfile {
   dac7_annual_sales_total: number;
 }
 
-function TabButton({
-  active,
-  onClick,
-  children,
-  badge,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  badge?: number;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${
-        active
-          ? 'bg-frost-ice text-white'
-          : 'text-frost-ice hover:bg-frost-ice/20'
-      }`}
-    >
-      {children}
-      {badge !== undefined && badge > 0 && (
-        <span className="px-1.5 py-0.5 text-xs rounded-full bg-aurora-orange text-white min-w-[20px] text-center">
-          {badge}
-        </span>
-      )}
-    </button>
-  );
-}
-
 function SellerDashboardContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const t = useTranslations('SellerDashboard');
 
-  // Read initial tab from URL
-  const tabParam = searchParams.get('tab') as DashboardTab | null;
-  const initialTab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'earnings';
-  const [activeTab, setActiveTab] = useState<DashboardTab>(initialTab);
-
-  // Seller profile state
   const [profile, setProfile] = useState<SellerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Fetch seller profile + check onboarding status
   const fetchProfile = useCallback(async () => {
     if (!user) return;
 
@@ -101,7 +57,6 @@ function SellerDashboardContent() {
         dac7_annual_sales_total: profileData.dac7_annual_sales_total ?? 0,
       });
 
-      // Redirect if seller onboarding not complete
       if (profileData?.seller_status !== 'active') {
         router.push('/seller/onboard');
         return;
@@ -123,32 +78,46 @@ function SellerDashboardContent() {
     }
   }, [user, authLoading, router, fetchProfile, refreshKey]);
 
-  // Update URL when tab changes (replace to avoid history pollution)
-  const handleTabChange = (tab: DashboardTab) => {
-    setActiveTab(tab);
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', tab);
-    window.history.replaceState({}, '', url.toString());
-  };
-
   const handleProfileRefresh = () => {
     setRefreshKey((k) => k + 1);
   };
 
-  // Loading state
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-bg-primary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-bg-elevated rounded w-48" />
-            <div className="h-10 bg-bg-elevated rounded w-72" />
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-20 bg-bg-elevated rounded-lg" />
-              ))}
+        {/* Header skeleton */}
+        <div className="bg-frost-ice/5 border-b border-frost-ice/20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <div className="animate-pulse space-y-2">
+              <div className="h-8 bg-bg-elevated rounded w-44" />
+              <div className="h-4 bg-bg-elevated rounded w-64" />
             </div>
-            <div className="h-64 bg-bg-elevated rounded-xl" />
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+          {/* Stat cards skeleton */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-snow-white border border-border rounded-lg p-4 flex flex-col gap-2">
+                <div className="w-8 h-8 bg-bg-elevated rounded-full" />
+                <div className="space-y-2">
+                  <div className="h-3 bg-bg-elevated rounded w-16" />
+                  <div className="h-7 bg-bg-elevated rounded w-24" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Content area skeleton */}
+          <div className="grid lg:grid-cols-3 gap-4 animate-pulse">
+            <div className="lg:col-span-1 space-y-4">
+              <div className="h-48 bg-bg-elevated rounded-lg" />
+            </div>
+            <div className="lg:col-span-2 space-y-4">
+              <div className="h-64 bg-bg-elevated rounded-lg" />
+              <div className="h-32 bg-bg-elevated rounded-lg" />
+            </div>
           </div>
         </div>
       </div>
@@ -159,51 +128,20 @@ function SellerDashboardContent() {
 
   return (
     <div className="min-h-screen bg-bg-primary">
-      {/* Header with Tabs */}
       <div className="bg-frost-ice/5 border-b border-frost-ice/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
-                {t('title')}
-              </h1>
-              <p className="text-text-secondary mt-1">{t('subtitle.contactOnly')}</p>
-              <Link
-                href="/orders?role=selling"
-                className="inline-flex items-center gap-1 text-sm text-frost-ice hover:underline mt-1"
-              >
-                {t('viewAllSales')} →
-              </Link>
-            </div>
-
-            {/* Tab Bar */}
-            <div className="flex items-center gap-1 bg-frost-ice/10 rounded-lg p-1">
-              <TabButton
-                active={activeTab === 'earnings'}
-                onClick={() => handleTabChange('earnings')}
-              >
-                {t('tabs.earnings')}
-              </TabButton>
-              <TabButton
-                active={activeTab === 'reviews'}
-                onClick={() => handleTabChange('reviews')}
-              >
-                {t('tabs.reviews')}
-              </TabButton>
-            </div>
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-polar-night">
+            {t('titleWallet')}
+          </h1>
+          <p className="text-text-secondary mt-1">{t('subtitle.wallet')}</p>
         </div>
       </div>
 
-      {/* Tab Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {activeTab === 'earnings' && (
-          <EarningsTab
-            profile={profile}
-            onProfileRefresh={handleProfileRefresh}
-          />
-        )}
-        {activeTab === 'reviews' && <ReviewsTab />}
+        <EarningsTab
+          profile={profile}
+          onProfileRefresh={handleProfileRefresh}
+        />
       </div>
     </div>
   );

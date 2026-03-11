@@ -144,11 +144,10 @@ function RatingSummary({
             {[1, 2, 3, 4, 5].map((i) => (
               <Star
                 key={i}
+                weight={i <= Math.round(averageRating) ? 'fill' : 'regular'}
                 className={cn(
                   'w-5 h-5',
-                  i <= Math.round(averageRating)
-                    ? 'text-amber-400 fill-amber-400'
-                    : 'text-snow-storm'
+                  i <= Math.round(averageRating) ? 'text-amber-400' : 'text-snow-storm'
                 )}
               />
             ))}
@@ -272,11 +271,10 @@ function ReviewCard({
           {[1, 2, 3, 4, 5].map((i) => (
             <Star
               key={i}
+              weight={i <= review.rating ? 'fill' : 'regular'}
               className={cn(
                 'w-4 h-4',
-                i <= review.rating
-                  ? 'text-amber-400 fill-amber-400'
-                  : 'text-snow-storm'
+                i <= review.rating ? 'text-amber-400' : 'text-snow-storm'
               )}
             />
           ))}

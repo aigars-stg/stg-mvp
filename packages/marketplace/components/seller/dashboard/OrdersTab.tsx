@@ -21,6 +21,7 @@ interface OrderItem {
   condition: string;
   photo_url: string | null;
   game_thumbnail: string | null;
+  game_image?: string | null;
 }
 
 interface Order {
@@ -301,6 +302,7 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
                   {firstItem && (
                     <ListingThumbnail
                       src={resolveListingImage({
+                        gameImage: firstItem.game_image,
                         gameThumbnail: firstItem.game_thumbnail,
                         photoUrl: firstItem.photo_url,
                       })}

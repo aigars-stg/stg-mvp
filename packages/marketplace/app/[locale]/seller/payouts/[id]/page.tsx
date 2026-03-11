@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import { requireServerAuth } from '@/lib/auth/server-auth';
 import { getPayoutStatementData } from '@/lib/services/document-service';
 import { formatPrice, formatCentsToCurrency } from '@/lib/services/pricing';
@@ -11,7 +12,10 @@ interface Props {
 
 export default async function PayoutStatementPage({ params }: Props) {
   const { locale, id: withdrawalId } = await params;
-  const { user, isStaff, serviceClient } = await requireServerAuth(locale);
+  const [{ user, isStaff, serviceClient }, t] = await Promise.all([
+    requireServerAuth(locale),
+    getTranslations({ locale, namespace: 'Documents' }),
+  ]);
 
   const data = await getPayoutStatementData(serviceClient, withdrawalId, user.id, isStaff);
 
@@ -19,10 +23,8 @@ export default async function PayoutStatementPage({ params }: Props) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-polar-night">Payout statement not available</h1>
-          <p className="mt-2 text-text-secondary">
-            This statement is not yet available or you do not have access.
-          </p>
+          <h1 className="text-2xl font-bold text-polar-night">{t('payoutStatement.notAvailable')}</h1>
+          <p className="mt-2 text-text-secondary">{t('payoutStatement.notAvailableDescription')}</p>
         </div>
       </div>
     );
@@ -36,17 +38,27 @@ export default async function PayoutStatementPage({ params }: Props) {
     ? `${withdrawal.iban.slice(0, 4)}****${withdrawal.iban.slice(-4)}`
     : withdrawal.iban;
 
+  const layoutLabels = {
+    reg: t('layout.reg'),
+    vat: t('layout.vat'),
+    no: t('layout.no'),
+    date: t('layout.date'),
+    recipient: t('layout.recipient'),
+    electronicSignature: t('layout.electronicSignature'),
+  };
+
   return (
     <DocumentLayout
-      title="Payout Statement"
+      title={t('payoutStatement.title')}
       documentNumber={document.document_number}
       date={document.created_at}
+      labels={layoutLabels}
       recipient={
         <div>
           <p className="font-medium">{seller.full_name}</p>
-          <p>IBAN: {maskedIban}</p>
+          <p>{t('payoutStatement.ibanLabel')} {maskedIban}</p>
           {withdrawal.account_holder_name && (
-            <p>Account holder: {withdrawal.account_holder_name}</p>
+            <p>{t('payoutStatement.accountHolder')} {withdrawal.account_holder_name}</p>
           )}
         </div>
       }
@@ -56,12 +68,12 @@ export default async function PayoutStatementPage({ params }: Props) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border-subtle text-left text-xs font-medium uppercase tracking-wide text-text-secondary">
-              <th className="pb-2 pr-4">Order</th>
-              <th className="pb-2 pr-4">Date</th>
-              <th className="pb-2 pr-4">Invoice</th>
-              <th className="pb-2 pr-4 text-right">Items</th>
-              <th className="pb-2 pr-4 text-right">Commission</th>
-              <th className="pb-2 text-right">Net credit</th>
+              <th className="pb-2 pr-4">{t('payoutStatement.orderColumn')}</th>
+              <th className="pb-2 pr-4">{t('payoutStatement.dateColumn')}</th>
+              <th className="pb-2 pr-4">{t('payoutStatement.invoiceColumn')}</th>
+              <th className="pb-2 pr-4 text-right">{t('payoutStatement.itemsColumn')}</th>
+              <th className="pb-2 pr-4 text-right">{t('payoutStatement.commissionColumn')}</th>
+              <th className="pb-2 text-right">{t('payoutStatement.netCreditColumn')}</th>
             </tr>
           </thead>
           <tbody>
@@ -92,27 +104,27 @@ export default async function PayoutStatementPage({ params }: Props) {
       {/* Payout total */}
       <DocumentTotals
         rows={[
-          { label: 'Net payout', amount: payoutEuros, bold: true },
+          { label: t('payoutStatement.netPayout'), amount: payoutEuros, bold: true },
         ]}
       />
 
       {/* Transfer details */}
       <div className="mt-8 rounded-lg bg-snow-storm p-4 text-sm print:bg-gray-50">
-        <p className="font-medium text-polar-night">Transfer details</p>
+        <p className="font-medium text-polar-night">{t('payoutStatement.transferDetails')}</p>
         <div className="mt-2 space-y-1 text-text-secondary">
           <div className="flex justify-between">
-            <span>IBAN</span>
+            <span>{t('payoutStatement.ibanRow')}</span>
             <span>{maskedIban}</span>
           </div>
           {withdrawal.bank_reference && (
             <div className="flex justify-between">
-              <span>Bank reference</span>
+              <span>{t('payoutStatement.bankReference')}</span>
               <span>{withdrawal.bank_reference}</span>
             </div>
           )}
           {withdrawal.processed_at && (
             <div className="flex justify-between">
-              <span>Completed</span>
+              <span>{t('payoutStatement.completed')}</span>
               <span>{formatDate(withdrawal.processed_at)}</span>
             </div>
           )}

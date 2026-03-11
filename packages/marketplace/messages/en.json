@@ -768,7 +768,8 @@
       "emailHint": "Order updates and tracking info will be sent here",
       "savePhone": "Save phone number for future orders",
       "savePhoneHint": "We'll remember your phone number for faster checkout next time",
-      "phoneError": "Please enter a valid phone number for the selected country"
+      "phoneError": "Please enter a valid phone number for the selected country",
+      "phoneCountryMismatch": "For delivery to {country}, please use a {country} mobile number. Your current phone won't work for this destination."
     },
     "summary": {
       "title": "Order Summary",
@@ -2187,7 +2188,9 @@
     "activeListings": "Active Listings",
     "reviews": "Reviews",
     "loadMore": "Load more ({current} of {total})",
-    "notSelling": "This user is not currently selling any items."
+    "notSelling": "This user is not currently selling any items.",
+    "listingsTab": "Listings ({count})",
+    "reviewsTab": "Reviews ({count})"
   },
   "Home": {
     "FeaturedGames": {
@@ -2431,10 +2434,12 @@
     }
   },
   "SellerDashboard": {
-    "title": "Seller Dashboard",
+    "title": "Seller dashboard",
+    "titleWallet": "Wallet & earnings",
     "subtitle": {
       "payoutsEnabled": "Manage your earnings, wallet, and withdrawals",
-      "contactOnly": "Manage your listings and connect with buyers"
+      "contactOnly": "Manage your listings and connect with buyers",
+      "wallet": "Your earnings from sales, ready to spend or withdraw"
     },
     "tabs": {
       "orders": "My sales",
@@ -2448,8 +2453,16 @@
       "transactionHistory": "Transaction History",
       "howItWorks": "How Earnings Work",
       "step1": "When a sale completes, your earnings (item price minus 10% commission) are credited to your wallet",
-      "step2": "You can withdraw your balance to your bank account at any time",
-      "step3": "Withdrawals are processed via bank transfer within 1-3 business days"
+      "step2": "Use your balance to buy games on Second Turn — no withdrawal needed",
+      "step3": "Or withdraw to your bank account at any time — processed within 1-3 business days",
+      "stats": {
+        "available": "Available",
+        "availableHint": "in your wallet",
+        "earnedThisMonth": "Earned this month",
+        "totalWithdrawn": "Total withdrawn",
+        "pendingWithdrawals": "Pending withdrawals",
+        "pendingCount": "{count, plural, one {# request} other {# requests}}"
+      }
     },
     "reviews": {
       "loading": "Loading reviews..."
@@ -2590,7 +2603,22 @@
       "reportReasonPlaceholder": "Describe why this review is inappropriate...",
       "reportSubmit": "Report",
       "reportSuccess": "Review reported. Our team will review it.",
-      "reported": "Reported"
+      "reported": "Reported",
+      "review": "review",
+      "reviews": "reviews",
+      "star": "star",
+      "stars": "stars",
+      "positive": "positive",
+      "loading": "Loading...",
+      "loadMore": "Load more",
+      "order": "Order",
+      "sellerResponse": "Seller response",
+      "respondToReview": "Respond to review",
+      "responsePlaceholder": "Write your response...",
+      "characters": "{count}/{max} characters",
+      "cancel": "Cancel",
+      "sending": "Sending...",
+      "sendResponse": "Send response"
     },
     "Dac7": {
       "cardTitle": "Tax Compliance",
@@ -2736,15 +2764,15 @@
         "awaitingSeller": "Awaiting seller",
         "resolved": "Resolved"
       },
-      "labelGenerating": "Generating your shipping label — this usually takes a few seconds.",
+      "labelGenerating": "Registering your shipment — this usually takes a few seconds.",
       "notices": {
         "delivered": {
           "title": "Your parcel has arrived",
-          "body": "Pick it up at the terminal and confirm receipt. You have 2 days to open a dispute if anything is wrong."
+          "body": "Pick it up at the terminal and confirm receipt. You have 2 days to report an issue if anything is wrong."
         },
         "deliveredSeller": {
           "title": "Buyer has received the parcel",
-          "body": "If no dispute is raised within 2 days, your earnings will be credited to your wallet automatically."
+          "body": "If no issue is reported within 2 days, your earnings will be credited to your wallet automatically."
         },
         "accepted": {
           "title": "Seller is preparing your order",
@@ -2827,7 +2855,19 @@
         "title": "How was your experience?",
         "description": "Share your feedback to help other buyers",
         "button": "Leave a review",
-        "alreadyReviewed": "You reviewed this order"
+        "alreadyReviewed": "You reviewed this order",
+        "yourReview": "Your review",
+        "buyerReview": "Buyer's review",
+        "placeholder": "Tell others about the item condition, packaging, communication with the seller...",
+        "submit": "Submit Review",
+        "submitting": "Submitting...",
+        "ratings": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "veryGood": "Very Good",
+          "excellent": "Excellent"
+        }
       },
       "actions": {
         "confirmReceipt": "Confirm Receipt",
@@ -3186,10 +3226,10 @@
       "processing": "Processing..."
     },
     "labelFailed": {
-      "title": "Shipping Label Not Generated",
-      "description": "There was an error generating your shipping label. Please try again.",
-      "retryLabelGeneration": "Retry Label Generation",
-      "generatingLabel": "Generating Label..."
+      "title": "Shipment Code Not Generated",
+      "description": "There was an error generating your shipment code. Please try again.",
+      "retryLabelGeneration": "Retry Code Generation",
+      "generatingLabel": "Generating Code..."
     },
     "readyToShip": {
       "title": "Ready to Ship",
@@ -3225,7 +3265,7 @@
       "orderPlaced": "Order Placed",
       "paymentReceived": "Payment Received",
       "orderAccepted": "Order Accepted",
-      "shippingLabelGenerated": "Shipping Label Generated"
+      "shippingLabelGenerated": "Shipment Registered"
     }
   },
   "WalletTransactions": {
@@ -3235,11 +3275,57 @@
       "withdrawal": "Withdrawal",
       "refundCredit": "Refund"
     },
+    "columns": {
+      "date": "Date",
+      "type": "Type",
+      "description": "Description",
+      "amount": "Amount",
+      "balance": "Balance"
+    },
+    "orderRef": "Order #{number} →",
+    "withdrawalStatus": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "rejected": "Rejected"
+    },
+    "filter": {
+      "label": "Period",
+      "allTime": "All time",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "this_week": "This week",
+      "last_week": "Last week",
+      "this_month": "This month",
+      "last_month": "Last month",
+      "this_quarter": "This quarter",
+      "this_year": "This year"
+    },
+    "exportCsv": "Download CSV",
     "empty": "No transactions yet",
     "emptyHint": "Earnings from completed sales will appear here",
     "balance": "bal.",
     "loading": "Loading...",
     "showMore": "Show more ({count} remaining)"
+  },
+  "WithdrawalForm": {
+    "amountLabel": "Withdrawal amount",
+    "available": "Available: {amount}",
+    "withdrawAll": "Withdraw all",
+    "holderNameLabel": "Account holder name",
+    "holderNamePlaceholder": "Full name as on bank account",
+    "ibanLabel": "IBAN",
+    "savedBadge": "Saved",
+    "submit": "Withdraw",
+    "cancel": "Cancel",
+    "securityNote": "Processed via bank transfer within 1–3 business days. Your bank details are saved for future withdrawals.",
+    "errors": {
+      "amountRequired": "Please enter an amount",
+      "exceedsBalance": "Amount exceeds your wallet balance",
+      "ibanRequired": "IBAN is required",
+      "nameRequired": "Account holder name is required",
+      "generic": "Something went wrong"
+    }
   },
   "WithdrawalHistory": {
     "statuses": {
@@ -3363,6 +3449,95 @@
       "hoursRemaining": "{hours} hours remaining to respond",
       "optionalNote": "Optional note (any comments for the buyer)",
       "responseLabel": "Your Response to Order #{orderNumber}"
+    }
+  },
+  "Documents": {
+    "layout": {
+      "reg": "Reg.",
+      "vat": "VAT",
+      "no": "No.",
+      "date": "Date:",
+      "recipient": "Recipient",
+      "electronicSignature": "This document was generated electronically and is valid without a signature."
+    },
+    "lineItems": {
+      "description": "Description",
+      "gross": "Gross",
+      "net": "Net",
+      "vatRate": "VAT Rate",
+      "vat": "VAT"
+    },
+    "invoice": {
+      "title": "Platform Services Invoice",
+      "notAvailable": "Invoice not available",
+      "notAvailableDescription": "This invoice is not yet available or you do not have access.",
+      "order": "Order:",
+      "country": "Country:",
+      "commissionLineItem": "Marketplace commission (10% of {amount})",
+      "shippingManagement": "Shipping management",
+      "totalNet": "Total net",
+      "vatLine": "VAT ({rate}%)",
+      "invoiceTotal": "Invoice total",
+      "paymentSummary": "Payment summary",
+      "totalCollected": "Total collected from buyer",
+      "platformServices": "Platform services (this invoice)",
+      "creditedToWallet": "Credited to your wallet"
+    },
+    "confirmation": {
+      "title": "Order Confirmation",
+      "notAvailable": "Order confirmation not available",
+      "notAvailableDescription": "This confirmation is not yet available or you do not have access.",
+      "seller": "Seller:",
+      "itemColumn": "Item",
+      "conditionColumn": "Condition",
+      "priceColumn": "Price",
+      "itemsRow": "Items",
+      "shippingRow": "Shipping",
+      "totalPaid": "Total paid",
+      "paymentDetails": "Payment details",
+      "cardPayment": "Card / bank payment",
+      "walletApplied": "Wallet balance applied",
+      "dateLabel": "Date",
+      "delivery": "Delivery",
+      "parcelLocker": "Parcel locker:",
+      "pickup": "Pickup",
+      "city": "City:",
+      "notes": "Notes:"
+    },
+    "creditNote": {
+      "title": "Credit Note",
+      "notAvailable": "Credit note not available",
+      "notAvailableDescription": "This credit note is not yet available or you do not have access.",
+      "order": "Order:",
+      "originalInvoice": "Original invoice:",
+      "reason": "Reason:",
+      "reversalCommission": "Reversal: marketplace commission (10% of {amount})",
+      "reversalShipping": "Reversal: shipping management",
+      "totalNet": "Total net",
+      "vatLine": "VAT ({rate}%)",
+      "creditNoteTotal": "Credit note total",
+      "refundSummary": "Refund summary",
+      "sellerWalletClawback": "Seller wallet clawback",
+      "platformCommissionReversed": "Platform commission reversed",
+      "buyerRefund": "Buyer refund"
+    },
+    "payoutStatement": {
+      "title": "Payout Statement",
+      "notAvailable": "Payout statement not available",
+      "notAvailableDescription": "This statement is not yet available or you do not have access.",
+      "ibanLabel": "IBAN:",
+      "accountHolder": "Account holder:",
+      "orderColumn": "Order",
+      "dateColumn": "Date",
+      "invoiceColumn": "Invoice",
+      "itemsColumn": "Items",
+      "commissionColumn": "Commission",
+      "netCreditColumn": "Net credit",
+      "netPayout": "Net payout",
+      "transferDetails": "Transfer details",
+      "ibanRow": "IBAN",
+      "bankReference": "Bank reference",
+      "completed": "Completed"
     }
   }
 }

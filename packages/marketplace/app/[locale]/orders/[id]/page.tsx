@@ -22,7 +22,7 @@ import { StatusTimeline, isCancelledStatus } from '@/components/shipping';
 import {
   OrderDetailHeader,
   OrderStatusNotice,
-  OrderItemsList,
+  OrderListingCard,
   OrderPricingSummary,
   OrderTimeline,
   OrderShippingSection,
@@ -30,7 +30,7 @@ import {
   SellerAcceptDecline,
   SellerLabelFailed,
   SellerReadyToShip,
-  BuyerReviewCTA,
+  OrderReview,
 } from '@/components/order-detail';
 import type { OrderDetailOrder, OrderDetailItem } from '@/lib/types/order-detail';
 import { formatDate, formatTime } from '@/lib/date-utils';
@@ -76,7 +76,8 @@ export default function OrderDetailPage() {
     issueDescription,
     setIssueDescription,
     handleReportIssue,
-    hasReview,
+    existingReview,
+    setExistingReview,
     // Seller actions
     showAcceptModal,
     setShowAcceptModal,
@@ -377,11 +378,14 @@ export default function OrderDetailPage() {
               />
             )}
 
-            <OrderItemsList
-              items={order_items as OrderDetailItem[]}
-              showGameLinks={isBuyer}
-              title={t('items.title', { count: order_items.length })}
-            />
+            {viewerRole && (order.status === 'delivered' || order.status === 'completed') && (
+              <OrderReview
+                orderId={order.id}
+                viewerRole={viewerRole}
+                existingReview={existingReview}
+                onReviewSubmitted={setExistingReview}
+              />
+            )}
 
             {isBuyer && !isCancelled && (
               <OrderActions
@@ -403,9 +407,18 @@ export default function OrderDetailPage() {
               />
             )}
 
-            {isBuyer && order.status === 'completed' && (
-              <BuyerReviewCTA orderId={order.id} hasReview={hasReview} />
-            )}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-polar-night">
+                {t('items.title', { count: order_items.length })}
+              </h3>
+              {order_items.map((item) => (
+                <OrderListingCard
+                  key={item.id}
+                  item={item as OrderDetailItem}
+                  showGameLink={isBuyer}
+                />
+              ))}
+            </div>
 
             <ConversationPanel
               messages={messages}

@@ -27,7 +27,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({
       hasAccount: !!profile?.payout_iban,
-      iban: profile?.payout_iban ? `****${profile.payout_iban.slice(-4)}` : null,
+      iban: profile?.payout_iban || null,
       accountHolderName: profile?.payout_account_holder_name || null,
     });
   } catch (error) {

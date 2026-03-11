@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- game thumbnails are external BGG URLs */
 'use client';
 
-import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense, useMemo } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Button, ResultPage } from '@second-turn/design-system';
@@ -13,7 +13,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { TerminalSelectorWithMap } from '@/components/checkout/TerminalSelectorWithMap';
 import { PaymentMethodLogos } from '@/components/checkout/PaymentMethodLogos';
 import { PhoneInput } from '@/components/common/PhoneInput';
-import { isValidPhoneNumber } from '@/lib/phone-utils';
+import { isValidPhoneNumber, detectPhoneCountry } from '@/lib/phone-utils';
 import { ReservationTimer } from '@/components/checkout/ReservationTimer';
 import { CheckoutSection } from '@/components/checkout/CheckoutSection';
 import { UserInfoCard } from '@/components/user/UserInfoCard';
@@ -116,6 +116,13 @@ function CheckoutPageContent() {
     : detectedCountry && ['LT', 'LV', 'EE'].includes(detectedCountry) ? detectedCountry
     : 'LV'
   ) as TerminalCountry;
+
+  // Warn when phone country doesn't match terminal country (non-blocking)
+  const phoneCountryMismatch = useMemo(() => {
+    if (!selectedTerminal || !receiverPhone || phoneError) return false;
+    const detected = detectPhoneCountry(receiverPhone);
+    return detected.country !== 'OTHER' && detected.country !== selectedTerminal.countryCode;
+  }, [selectedTerminal, receiverPhone, phoneError]);
 
   // Completion criteria
   const isTerminalComplete = selectedTerminal !== null;
@@ -653,9 +660,16 @@ function CheckoutPageContent() {
                   onChange={setReceiverPhone}
                   error={phoneError || undefined}
                   required
-                  defaultCountry={(profileCountry && ['LV', 'LT', 'EE'].includes(profileCountry) ? profileCountry : 'LV') as CountryCode}
+                  defaultCountry={defaultCountry as CountryCode}
                   id="receiver-phone"
                 />
+
+                {/* Phone/terminal country mismatch warning */}
+                {phoneCountryMismatch && selectedTerminal && (
+                  <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    {t('form.phoneCountryMismatch', { country: selectedTerminal.countryCode })}
+                  </p>
+                )}
 
                 {/* Save Phone Checkbox */}
                 <label className="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-bg-elevated transition-colors">

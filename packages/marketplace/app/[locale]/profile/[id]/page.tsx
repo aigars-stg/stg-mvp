@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
-import { Button, Card, ResultPage } from '@second-turn/design-system';
-import { ArrowLeft, RefreshCw as Loader2, User, Star, Package, ShoppingBag, Chat as MessageSquare } from '@/lib/icons';
+import { Button, Card, ResultPage, Tabs, TabsList, TabsTrigger, TabsContent } from '@second-turn/design-system';
+import { ArrowLeft, RefreshCw as Loader2, User, Star, Package } from '@/lib/icons';
 import { SellerReviewsList } from '@/components/seller/SellerReviewsList';
 import { BadgeTierPill, FoundingSellerPill } from '@/components/seller/SellerTrustBadge';
 import type { SellerBadgeTier } from '@/lib/types/seller';
@@ -267,9 +267,10 @@ export default function ProfilePage() {
                       {[1, 2, 3, 4, 5].map((i) => (
                         <Star
                           key={i}
+                          weight={i <= Math.round(seller.average_rating) ? 'fill' : 'regular'}
                           className={`w-5 h-5 ${
                             i <= Math.round(seller.average_rating)
-                              ? 'text-amber-400 fill-amber-400'
+                              ? 'text-amber-400'
                               : 'text-snow-storm'
                           }`}
                         />
@@ -301,76 +302,73 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Action Buttons (sellers only) */}
-            {isSeller && seller.active_listings_count !== undefined && seller.active_listings_count > 0 && (
-              <div className="flex flex-col gap-2 sm:items-end">
-                <Link href="/browse">
-                  <Button variant="primary" className="flex items-center gap-2">
-                    <ShoppingBag className="w-4 h-4" />
-                    {t('browseAllListings')}
-                  </Button>
-                </Link>
-              </div>
-            )}
           </div>
         </Card>
 
-        {/* Active Listings (sellers only) */}
-        {isSeller && listings && listings.data.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5" />
-              {t('activeListings')}
-              <span className="text-sm font-normal text-text-secondary">
-                ({listings.pagination.total})
-              </span>
-            </h2>
-            <div className="space-y-4">
-              {listings.data.map((listing) => (
-                <OfferCard key={listing.id} listing={listing} />
-              ))}
-            </div>
-            {listings.pagination.hasMore && (
-              <div className="mt-4 text-center">
-                <Button
-                  variant="secondary"
-                  onClick={handleLoadMoreListings}
-                  disabled={loadingMoreListings}
-                  className="min-w-[200px]"
-                >
-                  {loadingMoreListings ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      {tCommon('loading')}
-                    </>
-                  ) : (
-                    t('loadMore', { current: listings.data.length, total: listings.pagination.total })
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Reviews Section (sellers only) */}
+        {/* Seller content: tabbed Listings / Reviews */}
         {isSeller && (
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-polar-night mb-4 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5" />
-              {t('reviews')}
-            </h2>
+          <Tabs
+            variant="toggle"
+            defaultValue={listings && listings.data.length > 0 ? 'listings' : 'reviews'}
+            className="mb-6"
+          >
+            <TabsList className="mb-4">
+              <TabsTrigger value="listings">
+                {t('listingsTab', { count: listings?.pagination.total ?? 0 })}
+              </TabsTrigger>
+              <TabsTrigger value="reviews">
+                {t('reviewsTab', { count: seller.total_reviews })}
+              </TabsTrigger>
+            </TabsList>
 
-            <SellerReviewsList
-              reviews={reviews?.data || []}
-              totalReviews={seller.total_reviews}
-              averageRating={seller.average_rating}
-              positivePercent={seller.positive_rating_percent}
-              hasMore={reviews?.pagination.hasMore || false}
-              onLoadMore={handleLoadMoreReviews}
-              isLoadingMore={loadingMoreReviews}
-              showBreakdown={seller.total_reviews > 0}
-            />
-          </div>
+            <TabsContent value="listings">
+              {listings && listings.data.length > 0 ? (
+                <>
+                  <div className="space-y-4">
+                    {listings.data.map((listing) => (
+                      <OfferCard key={listing.id} listing={listing} hideSeller />
+                    ))}
+                  </div>
+                  {listings.pagination.hasMore && (
+                    <div className="mt-4 text-center">
+                      <Button
+                        variant="secondary"
+                        onClick={handleLoadMoreListings}
+                        disabled={loadingMoreListings}
+                        className="min-w-[200px]"
+                      >
+                        {loadingMoreListings ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            {tCommon('loading')}
+                          </>
+                        ) : (
+                          t('loadMore', { current: listings.data.length, total: listings.pagination.total })
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Card className="p-6 text-center text-text-secondary">
+                  <p>{t('notSelling')}</p>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="reviews">
+              <SellerReviewsList
+                reviews={reviews?.data || []}
+                totalReviews={seller.total_reviews}
+                averageRating={seller.average_rating}
+                positivePercent={seller.positive_rating_percent}
+                hasMore={reviews?.pagination.hasMore || false}
+                onLoadMore={handleLoadMoreReviews}
+                isLoadingMore={loadingMoreReviews}
+                showBreakdown={seller.total_reviews > 0}
+              />
+            </TabsContent>
+          </Tabs>
         )}
 
         {/* Non-seller message */}

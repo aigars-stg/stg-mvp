@@ -33,10 +33,12 @@ interface OfferCardProps {
   onAddToCart?: (listingId: string) => Promise<void>;
   isAddingToCart?: boolean;
   onSaveChange?: (listingId: string, saved: boolean) => void;
+  /** Hide seller info (e.g. on a seller's own profile page) */
+  hideSeller?: boolean;
   /** Buyer's country for calculating accurate shipping estimate */
 }
 
-export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }: OfferCardProps) {
+export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, hideSeller = false }: OfferCardProps) {
   const router = useRouter();
   const loader = useTopLoader();
   const { user } = useAuth();
@@ -577,30 +579,32 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
         {/* FOOTER: Seller info + actions (desktop and mobile) */}
         <div className="hidden sm:flex items-center justify-between gap-4 px-3 sm:px-4 py-3 border-t border-border-subtle">
           {/* Left: Seller Info */}
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">{t('sellerLabel')}</p>
-            <UserInfoCard
-              user={{
-                id: listing.seller.id,
-                name: listing.seller.full_name,
-                avatarUrl: listing.seller.avatar_url,
-                country: listing.seller.country,
-              }}
-              seller={{
-                totalSales: listing.seller.total_completed_sales ?? 0,
-                averageRating: listing.seller.average_rating ?? 0,
-                totalReviews: listing.seller.total_reviews ?? 0,
-                badgeTier: getSellerBadgeTier(
-                  listing.seller.total_completed_sales ?? 0,
-                  listing.seller.average_rating ?? 0
-                ),
-              }}
-              memberSince={listing.seller.member_since}
-              showMemberSince
-              size="sm"
-              compact
-            />
-          </div>
+          {!hideSeller && (
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">{t('sellerLabel')}</p>
+              <UserInfoCard
+                user={{
+                  id: listing.seller.id,
+                  name: listing.seller.full_name,
+                  avatarUrl: listing.seller.avatar_url,
+                  country: listing.seller.country,
+                }}
+                seller={{
+                  totalSales: listing.seller.total_completed_sales ?? 0,
+                  averageRating: listing.seller.average_rating ?? 0,
+                  totalReviews: listing.seller.total_reviews ?? 0,
+                  badgeTier: getSellerBadgeTier(
+                    listing.seller.total_completed_sales ?? 0,
+                    listing.seller.average_rating ?? 0
+                  ),
+                }}
+                memberSince={listing.seller.member_since}
+                showMemberSince
+                size="sm"
+                compact
+              />
+            </div>
+          )}
 
           {/* Middle: Listed date */}
           <span className="text-xs text-text-muted whitespace-nowrap flex-shrink-0">
@@ -683,6 +687,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
         </div>
 
         {/* Mobile Seller Info */}
+        {!hideSeller && (
         <div className="sm:hidden border-t border-border-subtle px-3 py-2.5">
           <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">{t('sellerLabel')}</p>
           <div className="flex items-center gap-2.5">
@@ -715,6 +720,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange }
             </span>
           </div>
         </div>
+        )}
 
         {/* Mobile Footer: Actions - Not shown for auctions (bid panel is above) */}
         {!isOwnListing && !isAuctionListing(listing) && (

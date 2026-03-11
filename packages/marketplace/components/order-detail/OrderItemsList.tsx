@@ -1,8 +1,9 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Badge } from '@second-turn/design-system';
-import { getConditionLabel, type ListingCondition } from '@/lib/types/listing';
+import { type ListingCondition } from '@/lib/types/listing';
 import { ListingThumbnail } from '@/components/common/ListingThumbnail';
 import { resolveListingImage } from '@/lib/utils/listing-image';
 import { formatPrice } from '@/lib/services/pricing';
@@ -23,6 +24,7 @@ export function OrderItemsList({
   showGameLinks = false,
   title,
 }: OrderItemsListProps) {
+  const t = useTranslations('Listings');
   return (
     <div className="bg-snow-white border border-border rounded-xl p-3 sm:p-4">
       {title && (
@@ -70,7 +72,7 @@ export function OrderItemsList({
                   variant={item.condition as ListingCondition}
                   size="sm"
                 >
-                  {getConditionLabel(item.condition as ListingCondition)}
+                  {t(`conditions.${item.condition}`)}
                 </Badge>
                 {compact && (
                   <span className="text-sm font-semibold text-polar-night">

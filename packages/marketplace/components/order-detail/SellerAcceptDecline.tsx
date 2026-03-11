@@ -66,18 +66,22 @@ export function SellerAcceptDecline({
             </div>
           )}
 
-          {!showAcceptModal && !showDeclineModal && (
+          {!showDeclineModal && (
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="primary"
                 onClick={() => {
-                  setShowAcceptModal(true);
-                  setShowDeclineModal(false);
                   setActionError(null);
+                  handleAcceptOrder();
                 }}
+                disabled={actionLoading}
               >
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                {t('actionRequired.acceptOrder')}
+                {actionLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                )}
+                {actionLoading ? t('acceptModal.processing') : t('actionRequired.acceptOrder')}
               </Button>
               <Button
                 variant="secondary"
@@ -90,47 +94,6 @@ export function SellerAcceptDecline({
                 <XCircle className="w-4 h-4 mr-2" />
                 {t('actionRequired.declineOrder')}
               </Button>
-            </div>
-          )}
-
-          {/* Accept form */}
-          {showAcceptModal && (
-            <div className="p-4 bg-snow-white border border-border rounded-lg">
-              <h4 className="font-semibold text-polar-night mb-3">
-                {t('acceptModal.title')}
-              </h4>
-              <p className="text-sm text-text-secondary mb-4">
-                {t('acceptModal.confirmDescription')}
-              </p>
-              <div className="flex gap-3">
-                <Button
-                  variant="primary"
-                  onClick={handleAcceptOrder}
-                  disabled={actionLoading}
-                >
-                  {actionLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {t('acceptModal.processing')}
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
-                      {t('acceptModal.confirmAccept')}
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setShowAcceptModal(false);
-                    setActionError(null);
-                  }}
-                  disabled={actionLoading}
-                >
-                  {t('acceptModal.cancel')}
-                </Button>
-              </div>
             </div>
           )}
 

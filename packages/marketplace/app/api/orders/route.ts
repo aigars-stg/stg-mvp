@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { resolveOrderItemImages } from '@/lib/utils/resolve-order-images';
 
 /**
  * GET /api/orders
@@ -27,7 +28,11 @@ export async function GET(_request: NextRequest) {
           price,
           condition,
           photo_url,
-          game_thumbnail
+          game_thumbnail,
+          listing:listings (
+            bgg_version_id,
+            game:games (image, versions)
+          )
         )
       `)
       .eq('buyer_id', user.id)
@@ -55,6 +60,7 @@ export async function GET(_request: NextRequest) {
         seller_name: order.seller_name || 'Unknown Seller',
         time_remaining_ms: timeRemaining,
         is_expired: timeRemaining !== null && timeRemaining <= 0,
+        order_items: resolveOrderItemImages(order.order_items),
       };
     });
 

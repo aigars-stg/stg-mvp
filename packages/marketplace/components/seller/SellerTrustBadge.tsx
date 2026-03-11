@@ -232,7 +232,7 @@ function BadgeTierPill({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full font-medium border',
+        'inline-flex items-center rounded-md font-medium border',
         config.bg,
         config.text,
         config.border,
@@ -266,7 +266,7 @@ export function FoundingSellerPill({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' 
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full font-medium border',
+        'inline-flex items-center rounded-md font-medium border',
         'bg-aurora-green/10 text-aurora-green border-aurora-green/20',
         sizeStyles[size]
       )}

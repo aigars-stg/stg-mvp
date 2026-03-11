@@ -147,7 +147,15 @@ export async function GET(
         .order('created_at', { ascending: true }),
       supabase
         .from('order_items')
-        .select('id, listing_id, game_name, bgg_game_id, price, condition, photo_url, game_thumbnail')
+        .select(`
+          id, listing_id, game_name, bgg_game_id, price, condition, photo_url, game_thumbnail,
+          listing:listings (
+            photo_urls, condition_notes, all_components_present, missing_components,
+            language, version_name, edition_year, publisher, shipping_notes, included_expansions,
+            bgg_version_id,
+            game:games (image, versions)
+          )
+        `)
         .eq('order_id', order.id),
       supabase
         .from('tracking_events')
@@ -286,7 +294,26 @@ export async function GET(
           resolution_note: order.dispute_resolution_note,
         } : null,
       },
-      order_items: orderItems || [],
+      order_items: (orderItems || []).map(({ listing, ...item }) => {
+        type BGGVersion = { id: number; image?: string | null; thumbnail?: string | null };
+        type ListingWithGame = {
+          bgg_version_id?: number | null;
+          game?: { image?: string | null; versions?: BGGVersion[] | null } | null;
+          [key: string]: unknown;
+        };
+        const { game: gameData, bgg_version_id, ...listingRest } = (listing ?? {}) as ListingWithGame;
+        // Resolve version-specific image, same logic as offers API
+        let gameImage = gameData?.image ?? null;
+        if (bgg_version_id && gameData?.versions) {
+          const version = (gameData.versions as BGGVersion[]).find(v => v.id === bgg_version_id);
+          if (version?.image) gameImage = version.image;
+        }
+        return {
+          ...item,
+          ...listingRest,
+          game_image: gameImage,
+        };
+      }),
       tracking_events: trackingEvents || [],
       buyer: buyerProfile,
       seller: sellerProfile,

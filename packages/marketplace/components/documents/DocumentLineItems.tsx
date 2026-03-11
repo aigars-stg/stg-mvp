@@ -8,21 +8,38 @@ export interface LineItem {
   vatEuros: number;
 }
 
-interface DocumentLineItemsProps {
-  items: LineItem[];
+interface DocumentLineItemLabels {
+  description?: string;
+  gross?: string;
+  net?: string;
+  vatRate?: string;
+  vat?: string;
 }
 
-export function DocumentLineItems({ items }: DocumentLineItemsProps) {
+interface DocumentLineItemsProps {
+  items: LineItem[];
+  labels?: DocumentLineItemLabels;
+}
+
+export function DocumentLineItems({ items, labels }: DocumentLineItemsProps) {
+  const l = {
+    description: labels?.description ?? 'Description',
+    gross: labels?.gross ?? 'Gross',
+    net: labels?.net ?? 'Net',
+    vatRate: labels?.vatRate ?? 'VAT Rate',
+    vat: labels?.vat ?? 'VAT',
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border-subtle text-left text-xs font-medium uppercase tracking-wide text-text-secondary">
-            <th className="pb-2 pr-4">Description</th>
-            <th className="pb-2 pr-4 text-right">Gross</th>
-            <th className="pb-2 pr-4 text-right">Net</th>
-            <th className="pb-2 pr-4 text-right">VAT Rate</th>
-            <th className="pb-2 text-right">VAT</th>
+            <th className="pb-2 pr-4">{l.description}</th>
+            <th className="pb-2 pr-4 text-right">{l.gross}</th>
+            <th className="pb-2 pr-4 text-right">{l.net}</th>
+            <th className="pb-2 pr-4 text-right">{l.vatRate}</th>
+            <th className="pb-2 text-right">{l.vat}</th>
           </tr>
         </thead>
         <tbody>

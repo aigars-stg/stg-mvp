@@ -768,7 +768,8 @@
       "emailHint": "Pasūtījuma atjauninājumi un izsekošanas informācija tiks nosūtīta šeit",
       "savePhone": "Saglabāt tālruņa numuru turpmākiem pasūtījumiem",
       "savePhoneHint": "Mēs atcerēsimies tavu tālruņa numuru, lai ātrāk norēķinātos nākamreiz",
-      "phoneError": "Lūdzu, ievadi derīgu tālruņa numuru izvēlētajai valstij"
+      "phoneError": "Lūdzu, ievadi derīgu tālruņa numuru izvēlētajai valstij",
+      "phoneCountryMismatch": "Piegādei uz {country}, lūdzu izmanto {country} mobilā tālruņa numuru. Tavs pašreizējais numurs nedarbojas šim galamērķim."
     },
     "summary": {
       "title": "Pasūtījuma kopsavilkums",
@@ -2181,7 +2182,9 @@
     "activeListings": "Aktīvie sludinājumi",
     "reviews": "Atsauksmes",
     "loadMore": "Ielādēt vēl ({current} no {total})",
-    "notSelling": "Šis lietotājs pašlaik nepārdod spēles."
+    "notSelling": "Šis lietotājs pašlaik nepārdod spēles.",
+    "listingsTab": "Sludinājumi ({count})",
+    "reviewsTab": "Atsauksmes ({count})"
   },
   "Home": {
     "FeaturedGames": {
@@ -2426,9 +2429,11 @@
   },
   "SellerDashboard": {
     "title": "Pārdevēja panelis",
+    "titleWallet": "Maks un ieņēmumi",
     "subtitle": {
       "payoutsEnabled": "Pārvaldi savus ienākumus, maku un izņemšanu",
-      "contactOnly": "Pārvaldi savus sludinājumus un sazinies ar pircējiem"
+      "contactOnly": "Pārvaldi savus sludinājumus un sazinies ar pircējiem",
+      "wallet": "Seko saviem ieņēmumiem un pārvaldi izmaksas"
     },
     "tabs": {
       "orders": "Mani pārdošanas darījumi",
@@ -2442,8 +2447,16 @@
       "transactionHistory": "Darījumu vēsture",
       "howItWorks": "Kā darbojas ieņēmumi",
       "step1": "Kad pārdošana ir pabeigta, Jūsu ieņēmumi (spēles cena mīnus 10% komisija) tiek ieskaitīti Jūsu makā",
-      "step2": "Jūs varat izņemt savu atlikumu uz bankas kontu jebkurā laikā",
-      "step3": "Izņemšana tiek apstrādāta ar bankas pārskaitījumu 1-3 darba dienu laikā"
+      "step2": "Izmanto atlikumu, lai iegādātos spēles Second Turn — izņemšana nav nepieciešama",
+      "step3": "Vai izņem uz bankas kontu jebkurā laikā — apstrādāts 1-3 darba dienu laikā",
+      "stats": {
+        "available": "Pieejams",
+        "availableHint": "jūsu makā",
+        "earnedThisMonth": "Nopelnīts šomēnes",
+        "totalWithdrawn": "Kopā izņemts",
+        "pendingWithdrawals": "Gaida izņemšanu",
+        "pendingCount": "{count, plural, one {# pieprasījums} other {# pieprasījumi}}"
+      }
     },
     "reviews": {
       "loading": "Ielādē atsauksmes..."
@@ -2576,7 +2589,22 @@
       "reportReasonPlaceholder": "Apraksti, kāpēc šī atsauksme ir neatbilstoša...",
       "reportSubmit": "Ziņot",
       "reportSuccess": "Atsauksme ir ziņota. Mūsu komanda to izskatīs.",
-      "reported": "Ziņots"
+      "reported": "Ziņots",
+      "review": "atsauksme",
+      "reviews": "atsauksmes",
+      "star": "zvaigzne",
+      "stars": "zvaigznes",
+      "positive": "pozitīvas",
+      "loading": "Ielādē...",
+      "loadMore": "Ielādēt vairāk",
+      "order": "Pasūtījums",
+      "sellerResponse": "Pārdevēja atbilde",
+      "respondToReview": "Atbildēt uz atsauksmi",
+      "responsePlaceholder": "Raksti savu atbildi...",
+      "characters": "{count}/{max} rakstzīmes",
+      "cancel": "Atcelt",
+      "sending": "Sūta...",
+      "sendResponse": "Nosūtīt atbildi"
     },
     "Dac7": {
       "cardTitle": "Nodokļu atbilstība",
@@ -2722,15 +2750,15 @@
         "awaitingSeller": "Gaida pārdevēju",
         "resolved": "Atrisināts"
       },
-      "labelGenerating": "Tiek ģenerēta pasta etiķete — tas parasti aizņem dažas sekundes.",
+      "labelGenerating": "Tiek reģistrēts jūsu sūtījums — tas parasti aizņem dažas sekundes.",
       "notices": {
         "delivered": {
           "title": "Tavs sūtījums ir pienācis",
-          "body": "Saņem to terminālī un apstiprin saņemšanu. Tev ir 2 dienas, lai atvērtu strīdu, ja kaut kas ir nepareizi."
+          "body": "Saņem to terminālī un apstiprin saņemšanu. Tev ir 2 dienas, lai ziņotu par problēmu, ja kaut kas ir nepareizi."
         },
         "deliveredSeller": {
           "title": "Pircējs ir saņēmis sūtījumu",
-          "body": "Ja 2 dienu laikā netiek atvērts strīds, tavi ienākumi tiks automātiski ieskaitīti tavā makā."
+          "body": "Ja 2 dienu laikā netiek ziņots par problēmu, tavi ienākumi tiks automātiski ieskaitīti tavā makā."
         },
         "accepted": {
           "title": "Pārdevējs gatavo tavu pasūtījumu",
@@ -2813,7 +2841,19 @@
         "title": "Kā bija tava pieredze?",
         "description": "Dalies ar atsauksmi, lai palīdzētu citiem pircējiem",
         "button": "Atstāt atsauksmi",
-        "alreadyReviewed": "Tu esi novērtējis šo pasūtījumu"
+        "alreadyReviewed": "Tu esi novērtējis šo pasūtījumu",
+        "yourReview": "Tava atsauksme",
+        "buyerReview": "Pircēja atsauksme",
+        "placeholder": "Pastāsti citiem par preces stāvokli, iepakojumu, saziņu ar pārdevēju...",
+        "submit": "Iesniegt atsauksmi",
+        "submitting": "Iesniedz...",
+        "ratings": {
+          "poor": "Slikti",
+          "fair": "Viduvēji",
+          "good": "Labi",
+          "veryGood": "Ļoti labi",
+          "excellent": "Izcili"
+        }
       },
       "actions": {
         "confirmReceipt": "Apstiprināt saņemšanu",
@@ -3172,10 +3212,10 @@
       "processing": "Apstrādā..."
     },
     "labelFailed": {
-      "title": "Piegādes uzlīme nav ģenerēta",
-      "description": "Ģenerējot piegādes uzlīmi, radās kļūda. Lūdzu, mēģiniet vēlreiz.",
-      "retryLabelGeneration": "Mēģināt ģenerēt uzlīmi",
-      "generatingLabel": "Ģenerē uzlīmi..."
+      "title": "Sūtījuma kods nav ģenerēts",
+      "description": "Ģenerējot sūtījuma kodu, radās kļūda. Lūdzu, mēģiniet vēlreiz.",
+      "retryLabelGeneration": "Mēģināt ģenerēt kodu",
+      "generatingLabel": "Ģenerē kodu..."
     },
     "readyToShip": {
       "title": "Gatavs nosūtīšanai",
@@ -3211,7 +3251,7 @@
       "orderPlaced": "Pasūtījums veikts",
       "paymentReceived": "Maksājums saņemts",
       "orderAccepted": "Pasūtījums pieņemts",
-      "shippingLabelGenerated": "Piegādes uzlīme ģenerēta"
+      "shippingLabelGenerated": "Sūtījums reģistrēts"
     }
   },
   "WalletTransactions": {
@@ -3221,11 +3261,57 @@
       "withdrawal": "Izmaksa",
       "refundCredit": "Atmaksa"
     },
+    "columns": {
+      "date": "Datums",
+      "type": "Veids",
+      "description": "Apraksts",
+      "amount": "Summa",
+      "balance": "Atlikums"
+    },
+    "orderRef": "Pasūtījums #{number} →",
+    "withdrawalStatus": {
+      "pending": "Gaida",
+      "processing": "Apstrādē",
+      "completed": "Pabeigts",
+      "rejected": "Noraidīts"
+    },
+    "filter": {
+      "label": "Periods",
+      "allTime": "Viss laiks",
+      "today": "Šodien",
+      "yesterday": "Vakar",
+      "this_week": "Šī nedēļa",
+      "last_week": "Pagājusī nedēļa",
+      "this_month": "Šis mēnesis",
+      "last_month": "Pagājušais mēnesis",
+      "this_quarter": "Šis ceturksnis",
+      "this_year": "Šis gads"
+    },
+    "exportCsv": "Lejupielādēt CSV",
     "empty": "Nav vēl nevienas transakcijas",
     "emptyHint": "Šeit parādīsies ieņēmumi no pabeigtiem pārdošanas darījumiem",
     "balance": "atl.",
     "loading": "Ielādē...",
     "showMore": "Rādīt vairāk (vēl {count})"
+  },
+  "WithdrawalForm": {
+    "amountLabel": "Izmaksas summa",
+    "available": "Pieejams: {amount}",
+    "withdrawAll": "Izņemt visu",
+    "holderNameLabel": "Konta īpašnieka vārds",
+    "holderNamePlaceholder": "Pilns vārds kā bankas kontā",
+    "ibanLabel": "IBAN",
+    "savedBadge": "Saglabāts",
+    "submit": "Izņemt",
+    "cancel": "Atcelt",
+    "securityNote": "Apstrādāts ar bankas pārskaitījumu 1–3 darba dienu laikā. Jūsu bankas dati tiek saglabāti turpmākajiem izņēmumiem.",
+    "errors": {
+      "amountRequired": "Lūdzu ievadiet summu",
+      "exceedsBalance": "Summa pārsniedz Jūsu maka atlikumu",
+      "ibanRequired": "IBAN ir obligāts",
+      "nameRequired": "Konta īpašnieka vārds ir obligāts",
+      "generic": "Kaut kas nogāja greizi"
+    }
   },
   "WithdrawalHistory": {
     "statuses": {
@@ -3349,6 +3435,95 @@
       "hoursRemaining": "Atbildei atlikušas {hours} stundas",
       "optionalNote": "Neobligāta piezīme (komentāri pircējam)",
       "responseLabel": "Jūsu atbilde pasūtījumam #{orderNumber}"
+    }
+  },
+  "Documents": {
+    "layout": {
+      "reg": "Reģ.",
+      "vat": "PVN",
+      "no": "Nr.",
+      "date": "Datums:",
+      "recipient": "Saņēmējs",
+      "electronicSignature": "Šis dokuments ir sagatavots elektroniski un ir derīgs bez paraksta."
+    },
+    "lineItems": {
+      "description": "Apraksts",
+      "gross": "Bruto",
+      "net": "Neto",
+      "vatRate": "PVN likme",
+      "vat": "PVN"
+    },
+    "invoice": {
+      "title": "Platformas pakalpojumu rēķins",
+      "notAvailable": "Rēķins nav pieejams",
+      "notAvailableDescription": "Šis rēķins vēl nav pieejams vai arī Jums nav piekļuves tiesību.",
+      "order": "Pasūtījums:",
+      "country": "Valsts:",
+      "commissionLineItem": "Platformas komisija (10% no {amount})",
+      "shippingManagement": "Piegādes administrēšana",
+      "totalNet": "Kopā neto",
+      "vatLine": "PVN ({rate}%)",
+      "invoiceTotal": "Rēķina kopsumma",
+      "paymentSummary": "Maksājuma kopsavilkums",
+      "totalCollected": "Kopā saņemts no pircēja",
+      "platformServices": "Platformas pakalpojumi (šis rēķins)",
+      "creditedToWallet": "Ieskaitīts Jūsu makā"
+    },
+    "confirmation": {
+      "title": "Pasūtījuma apstiprinājums",
+      "notAvailable": "Pasūtījuma apstiprinājums nav pieejams",
+      "notAvailableDescription": "Šis apstiprinājums vēl nav pieejams vai arī Jums nav piekļuves tiesību.",
+      "seller": "Pārdevējs:",
+      "itemColumn": "Prece",
+      "conditionColumn": "Stāvoklis",
+      "priceColumn": "Cena",
+      "itemsRow": "Preces",
+      "shippingRow": "Piegāde",
+      "totalPaid": "Kopā samaksāts",
+      "paymentDetails": "Maksājuma informācija",
+      "cardPayment": "Kartes / bankas maksājums",
+      "walletApplied": "Izmantotais maka atlikums",
+      "dateLabel": "Datums",
+      "delivery": "Piegāde",
+      "parcelLocker": "Pakomāts:",
+      "pickup": "Saņemšana",
+      "city": "Pilsēta:",
+      "notes": "Piezīmes:"
+    },
+    "creditNote": {
+      "title": "Kredītnota",
+      "notAvailable": "Kredītnota nav pieejama",
+      "notAvailableDescription": "Šī kredītnota vēl nav pieejama vai arī Jums nav piekļuves tiesību.",
+      "order": "Pasūtījums:",
+      "originalInvoice": "Sākotnējais rēķins:",
+      "reason": "Iemesls:",
+      "reversalCommission": "Atcelšana: platformas komisija (10% no {amount})",
+      "reversalShipping": "Atcelšana: piegādes administrēšana",
+      "totalNet": "Kopā neto",
+      "vatLine": "PVN ({rate}%)",
+      "creditNoteTotal": "Kredītnotas kopsumma",
+      "refundSummary": "Atmaksas kopsavilkums",
+      "sellerWalletClawback": "Pārdevēja maka atgūšana",
+      "platformCommissionReversed": "Atceltā platformas komisija",
+      "buyerRefund": "Pircēja atmaksa"
+    },
+    "payoutStatement": {
+      "title": "Izmaksas pārskats",
+      "notAvailable": "Izmaksas pārskats nav pieejams",
+      "notAvailableDescription": "Šis pārskats vēl nav pieejams vai arī Jums nav piekļuves tiesību.",
+      "ibanLabel": "IBAN:",
+      "accountHolder": "Konta īpašnieks:",
+      "orderColumn": "Pasūtījums",
+      "dateColumn": "Datums",
+      "invoiceColumn": "Rēķins",
+      "itemsColumn": "Preces",
+      "commissionColumn": "Komisija",
+      "netCreditColumn": "Neto kredīts",
+      "netPayout": "Neto izmaksa",
+      "transferDetails": "Pārskaitījuma informācija",
+      "ibanRow": "IBAN",
+      "bankReference": "Bankas atsauce",
+      "completed": "Pabeigts"
     }
   }
 }

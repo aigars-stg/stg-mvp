@@ -30,7 +30,7 @@ export function CheckoutSection({
 }: CheckoutSectionProps) {
   return (
     <div
-      className={`bg-snow-white rounded-xl overflow-hidden transition-colors border ${
+      className={`bg-snow-white rounded-xl transition-colors border ${
         isComplete
           ? 'border-aurora-green/20'
           : 'border-border'
@@ -96,7 +96,7 @@ export function CheckoutSection({
           isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
         }`}
       >
-        <div className="overflow-hidden min-h-0">
+        <div className={`min-h-0 ${isExpanded ? 'overflow-visible' : 'overflow-hidden'}`}>
           <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-border-subtle pt-4">
             {children}
           </div>

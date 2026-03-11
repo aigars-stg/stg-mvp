@@ -8,6 +8,7 @@ import { Home, Grid, Plus, ShoppingBasket as ShoppingCart, User, LogIn } from '@
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUnreadMessages } from '@/lib/contexts/UnreadMessagesContext';
 import { useUnreadNotifications } from '@/lib/contexts/UnreadNotificationsContext';
+import { useActiveOrders } from '@/lib/contexts/ActiveOrdersContext';
 import { useCart } from '@/lib/contexts/CartContext';
 import { useTranslations } from 'next-intl';
 import { getInitials } from '@/lib/auth/utils';
@@ -26,6 +27,7 @@ export function BottomNav() {
   const { user, profile } = useAuth();
   const { unreadCount } = useUnreadMessages();
   const { unreadCount: unreadNotifications } = useUnreadNotifications();
+  const { activeCount: activeOrders } = useActiveOrders();
   const { itemCount: cartCount } = useCart();
   const [sellSheetOpen, setSellSheetOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
@@ -80,7 +82,7 @@ export function BottomNav() {
           icon: User,
           path: null as null, // Opens bottom sheet instead
           active: isActive('/account') || isActive('/my-listings'),
-          hasNotification: unreadCount > 0 || unreadNotifications > 0,
+          hasNotification: unreadCount > 0 || unreadNotifications > 0 || activeOrders > 0,
         }
       : {
           label: t('signIn'),

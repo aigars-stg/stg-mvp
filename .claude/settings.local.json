@@ -78,7 +78,9 @@
       "mcp__playwright__browser_run_code",
       "mcp__playwright__browser_close",
       "Bash(pnpm --filter @second-turn/marketplace type-check)",
-      "mcp__filesystem__search_files"
+      "mcp__filesystem__search_files",
+      "WebSearch",
+      "mcp__claude_ai_Supabase__execute_sql"
     ],
     "deny": [
       "Bash(git push --force:*)",

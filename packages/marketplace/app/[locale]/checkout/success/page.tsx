@@ -34,7 +34,7 @@ function SuccessPageContent() {
       const o = data?.order;
 
       if (response.ok && o) {
-        router.replace(`/orders/${o.order_number}?welcome=true`);
+        router.replace(`/orders/${o.id}?welcome=true`);
         return true;
       }
 
@@ -54,7 +54,7 @@ function SuccessPageContent() {
       const data = await response.json();
 
       if (response.ok && data.order) {
-        router.replace(`/orders/${data.order.order_number}?welcome=true`);
+        router.replace(`/orders/${data.order.id}?welcome=true`);
         return true;
       }
 

@@ -2,6 +2,15 @@ import { STG_COMPANY } from '@/lib/constants/company';
 import { formatDate } from '@/lib/date-utils';
 import { PrintButton } from '@/components/legal/PrintButton';
 
+interface DocumentLayoutLabels {
+  reg?: string;
+  vat?: string;
+  no?: string;
+  date?: string;
+  recipient?: string;
+  electronicSignature?: string;
+}
+
 interface DocumentLayoutProps {
   /** Document title, e.g. "Platform Services Invoice" */
   title: string;
@@ -12,6 +21,7 @@ interface DocumentLayoutProps {
   /** Recipient block — name, address, VAT number etc. */
   recipient: React.ReactNode;
   children: React.ReactNode;
+  labels?: DocumentLayoutLabels;
 }
 
 export function DocumentLayout({
@@ -20,8 +30,17 @@ export function DocumentLayout({
   date,
   recipient,
   children,
+  labels,
 }: DocumentLayoutProps) {
   const formattedDate = formatDate(date);
+  const l = {
+    reg: labels?.reg ?? 'Reg.',
+    vat: labels?.vat ?? 'VAT',
+    no: labels?.no ?? 'No.',
+    date: labels?.date ?? 'Date:',
+    recipient: labels?.recipient ?? 'Recipient',
+    electronicSignature: labels?.electronicSignature ?? 'This document was generated electronically and is valid without a signature.',
+  };
 
   return (
     <>
@@ -42,7 +61,7 @@ export function DocumentLayout({
               <div>
                 <p className="text-lg font-bold text-polar-night">{STG_COMPANY.legalName}</p>
                 <p className="text-sm text-text-secondary">{STG_COMPANY.address}</p>
-                <p className="text-sm text-text-secondary">Reg. {STG_COMPANY.registrationNumber} / VAT {STG_COMPANY.vatNumber}</p>
+                <p className="text-sm text-text-secondary">{l.reg} {STG_COMPANY.registrationNumber} / {l.vat} {STG_COMPANY.vatNumber}</p>
               </div>
               <PrintButton />
             </div>
@@ -51,14 +70,14 @@ export function DocumentLayout({
             <div className="mt-8 border-b border-border-subtle pb-4">
               <h1 className="text-2xl font-bold text-polar-night">{title}</h1>
               <div className="mt-1 flex flex-wrap gap-x-6 text-sm text-text-secondary">
-                <span>No. {documentNumber}</span>
-                <span>Date: {formattedDate}</span>
+                <span>{l.no} {documentNumber}</span>
+                <span>{l.date} {formattedDate}</span>
               </div>
             </div>
 
             {/* Recipient */}
             <div className="mt-6">
-              <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Recipient</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">{l.recipient}</p>
               <div className="mt-1 text-sm text-polar-night">{recipient}</div>
             </div>
 
@@ -67,7 +86,7 @@ export function DocumentLayout({
 
             {/* Footer */}
             <div className="mt-12 border-t border-border-subtle pt-4 text-xs text-text-secondary">
-              <p>This document was generated electronically and is valid without a signature.</p>
+              <p>{l.electronicSignature}</p>
               <p className="mt-1">{STG_COMPANY.legalName} / {STG_COMPANY.vatNumber} / {STG_COMPANY.bankName} / {STG_COMPANY.iban}</p>
             </div>
           </div>

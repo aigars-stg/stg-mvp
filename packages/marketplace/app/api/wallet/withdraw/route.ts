@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { sendEmail } from '@/lib/email/resend';
+import { formatCentsToCurrency } from '@/lib/services/pricing';
 import { getWalletBalance } from '@/lib/services/wallet';
 import { createWithdrawalRequest, getUserWithdrawals } from '@/lib/services/withdrawal';
 import { withdrawalRequestSchema } from '@/lib/validation/seller';
@@ -75,6 +77,23 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Notify staff of new withdrawal request (fire-and-forget)
+    sendEmail({
+      to: 'info@secondturn.games',
+      subject: `Withdrawal request — ${formatCentsToCurrency(amountCents)}`,
+      html: `
+        <p>A new withdrawal request has been submitted.</p>
+        <ul>
+          <li><strong>Seller:</strong> ${user.email}</li>
+          <li><strong>Amount:</strong> ${formatCentsToCurrency(amountCents)}</li>
+          <li><strong>Account holder:</strong> ${accountHolderName}</li>
+          <li><strong>IBAN:</strong> ${iban}</li>
+          <li><strong>Request ID:</strong> ${result.withdrawalId}</li>
+        </ul>
+        <p>Process via the staff dashboard.</p>
+      `,
+    }).catch((err) => console.error('[Withdrawal email] Failed:', err));
 
     // Save IBAN to seller profile for future use
     await supabase

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Time as Clock, CheckCircleAlt01 as CheckCircle2 } from '@/lib/icons';
 import { statusSteps, getStepStatus } from './ShippingStatusConfig';
 
@@ -21,6 +22,7 @@ export function StatusTimeline({
   variant = 'vertical',
   className = '',
 }: StatusTimelineProps) {
+  const t = useTranslations('Orders.detail');
 
   if (variant === 'horizontal') {
     return (
@@ -56,7 +58,7 @@ export function StatusTimeline({
                       isActive ? 'text-frost-ice' : 'text-text-muted'
                     }`}
                   >
-                    {step.label}
+                    {t(`steps.${step.key}`)}
                   </span>
                 </div>
                 {index < statusSteps.length - 1 && (
@@ -129,7 +131,7 @@ export function StatusTimeline({
                       : 'text-text-muted'
                   }`}
                 >
-                  {step.label}
+                  {t(`steps.${step.key}`)}
                 </p>
                 {isCurrent &&
                   currentStatus === 'pending_seller' &&

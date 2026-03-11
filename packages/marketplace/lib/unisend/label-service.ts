@@ -4,6 +4,7 @@
  */
 
 import { getUnisendClient } from './client';
+import { PHONE_FORMATS } from './types';
 import type { CreateParcelRequest } from './types';
 import { isValidPhoneNumber } from '@/lib/phone-utils';
 import { createClient } from '@supabase/supabase-js';
@@ -63,10 +64,13 @@ export async function generateShippingLabel(
     validationErrors.push('Seller phone number format is invalid. Please enter a valid international phone number.');
   }
 
+  const receiverFmt = PHONE_FORMATS[params.receiverCountry];
   if (!params.receiverPhone || params.receiverPhone.trim() === '') {
-    validationErrors.push('Buyer phone number is missing. The buyer needs to add their phone number to their profile.');
+    validationErrors.push(`Buyer phone number is missing. Expected format: ${receiverFmt?.placeholder ?? 'international mobile'}.`);
+  } else if (receiverFmt && !receiverFmt.regex.test(params.receiverPhone)) {
+    validationErrors.push(`Buyer phone must be a valid ${params.receiverCountry} mobile (e.g. ${receiverFmt.example}). Got: ${params.receiverPhone}`);
   } else if (!isValidPhoneNumber(params.receiverPhone)) {
-    validationErrors.push('Buyer phone number format is invalid. Please enter a valid international phone number.');
+    validationErrors.push('Buyer phone number format is invalid.');
   }
 
   if (!params.destinationTerminalId || params.destinationTerminalId.trim() === '') {

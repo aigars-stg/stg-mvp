@@ -18,20 +18,12 @@ const CartIcon = dynamic(() => import('./CartIcon').then(mod => ({ default: mod.
   loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
 });
 
-const SavedGamesIcon = dynamic(() => import('./SavedGamesIcon').then(mod => ({ default: mod.SavedGamesIcon })), {
-  ssr: false,
-  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
-});
-
-const MessagesIcon = dynamic(() => import('./MessagesIcon').then(mod => ({ default: mod.MessagesIcon })), {
-  ssr: false,
-  loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
-});
 
 const NotificationsIcon = dynamic(() => import('./NotificationsIcon').then(mod => ({ default: mod.NotificationsIcon })), {
   ssr: false,
   loading: () => <div className="w-10 h-10 rounded-lg bg-bg-secondary animate-pulse" />,
 });
+
 
 const NavbarSearch = dynamic(() => import('./NavbarSearch').then(mod => ({ default: mod.NavbarSearch })), {
   ssr: false,
@@ -83,7 +75,6 @@ export function Navbar() {
         {/* Mobile Icons - visible below lg */}
         <div className="flex items-center gap-2 lg:hidden">
           <MobileSearchButton />
-          {user && <SavedGamesIcon />}
         </div>
 
         {/* Desktop Navigation - visible on lg and up */}
@@ -102,9 +93,7 @@ export function Navbar() {
           {user && (
             <div className="flex items-center ml-2 border-l border-border-subtle pl-2 border-r pr-2 mr-2 gap-1">
               <CartIcon />
-              <SavedGamesIcon />
               <NotificationsIcon />
-              <MessagesIcon />
             </div>
           )}
 

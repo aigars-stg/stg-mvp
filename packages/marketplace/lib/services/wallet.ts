@@ -68,16 +68,20 @@ export async function getWalletBalance(
 export async function getWalletTransactions(
   supabase: SupabaseClient,
   userId: string,
-  options: { limit?: number; offset?: number } = {}
+  options: { limit?: number; offset?: number; dateFrom?: string; dateTo?: string } = {}
 ): Promise<{ transactions: WalletTransaction[]; total: number }> {
-  const { limit = 20, offset = 0 } = options;
+  const { limit = 20, offset = 0, dateFrom, dateTo } = options;
 
-  const { data, error, count } = await supabase
+  let query = supabase
     .from('wallet_transactions')
     .select('*', { count: 'exact' })
     .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+    .order('created_at', { ascending: false });
+
+  if (dateFrom) query = query.gte('created_at', dateFrom);
+  if (dateTo) query = query.lte('created_at', dateTo);
+
+  const { data, error, count } = await query.range(offset, offset + limit - 1);
 
   if (error) {
     throw new Error(`Failed to fetch wallet transactions: ${error.message}`);

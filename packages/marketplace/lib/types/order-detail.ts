@@ -82,6 +82,16 @@ export interface OrderDetailOrder {
   credit_note_number?: string | null;
 }
 
+export interface IncludedExpansion {
+  bgg_id: number;
+  name: string;
+  language?: string | null;
+  publisher?: string | null;
+  year?: number | null;
+  thumbnail?: string | null;
+  image?: string | null;
+}
+
 export interface OrderDetailItem {
   id: string;
   listing_id?: string;
@@ -91,6 +101,18 @@ export interface OrderDetailItem {
   condition: string;
   photo_url: string | null;
   game_thumbnail?: string | null;
+  game_image?: string | null;
+  // Rich fields from listings JOIN (optional — present when listing still exists)
+  photo_urls?: string[] | null;
+  condition_notes?: string | null;
+  all_components_present?: boolean | null;
+  missing_components?: string | null;
+  language?: string | null;
+  version_name?: string | null;
+  edition_year?: number | null;
+  publisher?: string | null;
+  shipping_notes?: string | null;
+  included_expansions?: IncludedExpansion[] | null;
 }
 
 export interface OrderDetailUser {
