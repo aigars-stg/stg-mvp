@@ -130,6 +130,7 @@ function StaffOrdersContent() {
       fetchOrders();
       fetchRefundAlerts();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is the stable dep
   }, [user?.id, fetchOrders, fetchRefundAlerts]);
 
   const handleSearch = (e: React.FormEvent) => {

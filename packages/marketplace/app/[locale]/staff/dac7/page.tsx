@@ -161,6 +161,7 @@ function StaffDac7Content() {
     if (user) {
       fetchSellers();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is the stable dep
   }, [user?.id, fetchSellers]);
 
   const handleSearch = (e: React.FormEvent) => {

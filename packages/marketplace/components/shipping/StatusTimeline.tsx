@@ -16,7 +16,7 @@ interface StatusTimelineProps {
 
 export function StatusTimeline({
   currentStatus,
-  timeRemainingMs,
+  timeRemainingMs: _timeRemainingMs,
   timeRemainingLabel,
   title = 'Order Progress',
   variant = 'vertical',

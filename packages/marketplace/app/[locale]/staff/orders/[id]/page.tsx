@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { Link, useRouter } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import { Button, Badge } from '@second-turn/design-system';
 import {
@@ -68,7 +68,6 @@ interface StaffOrderData {
 
 export default function StaffOrderDetailPage() {
   const locale = useLocale();
-  const router = useRouter();
   const params = useParams();
   const orderId = params.id as string;
   const { user } = useAuth();
@@ -134,6 +133,7 @@ export default function StaffOrderDetailPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is the stable dep, full user object causes re-renders
   useEffect(() => { if (user && orderId) fetchOrder(); }, [user?.id, orderId, fetchOrder]);
 
   useEffect(() => {

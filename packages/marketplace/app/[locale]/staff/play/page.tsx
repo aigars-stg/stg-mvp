@@ -63,6 +63,7 @@ export default function StaffPlayPage() {
     if (user) {
       fetchAnalytics();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is the stable dep
   }, [user?.id, fetchAnalytics]);
 
   if (loading && !data) {

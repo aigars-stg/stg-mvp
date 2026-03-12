@@ -10,8 +10,6 @@ import {
 } from '@/lib/icons';
 interface SellerAcceptDeclineProps {
   timeRemaining: string | null;
-  showAcceptModal: boolean;
-  setShowAcceptModal: (show: boolean) => void;
   showDeclineModal: boolean;
   setShowDeclineModal: (show: boolean) => void;
   declineReason: string;
@@ -25,7 +23,7 @@ interface SellerAcceptDeclineProps {
 
 export function SellerAcceptDecline({
   timeRemaining,
-  showAcceptModal,
+  showAcceptModal: _showAcceptModal,
   setShowAcceptModal,
   showDeclineModal,
   setShowDeclineModal,

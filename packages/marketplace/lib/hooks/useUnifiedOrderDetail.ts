@@ -328,7 +328,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     } finally {
       setConfirmingReceipt(false);
     }
-  }, [user, data, orderId, fetchData, tActions, refreshActiveOrders]);
+  }, [user, data, fetchData, tActions, refreshActiveOrders]);
 
   // --- Buyer: Report issue ---
   const handleReportIssue = useCallback(async () => {
@@ -365,7 +365,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     } finally {
       setReportingIssue(false);
     }
-  }, [user, data, orderId, issueType, issueDescription, fetchData, tActions, refreshActiveOrders]);
+  }, [user, data, issueType, issueDescription, fetchData, tActions, refreshActiveOrders]);
 
   // --- Seller: Accept order ---
   const handleAcceptOrder = useCallback(async () => {
@@ -391,7 +391,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     } finally {
       setActionLoading(false);
     }
-  }, [orderId, fetchData, refreshActiveOrders]);
+  }, [data?.order.id, orderId, fetchData, refreshActiveOrders]);
 
   // --- Seller: Decline order ---
   const handleDeclineOrder = useCallback(async () => {
@@ -419,7 +419,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       setActionError(err instanceof Error ? err.message : 'Failed to decline order');
       setActionLoading(false);
     }
-  }, [orderId, declineReason, router, refreshActiveOrders]);
+  }, [data?.order.id, orderId, declineReason, router, refreshActiveOrders]);
 
   // --- Seller: Retry label generation ---
   const handleRetryLabel = useCallback(async () => {
@@ -444,7 +444,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     } finally {
       setRetryingLabel(false);
     }
-  }, [orderId, fetchData]);
+  }, [data?.order.id, orderId, fetchData]);
 
   // --- Helpers ---
   const getTimeRemainingMs = useCallback(() => {

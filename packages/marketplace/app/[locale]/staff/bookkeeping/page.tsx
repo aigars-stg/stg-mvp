@@ -172,6 +172,7 @@ function StaffBookkeepingContent() {
     if (user) {
       fetchData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is the stable dep
   }, [user?.id, fetchData]);
 
   const handleSearch = (e: React.FormEvent) => {

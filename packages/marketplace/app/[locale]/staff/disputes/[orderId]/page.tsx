@@ -129,6 +129,7 @@ export default function StaffDisputeDetailPage() {
 
   useEffect(() => {
     if (user && orderId) fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is the stable dep
   }, [user?.id, orderId, fetchData]);
 
   if (loading) {
