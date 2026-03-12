@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Search, Close } from '@/lib/icons';
 import { NavbarSearch } from './NavbarSearch';
+import { useTranslations } from 'next-intl';
 
 export function MobileSearchButton() {
+  const t = useTranslations('NavbarSearch');
   const [isOpen, setIsOpen] = useState(false);
 
   // Close on escape key
@@ -30,7 +32,7 @@ export function MobileSearchButton() {
       <button
         onClick={() => setIsOpen(true)}
         className="p-2 text-text-secondary hover:text-text hover:bg-bg-secondary rounded-lg transition-colors"
-        aria-label="Search games"
+        aria-label={t('searchLabel')}
       >
         <Search className="w-5 h-5" />
       </button>
@@ -52,16 +54,16 @@ export function MobileSearchButton() {
                 <button
                   onClick={() => setIsOpen(false)}
                   className="p-2 -ml-2 text-text-muted hover:text-text hover:bg-bg-secondary rounded-lg transition-colors"
-                  aria-label="Close search"
+                  aria-label={t('closeSearch')}
                 >
                   <Close className="w-5 h-5" />
                 </button>
-                <span className="text-sm font-medium text-text-secondary">Search games</span>
+                <span className="text-sm font-medium text-text-secondary">{t('searchLabel')}</span>
               </div>
 
               {/* Search Input */}
               <NavbarSearch
-                placeholder="Search for board games..."
+                placeholder={t('searchPlaceholder')}
                 isMobile
                 onNavigate={() => setIsOpen(false)}
               />

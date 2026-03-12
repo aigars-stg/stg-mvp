@@ -57,6 +57,9 @@
     }
   },
   "NavbarSearch": {
+    "searchPlaceholder": "Search for board games...",
+    "searchLabel": "Search games",
+    "closeSearch": "Close search",
     "expansion": "Expansion",
     "listing": "listing",
     "listings": "listings",

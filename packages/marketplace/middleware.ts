@@ -131,7 +131,7 @@ export async function middleware(request: NextRequest) {
 
   // Protected routes that require authentication
   // Note: Must handle both /route and /[locale]/route patterns
-  const protectedRoutes = ['/sell', '/account', '/my-listings', '/seller', '/messages', '/notifications', '/checkout', '/orders', '/wanted/new'];
+  const protectedRoutes = ['/sell', '/account', '/my-listings', '/seller', '/staff', '/messages', '/notifications', '/checkout', '/orders', '/wanted/new'];
   const publicRoutes = ['/seller/terms', '/auth/confirm'];
   const authRoutes = ['/auth/signin', '/auth/signup', '/auth'];
 

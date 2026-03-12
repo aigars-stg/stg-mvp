@@ -28,10 +28,17 @@ export async function GET(
 
     const supabase = await createServerSupabase();
 
-    // Get current user (optional - for access control)
+    // Require authentication
     const {
       data: { user },
     } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
 
     const selectFields = `
       id,
@@ -87,8 +94,8 @@ export async function GET(
       );
     }
 
-    // Access control: if user is logged in, verify they are buyer or seller
-    if (user && order.buyer_id !== user.id && order.seller_id !== user.id) {
+    // Access control: verify user is buyer or seller
+    if (order.buyer_id !== user.id && order.seller_id !== user.id) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }

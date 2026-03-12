@@ -78,7 +78,8 @@ Never use 12-hour time format (AM/PM).
 - `packages/marketplace/app/` - Next.js App Router pages
 
 ## Supported Languages
-English (default), Latvian (lv), Lithuanian (lt), Estonian (et)
+English (default), Latvian (lv)
+<!-- Future: Lithuanian (lt), Estonian (et) — routing and translation files not yet implemented -->
 
 ## Shared Components
 

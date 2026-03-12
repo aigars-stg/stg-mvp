@@ -57,6 +57,9 @@
     }
   },
   "NavbarSearch": {
+    "searchPlaceholder": "Meklēt galda spēles...",
+    "searchLabel": "Meklēt spēles",
+    "closeSearch": "Aizvērt meklēšanu",
     "expansion": "Papildinājums",
     "listing": "piedāvājums",
     "listings": "piedāvājumi",
@@ -1231,7 +1234,11 @@
       "clearAll": "Notīrīt visu",
       "clearFilters": "Notīrīt filtrus",
       "allListings": "Visi sludinājumi",
-      "all": "Visi"
+      "instantBuy": "Tūlītējs pirkums",
+      "contactSeller": "Sazināties ar pārdevēju",
+      "all": "Visi",
+      "buy": "Pirkt tagad",
+      "contact": "Sazināties"
     },
     "cart": {
       "addedToCart": "Pievienots grozam",
@@ -1495,6 +1502,8 @@
       "photoCount_other": "{count} fotogrāfijas",
       "allComponents": "Visas sastāvdaļas klāt",
       "missingComponents": "Dažas sastāvdaļas trūkst",
+      "instantBuy": "Tūlītējs pirkums",
+      "contactSeller": "Sazināties ar pārdevēju",
       "auction": "Izsole",
       "fixedPrice": "Fiksēta cena",
       "emptyPhotos": "Pievienojiet fotoattēlus priekšskatījumam",
@@ -2522,10 +2531,6 @@
       "noSales": "Tev vēl nav nevienas pārdošanas.",
       "noSalesHint": "Kad pārdosi spēli, tavi ieņēmumi parādīsies šeit.",
       "viewListings": "Skatīt tavus sludinājumus",
-      "heldUntilDelivery": "Aizturēts līdz piegādei",
-      "ordersInTransitSingular": "1 pasūtījums ceļā",
-      "ordersInTransitPlural": "{count} pasūtījumi ceļā",
-      "availableForPayout": "Pieejams izmaksai",
       "available": "Pieejams",
       "pending": "Gaida",
       "total": "Kopā",
@@ -2537,6 +2542,18 @@
       "statsSingular": "{count} pārdošana · {amount} pēdējās 30 dienās",
       "statsPlural": "{count} pārdošanas · {amount} pēdējās 30 dienās",
       "viewWallet": "Skatīt maku un darījumus"
+    },
+    "WithdrawalHistory": {
+      "title": "Pēdējās izmaksas",
+      "viewAll": "Skatīt visas",
+      "noWithdrawals": "Vēl nav izmaksu",
+      "noWithdrawalsHint": "Pieprasi izmaksu, lai redzētu vēsturi",
+      "status": {
+        "pending": "Gaida",
+        "processing": "Apstrādē",
+        "completed": "Pabeigts",
+        "rejected": "Noraidīts"
+      }
     },
     "TransactionList": {
       "title": "Pēdējās pārdošanas",
