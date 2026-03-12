@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { DISPUTE_WINDOW_DAYS } from '@/lib/pricing/constants';
 import { createServiceClient } from '@/lib/supabase/client';
+import { z } from 'zod';
 
 const adminSupabase = createServiceClient();
 
@@ -10,10 +11,10 @@ interface Params {
   params: Promise<{ id: string }>;
 }
 
-interface DisputeBody {
-  reason: string;
-  description: string;
-}
+const disputeBodySchema = z.object({
+  reason: z.string().min(1, 'Dispute reason is required').max(200),
+  description: z.string().min(10, 'Please provide a detailed description (at least 10 characters)').max(2000),
+});
 
 /**
  * POST /api/orders/[id]/dispute
@@ -34,22 +35,11 @@ export async function POST(request: NextRequest, { params }: Params) {
     if (response) return response;
 
     const { id: orderId } = await params;
-    const body: DisputeBody = await request.json();
-    const { reason, description } = body;
-
-    if (!reason || reason.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Dispute reason is required' },
-        { status: 400 }
-      );
+    const parsed = disputeBodySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
     }
-
-    if (!description || description.trim().length < 10) {
-      return NextResponse.json(
-        { error: 'Please provide a detailed description (at least 10 characters)' },
-        { status: 400 }
-      );
-    }
+    const { reason, description } = parsed.data;
 
     // Get order details
     const { data: order, error: orderError } = await adminSupabase

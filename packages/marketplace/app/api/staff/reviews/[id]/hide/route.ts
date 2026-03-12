@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/api/auth-middleware';
+import { requireStaffAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { createServiceClient } from '@/lib/supabase/client';
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -15,24 +14,8 @@ interface Params {
  */
 export async function POST(request: NextRequest, { params }: Params) {
   try {
-    const { response, user } = await requireAuth();
+    const { response, serviceClient } = await requireStaffAuth();
     if (response) return response;
-
-    const serviceClient = createServiceClient();
-
-    // Check staff access
-    const { data: userProfile } = await serviceClient
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (!userProfile || !userProfile.is_staff) {
-      return NextResponse.json(
-        { error: 'Staff access required' },
-        { status: 403 }
-      );
-    }
 
     const { id: reviewId } = await params;
 

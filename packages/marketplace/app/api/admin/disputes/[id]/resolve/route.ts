@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/api/auth-middleware';
+import { requireStaffAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { processRefund, processPartialRefund, processPostCompletionRefund, processPostCompletionPartialRefund, createRefundAdapter } from '@/lib/services/refund';
 import { sendDisputeResolved, sendRefundCompleted } from '@/lib/email/send-order-emails';
 import { creditSellerWallet } from '@/lib/services/wallet';
 import { formatCentsToCurrency } from '@/lib/services/pricing';
-import { createServiceClient } from '@/lib/supabase/client';
-
-const adminSupabase = createServiceClient();
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -36,22 +33,8 @@ interface ResolveBody {
  */
 export async function POST(request: NextRequest, { params }: Params) {
   try {
-    const { response, user } = await requireAuth();
+    const { response, user, serviceClient } = await requireStaffAuth();
     if (response) return response;
-
-    // Check staff role
-    const { data: userProfile } = await adminSupabase
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (!userProfile?.is_staff) {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
 
     const { id: orderId } = await params;
     const body: ResolveBody = await request.json();
@@ -80,7 +63,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
 
     // Get order
-    const { data: order, error: orderError } = await adminSupabase
+    const { data: order, error: orderError } = await serviceClient
       .from('orders')
       .select('id, order_number, status, dispute_status, buyer_id, seller_id, total_amount, buyer_wallet_debit_cents, everypay_payment_reference, payment_method, wallet_credited_at')
       .eq('id', orderId)
@@ -112,7 +95,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         : 'refunded';
 
     const now = new Date().toISOString();
-    const { error: updateError } = await adminSupabase
+    const { error: updateError } = await serviceClient
       .from('orders')
       .update({
         dispute_status: 'resolved',
@@ -134,7 +117,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
 
     // Close corresponding order_issues
-    await adminSupabase
+    await serviceClient
       .from('order_issues')
       .update({ status: 'resolved', resolved_at: now })
       .eq('order_id', orderId)
@@ -151,7 +134,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       if (order.wallet_credited_at) {
         // Post-completion: claw back seller wallet, refund buyer, generate credit note
         postCompletionResult = await processPostCompletionRefund(
-          adminSupabase, orderId, resolution_notes.trim(), createRefundAdapter(),
+          serviceClient, orderId, resolution_notes.trim(), createRefundAdapter(),
         );
         if (!postCompletionResult.success) {
           console.error(`Post-completion refund failed for order ${order.order_number}:`, postCompletionResult.error);
@@ -167,7 +150,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         }
       } else {
         // Pre-completion: standard refund (no wallet clawback needed)
-        refundResult = await processRefund(adminSupabase, orderId, createRefundAdapter());
+        refundResult = await processRefund(serviceClient, orderId, createRefundAdapter());
         if (!refundResult.success) {
           console.error(`Refund failed for order ${order.order_number}:`, refundResult.error);
         }
@@ -176,7 +159,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       if (order.wallet_credited_at) {
         // Post-completion: proportional clawback from seller wallet + refund buyer
         postCompletionResult = await processPostCompletionPartialRefund(
-          adminSupabase, orderId, refund_amount_cents, resolution_notes.trim(), createRefundAdapter(),
+          serviceClient, orderId, refund_amount_cents, resolution_notes.trim(), createRefundAdapter(),
         );
         if (!postCompletionResult.success) {
           console.error(`Post-completion partial refund failed for order ${order.order_number}:`, postCompletionResult.error);
@@ -191,7 +174,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         }
       } else {
         // Pre-completion: standard partial refund (no wallet clawback needed)
-        refundResult = await processPartialRefund(adminSupabase, orderId, refund_amount_cents, createRefundAdapter());
+        refundResult = await processPartialRefund(serviceClient, orderId, refund_amount_cents, createRefundAdapter());
         if (!refundResult.success) {
           console.error(`Partial refund failed for order ${order.order_number}:`, refundResult.error);
         }
@@ -199,7 +182,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     } else if (resolution_type === 'seller_favor' || resolution_type === 'mutual_agreement') {
       if (!order.wallet_credited_at) {
         // Pre-completion dispute resolved in seller's favor: credit wallet now
-        const walletResult = await creditSellerWallet(adminSupabase, orderId);
+        const walletResult = await creditSellerWallet(serviceClient, orderId);
         if (!walletResult.success) {
           console.error(`Seller wallet credit failed for order ${order.order_number}:`, walletResult.error);
         }
@@ -208,7 +191,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
 
     // Send resolution emails to buyer and seller
-    const { data: profiles } = await adminSupabase
+    const { data: profiles } = await serviceClient
       .from('user_profiles')
       .select('id, full_name, email')
       .in('id', [order.buyer_id, order.seller_id]);

@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
-import { createServiceClient } from '@/lib/supabase/client';
+import { requireStaffAuth } from '@/lib/api/auth-middleware';
 import {
   handleApiError,
-  handleForbiddenError,
-  handleAuthError,
   handleNotFoundError,
   handleValidationError,
 } from '@/lib/api/error-handler';
@@ -32,29 +29,8 @@ type RouteParams = {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return handleAuthError('Get feedback detail');
-    }
-
-    // Verify staff status using service client (bypasses RLS)
-    const serviceClient = createServiceClient();
-    const { data: profile, error: profileError } = await serviceClient
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !profile?.is_staff) {
-      return handleForbiddenError('Get feedback detail');
-    }
+    const { response, serviceClient } = await requireStaffAuth();
+    if (response) return response;
 
     // Fetch feedback
     const { data: feedback, error: feedbackError } = await serviceClient
@@ -128,29 +104,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return handleAuthError('Update feedback');
-    }
-
-    // Verify staff status using service client (bypasses RLS)
-    const serviceClient = createServiceClient();
-    const { data: profile, error: profileError } = await serviceClient
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !profile?.is_staff) {
-      return handleForbiddenError('Update feedback');
-    }
+    const { response, user, serviceClient } = await requireStaffAuth();
+    if (response) return response;
 
     // Parse request body
     const body = (await request.json()) as UpdateFeedbackRequest;

@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get('Authorization')
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-    if (!authHeader?.includes(serviceRoleKey)) {
+    if (authHeader !== 'Bearer ' + serviceRoleKey) {
       console.error('[Outbid] Unauthorized access attempt')
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,

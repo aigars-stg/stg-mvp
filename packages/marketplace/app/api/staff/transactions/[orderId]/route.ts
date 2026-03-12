@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireStaffAuth } from '@/lib/api/auth-middleware';
 import { getOrCreateTransactionConversation } from '@/lib/transactions';
-import { createServiceClient } from '@/lib/supabase/client';
 
 interface MessageRow {
   id: string;
@@ -47,40 +46,13 @@ export async function GET(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    // Verify staff status using service client (bypasses RLS)
-    const serviceClient = createServiceClient();
-    const { data: profile, error: profileError } = await serviceClient
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !profile?.is_staff) {
-      return NextResponse.json(
-        { error: 'Staff access required' },
-        { status: 403 }
-      );
-    }
+    const { response, serviceClient } = await requireStaffAuth();
+    if (response) return response;
 
     const orderId = params.orderId;
 
     // Fetch order
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await serviceClient
       .from('orders')
       .select(`
         id,
@@ -144,7 +116,7 @@ export async function GET(
     }
 
     // Fetch conversation
-    const { data: conversation, error: convError } = await supabase
+    const { data: conversation, error: convError } = await serviceClient
       .from('conversations')
       .select(`
         id,
@@ -166,7 +138,7 @@ export async function GET(
     }
 
     // Fetch messages
-    const { data: messages, error: messagesError } = await supabase
+    const { data: messages, error: messagesError } = await serviceClient
       .from('messages')
       .select(`
         id,
@@ -196,7 +168,7 @@ export async function GET(
     )];
 
     const { data: senderProfiles } = senderIds.length > 0
-      ? await supabase
+      ? await serviceClient
           .from('user_profiles')
           .select('id, full_name, avatar_url')
           .in('id', senderIds)
@@ -213,7 +185,7 @@ export async function GET(
     }));
 
     // Fetch order items
-    const { data: orderItems } = await supabase
+    const { data: orderItems } = await serviceClient
       .from('order_items')
       .select(`
         id,
@@ -228,7 +200,7 @@ export async function GET(
       .eq('order_id', orderId);
 
     // Fetch tracking events
-    const { data: trackingEvents } = await supabase
+    const { data: trackingEvents } = await serviceClient
       .from('tracking_events')
       .select(`
         id,
@@ -244,7 +216,7 @@ export async function GET(
       .order('event_timestamp', { ascending: true });
 
     // Fetch order issues
-    const { data: issues } = await supabase
+    const { data: issues } = await serviceClient
       .from('order_issues')
       .select(`
         id,
@@ -263,13 +235,13 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     // Fetch buyer and seller profiles (with full info for staff)
-    const { data: buyerProfile } = await supabase
+    const { data: buyerProfile } = await serviceClient
       .from('user_profiles')
       .select('id, full_name, avatar_url, email, phone')
       .eq('id', order.buyer_id)
       .single();
 
-    const { data: sellerProfile } = await supabase
+    const { data: sellerProfile } = await serviceClient
       .from('user_profiles')
       .select('id, full_name, avatar_url, email, phone')
       .eq('id', order.seller_id)

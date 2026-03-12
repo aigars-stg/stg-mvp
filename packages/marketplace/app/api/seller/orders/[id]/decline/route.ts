@@ -6,12 +6,13 @@ import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { calculateEverypayPortionCents, determineReleaseAction } from '@/lib/services/payment-capture';
 import { loggers } from '@/lib/logger';
+import { z } from 'zod';
 
 const log = loggers.payments;
 
-interface DeclineOrderBody {
-  reason?: string;
-}
+const declineBodySchema = z.object({
+  reason: z.string().max(500).optional(),
+});
 
 // Type for the seller_decline_order RPC result
 interface DeclineOrderResult {
@@ -37,8 +38,11 @@ export async function POST(
     if (response) return response;
 
     const orderId = params.id;
-    const body: DeclineOrderBody = await request.json();
-    const { reason } = body;
+    const parsed = declineBodySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
+    }
+    const { reason } = parsed.data;
 
     // Call database function to decline order
     const { data: rpcResult, error: declineError } = await supabase.rpc(
@@ -189,6 +193,18 @@ export async function POST(
           cancellationReason: order.seller_decline_reason || 'Seller declined',
         }).catch(() => {});
       }
+
+      // In-app notification to buyer (non-blocking)
+      try {
+        const serviceClient = (await import('@/lib/supabase/client')).createServiceClient();
+        await serviceClient.from('notifications').insert({
+          user_id: order.buyer_id,
+          type: 'order_cancelled',
+          title: `Order #${order.order_number} cancelled`,
+          body: 'The seller declined this order. Your refund is being processed.',
+          data: { order_id: orderId },
+        });
+      } catch (notifErr) { console.error(`[Order] Notification insert failed for ${orderId}:`, notifErr); }
     }
 
     return NextResponse.json({

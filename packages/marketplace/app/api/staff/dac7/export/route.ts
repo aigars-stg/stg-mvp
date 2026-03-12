@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
-import { createServiceClient } from '@/lib/supabase/client';
+import { requireStaffAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 
 export const dynamic = 'force-dynamic';
@@ -39,35 +38,8 @@ interface Dac7SellerExportData {
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    // Verify staff status using service client (bypasses RLS)
-    const serviceClient = createServiceClient();
-    const { data: profile, error: profileError } = await serviceClient
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !profile?.is_staff) {
-      return NextResponse.json(
-        { error: 'Staff access required' },
-        { status: 403 }
-      );
-    }
+    const { response, serviceClient } = await requireStaffAuth();
+    if (response) return response;
 
     // Parse query parameters
     const { searchParams } = new URL(request.url);
@@ -131,7 +103,7 @@ export async function GET(request: NextRequest) {
       'Verified',
     ];
 
-    const rows = ((sellers || []) as Dac7SellerExportData[]).map((seller) => [
+    const rows = ((sellers || []) as unknown as Dac7SellerExportData[]).map((seller) => [
       seller.user_id,
       seller.user_profiles?.email || '',
       seller.dac7_full_legal_name || seller.user_profiles?.full_name || '',

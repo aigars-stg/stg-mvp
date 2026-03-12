@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
+import { sellerIbanSchema } from '@/lib/validation/seller';
 
 /**
  * GET /api/seller/bank-account
@@ -46,30 +47,14 @@ export async function POST(request: NextRequest) {
     if (response) return response;
 
     const body = await request.json();
-    const { iban, accountHolderName } = body;
+    const parsed = sellerIbanSchema.safeParse(body);
 
-    if (!iban || typeof iban !== 'string') {
-      return NextResponse.json(
-        { error: 'IBAN is required' },
-        { status: 400 }
-      );
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]?.message || 'Invalid input';
+      return NextResponse.json({ error: firstError }, { status: 400 });
     }
 
-    if (!accountHolderName || typeof accountHolderName !== 'string') {
-      return NextResponse.json(
-        { error: 'Account holder name is required' },
-        { status: 400 }
-      );
-    }
-
-    // Basic IBAN format validation (2 letter country + 2 check digits + up to 30 alphanumeric)
-    const cleanIban = iban.replace(/\s/g, '').toUpperCase();
-    if (!/^[A-Z]{2}\d{2}[A-Z0-9]{4,30}$/.test(cleanIban)) {
-      return NextResponse.json(
-        { error: 'Invalid IBAN format' },
-        { status: 400 }
-      );
-    }
+    const { iban: cleanIban, accountHolderName } = parsed.data;
 
     // Update seller profile with IBAN
     const { error: updateError } = await supabase

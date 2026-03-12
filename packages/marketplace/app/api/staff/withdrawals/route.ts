@@ -1,34 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
-import { createServiceClient } from '@/lib/supabase/client';
+import { requireStaffAuth } from '@/lib/api/auth-middleware';
 import { completeWithdrawal } from '@/lib/services/withdrawal';
 
 export const dynamic = 'force-dynamic';
-
-/**
- * Verify staff access. Returns user or error response.
- */
-async function requireStaff() {
-  const supabase = await createServerSupabase();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return { error: NextResponse.json({ error: 'Authentication required' }, { status: 401 }) };
-  }
-
-  const serviceClient = createServiceClient();
-  const { data: profile, error: profileError } = await serviceClient
-    .from('user_profiles')
-    .select('is_staff')
-    .eq('id', user.id)
-    .single();
-
-  if (profileError || !profile?.is_staff) {
-    return { error: NextResponse.json({ error: 'Staff access required' }, { status: 403 }) };
-  }
-
-  return { user, serviceClient };
-}
 
 /**
  * GET /api/staff/withdrawals
@@ -36,9 +10,8 @@ async function requireStaff() {
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireStaff();
-    if ('error' in auth) return auth.error;
-    const { serviceClient } = auth;
+    const { response, serviceClient } = await requireStaffAuth();
+    if (response) return response;
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'pending';
@@ -136,9 +109,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireStaff();
-    if ('error' in auth) return auth.error;
-    const { user, serviceClient } = auth;
+    const { response, user, serviceClient } = await requireStaffAuth();
+    if (response) return response;
 
     const body = await request.json();
     const { withdrawalId, action, bankReference, rejectionReason } = body;

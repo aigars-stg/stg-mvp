@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/api/auth-middleware';
+import { requireStaffAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { processRefund, processPartialRefund, confirmSepaRefund, createRefundAdapter } from '@/lib/services/refund';
-import { createServiceClient } from '@/lib/supabase/client';
-
-const adminSupabase = createServiceClient();
 
 interface RefundBody {
   order_id: string;
@@ -21,22 +18,8 @@ interface RefundBody {
  */
 export async function POST(request: NextRequest) {
   try {
-    const { response, user } = await requireAuth();
+    const { response, serviceClient } = await requireStaffAuth();
     if (response) return response;
-
-    // Check staff role
-    const { data: userProfile } = await adminSupabase
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (!userProfile?.is_staff) {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
 
     const body: RefundBody = await request.json();
     const { order_id, refund_type, refund_amount_cents, sepa_reference } = body;
@@ -51,7 +34,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'SEPA reference is required' }, { status: 400 });
       }
 
-      const result = await confirmSepaRefund(adminSupabase, order_id, sepa_reference.trim());
+      const result = await confirmSepaRefund(serviceClient, order_id, sepa_reference.trim());
       if (!result.success) {
         return NextResponse.json({ error: result.error }, { status: 400 });
       }
@@ -60,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (refund_type === 'full') {
-      const result = await processRefund(adminSupabase, order_id, createRefundAdapter());
+      const result = await processRefund(serviceClient, order_id, createRefundAdapter());
       return NextResponse.json({
         success: result.success,
         walletRefundedCents: result.walletRefundedCents,
@@ -76,7 +59,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Valid refund_amount_cents is required for partial refunds' }, { status: 400 });
       }
 
-      const result = await processPartialRefund(adminSupabase, order_id, refund_amount_cents, createRefundAdapter());
+      const result = await processPartialRefund(serviceClient, order_id, refund_amount_cents, createRefundAdapter());
       return NextResponse.json({
         success: result.success,
         walletRefundedCents: result.walletRefundedCents,

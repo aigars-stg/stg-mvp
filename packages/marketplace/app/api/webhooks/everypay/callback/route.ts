@@ -96,8 +96,27 @@ export async function GET(request: NextRequest) {
     );
 
     if (SUCCESSFUL_STATES.has(paymentStatus.payment_state)) {
-      // 4. Create order based on type
+      // 4. Verify payment amount matches expected charge
       const metadata = checkoutEvent.payload as Record<string, unknown>;
+      const expectedChargeCents = metadata.everypay_charge_cents as number | undefined;
+      if (expectedChargeCents != null && paymentStatus.amount) {
+        const returnedCents = Math.round(parseFloat(paymentStatus.amount) * 100);
+        if (returnedCents !== expectedChargeCents) {
+          log.error(
+            { paymentReference, expectedChargeCents, returnedCents, amount: paymentStatus.amount },
+            'EveryPay amount mismatch — possible tampering or race condition'
+          );
+          Sentry.captureMessage('EveryPay amount mismatch', {
+            level: 'error',
+            extra: { paymentReference, expectedChargeCents, returnedCents },
+          });
+          return NextResponse.redirect(
+            `${appUrl}/checkout/success?error=amount_mismatch`
+          );
+        }
+      }
+
+      // 5. Create order based on type
       const orderRef = checkoutEvent.order_reference as string;
       const actualPaymentState = paymentStatus.payment_state;
 
@@ -184,7 +203,7 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      // 5. Mark event as processed
+      // 6. Mark event as processed
       await supabase
         .from('everypay_webhook_events')
         .update({
@@ -194,7 +213,7 @@ export async function GET(request: NextRequest) {
         })
         .eq('id', checkoutEvent.id);
 
-      // 6. Post system message and send emails (non-blocking)
+      // 7. Post system message and send emails (non-blocking)
       postOrderCreatedMessage(orderResult.orderId);
       sendOrderEmails(supabase, orderResult.orderId, {
         buyerId: metadata.buyer_id as string,

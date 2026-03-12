@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { callEdgeFunction } from '@/lib/supabase/edge-functions';
+import { z } from 'zod';
+
+const bidBodySchema = z.object({
+  amount: z.coerce.number().positive('Valid bid amount is required'),
+});
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -19,15 +24,11 @@ export async function POST(request: NextRequest, { params }: Params) {
     if (response) return response;
 
     const { id: listingId } = await params;
-    const body = await request.json();
-    const { amount } = body;
-
-    if (!amount || parseFloat(amount) <= 0) {
-      return NextResponse.json(
-        { error: 'Valid bid amount is required' },
-        { status: 400 }
-      );
+    const parsed = bidBodySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
     }
+    const { amount } = parsed.data;
 
     // Get IP and user agent for audit
     const ip = request.headers.get('x-forwarded-for') ||
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     const { data, error } = await supabase.rpc('place_bid', {
       p_listing_id: listingId,
       p_bidder_id: user.id,
-      p_amount: parseFloat(amount),
+      p_amount: amount,
       p_ip_address: ip ?? undefined,
       p_user_agent: userAgent,
     });

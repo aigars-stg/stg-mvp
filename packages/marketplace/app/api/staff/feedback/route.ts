@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
-import { createServiceClient } from '@/lib/supabase/client';
-import { handleApiError, handleForbiddenError, handleAuthError } from '@/lib/api/error-handler';
+import { requireStaffAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 import type { FeedbackStatus, FeedbackType } from '@/lib/types/feedback';
 
 export const dynamic = 'force-dynamic';
@@ -14,29 +13,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return handleAuthError('Staff feedback list');
-    }
-
-    // Verify staff status using service client (bypasses RLS)
-    const serviceClient = createServiceClient();
-    const { data: profile, error: profileError } = await serviceClient
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !profile?.is_staff) {
-      return handleForbiddenError('Staff feedback list');
-    }
+    const { response, serviceClient } = await requireStaffAuth();
+    if (response) return response;
 
     // Parse query parameters
     const { searchParams } = new URL(request.url);

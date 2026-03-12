@@ -8,6 +8,11 @@ import { createServiceClient } from '@/lib/supabase/client';
 import { loggers } from '@/lib/logger';
 import { isRefundableStatus } from '@/lib/services/refund';
 import { calculateEverypayPortionCents } from '@/lib/services/payment-capture';
+import { z } from 'zod';
+
+const refundBodySchema = z.object({
+  reason: z.string().min(1, 'Refund reason is required').max(500),
+});
 
 const log = loggers.payments;
 
@@ -19,11 +24,6 @@ const adminSupabase = createClient(
 interface Params {
   params: Promise<{ id: string }>;
 }
-
-interface RefundBody {
-  reason: string;
-}
-
 
 /**
  * POST /api/orders/[id]/refund
@@ -44,15 +44,11 @@ export async function POST(request: NextRequest, { params }: Params) {
     if (response) return response;
 
     const { id: orderId } = await params;
-    const body: RefundBody = await request.json();
-    const { reason } = body;
-
-    if (!reason || reason.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Refund reason is required' },
-        { status: 400 }
-      );
+    const parsed = refundBodySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
     }
+    const { reason } = parsed.data;
 
     // Get order details
     const { data: order, error: orderError } = await adminSupabase

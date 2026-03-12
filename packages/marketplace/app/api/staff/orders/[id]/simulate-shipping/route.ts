@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuth } from '@/lib/api/auth-middleware';
+import { requireStaffAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
 import { getTrackingUrl } from '@/lib/unisend/label-service';
-
-// Service role client for bypassing RLS
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 type SimulationAction =
   | 'label_printed'      // Seller printed label at terminal (assigns barcode)
@@ -51,29 +44,15 @@ export async function POST(
       );
     }
 
-    const { response, user, supabase: userSupabase } = await requireAuth();
+    const { response, serviceClient } = await requireStaffAuth();
     if (response) return response;
-
-    // Verify user is staff
-    const { data: profile } = await userSupabase
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile?.is_staff) {
-      return NextResponse.json(
-        { error: 'Staff access required' },
-        { status: 403 }
-      );
-    }
 
     const orderId = params.id;
     const body: SimulateShippingBody = await request.json();
     const { action, barcode: providedBarcode } = body;
 
     // Fetch current order state
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await serviceClient
       .from('orders')
       .select('id, order_number, status, shipping_method, unisend_parcel_id, barcode, tracking_url')
       .eq('id', orderId)
@@ -167,7 +146,7 @@ export async function POST(
     }
 
     // Apply the update
-    const { error: updateError } = await supabase
+    const { error: updateError } = await serviceClient
       .from('orders')
       .update(updateData)
       .eq('id', orderId);
@@ -202,27 +181,13 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { response, user, supabase: userSupabase } = await requireAuth();
+    const { response, serviceClient } = await requireStaffAuth();
     if (response) return response;
-
-    // Verify user is staff
-    const { data: profile } = await userSupabase
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile?.is_staff) {
-      return NextResponse.json(
-        { error: 'Staff access required' },
-        { status: 403 }
-      );
-    }
 
     const orderId = params.id;
 
     // Fetch order state
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await serviceClient
       .from('orders')
       .select('id, order_number, status, shipping_method, unisend_parcel_id, barcode, tracking_url, label_url')
       .eq('id', orderId)

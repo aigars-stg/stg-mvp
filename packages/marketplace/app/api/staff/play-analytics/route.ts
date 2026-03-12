@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
-import { createServiceClient } from '@/lib/supabase/client';
-import { handleApiError, handleForbiddenError, handleAuthError } from '@/lib/api/error-handler';
+import { requireStaffAuth } from '@/lib/api/auth-middleware';
+import { handleApiError } from '@/lib/api/error-handler';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,29 +15,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   try {
-    const supabase = await createServerSupabase();
-
-    // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return handleAuthError('Play analytics');
-    }
-
-    // Verify staff status using service client (bypasses RLS)
-    const serviceClient = createServiceClient();
-    const { data: profile, error: profileError } = await serviceClient
-      .from('user_profiles')
-      .select('is_staff')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !profile?.is_staff) {
-      return handleForbiddenError('Play analytics');
-    }
+    const { response, serviceClient } = await requireStaffAuth();
+    if (response) return response;
 
     // Get current date info for filtering
     const now = new Date();
