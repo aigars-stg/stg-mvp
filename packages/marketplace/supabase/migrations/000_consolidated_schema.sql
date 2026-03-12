@@ -174,12 +174,12 @@ CREATE TABLE listings (
   price DECIMAL(10,2) NOT NULL CHECK (price > 0),
   previous_price DECIMAL(10,2),              -- For price drop notifications
   -- Transaction type (2D model: method + format)
-  transaction_method TEXT NOT NULL DEFAULT 'contact_seller'
-    CHECK (transaction_method IN ('contact_seller', 'instant_buy')),
+  transaction_method TEXT NOT NULL DEFAULT 'claim'
+    CHECK (transaction_method IN ('claim')),
   pricing_format TEXT NOT NULL DEFAULT 'fixed_price'
     CHECK (pricing_format IN ('fixed_price', 'auction')),
-  listing_type TEXT NOT NULL DEFAULT 'instant_buy'
-    CHECK (listing_type IN ('instant_buy', 'contact_seller', 'auction')),
+  listing_type TEXT NOT NULL DEFAULT 'claim'
+    CHECK (listing_type IN ('claim', 'auction')),
   -- Auction fields (required when pricing_format = 'auction')
   auction_start_price DECIMAL(10,2),
   auction_current_bid DECIMAL(10,2),

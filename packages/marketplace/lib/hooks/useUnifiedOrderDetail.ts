@@ -140,8 +140,6 @@ export interface UseUnifiedOrderDetailReturn {
   setExistingReview: (review: ReviewData | null | undefined) => void;
 
   // Seller actions
-  showAcceptModal: boolean;
-  setShowAcceptModal: (show: boolean) => void;
   showDeclineModal: boolean;
   setShowDeclineModal: (show: boolean) => void;
   declineReason: string;
@@ -195,7 +193,6 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
   const [existingReview, setExistingReview] = useState<ReviewData | null | undefined>(undefined);
 
   // --- Seller action state ---
-  const [showAcceptModal, setShowAcceptModal] = useState(false);
   const [showDeclineModal, setShowDeclineModal] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
@@ -373,7 +370,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       setActionLoading(true);
       setActionError(null);
 
-      const response = await fetch(`/api/seller/orders/${data?.order.id ?? orderId}/accept`, {
+      const response = await fetch(`/api/seller/orders/${orderId}/accept`, {
         method: 'POST',
       });
 
@@ -384,7 +381,6 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       }
 
       await fetchData();
-      setShowAcceptModal(false);
       refreshActiveOrders();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to accept order');
@@ -399,7 +395,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       setActionLoading(true);
       setActionError(null);
 
-      const response = await fetch(`/api/seller/orders/${data?.order.id ?? orderId}/decline`, {
+      const response = await fetch(`/api/seller/orders/${orderId}/decline`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -427,7 +423,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
       setRetryingLabel(true);
       setRetryError(null);
 
-      const response = await fetch(`/api/seller/orders/${data?.order.id ?? orderId}/retry-label`, {
+      const response = await fetch(`/api/seller/orders/${orderId}/retry-label`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -486,8 +482,6 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     setExistingReview,
 
     // Seller actions
-    showAcceptModal,
-    setShowAcceptModal,
     showDeclineModal,
     setShowDeclineModal,
     declineReason,

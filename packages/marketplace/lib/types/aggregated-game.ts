@@ -30,7 +30,7 @@ export interface AggregatedGame {
   highest_price: number;
 
   // Split pricing by listing type
-  instant_buy_lowest_price: number | null;  // Lowest from non-auction listings (instant_buy + contact_seller)
+  instant_buy_lowest_price: number | null;  // Lowest from non-auction (claim) listings
   auction_lowest_price: number | null;      // Lowest current_bid or start_price from auctions
 
   // Counts by listing type (for icon strip tooltips)

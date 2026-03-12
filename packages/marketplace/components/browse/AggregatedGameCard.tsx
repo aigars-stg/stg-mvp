@@ -98,7 +98,7 @@ export function AggregatedGameCard({ game, allGameIds, index }: AggregatedGameCa
             {/* Vertical divider + listing type icons */}
             <span className="w-px h-3.5 bg-border-subtle" />
             {game.instant_buy_count > 0 && (
-              <span title={tListings('instantBuyTooltip', { count: game.instant_buy_count })}>
+              <span title={tListings('claimTooltip', { count: game.instant_buy_count })}>
                 <Delivery className="w-4 h-4 text-aurora-orange" />
               </span>
             )}

@@ -761,7 +761,7 @@ export function OfferCard({ listing, onAddToCart, isAddingToCart, onSaveChange, 
                   )}
                 </button>
 
-                {/* Reservation Timer / Add to Cart / Contact Seller */}
+                {/* Reservation Timer / Add to Cart */}
                 {listingStatus === 'reserved' && listing.reserved_until ? (
                   <ReservationTimer
                     expiresAt={listing.reserved_until}

@@ -653,7 +653,7 @@
       "viewImageAria": "View image {number}",
       "learnConditionAria": "Learn about {condition} condition",
       "offers": "{count, plural, one {# offer} other {# offers}}",
-      "instantBuyTooltip": "{count, plural, one {# instant buy} other {# instant buy}}",
+      "claimTooltip": "{count, plural, one {# listing} other {# listings}}",
       "auctionTooltip": "{count, plural, one {# auction} other {# auctions}}",
       "expansionTooltip": "Expansion",
       "expansionOffersTooltip": "Includes expansion offers",
@@ -1234,11 +1234,8 @@
       "clearAll": "Clear all",
       "clearFilters": "Clear Filters",
       "allListings": "All Listings",
-      "instantBuy": "Instant Buy",
-      "contactSeller": "Contact Seller",
       "all": "All",
-      "buy": "Buy now",
-      "contact": "Contact"
+      "buy": "Buy now"
     },
     "cart": {
       "addedToCart": "Added to cart",
@@ -1502,8 +1499,6 @@
       "photoCount_other": "{count} photos",
       "allComponents": "All components present",
       "missingComponents": "Some components missing",
-      "instantBuy": "Instant Buy",
-      "contactSeller": "Contact Seller",
       "auction": "Auction",
       "fixedPrice": "Fixed Price",
       "emptyPhotos": "Add photos to preview",
@@ -2499,18 +2494,12 @@
         "description": "View buyer inquiries"
       }
     },
-    "instantBuy": {
-      "title": "Enable Instant Buy",
-      "description": "Accept secure payments and get money directly to your bank account. Buyers can purchase instantly without messaging first.",
-      "button": "Set up payments"
-    },
     "quickLinks": {
       "title": "Quick Links",
       "myListings": "My Listings",
       "manageOrders": "Manage Orders",
       "createListing": "Create Listing",
-      "allTransactions": "All Transactions",
-      "learnListingTypes": "Learn about listing types"
+      "allTransactions": "All Transactions"
     },
     "bankAccountModal": {
       "addTitle": "Add Bank Account",

@@ -653,7 +653,7 @@
       "viewImageAria": "Skatīt attēlu {number}",
       "learnConditionAria": "Uzzināt par {condition} stāvokli",
       "offers": "{count, plural, one {# piedāvājums} other {# piedāvājumi}}",
-      "instantBuyTooltip": "{count, plural, one {# tūlītējs pirkums} other {# tūlītēji pirkumi}}",
+      "claimTooltip": "{count, plural, one {# piedāvājums} other {# piedāvājumi}}",
       "auctionTooltip": "{count, plural, one {# izsole} other {# izsoles}}",
       "expansionTooltip": "Papildinājums",
       "expansionOffersTooltip": "Ietver papildinājumu piedāvājumus",
@@ -1234,11 +1234,8 @@
       "clearAll": "Notīrīt visu",
       "clearFilters": "Notīrīt filtrus",
       "allListings": "Visi sludinājumi",
-      "instantBuy": "Tūlītējs pirkums",
-      "contactSeller": "Sazināties ar pārdevēju",
       "all": "Visi",
-      "buy": "Pirkt tagad",
-      "contact": "Sazināties"
+      "buy": "Pirkt tagad"
     },
     "cart": {
       "addedToCart": "Pievienots grozam",
@@ -1502,8 +1499,6 @@
       "photoCount_other": "{count} fotogrāfijas",
       "allComponents": "Visas sastāvdaļas klāt",
       "missingComponents": "Dažas sastāvdaļas trūkst",
-      "instantBuy": "Tūlītējs pirkums",
-      "contactSeller": "Sazināties ar pārdevēju",
       "auction": "Izsole",
       "fixedPrice": "Fiksēta cena",
       "emptyPhotos": "Pievienojiet fotoattēlus priekšskatījumam",
@@ -2499,18 +2494,12 @@
         "description": "Skatīt pircēju pieprasījumus"
       }
     },
-    "instantBuy": {
-      "title": "Aktivizēt tūlītējo pirkumu",
-      "description": "Pieņem drošus maksājumus un saņem naudu tieši savā bankas kontā. Pircēji var pirkt uzreiz bez ziņošanas.",
-      "button": "Iestatīt maksājumus"
-    },
     "quickLinks": {
       "title": "Ātrās saites",
       "myListings": "Mani sludinājumi",
       "manageOrders": "Pārvaldīt pasūtījumus",
       "createListing": "Izveidot sludinājumu",
-      "allTransactions": "Visi darījumi",
-      "learnListingTypes": "Par piedāvājumu veidiem"
+      "allTransactions": "Visi darījumi"
     },
     "bankAccountModal": {
       "addTitle": "Pievienot bankas kontu",

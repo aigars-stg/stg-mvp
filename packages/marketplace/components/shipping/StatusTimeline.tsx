@@ -6,8 +6,7 @@ import { statusSteps, getStepStatus } from './ShippingStatusConfig';
 
 interface StatusTimelineProps {
   currentStatus: string;
-  timeRemainingMs?: number | null;
-  /** Pre-formatted, translated "X remaining" string. Replaces inline formatting. */
+  /** Pre-formatted, translated "X remaining" string. */
   timeRemainingLabel?: string;
   title?: string;
   variant?: 'vertical' | 'horizontal';
@@ -16,7 +15,6 @@ interface StatusTimelineProps {
 
 export function StatusTimeline({
   currentStatus,
-  timeRemainingMs: _timeRemainingMs,
   timeRemainingLabel,
   title = 'Order Progress',
   variant = 'vertical',

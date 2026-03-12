@@ -23,8 +23,6 @@ interface SellerAcceptDeclineProps {
 
 export function SellerAcceptDecline({
   timeRemaining,
-  showAcceptModal: _showAcceptModal,
-  setShowAcceptModal,
   showDeclineModal,
   setShowDeclineModal,
   declineReason,
@@ -89,7 +87,6 @@ export function SellerAcceptDecline({
                 variant="secondary"
                 onClick={() => {
                   setShowDeclineModal(true);
-                  setShowAcceptModal(false);
                   setActionError(null);
                 }}
               >

@@ -79,8 +79,6 @@ export default function OrderDetailPage() {
     existingReview,
     setExistingReview,
     // Seller actions
-    showAcceptModal,
-    setShowAcceptModal,
     showDeclineModal,
     setShowDeclineModal,
     declineReason,
@@ -181,7 +179,6 @@ export default function OrderDetailPage() {
             <StatusTimeline
               currentStatus={order.status}
               variant="horizontal"
-              timeRemainingMs={timeRemainingMs}
               timeRemainingLabel={
                 timeRemainingMs && timeRemainingMs > 0
                   ? t('statusTimeline.remaining', {
@@ -334,8 +331,6 @@ export default function OrderDetailPage() {
             {isSeller && order.status === 'pending_seller' && (
               <SellerAcceptDecline
                 timeRemaining={timeRemaining}
-                showAcceptModal={showAcceptModal}
-                setShowAcceptModal={setShowAcceptModal}
                 showDeclineModal={showDeclineModal}
                 setShowDeclineModal={setShowDeclineModal}
                 declineReason={declineReason}
