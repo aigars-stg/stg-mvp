@@ -370,6 +370,46 @@ export default function StaffOrderDetailPage() {
               </div>
             )}
 
+            {/* Refund action card — cancelled orders without refund */}
+            {order.status === 'cancelled' && !order.timestamps.refunded_at && (
+              <div className="bg-aurora-orange/5 border border-aurora-orange/30 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-5 h-5 text-aurora-orange flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-polar-night">Refund not processed</p>
+                      <p className="text-sm text-text-secondary mt-0.5">
+                        This cancelled order has no refund on record. Process manually or wait for the safety net sweep.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="accent"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/admin/refund`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ orderId }),
+                        });
+                        if (res.ok) {
+                          fetchOrder();
+                        } else {
+                          const data = await res.json();
+                          alert(data.error || 'Refund failed');
+                        }
+                      } catch {
+                        alert('Refund request failed');
+                      }
+                    }}
+                  >
+                    Process Refund
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Issues (staff-only) */}
             {issues.length > 0 && (
               <div className="bg-snow-white border border-border rounded-xl p-4">

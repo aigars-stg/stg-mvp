@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale } from 'next-intl';
-import { Gavel, Trophy, Timer, Star, CreditCard, Heart } from '@/lib/icons';
+import { Gavel, Trophy, Timer, Star, CreditCard, Heart, CloseCircle as XCircle } from '@/lib/icons';
 import { formatMessageTime } from '@/lib/date-utils';
 
 export interface NotificationData {
@@ -30,6 +30,8 @@ const typeConfig: Record<string, { Icon: React.ComponentType<{ className?: strin
   second_chance: { Icon: Star, color: 'text-aurora-purple' },
   payment_reminder: { Icon: CreditCard, color: 'text-aurora-red' },
   wanted_match: { Icon: Heart, color: 'text-frost-ice' },
+  order_cancelled: { Icon: XCircle, color: 'text-aurora-red' },
+  new_order: { Icon: CreditCard, color: 'text-aurora-green' },
 };
 
 interface NotificationCardProps {

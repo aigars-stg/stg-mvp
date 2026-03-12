@@ -77,6 +77,7 @@ export interface OrderDetailOrder {
   label_error?: string;
   // Staff-specific
   payment?: OrderPayment;
+  cancellation_reason?: string | null;
   refund_reason?: string | null;
   invoice_number?: string | null;
   credit_note_number?: string | null;

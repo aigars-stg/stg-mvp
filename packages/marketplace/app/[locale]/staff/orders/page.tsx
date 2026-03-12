@@ -83,6 +83,7 @@ function StaffOrdersContent() {
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all');
   const [hasIssues, setHasIssues] = useState(searchParams.get('has_issues') === 'true');
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
+  const [refundAlertCount, setRefundAlertCount] = useState(0);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -111,11 +112,25 @@ function StaffOrdersContent() {
     }
   }, [statusFilter, searchQuery, hasIssues, currentPage]);
 
+  // Fetch count of orders needing refund attention
+  const fetchRefundAlerts = useCallback(async () => {
+    try {
+      const res = await fetch('/api/staff/refund-alerts');
+      if (res.ok) {
+        const result = await res.json();
+        setRefundAlertCount(result.count || 0);
+      }
+    } catch {
+      // Non-critical — silently ignore
+    }
+  }, []);
+
   useEffect(() => {
     if (user) {
       fetchOrders();
+      fetchRefundAlerts();
     }
-  }, [user?.id, fetchOrders]);
+  }, [user?.id, fetchOrders, fetchRefundAlerts]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,6 +159,35 @@ function StaffOrdersContent() {
 
   return (
     <>
+      {/* Refund alert banner */}
+      {refundAlertCount > 0 && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
+          <div className="bg-aurora-red/10 border border-aurora-red/30 rounded-xl p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-aurora-red flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-polar-night">
+                  {refundAlertCount} {refundAlertCount === 1 ? 'order needs' : 'orders need'} refund attention
+                </p>
+                <p className="text-sm text-text-secondary mt-0.5">
+                  Cancelled orders with missing or failed refunds require manual review.
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setStatusFilter('cancelled');
+                setCurrentPage(1);
+              }}
+            >
+              View Orders
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 border-b border-divider-subtle">
         <div className="flex flex-wrap items-center gap-4">

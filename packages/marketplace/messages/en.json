@@ -2736,7 +2736,14 @@
         "body": "This order has been cancelled and a refund has been initiated.",
         "defaultReason": "This order has been cancelled",
         "refundProcessed": "Refund Processed: €{amount}",
-        "refundedOn": "Refunded on {date}"
+        "refundedOn": "Refunded on {date}",
+        "reasons": {
+          "sellerTimeout": "The seller did not respond within 24 hours. A refund has been initiated.",
+          "sellerDeclined": "The seller declined this order. A refund has been initiated.",
+          "shippingTimeout": "The seller did not ship within the deadline. A refund has been initiated.",
+          "sellerCancelled": "The seller cancelled this order before shipping. A refund has been initiated.",
+          "default": "This order has been cancelled and a refund has been initiated."
+        }
       },
       "pending": {
         "expiredTitle": "Seller Deadline Expired",
@@ -3206,7 +3213,8 @@
       "title": "Action Required",
       "description": "Please accept or decline this order. You have 24 hours from when the order was placed to respond. If you don\u2019t respond in time, the order will be automatically cancelled and the buyer will be refunded.",
       "acceptOrder": "Accept Order",
-      "declineOrder": "Decline Order"
+      "declineOrder": "Decline Order",
+      "expiredDescription": "The response window has closed. This order will be automatically cancelled and the buyer refunded."
     },
     "acceptModal": {
       "title": "Confirm Accept Order",

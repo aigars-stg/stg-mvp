@@ -100,6 +100,17 @@ export async function POST(request: NextRequest, { params }: Params) {
         .in('id', listingIds);
     }
 
+    // In-app notification to buyer (non-blocking)
+    try {
+      await adminSupabase.from('notifications').insert({
+        user_id: order.buyer_id,
+        type: 'order_cancelled',
+        title: `Order #${order.order_number} cancelled`,
+        body: 'The seller cancelled this order before shipping. Your refund is being processed.',
+        data: { order_id: orderId },
+      });
+    } catch (notifErr) { console.error(`[Order] Notification insert failed for ${orderId}:`, notifErr); }
+
     console.log(`[Order] Seller cancelled order ${order.order_number} before shipping`);
 
     return NextResponse.json({

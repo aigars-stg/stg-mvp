@@ -39,6 +39,8 @@ export function SellerAcceptDecline({
 }: SellerAcceptDeclineProps) {
   const t = useTranslations('SellerOrderDetail');
 
+  const isExpired = timeRemaining === 'Expired';
+
   return (
     <div className="bg-aurora-yellow/10 border-2 border-aurora-yellow/30 rounded-xl p-6">
       <div className="flex items-start gap-4">
@@ -51,13 +53,15 @@ export function SellerAcceptDecline({
               {t('actionRequired.title')}
             </h3>
             {timeRemaining && (
-              <Badge variant={timeRemaining === 'Expired' ? 'error' : 'warning'}>
+              <Badge variant={isExpired ? 'error' : 'warning'}>
                 {timeRemaining}
               </Badge>
             )}
           </div>
           <p className="text-sm text-text-secondary mb-4">
-            {t('actionRequired.description')}
+            {isExpired
+              ? t('actionRequired.expiredDescription')
+              : t('actionRequired.description')}
           </p>
 
           {actionError && (
@@ -66,7 +70,7 @@ export function SellerAcceptDecline({
             </div>
           )}
 
-          {!showDeclineModal && (
+          {!showDeclineModal && !isExpired && (
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="primary"
@@ -98,7 +102,7 @@ export function SellerAcceptDecline({
           )}
 
           {/* Decline form */}
-          {showDeclineModal && (
+          {showDeclineModal && !isExpired && (
             <div className="p-4 bg-snow-white border border-border rounded-lg">
               <h4 className="font-semibold text-polar-night mb-3">
                 {t('declineModal.title')}

@@ -91,7 +91,8 @@ export async function GET(
         unisend_parcel_id,
         label_error,
         invoice_number,
-        credit_note_number
+        credit_note_number,
+        cancellation_reason
       `)
       .eq(isOrderNumber ? 'order_number' : 'id', orderParam)
       .single();
@@ -276,6 +277,7 @@ export async function GET(
           refunded_at: order.refunded_at,
           disputed_at: order.disputed_at,
         },
+        cancellation_reason: order.cancellation_reason,
         refund_amount: order.refund_amount,
         refund_status: order.refund_status,
         payment_method: order.payment_method,

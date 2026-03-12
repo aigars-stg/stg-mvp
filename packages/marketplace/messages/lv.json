@@ -2722,7 +2722,14 @@
         "body": "Šis pasūtījums ir atcelts un atmaksa ir uzsākta.",
         "defaultReason": "Šis pasūtījums ir atcelts",
         "refundProcessed": "Atmaksa veikta: €{amount}",
-        "refundedOn": "Atmaksāts {date}"
+        "refundedOn": "Atmaksāts {date}",
+        "reasons": {
+          "sellerTimeout": "Pārdevējs neatbildēja 24 stundu laikā. Atmaksa ir uzsākta.",
+          "sellerDeclined": "Pārdevējs noraidīja šo pasūtījumu. Atmaksa ir uzsākta.",
+          "shippingTimeout": "Pārdevējs nenosūtīja sūtījumu termiņā. Atmaksa ir uzsākta.",
+          "sellerCancelled": "Pārdevējs atcēla šo pasūtījumu pirms nosūtīšanas. Atmaksa ir uzsākta.",
+          "default": "Šis pasūtījums ir atcelts un atmaksa ir uzsākta."
+        }
       },
       "pending": {
         "expiredTitle": "Pārdevēja termiņš beidzies",
@@ -3192,7 +3199,8 @@
       "title": "Nepieciešama darbība",
       "description": "Lūdzu, pieņemiet vai noraidiet šo pasūtījumu. Jums ir 24 stundas no pasūtījuma veikšanas brīža, lai atbildētu. Ja neatbildēsiet laikā, pasūtījums tiks automātiski atcelts un pircējam tiks atgriezta nauda.",
       "acceptOrder": "Pieņemt pasūtījumu",
-      "declineOrder": "Noraidīt pasūtījumu"
+      "declineOrder": "Noraidīt pasūtījumu",
+      "expiredDescription": "Atbildes logs ir beidzies. Šis pasūtījums tiks automātiski atcelts un pircējam tiks atgriezta nauda."
     },
     "acceptModal": {
       "title": "Apstiprināt pasūtījuma pieņemšanu",

@@ -13,6 +13,15 @@ import { formatDate } from '@/lib/date-utils';
 import { formatCentsToCurrency } from '@/lib/services/pricing';
 import type { OrderDetailOrder, ViewerRole } from '@/lib/types/order-detail';
 
+function mapCancellationReasonToKey(reason?: string | null): string {
+  if (!reason) return 'default';
+  if (reason.includes('did not respond')) return 'sellerTimeout';
+  if (reason.includes('declined')) return 'sellerDeclined';
+  if (reason.includes('did not ship')) return 'shippingTimeout';
+  if (reason.includes('cancelled before shipping')) return 'sellerCancelled';
+  return 'default';
+}
+
 interface OrderStatusNoticeProps {
   order: OrderDetailOrder;
   viewerRole: ViewerRole;
@@ -29,6 +38,7 @@ export function OrderStatusNotice({
 
   // Cancelled notice
   if (status === 'cancelled') {
+    const reasonKey = mapCancellationReasonToKey(order.cancellation_reason);
     return (
       <div className="bg-aurora-red/10 border-2 border-aurora-red/20 rounded-xl p-4 sm:p-6">
         <div className="flex items-start gap-3">
@@ -38,7 +48,7 @@ export function OrderStatusNotice({
               {t('cancelled.title')}
             </h3>
             <p className="text-sm text-text-secondary mb-3">
-              {t('cancelled.body')}
+              {t(`cancelled.reasons.${reasonKey}`)}
             </p>
             {order.timestamps.refunded_at && (
               <div className="p-3 bg-aurora-green/10 border border-aurora-green/20 rounded-lg">

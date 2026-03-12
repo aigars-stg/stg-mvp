@@ -102,7 +102,7 @@ CREATE TABLE user_profiles (
 -- ============================================================================
 -- TABLE: seller_profiles
 -- PURPOSE: Seller-specific data separated for performance
--- FEATURES: Stripe Connect integration, DAC7 tax compliance, trust metrics
+-- FEATURES: EveryPay payments, wallet system, DAC7 tax compliance, trust metrics
 -- RELATIONSHIPS: user_profiles (1:1)
 -- ============================================================================
 CREATE TABLE seller_profiles (
@@ -111,19 +111,9 @@ CREATE TABLE seller_profiles (
     CHECK (seller_status IN ('not_started', 'onboarding', 'active', 'suspended')),
   seller_terms_accepted_at TIMESTAMPTZ,
   seller_terms_version TEXT DEFAULT '1.0',
-  -- Stripe Connect
-  stripe_connect_account_id TEXT,
-  stripe_connect_onboarding_completed BOOLEAN DEFAULT FALSE,
-  stripe_connect_charges_enabled BOOLEAN DEFAULT FALSE,
-  stripe_connect_payouts_enabled BOOLEAN DEFAULT FALSE,
-  stripe_connect_details_submitted BOOLEAN DEFAULT FALSE,
-  stripe_connect_updated_at TIMESTAMPTZ,
-  stripe_requirements JSONB DEFAULT '{}',
-  stripe_capabilities JSONB DEFAULT '{}',
-  -- Bank account info (from Stripe)
-  has_bank_account BOOLEAN DEFAULT FALSE,
-  bank_account_last4 TEXT,
-  bank_account_bank_name TEXT,
+  -- Payout info (collected at first withdrawal)
+  payout_iban TEXT,
+  payout_account_holder_name TEXT,
   -- Trust metrics (updated by triggers)
   total_reviews INTEGER DEFAULT 0,
   average_rating DECIMAL(2,1) DEFAULT 0.0,
@@ -524,7 +514,7 @@ CREATE TABLE basket_items (
 -- ============================================================================
 -- TABLE: orders
 -- PURPOSE: Completed purchases with full lifecycle tracking
--- FEATURES: Stripe payments, Unisend shipping, seller deadlines
+-- FEATURES: EveryPay payments, wallet system, Unisend shipping, seller deadlines
 -- RELATIONSHIPS: auth.users
 -- ============================================================================
 CREATE TABLE orders (
@@ -547,20 +537,17 @@ CREATE TABLE orders (
   receiver_name VARCHAR(255),
   receiver_phone VARCHAR(20),
   receiver_email VARCHAR(255),
-  -- Pricing (6% + EUR 0.50 service fee)
+  -- Pricing (10% seller commission, no buyer service fee)
   items_total DECIMAL(10,2) NOT NULL,
   shipping_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
-  service_fee DECIMAL(10,2) NOT NULL DEFAULT 0,
   total_amount DECIMAL(10,2) NOT NULL,
   locale TEXT DEFAULT 'en' CHECK (locale IN ('en', 'lv')),
-  -- Stripe
-  stripe_payment_intent_id VARCHAR(255),
-  stripe_transfer_id VARCHAR(255),
-  stripe_transfer_amount DECIMAL(10,2),
+  -- EveryPay + Wallet
+  everypay_payment_reference TEXT,
+  everypay_payment_state VARCHAR(50),
+  buyer_wallet_debit_cents INTEGER DEFAULT 0,
+  payment_method VARCHAR(20),
   paid_at TIMESTAMPTZ,
-  transferred_to_seller_at TIMESTAMPTZ,
-  payout_status VARCHAR(20) DEFAULT 'pending'
-    CHECK (payout_status IN ('pending', 'processing', 'completed', 'failed', 'on_hold')),
   -- Seller response (24-hour deadline)
   seller_response_deadline TIMESTAMPTZ,
   seller_responded_at TIMESTAMPTZ,
@@ -586,12 +573,19 @@ CREATE TABLE orders (
   cancelled_by UUID REFERENCES auth.users(id),
   refunded_at TIMESTAMPTZ,
   refund_amount DECIMAL(10,2),
+  refund_status VARCHAR DEFAULT NULL
+    CHECK (refund_status IN ('pending', 'processing', 'completed', 'failed', 'manual_sepa_required')),
+  refund_method VARCHAR,
+  refund_initiated_at TIMESTAMPTZ,
+  refund_completed_at TIMESTAMPTZ,
+  refund_error TEXT,
+  refund_note TEXT,
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   -- Constraints
   CONSTRAINT buyer_not_seller CHECK (buyer_id != seller_id),
-  CONSTRAINT total_amount_valid CHECK (total_amount = items_total + shipping_cost + service_fee),
+  CONSTRAINT total_amount_valid CHECK (total_amount = items_total + shipping_cost),
   CONSTRAINT t2t_has_shipping_info CHECK (
     shipping_method != 't2t' OR (
       destination_country IS NOT NULL AND
@@ -668,50 +662,49 @@ CREATE TABLE tracking_events (
 );
 
 -- ============================================================================
--- TABLE: payout_transactions
--- PURPOSE: Platform-to-seller Stripe transfers
--- RELATIONSHIPS: orders, auth.users
+-- TABLE: wallets
+-- PURPOSE: Platform wallet for buyer/seller balances (integer cents)
+-- RELATIONSHIPS: auth.users (1:1)
 -- ============================================================================
-CREATE TABLE payout_transactions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
-  seller_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
-  stripe_transfer_id VARCHAR(255),
-  stripe_connect_account_id VARCHAR(255) NOT NULL,
-  gross_amount DECIMAL(10,2) NOT NULL,
-  platform_fee DECIMAL(10,2) NOT NULL,
-  net_amount DECIMAL(10,2) NOT NULL,
-  status VARCHAR(20) NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'reversed')),
-  error_code VARCHAR(100),
-  error_message TEXT,
-  retry_count INTEGER DEFAULT 0,
+CREATE TABLE wallets (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  balance_cents INTEGER NOT NULL DEFAULT 0 CHECK (balance_cents >= 0),
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  completed_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ============================================================================
--- TABLE: seller_payouts
--- PURPOSE: Seller bank withdrawals (from Stripe to bank account)
+-- TABLE: wallet_transactions
+-- PURPOSE: Ledger of all wallet debits and credits
+-- RELATIONSHIPS: wallets, orders
+-- ============================================================================
+CREATE TABLE wallet_transactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  type VARCHAR(30) NOT NULL CHECK (type IN ('purchase_debit', 'sale_credit', 'refund_credit', 'withdrawal_debit', 'adjustment')),
+  amount_cents INTEGER NOT NULL,
+  balance_after_cents INTEGER NOT NULL,
+  order_id UUID REFERENCES orders(id),
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================================
+-- TABLE: withdrawal_requests
+-- PURPOSE: Seller requests to withdraw wallet balance to bank account
 -- RELATIONSHIPS: auth.users
 -- ============================================================================
-CREATE TABLE seller_payouts (
+CREATE TABLE withdrawal_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
-  stripe_payout_id VARCHAR(255) NOT NULL UNIQUE,
-  stripe_connect_account_id VARCHAR(255) NOT NULL,
-  amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
-  currency VARCHAR(3) DEFAULT 'eur',
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  amount_cents INTEGER NOT NULL CHECK (amount_cents > 0),
+  iban TEXT NOT NULL,
+  account_holder_name TEXT NOT NULL,
   status VARCHAR(20) NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'in_transit', 'paid', 'failed', 'canceled')),
-  bank_account_last4 VARCHAR(4),
-  bank_name VARCHAR(100),
-  initiated_at TIMESTAMPTZ DEFAULT NOW(),
-  arrival_date DATE,
-  paid_at TIMESTAMPTZ,
-  failure_code VARCHAR(100),
-  failure_message TEXT,
+    CHECK (status IN ('pending', 'processing', 'completed', 'rejected')),
+  staff_notes TEXT,
+  processed_by UUID REFERENCES auth.users(id),
+  processed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -820,7 +813,6 @@ CREATE INDEX idx_user_profiles_onboarding_email ON user_profiles (onboarding_ema
 
 -- Seller profiles indexes
 CREATE INDEX idx_seller_profiles_status ON seller_profiles (seller_status);
-CREATE INDEX idx_seller_profiles_stripe_account ON seller_profiles (stripe_connect_account_id) WHERE stripe_connect_account_id IS NOT NULL;
 CREATE INDEX idx_seller_profiles_dac7_year ON seller_profiles (dac7_reporting_year) WHERE dac7_reporting_year IS NOT NULL;
 CREATE INDEX idx_seller_profiles_dac7_status ON seller_profiles (dac7_compliance_status) WHERE dac7_compliance_status != 'exempt';
 CREATE INDEX idx_seller_profiles_dac7_needs_info ON seller_profiles (dac7_compliance_status) WHERE dac7_compliance_status IN ('approaching', 'required', 'blocked');
@@ -929,8 +921,7 @@ CREATE INDEX idx_orders_created ON orders (created_at DESC);
 CREATE INDEX idx_orders_order_number ON orders (order_number);
 CREATE INDEX idx_orders_barcode ON orders (barcode) WHERE barcode IS NOT NULL;
 CREATE INDEX idx_orders_seller_deadline ON orders (seller_response_deadline) WHERE status = 'pending_seller';
-CREATE INDEX idx_orders_payout_status ON orders (payout_status) WHERE payout_status = 'pending';
-CREATE INDEX idx_orders_stripe_transfer ON orders (stripe_transfer_id) WHERE stripe_transfer_id IS NOT NULL;
+CREATE INDEX idx_orders_everypay_ref ON orders (everypay_payment_reference) WHERE everypay_payment_reference IS NOT NULL;
 CREATE INDEX idx_orders_cancelled_by ON orders (cancelled_by) WHERE cancelled_by IS NOT NULL;
 CREATE INDEX idx_orders_locale ON orders (locale);
 
@@ -1032,21 +1023,13 @@ SELECT
   COALESCE(s.seller_status, 'not_started') AS seller_status,
   s.seller_terms_accepted_at,
   COALESCE(s.seller_terms_version, '1.0') AS seller_terms_version,
-  s.stripe_connect_account_id,
-  COALESCE(s.stripe_connect_onboarding_completed, FALSE) AS stripe_connect_onboarding_completed,
-  COALESCE(s.stripe_connect_charges_enabled, FALSE) AS stripe_connect_charges_enabled,
-  COALESCE(s.stripe_connect_payouts_enabled, FALSE) AS stripe_connect_payouts_enabled,
-  COALESCE(s.stripe_connect_details_submitted, FALSE) AS stripe_connect_details_submitted,
-  s.stripe_connect_updated_at,
-  COALESCE(s.stripe_requirements, '{}') AS stripe_requirements,
-  COALESCE(s.stripe_capabilities, '{}') AS stripe_capabilities,
+  s.payout_iban,
+  s.payout_account_holder_name,
   COALESCE(s.dac7_annual_transaction_count, 0) AS dac7_annual_transaction_count,
   COALESCE(s.dac7_annual_sales_total, 0.00) AS dac7_annual_sales_total,
   s.dac7_reporting_year,
   s.dac7_tax_id,
   s.dac7_tax_id_type,
-  COALESCE(s.has_bank_account, FALSE) AS has_bank_account,
-  s.bank_account_last4,
   s.bank_account_bank_name
 FROM user_profiles u
 LEFT JOIN seller_profiles s ON u.id = s.user_id;
@@ -1160,12 +1143,10 @@ SELECT
   seller_id AS user_id,
   COUNT(DISTINCT id) AS total_sales_count,
   COALESCE(SUM(items_total), 0) AS total_gross,
-  COALESCE(SUM(service_fee), 0) AS total_platform_fees,
-  COALESCE(SUM(items_total), 0) AS total_net,
-  COUNT(DISTINCT id) FILTER (WHERE payout_status = 'completed') AS completed_payouts_count,
-  COUNT(DISTINCT id) FILTER (WHERE payout_status = 'pending') AS pending_payouts_count,
+  COALESCE(SUM(ROUND(items_total * 0.10, 2)), 0) AS total_platform_fees,
+  COALESCE(SUM(ROUND(items_total * 0.90, 2)), 0) AS total_net,
   COUNT(DISTINCT id) FILTER (WHERE updated_at >= NOW() - INTERVAL '30 days') AS sales_last_30_days,
-  COALESCE(SUM(items_total) FILTER (WHERE updated_at >= NOW() - INTERVAL '30 days'), 0) AS earnings_last_30_days
+  COALESCE(SUM(ROUND(items_total * 0.90, 2)) FILTER (WHERE updated_at >= NOW() - INTERVAL '30 days'), 0) AS earnings_last_30_days
 FROM orders o
 WHERE status IN ('delivered', 'completed')
 GROUP BY seller_id;
@@ -1178,10 +1159,9 @@ SELECT
   'sale' AS transaction_type,
   o.order_number AS reference,
   o.status,
-  o.payout_status,
   o.items_total AS gross_amount,
-  o.service_fee AS platform_fee,
-  o.items_total AS net_amount,
+  ROUND(o.items_total * 0.10, 2) AS platform_fee,
+  ROUND(o.items_total * 0.90, 2) AS net_amount,
   (SELECT oi.game_name FROM order_items oi WHERE oi.order_id = o.id LIMIT 1) AS description,
   o.created_at,
   o.updated_at AS completed_at
@@ -1189,19 +1169,19 @@ FROM orders o
 WHERE o.status NOT IN ('pending_payment', 'cancelled')
 UNION ALL
 SELECT
-  sp.id,
-  sp.user_id,
-  'payout' AS transaction_type,
-  sp.stripe_payout_id AS reference,
-  sp.status,
-  sp.status AS payout_status,
-  -sp.amount AS gross_amount,
+  wt.id,
+  wt.user_id,
+  'withdrawal' AS transaction_type,
+  wr.id::text AS reference,
+  wr.status,
+  (wt.amount_cents / 100.0)::decimal(10,2) AS gross_amount,
   0 AS platform_fee,
-  -sp.amount AS net_amount,
-  CONCAT('Payout to ****', sp.bank_account_last4) AS description,
-  sp.created_at,
-  sp.paid_at AS completed_at
-FROM seller_payouts sp;
+  (wt.amount_cents / 100.0)::decimal(10,2) AS net_amount,
+  wt.description,
+  wt.created_at,
+  wr.processed_at AS completed_at
+FROM wallet_transactions wt
+JOIN withdrawal_requests wr ON wr.user_id = wt.user_id AND wt.type = 'withdrawal_debit';
 
 -- Grant access to views
 GRANT SELECT ON public_profiles TO public, anon, authenticated;
@@ -1460,8 +1440,9 @@ CREATE OR REPLACE FUNCTION create_order_from_basket(
   p_receiver_phone VARCHAR DEFAULT NULL,
   p_receiver_email VARCHAR DEFAULT NULL,
   p_shipping_cost DECIMAL DEFAULT 0,
-  p_service_fee DECIMAL DEFAULT 0,
-  p_stripe_payment_intent_id VARCHAR DEFAULT NULL
+  p_everypay_payment_reference TEXT DEFAULT NULL,
+  p_buyer_wallet_debit_cents INTEGER DEFAULT 0,
+  p_order_number TEXT DEFAULT NULL
 )
 RETURNS JSON
 LANGUAGE plpgsql
@@ -1475,6 +1456,7 @@ DECLARE
   v_items_total DECIMAL(10,2);
   v_total_amount DECIMAL(10,2);
   v_seller_country VARCHAR(2);
+  v_new_balance INTEGER;
 BEGIN
   SELECT b.*, up.country as seller_country INTO v_basket
   FROM baskets b JOIN user_profiles up ON b.seller_id = up.id
@@ -1494,24 +1476,56 @@ BEGIN
     RETURN json_build_object('success', false, 'error', 'Basket is empty');
   END IF;
 
-  v_total_amount := v_items_total + p_shipping_cost + p_service_fee;
-  v_order_number := generate_order_number();
+  v_total_amount := v_items_total + p_shipping_cost;
+  v_order_number := COALESCE(p_order_number, generate_order_number());
+
+  -- Debit buyer wallet if applicable
+  IF p_buyer_wallet_debit_cents > 0 THEN
+    INSERT INTO wallets (user_id, balance_cents)
+    VALUES (v_basket.buyer_id, 0)
+    ON CONFLICT (user_id) DO NOTHING;
+
+    UPDATE wallets
+    SET balance_cents = balance_cents - p_buyer_wallet_debit_cents,
+        updated_at = NOW()
+    WHERE user_id = v_basket.buyer_id
+      AND balance_cents >= p_buyer_wallet_debit_cents
+    RETURNING balance_cents INTO v_new_balance;
+
+    IF NOT FOUND THEN
+      RETURN json_build_object('success', false, 'error', 'Insufficient wallet balance');
+    END IF;
+  END IF;
 
   INSERT INTO orders (
     order_number, buyer_id, seller_id, shipping_method,
     destination_country, destination_terminal_id, destination_terminal_name, destination_terminal_address,
     sender_country, pickup_city, pickup_notes,
     receiver_name, receiver_phone, receiver_email,
-    items_total, shipping_cost, service_fee, total_amount,
-    stripe_payment_intent_id, paid_at, seller_response_deadline, status
+    items_total, shipping_cost, total_amount,
+    everypay_payment_reference, buyer_wallet_debit_cents,
+    paid_at, seller_response_deadline, status
   ) VALUES (
     v_order_number, v_basket.buyer_id, v_basket.seller_id, p_shipping_method,
     p_destination_country, p_destination_terminal_id, p_destination_terminal_name, p_destination_terminal_address,
     v_seller_country, p_pickup_city, p_pickup_notes,
     p_receiver_name, p_receiver_phone, p_receiver_email,
-    v_items_total, p_shipping_cost, p_service_fee, v_total_amount,
-    p_stripe_payment_intent_id, NOW(), NOW() + INTERVAL '24 hours', 'pending_seller'
+    v_items_total, p_shipping_cost, v_total_amount,
+    p_everypay_payment_reference, p_buyer_wallet_debit_cents,
+    NOW(), NOW() + INTERVAL '24 hours', 'pending_seller'
   ) RETURNING id INTO v_order_id;
+
+  IF p_buyer_wallet_debit_cents > 0 THEN
+    INSERT INTO wallet_transactions (user_id, type, amount_cents, balance_after_cents, order_id, description)
+    VALUES (
+      v_basket.buyer_id,
+      'purchase_debit',
+      p_buyer_wallet_debit_cents,
+      v_new_balance,
+      v_order_id,
+      'Purchase payment'
+    );
+  END IF;
 
   INSERT INTO order_items (order_id, listing_id, game_name, bgg_game_id, price, condition, photo_url)
   SELECT v_order_id, l.id, l.game_name, l.bgg_game_id, l.price, l.condition, l.photo_urls[1]

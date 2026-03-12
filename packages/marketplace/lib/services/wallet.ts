@@ -167,7 +167,6 @@ export async function refundToWallet(
   const { data, error } = await supabase.rpc('credit_wallet', {
     p_user_id: userId,
     p_amount_cents: amountCents,
-    p_type: 'refund_credit',
     p_order_id: orderId,
     p_description: 'Refund to wallet',
   });
