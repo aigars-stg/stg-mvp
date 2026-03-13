@@ -1,156 +1,100 @@
 ---
-title: "Sīkfailu politika"
-lastUpdated: "January 2026"
-description: "Kā Second Turn Games izmanto sīkfailus un līdzīgas tehnoloģijas."
+title: Sīkfailu politika
+lastUpdated: January 2026
+description: Kā Second Turn Games izmanto sīkfailus un līdzīgas tehnoloģijas.
 ---
 
-## 1. Ievads
+## 1. Introduction
 
 Šī Sīkfailu politika skaidro, kā Second Turn Games SIA ("mēs", "mūsu" vai "mūs") izmanto sīkfailus un līdzīgas tehnoloģijas mūsu platformā.
 
 <PlainTermsBox>
-Mēs izmantojam nelielu skaitu sīkfailu, lai platforma darbotos un atcerētos jūsu preferences. Mēs lūdzam atļauju pirms sīkfailu iestatīšanas, kas izseko, kā jūs izmantojat vietu.
+We use a small number of cookies to make the site work and remember your preferences. We ask before setting any cookies that track how you use the site.
 </PlainTermsBox>
 
+## 2. What Are Cookies?
+
+Cookies are small text files stored on your device when you visit a website. They help websites remember information about your visit, like your language preference or login status.
+
+**Similar technologies we use:**
+
+* **Local storage** - Stores data in your browser (like saved searches or listing drafts)
+* **Session storage** - Temporary data cleared when you close your browser
+
 ---
 
-## 2. Kas ir sīkfaili?
+## 3. Cookies We Use
 
-Sīkfaili ir nelieli teksta faili, kas tiek glabāti jūsu ierīcē, kad jūs apmeklējat vietni. Tie palīdz vietnēm atcerēties informāciju par jūsu vizīti, piemēram, jūsu valodas preferences vai pierakstīšanās stāvokli.
+### 3.1 Essential Cookies (Required)
 
-**Līdzīgas tehnoloģijas, kuras mēs izmantojam:**
-- **Vietējā glabāšana** — Dati glabājas jūsu pārlūkā (piemēram, saglabātie meklējumi vai sludinājumu melnraksti)
-- **Sesijas glabāšana** — Pagaidu dati, kas tiek notīrīti, kad aizverat pārlūku
+These cookies are necessary for the platform to function securely and reliably. You cannot opt out of these.
+
+| Cookie             | Purpose                                       | Duration |
+| ------------------ | --------------------------------------------- | -------- |
+| `sb-access-token`  | Keeps you signed in (Supabase authentication) | Session  |
+| `sb-refresh-token` | Refreshes your sign-in session                | 7 days   |
+| `locale`           | Remembers your language preference            | 1 year   |
+| `cookie-consent`   | Remembers your cookie preferences             | 1 year   |
+| `cf_clearance`     | Cloudflare bot protection verification        | Session  |
+
+### 3.2 Functional Cookies (Required)
+
+These improve your experience but do not track you across websites.
+
+| Cookie                | Purpose                                  | Duration      |
+| --------------------- | ---------------------------------------- | ------------- |
+| `recent-searches`     | Remembers your recent game searches      | Local storage |
+| `listing-draft`       | Saves unfinished listing drafts          | Local storage |
+| `terminal-preference` | Remembers your preferred parcel terminal | Local storage |
+
+### 3.3 Analytics Cookies (Your Choice)
+
+These help us understand how people use the site so we can improve it. **We only set these if you consent.**
+
+| Cookie | Purpose                                   | Provider         | Duration |
+| ------ | ----------------------------------------- | ---------------- | -------- |
+| `va_*` | Page views, session duration, device type | Vercel Analytics | 1 year   |
+
+**What analytics cookies collect:** Pages you visit, time spent on pages, device/browser type, and country.
+**What they do NOT collect:** Your name, email, what you buy or sell, your messages, or anything that personally identifies you.
 
 ---
 
-## 3. Sīkfaili, ko mēs izmantojam
-
-### 3.1 Būtisks sīkfails (obligāts)
-
-Šie sīkfaili ir nepieciešami platformai, lai funkcionētu. Jūs nevarat no tiem atteikties.
-
-| Sīkfails | Nolūks | Ilgums |
-|--------|---------|----------|
-| `sb-access-token` | Pasvēlē jūs pierakstījušus (Supabase autentifikācija) | Sesija |
-| `sb-refresh-token` | Atsvaidzina jūsu pierakstīšanās sesiju | 7 dienas |
-| `locale` | Atcerās jūsu valodas preference (EN/LV/LT/ET) | 1 gads |
-| `cookie-consent` | Atcerās jūsu sīkfailu preferences | 1 gads |
-| `cf_clearance` | Cloudflare bota aizsardzības verifikācija | Sesija |
-
-### 3.2 Funkcionāli sīkfaili (obligāts)
-
-Šie paaugstina jūsu pieredzi, bet neizstendē jūs visā vietnēs.
-
-| Sīkfails | Nolūks | Ilgums |
-|--------|---------|----------|
-| `recent-searches` | Atcerās jūsu neseno spēļu meklējumus | Vietējā glabāšana |
-| `listing-draft` | Glabā nepabeigtos sludinājumu melnrakstus | Vietējā glabāšana |
-| `terminal-preference` | Atcerās jūsu izvēlēto pakotnenes termināli | Vietējā glabāšana |
-
-### 3.3 Analītikas sīkfaili (jūsu izvēle)
-
-Šie palīdz mums saprast, kā cilvēki izmanto vietu, lai mēs varētu to uzlabot. **Mēs iestatam tikai tad, ja jūs piekrītat.**
-
-| Sīkfails | Nolūks | Sniedzējs | Ilgums |
-|--------|---------|----------|----------|
-| `va_*` | Lapas skati, sesijas ilgums, ierīces tips | Vercel Analītika | 1 gads |
-
-**Ko analītikas sīkfaili apkopo:**
-- Lapas, kuras jūs apmeklējat
-- Cik ilgi pavadāt lapas
-- Kādu ierīci/pārlūku izmantojat
-- No kuras valsts pārlūkojat
+## 4. Third-Party Cookies
 
 **Ko viņi NEIZSAUCAS:**
-- Jūsu vārds vai e-pasts
-- Ko jūs pērkāt vai pārdodat
-- Jūsu ziņojumi vai sludinājuma saturs
-- Neko, kas personīgi jūs identificē
+
+| Service                    | Purpose                                       | Their Cookie Policy                                                       |
+| -------------------------- | --------------------------------------------- | ------------------------------------------------------------------------- |
+| **EveryPay**, **Swedbank** | Secure payment processing (when you checkout) | [swedbank.lv/about/cookies](https://www.swedbank.lv/about/cookies)        |
+| **Cloudflare**             | Security and bot protection                   | [cloudflare.com/cookie-policy](https://www.cloudflare.com/cookie-policy/) |
+
+We do not control these cookies. Please check each provider's policy for details.
 
 ---
 
-## 4. Trešo pušu sīkfaili
+## 5. Your Choices
 
-Dažas funkcijas ietver trešo pušu pakalpojumus, kas var iestatīt savus sīkfailus:
+### 5.1 Cookie Consent Banner
 
-| Pakalpojums | Nolūks | Viņu Sīkfailu politika |
-|---------|---------|---------------------|
-| **EveryPay** | Maksājumu apstrāde (kad jūs kasos) | [every-pay.com/privacy-policy](https://every-pay.com/privacy-policy) |
-| **Cloudflare** | Drošība un bota aizsardzība | [cloudflare.com/cookie-policy](https://cloudflare.com/cookie-policy) |
+When you first visit, we ask whether you accept analytics cookies. Your choice is saved and you will not be asked again unless you clear your cookies.
 
-Mēs nekontrolējam šos sīkfailus. Pārbaudiet katra sniedzēja politiku detaļām.
+### 5.2 Changing Your Preferences
 
----
-
-## 5. Jūsu izvēle
+You can change your cookie preferences anytime by clicking the cookie icon in the footer of our website.
 
 ### 5.1 Sīkfailu piekrišanas baneris
 
-Kad pirmoreiz apmeklējat, mēs jautājam, vai jūs pieņemat analītikas sīkfailus. Jūsu izvēle tiek saglabāta un jūs netiks jautāti vēlreiz, ja vien neiztīrīsit savus sīkfailus.
+You can also control cookies through your browser settings (Chrome, Firefox, Safari, Edge).
 
-### 5.2 Preferenču maiņa
+*Note: Blocking essential cookies will prevent you from signing in or using core features.*
 
-Jūs jebkurā laikā varat mainīt sīkfailu preferences:
+### 5.4 Do Not Track
 
-1. Noklikšķiniet **sīkfailu ikonu** kājené
-2. Vai dodieties uz **Iestatījumi — Privātums — Sīkfailu preferences**
-
-### 5.3 Pārlūka iestatījumi
-
-Jūs varat arī kontrolēt sīkfailus, izmantojot savu pārlūku:
-
-| Pārlūks | Kā pārvaldīt sīkfailus |
-|---------|----------------------|
-| Chrome | Iestatījumi — Privātums un drošība — Sīkfaili |
-| Firefox | Iestatījumi — Privātums un drošība — Sīkfaili |
-| Safari | Preferences — Privātums — Vadības vietnes dati |
-| Edge | Iestatījumi — Privātums — Sīkfaili |
-
-**Piezīme:** Būtisku sīkfailu bloķēšana novērsīs pierakstīšanos un pamatfunkciju izmantošanu.
-
-### 5.4 Nepalaižu izsekošanu
-
-Mēs respektējam "Do Not Track" pārlūka iestatījumu. Ja tas ir iespējots, mēs neiestatīsim analītikas sīkfailus pat tad, ja iepriekš piekrītat.
+We respect the "Do Not Track" browser setting. If enabled, we will not set analytics cookies even if you previously consented to them.
 
 ---
 
-## 6. Sīkfailu saglabāšana
+## 6. Updates & Contact
 
-| Tips | Cik ilgi |
-|------|----------|
-| Sesijas sīkfaili | Izdzēsti, kad aizverat pārlūku |
-| Autentifikācija | 7 dienas (pēc tam jums būs jāpierakstās vēlreiz) |
-| Preferences | 1 gads |
-| Analītikas piekrišana | 1 gads |
-
----
-
-## 7. Atjauninājumi šai politikai
-
-Mēs varam atjaunināt šo Sīkfailu politiku, kad pievienojam jaunas funkcijas vai mainām sniedzējus. Pārbaudiet "Pēdējoreiz atjaunināts" datumu augšpusē.
-
-Ievērojamas izmaiņas tiks paziņotas, izmantojot sīkfailu piekrišanas banneri.
-
----
-
-## 8. Kontaktējiet mūs
-
-Jautājumi par mūsu sīkfailu praksēm?
-
-| | |
-|---|---|
-| **Privātuma jautājumi** | privacy@secondturn.games |
-| **Vispārīgs atbalsts** | info@secondturn.games |
-| **Adrese** | Second Turn Games SIA, Evalda Valtera 5-35, Rīga, LV-1021, Latvija |
-
----
-
-## Ātrs kopsavilkums
-
-| Tips | Obligāts? | Vai jūs varat atteikties? |
-|------|-----------|------------------|
-| **Būtisks** (pierakstīšanās, drošība) | Jā | Nē |
-| **Funkcionāls** (preferences, melnraksti) | Jā | Nē |
-| **Analītika** (izmantošanas statistika) | Nē | Jā — mēs lūdzam vispirms |
-| **Trešo pušu** (EveryPay, Cloudflare) | Tikai jūs izmantojot šos funkcijas | Pārbaudiet viņu politiku |
+We may update this Cookie Policy when we add new features or change providers. Significant changes will be announced via the cookie consent banner.
