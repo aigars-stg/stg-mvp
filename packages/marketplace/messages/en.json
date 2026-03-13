@@ -1,37 +1,11 @@
 {
   "Common": {
     "loading": "Loading...",
-    "error": "Error",
-    "save": "Save",
-    "cancel": "Cancel",
-    "closeModal": "Close",
-    "confirm": "Confirm",
-    "delete": "Delete",
-    "edit": "Edit",
-    "complete": "Complete",
     "completeResearchFirst": "Complete the game selection above first",
     "selectConditionFirst": "Select a condition above first",
     "aria": {
-      "previousImage": "Previous image",
-      "nextImage": "Next image",
-      "closeLightbox": "Close lightbox",
-      "addToWishlist": "Add to wishlist",
-      "removeFromWishlist": "Remove from wishlist",
-      "dismiss": "Dismiss",
       "helpSections": "Help sections",
-      "legalSections": "Legal sections",
-      "mainNavigation": "Main navigation",
-      "searchGames": "Search games",
-      "clearSearch": "Clear search",
-      "userMenu": "User menu",
-      "selectLanguage": "Select language",
-      "acceptTerms": "Accept seller terms"
-    },
-    "emptyStates": {
-      "noMessages": "No messages yet",
-      "noTransactions": "No transactions yet",
-      "noWithdrawals": "No withdrawal requests yet",
-      "noImage": "No image"
+      "legalSections": "Legal sections"
     },
     "ConditionInfoModal": {
       "title": "Condition grade",
@@ -104,7 +78,6 @@
     "ariaLabel": "Wanted listing actions",
     "viewListing": "View Listing",
     "edit": "Edit",
-    "extend": "Extend +30 Days",
     "reactivate": "Reactivate",
     "markAsFulfilled": "Mark as Fulfilled",
     "cancelListing": "Cancel Listing",
@@ -114,23 +87,15 @@
   "WantedStatusChangeModal": {
     "fulfilled": {
       "title": "Mark as Fulfilled",
-      "message": "Great news. Mark this wanted listing as fulfilled?",
-      "confirm": "Mark as Fulfilled"
+      "message": "Great news. Mark this wanted listing as fulfilled?"
     },
     "cancelled": {
       "title": "Cancel Listing",
-      "message": "Are you sure you want to cancel this wanted listing?",
-      "confirm": "Cancel Listing"
+      "message": "Are you sure you want to cancel this wanted listing?"
     },
     "active": {
       "title": "Reactivate Listing",
-      "message": "Reactivate this wanted listing?",
-      "confirm": "Reactivate"
-    },
-    "expired": {
-      "title": "Mark as Expired",
-      "message": "Mark this wanted listing as expired?",
-      "confirm": "Mark as Expired"
+      "message": "Reactivate this wanted listing?"
     },
     "cancel": "Cancel",
     "processing": "Processing..."
@@ -200,27 +165,18 @@
         "findYourGameSubtitle": "Start typing to search thousands of board games",
         "yourBudget": "Your Budget",
         "yourBudgetSubtitle": "Set the maximum amount you're willing to pay",
-        "minimumCondition": "Minimum Condition",
-        "minimumConditionSubtitle": "What's the minimum condition you'll accept?",
-        "locationDetails": "Location & Details",
-        "locationDetailsSubtitle": "Help sellers understand your location and preferences (optional)",
         "additionalNotes": "Additional Notes",
         "additionalNotesSubtitle": "Optional information for sellers"
       },
       "labels": {
-        "maximumPrice": "Maximum Price (€) *",
-        "yourLocation": "Your Location (Optional)",
-        "expansionPreference": "Expansion Preference",
-        "additionalNotes": "Additional Notes (Optional)"
+        "maximumPrice": "Maximum Price (€) *"
       },
       "placeholders": {
         "price": "50.00",
-        "location": "e.g., Riga, Latvia",
         "notes": "Any additional details about what you're looking for..."
       },
       "helpers": {
         "budget": "Sellers can offer games at any price, but setting a clear budget helps them understand your expectations",
-        "location": "Helps sellers estimate shipping costs and timing",
         "notes": "Examples: language preference, specific edition, local pickup preferred, etc.",
         "editWarning": "Game and edition details cannot be changed. If you need to change the game, please delete this wanted listing and create a new one."
       },
@@ -259,8 +215,7 @@
       },
       "loading": {
         "listing": "Loading wanted listing...",
-        "gameDetails": "Loading game details...",
-        "fallback": "Loading..."
+        "gameDetails": "Loading game details..."
       },
       "errors": {
         "completionRequired": "Please complete all required fields",
@@ -272,21 +227,15 @@
     },
     "DeleteConfirmationModal": {
       "title": "Delete Wanted Listing",
-      "message": "Are you sure you want to permanently delete \"{gameName}\"?",
       "warning": "This action cannot be undone. The wanted listing will be permanently removed from the database.",
-      "permanentWarning": "Warning: This is a permanent action and cannot be reversed.",
       "cancel": "Cancel",
-      "deleting": "Deleting...",
-      "delete": "Delete Listing"
+      "deleting": "Deleting..."
     },
     "ListingCard": {
       "wantedBadge": "Wanted",
-      "expired": "Expired",
       "expansion": "Expansion",
       "upTo": "Up to {price}",
       "iHaveThis": "I Have This",
-      "listingExpired": "Listing expired",
-      "acceptableConditions": "Acceptable conditions",
       "budget": "Budget",
       "maxResponsesReached": "Max responses reached",
       "viewOnBGG": "View on BoardGameGeek",
@@ -300,18 +249,6 @@
       "availableConditions": "Available conditions",
       "viewListings": "View Listings",
       "hint": "Check existing offers before posting"
-    },
-    "ListingPreview": {
-      "wanted": "Wanted",
-      "selectGame": "Select a game to see preview",
-      "language": "Language:",
-      "publisher": "Publisher:",
-      "edition": "Edition:",
-      "buyerBudget": "Buyer's Budget",
-      "upTo": "Up to €{price}",
-      "acceptableConditions": "Acceptable Conditions",
-      "additionalDetails": "Additional Details",
-      "readyToPost": "Ready to post"
     },
     "OfferCard": {
       "upTo": "Up to {price}",
@@ -341,9 +278,7 @@
     "infoTitle": "Information"
   },
   "OfflineError": {
-    "title": "You're offline",
-    "message": "Check your internet connection and try again.",
-    "retry": "Try again"
+    "title": "You're offline"
   },
   "OfflinePage": {
     "status": {
@@ -397,9 +332,7 @@
   },
   "EmailVerificationBanner": {
     "title": "Email Verification Required",
-    "message": "Please verify your email address to create listings and access all features. We sent a verification link to {email}.",
-    "sending": "Sending...",
-    "resend": "Resend Verification Email"
+    "sending": "Sending..."
   },
   "AccountDeletion": {
     "title": "Delete account",
@@ -434,8 +367,6 @@
     "pleaseTypeDelete": "Please type DELETE to confirm"
   },
   "MessagesPage": {
-    "title": "Messages",
-    "subtitle": "Conversations with buyers and sellers",
     "noConversations": "No conversations yet",
     "noConversationsHint": "When you reach out about a listing - or someone reaches out to you - it will show up here.",
     "unknownUser": "Unknown User",
@@ -463,61 +394,23 @@
     "tooLong": "Message is too long. Please shorten it by {count} character(s)."
   },
   "BankAccountForm": {
-    "holderName": "Account Holder Name",
-    "holderNameHint": "Enter name as it appears on your bank account",
     "iban": "IBAN",
     "ibanRequired": "IBAN is required",
-    "holderNameRequired": "Account holder name is required",
-    "addFailed": "Failed to add bank account",
-    "formatHint": "Format: {hint}",
     "securityNote": "Your bank details are stored securely. We only display the last 4 digits of your IBAN.",
     "cancel": "Cancel",
-    "addButton": "Add Bank Account",
     "adding": "Adding..."
   },
-  "TerminalSelector": {
-    "country": "Delivery Country",
-    "findTerminal": "Find Terminal",
-    "searchPlaceholder": "Search by name, address, or city...",
-    "loading": "Loading terminals...",
-    "retry": "Try again",
-    "noResults": "No terminals found matching your search",
-    "noTerminals": "No terminals available",
-    "selectedTerminal": "Selected Terminal",
-    "clickToChange": "Click to change terminal"
-  },
   "QuestionInput": {
-    "askPlaceholder": "Ask a question about this listing...",
-    "replyPlaceholder": "Write your reply...",
     "reply": "Reply",
-    "ask": "Ask",
-    "tooLong": "Please shorten by {count} character(s)"
-  },
-  "PayoutConfirmModal": {
-    "title": "Request Payout",
-    "amount": "Amount",
-    "to": "To",
-    "expectedArrival": "Expected arrival",
-    "arrivalNote": "Payouts typically arrive within 2 business days.",
-    "cancel": "Cancel",
-    "processing": "Processing...",
-    "confirm": "Confirm Payout",
-    "successTitle": "Payout requested",
-    "successMessage": "{amount} is on its way to your bank account.",
-    "successArrival": "Expected arrival: {date}"
+    "ask": "Ask"
   },
   "AvatarUpload": {
-    "loginRequired": "You must be logged in to upload an avatar",
     "mustBeLoggedIn": "You must be logged in to upload an avatar",
-    "sizeTooLarge": "Image must be less than 5MB",
     "fileTooLarge": "Image must be less than 5MB",
-    "invalidType": "File must be an image",
     "mustBeImage": "File must be an image",
     "changePhoto": "Change photo",
     "addPhoto": "Add a photo",
-    "remove": "Remove",
-    "hint": "JPG, PNG, or GIF – up to 5MB",
-    "fileFormats": "JPG, PNG, or GIF – up to 5MB"
+    "remove": "Remove"
   },
   "Navigation": {
     "home": "Home",
@@ -525,19 +418,14 @@
     "sell": "Sell a game",
     "sellShort": "Sell",
     "cart": "Cart",
-    "messages": "Messages",
     "profile": "Profile",
     "signIn": "Sign in",
     "searchPlaceholder": "Search games...",
-    "language": "Language",
     "userMenu": {
       "sellerDashboard": "Wallet & earnings",
       "myOrders": "Orders",
       "myListings": "My games",
-      "savedAndWanted": "Saved & wanted",
-      "startSelling": "Start selling",
       "staffDashboard": "Staff dashboard",
-      "dac7Compliance": "DAC7 Compliance",
       "signOut": "Sign out",
       "signOutError": "Failed to sign out. Please try again.",
       "join": "Join"
@@ -549,8 +437,6 @@
       "sectionActivity": "My Activity",
       "notifications": "Notifications",
       "messages": "Messages",
-      "savedListings": "Saved listings",
-      "wantedGames": "Wanted games",
       "sectionLanguage": "Language",
       "signingOut": "Signing out...",
       "guest": {
@@ -642,7 +528,6 @@
     },
     "card": {
       "expansion": "Expansion",
-      "auction": "Auction",
       "parcelLocker": "Parcel Locker",
       "pickupOnly": "Pickup only",
       "missingComponents": "Missing components",
@@ -654,7 +539,6 @@
       "learnConditionAria": "Learn about {condition} condition",
       "offers": "{count, plural, one {# offer} other {# offers}}",
       "claimTooltip": "{count, plural, one {# listing} other {# listings}}",
-      "auctionTooltip": "{count, plural, one {# auction} other {# auctions}}",
       "expansionTooltip": "Expansion",
       "expansionOffersTooltip": "Includes expansion offers",
       "auctionEndsIn": "Ends in",
@@ -677,19 +561,12 @@
     }
   },
   "OfferCard": {
-    "priceBreakdown": {
-      "shippingTo": "Shipping to {country}:",
-      "total": "Total:",
-      "estimateNote": "*Estimate based on same-country shipping. Final price at checkout."
-    },
     "price": {
       "from": "From",
-      "delivered": "delivered",
       "save": "Save {percentage}%"
     },
     "listing": {
       "listed": "Listed {date}",
-      "edition": "{year} edition",
       "expansion": "Expansion",
       "missingParts": "Missing parts",
       "photosCount": "{count} photos",
@@ -720,13 +597,10 @@
     "auction": {
       "badge": "Auction",
       "ended": "Auction Ended",
-      "currentBid": "Current bid",
-      "startingPrice": "Starting price",
       "startingAt": "Starting at €{price}",
       "bid": "bid",
       "bids": "bids",
-      "finalBid": "Final bid",
-      "awaitingPayment": "Awaiting payment"
+      "finalBid": "Final bid"
     }
   },
   "Checkout": {
@@ -739,14 +613,11 @@
       "backToCart": "Back to cart"
     },
     "title": "Checkout",
-    "orderFrom": "Order from {sellerName}",
     "collapse": {
       "selectTerminal": "Select Pickup Terminal",
       "contactInfo": "Contact Information",
       "terminalPrompt": "Choose a parcel locker",
       "contactPrompt": "We'll send tracking info here",
-      "complete": "Complete",
-      "required": "Required",
       "terminalHint": "Use the locate button to find nearby terminals, search by name or address, or browse the full list"
     },
     "country": {
@@ -758,13 +629,11 @@
       "weAccept": "We accept"
     },
     "preferredTerminal": {
-      "indicator": "Your preferred terminal",
-      "changeForThisOrder": "Change for this order"
+      "indicator": "Your preferred terminal"
     },
     "form": {
       "fullName": "Full Name",
       "email": "Email",
-      "phone": "Phone Number",
       "required": "*",
       "namePlaceholder": "Your full name",
       "emailPlaceholder": "your@email.com",
@@ -780,8 +649,6 @@
       "subtotal": "Subtotal ({count, plural, one {# item} other {# items}})",
       "shipping": "Shipping",
       "walletCredit": "Wallet credit",
-      "walletBalance": "Your wallet: {balance}",
-      "cardPayment": "Card payment",
       "total": "Total",
       "toPay": "To pay"
     },
@@ -797,21 +664,12 @@
       "address": "Evalda Valtera 5-35, Riga, LV-1021, Latvia"
     },
     "consent": {
-      "refundSummaryTitle": "Refund policy summary",
-      "refundPoint1": "All sellers are private individuals, not businesses",
-      "refundPoint2": "No 14-day return right - you cannot return an item because you changed your mind",
-      "refundPoint3": "Report problems within 2 days of delivery to request a refund",
-      "refundPoint4": "After order completion, sales are final",
       "checkboxPrefix": "By checking this box, I confirm I have read and agree to the",
       "termsLink": "Terms of Service",
       "deliveryLink": "Delivery",
       "and": "and",
       "returnsLink": "Returns",
       "pleaseAccept": "Please accept the terms to continue"
-    },
-    "info": {
-      "sellerDeadline": "Seller has 24 hours to accept",
-      "refundPolicy": "If the seller doesn't respond, you'll receive a full refund automatically."
     },
     "errors": {
       "expiredItems": "Some items in your cart have expired. Please return to cart.",
@@ -832,84 +690,8 @@
       },
       "errorTitle": "Order Processing Issue",
       "errorDescription": "We couldn't load your order details. Please check your email for confirmation.",
-      "processingTimeout": "Order processing is taking longer than expected. Please check your orders page or contact support.",
-      "errors": {
-        "payment_failed": "Your payment could not be processed. Please try again or use a different payment method.",
-        "fraud_declined": "Your payment could not be processed. Please try a different payment method or contact your bank.",
-        "card_declined": "Your card was declined by your bank. Please try a different card or payment method.",
-        "auth_failed": "Payment authentication was not completed. Please try again and complete the verification step.",
-        "technical_error": "A temporary issue prevented your payment. Please wait a moment and try again.",
-        "user_cancelled": "Your payment was not completed. Your cart is still available if you'd like to try again.",
-        "missing_reference": "Payment reference is missing. Please try checking out again.",
-        "unknown_payment": "We could not find this payment. Please try checking out again.",
-        "verification_failed": "We could not verify your payment status. Please check your orders or try again.",
-        "order_creation_failed": "Your payment was received but we could not complete the order. A refund has been initiated automatically. Please try again.",
-        "unknown_type": "An unexpected error occurred during checkout. Please contact support.",
-        "timeout": "Order processing is taking longer than expected. Please check your orders page or contact support."
-      },
-      "title": "Payment Successful",
-      "subtitle": "Your order has been placed and payment confirmed",
-      "orderNumber": "Order",
-      "orderSummary": {
-        "title": "Order Summary",
-        "soldBy": "Sold by {seller}",
-        "items": "Items",
-        "shipping": "Shipping",
-        "walletCredit": "Wallet credit",
-        "total": "Total",
-        "deliveryTo": "Delivery to",
-        "pickupAt": "Pickup at"
-      },
-      "nextSteps": {
-        "title": "What Happens Next",
-        "step1Title": "Seller Reviews Your Order",
-        "step1Description": "The seller has 24 hours to accept your order. You'll receive an email notification once they respond.",
-        "step1Deadline": "Response deadline: 24 hours",
-        "step2Title": "Shipping Arranged",
-        "step2Description": "Once accepted, the seller will arrange shipping or coordinate pickup details with you via messaging.",
-        "step3Title": "Receive Your Games",
-        "step3Description": "Pick up your games at the terminal or meet with the seller. Enjoy your new board games."
-      },
-      "email": {
-        "title": "Order confirmation sent",
-        "description": "We've sent a confirmation email with your order details and tracking information."
-      },
-      "refund": {
-        "title": "Automatic Refund Protection",
-        "description": "If the seller doesn't respond within 24 hours or declines your order, you'll receive an automatic full refund to your payment method."
-      },
-      "errorTitles": {
-        "card_declined": "Payment Declined",
-        "fraud_declined": "Payment Could Not Be Processed",
-        "auth_failed": "Authentication Incomplete",
-        "technical_error": "Temporary Issue",
-        "user_cancelled": "Payment Not Completed",
-        "payment_failed": "Payment Issue"
-      },
       "suggestions": {
-        "title": "What you can do",
-        "card_declined": {
-          "1": "Try a different card or bank link",
-          "2": "Check with your bank if restrictions apply"
-        },
-        "fraud_declined": {
-          "1": "Try a different payment method",
-          "2": "Contact your bank if the issue persists"
-        },
-        "auth_failed": {
-          "1": "Try again and complete the bank verification",
-          "2": "Have your bank app ready for confirmation"
-        },
-        "technical_error": {
-          "1": "Wait a moment and try again",
-          "2": "The issue is temporary, not on your end"
-        },
-        "user_cancelled": {
-          "1": "Your cart is still waiting for you"
-        },
-        "payment_failed": {
-          "1": "Try again or use a different payment method"
-        }
+        "title": "What you can do"
       },
       "reassurance": {
         "title": "No money was charged",
@@ -920,16 +702,6 @@
         "backToCart": "Back to Cart",
         "viewOrders": "View My Orders",
         "continueShopping": "Continue Shopping"
-      },
-      "sessionId": "Session ID: {sessionId}"
-    },
-    "PhoneInput": {
-      "label": "Phone Number",
-      "format": "Format: {example}",
-      "countryHint": {
-        "LT": "Lithuanian mobile number starting with +3706",
-        "LV": "Latvian mobile number starting with +371",
-        "EE": "Estonian mobile number starting with +372"
       }
     },
     "ReservationTimer": {
@@ -943,17 +715,14 @@
       "terminalCount": "{count} terminals"
     },
     "TerminalSelector": {
-      "deliveryCountry": "Delivery Country",
       "findTerminal": "Find Terminal",
       "searchPlaceholder": "Search by name, address, or city...",
       "loadingTerminals": "Loading terminals...",
-      "loadingMap": "Loading map...",
       "tryAgain": "Try again",
       "noTerminalsFound": "No terminals found matching your search",
       "noTerminalsAvailable": "No terminals available",
       "selectedTerminal": "Selected Terminal",
       "selected": "Selected:",
-      "clickToChange": "Click to change terminal",
       "map": "Map",
       "list": "List",
       "allTerminals": "All Terminals",
@@ -971,9 +740,7 @@
     "QuestionsDrawer": {
       "title": "Questions",
       "loading": "Loading...",
-      "noQuestionsYet": "No questions yet",
       "questionsCount": "{count, plural, =0 {No questions yet} =1 {1 question} other {# questions}}",
-      "errorLoadingQuestions": "Failed to load questions. Please try again.",
       "tryAgain": "Try again",
       "noQuestionsTitle": "No questions yet",
       "noQuestionsHint": "Ask about condition, shipping, or if they'd consider a trade.",
@@ -1193,7 +960,6 @@
       "noAuctions": "No auctions found",
       "tryAdjustingFilters": "Try adjusting your filters or search query",
       "beFirstToList": "Be the first to list a game.",
-      "beFirstToPost": "Be the first to post what you're looking for.",
       "beFirstToAuction": "No active auctions right now. Check back soon or list your own game as an auction.",
       "clearAllFilters": "Clear all filters"
     },
@@ -1204,10 +970,6 @@
   },
   "GameDetail": {
     "loading": "Loading game...",
-    "description": {
-      "showLess": "Show less",
-      "readMore": "Read more"
-    },
     "bgg": {
       "viewOnBGG": "View on BGG"
     },
@@ -1220,22 +982,9 @@
       "learnMore": "Learn more"
     },
     "sort": {
-      "priceLowHigh": "Price: Low to High",
-      "priceHighLow": "Price: High to Low",
-      "conditionBestFirst": "Condition: Best First",
-      "newestFirst": "Newest First",
       "priceAsc": "Price ↑",
       "priceDesc": "Price ↓",
       "newest": "Newest"
-    },
-    "filter": {
-      "filters": "Filters",
-      "filterByCondition": "Filter by Condition",
-      "clearAll": "Clear all",
-      "clearFilters": "Clear Filters",
-      "allListings": "All Listings",
-      "all": "All",
-      "buy": "Buy now"
     },
     "cart": {
       "addedToCart": "Added to cart",
@@ -1246,8 +995,6 @@
       "gotThisGame": "Have a copy gathering dust?"
     },
     "emptyState": {
-      "noOffersMatch": "No offers match your filters",
-      "tryAdjusting": "Try adjusting your filters to see more results.",
       "noOffersYet": "No copies listed yet",
       "beFirstToSell": "Have a copy gathering dust? Someone may be looking for it."
     },
@@ -1278,8 +1025,6 @@
     },
     "sections": {
       "marketplace": "Marketplace",
-      "help": "Help",
-      "legal": "Legal",
       "resources": "Resources",
       "partners": "Our partners"
     },
@@ -1287,59 +1032,34 @@
       "browseGames": "Browse games",
       "sellGame": "Sell a game",
       "requestGame": "Request a game",
-      "conditionGuide": "Condition guide",
-      "sellingGuide": "Selling guide",
-      "shipping": "Shipping",
-      "dac7": "DAC7 & taxes",
       "helpCentre": "Help centre",
       "legalHub": "Legal",
       "privacyPolicy": "Privacy policy",
-      "termsOfService": "Terms of service",
-      "sellerTerms": "Seller terms",
-      "fees": "Fees"
+      "termsOfService": "Terms of service"
     },
     "copyright": "Copyright © 2025-{year} Second Turn Games SIA",
     "compliance": {
-      "paymentMethods": "Accepted payment methods",
       "contactUs": "Contact us",
       "delivery": "Delivery",
       "returns": "Returns"
     }
   },
   "Legal": {
-    "lastUpdated": "Last updated: {date}",
-    "backToHome": "← Back to Home",
     "inPlainTerms": "In plain terms",
-    "sectionNotFound": "Section not found.",
     "page": {
       "title": "Legal",
       "description": "Terms of service, privacy policy, seller agreement, and other legal documents for Second Turn Games.",
       "breadcrumbHome": "Home",
       "breadcrumbLegal": "Legal"
-    },
-    "nav": {
-      "overview": "Overview",
-      "terms": "Terms of Service",
-      "privacy": "Privacy Policy",
-      "seller": "Seller Agreement",
-      "buyer": "Buyer Guide",
-      "cookies": "Cookie Policy",
-      "fees": "Fees"
     }
   },
   "Auction": {
-    "title": "Auction",
     "badge": "Auction",
     "won": "Won",
-    "currentBid": "Current Bid",
-    "startingPrice": "Starting Price",
     "bid": "bid",
     "bids": "bids",
-    "yourBid": "Your Bid",
     "minimum": "Minimum",
-    "placeBid": "Place Bid",
     "ended": "Auction Ended",
-    "endingSoon": "Ending soon",
     "wasExtended": "This auction was extended due to last-minute bidding",
     "youWon": "You Won",
     "completePayment": "Complete your payment within 48 hours to claim this game",
@@ -1417,21 +1137,13 @@
       "research": {
         "title": "Find your game"
       },
-      "review": {
-        "title": "Review & list"
-      },
       "game": {
         "title": "Find your game",
-        "subtitle": "Start typing to search thousands of board games",
-        "subtitleWithGame": "{gameName}",
-        "changeVersion": "Change version",
-        "changeName": "Change name",
         "expansionCount": "{count, plural, one {expansion} other {expansions}}"
       },
       "gameNameSelector": {
         "question": "Which name is on your box?",
         "other": "Other ({count})",
-        "otherScripts": "Select from other scripts:",
         "changeName": "Change Name"
       },
       "expansions": {
@@ -1451,9 +1163,7 @@
       },
       "pricing": {
         "title": "Pricing",
-        "subtitle": "Set your asking price",
-        "auctionTitle": "Auction Settings",
-        "auctionSubtitle": "Set your starting price and auction duration"
+        "subtitle": "Set your asking price"
       },
       "phone": {
         "label": "Phone number needed for shipping",
@@ -1466,7 +1176,6 @@
       "middle": "and confirm that all information provided is accurate. I understand that Second Turn Games reserves the right to remove listings that don't meet our guidelines."
     },
     "actions": {
-      "publishListing": "Publish Listing",
       "saveChanges": "Save Changes",
       "publishing": "Publishing...",
       "saving": "Saving...",
@@ -1481,8 +1190,6 @@
       "mobileSubtitle": "Review your listing details",
       "sections": {
         "game": "Game",
-        "condition": "Condition",
-        "photos": "Photos",
         "expansions": "Included expansions",
         "pricing": "Your earnings",
         "saleType": "Sale type",
@@ -1494,36 +1201,22 @@
         "fee": "Platform fee (10%)",
         "youReceive": "You receive"
       },
-      "noPhotos": "No photos yet",
       "photoCount": "{count} photo",
-      "photoCount_other": "{count} photos",
-      "allComponents": "All components present",
       "missingComponents": "Some components missing",
       "auction": "Auction",
       "fixedPrice": "Fixed Price",
       "emptyPhotos": "Add photos to preview",
-      "emptyPrice": "Set your price in step 3",
-      "emptyCondition": "Select condition in step 2"
-    },
-    "successModal": {
-      "title": "Listing published",
-      "subtitle": "Your game is now live and ready for buyers to discover.",
-      "viewListing": "View your listing",
-      "listAnother": "List another game",
-      "browseAll": "Browse all games"
+      "emptyPrice": "Set your price in step 3"
     },
     "validation": {
-      "selectGameVersion": "Please select a game and version",
       "selectCondition": "Please select the condition of your game",
       "photoRequired": "Please upload at least 1 photo for Acceptable condition items",
       "priceRequired": "Please enter a valid price",
-      "phoneRequired": "Please enter your phone number to enable shipping for Instant Buy listings",
       "termsRequired": "Please accept the terms and conditions",
       "emailVerificationRequired": "Please verify your email address before creating a listing. Check your inbox for the verification link.",
       "rateLimitWarning": "You have {remaining, plural, one {# listing} other {# listings}} remaining today."
     },
     "errors": {
-      "loadDraftFailed": "Failed to load draft. Please start fresh.",
       "phoneSaveFailed": "Failed to save phone number. Please try again.",
       "publishFailed": "Failed to publish listing: {message}",
       "updateFailed": "Failed to update listing: {message}",
@@ -1532,8 +1225,6 @@
       "goToMyListings": "Go to My Listings"
     },
     "GameSearch": {
-      "findYourGame": "Find Your Game",
-      "findYourGameSubtitle": "Search thousands of board games by name",
       "changeGame": "Change game",
       "changeVersion": "Change version",
       "changeName": "Change name",
@@ -1561,11 +1252,7 @@
       "completeness": {
         "question": "Are all original components included? *",
         "yesComplete": "Yes, complete",
-        "yesDescription": "All pieces included",
         "noIncomplete": "No, incomplete",
-        "noDescription": "Some pieces missing",
-        "change": "Change",
-        "missing": "Missing: {components}",
         "whatsMissing": "What's missing? *",
         "placeholder": "e.g., Missing 2 red cubes and 1 action card"
       },
@@ -1620,37 +1307,6 @@
         "removePhoto": "Remove photo"
       }
     },
-    "VersionSelector": {
-      "loading": {
-        "title": "Loading versions from BoardGameGeek...",
-        "subtitle": "This may take a few seconds"
-      },
-      "noVersions": {
-        "title": "No version data available from BoardGameGeek",
-        "description": "This game doesn't have detailed version information in BGG's database. You'll be able to enter edition details manually in the next step.",
-        "continueButton": "Continue Without Version Selection →"
-      },
-      "fetchError": {
-        "title": "Error loading versions",
-        "description": "Couldn't load version data from BoardGameGeek. Please try again.",
-        "retryButton": "Retry"
-      },
-      "gameInfo": {
-        "originalRelease": "Original release: {year}"
-      },
-      "versionList": {
-        "foundVersions": "Found {count} version - select yours:",
-        "foundVersions_other": "Found {count} versions - select yours:",
-        "publisher": "Publisher:",
-        "language": "Language:",
-        "year": "Year:",
-        "productCode": "Product Code:"
-      },
-      "help": {
-        "title": "Not sure which version you have?",
-        "description": "Check the box bottom or rulebook for publisher name and year. The product code (if present) is the most accurate identifier. If you can't find your exact version, choose the closest match."
-      }
-    },
     "LanguageVersionSelector": {
       "loading": "Loading versions from BoardGameGeek...",
       "noVersions": {
@@ -1660,17 +1316,12 @@
       },
       "autoSelected": {
         "title": "Version automatically selected",
-        "onlyVersion": "Only one version available for this game:",
-        "onlyLanguageVersion": "Only one {language} version available:"
+        "onlyVersion": "Only one version available for this game:"
       },
       "selectLanguage": "Select Language",
-      "required": "*",
       "otherLanguages": "Other ({count})",
       "showLess": "Show less",
-      "languagesAvailable": "{count} language available",
-      "languagesAvailable_other": "{count} languages available",
       "selectVersion": "Select your version",
-      "selectVersion_other": "Select your version ({count} available)",
       "noVersionsForLanguage": "No versions found for {language}. This shouldn't happen - please try selecting a different language."
     },
     "ManualVersionInput": {
@@ -1752,14 +1403,10 @@
       "newRetail": "New retail:",
       "baseGame": "Base game:",
       "expansions": "+ {count} expansion",
-      "expansions_other": "+ {count} expansions",
-      "priced": "({count} priced)",
       "pricedCount": "({count} priced)",
       "bundleRetail": "Bundle retail:",
-      "fill": "Fill",
       "fillButton": "Fill",
       "avgSoldHere": "Avg. sold here:",
-      "sales": "({count} sales)",
       "salesCount": "({count} sales)",
       "lowestOnSecondTurn": "Lowest on Second Turn:",
       "lowestIsAuction": "(current bid)",
@@ -1807,8 +1454,16 @@
           "shortDescription": "Appears unplayed or played once",
           "fullDescription": "Opened but essentially untouched. This game looks like you just removed the shrink wrap. Many games get opened, admired, and put on the shelf - if that's your game, this is probably the right grade.",
           "valueGuidance": "80–95% of retail",
-          "boxCriteria": ["No visible wear, scuffs, or scratches", "Corners sharp and intact", "No shelf wear or storage marks"],
-          "componentCriteria": ["All components present and accounted for", "Cards show no wear - edges crisp, no bowing", "Tokens unpunched, or punched with no damage"],
+          "boxCriteria": [
+            "No visible wear, scuffs, or scratches",
+            "Corners sharp and intact",
+            "No shelf wear or storage marks"
+          ],
+          "componentCriteria": [
+            "All components present and accounted for",
+            "Cards show no wear - edges crisp, no bowing",
+            "Tokens unpunched, or punched with no damage"
+          ],
           "proTip": "If you've played even once or twice, consider Very Good instead. Like New means essentially untouched."
         },
         "veryGood": {
@@ -1816,8 +1471,16 @@
           "shortDescription": "Played with care, minimal wear",
           "fullDescription": "Played and enjoyed, but handled with care. A game in Very Good condition is what you'd happily give as a gift.",
           "valueGuidance": "60–75% of retail",
-          "boxCriteria": ["Minor shelf wear or light scuffing", "Corners may show slight softening", "No tears, splits, or structural damage"],
-          "componentCriteria": ["All components present", "Cards show minimal handling - light edge wear at most", "Tokens punched cleanly, no lifting or tearing"],
+          "boxCriteria": [
+            "Minor shelf wear or light scuffing",
+            "Corners may show slight softening",
+            "No tears, splits, or structural damage"
+          ],
+          "componentCriteria": [
+            "All components present",
+            "Cards show minimal handling - light edge wear at most",
+            "Tokens punched cleanly, no lifting or tearing"
+          ],
           "proTip": "This is the sweet spot for most second-hand games. Buyers get a great game at a fair price."
         },
         "good": {
@@ -1825,8 +1488,16 @@
           "shortDescription": "Regular play wear, fully functional",
           "fullDescription": "Clearly pre-loved - this game has seen regular play but remains fully functional. All the adventures, some of the wear.",
           "valueGuidance": "40–55% of retail",
-          "boxCriteria": ["Noticeable wear, scuffs, or scratches", "Corner wear - soft corners, possible minor splits", "Light ring wear or sticker residue"],
-          "componentCriteria": ["All components present (or missing pieces clearly noted)", "Cards show shuffling wear on edges", "Boards may have minor warping or edge wear"],
+          "boxCriteria": [
+            "Noticeable wear, scuffs, or scratches",
+            "Corner wear - soft corners, possible minor splits",
+            "Light ring wear or sticker residue"
+          ],
+          "componentCriteria": [
+            "All components present (or missing pieces clearly noted)",
+            "Cards show shuffling wear on edges",
+            "Boards may have minor warping or edge wear"
+          ],
           "proTip": "Many collectors are happy with Good condition for games they want to play rather than display."
         },
         "acceptable": {
@@ -1834,8 +1505,16 @@
           "shortDescription": "Heavy wear, still playable",
           "fullDescription": "Well-loved and showing it. This game works, but it's seen better days. Always note what's missing or damaged in your listing description - buyers deserve to know exactly what they're getting.",
           "valueGuidance": "20–35% of retail",
-          "boxCriteria": ["Significant wear, creases, or damage", "Corner splits, tears, or tape repairs", "Box may not close properly"],
-          "componentCriteria": ["All crucial components present (minor pieces may be missing)", "Cards worn - may need sleeves to play comfortably", "Boards may have noticeable wear or warping"],
+          "boxCriteria": [
+            "Significant wear, creases, or damage",
+            "Corner splits, tears, or tape repairs",
+            "Box may not close properly"
+          ],
+          "componentCriteria": [
+            "All crucial components present (minor pieces may be missing)",
+            "Cards worn - may need sleeves to play comfortably",
+            "Boards may have noticeable wear or warping"
+          ],
           "proTip": "Be very specific about damage. 'Acceptable with taped corner' is better than vague descriptions."
         }
       },
@@ -1843,17 +1522,29 @@
         "punchedTokens": {
           "title": "Punched vs unpunched tokens",
           "description": "Whether cardboard tokens have been punched from their sheets matters to some buyers.",
-          "details": ["Unpunched: tokens still in their original sheets", "Punched: tokens removed from sheets (standard)", "Cleanly punched: removed carefully with no damage"]
+          "details": [
+            "Unpunched: tokens still in their original sheets",
+            "Punched: tokens removed from sheets (standard)",
+            "Cleanly punched: removed carefully with no damage"
+          ]
         },
         "sleevedCards": {
           "title": "Sleeved cards",
           "description": "Cards protected in sleeves are a plus. Note this in your listing.",
-          "details": ["Cards sleeved since purchase", "Cards sleeved after some play", "Note if sleeves are included"]
+          "details": [
+            "Cards sleeved since purchase",
+            "Cards sleeved after some play",
+            "Note if sleeves are included"
+          ]
         },
         "paintedMinis": {
           "title": "Painted miniatures",
           "description": "Some buyers want painted minis, others don't. Be clear about the state.",
-          "details": ["Unpainted (original)", "Primed only", "Fully painted"]
+          "details": [
+            "Unpainted (original)",
+            "Primed only",
+            "Fully painted"
+          ]
         }
       },
       "philosophy": {
@@ -1862,7 +1553,6 @@
       }
     },
     "pricingFormat": {
-      "title": "Pricing",
       "fixedPrice": {
         "label": "Fixed Price",
         "description": "Set your price"
@@ -1885,14 +1575,9 @@
       }
     },
     "auction": {
-      "startingPrice": {
-        "title": "Starting Price",
-        "description": "Bidding will start from this amount. Set it low to attract interest, or higher if you have a minimum in mind."
-      },
       "duration": {
         "title": "Auction Duration",
         "titleCooldown": "Initial Listing Period",
-        "description": "How long the auction will run before the highest bidder wins.",
         "cooldownHelper": "If no bids arrive in this time, the auction expires",
         "oneDay": "1 day",
         "days": "{count} days"
@@ -2006,10 +1691,6 @@
         "accurateDescriptions": "You're responsible for <strong>accurate descriptions</strong> of your games"
       },
       "readFullTerms": "Read full Seller Terms →",
-      "country": {
-        "title": "Where are you located?",
-        "hint": "This helps us show you available payment and shipping options."
-      },
       "checkbox": "I confirm I'm 18+, selling personal items, and agree to the",
       "sellerTerms": "Seller Terms",
       "acceptButton": "Accept seller terms",
@@ -2027,7 +1708,6 @@
       "title": "Mark as Sold",
       "message": "Are you sure you want to mark \"{gameName}\" as sold?",
       "description": "This will hide the listing from public search. You can reactivate it later if needed.",
-      "descriptionContactSeller": "Mark this listing as sold? It will be hidden from public search.",
       "confirm": "Mark as Sold"
     },
     "removed": {
@@ -2068,12 +1748,7 @@
       "preferences": "Preferences",
       "privacy": "Privacy"
     },
-    "profileBanner": {
-      "title": "Complete your profile",
-      "subtitle": "Add your name and country so others know who they're dealing with"
-    },
     "profileInfo": "Profile information",
-    "loading": "Loading...",
     "profileError": {
       "title": "Profile Loading Error",
       "description": "We couldn't load your profile. This might be due to a network issue or a problem with your account data.",
@@ -2082,9 +1757,6 @@
       "retry": "Retry",
       "signOut": "Sign Out",
       "contactSupport": "If this problem persists, please contact"
-    },
-    "validation": {
-      "fullNameRequired": "Full name is required"
     },
     "success": {
       "nameUpdated": "Name updated successfully",
@@ -2101,17 +1773,10 @@
       "signOut": "Failed to sign out. Please try again.",
       "downloadData": "Failed to download your data. Please try again."
     },
-    "profileHero": {
-      "memberSince": "Member since {date}"
-    },
     "fields": {
       "email": "Email",
       "phone": "Phone",
-      "location": "Location",
-      "addPhone": "Add phone number",
-      "selectCountry": "Select your country",
-      "add": "Add",
-      "edit": "Edit"
+      "location": "Location"
     },
     "publicProfile": {
       "title": "Public profile",
@@ -2182,8 +1847,6 @@
     "reviewCount": "{count, plural, =1 {# review} other {# reviews}}",
     "completedSales": "completed sales",
     "positive": "positive",
-    "browseAllListings": "Browse All Listings",
-    "activeListings": "Active Listings",
     "reviews": "Reviews",
     "loadMore": "Load more ({current} of {total})",
     "notSelling": "This user is not currently selling any items.",
@@ -2261,40 +1924,16 @@
     }
   },
   "UserCard": {
-    "memberSince": "Joined {date}",
-    "notSelling": "Not currently selling"
+    "memberSince": "Joined {date}"
   },
   "Dashboard": {
-    "ProfileCompletion": {
-      "title": "A bit about you",
-      "subtitle": "Help others know who they're dealing with",
-      "profileCompletion": "Profile completion",
-      "dismiss": "Dismiss",
-      "displayNameLabel": "What should we call you?",
-      "displayNamePlaceholder": "BoardGameFan42",
-      "suggestions": "Suggestions:",
-      "countryLabel": "Where are you from?",
-      "countryHint": "Helps show relevant listings near you",
-      "saving": "Saving...",
-      "saveAndContinue": "Save & continue",
-      "skipForNow": "Skip for now",
-      "errors": {
-        "nameRequired": "Please enter a display name",
-        "nameTooShort": "Display name must be at least 2 characters",
-        "nameTooLong": "Display name must be less than 50 characters",
-        "countryRequired": "Please select your country",
-        "somethingWrong": "Something went wrong. Please try again."
-      }
-    },
     "SellerCTA": {
       "title": "Start selling",
-      "subtitle": "Turn waiting games into someone's next adventure. Just a 10% commission on sales.",
-      "startSelling": "Start selling"
+      "subtitle": "Turn waiting games into someone's next adventure. Just a 10% commission on sales."
     }
   },
   "Cart": {
     "title": "Cart",
-    "loading": "Loading your cart...",
     "summary": {
       "itemsFromSellers": "{totalItems, plural, one {# item} other {# items}} from {basketCount, plural, one {# seller} other {# sellers}}"
     },
@@ -2311,17 +1950,10 @@
       "remove": "Remove from cart",
       "delete": "Delete"
     },
-    "review": "review",
-    "reviews": "reviews",
     "basket": {
-      "number": "Basket {index}/{total}",
-      "items": "{count, plural, one {# item} other {# items}}",
-      "subtotal": "Subtotal",
       "subtotalItems": "Subtotal ({count, plural, one {# item} other {# items}})",
       "shipping": "Shipping",
       "shippingAtCheckout": "Calculated at checkout",
-      "total": "Total",
-      "shippingNote": "+ shipping (calculated at checkout)",
       "checkout": "Checkout"
     },
     "orderSummary": {
@@ -2406,8 +2038,7 @@
       "emptyFiltered": {
         "title": "No {status} wanted listings",
         "description": "You don't have any {status} wanted listings at the moment"
-      },
-      "extended": "Wanted listing extended by 30 days"
+      }
     },
     "saved": {
       "loading": "Loading your saved listings...",
@@ -2432,17 +2063,9 @@
     }
   },
   "SellerDashboard": {
-    "title": "Seller dashboard",
     "titleWallet": "Wallet & earnings",
     "subtitle": {
-      "payoutsEnabled": "Manage your earnings, wallet, and withdrawals",
-      "contactOnly": "Manage your listings and connect with buyers",
       "wallet": "Your earnings from sales, ready to spend or withdraw"
-    },
-    "tabs": {
-      "orders": "My sales",
-      "earnings": "Earnings",
-      "reviews": "Reviews"
     },
     "earnings": {
       "withdraw": "Withdraw",
@@ -2465,97 +2088,19 @@
     "reviews": {
       "loading": "Loading reviews..."
     },
-    "viewAllSales": "View all sales",
-    "refresh": "Refresh",
-    "settings": "Settings",
-    "bankAccount": {
-      "title": "Bank Account",
-      "addDescription": "Add a bank account to withdraw your earnings",
-      "addButton": "Add Bank Account",
-      "updateLink": "Update bank account"
-    },
-    "pendingAlert": {
-      "title": "You have {count, plural, one {# order} other {# orders}} waiting",
-      "description": "Please review and respond to pending orders within 24 hours.",
-      "urgentDescription": "Some orders are expiring soon. Please respond as soon as possible.",
-      "reviewOrders": "Review Orders"
-    },
-    "quickActions": {
-      "createListing": {
-        "title": "Create Listing",
-        "description": "List a game for sale"
-      },
-      "myListings": {
-        "title": "My Listings",
-        "description": "Manage your active listings"
-      },
-      "messagesOrders": {
-        "title": "Messages & Orders",
-        "description": "View buyer inquiries"
-      }
-    },
-    "quickLinks": {
-      "title": "Quick Links",
-      "myListings": "My Listings",
-      "manageOrders": "Manage Orders",
-      "createListing": "Create Listing",
-      "allTransactions": "All Transactions"
-    },
-    "bankAccountModal": {
-      "addTitle": "Add Bank Account",
-      "updateTitle": "Update Bank Account"
-    },
     "recentReviews": {
-      "title": "Recent Reviews",
-      "viewAll": "View all reviews",
       "noReviews": "No reviews yet",
       "noReviewsHint": "Reviews from buyers will appear here after your first completed sale"
-    },
-    "BalanceCard": {
-      "title": "Wallet Balance",
-      "tryAgain": "Try Again",
-      "refreshBalance": "Refresh balance",
-      "noAccount": "Complete seller onboarding to start earning.",
-      "startSelling": "Start Selling",
-      "noSales": "You haven't made any sales yet.",
-      "noSalesHint": "Once you sell a game, your earnings will appear here.",
-      "viewListings": "View Your Listings",
-      "available": "Available",
-      "pending": "Pending",
-      "total": "Total",
-      "fundsReleasedInfo": "Earnings are credited to your wallet after delivery is confirmed",
-      "addBankHint": "Add a bank account to withdraw your earnings.",
-      "addBankAccount": "Add Bank Account",
-      "requestWithdrawal": "Withdraw",
-      "updated": "Updated {time}",
-      "statsSingular": "{count} sale · {amount} last 30 days",
-      "statsPlural": "{count} sales · {amount} last 30 days",
-      "viewWallet": "View wallet & transactions"
-    },
-    "WithdrawalHistory": {
-      "title": "Recent Withdrawals",
-      "viewAll": "View All",
-      "noWithdrawals": "No withdrawals yet",
-      "noWithdrawalsHint": "Request a withdrawal to see your history",
-      "status": {
-        "pending": "Pending",
-        "processing": "Processing",
-        "completed": "Completed",
-        "rejected": "Rejected"
-      }
     },
     "TransactionList": {
       "title": "Recent Sales",
       "viewAll": "View All",
       "noSales": "No sales yet",
-      "noSalesHint": "Your sales will appear here",
-      "buyer": "Buyer",
-      "orderNumber": "Order #{number}"
+      "noSalesHint": "Your sales will appear here"
     },
     "SellerTrustBadge": {
       "sale": "sale",
       "sales": "sales",
-      "newSeller": "New seller",
       "shipsFrom": "Ships from {country}",
       "badges": {
         "topSeller": "Top Seller",
@@ -2567,29 +2112,11 @@
     "SellerTrustCard": {
       "title": "Your Reputation",
       "rating": "Rating",
-      "reviews": "Reviews",
-      "sales": "Sales",
-      "memberSince": "Member Since",
-      "noReviews": "No reviews yet",
-      "noReviewsHint": "Reviews from buyers will appear here",
-      "badge": {
-        "topSeller": "Top Seller",
-        "trustedSeller": "Trusted Seller",
-        "newSeller": "New Seller"
-      },
-      "tips": {
-        "title": "Build your reputation",
-        "tip1": "Ship items promptly",
-        "tip2": "Respond to messages quickly",
-        "tip3": "Describe items accurately"
-      }
+      "reviews": "Reviews"
     },
     "SellerReviewsList": {
-      "title": "Reviews",
       "noReviews": "No reviews yet",
       "noReviewsHint": "Buyer reviews will appear here after completed orders",
-      "respond": "Respond to review",
-      "response": "Your response",
       "reportReview": "Report review",
       "reportReason": "Why are you reporting this review?",
       "reportReasonPlaceholder": "Describe why this review is inappropriate...",
@@ -2613,13 +2140,8 @@
       "sendResponse": "Send response"
     },
     "Dac7": {
-      "cardTitle": "Tax Compliance",
-      "cardSubtitle": "DAC7 EU reporting",
       "transactions": "Transactions",
       "sales": "Sales",
-      "taxInfoSubmitted": "Tax info submitted",
-      "noActionRequired": "No action required",
-      "clickToProvide": "Click to provide tax info",
       "provideTaxInfo": "Provide tax info",
       "approaching": {
         "title": "Tax information needed soon",
@@ -2633,10 +2155,6 @@
         "title": "Selling suspended",
         "description": "New listings are blocked until you provide tax information. Existing listings are hidden."
       }
-    },
-    "WalletInfo": {
-      "title": "Wallet",
-      "description": "Your earnings are stored in your platform wallet. Withdraw to your bank anytime."
     }
   },
   "Orders": {
@@ -2646,7 +2164,6 @@
       "confirmReceipt": "Confirm receipt",
       "activeDispute": "Dispute open"
     },
-    "subtitle": "Games heading your way",
     "loading": "Loading your orders...",
     "error": {
       "title": "Error loading orders",
@@ -2666,18 +2183,6 @@
       "completed": "Completed",
       "cancelled": "Cancelled"
     },
-    "statuses": {
-      "pendingPayment": "Pending Payment",
-      "pendingSeller": "Waiting for Seller",
-      "accepted": "Accepted",
-      "shipped": "Shipped",
-      "inTransit": "In Transit",
-      "delivered": "Delivered",
-      "completed": "Completed",
-      "cancelled": "Cancelled",
-      "disputed": "Disputed",
-      "refunded": "Refunded"
-    },
     "emptyState": {
       "title": "Nothing here yet",
       "descriptionAll": "When you buy a game, it'll show up here so you can follow its journey.",
@@ -2685,14 +2190,6 @@
       "button": "Find your next game"
     },
     "orderCard": {
-      "seller": "Seller: {name}",
-      "ordered": "Ordered {date}",
-      "total": "Total",
-      "items": "{count, plural, one {# item} other {# items}}",
-      "sellerDeadlineExpired": "Seller deadline expired - Refund processing",
-      "sellerTimeRemaining": "Seller has {hours}h {minutes}m to respond",
-      "terminalPickup": "Terminal Pickup",
-      "localPickup": "Local Pickup",
       "expired": "Expired",
       "from": "From: {name}",
       "itemsMore": "+{count} more"
@@ -2703,18 +2200,7 @@
       "backToOrders": "Back to Orders",
       "orderTitle": "Order {orderNumber}",
       "placedAt": "Placed {date} at {time}",
-      "viewTransaction": "View Transaction & Messages",
       "orderStatus": "Order Status",
-      "status": {
-        "pending_payment": "PENDING PAYMENT",
-        "pending_seller": "PENDING SELLER",
-        "accepted": "ACCEPTED",
-        "shipped": "SHIPPED",
-        "in_transit": "IN TRANSIT",
-        "delivered": "DELIVERED",
-        "completed": "COMPLETED",
-        "cancelled": "CANCELLED"
-      },
       "steps": {
         "placed": "Order Placed",
         "pending": "Waiting for Seller",
@@ -2722,13 +2208,9 @@
         "shipped": "Shipped",
         "delivered": "Delivered"
       },
-      "sellerTimeRemaining": "Seller has {hours}h {minutes}m to respond",
       "cancelled": {
         "title": "Order Cancelled",
-        "body": "This order has been cancelled and a refund has been initiated.",
-        "defaultReason": "This order has been cancelled",
         "refundProcessed": "Refund Processed: €{amount}",
-        "refundedOn": "Refunded on {date}",
         "reasons": {
           "sellerTimeout": "The seller did not respond within 24 hours. A refund has been initiated.",
           "sellerDeclined": "The seller declined this order. A refund has been initiated.",
@@ -2746,13 +2228,10 @@
       },
       "refunded": {
         "title": "Refund Processed",
-        "notice": "This order has been refunded.",
         "amount": "Refund amount: {amount}"
       },
       "disputed": {
-        "title": "This order is under review",
         "openedOn": "Dispute opened: {date}",
-        "contactSoon": "Our team will contact you within 24 hours",
         "inProgress": "Dispute in Progress",
         "yourReport": "Your report",
         "awaitingDeadline": "Waiting for seller response (deadline: {date})",
@@ -2805,19 +2284,7 @@
         "title": "Items ({count})"
       },
       "shipping": {
-        "deliveryTitle": "Delivery Information",
-        "pickupTitle": "Pickup Information",
-        "recipient": "Recipient",
-        "phone": "Phone",
-        "email": "Email",
-        "trackingNumber": "Tracking Number",
-        "trackPackage": "Track Package",
-        "pickupIn": "Pickup in {city}",
-        "pickupCoordinate": "Coordinate with the seller via messaging to arrange the exact meeting location.",
-        "note": "Note"
-      },
-      "tracking": {
-        "title": "Tracking Timeline"
+        "deliveryTitle": "Delivery Information"
       },
       "summary": {
         "title": "Order Summary",
@@ -2904,62 +2371,15 @@
         "startConversation": "Start the conversation with {name}",
         "buyerLabel": "Buyer",
         "sellerLabel": "Seller"
-      },
-      "buyer": {
-        "title": "Buyer"
       }
     }
   },
   "Help": {
-    "sectionNotFound": "Section not found.",
-    "nav": {
-      "overview": "Help Centre",
-      "buying": "How to Buy",
-      "selling": "How to Sell",
-      "grading": "Condition Grading",
-      "shipping": "Shipping",
-      "wallet": "Wallet & Payments",
-      "dac7": "DAC7 & Taxes"
-    },
     "page": {
       "title": "Help Centre",
       "description": "Guides and resources for buying and selling pre-loved board games on Second Turn Games.",
       "breadcrumbHome": "Home",
       "breadcrumbHelp": "Help Centre"
-    },
-    "faq": {
-      "q1": {
-        "question": "What is Second Turn Games?",
-        "answer": "Second Turn Games is a peer-to-peer marketplace for buying and selling pre-loved board games in the Baltic region (Latvia, Lithuania, Estonia). Every listing is verified against BoardGameGeek's database of 170,000+ games."
-      },
-      "q2": {
-        "question": "Where can I sell board games in Latvia?",
-        "answer": "Second Turn Games is the dedicated marketplace for selling board games in Latvia, Lithuania, and Estonia. List your games with verified BoardGameGeek data, set your price, and ship via parcel lockers. Sellers receive 90% of the sale price."
-      },
-      "q3": {
-        "question": "Is Second Turn Games safe?",
-        "answer": "Yes. Second Turn Games uses EveryPay (via Swedbank) for secure payment processing, offers buyer protection with a dispute resolution window, and verifies all listings against BoardGameGeek's database. The platform is operated by Second Turn Games SIA, registered in Latvia."
-      },
-      "q4": {
-        "question": "What are the fees on Second Turn Games?",
-        "answer": "Buyers pay the item price plus a flat €2.00 shipping fee (no service fee). Sellers pay a 10% commission on the item price, deducted automatically. Listing is free."
-      },
-      "q5": {
-        "question": "How does selling on Second Turn Games work?",
-        "answer": "Search for your game in the BoardGameGeek database, grade its condition, set a price, add photos, and publish. When someone buys, you confirm the order within 24 hours, pack the game, and drop it off at a parcel terminal. Your earnings are credited to your wallet after delivery."
-      },
-      "q6": {
-        "question": "How does shipping work on Second Turn Games?",
-        "answer": "Second Turn Games uses Unisend parcel terminals across the Baltic region. Shipping costs a flat €2.00 per order. After confirming an order, sellers receive a shipping code, pack the game, and drop it off at any Unisend terminal. Tracking updates automatically."
-      },
-      "q7": {
-        "question": "How do I get paid as a seller?",
-        "answer": "Two days after delivery (or when the buyer confirms earlier), your earnings (90% of item price) are credited to your platform wallet. You can withdraw to your IBAN bank account at any time - no fees, no minimum waiting period."
-      },
-      "q8": {
-        "question": "What board game conditions are accepted?",
-        "answer": "Second Turn Games uses four condition grades: Like New (played 1-2 times, all components present), Very Good (light wear, fully playable), Good (moderate wear, complete and playable), and Acceptable (noticeable wear but complete). All grades require complete, playable games."
-      }
     }
   },
   "Feedback": {
@@ -2976,7 +2396,6 @@
     "emailLabel": "Email (optional)",
     "emailHelper": "In case we need to follow up",
     "screenshotLabel": "Add a screenshot",
-    "screenshotHelper": "Helpful for bug reports",
     "submit": "Send feedback",
     "sending": "Sending...",
     "successTitle": "Thanks for your feedback",
@@ -3012,30 +2431,17 @@
     "title": "Galda Spēle",
     "subtitle": "Guess the daily board game",
     "guessPlaceholder": "Search for a board game...",
-    "guessButton": "Guess",
     "guessesRemaining": "{count, plural, =1 {1 guess remaining} other {# guesses remaining}}",
     "noResults": "No games found",
-    "players": "players",
     "guessNumber": "Guess #{number}",
     "yourGuesses": "{count, plural, =1 {Your guess (1)} other {Your guesses (#)}}",
-    "tapToDismiss": "Tap anywhere to continue",
-
-    "youWon": "You got it in {count}",
-    "youLost": "Better luck tomorrow",
     "comeBackTomorrow": "Come back tomorrow for a new puzzle",
-
     "shareResults": "Share results",
     "copiedToClipboard": "Copied to clipboard",
     "shared": "Shared",
     "shareFailed": "Share failed",
-    "availableOnSTG": "Available on Second Turn Games",
-
     "noListingsYet": "No one is selling this game yet",
     "sellThisGame": "Sell this game",
-
-    "helpButton": "How to play",
-    "statsButton": "Statistics",
-
     "statPlayed": "Played",
     "statWinRate": "Win %",
     "statCurrentStreak": "Streak",
@@ -3043,30 +2449,17 @@
     "statsTitle": "Statistics",
     "averageGuesses": "Average guesses",
     "guessDistribution": "Guess distribution",
-
-    "columnGame": "Game",
     "columnYear": "Year",
     "columnPlayers": "Max Players",
     "columnWeight": "Complexity",
     "columnTime": "Play Time",
     "columnCategory": "Categories",
     "columnMechanic": "Mechanics",
-
-    "feedbackCorrect": "Correct",
-    "feedbackClose": "Close",
-    "feedbackHigher": "Target is higher",
-    "feedbackLower": "Target is lower",
-    "feedbackPartial": "Partial match",
-    "feedbackNone": "No match",
-    "matched": "Matched",
-    "guessed": "Your guess",
-
     "errors": {
       "loadFailed": "Failed to load puzzle",
       "submitFailed": "Failed to submit guess",
       "alreadyGuessed": "You already guessed this game"
     },
-
     "turni": {
       "helpIntro": "Guess the mystery board game in 6 tries. I'll give you hints after each guess.",
       "win": {
@@ -3087,41 +2480,9 @@
         "14": "Two weeks strong.",
         "30": "A month of daily games. Legend."
       }
-    },
-
-    "help": {
-      "title": "How to play",
-      "description": "Guess the mystery board game in 6 tries. Each guess reveals clues about how close you are.",
-      "howToPlay": "Rules",
-      "rule1": "Each day there's a new mystery board game to guess",
-      "rule2": "Type a game name and select it to make a guess",
-      "rule3": "Use the feedback from each guess to narrow down the answer",
-
-      "feedbackLegend": "Feedback guide",
-      "legendCorrect": "Exact match or very close",
-      "legendClose": "Close (within range) or partial overlap",
-      "legendHigher": "The target value is higher",
-      "legendLower": "The target value is lower",
-      "legendNone": "No match or overlap",
-
-      "attributesTitle": "Attributes compared",
-      "attrYear": "Year",
-      "attrYearDesc": "When the game was first published",
-      "attrPlayers": "Max Players",
-      "attrPlayersDesc": "Maximum player count supported",
-      "attrWeight": "Complexity",
-      "attrWeightDesc": "BGG complexity rating (Light to Very Heavy)",
-      "attrTime": "Play Time",
-      "attrTimeDesc": "Average playing time in minutes",
-      "attrCategory": "Categories",
-      "attrCategoryDesc": "BGG categories (Strategy, Family, etc.)",
-      "attrMechanic": "Mechanics",
-      "attrMechanicDesc": "Game mechanisms (Worker Placement, etc.)"
     }
   },
   "SellerOrders": {
-    "title": "My sales",
-    "subtitle": "Manage your orders and respond to buyers",
     "loading": "Loading your orders...",
     "error": {
       "title": "Error loading orders",
@@ -3137,13 +2498,6 @@
       "acceptOrDecline": "Accept or decline",
       "activeDispute": "Dispute open"
     },
-    "summary": {
-      "allOrders": "All Orders",
-      "pending": "Pending",
-      "accepted": "Accepted",
-      "shipped": "Shipped",
-      "completed": "Completed"
-    },
     "tabs": {
       "pending": "Pending",
       "accepted": "Accepted",
@@ -3155,65 +2509,22 @@
       "all": "All"
     },
     "card": {
-      "buyer": "Buyer: {name}",
       "expired": "Expired",
-      "timeRemaining": "{hours}h {minutes}m left",
-      "items": "Items ({count})",
       "itemsMore": "+{count} more",
       "to": "To: {name}"
-    },
-    "shipping": {
-      "terminalPickup": "Terminal Pickup:",
-      "localPickup": "Local Pickup:"
-    },
-    "pricing": {
-      "items": "Items:",
-      "shipping": "Shipping:",
-      "commission": "Commission (10%):",
-      "youReceive": "You receive:"
-    },
-    "actions": {
-      "acceptOrder": "Accept Order",
-      "accepting": "Accepting...",
-      "decline": "Decline",
-      "viewDetails": "View Details"
-    },
-    "acceptModal": {
-      "title": "Accept Order",
-      "confirmDescription": "A size M parcel locker will be reserved automatically. Most board games fit comfortably in this size.",
-      "confirmAccept": "Confirm Accept",
-      "cancel": "Cancel",
-      "processing": "Accepting..."
-    },
-    "declineModal": {
-      "title": "Decline Order",
-      "description": "Please provide a reason for declining this order. The buyer will be automatically refunded.",
-      "placeholder": "e.g., Item no longer available",
-      "cancel": "Cancel",
-      "confirmDecline": "Confirm Decline",
-      "declining": "Declining..."
     }
   },
   "SellerOrderDetail": {
     "loading": "Loading order details...",
-    "error": {
-      "title": "Error loading order",
-      "orderNotFound": "Order not found"
-    },
     "backToOrders": "Back to Orders",
     "actionRequired": {
       "title": "Action Required",
-      "description": "Please accept or decline this order. You have 24 hours from when the order was placed to respond. If you don\u2019t respond in time, the order will be automatically cancelled and the buyer will be refunded.",
+      "description": "Please accept or decline this order. You have 24 hours from when the order was placed to respond. If you don’t respond in time, the order will be automatically cancelled and the buyer will be refunded.",
       "acceptOrder": "Accept Order",
       "declineOrder": "Decline Order",
       "expiredDescription": "The response window has closed. This order will be automatically cancelled and the buyer refunded."
     },
     "acceptModal": {
-      "title": "Confirm Accept Order",
-      "confirmDescription": "A size M parcel locker will be reserved automatically. Most board games fit comfortably in this size.",
-      "localPickupConfirm": "By accepting, you agree to coordinate pickup with the buyer in {city}. Please use the chat feature to arrange a meeting time and location.",
-      "confirmAccept": "Confirm Accept",
-      "cancel": "Cancel",
       "processing": "Processing..."
     },
     "declineModal": {
@@ -3235,37 +2546,15 @@
       "title": "Ready to Ship",
       "description": "Your parcel has been registered with Unisend. Follow these steps to ship:",
       "parcelId": "Your Parcel ID",
-      "step1": "Go to your nearest <strong>Unisend terminal</strong>",
-      "step2": "Enter the <strong>Parcel ID</strong> above at the terminal screen",
-      "step3": "<strong>Print the label</strong> at the terminal and attach it to your parcel",
-      "step4": "<strong>Place the parcel</strong> in the locker opened by the terminal",
       "trackPackage": "Track Package"
     },
     "shippingInfo": {
-      "title": "Shipping Information",
-      "terminalShipping": "Terminal-to-Terminal Shipping",
-      "localPickup": "Local Pickup",
-      "parcelSize": "Parcel Size: {size}",
-      "receiver": "Receiver:",
-      "buyerContact": "Buyer Contact:"
+      "title": "Shipping Information"
     },
     "buyerInfo": "Buyer",
     "messages": "Conversation",
-    "trackingHistory": "Tracking History",
-    "orderItems": "Order Items ({count})",
     "pricingSummary": {
-      "title": "Pricing Summary",
-      "itemsTotal": "Items Total:",
-      "shippingCost": "Shipping Cost:",
-      "platformCommission": "Platform Commission (10%):",
-      "youReceive": "You Receive:"
-    },
-    "timeline": {
-      "title": "Order Timeline",
-      "orderPlaced": "Order Placed",
-      "paymentReceived": "Payment Received",
-      "orderAccepted": "Order Accepted",
-      "shippingLabelGenerated": "Shipment Registered"
+      "title": "Pricing Summary"
     }
   },
   "WalletTransactions": {
@@ -3282,7 +2571,6 @@
       "amount": "Amount",
       "balance": "Balance"
     },
-    "orderRef": "Order #{number} →",
     "withdrawalStatus": {
       "pending": "Pending",
       "processing": "Processing",
@@ -3304,7 +2592,6 @@
     "exportCsv": "Download CSV",
     "empty": "No transactions yet",
     "emptyHint": "Earnings from completed sales will appear here",
-    "balance": "bal.",
     "loading": "Loading...",
     "showMore": "Show more ({count} remaining)"
   },
@@ -3373,32 +2660,15 @@
       "listingPublished": "Your game is now in play!",
       "listingPublishedSubtext": "We will notify you when someone makes a move.",
       "listingDetail": "{gameName} is listed at {price}.",
-      "resumeTurn": "Resume your turn",
-      "resumeSubtitle": "Continue where you left off",
       "listAnother": "List another game",
-      "viewListing": "View your listing",
-      "browseAll": "Browse all games"
+      "viewListing": "View your listing"
     },
     "achievements": {
       "firstTurn": {
-        "name": "First Turn",
-        "toast": "First Turn complete!",
-        "subtitle": "You're officially a player.",
-        "badge": "First Turn — Achievement unlocked"
-      },
-      "speedRound": {
-        "name": "Speed Round",
-        "toast": "Speed Round!",
-        "subtitle": "Listed in under a minute."
+        "toast": "First Turn complete!"
       }
     },
-    "validation": {
-      "researchIncomplete": "Please select a game and version to continue.",
-      "marketIncomplete": "Please select a condition to continue. Acceptable condition requires at least one photo.",
-      "actionIncomplete": "Please set a valid price to continue."
-    },
     "tracker": {
-      "ariaLabel": "Listing progress",
       "stepOf": "Step {current} of {total}",
       "stepStatus": {
         "active": "active",
@@ -3406,138 +2676,6 @@
         "current": "current",
         "upcoming": "upcoming"
       }
-    }
-  },
-  "Disputes": {
-    "status": {
-      "awaiting_seller": "Awaiting seller",
-      "under_review": "Under review",
-      "resolved": "Resolved"
-    },
-    "title": "Dispute in Progress",
-    "yourReport": "Your report",
-    "waitingForSeller": "Waiting for seller response (deadline: {deadline})",
-    "underReviewBuyer": "Our team is reviewing the dispute. We will notify you of the outcome.",
-    "underReviewSeller": "Our team is reviewing the dispute. We will notify both parties of the outcome.",
-    "resolution": "Resolution",
-    "yourResponse": "Your response",
-    "refunded": "This order has been refunded.",
-    "refundAmount": "Refund amount: {amount}",
-    "types": {
-      "not_as_described": "Item not as described",
-      "missing_parts": "Missing parts or components",
-      "damaged": "Item arrived damaged",
-      "wrong_item": "Wrong item received",
-      "not_received": "Item not received"
-    },
-    "sellerResponse": {
-      "howToRespond": "How would you like to respond?",
-      "contest": "Contest claim",
-      "contestDescription": "Provide your side for admin review",
-      "accept": "Accept claim",
-      "acceptDescription": "Agree to refund the buyer",
-      "acceptWarning": "By accepting, you agree that the buyer's claim is valid. The dispute will be resolved immediately and a full refund will be processed. This cannot be undone.",
-      "submitContest": "Submit Response",
-      "submitAccept": "Accept Claim and Refund Buyer",
-      "responseSubmitted": "Response Submitted",
-      "claimAccepted": "Claim Accepted",
-      "responseSubmittedMessage": "Our team will review the dispute and notify both parties of the outcome.",
-      "claimAcceptedMessage": "You accepted the buyer's claim. A refund will be processed for the buyer.",
-      "singleResponseWarning": "You can only submit one response. Make sure to include all relevant information before submitting.",
-      "minChars": "Minimum 50 characters",
-      "deadlineExpired": "Response deadline has passed",
-      "hoursRemaining": "{hours} hours remaining to respond",
-      "optionalNote": "Optional note (any comments for the buyer)",
-      "responseLabel": "Your Response to Order #{orderNumber}"
-    }
-  },
-  "Documents": {
-    "layout": {
-      "reg": "Reg.",
-      "vat": "VAT",
-      "no": "No.",
-      "date": "Date:",
-      "recipient": "Recipient",
-      "electronicSignature": "This document was generated electronically and is valid without a signature."
-    },
-    "lineItems": {
-      "description": "Description",
-      "gross": "Gross",
-      "net": "Net",
-      "vatRate": "VAT Rate",
-      "vat": "VAT"
-    },
-    "invoice": {
-      "title": "Platform Services Invoice",
-      "notAvailable": "Invoice not available",
-      "notAvailableDescription": "This invoice is not yet available or you do not have access.",
-      "order": "Order:",
-      "country": "Country:",
-      "commissionLineItem": "Marketplace commission (10% of {amount})",
-      "shippingManagement": "Shipping management",
-      "totalNet": "Total net",
-      "vatLine": "VAT ({rate}%)",
-      "invoiceTotal": "Invoice total",
-      "paymentSummary": "Payment summary",
-      "totalCollected": "Total collected from buyer",
-      "platformServices": "Platform services (this invoice)",
-      "creditedToWallet": "Credited to your wallet"
-    },
-    "confirmation": {
-      "title": "Order Confirmation",
-      "notAvailable": "Order confirmation not available",
-      "notAvailableDescription": "This confirmation is not yet available or you do not have access.",
-      "seller": "Seller:",
-      "itemColumn": "Item",
-      "conditionColumn": "Condition",
-      "priceColumn": "Price",
-      "itemsRow": "Items",
-      "shippingRow": "Shipping",
-      "totalPaid": "Total paid",
-      "paymentDetails": "Payment details",
-      "cardPayment": "Card / bank payment",
-      "walletApplied": "Wallet balance applied",
-      "dateLabel": "Date",
-      "delivery": "Delivery",
-      "parcelLocker": "Parcel locker:",
-      "pickup": "Pickup",
-      "city": "City:",
-      "notes": "Notes:"
-    },
-    "creditNote": {
-      "title": "Credit Note",
-      "notAvailable": "Credit note not available",
-      "notAvailableDescription": "This credit note is not yet available or you do not have access.",
-      "order": "Order:",
-      "originalInvoice": "Original invoice:",
-      "reason": "Reason:",
-      "reversalCommission": "Reversal: marketplace commission (10% of {amount})",
-      "reversalShipping": "Reversal: shipping management",
-      "totalNet": "Total net",
-      "vatLine": "VAT ({rate}%)",
-      "creditNoteTotal": "Credit note total",
-      "refundSummary": "Refund summary",
-      "sellerWalletClawback": "Seller wallet clawback",
-      "platformCommissionReversed": "Platform commission reversed",
-      "buyerRefund": "Buyer refund"
-    },
-    "payoutStatement": {
-      "title": "Payout Statement",
-      "notAvailable": "Payout statement not available",
-      "notAvailableDescription": "This statement is not yet available or you do not have access.",
-      "ibanLabel": "IBAN:",
-      "accountHolder": "Account holder:",
-      "orderColumn": "Order",
-      "dateColumn": "Date",
-      "invoiceColumn": "Invoice",
-      "itemsColumn": "Items",
-      "commissionColumn": "Commission",
-      "netCreditColumn": "Net credit",
-      "netPayout": "Net payout",
-      "transferDetails": "Transfer details",
-      "ibanRow": "IBAN",
-      "bankReference": "Bank reference",
-      "completed": "Completed"
     }
   }
 }
