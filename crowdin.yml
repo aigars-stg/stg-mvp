@@ -7,5 +7,13 @@
   {
     "source": "/packages/marketplace/messages/en.json",
     "translation": "/packages/marketplace/messages/%two_letters_code%.json"
+  },
+  {
+    "source": "/packages/marketplace/content/legal/en/*.mdx",
+    "translation": "/packages/marketplace/content/legal/%two_letters_code%/%original_file_name%"
+  },
+  {
+    "source": "/packages/marketplace/content/help/en/*.mdx",
+    "translation": "/packages/marketplace/content/help/%two_letters_code%/%original_file_name%"
   }
 ]
