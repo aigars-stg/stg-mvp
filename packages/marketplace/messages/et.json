@@ -1,0 +1,2905 @@
+{
+  "Common": {
+    "loading": "Loading...",
+    "completeResearchFirst": "Complete the game selection above first",
+    "selectConditionFirst": "Select a condition above first",
+    "aria": {
+      "helpSections": "Help sections",
+      "legalSections": "Legal sections"
+    },
+    "ConditionInfoModal": {
+      "title": "Condition grade",
+      "fullGradingGuide": "Full grading guide",
+      "close": "Close",
+      "whatToExpect": "What to expect",
+      "box": "Box",
+      "components": "Components",
+      "typicalValue": "Typical value:",
+      "ofRetailPrice": "of retail price"
+    },
+    "PhoneInput": {
+      "label": "Phone Number",
+      "dropdownLabel": "Select country code",
+      "prefixLabel": "Country code",
+      "otherPlaceholder": "123456789",
+      "formatHint": {
+        "LV": "Latvian number, 8 digits",
+        "EE": "Estonian number, 7-8 digits",
+        "LT": "Lithuanian mobile, 8 digits",
+        "OTHER": "Enter country code and phone number"
+      }
+    }
+  },
+  "NavbarSearch": {
+    "searchPlaceholder": "Search for board games...",
+    "searchLabel": "Search games",
+    "closeSearch": "Close search",
+    "expansion": "Expansion",
+    "listing": "listing",
+    "listings": "listings",
+    "sellThisGame": "Sell this game",
+    "requestThisGame": "Request this game",
+    "noGamesFound": "No games found for \"{query}\""
+  },
+  "CookieConsent": {
+    "title": "We use cookies",
+    "description": "We use essential cookies to make our site work. With your consent, we may also use analytics cookies to improve your experience.",
+    "learnMore": "Learn more about cookies",
+    "rejectOptional": "Reject Optional",
+    "acceptAll": "Accept All",
+    "essential": "Essential cookies:",
+    "essentialDescription": "Authentication, security (always active)",
+    "analytics": "Analytics cookies:",
+    "analyticsDescription": "Vercel Analytics, Speed Insights (requires consent)",
+    "ariaLabel": "Cookie consent"
+  },
+  "ListingActionsMenu": {
+    "ariaLabel": "Listing actions",
+    "viewListing": "View Listing",
+    "edit": "Edit",
+    "publish": "Publish",
+    "reactivate": "Reactivate",
+    "markAsSold": "Mark as Sold",
+    "removeListing": "Remove Listing",
+    "copyLink": "Copy Link",
+    "relist": "Re-list",
+    "deletePermanently": "Delete Permanently"
+  },
+  "DeleteConfirmationModal": {
+    "title": "Delete Listing",
+    "message": "Are you sure you want to permanently delete \"{gameName}\"?",
+    "warning": "This action cannot be undone. All listing data will be permanently removed.",
+    "permanentWarning": "Warning: This is a permanent action and cannot be reversed.",
+    "cancel": "Cancel",
+    "delete": "Delete Listing",
+    "deleting": "Deleting..."
+  },
+  "WantedListingActionsMenu": {
+    "ariaLabel": "Wanted listing actions",
+    "viewListing": "View Listing",
+    "edit": "Edit",
+    "reactivate": "Reactivate",
+    "markAsFulfilled": "Mark as Fulfilled",
+    "cancelListing": "Cancel Listing",
+    "copyLink": "Copy Link",
+    "deletePermanently": "Delete Permanently"
+  },
+  "WantedStatusChangeModal": {
+    "fulfilled": {
+      "title": "Mark as Fulfilled",
+      "message": "Great news. Mark {gameName} as fulfilled?",
+      "description": "This will move the listing to your fulfilled items.",
+      "confirmText": "Mark as Fulfilled"
+    },
+    "cancelled": {
+      "title": "Cancel Listing",
+      "message": "Are you sure you want to cancel {gameName}?",
+      "description": "You can reactivate it later if you change your mind.",
+      "confirmText": "Cancel Listing"
+    },
+    "active": {
+      "title": "Reactivate Listing",
+      "message": "Reactivate {gameName}?",
+      "description": "This listing will appear in your active wanted items again.",
+      "confirmText": "Reactivate"
+    },
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "default": {
+      "title": "Change Status",
+      "message": "Change the status of {gameName}?",
+      "confirmText": "Confirm"
+    }
+  },
+  "Wanted": {
+    "BudgetAssistant": {
+      "title": "Budget Guide",
+      "loading": "Loading pricing data...",
+      "error": "Unable to load pricing suggestions",
+      "newRetail": "New retail price",
+      "avgSoldHere": "Avg. sold here",
+      "lowestOnSecondTurn": "Lowest on Second Turn",
+      "salesCount": "{count} sales",
+      "suggestedFor": "Suggested budget ({condition})",
+      "suggestionTooltip": "This suggestion is based on typical market prices for {condition} copies.",
+      "fillButton": "Use",
+      "useBudget": "Use as Budget",
+      "disclaimer": "Prices are estimates based on market data. Actual prices may vary.",
+      "conditions": {
+        "likeNew": "Like New",
+        "veryGood": "Very Good",
+        "good": "Good",
+        "acceptable": "Acceptable"
+      }
+    },
+    "MinimumConditionSelector": {
+      "conditions": {
+        "likeNew": {
+          "label": "Like New",
+          "description": "Appears unplayed or played once. Components pristine."
+        },
+        "veryGood": {
+          "label": "Very Good",
+          "description": "Minimal wear. All components present and in great shape."
+        },
+        "good": {
+          "label": "Good",
+          "description": "Shows play wear but fully functional. All components present."
+        },
+        "acceptable": {
+          "label": "Acceptable",
+          "description": "Significant wear but playable. May have minor damage."
+        }
+      },
+      "helpText": "Sellers with games in <strong>better condition</strong> than your minimum can also respond. For example, if you select \"Good\", sellers with \"Very Good\" or \"Like New\" can offer."
+    },
+    "ExpansionPreferenceSelector": {
+      "baseOnly": "Base game only",
+      "baseOnlyDesc": "I just want the base game, no expansions needed",
+      "expansionsWelcome": "Expansions welcome",
+      "expansionsWelcomeDesc": "I'm open to bundles with expansions included"
+    },
+    "SuccessModal": {
+      "title": "Looking for a game posted",
+      "subtitle": "Your wanted listing is now live. Sellers who have this game will be able to see your request and respond.",
+      "viewListing": "View on Game Page",
+      "postAnother": "Looking for another game",
+      "browseListings": "Browse Listings"
+    },
+    "CreatePage": {
+      "pageTitle": "Post a Wanted Game",
+      "pageTitleEdit": "Edit Wanted Listing",
+      "pageSubtitle": "Let sellers know what game you're looking for and they can offer to sell it to you",
+      "pageSubtitleEdit": "Update your wanted game preferences",
+      "sections": {
+        "findYourGame": "Find Your Game",
+        "findYourGameSubtitle": "Start typing to search thousands of board games",
+        "yourBudget": "Your Budget",
+        "yourBudgetSubtitle": "Set the maximum amount you're willing to pay",
+        "additionalNotes": "Additional Notes",
+        "additionalNotesSubtitle": "Optional information for sellers"
+      },
+      "labels": {
+        "maximumPrice": "Maximum Price (€) *"
+      },
+      "placeholders": {
+        "price": "50.00",
+        "notes": "Any additional details about what you're looking for..."
+      },
+      "helpers": {
+        "budget": "Sellers can offer games at any price, but setting a clear budget helps them understand your expectations",
+        "notes": "Examples: language preference, specific edition, local pickup preferred, etc.",
+        "editWarning": "Game and edition details cannot be changed. If you need to change the game, please delete this wanted listing and create a new one."
+      },
+      "buttons": {
+        "changeVersion": "Change Version",
+        "changeName": "Change Name",
+        "postWantedGame": "Post Wanted Game",
+        "updateWantedListing": "Update Wanted Listing",
+        "posting": "Posting...",
+        "updating": "Updating...",
+        "backToListings": "Back to My Listings",
+        "preview": "Preview",
+        "saveDraft": "Save Draft"
+      },
+      "preview": {
+        "title": "Live Preview",
+        "selectGame": "Select a game to see preview",
+        "wantedBadge": "WANTED",
+        "sections": {
+          "game": "Game",
+          "budget": "Budget",
+          "notes": "Notes",
+          "buyer": "Buyer"
+        },
+        "budgetDisplay": "Up to {price}",
+        "readyToPost": "Ready to post",
+        "mobileTitle": "Wanted Listing Preview",
+        "mobileSubtitle": "Review your wanted listing details"
+      },
+      "draftBanner": {
+        "title": "You have a saved draft",
+        "subtitle": "Would you like to continue where you left off?",
+        "loadButton": "Load Draft",
+        "startFreshButton": "Start Fresh",
+        "dismiss": "Dismiss"
+      },
+      "loading": {
+        "listing": "Loading wanted listing...",
+        "gameDetails": "Loading game details..."
+      },
+      "errors": {
+        "completionRequired": "Please complete all required fields",
+        "listingNotFound": "Wanted listing not found",
+        "loadingFailed": "Failed to load wanted listing",
+        "permissionDenied": "You do not have permission to edit this wanted listing",
+        "gameDetailsFailed": "Failed to load game details"
+      }
+    },
+    "DeleteConfirmationModal": {
+      "title": "Delete Wanted Listing",
+      "warning": "This action cannot be undone. The wanted listing will be permanently removed from the database.",
+      "cancel": "Cancel",
+      "deleting": "Deleting...",
+      "confirmMessage": "Are you sure you want to delete {gameName} from your wanted list?",
+      "description": "This action cannot be undone. You can always add it back later.",
+      "deleteButton": "Delete"
+    },
+    "ListingCard": {
+      "wantedBadge": "Wanted",
+      "expansion": "Expansion",
+      "upTo": "Up to {price}",
+      "iHaveThis": "I Have This",
+      "budget": "Budget",
+      "maxResponsesReached": "Max responses reached",
+      "viewOnBGG": "View on BoardGameGeek",
+      "additionalNotes": "Additional notes",
+      "wantedCount": "{count, plural, one {# wanted} other {# wanted}}"
+    },
+    "ExistingSalesBanner": {
+      "title": "This game is already for sale",
+      "subtitle": "{count, plural, one {# seller is offering this game} other {# sellers are offering this game}}",
+      "priceRangeLabel": "Price range",
+      "availableConditions": "Available conditions",
+      "viewListings": "View Listings",
+      "hint": "Check existing offers before posting"
+    },
+    "OfferCard": {
+      "upTo": "Up to {price}",
+      "budget": "Budget",
+      "expansion": "Expansion",
+      "viewOnBGG": "View on BoardGameGeek",
+      "additionalNotes": "Additional Notes",
+      "listed": "Listed {date}"
+    }
+  },
+  "ConfirmationModal": {
+    "defaultTitle": "Confirm Action",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "processing": "Processing..."
+  },
+  "NotificationModal": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Information",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "successTitle": "Success",
+    "errorTitle": "Error",
+    "warningTitle": "Warning",
+    "infoTitle": "Information"
+  },
+  "OfflineError": {
+    "title": "You're offline",
+    "defaultMessage": "You appear to be offline. Please check your internet connection and try again.",
+    "tryAgain": "Try Again"
+  },
+  "OfflinePage": {
+    "status": {
+      "online": {
+        "title": "You're back online",
+        "subtitle": "Redirecting you back...",
+        "statusText": "Connected"
+      },
+      "slow": {
+        "title": "Slow connection",
+        "subtitle": "Your connection is unstable. Some features may not work properly.",
+        "statusText": "Weak signal"
+      },
+      "offline": {
+        "title": "You're offline",
+        "subtitle": "It looks like you've lost your internet connection. We'll keep trying to reconnect.",
+        "statusText": "No connection"
+      }
+    },
+    "retryingIn": "Retrying in {seconds}s",
+    "redirecting": "Redirecting...",
+    "checkingConnection": "Checking connection...",
+    "tryAgain": "Try again now",
+    "goBack": "Go back",
+    "goHome": "Go to home",
+    "availableOffline": "Available offline:",
+    "routes": {
+      "home": "Home",
+      "browse": "Browse games",
+      "sell": "Sell a game"
+    },
+    "tips": {
+      "title": "While you're offline:",
+      "tip1": "Previously viewed listings are still accessible",
+      "tip2": "Your saved games and listings are cached",
+      "tip3": "New actions will sync when you're back online"
+    }
+  },
+  "ErrorPage": {
+    "title": "Something went wrong",
+    "description": "We hit an unexpected problem. Our team has been notified and is looking into it.",
+    "tryAgain": "Try again",
+    "goHome": "Go to homepage",
+    "referenceCode": "Reference: {code}"
+  },
+  "NotFoundPage": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or may have been moved.",
+    "browseGames": "Browse games",
+    "goHome": "Go to homepage"
+  },
+  "EmailVerificationBanner": {
+    "title": "Email Verification Required",
+    "sending": "Sending...",
+    "errorPrefix": "Error: {message}",
+    "successMessage": "Verification email sent. Please check your inbox.",
+    "failedToResend": "Failed to resend verification email",
+    "dismiss": "Dismiss",
+    "description": "Please verify your email address ({email}) to access all features.",
+    "resendButton": "Resend verification email"
+  },
+  "AccountDeletion": {
+    "title": "Delete account",
+    "description": "Permanently delete your account and all associated data. This can't be undone.",
+    "confirmTitle": "Are you absolutely sure?",
+    "immediateEffects": "When you delete your account, the following happens immediately:",
+    "effects": {
+      "profileHidden": "Your profile will be hidden from other users",
+      "listingsRemoved": "All your active listings will be removed",
+      "signedOut": "You will be signed out from all devices",
+      "infoAnonymized": "Your personal information will be anonymized",
+      "emailAvailable": "Your email address will become available for new registration"
+    },
+    "forSellers": "For Sellers:",
+    "sellerRequirements": "You must have no pending withdrawals or open disputes. Any remaining wallet balance will be withdrawn before deletion.",
+    "recoveryTitle": "Account Recovery (14-Day Grace Period):",
+    "recoveryDescription": "You have 14 days to recover your account by emailing us at info@secondturn.games. After this period, deletion is permanent.",
+    "dataRetentionTitle": "Data Retention (GDPR Compliance):",
+    "dataRetentionDescription": "For legal and fraud prevention purposes, we retain:",
+    "retention": {
+      "transactions": "Transaction history (90 days)",
+      "listings": "Listing records (90 days)",
+      "communications": "Message history for dispute resolution (90 days)"
+    },
+    "dataRetentionAfter": "After 90 days, all data is permanently deleted.",
+    "finalWarning": "This action cannot be undone after the 14-day recovery period.",
+    "typeDeleteLabel": "Type DELETE to confirm:",
+    "typeDeletePlaceholder": "Type DELETE here",
+    "deleting": "Deleting...",
+    "confirmDelete": "Yes, delete my account",
+    "cancel": "Cancel",
+    "pleaseTypeDelete": "Please type DELETE to confirm"
+  },
+  "MessagesPage": {
+    "noConversations": "No conversations yet",
+    "noConversationsHint": "When you reach out about a listing - or someone reaches out to you - it will show up here.",
+    "unknownUser": "Unknown User",
+    "noMessages": "No messages yet",
+    "conversationNotFound": "Conversation not found",
+    "backToMessages": "Back to Messages",
+    "seller": "Seller",
+    "buyer": "Buyer",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "startConversation": "Start the conversation by sending a message below.",
+    "archivedPlaceholder": "Unarchive to send messages",
+    "title": "Messages",
+    "subtitle": "Your conversations with buyers and sellers"
+  },
+  "ListingStatus": {
+    "active": "Active",
+    "sold": "Sold",
+    "removed": "Removed",
+    "draft": "Draft"
+  },
+  "MessageInput": {
+    "placeholder": "Type your message...",
+    "addPhotos": "Add photos",
+    "maxPhotos": "Maximum {max} photos",
+    "send": "Send",
+    "tooLong": "Message is too long. Please shorten it by {count} character(s)."
+  },
+  "BankAccountForm": {
+    "iban": "IBAN",
+    "ibanRequired": "IBAN is required",
+    "securityNote": "Your bank details are stored securely. We only display the last 4 digits of your IBAN.",
+    "cancel": "Cancel",
+    "adding": "Adding...",
+    "accountHolderName": "Account Holder Name",
+    "namePlaceholder": "Full name as it appears on your bank account",
+    "nameRequired": "Account holder name is required",
+    "ibanLabel": "IBAN",
+    "format": "Format",
+    "addBankAccount": "Add Bank Account"
+  },
+  "QuestionInput": {
+    "reply": "Reply",
+    "ask": "Ask",
+    "placeholder": "Ask a question about this game...",
+    "replyTooLong": "Reply is {count} characters too long",
+    "questionTooLong": "Question is {count} characters too long"
+  },
+  "AvatarUpload": {
+    "mustBeLoggedIn": "You must be logged in to upload an avatar",
+    "fileTooLarge": "Image must be less than 5MB",
+    "mustBeImage": "File must be an image",
+    "changePhoto": "Change photo",
+    "addPhoto": "Add a photo",
+    "remove": "Remove"
+  },
+  "Navigation": {
+    "home": "Home",
+    "browse": "Browse",
+    "sell": "Sell a game",
+    "sellShort": "Sell",
+    "cart": "Cart",
+    "profile": "Profile",
+    "signIn": "Sign in",
+    "searchPlaceholder": "Search games...",
+    "userMenu": {
+      "sellerDashboard": "Wallet & earnings",
+      "myOrders": "Orders",
+      "myListings": "My games",
+      "staffDashboard": "Staff dashboard",
+      "signOut": "Sign out",
+      "signOutError": "Failed to sign out. Please try again.",
+      "join": "Join"
+    },
+    "profileSheet": {
+      "title": "Profile",
+      "guestTitle": "Account",
+      "accountSettings": "Account settings",
+      "sectionActivity": "My Activity",
+      "notifications": "Notifications",
+      "messages": "Messages",
+      "sectionLanguage": "Language",
+      "signingOut": "Signing out...",
+      "guest": {
+        "title": "Sign in to continue",
+        "description": "Access your listings, saved games, and messages",
+        "signIn": "Sign in",
+        "createAccount": "Create account"
+      }
+    },
+    "sellActionSheet": {
+      "title": "What would you like to do?",
+      "sellGame": "Sell a Game",
+      "sellGameDescription": "List your board game for sale",
+      "postWantedGame": "Post Wanted Game",
+      "postWantedGameDescription": "Looking for a specific game (ISO)"
+    }
+  },
+  "Auth": {
+    "emailEntry": {
+      "title": "Let's get you in",
+      "subtitle": "Enter your email to continue",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "continueButton": "Continue",
+      "divider": "or",
+      "continueWithGoogle": "Continue with Google",
+      "continueWithFacebook": "Continue with Facebook"
+    },
+    "checking": {
+      "title": "One moment..."
+    },
+    "newUser": {
+      "title": "Welcome to the table",
+      "subtitle": "Create your account securely without remembering another password.",
+      "changeEmail": "Change",
+      "magicLinkTitle": "What is a magic link?",
+      "magicLinkDescription": "It's a secure link we send to your email. Click it to sign in instantly. No password to create, remember, or lose.",
+      "sendMagicLink": "Send me magic link",
+      "sending": "Sending...",
+      "termsPrefix": "By continuing, you agree to our",
+      "termsOfService": "Terms of Service",
+      "termsAnd": "and",
+      "privacyPolicy": "Privacy Policy"
+    },
+    "existingUser": {
+      "welcomeBack": "Welcome back",
+      "readyForAnotherTurn": "Ready for another turn?",
+      "usuallySignInWith": "It looks like you usually sign in with {provider}.",
+      "changeEmail": "Change",
+      "signInWithGoogle": "Sign in with Google",
+      "signInWithFacebook": "Sign in with Facebook",
+      "divider": "or",
+      "sendMagicLink": "Send magic link",
+      "magicLinkDescription": "We'll email you a link to sign in instantly - no password needed.",
+      "sending": "Sending..."
+    },
+    "magicLinkSent": {
+      "title": "Check your inbox",
+      "subtitle": "We sent a magic link to {email}",
+      "stepOpenEmail": "Open email",
+      "stepClickLink": "Click link",
+      "expiryInfo": "The link will sign you in instantly on this device. It expires in 1 hour.",
+      "resendButton": "Didn't get it? Send again",
+      "sending": "Sending...",
+      "sentCount_one": "Sent {count} time",
+      "sentCount_other": "Sent {count} times",
+      "useDifferentEmail": "Use a different email"
+    },
+    "errors": {
+      "tooManyAttempts": "Too many attempts - let's take a breather. Try again in a few minutes.",
+      "captchaFailed": "Verification failed. Please try again."
+    },
+    "comingSoon": {
+      "title": "Launching soon",
+      "subtitle": "Sign up will be available when we officially launch. In the meantime, you can explore what's coming to the Baltic board game community.",
+      "exploreButton": "Explore preview",
+      "signInButton": "Sign in (if you have an account)"
+    },
+    "redirect": {
+      "message": "Redirecting..."
+    }
+  },
+  "Listings": {
+    "bid": "bid",
+    "bids": "bids",
+    "auction": {
+      "badge": "Auction",
+      "startingAt": "Starting at"
+    },
+    "card": {
+      "expansion": "Expansion",
+      "parcelLocker": "Parcel Locker",
+      "pickupOnly": "Pickup only",
+      "missingComponents": "Missing components",
+      "saveAria": "Save listing",
+      "unsaveAria": "Remove from saved",
+      "prevImageAria": "Previous image",
+      "nextImageAria": "Next image",
+      "viewImageAria": "View image {number}",
+      "learnConditionAria": "Learn about {condition} condition",
+      "offers": "{count, plural, one {# offer} other {# offers}}",
+      "claimTooltip": "{count, plural, one {# listing} other {# listings}}",
+      "expansionTooltip": "Expansion",
+      "expansionOffersTooltip": "Includes expansion offers",
+      "auctionEndsIn": "Ends in",
+      "auctionEnded": "Auction ended",
+      "cooldownResets": "Resets on bid"
+    },
+    "detail": {},
+    "create": {},
+    "conditions": {
+      "likeNew": "Like New",
+      "veryGood": "Very Good",
+      "good": "Good",
+      "acceptable": "Acceptable"
+    },
+    "statuses": {
+      "draft": "Draft",
+      "active": "Active",
+      "sold": "Sold",
+      "removed": "Removed"
+    },
+    "listing": {
+      "edition": "{year} edition"
+    }
+  },
+  "OfferCard": {
+    "price": {
+      "from": "From",
+      "save": "Save {percentage}%"
+    },
+    "listing": {
+      "listed": "Listed {date}",
+      "expansion": "Expansion",
+      "missingParts": "Missing parts",
+      "photosCount": "{count} photos",
+      "viewImageAria": "View image {number}",
+      "viewOnBGG": "View on BoardGameGeek",
+      "learnConditionAria": "Learn about {condition} condition",
+      "conditionGradesTooltip": "Click to learn about condition grades"
+    },
+    "expansions": {
+      "title": "Included Expansions ({count})",
+      "moreCount": "+{count} more"
+    },
+    "conditionDetails": {
+      "title": "Condition Details"
+    },
+    "actions": {
+      "saveAria": "Save listing",
+      "unsaveAria": "Remove from saved",
+      "saveTooltip": "Save listing",
+      "unsaveTooltip": "Remove from saved",
+      "askQuestion": "Ask a question",
+      "addToCart": "Add to Cart",
+      "sold": "Sold",
+      "reserved": "Reserved",
+      "reservedTooltip": "Someone is checking out - available soon if they don't complete"
+    },
+    "sellerLabel": "Seller",
+    "auction": {
+      "badge": "Auction",
+      "ended": "Auction Ended",
+      "startingAt": "Starting at €{price}",
+      "bid": "bid",
+      "bids": "bids",
+      "finalBid": "Final bid"
+    }
+  },
+  "Checkout": {
+    "loading": "Loading checkout...",
+    "errorTitle": "Unable to load checkout",
+    "returnToCart": "Return to Cart",
+    "breadcrumb": {
+      "cart": "Cart",
+      "checkout": "Checkout",
+      "backToCart": "Back to cart"
+    },
+    "title": "Checkout",
+    "collapse": {
+      "selectTerminal": "Select Pickup Terminal",
+      "contactInfo": "Contact Information",
+      "terminalPrompt": "Choose a parcel locker",
+      "contactPrompt": "We'll send tracking info here",
+      "terminalHint": "Use the locate button to find nearby terminals, search by name or address, or browse the full list"
+    },
+    "country": {
+      "title": "Where are you based?",
+      "subtitle": "This helps us show the right terminals, banks, and phone format for you",
+      "detected": "detected"
+    },
+    "payment": {
+      "weAccept": "We accept"
+    },
+    "preferredTerminal": {
+      "indicator": "Your preferred terminal"
+    },
+    "form": {
+      "fullName": "Full Name",
+      "email": "Email",
+      "required": "*",
+      "namePlaceholder": "Your full name",
+      "emailPlaceholder": "your@email.com",
+      "emailHint": "Order updates and tracking info will be sent here",
+      "savePhone": "Save phone number for future orders",
+      "savePhoneHint": "We'll remember your phone number for faster checkout next time",
+      "phoneError": "Please enter a valid phone number for the selected country",
+      "phoneCountryMismatch": "For delivery to {country}, please use a {country} mobile number. Your current phone won't work for this destination."
+    },
+    "summary": {
+      "title": "Order Summary",
+      "sellerLabel": "Seller",
+      "subtotal": "Subtotal ({count, plural, one {# item} other {# items}})",
+      "shipping": "Shipping",
+      "walletCredit": "Wallet credit",
+      "total": "Total",
+      "toPay": "To pay"
+    },
+    "actions": {
+      "paySecurely": "Confirm and Pay",
+      "payWithWallet": "Pay with Wallet",
+      "processing": "Processing...",
+      "backToCart": "Back to Cart"
+    },
+    "merchant": {
+      "label": "Platform operator",
+      "name": "Second Turn Games SIA",
+      "address": "Evalda Valtera 5-35, Riga, LV-1021, Latvia"
+    },
+    "consent": {
+      "checkboxPrefix": "By checking this box, I confirm I have read and agree to the",
+      "termsLink": "Terms of Service",
+      "deliveryLink": "Delivery",
+      "and": "and",
+      "returnsLink": "Returns",
+      "pleaseAccept": "Please accept the terms to continue"
+    },
+    "errors": {
+      "expiredItems": "Some items in your cart have expired. Please return to cart.",
+      "basketNotFound": "Basket not found",
+      "fetchCartFailed": "Failed to fetch cart",
+      "createSessionFailed": "Failed to create checkout session",
+      "noCheckoutUrl": "No checkout URL returned",
+      "paymentFailed": "Payment could not be processed. Please try again.",
+      "paymentUnavailableLocally": "Payment is not available from this location. Please try from a different network.",
+      "invalidAmount": "The payment amount is invalid. Please review your order."
+    },
+    "success": {
+      "loading": "Loading order details...",
+      "processing": {
+        "title": "Processing Your Order",
+        "description": "We're confirming your payment and creating your order. This usually takes just a few seconds.",
+        "wait": "Please wait..."
+      },
+      "errorTitle": "Order Processing Issue",
+      "errorDescription": "We couldn't load your order details. Please check your email for confirmation.",
+      "suggestions": {
+        "title": "What you can do"
+      },
+      "reassurance": {
+        "title": "No money was charged",
+        "description": "Your payment was not processed. Your cart items are still reserved for you."
+      },
+      "actions": {
+        "tryAgain": "Try Again",
+        "backToCart": "Back to Cart",
+        "viewOrders": "View My Orders",
+        "continueShopping": "Continue Shopping"
+      }
+    },
+    "ReservationTimer": {
+      "expired": "Expired",
+      "reserved": "Reserved:",
+      "ariaLabel": "{minutes} minutes and {seconds} seconds remaining",
+      "extendButton": "+5 min"
+    },
+    "TerminalMap": {
+      "selectTerminal": "Select This Terminal",
+      "terminalCount": "{count} terminals"
+    },
+    "TerminalSelector": {
+      "findTerminal": "Find Terminal",
+      "searchPlaceholder": "Search by name, address, or city...",
+      "loadingTerminals": "Loading terminals...",
+      "tryAgain": "Try again",
+      "noTerminalsFound": "No terminals found matching your search",
+      "noTerminalsAvailable": "No terminals available",
+      "selectedTerminal": "Selected Terminal",
+      "selected": "Selected:",
+      "map": "Map",
+      "list": "List",
+      "allTerminals": "All Terminals",
+      "showAllTerminals": "Show all terminals",
+      "hideList": "Hide list"
+    }
+  },
+  "Game": {
+    "NavigationArrows": {
+      "previousGame": "Previous game",
+      "nextGame": "Next game",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "QuestionsDrawer": {
+      "title": "Questions",
+      "loading": "Loading...",
+      "questionsCount": "{count, plural, =0 {No questions yet} =1 {1 question} other {# questions}}",
+      "tryAgain": "Try again",
+      "noQuestionsTitle": "No questions yet",
+      "noQuestionsHint": "Ask about condition, shipping, or if they'd consider a trade.",
+      "sellerCannotAsk": "You can't ask questions on your own listing, but you can reply to others.",
+      "askPlaceholder": "Ask a question about this listing...",
+      "signInToAsk": "Sign in to ask a question"
+    },
+    "QuestionThread": {
+      "seller": "Seller",
+      "anonymous": "Anonymous",
+      "reply": "Reply",
+      "cancel": "Cancel",
+      "replyPlaceholder": "Write a reply..."
+    }
+  },
+  "Emails": {
+    "orderConfirmation": {},
+    "shipping": {}
+  },
+  "HomePage": {
+    "hero": {
+      "discover": "Discover.",
+      "list": "List.",
+      "play": "Play.",
+      "tagline": "Every game deserves a second turn.",
+      "subtitle": "Buy and sell pre-loved board games across Latvia, Estonia, and Lithuania.",
+      "browseCard": {
+        "title": "Discover games",
+        "description": "Games waiting for their next adventure. From hidden gems to sold-out classics.",
+        "button": "See what's available"
+      },
+      "sellCard": {
+        "title": "Clear your shelf",
+        "description": "Your games deserve players who'll love them. Create a listing in under 5 minutes.",
+        "button": "Sell a game"
+      },
+      "wantedCard": {
+        "title": "Can't find it?",
+        "description": "Stop refreshing. Post what you're hunting and we'll alert you when it appears.",
+        "button": "Tell us what you want"
+      },
+      "comingSoonBadge": "Launching spring 2026",
+      "comingSoonSignup": "Be the first to browse when we open the doors.",
+      "comingSoonButton": "Coming soon"
+    },
+    "collections": {
+      "viewAll": "View all",
+      "scrollLeft": "Scroll left",
+      "scrollRight": "Scroll right",
+      "priceDisclaimer": "Item prices only. Full cost shown before checkout.",
+      "recently_listed": {
+        "title": "Recently listed games",
+        "subtitle": "Fresh arrivals from Baltic gamers"
+      },
+      "popular": {
+        "title": "Popular Right Now",
+        "subtitle": "Games everyone is looking at"
+      },
+      "price_drops": {
+        "title": "Price Drops",
+        "subtitle": "Recently reduced prices"
+      },
+      "trusted_sellers": {
+        "title": "From Trusted Sellers",
+        "subtitle": "Top-rated seller picks"
+      },
+      "great_condition": {
+        "title": "Like New Games",
+        "subtitle": "Pristine condition finds"
+      }
+    },
+    "wantedCollection": {
+      "title": "Games people want",
+      "subtitle": "Games that buyers are actively looking for",
+      "empty": {
+        "title": "Looking for something specific?",
+        "description": "Let the community know what you're searching for.",
+        "button": "Looking for a game"
+      },
+      "viewAll": "View all",
+      "viewAllWanted": "View all wanted",
+      "postWanted": "Looking for a game",
+      "postWantedListing": "Looking for a game",
+      "scrollLeft": "Scroll left",
+      "scrollRight": "Scroll right"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Simple, secure, and transparent for both buyers and sellers",
+      "forBuyers": "For buyers",
+      "forBuyersTag": "Find your game",
+      "forSellers": "For sellers",
+      "forSellersTag": "Earn from your shelf",
+      "buyerSteps": {
+        "step1": {
+          "title": "Browse & search",
+          "description": "Find games by title, category, condition, or location. Filter by what matters to you."
+        },
+        "step2": {
+          "title": "Review details",
+          "description": "Check condition photos, completeness info, and seller ratings. Ask questions if needed."
+        },
+        "step3": {
+          "title": "Purchase securely",
+          "description": "Pay through our secure system. Your payment is held until you confirm delivery."
+        },
+        "step4": {
+          "title": "Enjoy your game",
+          "description": "Receive your game, verify condition, and start playing. Leave a review to help others."
+        }
+      },
+      "sellerSteps": {
+        "step1": {
+          "title": "List your game",
+          "description": "Add photos, describe condition honestly, and set your price. Takes just 5 minutes."
+        },
+        "step2": {
+          "title": "Connect with buyers",
+          "description": "Answer questions, negotiate if you're open to offers, and arrange shipping or pickup."
+        },
+        "step3": {
+          "title": "Ship safely",
+          "description": "Pack carefully and ship within 2 business days. Payment is released after buyer confirmation."
+        },
+        "step4": {
+          "title": "Get paid",
+          "description": "Receive payment securely. List more games or use the funds to buy your next favorite."
+        }
+      }
+    },
+    "finalCTA": {
+      "title": "Ready to give a game its second turn?",
+      "subtitle": "Join the Baltic board game community. Buy pre-loved games, sell your collection, or post what you're hunting for.",
+      "button": "Join"
+    }
+  },
+  "Countries": {
+    "LV": "Latvia",
+    "EE": "Estonia",
+    "LT": "Lithuania",
+    "OTHER": "Other"
+  },
+  "CountryPrompt": {
+    "pickCountry": "Pick your country to see games near you",
+    "looksLikeYoureIn": "Looks like you're in {country}",
+    "yesImIn": "Yes, I'm in {country}",
+    "notInCountry": "Not in {country}?",
+    "somethingWentWrong": "Something went wrong"
+  },
+  "Browse": {
+    "metadata": {
+      "title": "Browse Board Games",
+      "description": "Browse pre-loved board games from sellers across Latvia, Lithuania, and Estonia. Find deals on popular titles with verified BoardGameGeek listings."
+    },
+    "tabs": {
+      "forSale": "For Sale",
+      "auctions": "Auctions",
+      "wanted": "Wanted",
+      "forSaleAria": "Show games for sale",
+      "auctionsAria": "Show games with active auctions",
+      "wantedAria": "Show wanted listings"
+    },
+    "sort": {
+      "recentlyListed": "Recently listed",
+      "recentlyPosted": "Recently posted",
+      "priceLowHigh": "Price: Low to High",
+      "priceHighLow": "Price: High to Low",
+      "expiringSoon": "Expiring Soon",
+      "budgetHighLow": "Budget: High to Low",
+      "budgetLowHigh": "Budget: Low to High",
+      "mostResponses": "Most Responses",
+      "endingSoon": "Ending Soon"
+    },
+    "filters": {
+      "title": "Filters",
+      "openFiltersAria": "Open filters",
+      "clear": "Clear",
+      "clearAll": "Clear All",
+      "applyFilters": "Apply Filters",
+      "activeFilters": "Active filters:",
+      "players": "Players",
+      "minAge": "Min Age",
+      "playTime": "Play Time",
+      "language": "Language",
+      "priceEur": "Price (EUR)",
+      "acceptableConditions": "Acceptable Conditions",
+      "budgetEur": "Budget (EUR)",
+      "location": "Location",
+      "expiringSoon": "Expiring Soon",
+      "expiringToggle": "Show only listings expiring within 7 days",
+      "searchLocationPlaceholder": "Search location...",
+      "minPlaceholder": "Min",
+      "maxPlaceholder": "Max",
+      "includeEnded": "Include ended auctions"
+    },
+    "playerCount": {
+      "solo": "Solo",
+      "eightPlus": "8+"
+    },
+    "playingTime": {
+      "under30": "< 30 min",
+      "thirtyTo60": "30-60 min",
+      "oneToTwoHours": "1-2 hours",
+      "twoPlus": "2+ hours"
+    },
+    "messages": {
+      "noDataAvailable": "No data available",
+      "noLanguagesAvailable": "No languages available",
+      "loadingMore": "Loading more games...",
+      "reachedEnd": "You've reached the end. Showing all {totalCount} games.",
+      "offlineError": "We couldn't load listings. Check your connection and try again.",
+      "genericError": "Something went wrong",
+      "tryAgain": "Try again"
+    },
+    "emptyState": {
+      "noGamesFound": "No games found",
+      "noWantedListings": "No wanted listings yet",
+      "noAuctions": "No auctions found",
+      "tryAdjustingFilters": "Try adjusting your filters or search query",
+      "beFirstToList": "Be the first to list a game.",
+      "beFirstToAuction": "No active auctions right now. Check back soon or list your own game as an auction.",
+      "clearAllFilters": "Clear all filters"
+    },
+    "wantedCta": {
+      "description": "Looking for a specific game? Let sellers know what you want.",
+      "button": "Post a wanted listing"
+    }
+  },
+  "GameDetail": {
+    "loading": "Loading game...",
+    "bgg": {
+      "viewOnBGG": "View on BGG"
+    },
+    "offers": {
+      "availableOffers": "Available Offers ({count})",
+      "activeAuctions": "Active Auctions ({count})"
+    },
+    "privateSeller": {
+      "footnote": "All listings are from private individuals. EU consumer return rights and guarantees do not apply.",
+      "learnMore": "Learn more"
+    },
+    "sort": {
+      "priceAsc": "Price ↑",
+      "priceDesc": "Price ↓",
+      "newest": "Newest"
+    },
+    "cart": {
+      "addedToCart": "Added to cart",
+      "viewCart": "View Cart"
+    },
+    "actions": {
+      "sellThisGame": "Sell this game",
+      "gotThisGame": "Have a copy gathering dust?"
+    },
+    "emptyState": {
+      "noOffersYet": "No copies listed yet",
+      "beFirstToSell": "Have a copy gathering dust? Someone may be looking for it."
+    },
+    "errors": {
+      "gameNotFound": "Game not found",
+      "noActiveListings": "This game might not have any active listings.",
+      "browseGames": "Browse Games"
+    },
+    "wanted": {
+      "title": "People looking for this ({count})"
+    },
+    "metadata": {
+      "gameNotFoundTitle": "Game Not Found",
+      "gameNotFoundDescription": "This game could not be found on Second Turn Games.",
+      "buyFrom": "Buy {gameName} from €{price}. {count, plural, one {# offer} other {# offers}} available from sellers in the Baltics.",
+      "findGame": "Find {gameName} on Second Turn Games - the Baltic marketplace for pre-owned board games."
+    }
+  },
+  "metadata": {
+    "title": "Second Turn Games | Buy & Sell Board Games",
+    "description": "The Baltic marketplace for pre-loved board games. Buy, sell, and discover games in Latvia, Estonia, and Lithuania.",
+    "keywords": "board games, used board games, secondhand board games, galda spēles, marketplace"
+  },
+  "Footer": {
+    "tagline": {
+      "line1": "Where games find new homes.",
+      "line2": "Join board game enthusiasts across Latvia, Estonia, and Lithuania."
+    },
+    "sections": {
+      "marketplace": "Marketplace",
+      "resources": "Resources",
+      "partners": "Our partners"
+    },
+    "links": {
+      "browseGames": "Browse games",
+      "sellGame": "Sell a game",
+      "requestGame": "Request a game",
+      "helpCentre": "Help centre",
+      "legalHub": "Legal",
+      "privacyPolicy": "Privacy policy",
+      "termsOfService": "Terms of service"
+    },
+    "copyright": "Copyright © 2025-{year} Second Turn Games SIA",
+    "compliance": {
+      "contactUs": "Contact us",
+      "delivery": "Delivery",
+      "returns": "Returns"
+    }
+  },
+  "Legal": {
+    "inPlainTerms": "In plain terms",
+    "page": {
+      "title": "Legal",
+      "description": "Terms of service, privacy policy, seller agreement, and other legal documents for Second Turn Games.",
+      "breadcrumbHome": "Home",
+      "breadcrumbLegal": "Legal"
+    },
+    "nav": {
+      "overview": "Overview",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "seller": "Seller Agreement",
+      "cookies": "Cookie Policy",
+      "fees": "Fees"
+    }
+  },
+  "Auction": {
+    "badge": "Auction",
+    "won": "Won",
+    "bid": "bid",
+    "bids": "bids",
+    "minimum": "Minimum",
+    "ended": "Auction Ended",
+    "wasExtended": "This auction was extended due to last-minute bidding",
+    "youWon": "You Won",
+    "completePayment": "Complete your payment within 48 hours to claim this game",
+    "payNow": "Pay Now",
+    "ownAuction": "You cannot bid on your own auction",
+    "status": {
+      "highBidder": "You're the high bidder",
+      "outbid": "You've been outbid – bid again?"
+    },
+    "errors": {
+      "minimumBid": "Bid must be at least EUR {amount}",
+      "failed": "Failed to place bid. Please try again.",
+      "loginRequired": "Please log in to place a bid"
+    },
+    "success": {
+      "bidPlaced": "Bid of EUR {amount} placed successfully.",
+      "bidPlacedExtended": "Bid placed. Auction extended by {minutes} minutes"
+    },
+    "notifications": {
+      "extended": "Auction extended by {minutes} minutes due to last-minute bid"
+    },
+    "cooldown": {
+      "resetsOnBid": "Resets on bid",
+      "biddingResetsTimer": "Bidding resets the timer to {hours}h",
+      "timerResetsEachBid": "Timer resets with each new bid"
+    },
+    "bidHistory": {
+      "title": "Bid History",
+      "noBidsYet": "No bids yet - be the first.",
+      "winning": "Winning",
+      "extendedAuction": "This bid extended the auction",
+      "showMore": "Show {count} more bids",
+      "showLess": "Show less"
+    }
+  },
+  "Sell": {
+    "metadata": {
+      "title": "Sell Board Games",
+      "description": "List your pre-loved board games for sale on Second Turn Games. Reach buyers across Latvia, Lithuania, and Estonia. Free to list, 10% commission on sales."
+    },
+    "page": {
+      "title": "Sell a game",
+      "editTitle": "Edit listing",
+      "bggAttribution": "Game data provided by BoardGameGeek",
+      "loading": "Loading...",
+      "welcome": {
+        "sellerActivated": "You're a seller now — list your first game"
+      },
+      "loadingGameDetails": "Loading game details...",
+      "loadingListing": "Loading listing...",
+      "preparing": "Preparing..."
+    },
+    "draftBanner": {
+      "title": "You have a saved draft",
+      "subtitle": "Would you like to continue where you left off?",
+      "loadButton": "Load Draft",
+      "startFreshButton": "Start fresh",
+      "dismiss": "Dismiss",
+      "savedMessage": "Draft saved. You can continue later from where you left off.",
+      "photosStripped": "Photos aren't saved in drafts. Please re-upload your photos."
+    },
+    "existingListings": {
+      "warningTitle_one": "You have an active listing for this game",
+      "warningTitle_other": "You already have {count} active listings for this game",
+      "warningSubtitle_one": "You can still list it again. Review your existing listing:",
+      "warningSubtitle_other": "You can still list it again. Review your existing listings:"
+    },
+    "editMode": {
+      "lockedInfo": "Game and edition details cannot be changed. If you need to change the game, please delete this listing and create a new one.",
+      "edition": "Edition:",
+      "language": "Language:",
+      "publisher": "Publisher:"
+    },
+    "sections": {
+      "research": {
+        "title": "Find your game"
+      },
+      "game": {
+        "title": "Find your game",
+        "expansionCount": "{count, plural, one {expansion} other {expansions}}"
+      },
+      "gameNameSelector": {
+        "question": "Which name is on your box?",
+        "other": "Other ({count})",
+        "changeName": "Change Name"
+      },
+      "expansions": {
+        "title": "Expansions",
+        "toggleTitle": "Include expansions?",
+        "addButton": "+",
+        "cancelButton": "Cancel"
+      },
+      "condition": {
+        "title": "Condition & details",
+        "subtitle": "Be honest - buyers appreciate transparency"
+      },
+      "photos": {
+        "title": "Upload photos",
+        "subtitleOptional": "Add up to 8 photos (optional but recommended)",
+        "subtitleRequired": "At least 1 photo required to show condition"
+      },
+      "pricing": {
+        "title": "Pricing",
+        "subtitle": "Set your asking price"
+      },
+      "phone": {
+        "label": "Phone number needed for shipping",
+        "description": "Unisend parcel lockers need your phone number to create shipping labels. This will be saved to your profile."
+      }
+    },
+    "terms": {
+      "prefix": "I agree to the",
+      "termsLink": "Terms of Service",
+      "middle": "and confirm that all information provided is accurate. I understand that Second Turn Games reserves the right to remove listings that don't meet our guidelines."
+    },
+    "actions": {
+      "saveChanges": "Save Changes",
+      "publishing": "Publishing...",
+      "saving": "Saving...",
+      "saveDraft": "Save Draft",
+      "preview": "Preview",
+      "edit": "Edit"
+    },
+    "preview": {
+      "title": "Live preview",
+      "selectGame": "Select a game to see your listing preview",
+      "mobileTitle": "Listing Preview",
+      "mobileSubtitle": "Review your listing details",
+      "sections": {
+        "game": "Game",
+        "expansions": "Included expansions",
+        "pricing": "Your earnings",
+        "saleType": "Sale type",
+        "seller": "Seller"
+      },
+      "pricingBreakdown": {
+        "price": "Listing price",
+        "startingBid": "Starting bid",
+        "fee": "Platform fee (10%)",
+        "youReceive": "You receive"
+      },
+      "photoCount": "{count} photo",
+      "missingComponents": "Some components missing",
+      "auction": "Auction",
+      "fixedPrice": "Fixed Price",
+      "emptyPhotos": "Add photos to preview",
+      "emptyPrice": "Set your price in step 3"
+    },
+    "validation": {
+      "selectCondition": "Please select the condition of your game",
+      "photoRequired": "Please upload at least 1 photo for Acceptable condition items",
+      "priceRequired": "Please enter a valid price",
+      "termsRequired": "Please accept the terms and conditions",
+      "emailVerificationRequired": "Please verify your email address before creating a listing. Check your inbox for the verification link.",
+      "rateLimitWarning": "You have {remaining, plural, one {# listing} other {# listings}} remaining today."
+    },
+    "errors": {
+      "phoneSaveFailed": "Failed to save phone number. Please try again.",
+      "publishFailed": "Failed to publish listing: {message}",
+      "updateFailed": "Failed to update listing: {message}",
+      "permissionDenied": "You can only edit your own listings.",
+      "listingNotFound": "This listing may have been removed or doesn't exist.",
+      "goToMyListings": "Go to My Listings"
+    },
+    "GameSearch": {
+      "changeGame": "Change game",
+      "changeVersion": "Change version",
+      "changeName": "Change name",
+      "placeholder": "Wingspan, Catan, Icecool...",
+      "clearSearch": "Clear search",
+      "expansion": "Expansion",
+      "searching": "Searching...",
+      "resultsFound": "{count} game found",
+      "resultsFound_other": "{count} games found",
+      "noResults": {
+        "title": "No results for \"{query}\"",
+        "helpText1": "Check the spelling, or look up the exact title on",
+        "bggLink": "BoardGameGeek.com",
+        "helpText2": ".",
+        "helpText3": "Still can't find it?",
+        "contactLink": "Let us know",
+        "helpText4": "and we'll help."
+      }
+    },
+    "ConditionSelector": {
+      "trustSignal": {
+        "title": "Honest descriptions build trust",
+        "description": "Accurate condition information helps buyers make confident decisions."
+      },
+      "completeness": {
+        "question": "Are all original components included? *",
+        "yesComplete": "Yes, complete",
+        "noIncomplete": "No, incomplete",
+        "whatsMissing": "What's missing? *",
+        "placeholder": "e.g., Missing 2 red cubes and 1 action card"
+      },
+      "condition": {
+        "title": "Overall Condition *",
+        "openGuide": "Open grading guide",
+        "likeNew": "Like New",
+        "likeNewDescription": "Almost no visible wear",
+        "veryGood": "Very Good",
+        "veryGoodDescription": "Minor wear, excellent condition",
+        "good": "Good",
+        "goodDescription": "Moderate wear, fully functional",
+        "acceptable": "Acceptable",
+        "acceptableDescription": "Heavy wear, still playable"
+      },
+      "additionalDetails": {
+        "title": "Additional Details",
+        "required": "*",
+        "optional": "(Optional)",
+        "descriptionRequired": "Please describe in more detail",
+        "descriptionOptional": "Describe any extras, or other important details",
+        "placeholderAcceptable": "e.g., Box has water damage on one corner, manual has torn pages, all components present and functional",
+        "placeholderOptional": "e.g., Cards are sleeved. Custom insert included.",
+        "characterCount": "{count}/500 characters"
+      }
+    },
+    "PhotoUpload": {
+      "guidelines": {
+        "requiredTitle": "Photos are required for Acceptable condition items",
+        "optionalTitle": "Photos help build buyer trust",
+        "tip1": "Photograph the box, components",
+        "tip2": "Show any damage or wear"
+      },
+      "upload": {
+        "clickOrDrag": "Click or drag photos here",
+        "formats": "JPEG, PNG, WebP, or AVIF",
+        "maxSize": "Max 10MB per image",
+        "uploaded": "{current}/{max} uploaded",
+        "photoCount": "{count} photo",
+        "photoCount_other": "{count} photos",
+        "addMore": "• Click to add more (up to {max})"
+      },
+      "errors": {
+        "invalidType": "{filename}: Only JPEG, PNG, WebP, and AVIF images are allowed",
+        "tooLarge": "{filename}: File size must be less than 10MB (current: {size}MB)",
+        "maxPhotos": "Maximum {max} photos allowed. You can upload {remaining} more."
+      },
+      "grid": {
+        "title": "Your Photos ({current}/{max})",
+        "photoAlt": "Photo {number}",
+        "uploadAlt": "Upload {number}",
+        "removePhoto": "Remove photo"
+      }
+    },
+    "LanguageVersionSelector": {
+      "loading": "Loading versions from BoardGameGeek...",
+      "noVersions": {
+        "title": "No version data available",
+        "description": "This game doesn't have detailed version information in BGG's database. You can continue without selecting a version.",
+        "continueButton": "Continue Without Version Selection →"
+      },
+      "autoSelected": {
+        "title": "Version automatically selected",
+        "onlyVersion": "Only one version available for this game:"
+      },
+      "selectLanguage": "Select Language",
+      "otherLanguages": "Other ({count})",
+      "showLess": "Show less",
+      "selectVersion": "Select your version",
+      "noVersionsForLanguage": "No versions found for {language}. This shouldn't happen - please try selecting a different language."
+    },
+    "ManualVersionInput": {
+      "title": "Specify Your Edition",
+      "subtitle": "Tell us about your copy of {gameName}",
+      "infoBanner": {
+        "line1": "We couldn't automatically retrieve version information from BoardGameGeek.",
+        "line2": "Please provide details about your copy to help buyers understand what they're purchasing."
+      },
+      "publisher": {
+        "label": "Publisher",
+        "placeholder": "e.g., Stonemaier Games, Z-Man Games, etc.",
+        "error": "Publisher is required"
+      },
+      "language": {
+        "label": "Language",
+        "placeholder": "e.g., English, German, French, etc.",
+        "error": "Language is required"
+      },
+      "versionName": {
+        "label": "Edition/Version Name",
+        "optional": "(optional)",
+        "placeholder": "e.g., Retail Edition, Kickstarter Edition, Second Edition",
+        "hint": "If left blank, we'll use \"{publisher} Edition\""
+      },
+      "editionYear": {
+        "label": "Edition Year",
+        "optional": "(optional)",
+        "placeholder": "e.g., 2023",
+        "error": "Please enter a valid year"
+      },
+      "continueButton": "Continue",
+      "cancelButton": "Cancel"
+    },
+    "ExpansionSelector": {
+      "loading": "Loading expansions...",
+      "noExpansions": "No expansions found for this game",
+      "searchPlaceholder": "Search...",
+      "clearSearch": "Clear search",
+      "resultsCount": "{filtered} of {total} expansions",
+      "selectedCount": "{count} selected",
+      "noMatch": "No match for \"{query}\"",
+      "searchTip": "Try English or check spelling",
+      "moreSelected": "+ {count} more selected",
+      "expansionsAvailable": "{count, plural, one {# expansion available} other {# expansions available}}",
+      "show": "Show",
+      "collapse": "Collapse",
+      "changeVersion": "Change version",
+      "changeName": "Change name",
+      "onlyEdition": "only edition",
+      "expansionsIncluded": "{count, plural, one {# expansion included} other {# expansions included}}",
+      "selectEdition": "Select edition",
+      "nameModal": {
+        "title": "Select display name",
+        "instruction": "Which name is on your box?",
+        "primary": "Primary",
+        "current": "Current",
+        "cancel": "Cancel"
+      }
+    },
+    "ErrorDisplay": {
+      "title": "Unable to Search",
+      "networkError": {
+        "title": "Try these steps:",
+        "step1": "Check your internet connection",
+        "step2": "Make sure WiFi or mobile data is enabled",
+        "step3": "Try refreshing the page"
+      },
+      "rateLimit": "BoardGameGeek is busy right now. Wait a moment and try again.",
+      "apiUnavailable": "BoardGameGeek may be experiencing issues. This usually resolves quickly.",
+      "timeout": "BoardGameGeek is responding slowly. Try again or wait a few minutes.",
+      "retryButton": "Try Again",
+      "contactSupport": "If this persists, please contact support with error code: {code}"
+    },
+    "PricingAssistant": {
+      "title": "Pricing assistant",
+      "loading": "Loading pricing data...",
+      "error": "Unable to load pricing suggestions",
+      "newRetail": "New retail:",
+      "baseGame": "Base game:",
+      "expansions": "+ {count} expansion",
+      "pricedCount": "({count} priced)",
+      "bundleRetail": "Bundle retail:",
+      "fillButton": "Fill",
+      "avgSoldHere": "Avg. sold here:",
+      "salesCount": "({count} sales)",
+      "lowestOnSecondTurn": "Lowest on Second Turn:",
+      "lowestIsAuction": "(current bid)",
+      "suggestedFor": "Suggested for {condition}:",
+      "suggestedStartingBid": "Suggested starting bid:",
+      "usePrice": "Use price",
+      "conditions": {
+        "likeNew": "Like New",
+        "veryGood": "Very Good",
+        "good": "Good",
+        "acceptable": "Acceptable"
+      },
+      "disclaimer": "Based on lowest EU retail prices. Your local market may differ - use as a guide."
+    },
+    "WantedContext": {
+      "title": "Matching a request",
+      "subtitle": "{buyer} is looking for this game",
+      "aBuyer": "A buyer",
+      "acceptableConditions": "Acceptable conditions",
+      "preferredEdition": "Preferred edition",
+      "buyerLocation": "Buyer location:",
+      "notificationNotice": "Your listing will go live publicly. The buyer will be notified immediately so they can act fast."
+    },
+    "GradingGuidePanel": {
+      "title": "Condition grading guide",
+      "tabs": {
+        "grades": "Grades",
+        "tips": "Tips"
+      },
+      "selected": "(selected)",
+      "specialConsiderations": "Special Considerations",
+      "quickTips": {
+        "title": "Quick tips",
+        "tip1": "When in doubt, grade down - buyers love positive surprises",
+        "tip2": "Use natural daylight for photos",
+        "tip3": "Mention sleeved cards as a positive",
+        "tip4": "Be specific about any damage"
+      },
+      "viewFullGuide": "View full grading guide",
+      "box": "Box",
+      "components": "Components",
+      "grades": {
+        "likeNew": {
+          "label": "Like New",
+          "shortDescription": "Appears unplayed or played once",
+          "fullDescription": "Opened but essentially untouched. This game looks like you just removed the shrink wrap. Many games get opened, admired, and put on the shelf - if that's your game, this is probably the right grade.",
+          "valueGuidance": "80–95% of retail",
+          "boxCriteria": [
+            "No visible wear, scuffs, or scratches",
+            "Corners sharp and intact",
+            "No shelf wear or storage marks"
+          ],
+          "componentCriteria": [
+            "All components present and accounted for",
+            "Cards show no wear - edges crisp, no bowing",
+            "Tokens unpunched, or punched with no damage"
+          ],
+          "proTip": "If you've played even once or twice, consider Very Good instead. Like New means essentially untouched."
+        },
+        "veryGood": {
+          "label": "Very Good",
+          "shortDescription": "Played with care, minimal wear",
+          "fullDescription": "Played and enjoyed, but handled with care. A game in Very Good condition is what you'd happily give as a gift.",
+          "valueGuidance": "60–75% of retail",
+          "boxCriteria": [
+            "Minor shelf wear or light scuffing",
+            "Corners may show slight softening",
+            "No tears, splits, or structural damage"
+          ],
+          "componentCriteria": [
+            "All components present",
+            "Cards show minimal handling - light edge wear at most",
+            "Tokens punched cleanly, no lifting or tearing"
+          ],
+          "proTip": "This is the sweet spot for most second-hand games. Buyers get a great game at a fair price."
+        },
+        "good": {
+          "label": "Good",
+          "shortDescription": "Regular play wear, fully functional",
+          "fullDescription": "Clearly pre-loved - this game has seen regular play but remains fully functional. All the adventures, some of the wear.",
+          "valueGuidance": "40–55% of retail",
+          "boxCriteria": [
+            "Noticeable wear, scuffs, or scratches",
+            "Corner wear - soft corners, possible minor splits",
+            "Light ring wear or sticker residue"
+          ],
+          "componentCriteria": [
+            "All components present (or missing pieces clearly noted)",
+            "Cards show shuffling wear on edges",
+            "Boards may have minor warping or edge wear"
+          ],
+          "proTip": "Many collectors are happy with Good condition for games they want to play rather than display."
+        },
+        "acceptable": {
+          "label": "Acceptable",
+          "shortDescription": "Heavy wear, still playable",
+          "fullDescription": "Well-loved and showing it. This game works, but it's seen better days. Always note what's missing or damaged in your listing description - buyers deserve to know exactly what they're getting.",
+          "valueGuidance": "20–35% of retail",
+          "boxCriteria": [
+            "Significant wear, creases, or damage",
+            "Corner splits, tears, or tape repairs",
+            "Box may not close properly"
+          ],
+          "componentCriteria": [
+            "All crucial components present (minor pieces may be missing)",
+            "Cards worn - may need sleeves to play comfortably",
+            "Boards may have noticeable wear or warping"
+          ],
+          "proTip": "Be very specific about damage. 'Acceptable with taped corner' is better than vague descriptions."
+        }
+      },
+      "specialConsiderationsContent": {
+        "punchedTokens": {
+          "title": "Punched vs unpunched tokens",
+          "description": "Whether cardboard tokens have been punched from their sheets matters to some buyers.",
+          "details": [
+            "Unpunched: tokens still in their original sheets",
+            "Punched: tokens removed from sheets (standard)",
+            "Cleanly punched: removed carefully with no damage"
+          ]
+        },
+        "sleevedCards": {
+          "title": "Sleeved cards",
+          "description": "Cards protected in sleeves are a plus. Note this in your listing.",
+          "details": [
+            "Cards sleeved since purchase",
+            "Cards sleeved after some play",
+            "Note if sleeves are included"
+          ]
+        },
+        "paintedMinis": {
+          "title": "Painted miniatures",
+          "description": "Some buyers want painted minis, others don't. Be clear about the state.",
+          "details": [
+            "Unpainted (original)",
+            "Primed only",
+            "Fully painted"
+          ]
+        }
+      },
+      "philosophy": {
+        "title": "When you're unsure",
+        "content": "If you're debating between two grades, go with the lower one. A buyer who receives a game in better condition than expected is delighted."
+      }
+    },
+    "pricingFormat": {
+      "fixedPrice": {
+        "label": "Fixed Price",
+        "description": "Set your price"
+      },
+      "auction": {
+        "label": "Auction",
+        "description": "Let buyers bid - highest offer wins"
+      }
+    },
+    "price": {
+      "label": "Price",
+      "labelAuction": "Starting bid",
+      "helperAuction": "The minimum amount you'll accept",
+      "bidLockMessage": "Pricing format cannot be changed after bids have been placed",
+      "commission": {
+        "fixedNote": "A 10% platform fee is deducted when your item sells",
+        "auctionNote": "A 10% platform fee is deducted from the winning bid",
+        "platformFee": "Platform fee (10%)",
+        "youReceive": "You receive"
+      }
+    },
+    "auction": {
+      "duration": {
+        "title": "Auction Duration",
+        "titleCooldown": "Initial Listing Period",
+        "cooldownHelper": "If no bids arrive in this time, the auction expires",
+        "oneDay": "1 day",
+        "days": "{count} days"
+      },
+      "endStrategy": {
+        "title": "How should the auction end?",
+        "fixed": {
+          "label": "Fixed end time",
+          "description": "Auction ends when the timer runs out"
+        },
+        "cooldown": {
+          "label": "Last-bid cooldown",
+          "description": "Timer resets after each bid, giving everyone time to respond"
+        }
+      },
+      "cooldownPeriod": {
+        "title": "Cooldown period after each bid",
+        "hours": "{count} hours"
+      },
+      "cooldownInfo": {
+        "title": "Last-bid cooldown",
+        "description": "Each bid resets the auction timer to {hours} hours. The auction ends only when no new bids arrive within the cooldown period. Great for giving more people time to discover and bid on your game."
+      },
+      "antiSnipe": {
+        "title": "Anti-snipe protection",
+        "description": "If someone bids in the last 5 minutes, the auction automatically extends by 2-5 minutes. This gives everyone a fair chance to respond."
+      }
+    },
+    "ListingReview": {
+      "title": "Review Your Listing",
+      "subtitle": "Make sure everything looks right before publishing",
+      "edit": "Edit",
+      "termsText": "I confirm that my listing information is accurate and I agree to the platform's terms of service. I understand that Second Turn Games may remove listings that don't meet community guidelines.",
+      "backToEdit": "Back to Edit",
+      "publishing": "Publishing...",
+      "publishButton": "Publish Listing",
+      "helpText": "After publishing, your listing will be visible to buyers immediately. You can edit or remove it at any time from My Listings.",
+      "preview": {
+        "title": "Live Preview",
+        "badge": "Preview",
+        "noPhoto": "No photo added"
+      },
+      "conditions": {
+        "likeNew": "Like New",
+        "veryGood": "Very Good",
+        "good": "Good",
+        "acceptable": "Acceptable"
+      },
+      "extras": {
+        "sleeved": "Sleeved",
+        "promos": "Promos Included",
+        "customInsert": "Custom Insert"
+      },
+      "sections": {
+        "gameInfo": "Game Information",
+        "game": "Game",
+        "version": "Version",
+        "publisher": "Publisher",
+        "languages": "Languages",
+        "language": "Language",
+        "year": "Year",
+        "condition": "Condition",
+        "overall": "Overall",
+        "description": "Description",
+        "components": "Components",
+        "allPresent": "All present",
+        "someMissing": "Some missing",
+        "missingDetails": "Missing details",
+        "extrasLabel": "Extras",
+        "photos": "Photos ({count})",
+        "photoAlt": "Listing photo",
+        "noPhotos": "No photos added",
+        "pricingShipping": "Pricing & Shipping"
+      },
+      "pricing": {
+        "price": "Price",
+        "standardShipping": "Standard shipping",
+        "expressShipping": "Express shipping",
+        "or": "or",
+        "freePickup": "Free pickup in {city}",
+        "yourCity": "your city",
+        "acceptsOffers": "Accepts offers",
+        "minimum": "min €{amount}",
+        "acceptsOffersLabel": "Accepts offers",
+        "yes": "Yes",
+        "min": "min",
+        "shipping": "Shipping",
+        "standard": "Standard",
+        "express": "Express",
+        "localPickup": "Local pickup",
+        "in": "in",
+        "shippingNotes": "Shipping notes",
+        "whySelling": "Why selling"
+      }
+    }
+  },
+  "SellerOnboard": {
+    "header": {
+      "title": "Become a seller",
+      "subtitle": "Turn your games into cash. Quick setup - start selling in under a minute."
+    },
+    "step1": {
+      "title": "Accept seller terms",
+      "heading": "Accept seller terms",
+      "description": "Review and accept our seller terms to confirm you're selling as a private individual.",
+      "keyPoints": {
+        "title": "Key points:",
+        "zeroFees": "<strong>Zero listing fees</strong> - free to list your games",
+        "ageRequirement": "You must be at least <strong>18 years old</strong>",
+        "personalItems": "You're selling <strong>personal items</strong>, not operating a business",
+        "accurateDescriptions": "You're responsible for <strong>accurate descriptions</strong> of your games"
+      },
+      "readFullTerms": "Read full Seller Terms →",
+      "checkbox": "I confirm I'm 18+, selling personal items, and agree to the",
+      "sellerTerms": "Seller Terms",
+      "acceptButton": "Accept seller terms",
+      "countryRequired": "Please select your country above to continue"
+    },
+    "support": {
+      "needHelp": "Need help?",
+      "contactUs": "Contact us"
+    }
+  },
+  "StatusChangeModal": {
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "sold": {
+      "title": "Mark as Sold",
+      "message": "Are you sure you want to mark \"{gameName}\" as sold?",
+      "description": "This will hide the listing from public search. You can reactivate it later if needed.",
+      "confirm": "Mark as Sold"
+    },
+    "removed": {
+      "title": "Remove Listing",
+      "message": "Are you sure you want to remove \"{gameName}\"?",
+      "description": "This will hide the listing from public search. You can reactivate or permanently delete it later.",
+      "confirm": "Remove Listing"
+    },
+    "publish": {
+      "title": "Publish Listing",
+      "message": "Are you sure you want to publish \"{gameName}\"?",
+      "description": "This will make your listing visible to buyers on the marketplace.",
+      "confirm": "Publish"
+    },
+    "reactivate": {
+      "title": "Reactivate Listing",
+      "message": "Are you sure you want to reactivate \"{gameName}\"?",
+      "description": "This will make your listing visible to buyers again.",
+      "confirm": "Reactivate"
+    },
+    "unpublish": {
+      "title": "Unpublish Listing",
+      "message": "Are you sure you want to unpublish \"{gameName}\"?",
+      "description": "This will hide the listing from public search and save it as a draft.",
+      "confirm": "Unpublish"
+    },
+    "default": {
+      "title": "Change Status",
+      "message": "Change status of \"{gameName}\"?",
+      "confirm": "Confirm"
+    }
+  },
+  "AccountSettings": {
+    "title": "Account settings",
+    "subtitle": "Your profile and preferences",
+    "tabs": {
+      "profile": "Profile",
+      "preferences": "Preferences",
+      "privacy": "Privacy"
+    },
+    "profileInfo": "Profile information",
+    "profileError": {
+      "title": "Profile Loading Error",
+      "description": "We couldn't load your profile. This might be due to a network issue or a problem with your account data.",
+      "userId": "User ID:",
+      "email": "Email:",
+      "retry": "Retry",
+      "signOut": "Sign Out",
+      "contactSupport": "If this problem persists, please contact"
+    },
+    "success": {
+      "nameUpdated": "Name updated successfully",
+      "phoneUpdated": "Phone number updated successfully",
+      "countryUpdated": "Country updated successfully",
+      "avatarUpdated": "Avatar updated successfully",
+      "dataDownloaded": "Your data has been downloaded successfully"
+    },
+    "error": {
+      "updateName": "Failed to update name",
+      "updatePhone": "Failed to update phone",
+      "updateCountry": "Failed to update country",
+      "updateAvatar": "Failed to update avatar",
+      "signOut": "Failed to sign out. Please try again.",
+      "downloadData": "Failed to download your data. Please try again."
+    },
+    "fields": {
+      "email": "Email",
+      "phone": "Phone",
+      "location": "Location"
+    },
+    "publicProfile": {
+      "title": "Public profile",
+      "description": "See how your profile appears to other users on Second Turn Games.",
+      "viewLink": "View public profile"
+    },
+    "yourData": {
+      "title": "Your data",
+      "description": "Export all your personal data in JSON format.",
+      "preparing": "Preparing...",
+      "download": "Download",
+      "gdprNote": "This feature complies with GDPR Article 20. Learn more in our",
+      "privacyPolicy": "Privacy Policy"
+    },
+    "preferredTerminal": {
+      "title": "Preferred Terminal",
+      "description": "Save your favorite terminal for faster checkout and shipping.",
+      "choose": "Choose Terminal",
+      "change": "Change",
+      "remove": "Remove",
+      "updated": "Preferred terminal updated",
+      "removed": "Preferred terminal removed",
+      "errorUpdate": "Failed to update preferred terminal",
+      "errorRemove": "Failed to remove preferred terminal"
+    }
+  },
+  "LoginActivity": {
+    "title": "Login Activity",
+    "lastSignIns": "Last 10 sign-ins",
+    "current": "Current",
+    "noActivity": "No login activity recorded yet.",
+    "unavailable": "Login activity unavailable",
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{count} minutes ago",
+      "hourAgo": "{count} hour ago",
+      "hoursAgo": "{count} hours ago",
+      "dayAgo": "{count} day ago",
+      "daysAgo": "{count} days ago"
+    },
+    "security": {
+      "tip": "Security tip:",
+      "warning": "If you see any unfamiliar activity, consider changing your password immediately and signing out all devices.",
+      "signOutAll": "Sign Out All Devices",
+      "signOutAllTitle": "Sign Out All Devices",
+      "signOutAllDescription": "This will sign you out from all devices including this one. You'll need to sign in again.",
+      "signingOut": "Signing out...",
+      "confirmSignOut": "Confirm Sign Out",
+      "cancel": "Cancel"
+    }
+  },
+  "EmailChange": {
+    "verificationSent": "Verification email sent",
+    "verificationDescription": "We've sent verification links to both {currentEmail} and {newEmail}. Click the link in the new email to complete the change.",
+    "placeholder": "newemail@example.com",
+    "hint": "We'll send a verification link to confirm.",
+    "validation": {
+      "invalidEmail": "Please enter a valid email address",
+      "sameEmail": "New email must be different from current email"
+    }
+  },
+  "ProfilePage": {
+    "backToBrowse": "Back to Browse",
+    "back": "Back",
+    "userNotFound": "User Not Found",
+    "profileNotFound": "This profile could not be found.",
+    "browseListings": "Browse Listings",
+    "reviewCount": "{count, plural, =1 {# review} other {# reviews}}",
+    "completedSales": "completed sales",
+    "positive": "positive",
+    "reviews": "Reviews",
+    "loadMore": "Load more ({current} of {total})",
+    "notSelling": "This user is not currently selling any items.",
+    "listingsTab": "Listings ({count})",
+    "reviewsTab": "Reviews ({count})"
+  },
+  "Home": {
+    "FeaturedGames": {
+      "title": "Recently Listed Games",
+      "subtitle": "Fresh arrivals from Baltic board game enthusiasts",
+      "browseAll": "Browse All Games"
+    },
+    "Features": {
+      "buyerProtection": {
+        "title": "Buyer Protection",
+        "description": "Your payment is held securely until you confirm delivery. Shop with confidence."
+      },
+      "verifiedSellers": {
+        "title": "Verified Sellers",
+        "description": "Browse seller ratings and reviews. Know who you're buying from."
+      },
+      "transparentCondition": {
+        "title": "Transparent Condition",
+        "description": "Detailed photos and condition grades for every game. No surprises."
+      }
+    },
+    "Testimonials": {
+      "title": "Loved by the Baltic Gaming Community",
+      "subtitle": "Join hundreds of happy buyers and sellers",
+      "goToTestimonial": "Go to testimonial {number}",
+      "testimonial1": {
+        "name": "Marta K.",
+        "role": "Board Game Collector",
+        "location": "Tallinn, Estonia",
+        "content": "Found a rare copy of Twilight Imperium for half the price of new. The seller was transparent about the condition and even offered local pickup. Best marketplace for board games in the Baltics!"
+      },
+      "testimonial2": {
+        "name": "Jānis R.",
+        "role": "Casual Seller",
+        "location": "Riga, Latvia",
+        "content": "Sold 5 games I no longer played within two weeks. The process was simple, and the buyer protection made me feel secure. Great way to declutter and help other gamers."
+      },
+      "testimonial3": {
+        "name": "Vytautas M.",
+        "role": "Game Café Owner",
+        "location": "Vilnius, Lithuania",
+        "content": "We regularly find games here for our café at amazing prices. The condition grading system is accurate, and the local community aspect makes it easy to coordinate pickups."
+      }
+    },
+    "WhySecondTurn": {
+      "title": "Why Choose Second Turn Games?",
+      "subtitle": "The smart way to grow your board game collection in the Baltics",
+      "saveMoney": {
+        "title": "Save Money",
+        "description": "Average savings of 40% compared to buying new. Quality games at great prices.",
+        "stat": "Up to 40% off"
+      },
+      "findRareGames": {
+        "title": "Find Rare Games",
+        "description": "Discover out-of-print titles and hard-to-find games not available in stores.",
+        "stat": "Unique finds"
+      },
+      "meetLocalGamers": {
+        "title": "Meet Local Gamers",
+        "description": "Connect with the Baltic board game community. Local pickup available across Estonia, Latvia, and Lithuania.",
+        "stat": "Baltic network"
+      },
+      "sustainableGaming": {
+        "title": "Sustainable Gaming",
+        "description": "Give quality games another adventure. Reduce waste while building your collection.",
+        "stat": "Second turns"
+      },
+      "builtForBaltics": "Built for the Baltics",
+      "connectingGamers": "Connecting gamers across Estonia, Latvia, and Lithuania"
+    }
+  },
+  "UserCard": {
+    "memberSince": "Joined {date}"
+  },
+  "Dashboard": {
+    "SellerCTA": {
+      "title": "Start selling",
+      "subtitle": "Turn waiting games into someone's next adventure. Just a 10% commission on sales."
+    }
+  },
+  "Cart": {
+    "title": "Cart",
+    "summary": {
+      "itemsFromSellers": "{totalItems, plural, one {# item} other {# items}} from {basketCount, plural, one {# seller} other {# sellers}}"
+    },
+    "error": {
+      "title": "Error loading cart",
+      "tryAgain": "Try again"
+    },
+    "emptyCart": {
+      "title": "Your cart is empty",
+      "description": "Your next favourite game is out there - we'll hold it here when you find it.",
+      "browseButton": "Browse games"
+    },
+    "item": {
+      "remove": "Remove from cart",
+      "delete": "Delete"
+    },
+    "basket": {
+      "subtotalItems": "Subtotal ({count, plural, one {# item} other {# items}})",
+      "shipping": "Shipping",
+      "shippingAtCheckout": "Calculated at checkout",
+      "checkout": "Checkout"
+    },
+    "orderSummary": {
+      "title": "Order Summary",
+      "totalItems": "Total items",
+      "fromSellers": "From sellers",
+      "subtotalAll": "Subtotal (all baskets)",
+      "separateCheckout": "Each basket is checked out and paid separately",
+      "shippingNote": "Shipping is added per seller at checkout"
+    },
+    "expiredItems": {
+      "title": "Previously in your cart",
+      "description": "These items are no longer reserved but still available.",
+      "dismissAll": "Dismiss all",
+      "addAgain": "Add to cart again",
+      "adding": "Adding...",
+      "noLongerAvailable": "This item is no longer available"
+    }
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "subtitle": "Keep track of your auctions, orders, and wanted matches",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications yet",
+    "noNotificationsHint": "When something needs your attention, it will appear here.",
+    "loadMore": "Load more",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "thisWeek": "This week",
+    "earlier": "Earlier",
+    "loading": "Loading..."
+  },
+  "MyListings": {
+    "publishSuccess": "Your listing is live.",
+    "title": "My listings",
+    "subtitle": "Games you're selling, seeking, and saving",
+    "buyerTitle": "Saved & wanted",
+    "buyerSubtitle": "Games you're seeking and saving",
+    "sellerCTA": {
+      "message": "Have pre-loved games gathering dust?",
+      "action": "Start selling"
+    },
+    "loading": "Loading...",
+    "buttons": {
+      "requestGame": "Request a game",
+      "sellGame": "Sell a game"
+    },
+    "tabs": {
+      "selling": "Selling",
+      "lookingFor": "Looking For",
+      "saved": "Saved"
+    },
+    "statusTabs": {
+      "all": "All"
+    },
+    "selling": {
+      "loading": "Loading your listings...",
+      "offlineError": "We couldn't load your listings. Check your connection and try again.",
+      "emptyAll": {
+        "title": "No listings yet",
+        "description": "Start selling your board games to the community",
+        "button": "Create Your First Listing"
+      },
+      "emptyFiltered": {
+        "title": "No {status} listings",
+        "description": "You don't have any {status} listings at the moment"
+      },
+      "emptyDraft": {
+        "title": "No draft listings",
+        "description": "Drafts are saved in your browser while you fill in the sell form. Open the sell page to continue where you left off.",
+        "button": "Continue on Sell Page"
+      }
+    },
+    "wanted": {
+      "loading": "Loading your wanted listings...",
+      "offlineError": "We couldn't load your wanted listings. Check your connection and try again.",
+      "emptyAll": {
+        "title": "No wanted listings yet",
+        "description": "Start posting games you're looking for",
+        "button": "Post Your First ISO"
+      },
+      "emptyFiltered": {
+        "title": "No {status} wanted listings",
+        "description": "You don't have any {status} wanted listings at the moment"
+      }
+    },
+    "saved": {
+      "loading": "Loading your saved listings...",
+      "empty": {
+        "title": "No saved listings yet",
+        "description": "Start saving listings you're interested in by clicking the heart icon on any listing card or detail page.",
+        "button": "Browse Listings"
+      }
+    },
+    "auction": {
+      "active": "Auction ({time})",
+      "awaitingPayment": "Awaiting Payment",
+      "noBids": "No Bids",
+      "paymentExpired": "Payment Expired",
+      "sold": "Sold (Auction)",
+      "processing": "Ending...",
+      "winningBid": "Winning bid: {amount}",
+      "payBy": "Pay by: {time}"
+    },
+    "clipboard": {
+      "success": "Link copied to clipboard"
+    }
+  },
+  "SellerDashboard": {
+    "titleWallet": "Wallet & earnings",
+    "subtitle": {
+      "wallet": "Your earnings from sales, ready to spend or withdraw"
+    },
+    "earnings": {
+      "withdraw": "Withdraw",
+      "requestWithdrawal": "Request Withdrawal",
+      "withdrawalRequests": "Withdrawal Requests",
+      "transactionHistory": "Transaction History",
+      "howItWorks": "How Earnings Work",
+      "step1": "When a sale completes, your earnings (item price minus 10% commission) are credited to your wallet",
+      "step2": "Use your balance to buy games on Second Turn — no withdrawal needed",
+      "step3": "Or withdraw to your bank account at any time — processed within 1-3 business days",
+      "stats": {
+        "available": "Available",
+        "availableHint": "in your wallet",
+        "earnedThisMonth": "Earned this month",
+        "totalWithdrawn": "Total withdrawn",
+        "pendingWithdrawals": "Pending withdrawals",
+        "pendingCount": "{count, plural, one {# request} other {# requests}}"
+      }
+    },
+    "reviews": {
+      "loading": "Loading reviews..."
+    },
+    "recentReviews": {
+      "noReviews": "No reviews yet",
+      "noReviewsHint": "Reviews from buyers will appear here after your first completed sale"
+    },
+    "TransactionList": {
+      "title": "Recent Sales",
+      "viewAll": "View All",
+      "noSales": "No sales yet",
+      "noSalesHint": "Your sales will appear here",
+      "gameSale": "Game sale",
+      "net": "net"
+    },
+    "SellerTrustBadge": {
+      "sale": "sale",
+      "sales": "sales",
+      "shipsFrom": "Ships from {country}",
+      "badges": {
+        "topSeller": "Top Seller",
+        "trustedSeller": "Trusted Seller",
+        "newSeller": "New Seller",
+        "foundingSeller": "Founding seller"
+      }
+    },
+    "SellerTrustCard": {
+      "title": "Your Reputation",
+      "rating": "Rating",
+      "reviews": "Reviews",
+      "noReviewsYet": "No reviews yet",
+      "completedSales": "Completed sales",
+      "positive": "Positive",
+      "basedOn": "Based on {count} reviews",
+      "earnTrusted": "Earn Trusted Seller",
+      "trustedRequirement": "Complete 5 sales with positive reviews to earn the Trusted Seller badge",
+      "earnTop": "Earn Top Seller",
+      "topRequirement": "Complete 20 sales with 95%+ positive reviews to earn the Top Seller badge"
+    },
+    "SellerReviewsList": {
+      "noReviews": "No reviews yet",
+      "noReviewsHint": "Buyer reviews will appear here after completed orders",
+      "reportReview": "Report review",
+      "reportReason": "Why are you reporting this review?",
+      "reportReasonPlaceholder": "Describe why this review is inappropriate...",
+      "reportSubmit": "Report",
+      "reportSuccess": "Review reported. Our team will review it.",
+      "reported": "Reported",
+      "review": "review",
+      "reviews": "reviews",
+      "star": "star",
+      "stars": "stars",
+      "positive": "positive",
+      "loading": "Loading...",
+      "loadMore": "Load more",
+      "order": "Order",
+      "sellerResponse": "Seller response",
+      "respondToReview": "Respond to review",
+      "responsePlaceholder": "Write your response...",
+      "characters": "{count}/{max} characters",
+      "cancel": "Cancel",
+      "sending": "Sending...",
+      "sendResponse": "Send response"
+    },
+    "Dac7": {
+      "transactions": "Transactions",
+      "sales": "Sales",
+      "provideTaxInfo": "Provide tax info",
+      "approaching": {
+        "title": "Tax information needed soon",
+        "description": "You're approaching EU DAC7 reporting thresholds ({percent}%). Please provide your tax information."
+      },
+      "required": {
+        "title": "Tax information required",
+        "description": "You've exceeded DAC7 thresholds. Please provide your tax information to continue selling."
+      },
+      "blocked": {
+        "title": "Selling suspended",
+        "description": "New listings are blocked until you provide tax information. Existing listings are hidden."
+      }
+    }
+  },
+  "Orders": {
+    "title": "My orders",
+    "actionRequired": {
+      "title": "Action required",
+      "confirmReceipt": "Confirm receipt",
+      "activeDispute": "Dispute open"
+    },
+    "loading": "Loading your orders...",
+    "error": {
+      "title": "Error loading orders",
+      "tryAgain": "Try again"
+    },
+    "roleTabs": {
+      "purchases": "My purchases",
+      "sales": "My sales"
+    },
+    "tabs": {
+      "all": "All Orders",
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "disputed": "Disputed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "emptyState": {
+      "title": "Nothing here yet",
+      "descriptionAll": "When you buy a game, it'll show up here so you can follow its journey.",
+      "descriptionFiltered": "No {status} orders",
+      "button": "Find your next game"
+    },
+    "orderCard": {
+      "expired": "Expired",
+      "from": "From: {name}",
+      "itemsMore": "+{count} more"
+    },
+    "detail": {
+      "loading": "Loading order details...",
+      "notFound": "Order not found",
+      "backToOrders": "Back to Orders",
+      "orderTitle": "Order {orderNumber}",
+      "placedAt": "Placed {date} at {time}",
+      "orderStatus": "Order Status",
+      "steps": {
+        "placed": "Order Placed",
+        "pending": "Waiting for Seller",
+        "accepted": "Seller Accepted",
+        "shipped": "Shipped",
+        "delivered": "Delivered"
+      },
+      "cancelled": {
+        "title": "Order Cancelled",
+        "refundProcessed": "Refund Processed: €{amount}",
+        "reasons": {
+          "sellerTimeout": "The seller did not respond within 24 hours. A refund has been initiated.",
+          "sellerDeclined": "The seller declined this order. A refund has been initiated.",
+          "shippingTimeout": "The seller did not ship within the deadline. A refund has been initiated.",
+          "sellerCancelled": "The seller cancelled this order before shipping. A refund has been initiated.",
+          "default": "This order has been cancelled and a refund has been initiated."
+        }
+      },
+      "pending": {
+        "expiredTitle": "Seller Deadline Expired",
+        "waitingTitle": "Waiting for Seller Response",
+        "expiredDescription": "The seller did not respond within 24 hours. Your refund is being processed automatically.",
+        "waitingDescription": "The seller has {hours} hours and {minutes} minutes to accept your order. If they don't respond, you'll receive an automatic full refund.",
+        "refundProtection": "If the seller doesn't respond in time, you'll receive an automatic full refund to your original payment method."
+      },
+      "refunded": {
+        "title": "Refund Processed",
+        "amount": "Refund amount: {amount}",
+        "returnedTo": "Returned to",
+        "toWallet": "{amount} to Wallet",
+        "toPaymentMethod": "{amount} to {method}",
+        "card": "Card",
+        "bankLink": "Bank link"
+      },
+      "disputed": {
+        "openedOn": "Dispute opened: {date}",
+        "inProgress": "Dispute in Progress",
+        "yourReport": "Your report",
+        "awaitingDeadline": "Waiting for seller response (deadline: {date})",
+        "underReview": "Our team is reviewing the dispute. We will notify you of the outcome.",
+        "yourResponse": "Your response",
+        "staffReviewing": "Our team is reviewing the dispute. We will notify both parties of the outcome.",
+        "resolution": "Resolution",
+        "awaitingSeller": "Awaiting seller",
+        "resolved": "Resolved"
+      },
+      "labelGenerating": "Registering your shipment — this usually takes a few seconds.",
+      "notices": {
+        "delivered": {
+          "title": "Your parcel has arrived",
+          "body": "Pick it up at the terminal and confirm receipt. You have 2 days to report an issue if anything is wrong."
+        },
+        "deliveredSeller": {
+          "title": "Buyer has received the parcel",
+          "body": "If no issue is reported within 2 days, your earnings will be credited to your wallet automatically."
+        },
+        "accepted": {
+          "title": "Seller is preparing your order",
+          "body": "They're getting it ready to ship. You'll be notified when it's on the way."
+        },
+        "shipped": {
+          "title": "Your parcel is on the way",
+          "body": "Track it below. You'll receive a notification when it arrives at the pickup terminal."
+        },
+        "completed": {
+          "title": "Order complete",
+          "body": "Thank you for your purchase."
+        },
+        "completedSeller": {
+          "title": "Order complete — you've been paid",
+          "body": "{amount} has been added to your wallet. You can withdraw any time."
+        }
+      },
+      "timeline": {
+        "title": "Tracking Timeline",
+        "paid": "Paid",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "refunded": "Refunded",
+        "disputed": "Disputed"
+      },
+      "statusTimeline": {
+        "remaining": "{hours}h {minutes}m remaining"
+      },
+      "items": {
+        "title": "Items ({count})"
+      },
+      "shipping": {
+        "deliveryTitle": "Delivery Information"
+      },
+      "summary": {
+        "title": "Order Summary",
+        "items": "Items",
+        "shipping": "Shipping",
+        "totalPaid": "Total Paid",
+        "free": "Free",
+        "commission": "Platform commission",
+        "youReceive": "You receive",
+        "youReceiveEstimated": "You'll receive (est.)",
+        "total": "Total",
+        "sellerCredit": "Seller credit",
+        "refund": "Refund",
+        "viewInvoice": "View invoice",
+        "viewCreditNote": "View credit note",
+        "orderConfirmation": "Order confirmation",
+        "invoice": "Invoice",
+        "creditNote": "Credit note",
+        "confirmation": "Confirmation",
+        "paidWith": {
+          "title": "Paid with",
+          "wallet": "Wallet",
+          "card": "Card",
+          "bankLink": "Bank link",
+          "walletAndCard": "Wallet + Card",
+          "walletAndBank": "Wallet + Bank link"
+        }
+      },
+      "seller": {
+        "title": "Seller"
+      },
+      "welcome": {
+        "title": "Payment successful",
+        "subtitle": "Your order has been placed and payment confirmed.",
+        "emailSent": "We've sent a confirmation email with your order details."
+      },
+      "help": {
+        "title": "Need Help?",
+        "description": "Contact support if you have any issues with your order."
+      },
+      "review": {
+        "title": "How was your experience?",
+        "description": "Share your feedback to help other buyers",
+        "button": "Leave a review",
+        "alreadyReviewed": "You reviewed this order",
+        "yourReview": "Your review",
+        "buyerReview": "Buyer's review",
+        "placeholder": "Tell others about the item condition, packaging, communication with the seller...",
+        "submit": "Submit Review",
+        "submitting": "Submitting...",
+        "ratings": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "veryGood": "Very Good",
+          "excellent": "Excellent"
+        }
+      },
+      "actions": {
+        "confirmReceipt": "Confirm Receipt",
+        "confirming": "Confirming...",
+        "confirmReceiptSuccess": "Receipt confirmed. Order is now complete.",
+        "confirmReceiptError": "Failed to confirm receipt",
+        "reportIssue": "Report Issue",
+        "reportIssueTitle": "Report an Issue",
+        "issueTypeLabel": "Issue Type",
+        "issueTypePlaceholder": "Select an issue type...",
+        "descriptionLabel": "Description (minimum 10 characters)",
+        "descriptionPlaceholder": "Describe the issue in detail...",
+        "characterCount": "{length}/2000 characters",
+        "submitIssue": "Submit Issue",
+        "submitting": "Submitting...",
+        "cancel": "Cancel",
+        "reportIssueSuccess": "Issue reported successfully. Our team will review and respond.",
+        "reportIssueError": "Failed to report issue",
+        "issueTypes": {
+          "not_received": "Package not received",
+          "damaged": "Item arrived damaged",
+          "wrong_item": "Wrong item received",
+          "not_as_described": "Item not as described",
+          "shipping_delay": "Shipping delay",
+          "seller_unresponsive": "Seller unresponsive",
+          "buyer_unresponsive": "Buyer unresponsive",
+          "payment_issue": "Payment issue",
+          "other": "Other"
+        }
+      },
+      "messages": {
+        "title": "Messages",
+        "empty": "No messages yet",
+        "emptyReadOnly": "No messages in this conversation",
+        "startConversation": "Start the conversation with {name}",
+        "buyerLabel": "Buyer",
+        "sellerLabel": "Seller"
+      }
+    },
+    "statuses": {
+      "pendingSeller": "Waiting for Seller",
+      "accepted": "Accepted",
+      "shipped": "Shipped",
+      "inTransit": "In Transit",
+      "delivered": "Delivered",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "disputed": "Disputed",
+      "refunded": "Refunded"
+    }
+  },
+  "Help": {
+    "page": {
+      "title": "Help Centre",
+      "description": "Guides and resources for buying and selling pre-loved board games on Second Turn Games.",
+      "breadcrumbHome": "Home",
+      "breadcrumbHelp": "Help Centre"
+    },
+    "nav": {
+      "overview": "Help Centre",
+      "buying": "How to Buy",
+      "selling": "How to Sell",
+      "grading": "Condition Grading",
+      "shipping": "Shipping",
+      "wallet": "Wallet & Payments",
+      "dac7": "DAC7 & Taxes"
+    },
+    "faq": {
+      "q1": {
+        "question": "What is Second Turn Games?",
+        "answer": "Second Turn Games is a peer-to-peer marketplace for buying and selling pre-loved board games in the Baltic region (Latvia, Lithuania, Estonia). Every listing is verified against BoardGameGeek's database of 170,000+ games."
+      },
+      "q2": {
+        "question": "Where can I sell board games in Latvia?",
+        "answer": "Second Turn Games is the dedicated marketplace for selling board games in Latvia, Lithuania, and Estonia. List your games with verified BoardGameGeek data, set your price, and ship via parcel lockers. Sellers receive 90% of the sale price."
+      },
+      "q3": {
+        "question": "Is Second Turn Games safe?",
+        "answer": "Yes. Second Turn Games uses EveryPay (via Swedbank) for secure payment processing, offers buyer protection with a dispute resolution window, and verifies all listings against BoardGameGeek's database. The platform is operated by Second Turn Games SIA, registered in Latvia."
+      },
+      "q4": {
+        "question": "What are the fees on Second Turn Games?",
+        "answer": "Buyers pay the item price plus a flat €2.00 shipping fee (no service fee). Sellers pay a 10% commission on the item price, deducted automatically. Listing is free."
+      },
+      "q5": {
+        "question": "How does selling on Second Turn Games work?",
+        "answer": "Search for your game in the BoardGameGeek database, grade its condition, set a price, add photos, and publish. When someone buys, you confirm the order within 24 hours, pack the game, and drop it off at a parcel terminal. Your earnings are credited to your wallet after delivery."
+      },
+      "q6": {
+        "question": "How does shipping work on Second Turn Games?",
+        "answer": "Second Turn Games uses Unisend parcel terminals across the Baltic region. Shipping costs a flat €2.00 per order. After confirming an order, sellers receive a shipping code, pack the game, and drop it off at any Unisend terminal. Tracking updates automatically."
+      },
+      "q7": {
+        "question": "How do I get paid as a seller?",
+        "answer": "Two days after delivery (or when the buyer confirms earlier), your earnings (90% of item price) are credited to your platform wallet. You can withdraw to your IBAN bank account at any time - no fees, no minimum waiting period."
+      },
+      "q8": {
+        "question": "What board game conditions are accepted?",
+        "answer": "Second Turn Games uses four condition grades: Like New (played 1-2 times, all components present), Very Good (light wear, fully playable), Good (moderate wear, complete and playable), and Acceptable (noticeable wear but complete). All grades require complete, playable games."
+      }
+    }
+  },
+  "Feedback": {
+    "button": "Feedback",
+    "title": "Share your feedback",
+    "typeLabel": "What's this about?",
+    "typefeature_request": "Feature request",
+    "typebug_report": "Bug report",
+    "typeother": "Something else",
+    "descriptionLabel": "Tell us more",
+    "descriptionPlaceholderFeature": "Describe the feature you'd like to see...",
+    "descriptionPlaceholderBug": "What happened? What did you expect?",
+    "descriptionPlaceholderOther": "Tell us what's on your mind...",
+    "emailLabel": "Email (optional)",
+    "emailHelper": "In case we need to follow up",
+    "screenshotLabel": "Add a screenshot",
+    "submit": "Send feedback",
+    "sending": "Sending...",
+    "successTitle": "Thanks for your feedback",
+    "successMessage": "We read every submission.",
+    "errorGeneric": "Something went wrong. Try again?",
+    "errorTooShort": "Please add a bit more detail",
+    "errorScreenshotTooLarge": "Screenshot must be less than 5MB",
+    "errorInvalidScreenshotType": "Screenshot must be JPEG, PNG, or WebP",
+    "tryAgain": "Try again"
+  },
+  "Newsletter": {
+    "description": "New features, updates, and the occasional good find. No spam.",
+    "placeholder": "Your email",
+    "subscribe": "Join",
+    "success": "You're in. Welcome to the community.",
+    "error": "Something went wrong. Try again?",
+    "errorInvalidEmail": "Please enter a valid email address",
+    "settingsTitle": "Newsletter",
+    "settingsDescription": "Hear about new features and updates",
+    "settingsLoading": "Loading...",
+    "settingsError": "Something went wrong. Try again?",
+    "settingsSubscribe": "Subscribe to newsletter",
+    "settingsUnsubscribe": "Unsubscribe from newsletter",
+    "unsubscribedTitle": "You've unsubscribed",
+    "unsubscribedMessage": "You won't receive any more newsletter emails from us.",
+    "alreadyUnsubscribedTitle": "Already unsubscribed",
+    "alreadyUnsubscribedMessage": "You're already unsubscribed from our newsletter.",
+    "unsubscribeErrorTitle": "Something went wrong",
+    "unsubscribeErrorMessage": "We couldn't process your unsubscribe request. Please try again or contact us.",
+    "backToHome": "Back to home"
+  },
+  "Play": {
+    "title": "Galda Spēle",
+    "subtitle": "Guess the daily board game",
+    "guessPlaceholder": "Search for a board game...",
+    "guessesRemaining": "{count, plural, =1 {1 guess remaining} other {# guesses remaining}}",
+    "noResults": "No games found",
+    "guessNumber": "Guess #{number}",
+    "yourGuesses": "{count, plural, =1 {Your guess (1)} other {Your guesses (#)}}",
+    "comeBackTomorrow": "Come back tomorrow for a new puzzle",
+    "shareResults": "Share results",
+    "copiedToClipboard": "Copied to clipboard",
+    "shared": "Shared",
+    "shareFailed": "Share failed",
+    "noListingsYet": "No one is selling this game yet",
+    "sellThisGame": "Sell this game",
+    "statPlayed": "Played",
+    "statWinRate": "Win %",
+    "statCurrentStreak": "Streak",
+    "statMaxStreak": "Best",
+    "statsTitle": "Statistics",
+    "averageGuesses": "Average guesses",
+    "guessDistribution": "Guess distribution",
+    "columnYear": "Year",
+    "columnPlayers": "Max Players",
+    "columnWeight": "Complexity",
+    "columnTime": "Play Time",
+    "columnCategory": "Categories",
+    "columnMechanic": "Mechanics",
+    "errors": {
+      "loadFailed": "Failed to load puzzle",
+      "submitFailed": "Failed to submit guess",
+      "alreadyGuessed": "You already guessed this game"
+    },
+    "turni": {
+      "helpIntro": "Guess the mystery board game in 6 tries. I'll give you hints after each guess.",
+      "win": {
+        "1": "Wow, first try. Are you a mind reader?",
+        "2": "Two guesses. You really know your games.",
+        "3": "Nice work. That was a tricky one.",
+        "4": "Got it. Solid detective work.",
+        "5": "Phew, you figured it out.",
+        "6": "Just in time. That was close."
+      },
+      "loss": {
+        "reveal": "Tough one. The answer was...",
+        "encourage": "Tomorrow's another game."
+      },
+      "streak": {
+        "3": "Three in a row. You're on a roll.",
+        "7": "A whole week. Impressive dedication.",
+        "14": "Two weeks strong.",
+        "30": "A month of daily games. Legend."
+      }
+    },
+    "help": {
+      "title": "Help",
+      "howToPlay": "How to Play",
+      "rule1": "Guess the board game in 6 tries",
+      "rule2": "Each guess reveals clues about the attributes",
+      "rule3": "Use the feedback to narrow down your next guess",
+      "feedbackLegend": "Feedback Legend",
+      "legendCorrect": "Correct - exact match",
+      "legendClose": "Close - within range",
+      "legendHigher": "Higher - the answer is higher",
+      "legendLower": "Lower - the answer is lower",
+      "legendNone": "Incorrect - no match"
+    }
+  },
+  "SellerOrders": {
+    "loading": "Loading your orders...",
+    "error": {
+      "title": "Error loading orders",
+      "tryAgain": "Try again"
+    },
+    "noOrders": {
+      "title": "No orders found",
+      "pending": "You have no pending orders to review",
+      "other": "No {tab} orders"
+    },
+    "actionRequired": {
+      "title": "Action required",
+      "acceptOrDecline": "Accept or decline",
+      "activeDispute": "Dispute open"
+    },
+    "tabs": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "disputed": "Disputed",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "all": "All"
+    },
+    "card": {
+      "expired": "Expired",
+      "itemsMore": "+{count} more",
+      "to": "To: {name}"
+    }
+  },
+  "SellerOrderDetail": {
+    "loading": "Loading order details...",
+    "backToOrders": "Back to Orders",
+    "actionRequired": {
+      "title": "Action Required",
+      "description": "Please accept or decline this order. You have 24 hours from when the order was placed to respond. If you don’t respond in time, the order will be automatically cancelled and the buyer will be refunded.",
+      "acceptOrder": "Accept Order",
+      "declineOrder": "Decline Order",
+      "expiredDescription": "The response window has closed. This order will be automatically cancelled and the buyer refunded."
+    },
+    "acceptModal": {
+      "processing": "Processing..."
+    },
+    "declineModal": {
+      "title": "Decline Order",
+      "description": "Are you sure you want to decline this order? The buyer will be automatically refunded.",
+      "reasonLabel": "Reason (optional)",
+      "reasonPlaceholder": "e.g., Item is no longer available, damaged, etc.",
+      "declineAndRefund": "Decline & Refund",
+      "cancel": "Cancel",
+      "processing": "Processing..."
+    },
+    "labelFailed": {
+      "title": "Shipment Code Not Generated",
+      "description": "There was an error generating your shipment code. Please try again.",
+      "retryLabelGeneration": "Retry Code Generation",
+      "generatingLabel": "Generating Code..."
+    },
+    "readyToShip": {
+      "title": "Ready to Ship",
+      "description": "Your parcel has been registered with Unisend. Follow these steps to ship:",
+      "parcelId": "Your Parcel ID",
+      "trackPackage": "Track Package"
+    },
+    "shippingInfo": {
+      "title": "Shipping Information"
+    },
+    "buyerInfo": "Buyer",
+    "messages": "Conversation",
+    "pricingSummary": {
+      "title": "Pricing Summary"
+    }
+  },
+  "WalletTransactions": {
+    "types": {
+      "saleCredit": "Sale earnings",
+      "purchaseDebit": "Purchase",
+      "withdrawal": "Withdrawal",
+      "refundCredit": "Refund"
+    },
+    "columns": {
+      "date": "Date",
+      "type": "Type",
+      "description": "Description",
+      "amount": "Amount",
+      "balance": "Balance"
+    },
+    "withdrawalStatus": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "rejected": "Rejected"
+    },
+    "filter": {
+      "label": "Period",
+      "allTime": "All time",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "this_week": "This week",
+      "last_week": "Last week",
+      "this_month": "This month",
+      "last_month": "Last month",
+      "this_quarter": "This quarter",
+      "this_year": "This year"
+    },
+    "exportCsv": "Download CSV",
+    "empty": "No transactions yet",
+    "emptyHint": "Earnings from completed sales will appear here",
+    "loading": "Loading...",
+    "showMore": "Show more ({count} remaining)"
+  },
+  "WithdrawalForm": {
+    "amountLabel": "Withdrawal amount",
+    "available": "Available: {amount}",
+    "withdrawAll": "Withdraw all",
+    "holderNameLabel": "Account holder name",
+    "holderNamePlaceholder": "Full name as on bank account",
+    "ibanLabel": "IBAN",
+    "savedBadge": "Saved",
+    "submit": "Withdraw",
+    "cancel": "Cancel",
+    "securityNote": "Processed via bank transfer within 1–3 business days. Your bank details are saved for future withdrawals.",
+    "errors": {
+      "amountRequired": "Please enter an amount",
+      "exceedsBalance": "Amount exceeds your wallet balance",
+      "ibanRequired": "IBAN is required",
+      "nameRequired": "Account holder name is required",
+      "generic": "Something went wrong"
+    }
+  },
+  "WithdrawalHistory": {
+    "statuses": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "rejected": "Rejected"
+    },
+    "empty": "No withdrawal requests yet",
+    "to": "To {iban}",
+    "bankRef": "Bank ref: {ref}",
+    "reason": "Reason: {reason}",
+    "loading": "Loading...",
+    "showMore": "Show more"
+  },
+  "Phases": {
+    "listing": {
+      "flowTitle": "Your Turn — List a Game",
+      "research": {
+        "name": "Research Phase",
+        "subtitle": "Find your game",
+        "shortName": "Research",
+        "continueButton": "Continue →"
+      },
+      "market": {
+        "name": "Condition & Photos",
+        "subtitle": "Tell buyers about your game's condition",
+        "shortName": "Condition",
+        "continueButton": "Continue to pricing"
+      },
+      "action": {
+        "name": "Pricing",
+        "subtitle": "Set your asking price",
+        "shortName": "Pricing",
+        "continueButton": "Continue to review"
+      },
+      "score": {
+        "name": "Score Phase",
+        "subtitle": "Review and list",
+        "shortName": "Score",
+        "publishButton": "List your game"
+      }
+    },
+    "celebrations": {
+      "listingPublished": "Your game is now in play!",
+      "listingPublishedSubtext": "We will notify you when someone makes a move.",
+      "listingDetail": "{gameName} is listed at {price}.",
+      "listAnother": "List another game",
+      "viewListing": "View your listing"
+    },
+    "achievements": {
+      "firstTurn": {
+        "toast": "First Turn complete!"
+      }
+    },
+    "tracker": {
+      "stepOf": "Step {current} of {total}",
+      "stepStatus": {
+        "active": "active",
+        "completed": "completed",
+        "current": "current",
+        "upcoming": "upcoming"
+      }
+    }
+  },
+  "Documents": {
+    "layout": {
+      "reg": "Reg.",
+      "vat": "VAT",
+      "no": "No.",
+      "date": "Date:",
+      "recipient": "Recipient",
+      "electronicSignature": "This document was generated electronically and is valid without a signature."
+    },
+    "lineItems": {
+      "description": "Description",
+      "gross": "Gross",
+      "net": "Net",
+      "vatRate": "VAT Rate",
+      "vat": "VAT"
+    },
+    "invoice": {
+      "title": "Platform Services Invoice",
+      "notAvailable": "Invoice not available",
+      "notAvailableDescription": "This invoice is not yet available or you do not have access.",
+      "order": "Order:",
+      "country": "Country:",
+      "commissionLineItem": "Marketplace commission (10% of {amount})",
+      "shippingManagement": "Shipping management",
+      "totalNet": "Total net",
+      "vatLine": "VAT ({rate}%)",
+      "invoiceTotal": "Invoice total",
+      "paymentSummary": "Payment summary",
+      "totalCollected": "Total collected from buyer",
+      "platformServices": "Platform services (this invoice)",
+      "creditedToWallet": "Credited to your wallet"
+    },
+    "confirmation": {
+      "title": "Order Confirmation",
+      "notAvailable": "Order confirmation not available",
+      "notAvailableDescription": "This confirmation is not yet available or you do not have access.",
+      "seller": "Seller:",
+      "itemColumn": "Item",
+      "conditionColumn": "Condition",
+      "priceColumn": "Price",
+      "itemsRow": "Items",
+      "shippingRow": "Shipping",
+      "totalPaid": "Total paid",
+      "paymentDetails": "Payment details",
+      "cardPayment": "Card / bank payment",
+      "walletApplied": "Wallet balance applied",
+      "dateLabel": "Date",
+      "delivery": "Delivery",
+      "parcelLocker": "Parcel locker:",
+      "pickup": "Pickup",
+      "city": "City:",
+      "notes": "Notes:"
+    },
+    "creditNote": {
+      "title": "Credit Note",
+      "notAvailable": "Credit note not available",
+      "notAvailableDescription": "This credit note is not yet available or you do not have access.",
+      "order": "Order:",
+      "originalInvoice": "Original invoice:",
+      "reason": "Reason:",
+      "reversalCommission": "Reversal: marketplace commission (10% of {amount})",
+      "reversalShipping": "Reversal: shipping management",
+      "totalNet": "Total net",
+      "vatLine": "VAT ({rate}%)",
+      "creditNoteTotal": "Credit note total",
+      "refundSummary": "Refund summary",
+      "sellerWalletClawback": "Seller wallet clawback",
+      "platformCommissionReversed": "Platform commission reversed",
+      "buyerRefund": "Buyer refund"
+    },
+    "payoutStatement": {
+      "title": "Payout Statement",
+      "notAvailable": "Payout statement not available",
+      "notAvailableDescription": "This statement is not yet available or you do not have access.",
+      "ibanLabel": "IBAN:",
+      "accountHolder": "Account holder:",
+      "orderColumn": "Order",
+      "dateColumn": "Date",
+      "invoiceColumn": "Invoice",
+      "itemsColumn": "Items",
+      "commissionColumn": "Commission",
+      "netCreditColumn": "Net credit",
+      "netPayout": "Net payout",
+      "transferDetails": "Transfer details",
+      "ibanRow": "IBAN",
+      "bankReference": "Bank reference",
+      "completed": "Completed"
+    }
+  }
+}
