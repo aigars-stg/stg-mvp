@@ -324,7 +324,7 @@ export default function OfflinePage() {
                   href={route.path}
                   className="px-3 py-1.5 text-sm bg-bg rounded-full border border-frost-gray hover:border-aurora-green transition-colors"
                 >
-                  {t(`routes.${route.labelKey}`)}
+                  {t(`routes.${route.labelKey}` as any)}
                 </Link>
               ))}
             </div>

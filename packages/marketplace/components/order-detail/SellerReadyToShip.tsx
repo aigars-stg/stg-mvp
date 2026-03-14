@@ -50,8 +50,9 @@ export function SellerReadyToShip({
                   {step}
                 </div>
                 <p className="text-sm text-text-secondary">
-                  {t.rich(`readyToShip.step${step}`, {
-                    strong: (chunks) => <strong className="text-polar-night">{chunks}</strong>,
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  {(t as any).rich(`readyToShip.step${step}`, {
+                    strong: (chunks: React.ReactNode) => <strong className="text-polar-night">{chunks}</strong>,
                   })}
                 </p>
               </div>

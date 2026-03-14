@@ -181,7 +181,7 @@ export function PricingAssistant({
       acceptable: 'acceptable',
     };
     const key = conditionKeys[cond] as keyof typeof conditionKeys | undefined;
-    return key ? tConditions(key) : cond;
+    return key ? tConditions(key as any) : cond;
   };
 
   if (!bggGameId) {

@@ -31,10 +31,10 @@ export function Testimonials() {
 
   const testimonials = testimonialKeys.map((item) => ({
     id: item.id,
-    name: t(`${item.key}.name`),
-    role: t(`${item.key}.role`),
-    location: t(`${item.key}.location`),
-    content: t(`${item.key}.content`),
+    name: t(`${item.key}.name` as any),
+    role: t(`${item.key}.role` as any),
+    location: t(`${item.key}.location` as any),
+    content: t(`${item.key}.content` as any),
     initials: item.initials,
   }));
 

@@ -45,7 +45,7 @@ export function OrderDetailHeader({
           </h1>
           <Badge variant={statusInfo.variant} size="sm">
             <StatusIcon className="w-3 h-3 mr-1" />
-            {statusInfo.labelKey ? tOrders(statusInfo.labelKey) : statusInfo.label}
+            {statusInfo.labelKey ? tOrders(statusInfo.labelKey as any) : statusInfo.label}
           </Badge>
           {extraBadges}
         </div>

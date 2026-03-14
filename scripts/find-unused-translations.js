@@ -90,9 +90,10 @@ const dynamicPrefixes = new Set();    // Prefixes where dynamic access prevents 
 for (const filePath of sourceFiles) {
   const content = fs.readFileSync(filePath, 'utf-8');
 
-  // Build a map of variable name → namespace for this file
-  // e.g. { t: 'Auth', tCommon: 'Common', tSections: 'Sell.sections' }
-  const varToNamespace = new Map();
+  // Build a map of variable name → Set of namespaces for this file
+  // Uses Set to handle variable shadowing (same var assigned multiple namespaces)
+  // e.g. { t: Set('Help.page', 'Help'), tCommon: Set('Common') }
+  const varToNamespaces = new Map();
 
   const assignmentPatterns = [
     // const t = useTranslations('Namespace')
@@ -108,7 +109,10 @@ for (const filePath of sourceFiles) {
     while ((match = pattern.exec(content)) !== null) {
       const varName = match[1];
       const ns = match[2];
-      varToNamespace.set(varName, ns);
+      if (!varToNamespaces.has(varName)) {
+        varToNamespaces.set(varName, new Set());
+      }
+      varToNamespaces.get(varName).add(ns);
       usedNamespaces.add(ns);
     }
   }
@@ -127,7 +131,7 @@ for (const filePath of sourceFiles) {
   }
 
   // For each translation variable, find its key references
-  for (const [varName, ns] of varToNamespace) {
+  for (const [varName, namespaces] of varToNamespaces) {
     // Escape varName for regex
     const escaped = varName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -137,11 +141,12 @@ for (const filePath of sourceFiles) {
     while ((dynMatch = dynRegex.exec(content)) !== null) {
       const template = dynMatch[1];
       const staticPrefix = template.split('${')[0];
-      if (staticPrefix) {
-        dynamicPrefixes.add(`${ns}.${staticPrefix}`);
-      } else {
-        // Template starts with ${...} — all children of this namespace are dynamic
-        dynamicPrefixes.add(`${ns}.`);
+      for (const ns of namespaces) {
+        if (staticPrefix) {
+          dynamicPrefixes.add(`${ns}.${staticPrefix}`);
+        } else {
+          dynamicPrefixes.add(`${ns}.`);
+        }
       }
     }
 
@@ -150,7 +155,9 @@ for (const filePath of sourceFiles) {
     let litMatch;
     while ((litMatch = litRegex.exec(content)) !== null) {
       const key = litMatch[1];
-      literalKeys.add(`${ns}.${key}`);
+      for (const ns of namespaces) {
+        literalKeys.add(`${ns}.${key}`);
+      }
     }
 
   }
@@ -166,9 +173,28 @@ for (const filePath of sourceFiles) {
   }
 
   for (const str of allStrings) {
-    for (const [, ns] of varToNamespace) {
-      const fullKey = `${ns}.${str}`;
-      // Only add if it's actually a valid key in the JSON
+    for (const [, namespaces] of varToNamespaces) {
+      for (const ns of namespaces) {
+        const fullKey = `${ns}.${str}`;
+        if (allKeysSet.has(fullKey)) {
+          literalKeys.add(fullKey);
+        }
+      }
+    }
+  }
+}
+
+// Config file indirection: scan for labelKey/key properties pointing to translation keys
+// e.g. { labelKey: 'nav.overview' } in help-sections.ts used as t(section.labelKey)
+for (const filePath of sourceFiles) {
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const labelKeyPattern = /(?:labelKey|translationKey|i18nKey)\s*:\s*['"]([a-zA-Z][a-zA-Z0-9_.]*)['"]/g;
+  let lkMatch;
+  while ((lkMatch = labelKeyPattern.exec(content)) !== null) {
+    const keyValue = lkMatch[1];
+    // Check if namespace.keyValue is a valid key for any used namespace
+    for (const ns of usedNamespaces) {
+      const fullKey = `${ns}.${keyValue}`;
       if (allKeysSet.has(fullKey)) {
         literalKeys.add(fullKey);
       }

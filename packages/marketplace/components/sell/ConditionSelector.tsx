@@ -36,8 +36,8 @@ export function ConditionSelector({
   const [showGradingGuide, setShowGradingGuide] = useState(false);
 
   // Helper to get condition label and description
-  const getConditionLabel = (value: string) => tCond(value);
-  const getConditionDescription = (value: string) => tCond(`${value}Description`);
+  const getConditionLabel = (value: string) => tCond(value as any);
+  const getConditionDescription = (value: string) => tCond(`${value}Description` as any);
 
   // Hide info card once user makes any selection
   const hasAnySelection = allComponentsPresent !== null || condition !== null;

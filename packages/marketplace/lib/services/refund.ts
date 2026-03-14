@@ -29,7 +29,7 @@ export function createRefundAdapter(): (
   };
 }
 
-// Statuses that allow refunds (before seller wallet credit, plus disputed)
+// Statuses that allow refunds (before seller wallet credit, plus disputed/cancelled)
 export const REFUNDABLE_STATUSES = [
   'pending_seller',
   'accepted',
@@ -37,6 +37,7 @@ export const REFUNDABLE_STATUSES = [
   'in_transit',
   'delivered',
   'disputed',
+  'cancelled',
 ] as const;
 
 export type RefundableStatus = (typeof REFUNDABLE_STATUSES)[number];
@@ -96,8 +97,9 @@ function determineRefundMethod(
 
 /**
  * Process a full refund for an order
- * - Refunds EveryPay portion via EveryPay API
- * - Refunds wallet portion back to buyer's wallet
+ * - Uses atomic claim to prevent double refunds
+ * - Refunds wallet portion first (internally reversible)
+ * - Then refunds EveryPay portion via EveryPay API
  * - Tracks refund status and method
  * - Only allowed pre-completion
  */
@@ -134,8 +136,9 @@ export async function processRefund(
 
   const refundMethod = determineRefundMethod(order.payment_method, walletPortionCents, everypayPortionCents);
 
-  // Mark refund as initiated
-  await supabase
+  // Atomic claim: only proceed if no refund is already in progress
+  // This prevents double refunds from concurrent requests (cron + manual, two tabs, etc.)
+  const { data: claimed, error: claimError } = await supabase
     .from('orders')
     .update({
       refund_status: 'processing',
@@ -143,90 +146,23 @@ export async function processRefund(
       refund_initiated_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
-    .eq('id', orderId);
+    .eq('id', orderId)
+    .is('refund_status', null)
+    .select('id');
+
+  if (claimError) {
+    return { success: false, walletRefundedCents: 0, everypayRefundedCents: 0, error: `Failed to claim refund: ${claimError.message}` };
+  }
+
+  if (!claimed || claimed.length === 0) {
+    return { success: false, walletRefundedCents: 0, everypayRefundedCents: 0, error: 'Refund already in progress or completed' };
+  }
 
   let walletRefundedCents = 0;
   let everypayRefundedCents = 0;
+  const isBankLink = order.payment_method === 'bank_link';
 
-  // Bank link payments: EveryPay marks as refunded but doesn't move money
-  // Flag for manual SEPA transfer instead of calling EveryPay refund
-  if (order.payment_method === 'bank_link' && everypayPortionCents > 0) {
-    // Still call EveryPay to mark the payment as refunded in their system
-    if (order.everypay_payment_reference) {
-      try {
-        const epResult = await refundEveryPay(order.everypay_payment_reference, everypayPortionCents);
-        if (epResult.reference) {
-          await supabase
-            .from('orders')
-            .update({ refund_everypay_reference: epResult.reference })
-            .eq('id', orderId);
-        }
-      } catch {
-        // Bank link refund API call is best-effort; SEPA is the real refund
-      }
-    }
-
-    // Refund wallet portion if any
-    if (walletPortionCents > 0) {
-      const walletResult = await refundToWallet(supabase, order.buyer_id, walletPortionCents, orderId);
-      if (walletResult.success) walletRefundedCents = walletPortionCents;
-    }
-
-    // Flag as manual SEPA required
-    await supabase
-      .from('orders')
-      .update({
-        status: 'refunded',
-        refund_status: 'manual_sepa_required',
-        refund_amount: order.total_amount,
-        refunded_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId);
-
-    return {
-      success: true,
-      walletRefundedCents,
-      everypayRefundedCents: 0,
-      refundMethod,
-      requiresManualSepa: true,
-    };
-  }
-
-  // Refund EveryPay portion (card payments)
-  if (everypayPortionCents > 0 && order.everypay_payment_reference) {
-    const epResult = await refundEveryPay(
-      order.everypay_payment_reference,
-      everypayPortionCents
-    );
-    if (!epResult.success) {
-      await supabase
-        .from('orders')
-        .update({
-          refund_status: 'failed',
-          refund_error: epResult.error || 'EveryPay refund failed',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', orderId);
-
-      return {
-        success: false,
-        walletRefundedCents: 0,
-        everypayRefundedCents: 0,
-        error: `EveryPay refund failed: ${epResult.error}`,
-      };
-    }
-    everypayRefundedCents = everypayPortionCents;
-
-    if (epResult.reference) {
-      await supabase
-        .from('orders')
-        .update({ refund_everypay_reference: epResult.reference })
-        .eq('id', orderId);
-    }
-  }
-
-  // Refund wallet portion
+  // Step 1: Refund wallet portion first (internally reversible if EveryPay fails)
   if (walletPortionCents > 0) {
     const walletResult = await refundToWallet(
       supabase,
@@ -247,22 +183,78 @@ export async function processRefund(
       return {
         success: false,
         walletRefundedCents: 0,
-        everypayRefundedCents,
+        everypayRefundedCents: 0,
         error: `Wallet refund failed: ${walletResult.error}`,
       };
     }
     walletRefundedCents = walletPortionCents;
   }
 
-  // Update order status
+  // Step 2: Refund EveryPay portion
+  if (everypayPortionCents > 0 && order.everypay_payment_reference) {
+    if (isBankLink) {
+      // Bank link: EveryPay marks as refunded but doesn't move money
+      // Call is best-effort; real refund is manual SEPA transfer
+      try {
+        const epResult = await refundEveryPay(order.everypay_payment_reference, everypayPortionCents);
+        if (epResult.reference) {
+          await supabase
+            .from('orders')
+            .update({ refund_everypay_reference: epResult.reference })
+            .eq('id', orderId);
+        }
+      } catch {
+        // Bank link refund API call is best-effort
+      }
+    } else {
+      // Card payment: EveryPay refund is the real refund
+      const epResult = await refundEveryPay(
+        order.everypay_payment_reference,
+        everypayPortionCents
+      );
+      if (!epResult.success) {
+        // Wallet was already refunded — mark as partial failure for staff
+        await supabase
+          .from('orders')
+          .update({
+            refund_status: walletRefundedCents > 0 ? 'partial_failure' : 'failed',
+            refund_error: epResult.error || 'EveryPay refund failed',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId);
+
+        return {
+          success: false,
+          walletRefundedCents,
+          everypayRefundedCents: 0,
+          error: `EveryPay refund failed: ${epResult.error}`,
+        };
+      }
+      everypayRefundedCents = everypayPortionCents;
+
+      if (epResult.reference) {
+        await supabase
+          .from('orders')
+          .update({ refund_everypay_reference: epResult.reference })
+          .eq('id', orderId);
+      }
+    }
+  }
+
+  // Step 3: Update order status
+  const requiresManualSepa = isBankLink && everypayPortionCents > 0;
+  const refundStatus = requiresManualSepa
+    ? 'manual_sepa_required'
+    : refundMethod === 'everypay_card' ? 'processing' : 'completed';
+
   await supabase
     .from('orders')
     .update({
       status: 'refunded',
-      refund_status: refundMethod === 'everypay_card' ? 'processing' : 'completed',
+      refund_status: refundStatus,
       refund_amount: order.total_amount,
       refunded_at: new Date().toISOString(),
-      refund_completed_at: refundMethod === 'wallet_only' ? new Date().toISOString() : null,
+      refund_completed_at: refundStatus === 'completed' ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
     })
     .eq('id', orderId);
@@ -272,6 +264,7 @@ export async function processRefund(
     walletRefundedCents,
     everypayRefundedCents,
     refundMethod,
+    requiresManualSepa,
   };
 }
 
@@ -287,12 +280,18 @@ export async function processPartialRefund(
 ): Promise<RefundResult> {
   const { data: order, error: fetchError } = await supabase
     .from('orders')
-    .select('id, status, buyer_id, buyer_wallet_debit_cents, everypay_payment_reference, payment_method')
+    .select('id, status, total_amount, buyer_id, buyer_wallet_debit_cents, everypay_payment_reference, payment_method')
     .eq('id', orderId)
     .single();
 
   if (fetchError || !order) {
     return { success: false, walletRefundedCents: 0, everypayRefundedCents: 0, error: 'Order not found' };
+  }
+
+  // Validate refund amount doesn't exceed order total
+  const totalAmountCents = Math.round(order.total_amount * 100);
+  if (refundAmountCents > totalAmountCents) {
+    return { success: false, walletRefundedCents: 0, everypayRefundedCents: 0, error: `Refund amount (${refundAmountCents}) exceeds order total (${totalAmountCents})` };
   }
 
   const walletDebitCents = order.buyer_wallet_debit_cents || 0;
@@ -302,8 +301,8 @@ export async function processPartialRefund(
 
   const refundMethod = determineRefundMethod(order.payment_method, walletRefundCents, everypayRefundCents);
 
-  // Mark refund as initiated
-  await supabase
+  // Atomic claim: only proceed if no refund is already in progress
+  const { data: claimed, error: claimError } = await supabase
     .from('orders')
     .update({
       refund_status: 'processing',
@@ -311,53 +310,23 @@ export async function processPartialRefund(
       refund_initiated_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
-    .eq('id', orderId);
+    .eq('id', orderId)
+    .is('refund_status', null)
+    .select('id');
+
+  if (claimError) {
+    return { success: false, walletRefundedCents: 0, everypayRefundedCents: 0, error: `Failed to claim refund: ${claimError.message}` };
+  }
+
+  if (!claimed || claimed.length === 0) {
+    return { success: false, walletRefundedCents: 0, everypayRefundedCents: 0, error: 'Refund already in progress or completed' };
+  }
 
   let walletRefundedCents = 0;
   let everypayRefundedCents = 0;
+  const isBankLink = order.payment_method === 'bank_link';
 
-  // Bank link: flag for manual SEPA
-  if (order.payment_method === 'bank_link' && everypayRefundCents > 0) {
-    if (walletRefundCents > 0) {
-      const walletResult = await refundToWallet(supabase, order.buyer_id, walletRefundCents, orderId);
-      if (walletResult.success) walletRefundedCents = walletRefundCents;
-    }
-
-    await supabase
-      .from('orders')
-      .update({
-        refund_status: 'manual_sepa_required',
-        refund_amount: refundAmountCents / 100,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId);
-
-    return { success: true, walletRefundedCents, everypayRefundedCents: 0, refundMethod, requiresManualSepa: true };
-  }
-
-  if (everypayRefundCents > 0 && order.everypay_payment_reference) {
-    const epResult = await refundEveryPay(order.everypay_payment_reference, everypayRefundCents);
-    if (!epResult.success) {
-      await supabase
-        .from('orders')
-        .update({
-          refund_status: 'failed',
-          refund_error: epResult.error || 'EveryPay refund failed',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', orderId);
-      return { success: false, walletRefundedCents: 0, everypayRefundedCents: 0, error: `EveryPay refund failed: ${epResult.error}` };
-    }
-    everypayRefundedCents = everypayRefundCents;
-
-    if (epResult.reference) {
-      await supabase
-        .from('orders')
-        .update({ refund_everypay_reference: epResult.reference })
-        .eq('id', orderId);
-    }
-  }
-
+  // Step 1: Refund wallet portion first (internally reversible)
   if (walletRefundCents > 0) {
     const walletResult = await refundToWallet(supabase, order.buyer_id, walletRefundCents, orderId);
     if (!walletResult.success) {
@@ -369,24 +338,60 @@ export async function processPartialRefund(
           updated_at: new Date().toISOString(),
         })
         .eq('id', orderId);
-      return { success: false, walletRefundedCents: 0, everypayRefundedCents, error: `Wallet refund failed: ${walletResult.error}` };
+      return { success: false, walletRefundedCents: 0, everypayRefundedCents: 0, error: `Wallet refund failed: ${walletResult.error}` };
     }
     walletRefundedCents = walletRefundCents;
   }
 
-  // Update refund tracking (partial refund doesn't change order status)
+  // Step 2: Refund EveryPay portion
+  if (everypayRefundCents > 0 && order.everypay_payment_reference) {
+    if (isBankLink) {
+      // Bank link: best-effort EveryPay call; real refund is manual SEPA
+      try {
+        await refundEveryPay(order.everypay_payment_reference, everypayRefundCents);
+      } catch { /* best-effort */ }
+    } else {
+      const epResult = await refundEveryPay(order.everypay_payment_reference, everypayRefundCents);
+      if (!epResult.success) {
+        await supabase
+          .from('orders')
+          .update({
+            refund_status: walletRefundedCents > 0 ? 'partial_failure' : 'failed',
+            refund_error: epResult.error || 'EveryPay refund failed',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId);
+        return { success: false, walletRefundedCents, everypayRefundedCents: 0, error: `EveryPay refund failed: ${epResult.error}` };
+      }
+      everypayRefundedCents = everypayRefundCents;
+
+      if (epResult.reference) {
+        await supabase
+          .from('orders')
+          .update({ refund_everypay_reference: epResult.reference })
+          .eq('id', orderId);
+      }
+    }
+  }
+
+  // Step 3: Update refund tracking (partial refund doesn't change order status)
+  const requiresManualSepa = isBankLink && everypayRefundCents > 0;
+  const refundStatus = requiresManualSepa
+    ? 'manual_sepa_required'
+    : refundMethod === 'everypay_card' ? 'processing' : 'completed';
+
   await supabase
     .from('orders')
     .update({
-      refund_status: refundMethod === 'everypay_card' ? 'processing' : 'completed',
+      refund_status: refundStatus,
       refund_amount: refundAmountCents / 100,
       refunded_at: new Date().toISOString(),
-      refund_completed_at: refundMethod === 'wallet_only' ? new Date().toISOString() : null,
+      refund_completed_at: refundStatus === 'completed' ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
     })
     .eq('id', orderId);
 
-  return { success: true, walletRefundedCents, everypayRefundedCents, refundMethod };
+  return { success: true, walletRefundedCents, everypayRefundedCents, refundMethod, requiresManualSepa };
 }
 
 /**

@@ -56,7 +56,7 @@ export function StatusTimeline({
                       isActive ? 'text-frost-ice' : 'text-text-muted'
                     }`}
                   >
-                    {t(`steps.${step.key}`)}
+                    {t(`steps.${step.key}` as any)}
                   </span>
                 </div>
                 {index < statusSteps.length - 1 && (
@@ -129,7 +129,7 @@ export function StatusTimeline({
                       : 'text-text-muted'
                   }`}
                 >
-                  {t(`steps.${step.key}`)}
+                  {t(`steps.${step.key}` as any)}
                 </p>
                 {isCurrent &&
                   currentStatus === 'pending_seller' &&

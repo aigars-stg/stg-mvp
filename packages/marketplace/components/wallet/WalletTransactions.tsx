@@ -158,7 +158,7 @@ export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProp
         <option value={ALL_TIME_KEY}>{t('filter.allTime')}</option>
         {DATE_RANGE_PRESETS.map((preset) => (
           <option key={preset.key} value={preset.key}>
-            {t(`filter.${preset.key}`)}
+            {t(`filter.${preset.key}` as any)}
           </option>
         ))}
       </select>
@@ -270,7 +270,7 @@ export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProp
                     {formatDateShort(tx.createdAt)}
                   </td>
                   <td className="hidden sm:table-cell px-3 py-3 text-xs text-text-secondary whitespace-nowrap">
-                    {t(labelKey)}
+                    {t(labelKey as any)}
                   </td>
                   <td className="px-3 py-3">
                     <div className="space-y-0.5">
@@ -297,7 +297,7 @@ export function WalletTransactions({ initialLimit = 10 }: WalletTransactionsProp
                           variant={WITHDRAWAL_STATUS_VARIANT[tx.withdrawalStatus] ?? 'default'}
                           size="sm"
                         >
-                          {t(`withdrawalStatus.${tx.withdrawalStatus}`)}
+                          {t(`withdrawalStatus.${tx.withdrawalStatus}` as any)}
                         </Badge>
                       )}
                     </div>

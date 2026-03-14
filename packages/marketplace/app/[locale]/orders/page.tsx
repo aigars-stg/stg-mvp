@@ -199,7 +199,7 @@ function PurchasesTab() {
               }
             `}
           >
-            {t(tab.labelKey)} ({counts[tab.key]})
+            {t(tab.labelKey as any)} ({counts[tab.key]})
           </button>
         ))}
       </div>
@@ -214,7 +214,7 @@ function PurchasesTab() {
           <p className="text-text-secondary mb-6">
             {activeTab === 'all'
               ? t('emptyState.descriptionAll')
-              : t('emptyState.descriptionFiltered', { status: t(`tabs.${activeTab}`).toLowerCase() })}
+              : t('emptyState.descriptionFiltered', { status: t(`tabs.${activeTab}` as any).toLowerCase() })}
           </p>
           {activeTab === 'all' && (
             <Link href="/browse">
@@ -267,7 +267,7 @@ function PurchasesTab() {
                       <span className="text-text-muted text-xs">·</span>
                       <Badge variant={statusInfo.variant} size="sm">
                         <StatusIcon className="w-3 h-3 mr-1" />
-                        {statusInfo.labelKey ? t(statusInfo.labelKey) : statusInfo.label}
+                        {statusInfo.labelKey ? t(statusInfo.labelKey as any) : statusInfo.label}
                       </Badge>
                       {order.status === 'pending_seller' && order.time_remaining_ms !== null && (
                         <>

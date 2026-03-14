@@ -72,7 +72,7 @@ export function OrderItemsList({
                   variant={item.condition as ListingCondition}
                   size="sm"
                 >
-                  {t(`conditions.${item.condition}`)}
+                  {t(`conditions.${item.condition}` as any)}
                 </Badge>
                 {compact && (
                   <span className="text-sm font-semibold text-polar-night">

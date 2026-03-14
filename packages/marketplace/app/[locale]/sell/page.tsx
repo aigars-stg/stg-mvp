@@ -1348,15 +1348,15 @@ function CreateModeSellContent() {
   const tTracker = useTranslations('Phases.tracker');
   const getPhaseLabel = useCallback(
     (phaseId: string) => ({
-      name: tPhases(`${phaseId}.name`),
-      subtitle: tPhases(`${phaseId}.subtitle`),
-      shortName: tPhases(`${phaseId}.shortName`),
+      name: tPhases(`${phaseId}.name` as any),
+      subtitle: tPhases(`${phaseId}.subtitle` as any),
+      shortName: tPhases(`${phaseId}.shortName` as any),
     }),
     [tPhases],
   );
   const getStepAriaLabel = useCallback(
     (name: string, stepNumber: number, totalSteps: number, status: PhaseStatus) =>
-      `${name}, ${tTracker('stepOf', { current: stepNumber, total: totalSteps })}, ${tTracker(`stepStatus.${status}`)}`,
+      `${name}, ${tTracker('stepOf', { current: stepNumber, total: totalSteps })}, ${tTracker(`stepStatus.${status}` as any)}`,
     [tTracker],
   );
 

@@ -87,18 +87,29 @@
   "WantedStatusChangeModal": {
     "fulfilled": {
       "title": "Mark as Fulfilled",
-      "message": "Great news. Mark this wanted listing as fulfilled?"
+      "message": "Great news. Mark {gameName} as fulfilled?",
+      "description": "This will move the listing to your fulfilled items.",
+      "confirmText": "Mark as Fulfilled"
     },
     "cancelled": {
       "title": "Cancel Listing",
-      "message": "Are you sure you want to cancel this wanted listing?"
+      "message": "Are you sure you want to cancel {gameName}?",
+      "description": "You can reactivate it later if you change your mind.",
+      "confirmText": "Cancel Listing"
     },
     "active": {
       "title": "Reactivate Listing",
-      "message": "Reactivate this wanted listing?"
+      "message": "Reactivate {gameName}?",
+      "description": "This listing will appear in your active wanted items again.",
+      "confirmText": "Reactivate"
     },
     "cancel": "Cancel",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "default": {
+      "title": "Change Status",
+      "message": "Change the status of {gameName}?",
+      "confirmText": "Confirm"
+    }
   },
   "Wanted": {
     "BudgetAssistant": {
@@ -229,7 +240,10 @@
       "title": "Delete Wanted Listing",
       "warning": "This action cannot be undone. The wanted listing will be permanently removed from the database.",
       "cancel": "Cancel",
-      "deleting": "Deleting..."
+      "deleting": "Deleting...",
+      "confirmMessage": "Are you sure you want to delete {gameName} from your wanted list?",
+      "description": "This action cannot be undone. You can always add it back later.",
+      "deleteButton": "Delete"
     },
     "ListingCard": {
       "wantedBadge": "Wanted",
@@ -278,7 +292,9 @@
     "infoTitle": "Information"
   },
   "OfflineError": {
-    "title": "You're offline"
+    "title": "You're offline",
+    "defaultMessage": "You appear to be offline. Please check your internet connection and try again.",
+    "tryAgain": "Try Again"
   },
   "OfflinePage": {
     "status": {
@@ -332,7 +348,13 @@
   },
   "EmailVerificationBanner": {
     "title": "Email Verification Required",
-    "sending": "Sending..."
+    "sending": "Sending...",
+    "errorPrefix": "Error: {message}",
+    "successMessage": "Verification email sent. Please check your inbox.",
+    "failedToResend": "Failed to resend verification email",
+    "dismiss": "Dismiss",
+    "description": "Please verify your email address ({email}) to access all features.",
+    "resendButton": "Resend verification email"
   },
   "AccountDeletion": {
     "title": "Delete account",
@@ -378,7 +400,9 @@
     "archive": "Archive",
     "unarchive": "Unarchive",
     "startConversation": "Start the conversation by sending a message below.",
-    "archivedPlaceholder": "Unarchive to send messages"
+    "archivedPlaceholder": "Unarchive to send messages",
+    "title": "Messages",
+    "subtitle": "Your conversations with buyers and sellers"
   },
   "ListingStatus": {
     "active": "Active",
@@ -398,11 +422,20 @@
     "ibanRequired": "IBAN is required",
     "securityNote": "Your bank details are stored securely. We only display the last 4 digits of your IBAN.",
     "cancel": "Cancel",
-    "adding": "Adding..."
+    "adding": "Adding...",
+    "accountHolderName": "Account Holder Name",
+    "namePlaceholder": "Full name as it appears on your bank account",
+    "nameRequired": "Account holder name is required",
+    "ibanLabel": "IBAN",
+    "format": "Format",
+    "addBankAccount": "Add Bank Account"
   },
   "QuestionInput": {
     "reply": "Reply",
-    "ask": "Ask"
+    "ask": "Ask",
+    "placeholder": "Ask a question about this game...",
+    "replyTooLong": "Reply is {count} characters too long",
+    "questionTooLong": "Question is {count} characters too long"
   },
   "AvatarUpload": {
     "mustBeLoggedIn": "You must be logged in to upload an avatar",
@@ -558,6 +591,9 @@
       "active": "Active",
       "sold": "Sold",
       "removed": "Removed"
+    },
+    "listing": {
+      "edition": "{year} edition"
     }
   },
   "OfferCard": {
@@ -880,7 +916,8 @@
   "Countries": {
     "LV": "Latvia",
     "EE": "Estonia",
-    "LT": "Lithuania"
+    "LT": "Lithuania",
+    "OTHER": "Other"
   },
   "CountryPrompt": {
     "pickCountry": "Pick your country to see games near you",
@@ -1051,6 +1088,14 @@
       "description": "Terms of service, privacy policy, seller agreement, and other legal documents for Second Turn Games.",
       "breadcrumbHome": "Home",
       "breadcrumbLegal": "Legal"
+    },
+    "nav": {
+      "overview": "Overview",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "seller": "Seller Agreement",
+      "cookies": "Cookie Policy",
+      "fees": "Fees"
     }
   },
   "Auction": {
@@ -2096,7 +2141,9 @@
       "title": "Recent Sales",
       "viewAll": "View All",
       "noSales": "No sales yet",
-      "noSalesHint": "Your sales will appear here"
+      "noSalesHint": "Your sales will appear here",
+      "gameSale": "Game sale",
+      "net": "net"
     },
     "SellerTrustBadge": {
       "sale": "sale",
@@ -2112,7 +2159,15 @@
     "SellerTrustCard": {
       "title": "Your Reputation",
       "rating": "Rating",
-      "reviews": "Reviews"
+      "reviews": "Reviews",
+      "noReviewsYet": "No reviews yet",
+      "completedSales": "Completed sales",
+      "positive": "Positive",
+      "basedOn": "Based on {count} reviews",
+      "earnTrusted": "Earn Trusted Seller",
+      "trustedRequirement": "Complete 5 sales with positive reviews to earn the Trusted Seller badge",
+      "earnTop": "Earn Top Seller",
+      "topRequirement": "Complete 20 sales with 95%+ positive reviews to earn the Top Seller badge"
     },
     "SellerReviewsList": {
       "noReviews": "No reviews yet",
@@ -2228,7 +2283,12 @@
       },
       "refunded": {
         "title": "Refund Processed",
-        "amount": "Refund amount: {amount}"
+        "amount": "Refund amount: {amount}",
+        "returnedTo": "Returned to",
+        "toWallet": "{amount} to Wallet",
+        "toPaymentMethod": "{amount} to {method}",
+        "card": "Card",
+        "bankLink": "Bank link"
       },
       "disputed": {
         "openedOn": "Dispute opened: {date}",
@@ -2303,7 +2363,15 @@
         "orderConfirmation": "Order confirmation",
         "invoice": "Invoice",
         "creditNote": "Credit note",
-        "confirmation": "Confirmation"
+        "confirmation": "Confirmation",
+        "paidWith": {
+          "title": "Paid with",
+          "wallet": "Wallet",
+          "card": "Card",
+          "bankLink": "Bank link",
+          "walletAndCard": "Wallet + Card",
+          "walletAndBank": "Wallet + Bank link"
+        }
       },
       "seller": {
         "title": "Seller"
@@ -2372,6 +2440,17 @@
         "buyerLabel": "Buyer",
         "sellerLabel": "Seller"
       }
+    },
+    "statuses": {
+      "pendingSeller": "Waiting for Seller",
+      "accepted": "Accepted",
+      "shipped": "Shipped",
+      "inTransit": "In Transit",
+      "delivered": "Delivered",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "disputed": "Disputed",
+      "refunded": "Refunded"
     }
   },
   "Help": {
@@ -2380,6 +2459,49 @@
       "description": "Guides and resources for buying and selling pre-loved board games on Second Turn Games.",
       "breadcrumbHome": "Home",
       "breadcrumbHelp": "Help Centre"
+    },
+    "nav": {
+      "overview": "Help Centre",
+      "buying": "How to Buy",
+      "selling": "How to Sell",
+      "grading": "Condition Grading",
+      "shipping": "Shipping",
+      "wallet": "Wallet & Payments",
+      "dac7": "DAC7 & Taxes"
+    },
+    "faq": {
+      "q1": {
+        "question": "What is Second Turn Games?",
+        "answer": "Second Turn Games is a peer-to-peer marketplace for buying and selling pre-loved board games in the Baltic region (Latvia, Lithuania, Estonia). Every listing is verified against BoardGameGeek's database of 170,000+ games."
+      },
+      "q2": {
+        "question": "Where can I sell board games in Latvia?",
+        "answer": "Second Turn Games is the dedicated marketplace for selling board games in Latvia, Lithuania, and Estonia. List your games with verified BoardGameGeek data, set your price, and ship via parcel lockers. Sellers receive 90% of the sale price."
+      },
+      "q3": {
+        "question": "Is Second Turn Games safe?",
+        "answer": "Yes. Second Turn Games uses EveryPay (via Swedbank) for secure payment processing, offers buyer protection with a dispute resolution window, and verifies all listings against BoardGameGeek's database. The platform is operated by Second Turn Games SIA, registered in Latvia."
+      },
+      "q4": {
+        "question": "What are the fees on Second Turn Games?",
+        "answer": "Buyers pay the item price plus a flat €2.00 shipping fee (no service fee). Sellers pay a 10% commission on the item price, deducted automatically. Listing is free."
+      },
+      "q5": {
+        "question": "How does selling on Second Turn Games work?",
+        "answer": "Search for your game in the BoardGameGeek database, grade its condition, set a price, add photos, and publish. When someone buys, you confirm the order within 24 hours, pack the game, and drop it off at a parcel terminal. Your earnings are credited to your wallet after delivery."
+      },
+      "q6": {
+        "question": "How does shipping work on Second Turn Games?",
+        "answer": "Second Turn Games uses Unisend parcel terminals across the Baltic region. Shipping costs a flat €2.00 per order. After confirming an order, sellers receive a shipping code, pack the game, and drop it off at any Unisend terminal. Tracking updates automatically."
+      },
+      "q7": {
+        "question": "How do I get paid as a seller?",
+        "answer": "Two days after delivery (or when the buyer confirms earlier), your earnings (90% of item price) are credited to your platform wallet. You can withdraw to your IBAN bank account at any time - no fees, no minimum waiting period."
+      },
+      "q8": {
+        "question": "What board game conditions are accepted?",
+        "answer": "Second Turn Games uses four condition grades: Like New (played 1-2 times, all components present), Very Good (light wear, fully playable), Good (moderate wear, complete and playable), and Acceptable (noticeable wear but complete). All grades require complete, playable games."
+      }
     }
   },
   "Feedback": {
@@ -2480,6 +2602,19 @@
         "14": "Two weeks strong.",
         "30": "A month of daily games. Legend."
       }
+    },
+    "help": {
+      "title": "Help",
+      "howToPlay": "How to Play",
+      "rule1": "Guess the board game in 6 tries",
+      "rule2": "Each guess reveals clues about the attributes",
+      "rule3": "Use the feedback to narrow down your next guess",
+      "feedbackLegend": "Feedback Legend",
+      "legendCorrect": "Correct - exact match",
+      "legendClose": "Close - within range",
+      "legendHigher": "Higher - the answer is higher",
+      "legendLower": "Lower - the answer is lower",
+      "legendNone": "Incorrect - no match"
     }
   },
   "SellerOrders": {
@@ -2676,6 +2811,95 @@
         "current": "current",
         "upcoming": "upcoming"
       }
+    }
+  },
+  "Documents": {
+    "layout": {
+      "reg": "Reg.",
+      "vat": "VAT",
+      "no": "No.",
+      "date": "Date:",
+      "recipient": "Recipient",
+      "electronicSignature": "This document was generated electronically and is valid without a signature."
+    },
+    "lineItems": {
+      "description": "Description",
+      "gross": "Gross",
+      "net": "Net",
+      "vatRate": "VAT Rate",
+      "vat": "VAT"
+    },
+    "invoice": {
+      "title": "Platform Services Invoice",
+      "notAvailable": "Invoice not available",
+      "notAvailableDescription": "This invoice is not yet available or you do not have access.",
+      "order": "Order:",
+      "country": "Country:",
+      "commissionLineItem": "Marketplace commission (10% of {amount})",
+      "shippingManagement": "Shipping management",
+      "totalNet": "Total net",
+      "vatLine": "VAT ({rate}%)",
+      "invoiceTotal": "Invoice total",
+      "paymentSummary": "Payment summary",
+      "totalCollected": "Total collected from buyer",
+      "platformServices": "Platform services (this invoice)",
+      "creditedToWallet": "Credited to your wallet"
+    },
+    "confirmation": {
+      "title": "Order Confirmation",
+      "notAvailable": "Order confirmation not available",
+      "notAvailableDescription": "This confirmation is not yet available or you do not have access.",
+      "seller": "Seller:",
+      "itemColumn": "Item",
+      "conditionColumn": "Condition",
+      "priceColumn": "Price",
+      "itemsRow": "Items",
+      "shippingRow": "Shipping",
+      "totalPaid": "Total paid",
+      "paymentDetails": "Payment details",
+      "cardPayment": "Card / bank payment",
+      "walletApplied": "Wallet balance applied",
+      "dateLabel": "Date",
+      "delivery": "Delivery",
+      "parcelLocker": "Parcel locker:",
+      "pickup": "Pickup",
+      "city": "City:",
+      "notes": "Notes:"
+    },
+    "creditNote": {
+      "title": "Credit Note",
+      "notAvailable": "Credit note not available",
+      "notAvailableDescription": "This credit note is not yet available or you do not have access.",
+      "order": "Order:",
+      "originalInvoice": "Original invoice:",
+      "reason": "Reason:",
+      "reversalCommission": "Reversal: marketplace commission (10% of {amount})",
+      "reversalShipping": "Reversal: shipping management",
+      "totalNet": "Total net",
+      "vatLine": "VAT ({rate}%)",
+      "creditNoteTotal": "Credit note total",
+      "refundSummary": "Refund summary",
+      "sellerWalletClawback": "Seller wallet clawback",
+      "platformCommissionReversed": "Platform commission reversed",
+      "buyerRefund": "Buyer refund"
+    },
+    "payoutStatement": {
+      "title": "Payout Statement",
+      "notAvailable": "Payout statement not available",
+      "notAvailableDescription": "This statement is not yet available or you do not have access.",
+      "ibanLabel": "IBAN:",
+      "accountHolder": "Account holder:",
+      "orderColumn": "Order",
+      "dateColumn": "Date",
+      "invoiceColumn": "Invoice",
+      "itemsColumn": "Items",
+      "commissionColumn": "Commission",
+      "netCreditColumn": "Net credit",
+      "netPayout": "Net payout",
+      "transferDetails": "Transfer details",
+      "ibanRow": "IBAN",
+      "bankReference": "Bank reference",
+      "completed": "Completed"
     }
   }
 }

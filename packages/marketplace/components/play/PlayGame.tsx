@@ -137,7 +137,7 @@ function StatsPanel({ stats }: StatsPanelProps) {
         <div className="mb-4">
           <TurniReaction
             mood="holding-meeple"
-            message={tTurni(`streak.${streakKey}`)}
+            message={tTurni(`streak.${streakKey}` as any)}
             size="sm"
           />
         </div>
@@ -225,7 +225,7 @@ function RevealCard({ answer, puzzle, lowestPrice }: RevealCardProps) {
         {isWin ? (
           <TurniReaction
             mood="celebrating"
-            message={tTurni(`win.${getTurniWinKey(puzzle.guesses.length)}`)}
+            message={tTurni(`win.${getTurniWinKey(puzzle.guesses.length)}` as any)}
             size="md"
           />
         ) : (

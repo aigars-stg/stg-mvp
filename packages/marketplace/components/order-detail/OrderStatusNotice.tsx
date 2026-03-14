@@ -48,7 +48,7 @@ export function OrderStatusNotice({
               {t('cancelled.title')}
             </h3>
             <p className="text-sm text-text-secondary mb-3">
-              {t(`cancelled.reasons.${reasonKey}`)}
+              {t(`cancelled.reasons.${reasonKey}` as any)}
             </p>
             {order.timestamps.refunded_at && (
               <div className="p-3 bg-aurora-green/10 border border-aurora-green/20 rounded-lg">

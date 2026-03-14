@@ -160,7 +160,7 @@ export function OrderListingCard({ item, showGameLink = false }: OrderListingCar
                 className="flex items-center gap-1 text-sm text-text-secondary hover:text-frost-ice transition-colors"
                 title={t('listing.conditionGradesTooltip')}
               >
-                {tListings(`conditions.${item.condition}`)}
+                {tListings(`conditions.${item.condition}` as any)}
                 <Info className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
               {item.all_components_present === false && (
@@ -211,7 +211,7 @@ export function OrderListingCard({ item, showGameLink = false }: OrderListingCar
                   className="flex items-center gap-1 text-sm text-text-secondary hover:text-frost-ice transition-colors self-start"
                   title={t('listing.conditionGradesTooltip')}
                 >
-                  {tListings(`conditions.${item.condition}`)}
+                  {tListings(`conditions.${item.condition}` as any)}
                   <Info className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
                 {item.all_components_present === false && (
@@ -366,7 +366,7 @@ export function OrderListingCard({ item, showGameLink = false }: OrderListingCar
         {/* Condition badge footer */}
         <div className="border-t border-border-subtle px-3 sm:px-4 py-2.5 flex items-center gap-2">
           <Badge variant={item.condition as ListingCondition} size="sm">
-            {tListings(`conditions.${item.condition}`)}
+            {tListings(`conditions.${item.condition}` as any)}
           </Badge>
         </div>
       </div>

@@ -166,7 +166,7 @@ export default function SellerOnboardingPage() {
           {profile?.country && (
             <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
               <span className={`fi fi-${profile.country.toLowerCase()}`} />
-              <span>{tCountry(profile.country)}</span>
+              <span>{tCountry(profile.country as any)}</span>
             </div>
           )}
 

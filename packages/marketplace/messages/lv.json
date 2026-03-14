@@ -87,18 +87,29 @@
   "WantedStatusChangeModal": {
     "fulfilled": {
       "title": "Atzīmēt kā atrastu",
-      "message": "Lieliski. Atzīmēt šo meklējumu kā atrastu?"
+      "message": "Lieliskas ziņas. Atzīmēt {gameName} kā izpildītu?",
+      "description": "Šis pārvietos sludinājumu uz izpildītajiem.",
+      "confirmText": "Atzīmēt kā izpildītu"
     },
     "cancelled": {
       "title": "Atcelt meklējumu",
-      "message": "Vai tiešām vēlies atcelt šo meklējumu?"
+      "message": "Vai tiešām vēlaties atcelt {gameName}?",
+      "description": "Jūs varat to atkārtoti aktivizēt vēlāk, ja pārdomājat.",
+      "confirmText": "Atcelt sludinājumu"
     },
     "active": {
       "title": "Aktivizēt atkārtoti",
-      "message": "Aktivizēt šo meklējumu atkārtoti?"
+      "message": "Aktivizēt {gameName} atkārtoti?",
+      "description": "Šis sludinājums atkal parādīsies jūsu aktīvajos vēlmju sludinājumos.",
+      "confirmText": "Aktivizēt atkārtoti"
     },
     "cancel": "Atcelt",
-    "processing": "Apstrādā..."
+    "processing": "Apstrādā...",
+    "default": {
+      "title": "Mainīt statusu",
+      "message": "Mainīt {gameName} statusu?",
+      "confirmText": "Apstiprināt"
+    }
   },
   "Wanted": {
     "BudgetAssistant": {
@@ -229,7 +240,10 @@
       "title": "Dzēst meklējumu",
       "warning": "Šo darbību nevar atsaukt. Meklējums tiks neatgriezeniski izdzēsts no datubāzes.",
       "cancel": "Atcelt",
-      "deleting": "Dzēš..."
+      "deleting": "Dzēš...",
+      "confirmMessage": "Vai tiešām vēlaties dzēst {gameName} no vēlmju saraksta?",
+      "description": "Šo darbību nevar atsaukt. Jūs vienmēr varat to pievienot vēlāk.",
+      "deleteButton": "Dzēst"
     },
     "ListingCard": {
       "wantedBadge": "Meklē",
@@ -278,7 +292,9 @@
     "infoTitle": "Informācija"
   },
   "OfflineError": {
-    "title": "Tu esi bezsaistē"
+    "title": "Tu esi bezsaistē",
+    "defaultMessage": "Izskatās, ka esat bezsaistē. Lūdzu, pārbaudiet interneta savienojumu un mēģiniet vēlreiz.",
+    "tryAgain": "Mēģināt vēlreiz"
   },
   "OfflinePage": {
     "status": {
@@ -332,7 +348,13 @@
   },
   "EmailVerificationBanner": {
     "title": "Nepieciešams verificēt e-pastu",
-    "sending": "Sūta..."
+    "sending": "Sūta...",
+    "errorPrefix": "Kļūda: {message}",
+    "successMessage": "Verifikācijas e-pasts nosūtīts. Lūdzu, pārbaudiet savu iesūtni.",
+    "failedToResend": "Neizdevās atkārtoti nosūtīt verifikācijas e-pastu",
+    "dismiss": "Aizvērt",
+    "description": "Lūdzu, verificējiet savu e-pasta adresi ({email}), lai piekļūtu visām funkcijām.",
+    "resendButton": "Nosūtīt verifikācijas e-pastu atkārtoti"
   },
   "AccountDeletion": {
     "title": "Dzēst kontu",
@@ -378,7 +400,9 @@
     "archive": "Arhivēt",
     "unarchive": "Atarhivēt",
     "startConversation": "Sāc sarunu, nosūtot ziņojumu zemāk.",
-    "archivedPlaceholder": "Atarhivē, lai sūtītu ziņojumus"
+    "archivedPlaceholder": "Atarhivē, lai sūtītu ziņojumus",
+    "title": "Ziņojumi",
+    "subtitle": "Tavas sarunas ar pircējiem un pārdevējiem"
   },
   "ListingStatus": {
     "active": "Aktīvs",
@@ -398,11 +422,20 @@
     "ibanRequired": "IBAN ir obligāts",
     "securityNote": "Tavas bankas dati tiek droši glabāti. Mēs attēlojam tikai pēdējos 4 IBAN ciparus.",
     "cancel": "Atcelt",
-    "adding": "Pievieno..."
+    "adding": "Pievieno...",
+    "accountHolderName": "Konta turētāja vārds",
+    "namePlaceholder": "Pilns vārds, kā norādīts bankas kontā",
+    "nameRequired": "Konta turētāja vārds ir obligāts",
+    "ibanLabel": "IBAN",
+    "format": "Formāts",
+    "addBankAccount": "Pievienot bankas kontu"
   },
   "QuestionInput": {
     "reply": "Atbildēt",
-    "ask": "Jautāt"
+    "ask": "Jautāt",
+    "placeholder": "Uzdodiet jautājumu par šo spēli...",
+    "replyTooLong": "Atbilde ir par {count} rakstzīmēm par garu",
+    "questionTooLong": "Jautājums ir par {count} rakstzīmēm par garu"
   },
   "AvatarUpload": {
     "mustBeLoggedIn": "Tev jābūt pieteiktam, lai augšupielādētu avataru",
@@ -558,6 +591,9 @@
       "active": "Aktīvs",
       "sold": "Pārdots",
       "removed": "Noņemts"
+    },
+    "listing": {
+      "edition": "{year}. gada izdevums"
     }
   },
   "OfferCard": {
@@ -880,7 +916,8 @@
   "Countries": {
     "LV": "Latvija",
     "EE": "Igaunija",
-    "LT": "Lietuva"
+    "LT": "Lietuva",
+    "OTHER": "Cita"
   },
   "CountryPrompt": {
     "pickCountry": "Izvēlies valsti, lai redzētu spēles tev tuvumā",
@@ -1051,6 +1088,14 @@
       "description": "Lietošanas noteikumi, privātuma politika, pārdevēja līgums un citi Second Turn Games juridiskie dokumenti.",
       "breadcrumbHome": "Sākums",
       "breadcrumbLegal": "Juridiskie dokumenti"
+    },
+    "nav": {
+      "overview": "Pārskats",
+      "terms": "Lietošanas noteikumi",
+      "privacy": "Privātuma politika",
+      "seller": "Pārdevēja līgums",
+      "cookies": "Sīkdatņu politika",
+      "fees": "Maksas"
     }
   },
   "Auction": {
@@ -2096,7 +2141,9 @@
       "title": "Pēdējās pārdošanas",
       "viewAll": "Skatīt visas",
       "noSales": "Vēl nav pārdošanu",
-      "noSalesHint": "Tavas pārdošanas parādīsies šeit"
+      "noSalesHint": "Tavas pārdošanas parādīsies šeit",
+      "gameSale": "Spēles pārdošana",
+      "net": "neto"
     },
     "SellerTrustBadge": {
       "sale": "pārdošana",
@@ -2112,7 +2159,15 @@
     "SellerTrustCard": {
       "title": "Tava reputācija",
       "rating": "Vērtējums",
-      "reviews": "Atsauksmes"
+      "reviews": "Atsauksmes",
+      "noReviewsYet": "Vēl nav atsauksmju",
+      "completedSales": "Pabeigti pārdošanas darījumi",
+      "positive": "Pozitīvas",
+      "basedOn": "Pamatojoties uz {count} atsauksmēm",
+      "earnTrusted": "Iegūsti Uzticams pārdevējs",
+      "trustedRequirement": "Pabeidz 5 pārdošanas darījumus ar pozitīvām atsauksmēm, lai iegūtu Uzticama pārdevēja nozīmi",
+      "earnTop": "Iegūsti Labākais pārdevējs",
+      "topRequirement": "Pabeidz 20 pārdošanas darījumus ar 95%+ pozitīvām atsauksmēm, lai iegūtu Labākā pārdevēja nozīmi"
     },
     "SellerReviewsList": {
       "noReviews": "Vēl nav atsauksmju",
@@ -2228,7 +2283,12 @@
       },
       "refunded": {
         "title": "Atmaksa apstrādāta",
-        "amount": "Atmaksas summa: {amount}"
+        "amount": "Atmaksas summa: {amount}",
+        "returnedTo": "Atgriezts uz",
+        "toWallet": "{amount} uz Maku",
+        "toPaymentMethod": "{amount} uz {method}",
+        "card": "Karte",
+        "bankLink": "Banka"
       },
       "disputed": {
         "openedOn": "Strīds atvērts: {date}",
@@ -2303,7 +2363,15 @@
         "orderConfirmation": "Pasūtījuma apstiprinājums",
         "invoice": "Rēķins",
         "creditNote": "Kredīta note",
-        "confirmation": "Apstiprinājums"
+        "confirmation": "Apstiprinājums",
+        "paidWith": {
+          "title": "Apmaksāts ar",
+          "wallet": "Maks",
+          "card": "Karte",
+          "bankLink": "Banka",
+          "walletAndCard": "Maks + Karte",
+          "walletAndBank": "Maks + Banka"
+        }
       },
       "seller": {
         "title": "Pārdevējs"
@@ -2372,6 +2440,17 @@
         "buyerLabel": "Pircējs",
         "sellerLabel": "Pārdevējs"
       }
+    },
+    "statuses": {
+      "pendingSeller": "Gaida pārdevēju",
+      "accepted": "Pieņemts",
+      "shipped": "Nosūtīts",
+      "inTransit": "Ceļā",
+      "delivered": "Piegādāts",
+      "completed": "Pabeigts",
+      "cancelled": "Atcelts",
+      "disputed": "Strīds",
+      "refunded": "Atmaksāts"
     }
   },
   "Help": {
@@ -2380,6 +2459,49 @@
       "description": "Ceļveži un resursi galda spēļu pirkšanai un pārdošanai platformā Second Turn Games.",
       "breadcrumbHome": "Sākums",
       "breadcrumbHelp": "Palīdzības centrs"
+    },
+    "nav": {
+      "overview": "Palīdzības centrs",
+      "buying": "Kā pirkt",
+      "selling": "Kā pārdot",
+      "grading": "Stāvokļa novērtēšana",
+      "shipping": "Piegāde",
+      "wallet": "Maks un maksājumi",
+      "dac7": "DAC7 un nodokļi"
+    },
+    "faq": {
+      "q1": {
+        "question": "Kas ir Second Turn Games?",
+        "answer": "Second Turn Games ir vienādranga tirgus vieta, kur pirkt un pārdot iepriekš mīlētas galda spēles Baltijas reģionā (Latvijā, Lietuvā, Igaunijā). Katrs sludinājums tiek verificēts pret BoardGameGeek datubāzi ar vairāk nekā 170 000 spēlēm."
+      },
+      "q2": {
+        "question": "Kur es varu pārdot galda spēles Latvijā?",
+        "answer": "Second Turn Games ir specializēta tirgus vieta galda spēļu pārdošanai Latvijā, Lietuvā un Igaunijā. Ievieto savas spēles ar verificētiem BoardGameGeek datiem, nosaki cenu un nosūti caur pakomātiem. Pārdevēji saņem 90% no pārdošanas cenas."
+      },
+      "q3": {
+        "question": "Vai Second Turn Games ir droša?",
+        "answer": "Jā. Second Turn Games izmanto EveryPay (caur Swedbank) drošai maksājumu apstrādei, piedāvā pircēja aizsardzību ar strīdu risināšanas periodu un verificē visus sludinājumus pret BoardGameGeek datubāzi. Platformu pārvalda Second Turn Games SIA, reģistrēta Latvijā."
+      },
+      "q4": {
+        "question": "Kādas ir maksas Second Turn Games?",
+        "answer": "Pircēji maksā spēles cenu un fiksētu €2.00 piegādes maksu (bez pakalpojuma maksas). Pārdevēji maksā 10% komisiju no spēles cenas, kas tiek ieturēta automātiski. Sludinājuma izvietošana ir bezmaksas."
+      },
+      "q5": {
+        "question": "Kā darbojas pārdošana Second Turn Games?",
+        "answer": "Meklē savu spēli BoardGameGeek datubāzē, novērtē tās stāvokli, nosaki cenu, pievieno fotogrāfijas un publicē. Kad kāds nopērk, apstiprināi pasūtījumu 24 stundu laikā, iepako spēli un nodod pakomātā. Tavi ieņēmumi tiek ieskaitīti makā pēc piegādes."
+      },
+      "q6": {
+        "question": "Kā darbojas piegāde Second Turn Games?",
+        "answer": "Second Turn Games izmanto Unisend pakomātus visā Baltijas reģionā. Piegāde maksā fiksētu €2.00 par pasūtījumu. Pēc pasūtījuma apstiprināšanas pārdevēji saņem sūtīšanas kodu, iepako spēli un nodod to jebkurā Unisend pakomātā. Izsekošana atjauninās automātiski."
+      },
+      "q7": {
+        "question": "Kā es saņemu samaksu kā pārdevējs?",
+        "answer": "Divas dienas pēc piegādes (vai kad pircējs apstiprina ātrāk), tavi ieņēmumi (90% no spēles cenas) tiek ieskaitīti platformas makā. Tu vari izņemt naudu uz savu IBAN bankas kontu jebkurā laikā - bez maksas, bez minimālā gaidīšanas perioda."
+      },
+      "q8": {
+        "question": "Kādi galda spēļu stāvokļi tiek pieņemti?",
+        "answer": "Second Turn Games izmanto četras stāvokļa pakāpes: Gandrīz jauna (spēlēta 1-2 reizes, visi komponenti klāt), Ľoti laba (neliels nolietojums, pilnībā spēlējama), Laba (mērens nolietojums, pilnīga un spēlējama) un Pieņemama (pamanāms nolietojums, bet pilnīga). Visām pakāpēm nepieciešamas pilnīgas, spēlējamas spēles."
+      }
     }
   },
   "Feedback": {
@@ -2480,6 +2602,19 @@
         "14": "Divas nedēļas spēkā.",
         "30": "Mēnesis ikdienas spēļu. Leģenda."
       }
+    },
+    "help": {
+      "title": "Palīdzība",
+      "howToPlay": "Kā spēlēt",
+      "rule1": "Uzminiet galda spēli 6 mēģinājumos",
+      "rule2": "Katrs minējums atklāj norādes par atribūtiem",
+      "rule3": "Izmantojiet atgriezenisko saiti, lai sašaurinātu nākamo minējumu",
+      "feedbackLegend": "Atgriezeniskās saites leģenda",
+      "legendCorrect": "Pareizi - precīza atbilstība",
+      "legendClose": "Tuvu - diapazonā",
+      "legendHigher": "Augstāk - atbilde ir augstāka",
+      "legendLower": "Zemāk - atbilde ir zemāka",
+      "legendNone": "Nepareizi - nav atbilstības"
     }
   },
   "SellerOrders": {
@@ -2676,6 +2811,95 @@
         "current": "pašreizējais",
         "upcoming": "gaidāmais"
       }
+    }
+  },
+  "Documents": {
+    "layout": {
+      "reg": "Reģ.",
+      "vat": "PVN",
+      "no": "Nr.",
+      "date": "Datums:",
+      "recipient": "Saņēmējs",
+      "electronicSignature": "Šis dokuments ir sagatavots elektroniski un ir derīgs bez paraksta."
+    },
+    "lineItems": {
+      "description": "Apraksts",
+      "gross": "Bruto",
+      "net": "Neto",
+      "vatRate": "PVN likme",
+      "vat": "PVN"
+    },
+    "invoice": {
+      "title": "Platformas pakalpojumu rēķins",
+      "notAvailable": "Rēķins nav pieejams",
+      "notAvailableDescription": "Šis rēķins vēl nav pieejams vai arī Jums nav piekļuves tiesību.",
+      "order": "Pasūtījums:",
+      "country": "Valsts:",
+      "commissionLineItem": "Platformas komisija (10% no {amount})",
+      "shippingManagement": "Piegādes administrēšana",
+      "totalNet": "Kopā neto",
+      "vatLine": "PVN ({rate}%)",
+      "invoiceTotal": "Rēķina kopsumma",
+      "paymentSummary": "Maksājuma kopsavilkums",
+      "totalCollected": "Kopā saņemts no pircēja",
+      "platformServices": "Platformas pakalpojumi (šis rēķins)",
+      "creditedToWallet": "Ieskaitīts Jūsu makā"
+    },
+    "confirmation": {
+      "title": "Pasūtījuma apstiprinājums",
+      "notAvailable": "Pasūtījuma apstiprinājums nav pieejams",
+      "notAvailableDescription": "Šis apstiprinājums vēl nav pieejams vai arī Jums nav piekļuves tiesību.",
+      "seller": "Pārdevējs:",
+      "itemColumn": "Prece",
+      "conditionColumn": "Stāvoklis",
+      "priceColumn": "Cena",
+      "itemsRow": "Preces",
+      "shippingRow": "Piegāde",
+      "totalPaid": "Kopā samaksāts",
+      "paymentDetails": "Maksājuma informācija",
+      "cardPayment": "Kartes / bankas maksājums",
+      "walletApplied": "Izmantotais maka atlikums",
+      "dateLabel": "Datums",
+      "delivery": "Piegāde",
+      "parcelLocker": "Pakomāts:",
+      "pickup": "Saņemšana",
+      "city": "Pilsēta:",
+      "notes": "Piezīmes:"
+    },
+    "creditNote": {
+      "title": "Kredītnota",
+      "notAvailable": "Kredītnota nav pieejama",
+      "notAvailableDescription": "Šī kredītnota vēl nav pieejama vai arī Jums nav piekļuves tiesību.",
+      "order": "Pasūtījums:",
+      "originalInvoice": "Sākotnējais rēķins:",
+      "reason": "Iemesls:",
+      "reversalCommission": "Atcelšana: platformas komisija (10% no {amount})",
+      "reversalShipping": "Atcelšana: piegādes administrēšana",
+      "totalNet": "Kopā neto",
+      "vatLine": "PVN ({rate}%)",
+      "creditNoteTotal": "Kredītnotas kopsumma",
+      "refundSummary": "Atmaksas kopsavilkums",
+      "sellerWalletClawback": "Pārdevēja maka atgūšana",
+      "platformCommissionReversed": "Atceltā platformas komisija",
+      "buyerRefund": "Pircēja atmaksa"
+    },
+    "payoutStatement": {
+      "title": "Izmaksas pārskats",
+      "notAvailable": "Izmaksas pārskats nav pieejams",
+      "notAvailableDescription": "Šis pārskats vēl nav pieejams vai arī Jums nav piekļuves tiesību.",
+      "ibanLabel": "IBAN:",
+      "accountHolder": "Konta īpašnieks:",
+      "orderColumn": "Pasūtījums",
+      "dateColumn": "Datums",
+      "invoiceColumn": "Rēķins",
+      "itemsColumn": "Preces",
+      "commissionColumn": "Komisija",
+      "netCreditColumn": "Neto kredīts",
+      "netPayout": "Neto izmaksa",
+      "transferDetails": "Pārskaitījuma informācija",
+      "ibanRow": "IBAN",
+      "bankReference": "Bankas atsauce",
+      "completed": "Pabeigts"
     }
   }
 }

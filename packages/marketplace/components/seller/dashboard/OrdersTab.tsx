@@ -325,7 +325,7 @@ export function OrdersTab({ isActive, onPendingCountChange }: OrdersTabProps) {
                       <span className="text-text-muted text-xs">·</span>
                       <Badge variant={statusConfig.variant} size="sm">
                         <StatusIcon className="w-3 h-3 mr-1" />
-                        {statusConfig.labelKey ? tOrders(statusConfig.labelKey) : statusConfig.label}
+                        {statusConfig.labelKey ? tOrders(statusConfig.labelKey as any) : statusConfig.label}
                       </Badge>
                       {order.status === 'pending_seller' && order.time_remaining_ms !== null && (
                         <>

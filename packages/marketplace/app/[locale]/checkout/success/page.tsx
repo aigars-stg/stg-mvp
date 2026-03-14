@@ -176,8 +176,8 @@ function SuccessPageContent() {
     );
   }
 
-  // Error state
-  const errorKey = error ? `errors.${error}` : null;
+  // Error state — dynamic key from URL param, use type assertion
+  const errorKey = error ? (`errors.${error}` as Parameters<typeof t>[0]) : null;
   const errorMessage = errorKey && t.has(errorKey)
     ? t(errorKey)
     : (error || t('errorDescription'));
@@ -189,11 +189,12 @@ function SuccessPageContent() {
   const isRetryable = error ? retryableErrors.has(error) : false;
   const retryHref = basketId ? `/checkout?basket=${basketId}` : '/cart';
 
-  const titleKey = error ? `errorTitles.${error}` : null;
+  type TKey = Parameters<typeof t>[0];
+  const titleKey = error ? (`errorTitles.${error}` as TKey) : null;
   const errorTitle = titleKey && t.has(titleKey) ? t(titleKey) : t('errorTitle');
 
-  const suggestion1Key = error ? `suggestions.${error}.1` : null;
-  const suggestion2Key = error ? `suggestions.${error}.2` : null;
+  const suggestion1Key = error ? (`suggestions.${error}.1` as TKey) : null;
+  const suggestion2Key = error ? (`suggestions.${error}.2` as TKey) : null;
   const hasSuggestions = suggestion1Key && t.has(suggestion1Key);
 
   return (

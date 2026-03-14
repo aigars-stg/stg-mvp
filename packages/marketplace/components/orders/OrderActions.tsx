@@ -147,12 +147,12 @@ export function OrderActions({
                 <option value="">{t('issueTypePlaceholder')}</option>
                 {BASE_ISSUE_TYPES.map((type) => (
                   <option key={type} value={type}>
-                    {t(`issueTypes.${type}`)}
+                    {t(`issueTypes.${type}` as any)}
                   </option>
                 ))}
                 {ROLE_SPECIFIC_TYPES[currentUserRole].map((type) => (
                   <option key={type} value={type}>
-                    {t(`issueTypes.${type}`)}
+                    {t(`issueTypes.${type}` as any)}
                   </option>
                 ))}
                 <option value="other">{t('issueTypes.other')}</option>

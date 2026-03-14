@@ -111,7 +111,7 @@ export function WithdrawalHistory() {
                   {formatCentsToCurrency(w.amountCents)}
                 </p>
                 <Badge variant={config.variant}>
-                  {t(config.labelKey)}
+                  {t(config.labelKey as any)}
                 </Badge>
               </div>
               <div className="flex items-center justify-between text-xs text-text-muted">

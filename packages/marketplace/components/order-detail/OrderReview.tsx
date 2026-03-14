@@ -125,7 +125,7 @@ export function OrderReview({ orderId, viewerRole, existingReview, onReviewSubmi
       </div>
 
       {activeRating > 0 && (
-        <p className="text-xs text-text-secondary mb-1">{t(`ratings.${RATING_KEYS[activeRating]}`)}</p>
+        <p className="text-xs text-text-secondary mb-1">{t(`ratings.${RATING_KEYS[activeRating]}` as any)}</p>
       )}
 
       {rating > 0 && (
