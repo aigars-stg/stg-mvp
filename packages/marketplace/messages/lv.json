@@ -540,7 +540,9 @@
     },
     "errors": {
       "tooManyAttempts": "Pārāk daudz mēģinājumu - uztaisi pauzi. Mēģini vēlreiz pēc dažām minūtēm.",
-      "captchaFailed": "Verifikācija neizdevās. Lūdzu, mēģini vēlreiz."
+      "captchaFailed": "Verifikācija neizdevās. Lūdzu, mēģini vēlreiz.",
+      "verificationFailed": "Šī saite nedarbojās — iespējams, tā ir beigusies. Ievadi savu e-pastu, lai saņemtu jaunu.",
+      "checkFailed": "Kaut kas nogāja greizi. Lūdzu, mēģini vēlreiz."
     },
     "comingSoon": {
       "title": "Drīz startēsim",
@@ -918,6 +920,19 @@
     "EE": "Igaunija",
     "LT": "Lietuva",
     "OTHER": "Cita"
+  },
+  "OnboardingChecklist": {
+    "title": "Darba sākšana",
+    "progress": "{completed} no {total} izdarīts",
+    "dismiss": "Aizvērt",
+    "steps": {
+      "profile": "Aizpildi savu profilu",
+      "sell": "Sāc pārdot savas spēles"
+    }
+  },
+  "WelcomeBanner": {
+    "message": "Tu esi iekšā. Laipni lūdzam Second Turn Games.",
+    "dismiss": "Aizvērt"
   },
   "CountryPrompt": {
     "pickCountry": "Izvēlies valsti, lai redzētu spēles tev tuvumā",

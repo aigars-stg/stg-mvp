@@ -11,6 +11,16 @@ import {
   Hr,
 } from '@react-email/components';
 import * as React from 'react';
+import {
+  main,
+  container,
+  h1,
+  text,
+  hr,
+  buttonContainer,
+  button,
+  footer,
+} from '@/lib/email/styles';
 
 interface NewMessageEmailProps {
   recipientName: string;
@@ -90,35 +100,7 @@ export const NewMessageEmail = ({
 
 export default NewMessageEmail;
 
-// Styles
-const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
-
-const container = {
-  backgroundColor: '#ffffff',
-  margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-  maxWidth: '600px',
-};
-
-const h1 = {
-  color: '#2e3a4d',
-  fontSize: '32px',
-  fontWeight: '700',
-  margin: '40px 0',
-  padding: '0 40px',
-};
-
-const text = {
-  color: '#525f7f',
-  fontSize: '16px',
-  lineHeight: '24px',
-  margin: '16px 40px',
-};
-
+// Template-specific styles
 const messageBox = {
   backgroundColor: '#f8fafc',
   border: '2px solid #88C0D0',
@@ -132,11 +114,6 @@ const orderNumberStyle = {
   fontWeight: '600',
   color: '#6b7c93',
   margin: '0 0 12px 0',
-};
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '16px 0',
 };
 
 const senderLabel = {
@@ -176,31 +153,6 @@ const infoText = {
   fontSize: '14px',
   lineHeight: '20px',
   margin: '0',
-  textAlign: 'center' as const,
-};
-
-const buttonContainer = {
-  margin: '32px 40px',
-  textAlign: 'center' as const,
-};
-
-const button = {
-  backgroundColor: '#88C0D0',
-  borderRadius: '8px',
-  color: '#fff',
-  fontSize: '16px',
-  fontWeight: '600',
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'inline-block',
-  padding: '14px 40px',
-};
-
-const footer = {
-  color: '#8898aa',
-  fontSize: '12px',
-  lineHeight: '18px',
-  margin: '32px 40px 0',
   textAlign: 'center' as const,
 };
 

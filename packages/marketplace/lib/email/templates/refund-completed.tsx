@@ -10,6 +10,18 @@ import {
   Hr,
 } from '@react-email/components';
 import * as React from 'react';
+import {
+  main,
+  container,
+  h1,
+  text,
+  hr,
+  footer,
+  orderNumberStyle,
+  detailsTable,
+  infoBox,
+  infoText,
+} from '@/lib/email/styles';
 
 interface RefundCompletedEmailProps {
   buyerName: string;
@@ -95,55 +107,12 @@ export const RefundCompletedEmail = ({
 
 export default RefundCompletedEmail;
 
-const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
-
-const container = {
-  backgroundColor: '#ffffff',
-  margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-  maxWidth: '600px',
-};
-
-const h1 = {
-  color: '#2e3a4d',
-  fontSize: '32px',
-  fontWeight: '700',
-  margin: '40px 0',
-  padding: '0 40px',
-};
-
-const text = {
-  color: '#525f7f',
-  fontSize: '16px',
-  lineHeight: '24px',
-  margin: '16px 40px',
-};
-
 const successBox = {
   backgroundColor: '#e6ffe6',
   border: '2px solid #a3be8c',
   borderRadius: '12px',
   margin: '24px 40px',
   padding: '24px',
-};
-
-const orderNumberStyle = {
-  fontSize: '24px',
-  fontWeight: '600',
-  color: '#2e3a4d',
-  margin: '0 0 16px 0',
-};
-
-const hr = { borderColor: '#e6ebf1', margin: '16px 0' };
-
-const detailsTable = {
-  width: '100%',
-  borderCollapse: 'collapse' as const,
 };
 
 const label = {
@@ -167,14 +136,6 @@ const amountValue = {
   paddingBottom: '12px',
 };
 
-const infoBox = {
-  backgroundColor: '#e6f7ff',
-  border: '1px solid #88C0D0',
-  borderRadius: '8px',
-  margin: '24px 40px',
-  padding: '20px',
-};
-
 const infoTitle = {
   color: '#2e3a4d',
   fontSize: '18px',
@@ -182,17 +143,3 @@ const infoTitle = {
   margin: '0 0 12px 0',
 };
 
-const infoText = {
-  color: '#525f7f',
-  fontSize: '14px',
-  lineHeight: '22px',
-  margin: '0',
-};
-
-const footer = {
-  color: '#8898aa',
-  fontSize: '12px',
-  lineHeight: '18px',
-  margin: '32px 40px 0',
-  textAlign: 'center' as const,
-};

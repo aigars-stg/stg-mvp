@@ -137,22 +137,14 @@ export default function SellerOnboardingPage() {
           <div className="bg-snow-stormLight border border-border rounded-lg p-3 sm:p-4 mb-4">
             <p className="font-semibold text-polar-night mb-2 sm:mb-3 text-sm sm:text-base">{t('step1.keyPoints.title')}</p>
             <ul className="space-y-2 text-xs sm:text-sm text-text-secondary">
-              <li className="flex items-start gap-2">
-                <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-                <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.zeroFees') }} />
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-                <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.ageRequirement') }} />
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-                <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.personalItems') }} />
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
-                <span dangerouslySetInnerHTML={{ __html: t.raw('step1.keyPoints.accurateDescriptions') }} />
-              </li>
+              {(['zeroFees', 'ageRequirement', 'personalItems', 'accurateDescriptions'] as const).map((key) => (
+                <li key={key} className="flex items-start gap-2">
+                  <span className="text-frost-ice mt-0.5 flex-shrink-0">•</span>
+                  <span>{t.rich(`step1.keyPoints.${key}`, {
+                    strong: (chunks) => <strong className="font-semibold text-polar-night">{chunks}</strong>
+                  })}</span>
+                </li>
+              ))}
             </ul>
             <p className="mt-3 sm:mt-4 pt-3 border-t border-border">
               <Link href="/legal/seller" target="_blank" className="text-frost-ice hover:underline text-xs sm:text-sm">

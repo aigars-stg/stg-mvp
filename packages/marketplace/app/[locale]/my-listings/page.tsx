@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { cleanUrlParam } from '@/lib/utils/clean-url-param';
 import { Button, Card } from '@second-turn/design-system';
 import { Package, Time as Clock, CheckCircle, CloseCircle as XCircle, Plus, Search, Heart, Layout as LayoutDashboard, Store } from '@/lib/icons';
 import { EmptyStateIcon } from '@/components/common/EmptyStateIcon';
@@ -115,9 +116,7 @@ function MyListingsContent() {
   // reappear if the user refreshes or navigates back to this page later.
   useEffect(() => {
     if (justPublished) {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('published');
-      window.history.replaceState({}, '', url.toString());
+      cleanUrlParam('published');
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

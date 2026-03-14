@@ -11,6 +11,16 @@ import {
   Link,
 } from '@react-email/components';
 import * as React from 'react';
+import {
+  main,
+  container,
+  h1,
+  text,
+  hr,
+  footer,
+  orderNumberStyle,
+  detailsTable,
+} from '@/lib/email/styles';
 
 interface SepaRefundRequiredEmailProps {
   orderNumber: string;
@@ -82,55 +92,12 @@ export const SepaRefundRequiredEmail = ({
 
 export default SepaRefundRequiredEmail;
 
-const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
-
-const container = {
-  backgroundColor: '#ffffff',
-  margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-  maxWidth: '600px',
-};
-
-const h1 = {
-  color: '#2e3a4d',
-  fontSize: '32px',
-  fontWeight: '700',
-  margin: '40px 0',
-  padding: '0 40px',
-};
-
-const text = {
-  color: '#525f7f',
-  fontSize: '16px',
-  lineHeight: '24px',
-  margin: '16px 40px',
-};
-
 const alertBox = {
   backgroundColor: '#fff3e0',
   border: '2px solid #e8a838',
   borderRadius: '12px',
   margin: '24px 40px',
   padding: '24px',
-};
-
-const orderNumberStyle = {
-  fontSize: '24px',
-  fontWeight: '600',
-  color: '#2e3a4d',
-  margin: '0 0 16px 0',
-};
-
-const hr = { borderColor: '#e6ebf1', margin: '16px 0' };
-
-const detailsTable = {
-  width: '100%',
-  borderCollapse: 'collapse' as const,
 };
 
 const label = {
@@ -154,10 +121,3 @@ const amountValue = {
   paddingBottom: '12px',
 };
 
-const footer = {
-  color: '#8898aa',
-  fontSize: '12px',
-  lineHeight: '18px',
-  margin: '32px 40px 0',
-  textAlign: 'center' as const,
-};

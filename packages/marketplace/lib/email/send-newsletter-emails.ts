@@ -3,11 +3,9 @@
  * SERVER-ONLY: This file should only be imported in API routes
  */
 
-import { sendEmail } from './resend';
+import { sendEmail, BASE_URL } from './resend';
 import { NewsletterWelcomeEmail } from './templates/newsletter-welcome';
 import type { NewsletterLocale, NewsletterSource } from '@/lib/newsletter';
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://secondturn.games';
 
 const subjects = {
   en: 'Welcome to the Second Turn Games',

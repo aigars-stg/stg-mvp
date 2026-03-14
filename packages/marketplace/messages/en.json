@@ -540,7 +540,9 @@
     },
     "errors": {
       "tooManyAttempts": "Too many attempts - let's take a breather. Try again in a few minutes.",
-      "captchaFailed": "Verification failed. Please try again."
+      "captchaFailed": "Verification failed. Please try again.",
+      "verificationFailed": "That link didn't work — it may have expired. Enter your email to get a fresh one.",
+      "checkFailed": "Something went wrong. Please try again."
     },
     "comingSoon": {
       "title": "Launching soon",
@@ -918,6 +920,19 @@
     "EE": "Estonia",
     "LT": "Lithuania",
     "OTHER": "Other"
+  },
+  "OnboardingChecklist": {
+    "title": "Getting started",
+    "progress": "{completed} of {total} done",
+    "dismiss": "Dismiss",
+    "steps": {
+      "profile": "Complete your profile",
+      "sell": "Start selling your games"
+    }
+  },
+  "WelcomeBanner": {
+    "message": "You're in. Welcome to Second Turn Games.",
+    "dismiss": "Dismiss"
   },
   "CountryPrompt": {
     "pickCountry": "Pick your country to see games near you",
@@ -1730,7 +1745,7 @@
       "description": "Review and accept our seller terms to confirm you're selling as a private individual.",
       "keyPoints": {
         "title": "Key points:",
-        "zeroFees": "<strong>Zero listing fees</strong> - free to list your games",
+        "zeroFees": "<strong>Zero listing fees</strong> — free to list your games",
         "ageRequirement": "You must be at least <strong>18 years old</strong>",
         "personalItems": "You're selling <strong>personal items</strong>, not operating a business",
         "accurateDescriptions": "You're responsible for <strong>accurate descriptions</strong> of your games"

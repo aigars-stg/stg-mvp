@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
+import { cleanUrlParam } from '@/lib/utils/clean-url-param';
 import { Button, Modal, Input, Card } from '@second-turn/design-system';
 import type { BGGGame } from '@/lib/bgg-api';
 import type { BGGVersion, VersionSelection } from '@/lib/bgg-types';
@@ -1136,10 +1137,7 @@ function CreateModeSellContent() {
   useEffect(() => {
     if (isWelcome) {
       addToast('success', t('welcome.sellerActivated'));
-      // Clean URL without re-render
-      const url = new URL(window.location.href);
-      url.searchParams.delete('welcome');
-      window.history.replaceState({}, '', url.toString());
+      cleanUrlParam('welcome');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWelcome]);

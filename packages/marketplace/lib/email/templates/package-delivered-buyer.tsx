@@ -11,6 +11,11 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import {
+  main,
+  container,
+  hr,
+} from '@/lib/email/styles';
 
 interface PackageDeliveredBuyerEmailProps {
   buyerName: string;
@@ -127,21 +132,7 @@ export const PackageDeliveredBuyerEmail = ({
 
 export default PackageDeliveredBuyerEmail;
 
-// Styles
-const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
-
-const container = {
-  backgroundColor: '#ffffff',
-  margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-  maxWidth: '600px',
-};
-
+// Template-specific styles
 const h1 = {
   color: '#2e3a4d',
   fontSize: '28px',
@@ -202,11 +193,6 @@ const orderNumberText = {
   fontWeight: '600',
   color: '#2e3a4d',
   margin: '0',
-};
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '16px 0',
 };
 
 const instructionsBox = {

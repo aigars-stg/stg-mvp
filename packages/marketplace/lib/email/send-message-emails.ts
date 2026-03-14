@@ -2,7 +2,7 @@
  * Email utilities for transaction message notifications
  */
 
-import { sendEmail } from './resend';
+import { sendEmail, BASE_URL } from './resend';
 import { NewMessageEmail } from './templates/new-message';
 import { createServiceClient } from '@/lib/supabase/client';
 
@@ -65,8 +65,7 @@ export async function sendNewMessageEmail(
     }
 
     // Build order URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://secondturn.games';
-    const transactionUrl = `${baseUrl}/orders/${orderId}`;
+    const transactionUrl = `${BASE_URL}/orders/${orderId}`;
 
     // Send email
     await sendEmail({

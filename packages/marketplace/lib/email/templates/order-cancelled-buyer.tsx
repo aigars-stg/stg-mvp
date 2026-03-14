@@ -12,6 +12,19 @@ import {
 } from '@react-email/components';
 import * as React from 'react';
 import { formatPrice } from '@/lib/services/pricing';
+import {
+  main,
+  container,
+  h1,
+  text,
+  orderBoxOrange,
+  orderNumberStyle,
+  hr,
+  detailsTable,
+  buttonContainer,
+  button,
+  footer,
+} from '@/lib/email/styles';
 
 interface OrderCancelledBuyerEmailProps {
   buyerName: string;
@@ -47,7 +60,7 @@ export const OrderCancelledBuyerEmail = ({
             cancelled.
           </Text>
 
-          <Section style={orderBox}>
+          <Section style={orderBoxOrange}>
             <Text style={orderNumberStyle}>Order #{orderNumber}</Text>
             <Hr style={hr} />
 
@@ -100,60 +113,7 @@ export const OrderCancelledBuyerEmail = ({
 
 export default OrderCancelledBuyerEmail;
 
-// Styles
-const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
-
-const container = {
-  backgroundColor: '#ffffff',
-  margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-  maxWidth: '600px',
-};
-
-const h1 = {
-  color: '#2e3a4d',
-  fontSize: '32px',
-  fontWeight: '700',
-  margin: '40px 0',
-  padding: '0 40px',
-};
-
-const text = {
-  color: '#525f7f',
-  fontSize: '16px',
-  lineHeight: '24px',
-  margin: '16px 40px',
-};
-
-const orderBox = {
-  backgroundColor: '#f8fafc',
-  border: '2px solid #d08770',
-  borderRadius: '12px',
-  margin: '24px 40px',
-  padding: '24px',
-};
-
-const orderNumberStyle = {
-  fontSize: '24px',
-  fontWeight: '600',
-  color: '#2e3a4d',
-  margin: '0 0 16px 0',
-};
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '16px 0',
-};
-
-const detailsTable = {
-  width: '100%',
-  borderCollapse: 'collapse' as const,
-};
-
+// Template-specific styles
 const label = {
   color: '#6b7c93',
   fontSize: '14px',
@@ -197,27 +157,3 @@ const refundText = {
   margin: '0',
 };
 
-const buttonContainer = {
-  margin: '32px 40px',
-  textAlign: 'center' as const,
-};
-
-const button = {
-  backgroundColor: '#88C0D0',
-  borderRadius: '8px',
-  color: '#fff',
-  fontSize: '16px',
-  fontWeight: '600',
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'inline-block',
-  padding: '14px 40px',
-};
-
-const footer = {
-  color: '#8898aa',
-  fontSize: '12px',
-  lineHeight: '18px',
-  margin: '32px 40px 0',
-  textAlign: 'center' as const,
-};

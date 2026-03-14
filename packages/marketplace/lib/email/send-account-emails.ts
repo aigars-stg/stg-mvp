@@ -3,8 +3,9 @@
  * SERVER-ONLY: This file should only be imported in API routes
  */
 
-import { sendEmail } from './resend';
+import { sendEmail, BASE_URL } from './resend';
 import { AccountDeletedEmail } from './templates/account-deleted';
+import { WelcomeNewUserEmail } from './templates/welcome-new-user';
 
 
 /**
@@ -42,3 +43,35 @@ export async function sendAccountDeletedEmail(params: {
     }
 }
 
+const welcomeSubjects = {
+    en: 'Welcome to Second Turn Games',
+    lv: 'Laipni lūgti Second Turn Games',
+};
+
+/**
+ * Send welcome email to newly registered user
+ */
+export async function sendWelcomeEmail(params: {
+    email: string;
+    locale: 'en' | 'lv';
+}) {
+    const { email, locale } = params;
+    const localePrefix = locale === 'en' ? '' : `/${locale}`;
+
+    try {
+        await sendEmail({
+            to: email,
+            subject: welcomeSubjects[locale] || welcomeSubjects.en,
+            react: WelcomeNewUserEmail({
+                locale,
+                profileUrl: `${BASE_URL}${localePrefix}/account/settings`,
+                browseUrl: `${BASE_URL}${localePrefix}`,
+            }),
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error('❌ [Email] Failed to send welcome email:', error);
+        return { success: false, error };
+    }
+}

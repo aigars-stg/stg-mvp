@@ -9,6 +9,12 @@ import { Section } from '@react-email/section';
 import { Text } from '@react-email/text';
 import { Hr } from '@react-email/hr';
 import * as React from 'react';
+import {
+  main,
+  buttonContainer,
+  buttonDark,
+  footer,
+} from '@/lib/email/styles';
 
 interface AccountDeletedEmailProps {
     userName: string;
@@ -63,7 +69,7 @@ export const AccountDeletedEmail = ({
                     </Text>
 
                     <Section style={buttonContainer}>
-                        <Button style={button} href={supportUrl}>
+                        <Button style={buttonDark} href={supportUrl}>
                             Contact Us to Recover
                         </Button>
                     </Section>
@@ -84,11 +90,6 @@ export const AccountDeletedEmail = ({
 export default AccountDeletedEmail;
 
 // Styles
-const main = {
-    backgroundColor: '#f6f9fc',
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
-
 const container = {
     backgroundColor: '#ffffff',
     margin: '0 auto',
@@ -163,27 +164,3 @@ const hr = {
     margin: '24px 0',
 };
 
-const buttonContainer = {
-    margin: '32px 40px',
-    textAlign: 'center' as const,
-};
-
-const button = {
-    backgroundColor: '#4c566a', // Polar Night
-    borderRadius: '8px',
-    color: '#fff',
-    fontSize: '16px',
-    fontWeight: '600',
-    textDecoration: 'none',
-    textAlign: 'center' as const,
-    display: 'inline-block',
-    padding: '14px 40px',
-};
-
-const footer = {
-    color: '#8898aa',
-    fontSize: '12px',
-    lineHeight: '18px',
-    margin: '32px 40px 0',
-    textAlign: 'center' as const,
-};

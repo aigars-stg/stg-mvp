@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { cleanUrlParam } from '@/lib/utils/clean-url-param';
 import { Link } from '@/i18n/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { Button, Badge } from '@second-turn/design-system';
@@ -46,9 +47,7 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     if (isWelcome) {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('welcome');
-      window.history.replaceState({}, '', url.pathname);
+      cleanUrlParam('welcome');
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

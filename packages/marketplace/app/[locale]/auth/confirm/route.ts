@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { logLoginActivity, getClientIP } from '@/lib/auth/activity-logger';
+import { sendWelcomeEmail } from '@/lib/email/send-account-emails';
 
 export async function GET(
   request: NextRequest,
@@ -62,6 +63,10 @@ export async function GET(
     return NextResponse.redirect(new URL('/auth?error=verification_failed', request.url));
   }
 
+  // Detect new accounts (created within last 2 minutes)
+  const isNewAccount = !!user?.created_at
+    && (Date.now() - new Date(user.created_at).getTime()) < 2 * 60 * 1000;
+
   // Log Activity if successful
   if (user) {
     try {
@@ -85,6 +90,14 @@ export async function GET(
       // Non-blocking, continue
     }
 
+    // Send welcome email for new signups (fire-and-forget)
+    if (isNewAccount && user.email) {
+      sendWelcomeEmail({
+        email: user.email,
+        locale: locale === 'lv' ? 'lv' : 'en',
+      }).catch((err) => console.error('Failed to send welcome email:', err));
+    }
+
     // For OAuth users: capture locale if not set (OAuth providers don't send auth emails)
     // This ensures future emails (password reset, email change) use the correct locale
     if (code && !user.user_metadata?.preferred_locale) {
@@ -99,6 +112,10 @@ export async function GET(
     }
   }
 
-  // Redirect to application
-  return NextResponse.redirect(new URL(next, request.url));
+  // Redirect to application — add welcome flag only for new signups
+  const redirectUrl = new URL(next, request.url);
+  if (isNewAccount) {
+    redirectUrl.searchParams.set('welcome', 'true');
+  }
+  return NextResponse.redirect(redirectUrl);
 }
