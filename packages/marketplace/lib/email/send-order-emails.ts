@@ -20,6 +20,7 @@ import { DisputeResolvedEmail } from './templates/dispute-resolved';
 import { RefundCompletedEmail } from './templates/refund-completed';
 import { ShippingReminderEmail } from './templates/shipping-reminder';
 import { ShippingDeadlineCancelledEmail } from './templates/shipping-deadline-cancelled';
+import { SepaRefundRequiredEmail } from './templates/sepa-refund-required';
 import { loggers } from '../logger';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? (() => {
@@ -557,6 +558,39 @@ export async function sendRefundCompleted(params: {
     return { success: true };
   } catch (error) {
     loggers.email.error({ orderNumber, buyerEmail, error }, 'Failed to send refund completed email');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send staff notification that a manual SEPA refund is required
+ * Called when a bank link payment needs refunding (EveryPay can't auto-refund bank links)
+ */
+export async function sendSepaRefundRequired(params: {
+  orderNumber: string;
+  orderId: string;
+  refundAmountEuros: string;
+  buyerName: string;
+}) {
+  const { orderNumber, orderId, refundAmountEuros, buyerName } = params;
+  const staffEmail = 'info@secondturn.games';
+
+  try {
+    await sendEmail({
+      to: staffEmail,
+      subject: `Action required: Manual SEPA refund for Order #${orderNumber}`,
+      react: SepaRefundRequiredEmail({
+        orderNumber,
+        orderId,
+        refundAmountEuros,
+        buyerName,
+      }),
+    });
+
+    loggers.email.info({ orderNumber }, 'SEPA refund notification sent to staff');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, error }, 'Failed to send SEPA refund notification to staff');
     return { success: false, error };
   }
 }

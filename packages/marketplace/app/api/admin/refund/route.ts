@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireStaffAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { processRefund, processPartialRefund, confirmSepaRefund, createRefundAdapter } from '@/lib/services/refund';
+import { processRefund, processPartialRefund, confirmSepaRefund, createRefundAdapter, sendBuyerRefundEmail } from '@/lib/services/refund';
 
 interface RefundBody {
   order_id: string;
@@ -44,6 +44,11 @@ export async function POST(request: NextRequest) {
 
     if (refund_type === 'full') {
       const result = await processRefund(serviceClient, order_id, createRefundAdapter());
+
+      if (result.success) {
+        sendBuyerRefundEmail(serviceClient, order_id, result);
+      }
+
       return NextResponse.json({
         success: result.success,
         walletRefundedCents: result.walletRefundedCents,
@@ -60,6 +65,11 @@ export async function POST(request: NextRequest) {
       }
 
       const result = await processPartialRefund(serviceClient, order_id, refund_amount_cents, createRefundAdapter());
+
+      if (result.success) {
+        sendBuyerRefundEmail(serviceClient, order_id, result);
+      }
+
       return NextResponse.json({
         success: result.success,
         walletRefundedCents: result.walletRefundedCents,

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireStaffAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { processRefund, processPartialRefund, processPostCompletionRefund, processPostCompletionPartialRefund, createRefundAdapter } from '@/lib/services/refund';
-import { sendDisputeResolved, sendRefundCompleted } from '@/lib/email/send-order-emails';
+import { processRefund, processPartialRefund, processPostCompletionRefund, processPostCompletionPartialRefund, createRefundAdapter, sendBuyerRefundEmail, relistOrderItems } from '@/lib/services/refund';
+import { sendDisputeResolved } from '@/lib/email/send-order-emails';
 import { creditSellerWallet } from '@/lib/services/wallet';
-import { formatCentsToCurrency } from '@/lib/services/pricing';
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -142,9 +141,8 @@ export async function POST(request: NextRequest, { params }: Params) {
           // Map to refundResult shape for email sending below
           refundResult = {
             success: true,
-            walletRefundedCents: postCompletionResult.buyerRefundResult?.walletRefundedCents,
-            everypayRefundedCents: postCompletionResult.buyerRefundResult?.everypayRefundedCents,
-            requiresManualSepa: postCompletionResult.buyerRefundResult?.requiresManualSepa,
+            walletRefundedCents: postCompletionResult.buyerRefundResult?.walletRefundedCents ?? 0,
+            everypayRefundedCents: postCompletionResult.buyerRefundResult?.everypayRefundedCents ?? 0,
             refundMethod: postCompletionResult.buyerRefundResult?.requiresManualSepa ? 'everypay_bank_link' : undefined,
           };
         }
@@ -166,9 +164,8 @@ export async function POST(request: NextRequest, { params }: Params) {
         } else {
           refundResult = {
             success: true,
-            walletRefundedCents: postCompletionResult.buyerRefundResult?.walletRefundedCents,
-            everypayRefundedCents: postCompletionResult.buyerRefundResult?.everypayRefundedCents,
-            requiresManualSepa: postCompletionResult.buyerRefundResult?.requiresManualSepa,
+            walletRefundedCents: postCompletionResult.buyerRefundResult?.walletRefundedCents ?? 0,
+            everypayRefundedCents: postCompletionResult.buyerRefundResult?.everypayRefundedCents ?? 0,
             refundMethod: postCompletionResult.buyerRefundResult?.requiresManualSepa ? 'everypay_bank_link' : undefined,
           };
         }
@@ -188,6 +185,11 @@ export async function POST(request: NextRequest, { params }: Params) {
         }
       }
       // Post-completion seller_favor: wallet already credited, nothing to do
+    }
+
+    // Relist items when dispute resolves with refund (buyer gets items back to marketplace)
+    if (resolution_type === 'buyer_full_refund' || resolution_type === 'buyer_partial_refund') {
+      await relistOrderItems(serviceClient, orderId);
     }
 
     // Send resolution emails to buyer and seller
@@ -211,23 +213,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
       // Send refund confirmation to buyer if refund was processed
       if (refundResult?.success) {
-        const buyerProfile = profiles.find(p => p.id === order.buyer_id);
-        if (buyerProfile?.email) {
-          const refundMethodMap: Record<string, 'card' | 'bank' | 'wallet'> = {
-            everypay_card: 'card',
-            everypay_bank_link: 'bank',
-            wallet_only: 'wallet',
-            mixed: 'wallet',
-          };
-          const totalRefundCents = (refundResult.walletRefundedCents || 0) + (refundResult.everypayRefundedCents || 0);
-          sendRefundCompleted({
-            buyerName: buyerProfile.full_name || 'Buyer',
-            buyerEmail: buyerProfile.email,
-            orderNumber: order.order_number,
-            refundAmount: formatCentsToCurrency(totalRefundCents),
-            refundMethod: refundMethodMap[refundResult.refundMethod || ''] || 'card',
-          }).catch(err => console.error('Refund email failed:', err));
-        }
+        sendBuyerRefundEmail(serviceClient, orderId, refundResult);
       }
     }
 

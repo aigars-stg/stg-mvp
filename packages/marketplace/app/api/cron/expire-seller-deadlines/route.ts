@@ -278,18 +278,8 @@ export async function GET(request: NextRequest) {
         }
 
         // Relist items
-        const { data: orderItems } = await supabase
-          .from('order_items')
-          .select('listing_id')
-          .eq('order_id', expiredOrder.id);
-
-        if (orderItems && orderItems.length > 0) {
-          const listingIds = orderItems.map(item => item.listing_id);
-          await supabase
-            .from('listings')
-            .update({ status: 'active', sold_at: null, updated_at: new Date().toISOString() })
-            .in('id', listingIds);
-        }
+        const { relistOrderItems } = await import('@/lib/services/refund');
+        await relistOrderItems(supabase, expiredOrder.id);
 
         // Send cancellation emails to buyer and seller
         try {

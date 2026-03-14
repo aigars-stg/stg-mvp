@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendOrderCancelledToBuyer } from '@/lib/email/send-order-emails';
-import { refundPayment, voidPayment } from '@/lib/everypay/client';
 import { postOrderDeclinedMessage } from '@/lib/transactions';
 import { requireAuth } from '@/lib/api/auth-middleware';
 import { handleApiError } from '@/lib/api/error-handler';
-import { calculateEverypayPortionCents, determineReleaseAction } from '@/lib/services/payment-capture';
+import { processRefund, createRefundAdapter } from '@/lib/services/refund';
 import { loggers } from '@/lib/logger';
 import { z } from 'zod';
 
@@ -70,93 +69,20 @@ export async function POST(
     // Post system message to transaction conversation (non-blocking)
     postOrderDeclinedMessage(orderId, reason);
 
-    // Process refund if required
+    // Process refund if required (using shared refund service)
     let refundIncomplete = false;
     if (result.requires_refund) {
       try {
-        // Fetch the order to get EveryPay reference and wallet debit info
-        const { data: orderForRefund } = await supabase
-          .from('orders')
-          .select(
-            'buyer_id, everypay_payment_reference, everypay_payment_state, buyer_wallet_debit_cents, total_amount'
-          )
-          .eq('id', orderId)
-          .single();
+        const { createServiceClient } = await import('@/lib/supabase/client');
+        const serviceClient = createServiceClient();
+        const refundResult = await processRefund(serviceClient, orderId, createRefundAdapter());
 
-        if (orderForRefund) {
-          const {
-            buyer_id: buyerId,
-            everypay_payment_reference: everypayRef,
-            everypay_payment_state: everypayState,
-            buyer_wallet_debit_cents: walletDebitCents,
-            total_amount: totalAmount,
-          } = orderForRefund;
-
-          let everyPayRefunded = false;
-          let walletRefunded = false;
-
-          // Release EveryPay funds: void if pre-authorised, refund if already settled
-          const everypayAmountCents = calculateEverypayPortionCents(totalAmount, walletDebitCents);
-          const releaseAction = determineReleaseAction(everypayState, everypayRef, everypayAmountCents);
-
-          try {
-            if (releaseAction === 'void') {
-              try {
-                await voidPayment(everypayRef!);
-              } catch {
-                // If void fails (e.g., auto-captured), fall back to refund
-                await refundPayment(everypayRef!, everypayAmountCents);
-              }
-              everyPayRefunded = true;
-            } else if (releaseAction === 'refund') {
-              await refundPayment(everypayRef!, everypayAmountCents);
-              everyPayRefunded = true;
-            } else {
-              everyPayRefunded = true; // No EveryPay portion to refund
-            }
-          } catch (epError) {
-            log.error({ orderId, error: epError }, 'EveryPay refund failed on seller decline');
-          }
-
-          // Refund wallet debit back to buyer's wallet
-          if (walletDebitCents && walletDebitCents > 0) {
-            const { error: walletError } = await supabase.rpc('credit_wallet', {
-              p_user_id: buyerId,
-              p_amount_cents: walletDebitCents,
-              p_order_id: orderId,
-              p_description: 'Refund — order declined by seller',
-            });
-            if (walletError) {
-              log.error({ orderId, walletError }, 'Wallet refund failed on seller decline');
-            } else {
-              walletRefunded = true;
-            }
-          } else {
-            walletRefunded = true; // No wallet portion to refund
-          }
-
-          // Update order with refund info — track partial failures
-          const refundFailed = !everyPayRefunded || !walletRefunded;
-          await supabase
-            .from('orders')
-            .update({
-              refunded_at: new Date().toISOString(),
-              refund_amount: totalAmount,
-              ...(refundFailed && {
-                refund_note: `Refund incomplete: EveryPay ${everyPayRefunded ? 'OK' : 'FAILED'}, Wallet ${walletRefunded ? 'OK' : 'FAILED'}`,
-              }),
-            })
-            .eq('id', orderId);
-
-          if (refundFailed) {
-            refundIncomplete = true;
-            log.error(
-              { orderId, everyPayRefunded, walletRefunded },
-              'Partial refund on seller decline — manual intervention needed'
-            );
-          }
+        if (!refundResult.success) {
+          refundIncomplete = true;
+          log.error({ orderId, error: refundResult.error }, 'Refund failed on seller decline');
         }
       } catch (refundError) {
+        refundIncomplete = true;
         log.error({ orderId, error: refundError }, 'Refund processing failed on seller decline');
       }
     }

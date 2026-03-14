@@ -9,6 +9,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { refundToWallet } from './wallet';
 import { createCreditNote } from './document-service';
 import { resolveVatBreakdown, LATVIA_VAT_RATE } from '@/lib/bookkeeping-utils';
+import { formatCentsToCurrency } from './pricing';
 
 /**
  * Create a refund adapter that wraps the EveryPay refundPayment API
@@ -56,6 +57,14 @@ export interface RefundAmounts {
   walletPortionCents: number;
   everypayPortionCents: number;
 }
+
+/** Maps internal refund method strings to email template values */
+const REFUND_METHOD_TO_EMAIL: Record<string, 'card' | 'bank' | 'wallet'> = {
+  everypay_card: 'card',
+  everypay_bank_link: 'bank',
+  wallet_only: 'wallet',
+  mixed: 'wallet',
+};
 
 /**
  * Check if an order status allows refunds
@@ -111,7 +120,7 @@ export async function processRefund(
   // Fetch order details
   const { data: order, error: fetchError } = await supabase
     .from('orders')
-    .select('id, status, total_amount, buyer_id, buyer_wallet_debit_cents, everypay_payment_reference, payment_method')
+    .select('id, order_number, status, total_amount, buyer_id, buyer_wallet_debit_cents, everypay_payment_reference, payment_method')
     .eq('id', orderId)
     .single();
 
@@ -259,6 +268,11 @@ export async function processRefund(
     })
     .eq('id', orderId);
 
+  // Notify staff if manual SEPA transfer is needed
+  if (requiresManualSepa) {
+    notifyStaffSepaRequired(supabase, orderId, order.order_number, order.buyer_id, Math.round(order.total_amount * 100));
+  }
+
   return {
     success: true,
     walletRefundedCents,
@@ -280,7 +294,7 @@ export async function processPartialRefund(
 ): Promise<RefundResult> {
   const { data: order, error: fetchError } = await supabase
     .from('orders')
-    .select('id, status, total_amount, buyer_id, buyer_wallet_debit_cents, everypay_payment_reference, payment_method')
+    .select('id, order_number, status, total_amount, buyer_id, buyer_wallet_debit_cents, everypay_payment_reference, payment_method')
     .eq('id', orderId)
     .single();
 
@@ -391,7 +405,103 @@ export async function processPartialRefund(
     })
     .eq('id', orderId);
 
+  // Notify staff if manual SEPA transfer is needed
+  if (requiresManualSepa) {
+    notifyStaffSepaRequired(supabase, orderId, order.order_number, order.buyer_id, refundAmountCents);
+  }
+
   return { success: true, walletRefundedCents, everypayRefundedCents, refundMethod, requiresManualSepa };
+}
+
+/**
+ * Send refund confirmation email to buyer (non-blocking)
+ * Shared helper used by all refund endpoints to avoid duplication.
+ */
+export async function sendBuyerRefundEmail(
+  supabase: SupabaseClient,
+  orderId: string,
+  refundResult: Pick<RefundResult, 'walletRefundedCents' | 'everypayRefundedCents' | 'refundMethod'>,
+) {
+  try {
+    const { data: order } = await supabase
+      .from('orders')
+      .select('order_number, buyer_id')
+      .eq('id', orderId)
+      .single();
+
+    if (!order) return;
+
+    const { data: buyerProfile } = await supabase
+      .from('user_profiles')
+      .select('full_name, email')
+      .eq('id', order.buyer_id)
+      .single();
+
+    if (!buyerProfile?.email) return;
+
+    const totalRefundCents = (refundResult.walletRefundedCents || 0) + (refundResult.everypayRefundedCents || 0);
+    const { sendRefundCompleted } = await import('@/lib/email/send-order-emails');
+    sendRefundCompleted({
+      buyerName: buyerProfile.full_name || 'Buyer',
+      buyerEmail: buyerProfile.email,
+      orderNumber: order.order_number,
+      refundAmount: formatCentsToCurrency(totalRefundCents),
+      refundMethod: REFUND_METHOD_TO_EMAIL[refundResult.refundMethod || ''] || 'card',
+    }).catch(() => {});
+  } catch {
+    // Non-blocking
+  }
+}
+
+/**
+ * Relist order items back to the marketplace
+ * Used when an order is cancelled, refunded, or a dispute resolves with buyer refund.
+ */
+export async function relistOrderItems(
+  supabase: SupabaseClient,
+  orderId: string,
+): Promise<void> {
+  const { data: orderItems } = await supabase
+    .from('order_items')
+    .select('listing_id')
+    .eq('order_id', orderId);
+
+  if (orderItems && orderItems.length > 0) {
+    const listingIds = orderItems.map(item => item.listing_id);
+    await supabase
+      .from('listings')
+      .update({ status: 'active', sold_at: null, updated_at: new Date().toISOString() })
+      .in('id', listingIds);
+  }
+}
+
+/**
+ * Send staff notification for manual SEPA refund (non-blocking)
+ */
+async function notifyStaffSepaRequired(
+  supabase: SupabaseClient,
+  orderId: string,
+  orderNumber: string,
+  buyerId: string,
+  refundAmountCents: number,
+) {
+  try {
+    const { data: buyerProfile } = await supabase
+      .from('user_profiles')
+      .select('full_name')
+      .eq('id', buyerId)
+      .single();
+
+    const { sendSepaRefundRequired } = await import('@/lib/email/send-order-emails');
+    sendSepaRefundRequired({
+      orderNumber,
+      orderId,
+      refundAmountEuros: formatCentsToCurrency(refundAmountCents),
+      buyerName: buyerProfile?.full_name || 'Unknown buyer',
+    }).catch(() => {});
+  } catch {
+    // Non-blocking — don't fail the refund if notification fails
+  }
 }
 
 /**
