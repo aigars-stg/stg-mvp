@@ -87,6 +87,23 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
+    // Validate partial refund amount is within bounds
+    if (resolution_type === 'buyer_partial_refund' && refund_amount_cents) {
+      const maxRefundCents = Math.round(order.total_amount * 100);
+      if (refund_amount_cents <= 0) {
+        return NextResponse.json(
+          { error: 'Refund amount must be greater than zero' },
+          { status: 400 }
+        );
+      }
+      if (refund_amount_cents > maxRefundCents) {
+        return NextResponse.json(
+          { error: `Refund amount cannot exceed order total (${maxRefundCents} cents)` },
+          { status: 400 }
+        );
+      }
+    }
+
     // Determine final order status based on resolution
     const finalOrderStatus =
       resolution_type === 'seller_favor' || resolution_type === 'mutual_agreement'

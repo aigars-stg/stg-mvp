@@ -37,6 +37,7 @@ interface DisputeOrder {
   dispute_description?: string | null;
   dispute_status?: string | null;
   dispute_seller_response?: string | null;
+  dispute_seller_photo_urls?: string[] | null;
   dispute_seller_responded_at?: string | null;
   dispute_seller_deadline?: string | null;
   dispute_photo_urls?: string[] | null;
@@ -73,10 +74,21 @@ interface UserProfile {
   email?: string;
 }
 
+interface OrderIssue {
+  id: string;
+  issue_type: string;
+  description: string;
+  photo_urls: string[];
+  status: string;
+  created_at: string;
+  reporter_role: string;
+}
+
 interface StaffDisputeData {
   order: DisputeOrder;
   order_items: OrderDetailItem[];
   tracking_events: TrackingEvent[];
+  issues: OrderIssue[];
   buyer: UserProfile | null;
   seller: UserProfile | null;
   seller_wallet_balance_cents: number | null;
@@ -159,12 +171,9 @@ export default function StaffDisputeDetailPage() {
     );
   }
 
-  const { order, order_items, tracking_events, buyer, seller, seller_wallet_balance_cents } = data;
+  const { order, order_items, tracking_events, issues, buyer, seller, seller_wallet_balance_cents } = data;
 
-  const isResolved =
-    order.dispute_status === 'resolved' ||
-    order.status === 'refunded' ||
-    order.status === 'completed';
+  const isResolved = order.dispute_status === 'resolved';
   const isDisputed = order.status === 'disputed';
 
 
@@ -217,9 +226,61 @@ export default function StaffDisputeDetailPage() {
 
             <DisputeSellerResponse
               response={order.dispute_seller_response}
+              photoUrls={order.dispute_seller_photo_urls}
               respondedAt={order.dispute_seller_responded_at}
               deadline={order.dispute_seller_deadline}
             />
+
+            {/* Prior Issues (from Report Issue flow) */}
+            {issues && issues.length > 0 && (
+              <div className="bg-snow-white border border-border rounded-xl p-4">
+                <h3 className="text-sm font-semibold text-polar-night mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-aurora-yellow" />
+                  Prior Issues ({issues.length})
+                </h3>
+                <div className="space-y-4">
+                  {issues.map((issue) => (
+                    <div key={issue.id} className="border-b border-border-subtle last:border-0 pb-3 last:pb-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="default" size="sm">
+                          {issue.issue_type.replace(/_/g, ' ')}
+                        </Badge>
+                        <span className="text-xs text-text-muted capitalize">
+                          {issue.reporter_role}
+                        </span>
+                        <Badge
+                          variant={issue.status === 'resolved' ? 'success' : issue.status === 'investigating' ? 'warning' : 'error'}
+                          size="sm"
+                        >
+                          {issue.status}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-text-secondary whitespace-pre-wrap mt-1">
+                        {issue.description}
+                      </p>
+                      {issue.photo_urls && issue.photo_urls.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {issue.photo_urls.map((url, idx) => (
+                            <a
+                              key={idx}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-frost-ice hover:underline"
+                            >
+                              Photo {idx + 1}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-text-muted mt-1">
+                        {formatDateTime(issue.created_at, locale)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <OrderItemsList
               items={order_items}

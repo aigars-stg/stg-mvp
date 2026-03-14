@@ -69,6 +69,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         buyer_id,
         status,
         dispute_status,
+        dispute_reason,
         dispute_seller_responded_at,
         dispute_seller_deadline,
         total_amount
@@ -130,45 +131,59 @@ export async function POST(request: NextRequest, { params }: Params) {
     const now = new Date().toISOString();
 
     if (accept_claim) {
-      // Seller accepts buyer's claim — auto-resolve without admin
-      const { error: updateError } = await adminSupabase
+      // Seller accepts buyer's claim — record response first, then process refund
+      const { error: responseError } = await adminSupabase
         .from('orders')
         .update({
           dispute_seller_response: (response_text || 'Seller accepted the claim.').trim(),
-          dispute_photo_urls: photo_urls || [],
+          dispute_seller_photo_urls: photo_urls || [],
           dispute_seller_responded_at: now,
-          dispute_status: 'resolved',
           dispute_resolution: 'buyer_full_refund',
-          dispute_resolved_at: now,
-          status: 'refunded',
           updated_at: now,
         })
         .eq('id', orderId);
 
-      if (updateError) {
-        console.error('Failed to save dispute acceptance:', updateError);
+      if (responseError) {
+        console.error('Failed to save dispute acceptance:', responseError);
         return NextResponse.json(
           { error: 'Failed to submit response' },
           { status: 500 }
         );
       }
 
-      // Close corresponding order_issues
-      await adminSupabase
-        .from('order_issues')
-        .update({ status: 'resolved', resolved_at: now })
-        .eq('order_id', orderId)
-        .in('status', ['open', 'investigating']);
-
-      // Process refund (non-blocking but log errors)
+      // Process refund before marking as resolved
+      let refundSuccess = false;
       try {
         const { processRefund, createRefundAdapter } = await import('@/lib/services/refund');
-        await processRefund(adminSupabase, orderId, createRefundAdapter());
+        const result = await processRefund(adminSupabase, orderId, createRefundAdapter());
+        refundSuccess = result.success;
+        if (!result.success) {
+          console.error(`Refund failed for auto-resolved dispute on order ${order.order_number}:`, result.error);
+        }
       } catch (refundError) {
         console.error(`Refund failed for auto-resolved dispute on order ${order.order_number}:`, refundError);
       }
 
-      // Notify buyer that seller accepted
+      // Update final status based on refund outcome
+      const resolvedAt = now;
+      await adminSupabase
+        .from('orders')
+        .update({
+          dispute_status: 'resolved',
+          dispute_resolved_at: resolvedAt,
+          status: refundSuccess ? 'refunded' : 'disputed',
+          updated_at: resolvedAt,
+        })
+        .eq('id', orderId);
+
+      // Close corresponding order_issues
+      await adminSupabase
+        .from('order_issues')
+        .update({ status: 'resolved', resolved_at: resolvedAt })
+        .eq('order_id', orderId)
+        .in('status', ['open', 'investigating']);
+
+      // Notify buyer that seller accepted (async, don't block)
       try {
         const { sendDisputeSellerAccepted } = await import('@/lib/email/send-order-emails');
         const { data: buyerProfile } = await adminSupabase
@@ -190,14 +205,17 @@ export async function POST(request: NextRequest, { params }: Params) {
         console.error('Failed to send dispute accepted email:', emailError);
       }
 
-      console.log(`[Dispute] Seller accepted claim on order ${order.order_number} — auto-resolved`);
+      console.log(`[Dispute] Seller accepted claim on order ${order.order_number} — auto-resolved (refund ${refundSuccess ? 'succeeded' : 'failed'})`);
 
       return NextResponse.json({
         success: true,
         orderNumber: order.order_number,
         disputeStatus: 'resolved',
         autoResolved: true,
-        message: 'You accepted the claim. A refund will be processed for the buyer.',
+        refundProcessed: refundSuccess,
+        message: refundSuccess
+          ? 'You accepted the claim. A refund will be processed for the buyer.'
+          : 'You accepted the claim. The refund could not be processed automatically — our team will handle it.',
       });
     }
 
@@ -206,7 +224,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       .from('orders')
       .update({
         dispute_seller_response: response_text.trim(),
-        dispute_photo_urls: photo_urls || [],
+        dispute_seller_photo_urls: photo_urls || [],
         dispute_seller_responded_at: now,
         dispute_status: 'under_review',
         updated_at: now,
@@ -221,14 +239,13 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Notify buyer that seller responded
+    // Notify buyer that seller responded + notify staff of escalation
     try {
-      const { sendDisputeSellerResponse } = await import('@/lib/email/send-order-emails');
-      const { data: buyerProfile } = await adminSupabase
-        .from('user_profiles')
-        .select('full_name, email')
-        .eq('id', order.buyer_id)
-        .single();
+      const { sendDisputeSellerResponse, sendDisputeEscalatedToStaff } = await import('@/lib/email/send-order-emails');
+      const [{ data: buyerProfile }, { data: sellerProfile }] = await Promise.all([
+        adminSupabase.from('user_profiles').select('full_name, email').eq('id', order.buyer_id).single(),
+        adminSupabase.from('user_profiles').select('full_name').eq('id', order.seller_id).single(),
+      ]);
 
       if (buyerProfile?.email) {
         sendDisputeSellerResponse({
@@ -238,8 +255,19 @@ export async function POST(request: NextRequest, { params }: Params) {
           orderId: order.id,
         });
       }
+
+      // Staff notification
+      sendDisputeEscalatedToStaff({
+        orderNumber: order.order_number,
+        orderId: order.id,
+        reason: order.dispute_reason || 'Unknown',
+        buyerName: buyerProfile?.full_name || 'Unknown',
+        sellerName: sellerProfile?.full_name || 'Unknown',
+        totalAmountEuros: (order.total_amount || 0).toFixed(2),
+        escalationReason: 'seller_contested',
+      });
     } catch (emailError) {
-      console.error('Failed to send dispute response email:', emailError);
+      console.error('Failed to send dispute response emails:', emailError);
     }
 
     console.log(`[Dispute] Seller responded to dispute on order ${order.order_number}`);

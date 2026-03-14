@@ -2681,6 +2681,10 @@
       "title": "Ready to Ship",
       "description": "Your parcel has been registered with Unisend. Follow these steps to ship:",
       "parcelId": "Your Parcel ID",
+      "step1": "Go to your nearest <strong>Unisend parcel locker</strong>",
+      "step2": "Select <strong>Send a parcel</strong> on the terminal screen",
+      "step3": "Enter your <strong>Parcel ID</strong> shown above",
+      "step4": "Place your package in the locker and <strong>close the door</strong>",
       "trackPackage": "Track Package"
     },
     "shippingInfo": {

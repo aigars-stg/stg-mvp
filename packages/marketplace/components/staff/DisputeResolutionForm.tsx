@@ -30,17 +30,27 @@ export function DisputeResolutionForm({
   onResolved,
 }: DisputeResolutionFormProps) {
   const [resolutionType, setResolutionType] = useState<ResolutionType | ''>('');
-  const [refundAmountCents, setRefundAmountCents] = useState(defaultRefundAmountCents);
+  const [refundAmountEuros, setRefundAmountEuros] = useState(
+    (defaultRefundAmountCents / 100).toFixed(2)
+  );
   const [resolutionNote, setResolutionNote] = useState('');
+  const [confirming, setConfirming] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<{
     type: 'success' | 'error';
     text: string;
   } | null>(null);
 
-  const handleResolve = async () => {
-    if (!resolutionType || resolutionNote.trim().length < 10) return;
+  const refundAmountCents = Math.round(parseFloat(refundAmountEuros || '0') * 100);
+  const canSubmit = resolutionType && resolutionNote.trim().length >= 10 &&
+    (resolutionType !== 'buyer_partial_refund' || refundAmountCents > 0);
 
+  const handleResolveClick = () => {
+    if (!canSubmit) return;
+    setConfirming(true);
+  };
+
+  const handleConfirm = async () => {
     setSubmitting(true);
     setSubmitMessage(null);
 
@@ -73,7 +83,7 @@ export function DisputeResolutionForm({
 
       setSubmitMessage({
         type: 'success',
-        text: `Dispute resolved: ${resolutionLabels[resolutionType]}. Order status: ${result.finalStatus}.${result.requiresManualSepa ? ' Manual SEPA refund required.' : ''}`,
+        text: `Dispute resolved: ${resolutionLabels[resolutionType as ResolutionType]}. Order status: ${result.finalStatus}.${result.requiresManualSepa ? ' Manual SEPA refund required.' : ''}`,
       });
 
       onResolved();
@@ -84,6 +94,7 @@ export function DisputeResolutionForm({
       });
     } finally {
       setSubmitting(false);
+      setConfirming(false);
     }
   };
 
@@ -107,79 +118,94 @@ export function DisputeResolutionForm({
           </div>
         )}
 
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="w-full sm:w-auto">
-            <label className="block text-xs text-text-muted mb-1">
-              Resolution
-            </label>
-            <select
-              value={resolutionType}
-              onChange={(e) =>
-                setResolutionType(e.target.value as ResolutionType | '')
-              }
-              className="w-full sm:w-64 px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice bg-snow-white"
-            >
-              <option value="">Select resolution...</option>
-              {Object.entries(resolutionLabels).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {resolutionType === 'buyer_partial_refund' && (
-            <div>
-              <label className="block text-xs text-text-muted mb-1">
-                Refund amount (cents)
-              </label>
-              <input
-                type="number"
-                value={refundAmountCents}
-                onChange={(e) =>
-                  setRefundAmountCents(parseInt(e.target.value) || 0)
-                }
-                min={1}
-                className="w-32 px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice"
-              />
-              <span className="text-xs text-text-muted ml-2">
-                = {formatCentsToCurrency(refundAmountCents)}
-              </span>
+        {/* Confirmation banner */}
+        {confirming && (
+          <div className="p-3 rounded-lg mb-3 bg-aurora-yellow/10 border border-aurora-yellow/30">
+            <p className="text-sm font-medium text-polar-night mb-2">
+              Confirm resolution: {resolutionLabels[resolutionType as ResolutionType]}
+              {resolutionType === 'buyer_partial_refund' && ` — ${formatCentsToCurrency(refundAmountCents)}`}
+            </p>
+            <p className="text-xs text-text-secondary mb-3">This action is irreversible.</p>
+            <div className="flex gap-2">
+              <Button variant="accent" size="sm" onClick={handleConfirm} disabled={submitting}>
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setConfirming(false)} disabled={submitting}>
+                Cancel
+              </Button>
             </div>
-          )}
-
-          <div className="flex-1 min-w-[200px]">
-            <label className="block text-xs text-text-muted mb-1">
-              Resolution note (min 10 chars)
-            </label>
-            <textarea
-              value={resolutionNote}
-              onChange={(e) => setResolutionNote(e.target.value)}
-              rows={2}
-              placeholder="Describe the resolution and reasoning..."
-              className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice resize-none"
-            />
           </div>
+        )}
 
-          <div>
-            <Button
-              variant="accent"
-              size="sm"
-              onClick={handleResolve}
-              disabled={
-                submitting ||
-                !resolutionType ||
-                resolutionNote.trim().length < 10
-              }
-            >
-              {submitting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                'Resolve Dispute'
-              )}
-            </Button>
+        {!confirming && (
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="w-full sm:w-auto">
+              <label className="block text-xs text-text-muted mb-1">
+                Resolution
+              </label>
+              <select
+                value={resolutionType}
+                onChange={(e) =>
+                  setResolutionType(e.target.value as ResolutionType | '')
+                }
+                className="w-full sm:w-64 px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice bg-snow-white"
+              >
+                <option value="">Select resolution...</option>
+                {Object.entries(resolutionLabels).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {resolutionType === 'buyer_partial_refund' && (
+              <div>
+                <label className="block text-xs text-text-muted mb-1">
+                  Refund amount (EUR)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={refundAmountEuros}
+                    onChange={(e) => setRefundAmountEuros(e.target.value)}
+                    min={0.01}
+                    max={defaultRefundAmountCents / 100}
+                    step={0.01}
+                    className="w-32 px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice"
+                  />
+                  <span className="text-xs text-text-muted">
+                    max {formatCentsToCurrency(defaultRefundAmountCents)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-xs text-text-muted mb-1">
+                Resolution note (min 10 chars)
+              </label>
+              <textarea
+                value={resolutionNote}
+                onChange={(e) => setResolutionNote(e.target.value)}
+                rows={2}
+                placeholder="Describe the resolution and reasoning..."
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-frost-ice resize-none"
+              />
+            </div>
+
+            <div>
+              <Button
+                variant="accent"
+                size="sm"
+                onClick={handleResolveClick}
+                disabled={!canSubmit}
+              >
+                Resolve Dispute
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

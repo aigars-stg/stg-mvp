@@ -2681,6 +2681,10 @@
       "title": "Gatavs nosūtīšanai",
       "description": "Jūsu sūtījums ir reģistrēts Unisend. Sekojiet šiem soļiem:",
       "parcelId": "Jūsu sūtījuma ID",
+      "step1": "Dodieties uz tuvāko <strong>Unisend pakomātu</strong>",
+      "step2": "Terminālī izvēlieties <strong>Nosūtīt sūtījumu</strong>",
+      "step3": "Ievadiet augstāk norādīto <strong>sūtījuma ID</strong>",
+      "step4": "Ievietojiet sūtījumu skapītī un <strong>aizveriet durvis</strong>",
       "trackPackage": "Izsekot sūtījumu"
     },
     "shippingInfo": {

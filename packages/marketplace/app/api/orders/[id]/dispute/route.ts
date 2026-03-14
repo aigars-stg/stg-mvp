@@ -14,6 +14,7 @@ interface Params {
 const disputeBodySchema = z.object({
   reason: z.string().min(1, 'Dispute reason is required').max(200),
   description: z.string().min(10, 'Please provide a detailed description (at least 10 characters)').max(2000),
+  photo_urls: z.array(z.string().url()).max(5).optional(),
 });
 
 /**
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
     }
-    const { reason, description } = parsed.data;
+    const { reason, description, photo_urls } = parsed.data;
 
     // Get order details
     const { data: order, error: orderError } = await adminSupabase
@@ -109,16 +110,18 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     // Update order to disputed status with 48h seller deadline
     const sellerDeadline = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    const nowIso = new Date().toISOString();
     const { error: updateError } = await adminSupabase
       .from('orders')
       .update({
         status: 'disputed',
-        disputed_at: new Date().toISOString(),
+        disputed_at: nowIso,
         dispute_reason: reason,
         dispute_description: description,
+        dispute_photo_urls: photo_urls || [],
         dispute_status: 'awaiting_seller',
         dispute_seller_deadline: sellerDeadline.toISOString(),
-        updated_at: new Date().toISOString(),
+        updated_at: nowIso,
       })
       .eq('id', orderId);
 
@@ -130,11 +133,13 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Fetch both profiles in parallel for notification emails
-    const [{ data: sellerProfile }, { data: buyerProfile }] = await Promise.all([
+    // Fetch game name and profiles in parallel for notification emails
+    const [{ data: orderItems }, { data: sellerProfile }, { data: buyerProfile }] = await Promise.all([
+      adminSupabase.from('order_items').select('game_name').eq('order_id', orderId).limit(1),
       adminSupabase.from('user_profiles').select('email, full_name').eq('id', order.seller_id).single(),
       adminSupabase.from('user_profiles').select('email, full_name').eq('id', user.id).single(),
     ]);
+    const gameName = orderItems?.[0]?.game_name || order.order_number;
 
     // Send notification emails (async, don't block response)
     const { sendDisputeOpenedToSeller, sendDisputeOpenedToBuyer } = await import('@/lib/email/send-order-emails');
@@ -145,7 +150,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         sellerEmail: sellerProfile.email,
         orderNumber: order.order_number,
         orderId: order.id,
-        gameName: order.order_number,
+        gameName,
         buyerReason: reason,
       });
     }

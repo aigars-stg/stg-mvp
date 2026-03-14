@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { AlertTriangle } from '@/lib/icons';
+import { EvidencePhotoGrid } from './EvidencePhotoGrid';
 
 interface DisputeClaimCardProps {
   reason: string | null | undefined;
@@ -37,25 +37,7 @@ export function DisputeClaimCard({ reason, description, photoUrls }: DisputeClai
           <span className="text-xs text-text-muted">
             Photos ({photoUrls.length})
           </span>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {photoUrls.map((url, idx) => (
-              <a
-                key={idx}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative w-20 h-20 rounded-lg overflow-hidden border border-border hover:shadow-md transition-shadow"
-              >
-                <Image
-                  src={url}
-                  alt={`Dispute evidence ${idx + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="80px"
-                />
-              </a>
-            ))}
-          </div>
+          <EvidencePhotoGrid urls={photoUrls} altPrefix="Dispute evidence" />
         </div>
       )}
       {!reason && !description && (

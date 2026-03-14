@@ -21,7 +21,10 @@ import { RefundCompletedEmail } from './templates/refund-completed';
 import { ShippingReminderEmail } from './templates/shipping-reminder';
 import { ShippingDeadlineCancelledEmail } from './templates/shipping-deadline-cancelled';
 import { SepaRefundRequiredEmail } from './templates/sepa-refund-required';
+import { DisputeEscalatedStaffEmail } from './templates/dispute-escalated-staff';
 import { loggers } from '../logger';
+
+const STAFF_EMAIL = 'info@secondturn.games';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? (() => {
   if (process.env.NODE_ENV === 'production') {
@@ -573,7 +576,7 @@ export async function sendSepaRefundRequired(params: {
   buyerName: string;
 }) {
   const { orderNumber, orderId, refundAmountEuros, buyerName } = params;
-  const staffEmail = 'info@secondturn.games';
+  const staffEmail = STAFF_EMAIL;
 
   try {
     await sendEmail({
@@ -591,6 +594,45 @@ export async function sendSepaRefundRequired(params: {
     return { success: true };
   } catch (error) {
     loggers.email.error({ orderNumber, error }, 'Failed to send SEPA refund notification to staff');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send staff notification when a dispute is escalated to under_review
+ * Called when seller contests a claim or when the 48h deadline expires
+ */
+export async function sendDisputeEscalatedToStaff(params: {
+  orderNumber: string;
+  orderId: string;
+  reason: string;
+  buyerName: string;
+  sellerName: string;
+  totalAmountEuros: string;
+  escalationReason: 'seller_contested' | 'seller_deadline_expired';
+}) {
+  const { orderNumber, orderId, reason, buyerName, sellerName, totalAmountEuros, escalationReason } = params;
+  const staffEmail = STAFF_EMAIL;
+
+  try {
+    await sendEmail({
+      to: staffEmail,
+      subject: `Dispute needs review: Order #${orderNumber}`,
+      react: DisputeEscalatedStaffEmail({
+        orderNumber,
+        orderId,
+        reason,
+        buyerName,
+        sellerName,
+        totalAmountEuros,
+        escalationReason,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, escalationReason }, 'Dispute escalation notification sent to staff');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, error }, 'Failed to send dispute escalation notification to staff');
     return { success: false, error };
   }
 }

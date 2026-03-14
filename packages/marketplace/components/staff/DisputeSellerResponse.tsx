@@ -3,14 +3,16 @@
 import { useLocale } from 'next-intl';
 import { User, Time as Clock } from '@/lib/icons';
 import { formatDateTime } from '@/lib/date-utils';
+import { EvidencePhotoGrid } from './EvidencePhotoGrid';
 
 interface DisputeSellerResponseProps {
   response: string | null | undefined;
+  photoUrls?: string[] | null | undefined;
   respondedAt: string | null | undefined;
   deadline: string | null | undefined;
 }
 
-export function DisputeSellerResponse({ response, respondedAt, deadline }: DisputeSellerResponseProps) {
+export function DisputeSellerResponse({ response, photoUrls, respondedAt, deadline }: DisputeSellerResponseProps) {
   const locale = useLocale();
   return (
     <div className="bg-snow-white border border-border rounded-xl p-4">
@@ -23,6 +25,14 @@ export function DisputeSellerResponse({ response, respondedAt, deadline }: Dispu
           <p className="text-sm text-text-secondary whitespace-pre-wrap mb-2">
             {response}
           </p>
+          {photoUrls && photoUrls.length > 0 && (
+            <div className="mb-2">
+              <span className="text-xs text-text-muted">
+                Photos ({photoUrls.length})
+              </span>
+              <EvidencePhotoGrid urls={photoUrls} altPrefix="Seller evidence" />
+            </div>
+          )}
           {respondedAt && (
             <p className="text-xs text-text-muted flex items-center gap-1">
               <Clock className="w-3 h-3" />
