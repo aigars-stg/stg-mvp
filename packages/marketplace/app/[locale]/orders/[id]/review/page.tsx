@@ -82,6 +82,8 @@ export default function ReviewOrderPage() {
           const existingReview = await checkExistingReview(orderId);
           if (existingReview) {
             setEligibility({ can_review: false, reason: 'Already reviewed', review_id: existingReview.id });
+          } else if (['refunded', 'cancelled'].includes(orderData.order.status)) {
+            setEligibility({ can_review: false, reason: 'Reviews are not available for refunded or cancelled orders' });
           } else if (orderData.order.status === 'delivered' || orderData.order.status === 'completed') {
             setEligibility({ can_review: true });
           } else {

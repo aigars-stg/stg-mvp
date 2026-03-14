@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Skeleton } from '@second-turn/design-system';
-import { ArrowUp, Wallet, TrendUp, CurrencyDollar, Time as Clock } from '@/lib/icons';
+import { ArrowUp, Wallet, TrendUp, CurrencyDollar, Time as Clock, AlertTriangle } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { WalletTransactions } from '@/components/wallet/WalletTransactions';
 import { WithdrawalForm } from '@/components/wallet/WithdrawalForm';
@@ -148,6 +148,25 @@ export function EarningsTab({ profile, onProfileRefresh: _onProfileRefresh }: Ea
           annualTransactionCount={profile.dac7_annual_transaction_count || 0}
           annualSalesTotal={profile.dac7_annual_sales_total || 0}
         />
+      )}
+
+      {/* IBAN nudge — show when seller has no payout details configured */}
+      {!statsLoading && !profile?.payout_iban && (
+        <div className="bg-aurora-orange/10 border border-aurora-orange/20 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex items-start gap-3 flex-1">
+            <AlertTriangle className="w-5 h-5 text-aurora-orange flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-polar-night">{t('earnings.payoutNudge.title')}</p>
+              <p className="text-sm text-text-secondary mt-0.5">{t('earnings.payoutNudge.description')}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowWithdrawForm(true)}
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-snow-white bg-aurora-orange hover:bg-aurora-orange/90 rounded-lg transition-colors whitespace-nowrap"
+          >
+            {t('earnings.payoutNudge.action')}
+          </button>
+        </div>
       )}
 
       {/* Stats cards */}

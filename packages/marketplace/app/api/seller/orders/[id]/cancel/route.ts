@@ -27,7 +27,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     // Get order
     const { data: order, error: orderError } = await adminSupabase
       .from('orders')
-      .select('id, order_number, seller_id, buyer_id, status, total_amount')
+      .select('id, order_number, seller_id, buyer_id, status, total_amount, label_url, unisend_parcel_id, barcode')
       .eq('id', orderId)
       .single();
 
@@ -48,7 +48,18 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Check no tracking events exist (parcel not yet dropped off)
+    // Block cancellation if a shipping label exists — the parcel is already
+    // registered with Unisend and may be in transit even if tracking events
+    // haven't synced yet (cron delay).  Seller must contact support instead.
+    if (order.label_url || order.unisend_parcel_id || order.barcode) {
+      return NextResponse.json(
+        { error: 'This order has a shipping label and may already be in transit. Please contact support to cancel.' },
+        { status: 400 }
+      );
+    }
+
+    // Secondary check: tracking events (covers edge cases where label fields
+    // were cleared but the parcel was actually dropped off)
     const { data: trackingEvents } = await adminSupabase
       .from('tracking_events')
       .select('id')

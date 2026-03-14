@@ -531,7 +531,7 @@
       "subtitle": "We sent a magic link to {email}",
       "stepOpenEmail": "Open email",
       "stepClickLink": "Click link",
-      "expiryInfo": "The link will sign you in instantly on this device. It expires in 1 hour.",
+      "expiryInfo": "The link will sign you in instantly on this device. It is valid for 24 hours.",
       "resendButton": "Didn't get it? Send again",
       "sending": "Sending...",
       "sentCount_one": "Sent {count} time",
@@ -709,6 +709,11 @@
       "returnsLink": "Returns",
       "pleaseAccept": "Please accept the terms to continue"
     },
+    "reservation": {
+      "expiredTitle": "Your reservation has expired",
+      "expiredMessage": "Items may no longer be available. Please return to your cart to check availability.",
+      "returnToCart": "Return to Cart"
+    },
     "errors": {
       "expiredItems": "Some items in your cart have expired. Please return to cart.",
       "basketNotFound": "Basket not found",
@@ -731,9 +736,24 @@
       "suggestions": {
         "title": "What you can do"
       },
+      "errorTitles": {
+        "order_creation_failed": "Your payment has been refunded"
+      },
+      "errors": {
+        "order_creation_failed": "Your payment went through, but we hit a technical issue creating your order. A full refund has been issued automatically."
+      },
       "reassurance": {
         "title": "No money was charged",
-        "description": "Your payment was not processed. Your cart items are still reserved for you."
+        "description": "Your payment was not processed. Your cart items are still reserved for you.",
+        "refundedTitle": "Your money is being returned",
+        "refundedDescription": "A full refund has been issued. It may take a few minutes to appear depending on your payment method. You can safely try again."
+      },
+      "timeout": {
+        "title": "Payment is being processed",
+        "description": "Your payment is being processed. This may take a few minutes.",
+        "checkOrders": "Check your orders page to see if your order has been created.",
+        "contactUs": "If you don't see your order within 15 minutes, please contact us at info@secondturn.games",
+        "viewOrders": "Check Order Status"
       },
       "actions": {
         "tryAgain": "Try Again",
@@ -1646,11 +1666,11 @@
         "title": "How should the auction end?",
         "fixed": {
           "label": "Fixed end time",
-          "description": "Auction ends when the timer runs out"
+          "description": "Auction ends at the scheduled time, regardless of bidding activity"
         },
         "cooldown": {
           "label": "Last-bid cooldown",
-          "description": "Timer resets after each bid, giving everyone time to respond"
+          "description": "If a bid is placed near the end, the auction extends to prevent last-second sniping"
         }
       },
       "cooldownPeriod": {
@@ -2143,6 +2163,11 @@
         "totalWithdrawn": "Total withdrawn",
         "pendingWithdrawals": "Pending withdrawals",
         "pendingCount": "{count, plural, one {# request} other {# requests}}"
+      },
+      "payoutNudge": {
+        "title": "Set up your payout details",
+        "description": "Add your IBAN so you can withdraw earnings to your bank account when you are ready.",
+        "action": "Set up now"
       }
     },
     "reviews": {
@@ -2315,7 +2340,10 @@
         "staffReviewing": "Our team is reviewing the dispute. We will notify both parties of the outcome.",
         "resolution": "Resolution",
         "awaitingSeller": "Awaiting seller",
-        "resolved": "Resolved"
+        "resolved": "Resolved",
+        "yourPhotos": "Your photos",
+        "sellerResponse": "Seller's response",
+        "sellerPhotos": "Seller's photos"
       },
       "labelGenerating": "Registering your shipment — this usually takes a few seconds.",
       "notices": {
@@ -2672,6 +2700,8 @@
       "description": "Please accept or decline this order. You have 24 hours from when the order was placed to respond. If you don’t respond in time, the order will be automatically cancelled and the buyer will be refunded.",
       "acceptOrder": "Accept Order",
       "declineOrder": "Decline Order",
+      "respondWithin": "Respond within",
+      "expired": "Expired",
       "expiredDescription": "The response window has closed. This order will be automatically cancelled and the buyer refunded."
     },
     "acceptModal": {
@@ -2701,6 +2731,14 @@
       "step3": "Enter your <strong>Parcel ID</strong> shown above",
       "step4": "Place your package in the locker and <strong>close the door</strong>",
       "trackPackage": "Track Package"
+    },
+    "cancelBlocked": {
+      "description": "This order has a shipping label and may already be in transit. To cancel, please contact support."
+    },
+    "cancelAllowed": {
+      "description": "Changed your mind? You can cancel this order before the shipping label is generated.",
+      "cancelOrder": "Cancel Order",
+      "cancelling": "Cancelling..."
     },
     "shippingInfo": {
       "title": "Shipping Information"
@@ -2764,6 +2802,11 @@
       "amountRequired": "Please enter an amount",
       "exceedsBalance": "Amount exceeds your wallet balance",
       "ibanRequired": "IBAN is required",
+      "ibanTooShort": "IBAN is too short",
+      "ibanInvalidFormat": "IBAN must start with a country code (e.g. LV, LT, EE) followed by digits",
+      "ibanInvalidLength": "IBAN length is invalid",
+      "ibanWrongLength": "IBAN length is incorrect for this country",
+      "ibanCheckDigit": "Invalid IBAN — please check the number and try again",
       "nameRequired": "Account holder name is required",
       "generic": "Something went wrong"
     }

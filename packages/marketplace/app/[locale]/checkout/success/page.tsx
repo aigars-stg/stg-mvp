@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, ResultPage } from '@second-turn/design-system';
-import { Package, ArrowRight, RefreshCw as Loader2, AlertCircle, Shield, LightbulbOn, ShoppingBasket } from '@/lib/icons';
+import { Package, ArrowRight, RefreshCw as Loader2, AlertCircle, Shield, LightbulbOn, ShoppingBasket, Time } from '@/lib/icons';
 
 const MAX_RETRIES = 15;
 const RETRY_DELAY_MS = 2000;
@@ -176,6 +176,44 @@ function SuccessPageContent() {
     );
   }
 
+  // Timeout state — dedicated UX with clear next steps
+  if (error === 'timeout') {
+    return (
+      <ResultPage
+        variant="warning"
+        icon={<Time className="w-8 h-8 sm:w-10 sm:h-10" />}
+        title={t('timeout.title')}
+        description={t('timeout.description')}
+      >
+        <ResultPage.Content>
+          <div className="bg-frost-ice/5 border border-frost-ice/20 rounded-lg p-4">
+            <p className="text-text-secondary">
+              {t('timeout.checkOrders')}
+            </p>
+            <p className="text-sm text-text-muted mt-2">
+              {t('timeout.contactUs')}
+            </p>
+          </div>
+        </ResultPage.Content>
+
+        <ResultPage.Actions>
+          <Link href="/orders" className="block">
+            <Button variant="primary" fullWidth>
+              <Package className="w-4 h-4 mr-2" />
+              {t('timeout.viewOrders')}
+            </Button>
+          </Link>
+          <Link href="/browse" className="block">
+            <Button variant="secondary" fullWidth>
+              {t('actions.continueShopping')}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </ResultPage.Actions>
+      </ResultPage>
+    );
+  }
+
   // Error state — dynamic key from URL param, use type assertion
   const errorKey = error ? (`errors.${error}` as Parameters<typeof t>[0]) : null;
   const errorMessage = errorKey && t.has(errorKey)
@@ -185,6 +223,7 @@ function SuccessPageContent() {
   const retryableErrors = new Set([
     'payment_failed', 'fraud_declined', 'card_declined',
     'auth_failed', 'technical_error', 'user_cancelled',
+    'order_creation_failed',
   ]);
   const isRetryable = error ? retryableErrors.has(error) : false;
   const retryHref = basketId ? `/checkout?basket=${basketId}` : '/cart';
@@ -231,8 +270,12 @@ function SuccessPageContent() {
             <div className="flex gap-3">
               <Shield className="w-5 h-5 text-frost-ice flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-polar-night">{t('reassurance.title')}</p>
-                <p className="text-sm text-text-secondary mt-1">{t('reassurance.description')}</p>
+                <p className="font-medium text-polar-night">
+                  {error === 'order_creation_failed' ? t('reassurance.refundedTitle') : t('reassurance.title')}
+                </p>
+                <p className="text-sm text-text-secondary mt-1">
+                  {error === 'order_creation_failed' ? t('reassurance.refundedDescription') : t('reassurance.description')}
+                </p>
               </div>
             </div>
           </div>

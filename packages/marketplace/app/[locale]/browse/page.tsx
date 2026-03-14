@@ -42,6 +42,10 @@ export default function BrowsePage() {
   // Ref for infinite scroll sentinel
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
+  // Debounce and abort refs for filter race condition prevention
+  const debounceRef = useRef<NodeJS.Timeout>();
+  const abortControllerRef = useRef<AbortController>();
+
   // Destructure commonly used filter values for easier access
   const {
     listingType,
@@ -101,7 +105,7 @@ export default function BrowsePage() {
   }, [setListingType, setSortBy]);
 
   // Fetch aggregated games with pagination
-  const fetchGames = async (page: number, append = false) => {
+  const fetchGames = async (page: number, append = false, signal?: AbortSignal) => {
     try {
       if (page === 1) {
         setLoading(true);
@@ -138,13 +142,20 @@ export default function BrowsePage() {
       // Add language filters
       selectedLanguages.forEach(lang => params.append('language', lang));
 
-      const response = await fetch(`/api/games?${params.toString()}`);
+      const response = await fetch(`/api/games?${params.toString()}`, { signal });
+
+      // If this request was aborted, don't update state
+      if (signal?.aborted) return;
 
       if (!response.ok) {
         throw new Error('Failed to fetch games');
       }
 
       const data = await response.json();
+
+      // Check again after async JSON parsing
+      if (signal?.aborted) return;
+
       const newGames = data.games || [];
 
       if (append && page > 1) {
@@ -161,6 +172,8 @@ export default function BrowsePage() {
       setError('');
       setIsOffline(false);
     } catch (err: unknown) {
+      // Ignore aborted requests — a newer request superseded this one
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       console.error('Error fetching games:', err);
       if (isOfflineError(err)) {
         setIsOffline(true);
@@ -170,8 +183,10 @@ export default function BrowsePage() {
         setError(err instanceof Error ? err.message : 'Failed to load games');
       }
     } finally {
-      setLoading(false);
-      setLoadingMore(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
   };
 
@@ -205,21 +220,41 @@ export default function BrowsePage() {
     }
   };
 
-  // Initial fetch on mount
+  // Initial fetch on mount / listing type change (no debounce, but abort stale)
   useEffect(() => {
+    // Abort any in-flight request and clear pending debounce
+    abortControllerRef.current?.abort();
+    clearTimeout(debounceRef.current);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     if (listingType === 'sell' || listingType === 'auctions') {
-      fetchGames(1, false);
+      fetchGames(1, false, controller.signal);
     } else {
       fetchWantedListings();
     }
+
+    return () => { controller.abort(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listingType]);
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters change (debounced + abort stale)
   useEffect(() => {
-    if (filtersInitialized && (listingType === 'sell' || listingType === 'auctions')) {
-      fetchGames(1, false);
-    }
+    if (!filtersInitialized || (listingType !== 'sell' && listingType !== 'auctions')) return;
+
+    // Abort any in-flight request from a previous filter change
+    abortControllerRef.current?.abort();
+
+    // Debounce: wait 300ms after last filter change before fetching
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      fetchGames(1, false, controller.signal);
+    }, 300);
+
+    return () => { clearTimeout(debounceRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, selectedLanguages, priceMin, priceMax, sortBy, showEndedAuctions, filtersInitialized, listingType]);
 
@@ -231,7 +266,9 @@ export default function BrowsePage() {
       (entries) => {
         const [entry] = entries;
         if (entry.isIntersecting && !loadingMore && !loading && hasMore) {
-          fetchGames(currentPage + 1, true);
+          const controller = new AbortController();
+          abortControllerRef.current = controller;
+          fetchGames(currentPage + 1, true, controller.signal);
         }
       },
       {
@@ -248,6 +285,14 @@ export default function BrowsePage() {
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingMore, loading, hasMore, currentPage, filtersInitialized, listingType]);
+
+  // Cleanup on unmount: abort in-flight requests and clear debounce timer
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+      clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   // Helper: Check if a player count matches a game's player range
   const playerCountMatches = (gamePlayerCount: string | null, selectedCount: number): boolean => {

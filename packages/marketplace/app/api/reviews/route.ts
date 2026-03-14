@@ -126,6 +126,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Quick guard: block reviews on refunded or cancelled orders
+    const { data: orderStatus } = await supabase
+      .from('orders')
+      .select('status')
+      .eq('id', order_id)
+      .single();
+
+    if (orderStatus && ['refunded', 'cancelled'].includes(orderStatus.status)) {
+      return NextResponse.json(
+        { error: 'Reviews are not allowed on refunded or cancelled orders' },
+        { status: 400 }
+      );
+    }
+
     // Check if buyer can review this order
     const { data: canReviewData, error: canReviewError } = await supabase
       .rpc('can_buyer_review_order', {

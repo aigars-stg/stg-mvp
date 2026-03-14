@@ -79,6 +79,7 @@ function CheckoutPageContent() {
   const [submitting, setSubmitting] = useState(false);
   const [canExtendReservation, setCanExtendReservation] = useState(true);
   const [isExtending, setIsExtending] = useState(false);
+  const [reservationExpired, setReservationExpired] = useState(false);
 
   // Terminal selection (country derived from terminal or profile)
   const [selectedTerminal, setSelectedTerminal] = useState<Terminal | null>(null);
@@ -133,8 +134,8 @@ function CheckoutPageContent() {
     !phoneError;
   const isTermsComplete = termsAccepted;
 
-  // Overall validation
-  const isValid = basket && isTerminalComplete && isContactComplete && isTermsComplete;
+  // Overall validation (block checkout if reservation expired)
+  const isValid = basket && isTerminalComplete && isContactComplete && isTermsComplete && !reservationExpired;
 
   // Single basket-level reservation timer (earliest expiry across all items)
   const earliestExpiry = basket?.items.reduce<string | null>((earliest, item) => {
@@ -354,6 +355,18 @@ function CheckoutPageContent() {
       setSubmitting(true);
       setError(null);
 
+      // Re-fetch wallet balance to catch concurrent spending (audit 3.2)
+      try {
+        const walletRes = await fetch('/api/wallet/balance');
+        const walletData = await walletRes.json();
+        const freshBalance = walletData.balanceCents ?? 0;
+        if (freshBalance !== walletBalanceCents) {
+          setWalletBalanceCents(freshBalance);
+        }
+      } catch {
+        // Non-fatal: server will use authoritative balance anyway
+      }
+
       if (savePhone && receiverPhone) {
         try {
           await updateProfile({ phone: receiverPhone });
@@ -393,6 +406,11 @@ function CheckoutPageContent() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle stale items — redirect back to cart (audit 3.1)
+        if (data.staleItems) {
+          router.push('/cart');
+          return;
+        }
         throw new Error(data.error || t('errors.createSessionFailed'));
       }
 
@@ -447,10 +465,10 @@ function CheckoutPageContent() {
     }
   };
 
-  // Handle expired item — redirect to cart which handles cleanup
+  // Handle expired reservation — show expiry banner and disable checkout
   const handleItemExpired = useCallback(() => {
-    router.push('/cart');
-  }, [router]);
+    setReservationExpired(true);
+  }, []);
 
   // Loading state
   if (authLoading || loading) {
@@ -554,6 +572,44 @@ function CheckoutPageContent() {
 
             {/* Rest of checkout form — hidden until country is set */}
             {!hasValidCountry ? null : (<>
+
+            {/* Reservation expiry banner — blocks checkout when timer runs out (audit 3.3) */}
+            {reservationExpired && (
+              <div className="bg-aurora-red/10 border-2 border-aurora-red/30 rounded-xl p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-aurora-red flex-shrink-0 mt-0.5" />
+                  <div className="flex-grow">
+                    <h2 className="font-semibold text-polar-night">
+                      {t('reservation.expiredTitle')}
+                    </h2>
+                    <p className="text-sm text-text-secondary mt-1 mb-3">
+                      {t('reservation.expiredMessage')}
+                    </p>
+                    <Link href="/cart">
+                      <Button variant="primary" size="sm">
+                        <ArrowLeft className="w-4 h-4 mr-1.5" />
+                        {t('reservation.returnToCart')}
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Reservation countdown — prominent banner at top of form (audit 3.3 / 3.4) */}
+            {earliestExpiry && !reservationExpired && (
+              <div className="bg-snow-white border border-border rounded-xl px-4 py-3 flex items-center justify-between">
+                <ReservationTimer
+                  expiresAt={earliestExpiry}
+                  onExpire={handleItemExpired}
+                  onExtend={handleExtendReservation}
+                  canExtend={canExtendReservation}
+                  isExtending={isExtending}
+                  size="md"
+                  showLabel
+                />
+              </div>
+            )}
 
             {/* Terminal Selection */}
             <CheckoutSection
@@ -1013,6 +1069,14 @@ function CheckoutPageContent() {
       {/* Mobile: Sticky Bottom Bar — hidden until country is set */}
       {hasValidCountry && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-snow-white border-t-2 border-border p-4 z-50 shadow-lg safe-area-inset-bottom">
+          {reservationExpired ? (
+            <Link href="/cart" className="block">
+              <Button variant="primary" fullWidth>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t('reservation.returnToCart')}
+              </Button>
+            </Link>
+          ) : (<>
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm text-text-secondary">
               {pricing && pricing.walletDebitCents > 0 ? t('summary.toPay') : t('summary.total')}
@@ -1056,6 +1120,7 @@ function CheckoutPageContent() {
               <PaymentMethodLogos country={defaultCountry} compact />
             )}
           </div>
+          </>)}
         </div>
       )}
     </div>

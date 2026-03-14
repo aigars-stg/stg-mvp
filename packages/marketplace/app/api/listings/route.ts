@@ -38,6 +38,14 @@ export async function POST(request: NextRequest) {
     // Derive listing_type for backwards compatibility
     const listingType = pricingFormat === 'auction' ? 'auction' : 'claim';
 
+    // Require verified email
+    if (!user.email_confirmed_at) {
+      return NextResponse.json(
+        { error: 'Please verify your email address before creating a listing.' },
+        { status: 403 }
+      );
+    }
+
     // Check if seller has completed onboarding
     const { data: profile, error: profileError } = await supabase
       .from('seller_profiles')
@@ -146,6 +154,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Condition is required' }, { status: 400 });
     }
 
+    const validConditions = ['likeNew', 'veryGood', 'good', 'acceptable'];
+    if (!validConditions.includes(condition)) {
+      return NextResponse.json(
+        { error: `Invalid condition. Must be one of: ${validConditions.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
     // Price is now required for ALL listings (fixed price or auction starting bid)
     if (!price || parseFloat(price) <= 0) {
       return NextResponse.json({ error: 'Valid price is required' }, { status: 400 });
@@ -206,15 +222,14 @@ export async function POST(request: NextRequest) {
 
       // Condition
       condition,
-      condition_notes: conditionNotes || null,
+      condition_notes: conditionNotes ? String(conditionNotes).slice(0, 500) : null,
       all_components_present: allComponentsPresent !== false, // Default to true
-      missing_components: missingComponents || null,
+      missing_components: missingComponents ? String(missingComponents).slice(0, 500) : null,
 
       // Pricing - price is now used for both fixed price and auction starting bid
       price: parseFloat(price),
 
       // Shipping - T2T only (terminal-to-terminal via Unisend)
-      shipping_local_pickup: false,
       shipping_parcel_locker: true,
       shipping_notes: null,
 
@@ -357,7 +372,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const pricingFormat = searchParams.get('pricingFormat');
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
 
     // Calculate offset for pagination
     const from = (page - 1) * limit;
@@ -436,7 +451,6 @@ export async function GET(request: NextRequest) {
         all_components_present: row.all_components_present,
         missing_components: row.missing_components,
         price: row.price,
-        shipping_local_pickup: row.shipping_local_pickup,
         shipping_parcel_locker: row.shipping_parcel_locker,
         shipping_notes: row.shipping_notes,
         seller_id: row.seller_id,

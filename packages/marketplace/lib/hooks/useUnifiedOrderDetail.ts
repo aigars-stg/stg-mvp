@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
@@ -49,6 +49,7 @@ export interface OrderDispute {
   seller_responded_at?: string;
   seller_deadline?: string;
   photo_urls?: string[];
+  seller_photo_urls?: string[];
   resolved_at?: string;
   resolution?: string;
   resolution_note?: string;
@@ -150,6 +151,8 @@ export interface UseUnifiedOrderDetailReturn {
   retryingLabel: boolean;
   retryError: string | null;
   handleRetryLabel: () => Promise<void>;
+  cancellingOrder: boolean;
+  handleCancelOrder: () => Promise<void>;
 
   // Shared
   actionError: string | null;
@@ -158,7 +161,21 @@ export interface UseUnifiedOrderDetailReturn {
   getTimeRemainingMs: () => number | null;
   timeRemaining: string | null;
   fetchData: () => Promise<void>;
+  refreshing: boolean;
+  handleManualRefresh: () => Promise<void>;
 }
+
+/** Statuses where the order is still in progress and polling is useful */
+const ACTIVE_STATUSES = new Set([
+  'pending_seller',
+  'accepted',
+  'shipped',
+  'in_transit',
+  'delivered',
+  'disputed',
+]);
+
+const POLL_INTERVAL_MS = 30_000;
 
 export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
   const router = useRouter();
@@ -198,6 +215,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
   const [actionLoading, setActionLoading] = useState(false);
   const [retryingLabel, setRetryingLabel] = useState(false);
   const [retryError, setRetryError] = useState<string | null>(null);
+  const [cancellingOrder, setCancellingOrder] = useState(false);
 
   // --- Timer state ---
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
@@ -256,12 +274,71 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- messaging refs are stable
   }, [orderId]);
 
+  // --- Refreshing state (for manual refresh button) ---
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Silent re-fetch that doesn't show the full loading spinner
+  const silentFetch = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/transactions/${orderId}/conversation`);
+      const result = await response.json();
+      if (response.ok) {
+        setData(result);
+        messaging.setMessages(result.messages);
+      }
+    } catch {
+      // Silent — don't overwrite existing data on poll failure
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- messaging refs are stable
+  }, [orderId]);
+
+  // Manual refresh handler (shows brief loading indicator)
+  const handleManualRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await silentFetch();
+    setRefreshing(false);
+  }, [silentFetch]);
+
   // Initial data fetch
   useEffect(() => {
     if (user && orderId) {
       fetchData();
     }
   }, [user, orderId, fetchData]);
+
+  // --- Polling for active orders (every 30s) ---
+  const statusRef = useRef<string | undefined>(undefined);
+  statusRef.current = data?.order.status;
+
+  useEffect(() => {
+    if (!user || !orderId) return;
+
+    const interval = setInterval(() => {
+      if (statusRef.current && ACTIVE_STATUSES.has(statusRef.current)) {
+        silentFetch();
+      }
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [user, orderId, silentFetch]);
+
+  // --- Re-fetch on tab visibility change ---
+  useEffect(() => {
+    if (!user || !orderId) return;
+
+    const handleVisibilityChange = () => {
+      if (
+        document.visibilityState === 'visible' &&
+        statusRef.current &&
+        ACTIVE_STATUSES.has(statusRef.current)
+      ) {
+        silentFetch();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user, orderId, silentFetch]);
 
   // --- Countdown timer for seller response deadline ---
   useEffect(() => {
@@ -442,6 +519,30 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     }
   }, [data?.order.id, orderId, fetchData]);
 
+  // --- Seller: Cancel accepted order (only before label is generated) ---
+  const handleCancelOrder = useCallback(async () => {
+    try {
+      setCancellingOrder(true);
+      setActionError(null);
+
+      const response = await fetch(`/api/seller/orders/${orderId}/cancel`, {
+        method: 'POST',
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to cancel order');
+      }
+
+      refreshActiveOrders();
+      router.push('/orders');
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to cancel order');
+      setCancellingOrder(false);
+    }
+  }, [orderId, router, refreshActiveOrders]);
+
   // --- Helpers ---
   const getTimeRemainingMs = useCallback(() => {
     if (!data?.order.timestamps.seller_response_deadline) return null;
@@ -492,6 +593,8 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     retryingLabel,
     retryError,
     handleRetryLabel,
+    cancellingOrder,
+    handleCancelOrder,
 
     // Shared
     actionError,
@@ -500,5 +603,7 @@ export function useUnifiedOrderDetail(): UseUnifiedOrderDetailReturn {
     getTimeRemainingMs,
     timeRemaining,
     fetchData,
+    refreshing,
+    handleManualRefresh,
   };
 }

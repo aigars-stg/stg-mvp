@@ -10,6 +10,8 @@ import { refundToWallet } from './wallet';
 import { createCreditNote } from './document-service';
 import { resolveVatBreakdown, LATVIA_VAT_RATE } from '@/lib/bookkeeping-utils';
 import { formatCentsToCurrency } from './pricing';
+import { formatDate } from '@/lib/date-utils';
+import { loggers } from '@/lib/logger';
 
 /**
  * Create a refund adapter that wraps the EveryPay refundPayment API
@@ -505,6 +507,122 @@ async function notifyStaffSepaRequired(
 }
 
 /**
+ * Send credit note email to buyer after a post-completion refund (non-blocking)
+ */
+async function sendCreditNoteEmail(
+  supabase: SupabaseClient,
+  orderId: string,
+  buyerId: string,
+  orderNumber: string,
+  creditNoteNumber: string,
+  totalAmountEuros: number,
+) {
+  try {
+    const { data: buyerProfile } = await supabase
+      .from('user_profiles')
+      .select('full_name, email')
+      .eq('id', buyerId)
+      .single();
+
+    if (!buyerProfile?.email) return;
+
+    const { sendCreditNoteToBuyer } = await import('@/lib/email/send-order-emails');
+    sendCreditNoteToBuyer({
+      buyerName: buyerProfile.full_name || 'Buyer',
+      buyerEmail: buyerProfile.email,
+      orderNumber,
+      creditNoteNumber,
+      refundAmount: formatCentsToCurrency(Math.round(totalAmountEuros * 100)),
+      refundDate: formatDate(new Date()),
+    }).catch(() => {});
+  } catch {
+    // Non-blocking — don't fail the refund if email fails
+  }
+}
+
+/**
+ * Attempt a wallet clawback, handling insufficient balance by clawing back
+ * whatever is available and notifying staff about the shortfall.
+ * Returns the actual cents clawed back and any shortfall details.
+ */
+async function attemptWalletClawback(
+  supabase: SupabaseClient,
+  orderId: string,
+  orderNumber: string,
+  sellerId: string,
+  clawbackCents: number,
+  clawbackType: 'full' | 'partial',
+): Promise<
+  | { success: true; actualClawbackCents: number; clawbackShortfall?: PostCompletionRefundResult['clawbackShortfall'] }
+  | { success: false; error: string }
+> {
+  const { data: debitResult, error: debitError } = await supabase.rpc('debit_seller_wallet', {
+    p_order_id: orderId,
+    p_amount_cents: clawbackCents,
+  });
+
+  if (debitError) {
+    return { success: false, error: `Wallet clawback failed: ${debitError.message}` };
+  }
+
+  const debit = debitResult as { success: boolean; error?: string; available_cents?: number };
+  if (debit.success) {
+    return { success: true, actualClawbackCents: clawbackCents };
+  }
+
+  // Handle insufficient balance: clawback whatever is available
+  if (debit.error !== 'Insufficient wallet balance' || typeof debit.available_cents !== 'number') {
+    return { success: false, error: `Wallet clawback failed: ${debit.error}` };
+  }
+
+  const availableCents = debit.available_cents;
+  const shortfallCents = clawbackCents - availableCents;
+
+  loggers.wallet.error(
+    { orderId, orderNumber, requiredCents: clawbackCents, availableCents, shortfallCents },
+    `${clawbackType === 'full' ? 'Wallet' : 'Partial refund'} clawback insufficient balance — attempting partial clawback`
+  );
+
+  const clawbackShortfall = { shortfallCents, availableCents, requiredCents: clawbackCents };
+  let actualClawbackCents = 0;
+
+  if (availableCents > 0) {
+    const { data: partialResult, error: partialError } = await supabase.rpc('debit_seller_wallet', {
+      p_order_id: orderId,
+      p_amount_cents: availableCents,
+    });
+
+    const partial = partialResult as { success: boolean; error?: string } | null;
+    if (partialError || !partial?.success) {
+      loggers.wallet.error(
+        { orderId, error: partialError?.message || partial?.error },
+        'Partial wallet clawback also failed'
+      );
+    } else {
+      actualClawbackCents = availableCents;
+    }
+  }
+
+  // Record shortfall on the order for staff tracking
+  await supabase
+    .from('orders')
+    .update({
+      refund_error: `Clawback shortfall: required ${clawbackCents}c, available ${availableCents}c, shortfall ${shortfallCents}c`,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', orderId);
+
+  // Notify staff about the shortfall (non-blocking)
+  notifyStaffClawbackShortfall(
+    supabase, orderId, orderNumber, sellerId,
+    shortfallCents, availableCents, clawbackCents,
+    clawbackType,
+  );
+
+  return { success: true, actualClawbackCents, clawbackShortfall };
+}
+
+/**
  * Confirm a manual SEPA refund has been processed
  * Called by staff after completing a bank transfer
  */
@@ -541,6 +659,12 @@ export interface PostCompletionRefundResult {
   walletClawbackCents?: number;
   buyerRefundResult?: RefundResult;
   error?: string;
+  /** When clawback fails due to insufficient balance, contains the shortfall details */
+  clawbackShortfall?: {
+    shortfallCents: number;
+    availableCents: number;
+    requiredCents: number;
+  };
 }
 
 /**
@@ -580,19 +704,13 @@ export async function processPostCompletionRefund(
   const clawbackCents = order.seller_wallet_credit_cents;
 
   // Step 1: Claw back seller wallet
-  const { data: debitResult, error: debitError } = await supabase.rpc('debit_seller_wallet', {
-    p_order_id: orderId,
-    p_amount_cents: clawbackCents,
-  });
-
-  if (debitError) {
-    return { success: false, error: `Wallet clawback failed: ${debitError.message}` };
+  const clawbackResult = await attemptWalletClawback(
+    supabase, orderId, order.order_number, order.seller_id, clawbackCents, 'full',
+  );
+  if (!clawbackResult.success) {
+    return { success: false, error: clawbackResult.error };
   }
-
-  const debit = debitResult as { success: boolean; error?: string };
-  if (!debit.success) {
-    return { success: false, error: `Wallet clawback failed: ${debit.error}` };
-  }
+  const { actualClawbackCents, clawbackShortfall } = clawbackResult;
 
   // Step 2: Refund buyer
   const { walletPortionCents, everypayPortionCents } = calculateRefundAmounts(
@@ -633,12 +751,16 @@ export async function processPostCompletionRefund(
     ? 'wallet_only'
     : order.payment_method === 'bank_link' ? 'everypay_bank_link' : 'everypay_card';
 
+  const refundStatus = clawbackShortfall
+    ? 'partial_failure'
+    : requiresManualSepa ? 'manual_sepa_required' : 'completed';
+
   // Update order status
   await supabase
     .from('orders')
     .update({
       status: 'refunded',
-      refund_status: requiresManualSepa ? 'manual_sepa_required' : 'completed',
+      refund_status: refundStatus,
       refund_amount: order.total_amount,
       refund_reason: refundReason,
       refund_method: refundMethod,
@@ -688,7 +810,7 @@ export async function processPostCompletionRefund(
       everypay_cents: everypayRefundedCents,
       requires_manual_sepa: requiresManualSepa,
     },
-    seller_clawback_cents: clawbackCents,
+    seller_clawback_cents: actualClawbackCents,
   };
 
   let creditNoteNumber: string | undefined;
@@ -704,12 +826,16 @@ export async function processPostCompletionRefund(
       .from('orders')
       .update({ credit_note_number: creditNoteNumber })
       .eq('id', orderId);
+
+    // Send credit note email to buyer (non-blocking)
+    sendCreditNoteEmail(supabase, orderId, order.buyer_id, order.order_number, creditNoteNumber, order.total_amount);
   }
 
   return {
     success: true,
     creditNoteNumber,
-    walletClawbackCents: clawbackCents,
+    walletClawbackCents: actualClawbackCents,
+    clawbackShortfall,
     buyerRefundResult: {
       success: true,
       walletRefundedCents,
@@ -757,22 +883,19 @@ export async function processPostCompletionPartialRefund(
   const clawbackCents = Math.round(
     refundAmountCents * (order.seller_wallet_credit_cents / totalAmountCents)
   );
+  let actualClawbackCents = 0;
+  let clawbackShortfall: PostCompletionRefundResult['clawbackShortfall'];
 
   // Step 1: Claw back proportional amount from seller wallet
   if (clawbackCents > 0) {
-    const { data: debitResult, error: debitError } = await supabase.rpc('debit_seller_wallet', {
-      p_order_id: orderId,
-      p_amount_cents: clawbackCents,
-    });
-
-    if (debitError) {
-      return { success: false, error: `Wallet clawback failed: ${debitError.message}` };
+    const clawbackResult = await attemptWalletClawback(
+      supabase, orderId, order.order_number, order.seller_id, clawbackCents, 'partial',
+    );
+    if (!clawbackResult.success) {
+      return { success: false, error: clawbackResult.error };
     }
-
-    const debit = debitResult as { success: boolean; error?: string };
-    if (!debit.success) {
-      return { success: false, error: `Wallet clawback failed: ${debit.error}` };
-    }
+    actualClawbackCents = clawbackResult.actualClawbackCents;
+    clawbackShortfall = clawbackResult.clawbackShortfall;
   }
 
   // Step 2: Refund buyer the partial amount
@@ -814,11 +937,15 @@ export async function processPostCompletionPartialRefund(
     ? 'wallet_only'
     : order.payment_method === 'bank_link' ? 'everypay_bank_link' : 'everypay_card';
 
+  const refundStatus = clawbackShortfall
+    ? 'partial_failure'
+    : requiresManualSepa ? 'manual_sepa_required' : 'completed';
+
   // Update order
   await supabase
     .from('orders')
     .update({
-      refund_status: requiresManualSepa ? 'manual_sepa_required' : 'completed',
+      refund_status: refundStatus,
       refund_amount: refundAmountCents / 100,
       refund_reason: refundReason,
       refund_method: refundMethod,
@@ -830,7 +957,8 @@ export async function processPostCompletionPartialRefund(
 
   return {
     success: true,
-    walletClawbackCents: clawbackCents,
+    walletClawbackCents: actualClawbackCents,
+    clawbackShortfall,
     buyerRefundResult: {
       success: true,
       walletRefundedCents,
@@ -838,4 +966,61 @@ export async function processPostCompletionPartialRefund(
       requiresManualSepa,
     },
   };
+}
+
+/**
+ * Notify staff about a wallet clawback shortfall (non-blocking).
+ * Creates an in-app notification and sends an email to the staff address.
+ */
+async function notifyStaffClawbackShortfall(
+  supabase: SupabaseClient,
+  orderId: string,
+  orderNumber: string,
+  sellerId: string,
+  shortfallCents: number,
+  availableCents: number,
+  requiredCents: number,
+  clawbackType: 'full' | 'partial',
+) {
+  try {
+    // Look up seller name for the notification
+    const { data: sellerProfile } = await supabase
+      .from('user_profiles')
+      .select('full_name')
+      .eq('id', sellerId)
+      .single();
+
+    const sellerName = sellerProfile?.full_name || 'Unknown seller';
+
+    // Create in-app notification for staff via RPC
+    await supabase.rpc('create_notification', {
+      p_user_id: sellerId,
+      p_type: 'clawback_shortfall',
+      p_title: `Wallet clawback shortfall on Order #${orderNumber}`,
+      p_body: `Manual recovery required: seller ${sellerName} has insufficient wallet balance. Shortfall: ${formatCentsToCurrency(shortfallCents)}, available: ${formatCentsToCurrency(availableCents)}, required: ${formatCentsToCurrency(requiredCents)}.`,
+      p_data: JSON.stringify({
+        order_id: orderId,
+        order_number: orderNumber,
+        seller_id: sellerId,
+        shortfall_cents: shortfallCents,
+        available_cents: availableCents,
+        required_cents: requiredCents,
+        clawback_type: clawbackType,
+      }),
+    });
+
+    // Send email to staff
+    const { sendClawbackShortfallToStaff } = await import('@/lib/email/send-order-emails');
+    sendClawbackShortfallToStaff({
+      orderNumber,
+      orderId,
+      sellerName,
+      shortfallCents,
+      availableCents,
+      requiredCents,
+      clawbackType,
+    }).catch(() => {});
+  } catch {
+    // Non-blocking — don't fail the refund if notification fails
+  }
 }

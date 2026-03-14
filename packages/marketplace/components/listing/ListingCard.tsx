@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Card, Badge } from '@second-turn/design-system';
-import { Package, LocationPin as MapPin, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Gavel } from '@/lib/icons';
+import { Package, AlertCircle, Users, User as Baby, Time as Clock, Heart, PuzzlePiece as Puzzle, BookOpen, Gavel } from '@/lib/icons';
 import { ImageCarousel } from '@/components/common/ImageCarousel';
 import type { ListingWithSeller } from '@/lib/types/listing';
 import { isAuctionListing, getAuctionTimeRemaining, formatCompactTimeRemaining } from '@/lib/types/listing';
@@ -301,17 +301,12 @@ export function ListingCard({ listing, showSeller = false, isOwnListing = false,
                 )}
                 <span>{getCountryName(listing.seller.country)}</span>
                 <span className="text-text-muted">•</span>
-                {listing.shipping_parcel_locker ? (
+                {listing.shipping_parcel_locker && (
                   <span className="flex items-center gap-1">
                     <Package className="w-3.5 h-3.5" aria-hidden="true" />
                     {t('card.parcelLocker')}
                   </span>
-                ) : listing.shipping_local_pickup ? (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
-                    {t('card.pickupOnly')}
-                  </span>
-                ) : null}
+                )}
               </div>
             )}
 

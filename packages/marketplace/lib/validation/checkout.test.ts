@@ -14,13 +14,6 @@ const validT2tCheckout = {
   useWallet: true,
 };
 
-const validPickupCheckout = {
-  basketId: '550e8400-e29b-41d4-a716-446655440000',
-  shippingMethod: 'local_pickup' as const,
-  pickupCity: 'Riga',
-  useWallet: false,
-};
-
 /** Helper to omit keys from an object (avoids unused-var lint warnings from destructuring) */
 function omit<T extends Record<string, unknown>, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> {
   const copy = { ...obj };
@@ -46,17 +39,6 @@ describe('checkoutSessionSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('accepts valid local pickup', () => {
-    const result = checkoutSessionSchema.safeParse(validPickupCheckout);
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects local pickup missing city', () => {
-    const incomplete = omit(validPickupCheckout, 'pickupCity');
-    const result = checkoutSessionSchema.safeParse(incomplete);
-    expect(result.success).toBe(false);
-  });
-
   it('defaults useWallet to true when omitted', () => {
     const withoutWallet = omit(validT2tCheckout, 'useWallet');
     const result = checkoutSessionSchema.safeParse(withoutWallet);
@@ -78,6 +60,14 @@ describe('checkoutSessionSchema', () => {
     const result = checkoutSessionSchema.safeParse({
       ...validT2tCheckout,
       shippingMethod: 'drone',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects local_pickup as shipping method', () => {
+    const result = checkoutSessionSchema.safeParse({
+      ...validT2tCheckout,
+      shippingMethod: 'local_pickup',
     });
     expect(result.success).toBe(false);
   });

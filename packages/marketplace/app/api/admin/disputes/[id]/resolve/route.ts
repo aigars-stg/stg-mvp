@@ -155,6 +155,14 @@ export async function POST(request: NextRequest, { params }: Params) {
         if (!postCompletionResult.success) {
           console.error(`Post-completion refund failed for order ${order.order_number}:`, postCompletionResult.error);
         } else {
+          if (postCompletionResult.clawbackShortfall) {
+            console.warn(
+              `[Dispute] Clawback shortfall on order ${order.order_number}: ` +
+              `required ${postCompletionResult.clawbackShortfall.requiredCents}c, ` +
+              `available ${postCompletionResult.clawbackShortfall.availableCents}c, ` +
+              `shortfall ${postCompletionResult.clawbackShortfall.shortfallCents}c — staff notified`
+            );
+          }
           // Map to refundResult shape for email sending below
           refundResult = {
             success: true,
@@ -179,6 +187,14 @@ export async function POST(request: NextRequest, { params }: Params) {
         if (!postCompletionResult.success) {
           console.error(`Post-completion partial refund failed for order ${order.order_number}:`, postCompletionResult.error);
         } else {
+          if (postCompletionResult.clawbackShortfall) {
+            console.warn(
+              `[Dispute] Partial clawback shortfall on order ${order.order_number}: ` +
+              `required ${postCompletionResult.clawbackShortfall.requiredCents}c, ` +
+              `available ${postCompletionResult.clawbackShortfall.availableCents}c, ` +
+              `shortfall ${postCompletionResult.clawbackShortfall.shortfallCents}c — staff notified`
+            );
+          }
           refundResult = {
             success: true,
             walletRefundedCents: postCompletionResult.buyerRefundResult?.walletRefundedCents ?? 0,
@@ -241,6 +257,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       finalStatus: finalOrderStatus,
       requiresManualSepa: refundResult?.requiresManualSepa || postCompletionResult?.buyerRefundResult?.requiresManualSepa || false,
       creditNoteNumber: postCompletionResult?.creditNoteNumber,
+      clawbackShortfall: postCompletionResult?.clawbackShortfall || null,
     });
   } catch (error) {
     return handleApiError(error, 'Resolve dispute');

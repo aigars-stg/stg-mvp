@@ -1419,8 +1419,24 @@ function CreateModeSellContent() {
         </a>
       </div>
 
-      {/* Email Verification Banner */}
-      <EmailVerificationBanner />
+      {/* Pre-flight checks: email verification and phone number */}
+      {!user?.email_confirmed_at && (
+        <EmailVerificationBanner />
+      )}
+      {!shared.hasPhone && !shared.sellerPhone && (
+        <div className="bg-aurora-orange/10 border border-aurora-orange/30 rounded-lg p-4 mb-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-aurora-orange flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-polar-night mb-1">Phone number required</p>
+              <p className="text-sm text-text-secondary">
+                Please add your phone number before creating a listing. You can add it in the details section below, or in your{' '}
+                <a href="/settings" className="text-frost-ice hover:underline">account settings</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Wanted Listing Context Banner */}
       {shared.wantedListing && (

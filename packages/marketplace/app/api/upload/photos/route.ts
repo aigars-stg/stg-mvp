@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
     }
 
     const uploadedUrls: string[] = [];
+    const uploadedPaths: string[] = []; // Track storage paths for cleanup on failure
 
     // Upload each file
     for (let i = 0; i < files.length; i++) {
@@ -77,14 +78,16 @@ export async function POST(request: NextRequest) {
 
       // Process image: compress, resize if needed, strip ALL metadata (GPS, EXIF, XMP, IPTC, ICC)
       let processedBuffer: Buffer;
-      let contentType = 'image/webp';
+      const contentType = 'image/webp';
       try {
         const result = await processImageForUpload(originalBuffer);
         processedBuffer = result.buffer;
       } catch {
-        // Fallback: use original buffer if processing fails
-        processedBuffer = originalBuffer;
-        contentType = file.type;
+        // Do NOT fall back to original — unprocessed images retain EXIF/GPS metadata
+        return NextResponse.json(
+          { error: `Could not process image "${file.name}". Please try a different file.` },
+          { status: 422 }
+        );
       }
 
       // Upload to Supabase Storage
@@ -97,12 +100,8 @@ export async function POST(request: NextRequest) {
         });
 
       if (error) {
-        // Clean up already uploaded files
-        if (uploadedUrls.length > 0) {
-          const uploadedPaths = uploadedUrls.map(url => {
-            const urlParts = url.split('/');
-            return urlParts[urlParts.length - 1];
-          });
+        // Clean up already uploaded files using tracked storage paths
+        if (uploadedPaths.length > 0) {
           await (supabase as TypedSupabase).storage.from(BUCKET_NAME).remove(uploadedPaths);
         }
 
@@ -125,6 +124,7 @@ export async function POST(request: NextRequest) {
       }
 
       uploadedUrls.push(urlData.publicUrl);
+      uploadedPaths.push(filePath);
     }
 
     return NextResponse.json({

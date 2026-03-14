@@ -5,7 +5,7 @@ import { SUCCESSFUL_STATES, FAILED_STATES } from '@/lib/everypay/types';
 import { classifyPaymentError } from '@/lib/everypay/classify-error';
 import { determineReleaseAction } from '@/lib/services/payment-capture';
 import { postOrderCreatedMessage } from '@/lib/transactions';
-import { sendOrderEmails } from '@/lib/email/send-order-emails';
+import { sendOrderEmails, sendAutoRefundToBuyer } from '@/lib/email/send-order-emails';
 import * as Sentry from '@sentry/nextjs';
 import { loggers } from '@/lib/logger';
 
@@ -190,6 +190,46 @@ export async function GET(request: NextRequest) {
             },
           })
           .eq('id', checkoutEvent.id);
+
+        // Notify buyer about the auto-refund (non-blocking)
+        const buyerId = metadata.buyer_id as string;
+        if (buyerId) {
+          // In-app notification
+          supabase.from('notifications').insert({
+            user_id: buyerId,
+            type: 'payment_refunded',
+            title: 'Payment automatically refunded',
+            body: 'Your payment was refunded due to a processing error. Please try again.',
+            data: { payment_reference: paymentReference },
+          }).then(({ error: notifError }) => {
+            if (notifError) log.error({ notifError, paymentReference }, 'Failed to create auto-refund buyer notification');
+          });
+
+          // Email notification
+          const refundAmountEuros = paymentStatus.amount || '0.00';
+          const basketId = metadata.basket_id as string;
+          const retryUrl = basketId
+            ? `${appUrl}/checkout?basket=${basketId}`
+            : `${appUrl}/browse`;
+
+          supabase
+            .from('user_profiles')
+            .select('full_name, email')
+            .eq('id', buyerId)
+            .single()
+            .then(({ data: buyerProfile }) => {
+              if (buyerProfile?.email) {
+                sendAutoRefundToBuyer({
+                  buyerName: buyerProfile.full_name || 'there',
+                  buyerEmail: buyerProfile.email,
+                  refundAmountEuros,
+                  retryUrl,
+                }).catch((err) =>
+                  log.error({ err, paymentReference }, 'Failed to send auto-refund email to buyer')
+                );
+              }
+            });
+        }
 
         // Build redirect with retry context
         const failParams = new URLSearchParams({ error: 'order_creation_failed' });

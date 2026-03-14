@@ -65,7 +65,6 @@ export interface Listing {
   previous_price: number | null; // For showing "Price Reduced" indicators
 
   // Shipping
-  shipping_local_pickup: boolean;
   shipping_parcel_locker: boolean;
   shipping_notes: string | null;
 

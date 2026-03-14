@@ -13,6 +13,57 @@ const IBAN_HINTS: Record<string, string> = {
   EE: 'EE00 0000 0000 0000 0000',
 };
 
+// Expected IBAN lengths for Baltic countries
+const IBAN_LENGTHS: Record<string, number> = {
+  LV: 21,
+  LT: 20,
+  EE: 20,
+};
+
+/**
+ * Validate IBAN format and MOD97 check digit (ISO 7064)
+ * Returns null if valid, error message string if invalid
+ */
+function validateIBAN(raw: string): string | null {
+  const iban = raw.replace(/\s/g, '').toUpperCase();
+
+  if (iban.length < 2) return 'ibanTooShort';
+
+  // Must start with 2-letter country code + 2 digits
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(iban)) return 'ibanInvalidFormat';
+
+  // Total length: 15-34 characters
+  if (iban.length < 15 || iban.length > 34) return 'ibanInvalidLength';
+
+  // Check Baltic country-specific lengths
+  const country = iban.substring(0, 2);
+  const expectedLength = IBAN_LENGTHS[country];
+  if (expectedLength && iban.length !== expectedLength) {
+    return 'ibanWrongLength';
+  }
+
+  // MOD97 check (ISO 7064): move first 4 chars to end, convert letters to digits
+  const rearranged = iban.substring(4) + iban.substring(0, 4);
+  const numericStr = rearranged
+    .split('')
+    .map((ch) => {
+      const code = ch.charCodeAt(0);
+      // A=10 ... Z=35
+      return code >= 65 && code <= 90 ? (code - 55).toString() : ch;
+    })
+    .join('');
+
+  // Compute mod 97 using chunked approach (handles large numbers)
+  let remainder = 0;
+  for (let i = 0; i < numericStr.length; i++) {
+    remainder = (remainder * 10 + parseInt(numericStr[i], 10)) % 97;
+  }
+
+  if (remainder !== 1) return 'ibanCheckDigit';
+
+  return null;
+}
+
 interface WithdrawalFormProps {
   balanceCents: number;
   /** Pre-fill IBAN from seller profile */
@@ -36,6 +87,7 @@ export function WithdrawalForm({
   const [accountHolderName, setAccountHolderName] = useState(savedName || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ibanError, setIbanError] = useState<string | null>(null);
 
   const balanceEuros = balanceCents / 100;
 
@@ -54,7 +106,21 @@ export function WithdrawalForm({
 
   const handleIBANChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIban(formatIBAN(e.target.value));
+    setIbanError(null);
     setError(null);
+  };
+
+  const ibanErrorMessage = (key: string): string => {
+    const tKey = `errors.${key}` as Parameters<typeof t>[0];
+    return t.has(tKey) ? t(tKey) : t('errors.generic');
+  };
+
+  const handleIBANBlur = () => {
+    const cleaned = iban.replace(/\s/g, '');
+    if (cleaned.length > 0) {
+      const validationKey = validateIBAN(cleaned);
+      setIbanError(validationKey ? ibanErrorMessage(validationKey) : null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,8 +139,15 @@ export function WithdrawalForm({
       return;
     }
 
-    if (!iban.replace(/\s/g, '').trim()) {
+    const cleanedIban = iban.replace(/\s/g, '').trim();
+    if (!cleanedIban) {
       setError(t('errors.ibanRequired'));
+      return;
+    }
+
+    const ibanValidationKey = validateIBAN(cleanedIban);
+    if (ibanValidationKey) {
+      setIbanError(ibanErrorMessage(ibanValidationKey));
       return;
     }
 
@@ -191,14 +264,21 @@ export function WithdrawalForm({
           type="text"
           value={iban}
           onChange={handleIBANChange}
+          onBlur={handleIBANBlur}
           placeholder={hint}
-          className="w-full px-4 py-3 rounded-lg border border-border bg-snow-white
+          className={`w-full px-4 py-3 rounded-lg border bg-snow-white
                      text-polar-night placeholder:text-text-muted font-mono tracking-wide
-                     focus:outline-none focus:border-frost-ice focus:ring-2 focus:ring-frost-ice/20
-                     transition-colors uppercase"
+                     focus:outline-none focus:ring-2 transition-colors uppercase ${
+                       ibanError
+                         ? 'border-aurora-red focus:border-aurora-red focus:ring-aurora-red/20'
+                         : 'border-border focus:border-frost-ice focus:ring-frost-ice/20'
+                     }`}
           disabled={loading}
           autoComplete="off"
         />
+        {ibanError && (
+          <p className="text-xs text-aurora-red mt-1">{ibanError}</p>
+        )}
       </div>
 
       {/* Error */}

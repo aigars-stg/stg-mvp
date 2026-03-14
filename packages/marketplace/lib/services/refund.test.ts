@@ -6,7 +6,7 @@ import {
 } from './refund';
 
 describe('REFUNDABLE_STATUSES', () => {
-  it('includes all pre-completion statuses and disputed', () => {
+  it('includes all pre-completion statuses, disputed, and cancelled', () => {
     expect(REFUNDABLE_STATUSES).toEqual([
       'pending_seller',
       'accepted',
@@ -14,6 +14,7 @@ describe('REFUNDABLE_STATUSES', () => {
       'in_transit',
       'delivered',
       'disputed',
+      'cancelled',
     ]);
   });
 
@@ -21,7 +22,6 @@ describe('REFUNDABLE_STATUSES', () => {
     const statuses = REFUNDABLE_STATUSES as readonly string[];
     expect(statuses).not.toContain('completed');
     expect(statuses).not.toContain('refunded');
-    expect(statuses).not.toContain('cancelled');
   });
 });
 
@@ -33,6 +33,7 @@ describe('isRefundableStatus', () => {
     expect(isRefundableStatus('in_transit')).toBe(true);
     expect(isRefundableStatus('delivered')).toBe(true);
     expect(isRefundableStatus('disputed')).toBe(true);
+    expect(isRefundableStatus('cancelled')).toBe(true);
   });
 
   it('returns false for completed orders', () => {
@@ -43,8 +44,8 @@ describe('isRefundableStatus', () => {
     expect(isRefundableStatus('refunded')).toBe(false);
   });
 
-  it('returns false for cancelled orders', () => {
-    expect(isRefundableStatus('cancelled')).toBe(false);
+  it('returns true for cancelled orders', () => {
+    expect(isRefundableStatus('cancelled')).toBe(true);
   });
 
   it('returns false for unknown statuses', () => {

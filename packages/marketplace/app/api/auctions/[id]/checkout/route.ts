@@ -10,7 +10,7 @@ interface Params {
 }
 
 interface AuctionCheckoutBody {
-  shippingMethod: 't2t' | 'local_pickup';
+  shippingMethod: 't2t';
   destinationCountry?: string;
   destinationTerminalId?: string;
   destinationTerminalName?: string;
@@ -18,8 +18,6 @@ interface AuctionCheckoutBody {
   receiverName?: string;
   receiverPhone?: string;
   receiverEmail?: string;
-  pickupCity?: string;
-  pickupNotes?: string;
   useWallet?: boolean;
 }
 
@@ -39,8 +37,8 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     const { shippingMethod } = body;
 
-    // Validate shipping method
-    if (!shippingMethod || !['t2t', 'local_pickup'].includes(shippingMethod)) {
+    // Validate shipping method (only T2T parcel locker shipping is supported)
+    if (shippingMethod !== 't2t') {
       return NextResponse.json(
         { error: 'Valid shipping method is required' },
         { status: 400 }
@@ -178,8 +176,6 @@ export async function POST(request: NextRequest, { params }: Params) {
       receiverName: body.receiverName,
       receiverPhone: body.receiverPhone,
       receiverEmail: body.receiverEmail,
-      pickupCity: body.pickupCity,
-      pickupNotes: body.pickupNotes,
     }, appUrl);
 
     switch (result.type) {

@@ -28,7 +28,7 @@ export interface CheckoutInput {
   basketId: string;
   buyerId: string;
   sellerId: string;
-  shippingMethod: 't2t' | 'local_pickup';
+  shippingMethod: 't2t';
   itemsTotalEuros: number;
   shippingCostEuros: number;
   locale: string;
@@ -45,10 +45,6 @@ export interface CheckoutInput {
   receiverPhone?: string;
   receiverEmail?: string;
 
-  // Local pickup fields
-  pickupCity?: string;
-  pickupNotes?: string;
-
   // Wallet preference
   useWallet: boolean;
 }
@@ -57,7 +53,7 @@ export interface AuctionCheckoutInput {
   listingId: string;
   buyerId: string;
   sellerId: string;
-  shippingMethod: 't2t' | 'local_pickup';
+  shippingMethod: 't2t';
   winningBidEuros: number;
   shippingCostEuros: number;
   gameName: string;
@@ -74,10 +70,6 @@ export interface AuctionCheckoutInput {
   receiverName?: string;
   receiverPhone?: string;
   receiverEmail?: string;
-
-  // Local pickup fields
-  pickupCity?: string;
-  pickupNotes?: string;
 
   // Wallet preference
   useWallet: boolean;
@@ -188,8 +180,8 @@ export async function createCheckoutSession(
     p_receiver_name: input.receiverName || null,
     p_receiver_phone: input.receiverPhone || null,
     p_receiver_email: input.receiverEmail || null,
-    p_pickup_city: input.pickupCity || null,
-    p_pickup_notes: input.pickupNotes || null,
+    p_pickup_city: null,
+    p_pickup_notes: null,
     p_shipping_cost: shippingCostEuros,
     p_everypay_payment_reference: null as string | null,
     p_buyer_wallet_debit_cents: pricing.walletDebitCents,
@@ -296,8 +288,6 @@ export async function createCheckoutSession(
           receiver_name: input.receiverName || null,
           receiver_phone: input.receiverPhone || null,
           receiver_email: input.receiverEmail || null,
-          pickup_city: input.pickupCity || null,
-          pickup_notes: input.pickupNotes || null,
           locale,
         },
         processed_at: null,
@@ -387,8 +377,6 @@ export async function createAuctionCheckoutSession(
         receiver_name: input.receiverName || null,
         receiver_phone: input.receiverPhone || null,
         receiver_email: input.receiverEmail || null,
-        pickup_city: input.pickupCity || null,
-        pickup_notes: input.pickupNotes || null,
         items_total: winningBidEuros,
         shipping_cost: shippingCostEuros,
         total_amount: winningBidEuros + shippingCostEuros,
@@ -498,8 +486,6 @@ export async function createAuctionCheckoutSession(
         receiver_name: input.receiverName || null,
         receiver_phone: input.receiverPhone || null,
         receiver_email: input.receiverEmail || null,
-        pickup_city: input.pickupCity || null,
-        pickup_notes: input.pickupNotes || null,
         locale,
       },
       processed_at: null,

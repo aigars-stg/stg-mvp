@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Badge } from '@second-turn/design-system';
-import { ArrowLeft } from '@/lib/icons';
+import { ArrowLeft, RefreshCw } from '@/lib/icons';
 import { getStatusConfig } from '@/components/shipping';
 
 interface OrderDetailHeaderProps {
@@ -14,6 +14,10 @@ interface OrderDetailHeaderProps {
   backLabel: string;
   /** Extra content rendered after the status badge (e.g. "Open Issues" badge) */
   extraBadges?: React.ReactNode;
+  /** Callback to manually refresh order data */
+  onRefresh?: () => void;
+  /** Whether a refresh is currently in progress */
+  refreshing?: boolean;
 }
 
 export function OrderDetailHeader({
@@ -23,6 +27,8 @@ export function OrderDetailHeader({
   backHref,
   backLabel,
   extraBadges,
+  onRefresh,
+  refreshing,
 }: OrderDetailHeaderProps) {
   const tOrders = useTranslations('Orders');
   const statusInfo = getStatusConfig(status);
@@ -48,6 +54,16 @@ export function OrderDetailHeader({
             {statusInfo.labelKey ? tOrders(statusInfo.labelKey as any) : statusInfo.label}
           </Badge>
           {extraBadges}
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              disabled={refreshing}
+              className="ml-auto p-1.5 rounded-lg text-text-secondary hover:text-frost-ice hover:bg-frost-ice/10 transition-colors disabled:opacity-50"
+              aria-label="Refresh order"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+          )}
         </div>
         <p className="text-sm text-text-secondary mt-1">{subtitle}</p>
       </div>

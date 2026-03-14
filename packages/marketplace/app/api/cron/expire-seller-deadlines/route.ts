@@ -369,6 +369,92 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Retry failed payment captures (orders stuck in 'capture_pending')
+    let captureRetriesSucceeded = 0;
+    let captureRetriesFailed = 0;
+    let captureEscalated = 0;
+
+    const { data: pendingCaptures } = await supabase
+      .from('orders')
+      .select('id, order_number, everypay_payment_reference, total_amount, buyer_wallet_debit_cents, seller_responded_at')
+      .eq('status', 'accepted')
+      .eq('everypay_payment_state', 'capture_pending');
+
+    if (pendingCaptures && pendingCaptures.length > 0) {
+      const { capturePayment } = await import('@/lib/everypay/client');
+      const { calculateEverypayPortionCents } = await import('@/lib/services/payment-capture');
+
+      for (const order of pendingCaptures) {
+        const everypayAmountCents = calculateEverypayPortionCents(
+          order.total_amount,
+          order.buyer_wallet_debit_cents
+        );
+
+        // Check if accepted more than 24 hours ago — escalate to staff
+        const acceptedAt = order.seller_responded_at ? new Date(order.seller_responded_at).getTime() : 0;
+        const hoursSinceAccepted = (Date.now() - acceptedAt) / (1000 * 60 * 60);
+
+        if (hoursSinceAccepted > 24) {
+          log.error(
+            { orderId: order.id, orderNumber: order.order_number, hoursSinceAccepted: Math.round(hoursSinceAccepted) },
+            'CRITICAL: Payment capture failed for 24h+, escalating to staff'
+          );
+
+          // Notify staff via email (best-effort)
+          try {
+            const { sendEmail } = await import('@/lib/email/resend');
+            const amountEuros = (everypayAmountCents / 100).toFixed(2);
+            await sendEmail({
+              to: 'info@secondturn.games',
+              subject: `URGENT: Payment capture failed for Order #${order.order_number}`,
+              html: [
+                `<p>EveryPay payment capture has been failing for <strong>${Math.round(hoursSinceAccepted)} hours</strong> on Order #${order.order_number}.</p>`,
+                `<p><strong>Amount:</strong> €${amountEuros}<br/>`,
+                `<strong>Order ID:</strong> ${order.id}<br/>`,
+                `<strong>Payment ref:</strong> ${order.everypay_payment_reference}</p>`,
+                `<p>The order state has been moved to <code>capture_failed</code>. Please capture or resolve manually in the EveryPay dashboard.</p>`,
+              ].join('\n'),
+            });
+          } catch {
+            // Email is best-effort — the log.error above ensures visibility
+          }
+
+          // Update state so we don't keep escalating every 5 minutes
+          await supabase
+            .from('orders')
+            .update({
+              everypay_payment_state: 'capture_failed',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.id);
+
+          captureEscalated++;
+          continue;
+        }
+
+        // Attempt capture retry
+        try {
+          await capturePayment(order.everypay_payment_reference!, everypayAmountCents);
+          await supabase
+            .from('orders')
+            .update({
+              everypay_payment_state: 'settled',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.id);
+
+          captureRetriesSucceeded++;
+          log.info({ orderId: order.id, orderNumber: order.order_number }, 'Payment capture retry succeeded');
+        } catch (captureErr) {
+          captureRetriesFailed++;
+          log.warn(
+            { orderId: order.id, orderNumber: order.order_number, error: captureErr, hoursSinceAccepted: Math.round(hoursSinceAccepted) },
+            'Payment capture retry failed, will retry next cron run'
+          );
+        }
+      }
+    }
+
     const summary = {
       success: true,
       cancelledCount,
@@ -378,6 +464,9 @@ export async function GET(request: NextRequest) {
       disputeDeadlinesExpired,
       shippingDeadlinesCancelled,
       shippingRemindersSent,
+      captureRetriesSucceeded,
+      captureRetriesFailed,
+      captureEscalated,
       timestamp: new Date().toISOString(),
     };
 

@@ -1053,6 +1053,7 @@ export type Database = {
           dispute_resolved_at: string | null
           dispute_resolved_by: string | null
           dispute_seller_deadline: string | null
+          dispute_seller_photo_urls: string[] | null
           dispute_seller_responded_at: string | null
           dispute_seller_response: string | null
           dispute_status: string | null
@@ -1137,6 +1138,7 @@ export type Database = {
           dispute_resolved_at?: string | null
           dispute_resolved_by?: string | null
           dispute_seller_deadline?: string | null
+          dispute_seller_photo_urls?: string[] | null
           dispute_seller_responded_at?: string | null
           dispute_seller_response?: string | null
           dispute_status?: string | null
@@ -1221,6 +1223,7 @@ export type Database = {
           dispute_resolved_at?: string | null
           dispute_resolved_by?: string | null
           dispute_seller_deadline?: string | null
+          dispute_seller_photo_urls?: string[] | null
           dispute_seller_responded_at?: string | null
           dispute_seller_response?: string | null
           dispute_status?: string | null

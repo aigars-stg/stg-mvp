@@ -36,6 +36,27 @@ import {
 import type { OrderDetailOrder, OrderDetailItem } from '@/lib/types/order-detail';
 import { formatDate, formatTime } from '@/lib/date-utils';
 
+function DisputePhotoGrid({ urls, label }: { urls: string[]; label: string }) {
+  return (
+    <div>
+      <p className="text-xs text-text-muted mb-1">{label}</p>
+      <div className="flex flex-wrap gap-2">
+        {urls.map((url, idx) => (
+          <a
+            key={idx}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative w-16 h-16 rounded-lg overflow-hidden border border-border hover:shadow-md transition-shadow"
+          >
+            <img src={url} alt={`${label} ${idx + 1}`} className="w-full h-full object-cover" />
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function OrderDetailPage() {
   const locale = useLocale();
   const t = useTranslations('Orders.detail');
@@ -88,12 +109,16 @@ export default function OrderDetailPage() {
     retryingLabel,
     retryError,
     handleRetryLabel,
+    cancellingOrder,
+    handleCancelOrder,
     // Shared
     actionError,
     setActionError,
     actionSuccess,
     getTimeRemainingMs,
     timeRemaining,
+    refreshing,
+    handleManualRefresh,
   } = useUnifiedOrderDetail();
 
   if (authLoading || loading) {
@@ -143,6 +168,8 @@ export default function OrderDetailPage() {
         })}
         backHref={isSeller ? '/orders?role=selling' : '/orders'}
         backLabel={t('backToOrders')}
+        onRefresh={handleManualRefresh}
+        refreshing={refreshing}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -251,12 +278,20 @@ export default function OrderDetailPage() {
               timeRemainingMs={timeRemainingMs}
             />
 
-            {/* Dispute status section */}
-            {order.status === 'disputed' && order.dispute && (
-              <div className="bg-aurora-red/5 border border-aurora-red/20 rounded-xl p-4 sm:p-6 space-y-4">
+            {/* Dispute status section — visible during active dispute AND after resolution */}
+            {order.dispute && (
+              <div className={`border rounded-xl p-4 sm:p-6 space-y-4 ${
+                order.dispute.status === 'resolved'
+                  ? 'bg-snow-white border-border'
+                  : 'bg-aurora-red/5 border-aurora-red/20'
+              }`}>
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-aurora-red" />
-                  <h3 className="font-semibold text-polar-night">{t('disputed.inProgress')}</h3>
+                  <AlertTriangle className={`w-5 h-5 ${
+                    order.dispute.status === 'resolved' ? 'text-text-muted' : 'text-aurora-red'
+                  }`} />
+                  <h3 className="font-semibold text-polar-night">
+                    {order.dispute.status === 'resolved' ? t('disputed.resolved') : t('disputed.inProgress')}
+                  </h3>
                   <Badge variant={
                     order.dispute.status === 'awaiting_seller' ? 'warning' :
                     order.dispute.status === 'under_review' ? 'default' :
@@ -276,16 +311,31 @@ export default function OrderDetailPage() {
                       <p className="text-sm font-medium text-polar-night">{order.dispute.reason}</p>
                       <p className="text-sm text-text-secondary mt-1">{order.dispute.description}</p>
                     </div>
+                    {order.dispute.photo_urls && order.dispute.photo_urls.length > 0 && (
+                      <DisputePhotoGrid urls={order.dispute.photo_urls} label={t('disputed.yourPhotos')} />
+                    )}
                     {order.dispute.status === 'awaiting_seller' && order.dispute.seller_deadline && (
                       <div className="flex items-center gap-2 text-sm text-text-secondary">
                         <Clock className="w-4 h-4" />
                         {t('disputed.awaitingDeadline', { date: formatDate(order.dispute.seller_deadline) })}
                       </div>
                     )}
-                    {order.dispute.status === 'under_review' && (
+                    {order.dispute.status === 'under_review' && !order.dispute.resolved_at && (
                       <p className="text-sm text-text-secondary">
-                        {t('disputed.underReview')}
+                        {t('disputed.staffReviewing')}
                       </p>
+                    )}
+                    {/* Show seller's response to buyer (after seller has responded) */}
+                    {order.dispute.seller_response && order.dispute.seller_responded_at && (
+                      <div className="pt-3 border-t border-border-subtle">
+                        <p className="text-xs text-text-muted mb-1">{t('disputed.sellerResponse')}</p>
+                        <p className="text-sm text-text-secondary whitespace-pre-wrap">{order.dispute.seller_response}</p>
+                        {order.dispute.seller_photo_urls && order.dispute.seller_photo_urls.length > 0 && (
+                          <div className="mt-2">
+                            <DisputePhotoGrid urls={order.dispute.seller_photo_urls} label={t('disputed.sellerPhotos')} />
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}
@@ -303,7 +353,7 @@ export default function OrderDetailPage() {
                   />
                 )}
 
-                {isSeller && order.dispute.status === 'under_review' && (
+                {isSeller && (order.dispute.status === 'under_review' || order.dispute.status === 'resolved') && (
                   <div className="space-y-3">
                     {order.dispute.seller_response && (
                       <div>
@@ -311,16 +361,19 @@ export default function OrderDetailPage() {
                         <p className="text-sm text-text-secondary">{order.dispute.seller_response}</p>
                       </div>
                     )}
-                    <p className="text-sm text-text-secondary">
-                      {t('disputed.staffReviewing')}
-                    </p>
+                    {order.dispute.status === 'under_review' && (
+                      <p className="text-sm text-text-secondary">
+                        {t('disputed.staffReviewing')}
+                      </p>
+                    )}
                   </div>
                 )}
 
-                {order.dispute.status === 'resolved' && order.dispute.resolution_note && (
-                  <div className="pt-3 border-t border-aurora-red/10">
+                {/* Resolution note — visible to both buyer and seller after dispute is resolved */}
+                {order.dispute.resolved_at && order.dispute.resolution_note && (
+                  <div className="pt-3 border-t border-border-subtle">
                     <p className="text-xs text-text-muted">{t('disputed.resolution')}</p>
-                    <p className="text-sm text-text-secondary">{order.dispute.resolution_note}</p>
+                    <p className="text-sm text-text-secondary mt-1">{order.dispute.resolution_note}</p>
                   </div>
                 )}
               </div>
@@ -330,6 +383,7 @@ export default function OrderDetailPage() {
             {isSeller && order.status === 'pending_seller' && (
               <SellerAcceptDecline
                 timeRemaining={timeRemaining}
+                sellerResponseDeadline={order.timestamps.seller_response_deadline}
                 showDeclineModal={showDeclineModal}
                 setShowDeclineModal={setShowDeclineModal}
                 declineReason={declineReason}
@@ -372,7 +426,50 @@ export default function OrderDetailPage() {
               />
             )}
 
-            {viewerRole && (order.status === 'delivered' || order.status === 'completed') && (
+            {/* Seller: Cancel accepted order */}
+            {isSeller && order.status === 'accepted' && (
+              <div className="bg-snow-white border border-border rounded-xl p-4">
+                {order.tracking.label_url || order.tracking.parcel_id ? (
+                  /* Label exists — parcel is in Unisend system, block self-service cancel */
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-text-muted flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-text-secondary">
+                        {tSeller('cancelBlocked.description')}
+                      </p>
+                      <a href="mailto:support@secondturn.gg" className="text-sm text-frost-ice hover:underline mt-1 inline-block">
+                        support@secondturn.gg
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  /* No label yet — allow self-service cancel */
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm text-text-secondary">
+                      {tSeller('cancelAllowed.description')}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCancelOrder}
+                      disabled={cancellingOrder}
+                      className="text-aurora-red hover:text-aurora-red flex-shrink-0"
+                    >
+                      {cancellingOrder ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {tSeller('cancelAllowed.cancelling')}
+                        </>
+                      ) : (
+                        tSeller('cancelAllowed.cancelOrder')
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {viewerRole && ['delivered', 'completed'].includes(order.status) && order.status !== 'refunded' && (
               <OrderReview
                 orderId={order.id}
                 viewerRole={viewerRole}

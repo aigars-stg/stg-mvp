@@ -17,11 +17,9 @@ const SYSTEM_MESSAGE_TEMPLATES: Record<
 > = {
   order_created: () => 'Order placed. Seller has 24 hours to respond.',
   order_accepted: (meta) =>
-    meta?.shippingMethod === 'local_pickup'
-      ? 'Seller accepted the order. Coordinate pickup details below.'
-      : meta?.labelGenerated === 'false' // string — metadata values are Record<string, string>
-        ? 'Seller accepted the order. Shipping label could not be generated — the seller will arrange shipping shortly.'
-        : 'Seller accepted the order. Shipping label created.',
+    meta?.labelGenerated === 'false' // string — metadata values are Record<string, string>
+      ? 'Seller accepted the order. Shipping label could not be generated — the seller will arrange shipping shortly.'
+      : 'Seller accepted the order. Shipping label created.',
   order_declined: (meta) =>
     meta?.reason
       ? `Seller declined the order: ${meta.reason}. Your payment will be refunded.`
@@ -147,7 +145,7 @@ export async function postOrderCreatedMessage(orderId: string): Promise<string |
  */
 export async function postOrderAcceptedMessage(
   orderId: string,
-  shippingMethod: 'local_pickup' | 't2t',
+  shippingMethod: 't2t',
   labelGenerated?: boolean
 ): Promise<string | null> {
   return postSystemMessageSafe(orderId, 'order_accepted', {

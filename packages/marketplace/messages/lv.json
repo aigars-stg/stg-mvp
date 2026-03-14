@@ -531,7 +531,7 @@
       "subtitle": "Nosūtījām maģisko saiti uz {email}",
       "stepOpenEmail": "Atver e-pastu",
       "stepClickLink": "Noklikšķini uz saites",
-      "expiryInfo": "Saite uzreiz pieteiks tevi šajā ierīcē. Derīga 1 stundu.",
+      "expiryInfo": "Saite uzreiz pieteiks tevi šajā ierīcē. Derīga 24 stundas.",
       "resendButton": "Nesaņēmi? Nosūtīt vēlreiz",
       "sending": "Nosūta...",
       "sentCount_one": "Nosūtīts {count} reizi",
@@ -709,6 +709,11 @@
       "returnsLink": "Atgriešanas noteikumiem",
       "pleaseAccept": "Lūdzu, pieņemiet noteikumus, lai turpinātu"
     },
+    "reservation": {
+      "expiredTitle": "Tava rezervācija ir beigusies",
+      "expiredMessage": "Spēles var vairs nebūt pieejamas. Lūdzu, atgriezies pie groza, lai pārbaudītu pieejamību.",
+      "returnToCart": "Atgriezties pie groza"
+    },
     "errors": {
       "expiredItems": "Tavam grozam ir beidzies rezervācijas termiņš. Lūdzu, atgriezies pie groza.",
       "basketNotFound": "Grozs nav atrasts",
@@ -731,9 +736,24 @@
       "suggestions": {
         "title": "Ko tu vari darīt"
       },
+      "errorTitles": {
+        "order_creation_failed": "Tavs maksājums ir atmaksāts"
+      },
+      "errors": {
+        "order_creation_failed": "Tavs maksājums tika apstrādāts, bet radās tehniska problēma, veidojot pasūtījumu. Pilna atmaksa ir veikta automātiski."
+      },
       "reassurance": {
         "title": "Nauda netika iekasēta",
-        "description": "Tavs maksājums netika apstrādāts. Tava groza preces joprojām ir rezervētas tev."
+        "description": "Tavs maksājums netika apstrādāts. Tava groza preces joprojām ir rezervētas tev.",
+        "refundedTitle": "Tava nauda tiek atgriezta",
+        "refundedDescription": "Pilna atmaksa ir veikta. Atkarībā no maksājuma veida, tā var parādīties dažu minūšu laikā. Tu vari droši mēģināt vēlreiz."
+      },
+      "timeout": {
+        "title": "Maksājums tiek apstrādāts",
+        "description": "Tavs maksājums tiek apstrādāts. Tas var aizņemt dažas minūtes.",
+        "checkOrders": "Pārbaudi savu pasūtījumu lapu, lai redzētu, vai pasūtījums ir izveidots.",
+        "contactUs": "Ja neredzi savu pasūtījumu 15 minūšu laikā, lūdzu, sazinies ar mums: info@secondturn.games",
+        "viewOrders": "Pārbaudīt pasūtījuma statusu"
       },
       "actions": {
         "tryAgain": "Mēģināt vēlreiz",
@@ -1646,11 +1666,11 @@
         "title": "Kā izsolei vajadzētu beigties?",
         "fixed": {
           "label": "Fiksēts beigu laiks",
-          "description": "Izsole beidzas, kad taimeris norit"
+          "description": "Izsole beidzas plānotajā laikā, neatkarīgi no likmju aktivitātes"
         },
         "cooldown": {
           "label": "Pēdējās likmes gaidīšana",
-          "description": "Taimeris atiestatās pēc katras likmes, dodot visiem laiku reaģēt"
+          "description": "Ja likme tiek veikta tuvu beigām, izsole pagarinās, lai novērstu pēdējā brīža snaipošanu"
         }
       },
       "cooldownPeriod": {
@@ -2143,6 +2163,11 @@
         "totalWithdrawn": "Kopā izņemts",
         "pendingWithdrawals": "Gaida izņemšanu",
         "pendingCount": "{count, plural, one {# pieprasījums} other {# pieprasījumi}}"
+      },
+      "payoutNudge": {
+        "title": "Iestatiet izmaksas datus",
+        "description": "Pievienojiet savu IBAN, lai varētu izņemt ieņēmumus uz bankas kontu, kad esat gatavs.",
+        "action": "Iestatīt tagad"
       }
     },
     "reviews": {
@@ -2315,7 +2340,10 @@
         "staffReviewing": "Mūsu komanda izskata strīdu. Mēs paziņosim abām pusēm par rezultātu.",
         "resolution": "Atrisinājums",
         "awaitingSeller": "Gaida pārdevēju",
-        "resolved": "Atrisināts"
+        "resolved": "Atrisināts",
+        "yourPhotos": "Jūsu fotoattēli",
+        "sellerResponse": "Pārdevēja atbilde",
+        "sellerPhotos": "Pārdevēja fotoattēli"
       },
       "labelGenerating": "Tiek reģistrēts jūsu sūtījums — tas parasti aizņem dažas sekundes.",
       "notices": {
@@ -2672,6 +2700,8 @@
       "description": "Lūdzu, pieņemiet vai noraidiet šo pasūtījumu. Jums ir 24 stundas no pasūtījuma veikšanas brīža, lai atbildētu. Ja neatbildēsiet laikā, pasūtījums tiks automātiski atcelts un pircējam tiks atgriezta nauda.",
       "acceptOrder": "Pieņemt pasūtījumu",
       "declineOrder": "Noraidīt pasūtījumu",
+      "respondWithin": "Atbildiet līdz",
+      "expired": "Beidzies",
       "expiredDescription": "Atbildes logs ir beidzies. Šis pasūtījums tiks automātiski atcelts un pircējam tiks atgriezta nauda."
     },
     "acceptModal": {
@@ -2701,6 +2731,14 @@
       "step3": "Ievadiet augstāk norādīto <strong>sūtījuma ID</strong>",
       "step4": "Ievietojiet sūtījumu skapītī un <strong>aizveriet durvis</strong>",
       "trackPackage": "Izsekot sūtījumu"
+    },
+    "cancelBlocked": {
+      "description": "Šim pasūtījumam ir piegādes etiķete un tas, iespējams, jau ir ceļā. Lai atceltu, lūdzu, sazinieties ar atbalstu."
+    },
+    "cancelAllowed": {
+      "description": "Pārdomājāt? Varat atcelt šo pasūtījumu pirms piegādes etiķetes ģenerēšanas.",
+      "cancelOrder": "Atcelt pasūtījumu",
+      "cancelling": "Atceļ..."
     },
     "shippingInfo": {
       "title": "Piegādes informācija"
@@ -2764,6 +2802,11 @@
       "amountRequired": "Lūdzu ievadiet summu",
       "exceedsBalance": "Summa pārsniedz Jūsu maka atlikumu",
       "ibanRequired": "IBAN ir obligāts",
+      "ibanTooShort": "IBAN ir pārāk īss",
+      "ibanInvalidFormat": "IBAN jāsākas ar valsts kodu (piem. LV, LT, EE) un cipariem",
+      "ibanInvalidLength": "IBAN garums nav derīgs",
+      "ibanWrongLength": "IBAN garums nav pareizs šai valstij",
+      "ibanCheckDigit": "Nederīgs IBAN — lūdzu pārbaudiet numuru un mēģiniet vēlreiz",
       "nameRequired": "Konta īpašnieka vārds ir obligāts",
       "generic": "Kaut kas nogāja greizi"
     }

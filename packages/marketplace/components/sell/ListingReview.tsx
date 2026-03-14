@@ -26,9 +26,7 @@ interface ListingFormData {
   shippingOptions: {
     standard: boolean;
     express: boolean;
-    localPickup: boolean;
   };
-  pickupCity: string;
   shippingNotes: string;
   whySelling: string;
   termsAccepted: boolean;
@@ -142,12 +140,6 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
                 {formData.shippingOptions.standard && tPricing('standardShipping')}
                 {formData.shippingOptions.standard && formData.shippingOptions.express && ` ${tPricing('or')} `}
                 {formData.shippingOptions.express && tPricing('expressShipping')}
-                {formData.shippingOptions.localPickup && (
-                  <span className="text-success">
-                    {(formData.shippingOptions.standard || formData.shippingOptions.express) && ` ${tPricing('or')} `}
-                    {tPricing('freePickup', { city: formData.pickupCity || tPricing('yourCity') })}
-                  </span>
-                )}
               </div>
 
               {formData.acceptOffers && (
@@ -331,11 +323,6 @@ export function ListingReview({ formData, onEdit, onPublish, isPublishing = fals
               <div className="text-right text-polar-night">
                 {formData.shippingOptions.standard && <div>{tPricing('standard')}</div>}
                 {formData.shippingOptions.express && <div>{tPricing('express')}</div>}
-                {formData.shippingOptions.localPickup && (
-                  <div className="text-success">
-                    {tPricing('localPickup')}{formData.pickupCity && ` ${tPricing('in')} ${formData.pickupCity}`}
-                  </div>
-                )}
               </div>
             </div>
             {formData.shippingNotes && (

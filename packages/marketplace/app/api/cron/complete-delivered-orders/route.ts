@@ -3,6 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 import { postOrderCompletedMessage } from '@/lib/transactions';
 import { handleApiError } from '@/lib/api/error-handler';
 import { creditSellerWallet } from '@/lib/services/wallet';
+import {
+  sendOrderCompletedToBuyer,
+  sendOrderCompletedToSeller,
+} from '@/lib/email/send-order-emails';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,7 +46,7 @@ export async function GET(request: NextRequest) {
     // Query delivered orders that have no open disputes or issues
     const { data: orders, error: fetchError } = await supabase
       .from('orders')
-      .select('id, order_number, delivered_at, updated_at, dispute_status')
+      .select('id, order_number, delivered_at, updated_at, dispute_status, buyer_id, seller_id')
       .eq('status', 'delivered')
       .is('dispute_status', null);
 
@@ -87,28 +91,36 @@ export async function GET(request: NextRequest) {
 
     console.log(`📦 [Cron] Found ${ordersToComplete.length} orders to complete`);
 
-    // Mark orders as completed
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({
-        status: 'completed',
-        updated_at: new Date().toISOString(),
-      })
-      .in(
-        'id',
-        ordersToComplete.map((o) => o.id)
-      );
-
-    if (updateError) {
-      throw new Error(`Failed to complete orders: ${updateError.message}`);
-    }
-
-    console.log(`✅ [Cron] Completed ${ordersToComplete.length} orders`);
-
-    // Credit seller wallets for each completed order
+    // Complete each order individually with an atomic status guard.
+    // This prevents racing with concurrent refund requests — the update
+    // only succeeds if the order is still in 'delivered' status.
+    let completedCount = 0;
     let walletSuccessCount = 0;
     let walletFailCount = 0;
+    let skippedCount = 0;
+
     for (const order of ordersToComplete) {
+      const { data: updated, error: updateError } = await supabase
+        .from('orders')
+        .update({
+          status: 'completed',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', order.id)
+        .eq('status', 'delivered') // atomic guard: only update if still delivered
+        .select('id')
+        .single();
+
+      if (updateError || !updated) {
+        // Order status changed between select and update (e.g. refunded concurrently)
+        console.log(`[Cron] Skipped order ${order.order_number} — status changed before completion`);
+        skippedCount++;
+        continue;
+      }
+
+      completedCount++;
+
+      // Only credit wallet if status transition succeeded
       const walletResult = await creditSellerWallet(supabase, order.id);
       if (walletResult.success) {
         walletSuccessCount++;
@@ -116,21 +128,67 @@ export async function GET(request: NextRequest) {
         walletFailCount++;
         console.error(`[Cron] Wallet credit failed for order ${order.id}: ${walletResult.error}`);
       }
+
+      // Post system message (non-blocking)
+      postOrderCompletedMessage(order.id);
+
+      // Create in-app notifications for buyer and seller (non-blocking)
+      supabase.rpc('create_notification', {
+        p_user_id: order.buyer_id,
+        p_type: 'order_completed',
+        p_title: `Order #${order.order_number} is complete`,
+        p_body: 'Your order has been finalized. We hope you enjoy your game.',
+        p_data: { order_id: order.id },
+      }).then(({ error: notifErr }) => {
+        if (notifErr) console.error(`[Cron] Buyer notification failed for order ${order.id}:`, notifErr);
+      });
+
+      supabase.rpc('create_notification', {
+        p_user_id: order.seller_id,
+        p_type: 'order_completed',
+        p_title: `Sale complete - Order #${order.order_number}`,
+        p_body: 'The order has been finalized and your earnings have been credited to your wallet.',
+        p_data: { order_id: order.id },
+      }).then(({ error: notifErr }) => {
+        if (notifErr) console.error(`[Cron] Seller notification failed for order ${order.id}:`, notifErr);
+      });
+
+      // Send completion emails (non-blocking, fire-and-forget)
+      // Fetch participant profiles for email addresses
+      Promise.all([
+        supabase.from('user_profiles').select('full_name, email').eq('id', order.buyer_id).single(),
+        supabase.from('user_profiles').select('full_name, email').eq('id', order.seller_id).single(),
+      ]).then(([{ data: buyerProfile }, { data: sellerProfile }]) => {
+        if (buyerProfile) {
+          sendOrderCompletedToBuyer({
+            buyerName: buyerProfile.full_name,
+            buyerEmail: buyerProfile.email,
+            orderNumber: order.order_number,
+            orderId: order.id,
+            sellerName: sellerProfile?.full_name || 'Seller',
+          }).catch(() => {});
+        }
+        if (sellerProfile) {
+          sendOrderCompletedToSeller({
+            sellerName: sellerProfile.full_name,
+            sellerEmail: sellerProfile.email,
+            orderNumber: order.order_number,
+            orderId: order.id,
+          }).catch(() => {});
+        }
+      }).catch((err: unknown) => console.error(`[Cron] Email fetch failed for order ${order.id}:`, err));
     }
+
+    console.log(`✅ [Cron] Completed ${completedCount} orders (${skippedCount} skipped due to status change)`);
 
     if (walletFailCount > 0) {
       console.warn(`[Cron] Wallet credits: ${walletSuccessCount} succeeded, ${walletFailCount} failed`);
     }
 
-    // Post system messages for each completed order (non-blocking)
-    for (const order of ordersToComplete) {
-      postOrderCompletedMessage(order.id);
-    }
-
     return NextResponse.json({
       success: true,
-      completedCount: ordersToComplete.length,
-      completedOrders: ordersToComplete.map((o) => o.order_number),
+      completedCount,
+      skippedCount,
       walletCredits: { succeeded: walletSuccessCount, failed: walletFailCount },
       timestamp: new Date().toISOString(),
     });

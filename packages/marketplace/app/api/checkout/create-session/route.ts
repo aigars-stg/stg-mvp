@@ -95,11 +95,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify seller has active status
+    // Verify listing availability and prices haven't changed (audit 3.1)
     const adminSupabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
+
+    const listingIds = basket.items.map((item) => item.listing_id);
+    const { data: listings, error: listingsError } = await adminSupabase
+      .from('listings')
+      .select('id, status, price')
+      .in('id', listingIds);
+
+    if (listingsError || !listings) {
+      return NextResponse.json(
+        { error: 'Failed to verify listing availability' },
+        { status: 500 }
+      );
+    }
+
+    const listingMap = new Map(listings.map((l) => [l.id, l]));
+    const staleItems = basket.items.filter((item) => {
+      const listing = listingMap.get(item.listing_id);
+      return !listing || listing.status !== 'active' || listing.price !== item.price;
+    });
+
+    if (staleItems.length > 0) {
+      return NextResponse.json(
+        {
+          error: 'Some items have changed since you started checkout. Please return to cart.',
+          staleItems: true,
+        },
+        { status: 409 }
+      );
+    }
 
     const { data: sellerProfile } = await adminSupabase
       .from('seller_profiles')
@@ -168,10 +197,6 @@ export async function POST(request: NextRequest) {
       receiverName: input.receiverName,
       receiverPhone: input.receiverPhone,
       receiverEmail: input.receiverEmail,
-
-      // Local pickup fields
-      pickupCity: input.pickupCity,
-      pickupNotes: input.pickupNotes,
     }, appUrl);
 
     // Return based on result type

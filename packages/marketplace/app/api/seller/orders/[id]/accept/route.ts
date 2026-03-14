@@ -75,8 +75,15 @@ export async function POST(
               .update({ everypay_payment_state: 'settled' })
               .eq('id', orderId);
           } catch (captureErr) {
-            console.error('[Accept Order] Payment capture failed:', captureErr);
-            // Order is already accepted — payment may auto-capture within the delay window
+            console.error('[Accept Order] Payment capture failed, marking for retry:', captureErr);
+            // Mark for retry — the expire-seller-deadlines cron will retry capture every 5 minutes
+            await supabase
+              .from('orders')
+              .update({
+                everypay_payment_state: 'capture_pending',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', orderId);
           }
         }
       }
@@ -157,10 +164,7 @@ export async function POST(
         }
 
         // Send acceptance email to buyer
-        const destinationInfo =
-          order.shipping_method === 't2t'
-            ? order.destination_terminal_name || ''
-            : order.pickup_city || '';
+        const destinationInfo = order.destination_terminal_name || '';
 
         sendOrderAcceptedToBuyer({
           buyerName: buyerProfile.full_name,
@@ -168,7 +172,7 @@ export async function POST(
           orderNumber: order.order_number,
           orderId: orderId,
           sellerName: sellerProfile.full_name,
-          shippingMethod: (order.shipping_method || 't2t') as 'local_pickup' | 't2t',
+          shippingMethod: (order.shipping_method || 't2t') as 't2t',
           destinationInfo,
           trackingNumber,
           trackingUrl,
@@ -179,7 +183,7 @@ export async function POST(
     // Post system message now that labelGenerated is known (non-blocking)
     postOrderAcceptedMessage(
       orderId,
-      (result.shipping_method || 't2t') as 't2t' | 'local_pickup',
+      (result.shipping_method || 't2t') as 't2t',
       labelGenerated
     );
 

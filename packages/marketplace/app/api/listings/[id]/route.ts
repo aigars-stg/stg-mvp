@@ -29,10 +29,8 @@ interface ListingUpdateFields {
   accept_offers?: boolean;
   minimum_offer?: number | null;
   photo_urls?: string[];
-  shipping_local_pickup?: boolean;
   shipping_parcel_locker?: boolean;
   shipping_notes?: string | null;
-  pickup_city?: string | null;
   status?: string;
   why_selling?: string | null;
   pricing_format?: string;
@@ -163,9 +161,9 @@ export async function PATCH(
       }
       updates.condition = body.condition;
     }
-    if (body.condition_notes !== undefined) updates.condition_notes = body.condition_notes;
+    if (body.condition_notes !== undefined) updates.condition_notes = body.condition_notes ? String(body.condition_notes).slice(0, 500) : null;
     if (body.all_components_present !== undefined) updates.all_components_present = body.all_components_present;
-    if (body.missing_components !== undefined) updates.missing_components = body.missing_components;
+    if (body.missing_components !== undefined) updates.missing_components = body.missing_components ? String(body.missing_components).slice(0, 500) : null;
 
     // Pricing fields - handle price reduction tracking
     if (body.price !== undefined) {
@@ -260,7 +258,7 @@ export async function PATCH(
       updates.auction_cooldown_hours = body.auction_cooldown_hours ?? null;
     }
 
-    // Photo fields
+    // Photo fields — validate URLs belong to this user's storage folder
     if (body.photo_urls !== undefined) {
       if (!Array.isArray(body.photo_urls)) {
         return NextResponse.json(
@@ -268,21 +266,36 @@ export async function PATCH(
           { status: 400 }
         );
       }
+      if (body.photo_urls.length > 8) {
+        return NextResponse.json(
+          { error: 'Maximum 8 photos allowed' },
+          { status: 400 }
+        );
+      }
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const allowedPrefix = `${supabaseUrl}/storage/v1/object/public/listing-photos/${user!.id}/`;
+      for (const url of body.photo_urls) {
+        if (typeof url !== 'string' || !url.startsWith(allowedPrefix)) {
+          return NextResponse.json(
+            { error: 'Invalid photo URL. Photos must be uploaded through the platform.' },
+            { status: 400 }
+          );
+        }
+      }
       updates.photo_urls = body.photo_urls;
     }
 
     // Shipping fields
-    if (body.shipping_local_pickup !== undefined) updates.shipping_local_pickup = body.shipping_local_pickup;
     if (body.shipping_parcel_locker !== undefined) updates.shipping_parcel_locker = body.shipping_parcel_locker;
     if (body.shipping_notes !== undefined) updates.shipping_notes = body.shipping_notes;
-    if (body.pickup_city !== undefined) updates.pickup_city = body.pickup_city;
 
-    // Status field (for status changes)
+    // Status field — sellers can only toggle between active and removed
+    // 'sold' and 'draft' transitions are system-only (order completion, etc.)
     if (body.status !== undefined) {
-      const validStatuses = ['draft', 'active', 'sold', 'removed'];
-      if (!validStatuses.includes(body.status)) {
+      const sellerAllowedStatuses = ['active', 'removed'];
+      if (!sellerAllowedStatuses.includes(body.status)) {
         return NextResponse.json(
-          { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
+          { error: `Invalid status. Sellers can only set: ${sellerAllowedStatuses.join(', ')}` },
           { status: 400 }
         );
       }
@@ -351,6 +364,19 @@ export async function DELETE(
     const hardDelete = searchParams.get('hard') === 'true';
 
     if (hardDelete) {
+      // Guard: only allow hard delete if listing has no related orders
+      const { count: orderCount } = await supabase
+        .from('order_items')
+        .select('*', { count: 'exact', head: true })
+        .eq('listing_id', id);
+
+      if (orderCount && orderCount > 0) {
+        return NextResponse.json(
+          { error: 'Cannot permanently delete a listing with associated orders. Use soft delete instead.' },
+          { status: 400 }
+        );
+      }
+
       // Hard delete - permanently remove from database
       const { error: deleteError } = await supabase
         .from('listings')

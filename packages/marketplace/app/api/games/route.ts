@@ -18,7 +18,6 @@ interface ListingWithSeller {
   auction_ends_at: string | null;
   condition: ListingCondition | null;
   language: string | null;
-  shipping_local_pickup: boolean;
   shipping_parcel_locker: boolean;
   included_expansions: unknown[] | null;
   created_at: string;
@@ -105,7 +104,6 @@ export async function GET(request: NextRequest) {
         auction_ends_at,
         condition,
         language,
-        shipping_local_pickup,
         shipping_parcel_locker,
         included_expansions,
         created_at,
@@ -288,7 +286,6 @@ export async function GET(request: NextRequest) {
       const gameLanguages = new Set<string>();
       let lowestPrice = Infinity;
       let highestPrice = -Infinity;
-      let hasLocalPickup = false;
       let hasParcelShipping = false;
       let hasAuction = false;
       let soonestAuctionEndsAt: string | null = null;
@@ -362,7 +359,6 @@ export async function GET(request: NextRequest) {
         if (effectivePrice > highestPrice) highestPrice = effectivePrice;
 
         // Track shipping options and listing types
-        if (listing.shipping_local_pickup) hasLocalPickup = true;
         if (listing.shipping_parcel_locker) hasParcelShipping = true;
         if (isAuction) hasAuction = true;
       }
@@ -401,7 +397,6 @@ export async function GET(request: NextRequest) {
         conditions: [...conditions] as ListingCondition[],
         languages: [...gameLanguages].sort(),
         seller_countries: [...sellerCountries],
-        has_local_pickup: hasLocalPickup,
         has_parcel_shipping: hasParcelShipping,
         has_auction: hasAuction,
         auction_soonest_ends_at: soonestAuctionEndsAt,

@@ -45,7 +45,6 @@ export interface AggregatedGame {
   conditions: ListingCondition[];
   languages: string[];  // Languages available from listings
   seller_countries: string[];
-  has_local_pickup: boolean;
   has_parcel_shipping: boolean;
   has_auction: boolean;  // Whether any offers are auctions
   auction_soonest_ends_at: string | null;  // Earliest non-expired auction end time

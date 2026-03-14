@@ -7,6 +7,10 @@ import { RefreshCw as Loader2 } from '@/lib/icons';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTranslations } from 'next-intl';
 import { CountryPrompt } from '@/components/onboarding';
+import { PhoneInput } from '@/components/common/PhoneInput';
+import { isValidPhoneNumber } from '@/lib/phone-utils';
+import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
+import type { CountryCode } from '@/lib/country-utils';
 
 interface OnboardingStatus {
   seller_status: string;
@@ -17,7 +21,7 @@ interface OnboardingStatus {
 
 export default function SellerOnboardingPage() {
   const router = useRouter();
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading, updateProfile } = useAuth();
   const t = useTranslations('SellerOnboard');
   const tCountry = useTranslations('Countries');
 
@@ -25,6 +29,12 @@ export default function SellerOnboardingPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [acceptingTerms, setAcceptingTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phone, setPhone] = useState(profile?.phone || '');
+
+  // Derived checks
+  const hasPhone = !!profile?.phone;
+  const phoneValid = hasPhone || isValidPhoneNumber(phone);
+  const emailVerified = !!user?.email_confirmed_at;
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -68,6 +78,14 @@ export default function SellerOnboardingPage() {
     try {
       setAcceptingTerms(true);
       setError(null);
+
+      // Save phone to profile if not already saved
+      if (!hasPhone && phone) {
+        const { error: phoneErr } = await updateProfile({ phone: phone.trim() });
+        if (phoneErr) {
+          throw new Error('Failed to save phone number. Please try again.');
+        }
+      }
 
       const response = await fetch('/api/seller/onboarding/accept-terms', {
         method: 'POST',
@@ -121,6 +139,16 @@ export default function SellerOnboardingPage() {
           </div>
         )}
 
+        {/* Email Verification Gate */}
+        {!emailVerified && (
+          <div className="mb-8">
+            <EmailVerificationBanner />
+            <p className="text-sm text-text-secondary mt-2">
+              Please verify your email address before becoming a seller.
+            </p>
+          </div>
+        )}
+
         {/* Accept Terms */}
         <div className="bg-snow-white border border-border rounded-lg p-4 sm:p-6 lg:p-8 mb-8">
           <h2 className="text-xl sm:text-2xl font-semibold text-polar-night mb-6">
@@ -162,6 +190,25 @@ export default function SellerOnboardingPage() {
             </div>
           )}
 
+          {/* Phone Number */}
+          {!hasPhone && (
+            <div className="bg-snow-stormLight border border-border rounded-lg p-3 sm:p-4 mb-4">
+              <p className="font-semibold text-polar-night mb-1 text-sm sm:text-base">
+                Phone number
+              </p>
+              <p className="text-xs sm:text-sm text-text-secondary mb-3">
+                Required for shipping label generation and buyer communication.
+              </p>
+              <PhoneInput
+                value={phone}
+                onChange={setPhone}
+                required
+                defaultCountry={(profile?.country && ['LV', 'LT', 'EE'].includes(profile.country) ? profile.country : 'LV') as CountryCode}
+                id="onboard-phone"
+              />
+            </div>
+          )}
+
           <label className="flex items-start gap-2.5 sm:gap-3 mb-4 cursor-pointer">
             <input
               type="checkbox"
@@ -184,7 +231,7 @@ export default function SellerOnboardingPage() {
             fullWidth
             className="sm:w-auto"
             onClick={handleAcceptTerms}
-            disabled={!termsAccepted || !profile?.country || acceptingTerms}
+            disabled={!termsAccepted || !profile?.country || !phoneValid || !emailVerified || acceptingTerms}
             loading={acceptingTerms}
           >
             {t('step1.acceptButton')}
@@ -192,6 +239,16 @@ export default function SellerOnboardingPage() {
           {!profile?.country && termsAccepted && (
             <p className="text-xs text-aurora-orange mt-2">
               {t('step1.countryRequired')}
+            </p>
+          )}
+          {!phoneValid && termsAccepted && profile?.country && (
+            <p className="text-xs text-aurora-orange mt-2">
+              Please add a valid phone number to continue.
+            </p>
+          )}
+          {!emailVerified && termsAccepted && (
+            <p className="text-xs text-aurora-orange mt-2">
+              Please verify your email address to continue.
             </p>
           )}
         </div>

@@ -22,6 +22,11 @@ import { ShippingReminderEmail } from './templates/shipping-reminder';
 import { ShippingDeadlineCancelledEmail } from './templates/shipping-deadline-cancelled';
 import { SepaRefundRequiredEmail } from './templates/sepa-refund-required';
 import { DisputeEscalatedStaffEmail } from './templates/dispute-escalated-staff';
+import { ClawbackShortfallStaffEmail } from './templates/clawback-shortfall-staff';
+import { AutoRefundBuyerEmail } from './templates/auto-refund-buyer';
+import { OrderCompletedBuyerEmail } from './templates/order-completed-buyer';
+import { OrderCompletedSellerEmail } from './templates/order-completed-seller';
+import { CreditNoteBuyerEmail } from './templates/credit-note-buyer';
 import { loggers } from '../logger';
 
 const STAFF_EMAIL = 'info@secondturn.games';
@@ -670,6 +675,45 @@ export async function sendShippingReminder(params: {
 }
 
 /**
+ * Send staff notification when wallet clawback fails due to insufficient balance
+ * Called during post-completion dispute refunds when seller has withdrawn funds
+ */
+export async function sendClawbackShortfallToStaff(params: {
+  orderNumber: string;
+  orderId: string;
+  sellerName: string;
+  shortfallCents: number;
+  availableCents: number;
+  requiredCents: number;
+  clawbackType: 'full' | 'partial';
+}) {
+  const { orderNumber, orderId, sellerName, shortfallCents, availableCents, requiredCents, clawbackType } = params;
+  const staffEmail = STAFF_EMAIL;
+
+  try {
+    await sendEmail({
+      to: staffEmail,
+      subject: `Action required: Wallet clawback shortfall for Order #${orderNumber}`,
+      react: ClawbackShortfallStaffEmail({
+        orderNumber,
+        orderId,
+        sellerName,
+        shortfallCents,
+        availableCents,
+        requiredCents,
+        clawbackType,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, shortfallCents }, 'Clawback shortfall notification sent to staff');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, error }, 'Failed to send clawback shortfall notification to staff');
+    return { success: false, error };
+  }
+}
+
+/**
  * Send shipping deadline cancelled notification to buyer or seller
  */
 export async function sendShippingDeadlineCancelled(params: {
@@ -695,6 +739,135 @@ export async function sendShippingDeadlineCancelled(params: {
     return { success: true };
   } catch (error) {
     loggers.email.error({ orderNumber, recipientEmail, error }, 'Failed to send shipping deadline cancelled email');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send order completed notification to buyer
+ */
+export async function sendOrderCompletedToBuyer(params: {
+  buyerName: string;
+  buyerEmail: string;
+  orderNumber: string;
+  orderId: string;
+  sellerName: string;
+}) {
+  const { buyerName, buyerEmail, orderNumber, orderId, sellerName } = params;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `Order #${orderNumber} Complete`,
+      react: OrderCompletedBuyerEmail({
+        buyerName,
+        orderNumber,
+        sellerName,
+        orderUrl: `${APP_URL}/orders/${orderId}`,
+        reviewUrl: `${APP_URL}/orders/${orderId}/review`,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, buyerEmail }, 'Order completed email sent to buyer');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, buyerEmail, error }, 'Failed to send order completed email to buyer');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send order completed notification to seller (earnings credited)
+ */
+export async function sendOrderCompletedToSeller(params: {
+  sellerName: string;
+  sellerEmail: string;
+  orderNumber: string;
+  orderId: string;
+}) {
+  const { sellerName, sellerEmail, orderNumber, orderId } = params;
+
+  try {
+    await sendEmail({
+      to: sellerEmail,
+      subject: `Sale Complete - Order #${orderNumber}`,
+      react: OrderCompletedSellerEmail({
+        sellerName,
+        orderNumber,
+        orderUrl: `${APP_URL}/orders/${orderId}`,
+        walletUrl: `${APP_URL}/wallet`,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, sellerEmail }, 'Order completed email sent to seller');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, sellerEmail, error }, 'Failed to send order completed email to seller');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send auto-refund notification to buyer when order creation fails after payment
+ */
+export async function sendAutoRefundToBuyer(params: {
+  buyerName: string;
+  buyerEmail: string;
+  refundAmountEuros: string;
+  retryUrl: string;
+}) {
+  const { buyerName, buyerEmail, refundAmountEuros, retryUrl } = params;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `Payment Refunded - Please Try Again`,
+      react: AutoRefundBuyerEmail({
+        buyerName,
+        refundAmountEuros,
+        retryUrl,
+      }),
+    });
+
+    loggers.email.info({ buyerEmail, refundAmountEuros }, 'Auto-refund notification sent to buyer');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ buyerEmail, error }, 'Failed to send auto-refund notification to buyer');
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send credit note to buyer after a post-completion refund.
+ * This is a VAT document so buyers should have it for their records.
+ */
+export async function sendCreditNoteToBuyer(params: {
+  buyerName: string;
+  buyerEmail: string;
+  orderNumber: string;
+  creditNoteNumber: string;
+  refundAmount: string;
+  refundDate: string;
+}) {
+  const { buyerName, buyerEmail, orderNumber, creditNoteNumber, refundAmount, refundDate } = params;
+
+  try {
+    await sendEmail({
+      to: buyerEmail,
+      subject: `Credit Note ${creditNoteNumber} - Order #${orderNumber}`,
+      react: CreditNoteBuyerEmail({
+        buyerName,
+        orderNumber,
+        creditNoteNumber,
+        refundAmount,
+        refundDate,
+      }),
+    });
+
+    loggers.email.info({ orderNumber, creditNoteNumber, buyerEmail }, 'Credit note email sent to buyer');
+    return { success: true };
+  } catch (error) {
+    loggers.email.error({ orderNumber, creditNoteNumber, buyerEmail, error }, 'Failed to send credit note email to buyer');
     return { success: false, error };
   }
 }
